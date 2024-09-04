@@ -1,0 +1,97 @@
+{% load static %}
+{% load widget_tweaks %}
+<div id="cronologia_modal"  style="display: none;">
+
+ <form id="cronologia_form">
+
+     <table class="table">
+         <tbody>
+             <tr>
+                 <td style="text-align: right;">{{ form_cronologia.fecha.label }}</td>
+                 <td>{{ form_cronologia.fecha }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_cronologia.vencimiento.label }}</td>
+                 <td>{{ form_cronologia.vencimiento }}</td>
+
+             </tr>
+             <tr>
+                <td style="text-align: right;">{{ form_cronologia.estimadorecepcion.label }}</td>
+                 <td>{{ form_cronologia.estimadorecepcion }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_cronologia.etd.label }}</td>
+                 <td>{{ form_cronologia.etd }}</td>
+                  <!-- COLUMNA TRES -->
+                 <td style="text-align: right;">{{ form_cronologia.eta.label }}</td>
+                 <td>{{ form_cronologia.eta }}</td>
+
+             </tr>
+              <tr>
+                 <td style="text-align: right;">{{ form_cronologia.recepcion.label }}</td>
+                 <td>{{ form_cronologia.recepcion }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_cronologia.lugar.label }}</td>
+                 <td>{{ form_cronologia.lugar }}</td>
+                  <!-- COLUMNA TRES -->
+                 <td style="text-align: right;">{{ form_cronologia.onhand.label }}</td>
+                 <td>{{ form_cronologia.onhand }}</td>
+             </tr>
+              <tr>
+                 <td style="text-align: right;">{{ form_cronologia.fecseguro.label }}</td>
+                 <td>{{ form_cronologia.fecseguro }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_cronologia.nroseguro.label }}</td>
+                 <td>{{ form_cronologia.nroseguro }}</td>
+                  <!-- COLUMNA TRES -->
+                 <td style="text-align: right;">{{ form_cronologia.prima.label }}</td>
+                 <td>{{ form_cronologia.prima }}</td>
+             </tr>
+              <tr>
+                  <td style="text-align: right;">{{ form_cronologia.fecemision.label }}</td>
+                 <td>{{ form_cronologia.fecemision }}</td>
+                   <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_cronologia.bltipo.label }}</td>
+                 <td>{{ form_cronologia.bltipo }}</td>
+                   <!-- COLUMNA TRES -->
+                 <td style="text-align: right;">{{ form_cronologia.originales.label }}</td>
+                 <td>{{ form_cronologia.originales }}</td>
+             </tr>
+              <tr>
+                 <td style="text-align: right;">{{ form_cronologia.fecdocage.label }}</td>
+                 <td>{{ form_cronologia.fecdocage }}</td>
+                    <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_cronologia.manifiesto.label }}</td>
+                 <td>{{ form_cronologia.manifiesto }}</td>
+                     <!-- COLUMNA TRES -->
+                 <td style="text-align: right;">{{ form_cronologia.recepcionprealert.label }}</td>
+                 <td>{{ form_cronologia.recepcionprealert }}</td>
+             </tr>
+              <tr>
+                 <td style="text-align: right;">{{ form_cronologia.loadingdate.label }}</td>
+                 <td>{{ form_cronologia.loadingdate }}</td>
+                     <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_cronologia.credito.label }}</td>
+                 <td>{{ form_cronologia.credito }}</td>
+             </tr>
+              <tr>
+                 <td style="text-align: right;">{{ form_cronologia.arriboreal.label }}</td>
+                 <td>{{ form_cronologia.arriboreal }}</td>
+                  <!-- COLUMNA DOS -->
+             </tr>
+              <tr>
+                 <td style="text-align: right;">{{ form_cronologia.fecaduana.label }}</td>
+                 <td>{{ form_cronologia.fecaduana }}</td>
+                   <!-- COLUMNA DOS -->
+             </tr>
+             <tr>
+                 <td style="text-align: right;">{{ form_cronologia.pagoenfirme.label }}</td>
+                 <td>{{ form_cronologia.pagoenfirme }}</td>
+                   <!-- COLUMNA DOS -->
+             </tr>
+
+         </tbody>
+
+     </table>
+
+
+    </form>
+</div>

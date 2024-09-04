@@ -1,0 +1,36 @@
+{% extends 'base_table.html' %}
+{% load static %}
+{% block title_page %}BUQUES{% endblock title_page %}
+
+{% block table_datatable %}
+    <table id="tabla_buque" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Código</th>
+            <th class="text-left">Nombre</th>
+            <th class="text-left">Bandera</th>
+            <th class="text-left">Observaciones</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Código</th>
+            <th class="text-left">Nombre</th>
+            <th class="text-left">Bandera</th>
+            <th class="text-left">Observaciones</th>
+        </tr>
+        </tfoot>
+    </table>
+    <hr>
+{% endblock table_datatable %}
+
+
+{% block script_datatable %}
+    <script src="{% static 'grilla/js_buques.js' %}"></script>
+{% endblock script_datatable %}

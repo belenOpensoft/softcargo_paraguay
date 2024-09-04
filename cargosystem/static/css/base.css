@@ -1,0 +1,9 @@
+body {
+    /*background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;*/
+}
+
+.custom-nav-link {
+    color: grey; /* Cambia el color según tu preferencia */
+}

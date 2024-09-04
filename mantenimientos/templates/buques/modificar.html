@@ -1,0 +1,29 @@
+{% extends 'base_form.html' %}
+
+{% block formulario %}
+<form method="POST">
+        <table class="form-control form-control-a">
+            {% csrf_token %}
+            <tr>
+                <th>{{ form.codigo.label }}</th>
+                <td>{{ form.codigo }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.nombre.label }}</th>
+                <td>{{ form.nombre }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.bandera.label }}</th>
+                <td>{{ form.bandera }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.observaciones.label }}</th>
+                <td>{{ form.observaciones }}</td>
+            </tr>
+        </table>
+    <br>
+    <button type="submit" class="btn btn-primary">Modificar</button>
+    <a href="/buques" class="btn btn-dark" onclick="return(confirm('¿Esta seguro de cancelar?'))">Cancelar</a>
+</form>
+
+{% endblock formulario %}

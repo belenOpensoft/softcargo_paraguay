@@ -1,0 +1,99 @@
+<div id="add_master_modal" style="display: none;" tabindex="-1">
+    <form id="add_master_form">
+        <table class="table table-condensed table-sm mitabla" border="0">
+            {% csrf_token %}
+            <tbody>
+                <tr style="">
+                    <th>{{ form_add_master.transportista.label }}</th>
+                    <td>{{ form_add_master.transportista }}</td>
+                    <th>{{ form_add_master.awb.label }}</th>
+                    <td>{{ form_add_master.awb }}</td>
+                    <td colspan="4"></td>
+                </tr>
+                <tr>
+                    <th>{{ form_add_master.agente.label }}</th>
+                    <td colspan="3">{{ form_add_master.agente }}</td>
+                    <th>{{ form_add_master.origen.label }}</th>
+                    <td>{{ form_add_master.origen }}</td>
+                    <th>{{ form_add_master.loading.label }}</th>
+                    <td>{{ form_add_master.loading }}</td>
+                </tr>
+                <tr>
+                    <th>{{ form_add_master.embarcador.label }}</th>
+                    <td colspan="3">{{ form_add_master.embarcador }}</td>
+                    <th>{{ form_add_master.destino.label }}</th>
+                    <td>{{ form_add_master.destino }}</td>
+                    <th>{{ form_add_master.discharge.label }}</th>
+                    <td>{{ form_add_master.discharge }}</td>
+                </tr>
+                <tr>
+                    <th>{{ form_add_master.armador.label }}</th>
+                    <td>{{ form_add_master.armador }}</td>
+                    <td colspan="2"></td>
+                    <th>{{ form_add_master.fecha.label }}</th>
+                    <td>{{ form_add_master.fecha }}</td>.
+                    <th>{{ form_add_master.cotizacion.label }}</th>
+                    <td>{{ form_add_master.cotizacion }}</td>
+                </tr>
+                <tr>
+                    <th>{{ form_add_master.vapor.label }}</th>
+                    <td>{{ form_add_master.vapor }}</td>
+                    <th>{{ form_add_master.viaje.label }}</th>
+                    <td>{{ form_add_master.viaje }}</td>
+                    <th>{{ form_add_master.status.label }}</th>
+                    <td>{{ form_add_master.status }}</td>
+                </tr>
+                <tr>
+                    <th>{{ form_add_master.aduana.label }}</th>
+                    <td>{{ form_add_master.aduana }}</td>
+                    <th></th>
+                    <td></td>
+                    <th>{{ form_add_master.posicion.label }}</th>
+                    <td>{{ form_add_master.posicion }}</td>
+                </tr> <tr>
+                    <th>{{ form_add_master.moneda.label }}</th>
+                    <td>{{ form_add_master.moneda }}</td>
+                    <th>{{ form_add_master.arbitraje.label }}</th>
+                    <td>{{ form_add_master.arbitraje }}</td>
+                    <th>{{ form_add_master.operacion.label }}</th>
+                    <td>{{ form_add_master.operacion }}</td>
+                </tr>
+                <tr>
+    <!--                <th>{{ form_add_master.aduana.label }}</th>-->
+    <!--                <td>{{ form_add_master.aduana }}</td>-->
+    <!--                <th>{{ form_add_master.manifiesto.label }}</th>-->
+    <!--                <td>{{ form_add_master.manifiesto }}</td>-->
+    <!--                <th>{{ form_add_master.operacion.label }}</th>-->
+    <!--                <td>{{ form_add_master.operacion }}</td>-->
+                </tr>
+                <tr>
+                    <th>{{ form_add_master.tarifa.label }}</th>
+                    <td>{{ form_add_master.tarifa }}</td>
+                    <th>{{ form_add_master.kilosmadre.label }}</th>
+                    <td>{{ form_add_master.kilosmadre }}</td>
+                    <th>{{ form_add_master.bultosmadre.label }}</th>
+                    <td>{{ form_add_master.bultosmadre }}</td>
+                </tr>
+                <tr>
+                    <th>{{ form_add_master.pagoflete.label }}</th>
+                    <td>{{ form_add_master.pagoflete }}</td>
+                    <th>{{ form_add_master.trafico.label }}</th>
+                    <td>{{ form_add_master.trafico }}</td>
+                </tr>
+                <tr>
+                    <td colspan="8">&nbsp;<br></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td></td>
+                    <td colspan="7">
+                        <button name="guardar_master" id="guardar_master" class="btn btn-dark" style="with:250px;">Guardar</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+
+    </form>
+</div>
+

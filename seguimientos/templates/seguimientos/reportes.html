@@ -1,0 +1,94 @@
+{% extends 'base_form.html' %}
+{% block titulo_form %}REPORTES{% endblock titulo_form %}
+
+{% block formulario %}
+
+   <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-4">
+                    {{ form.desde.label_tag }}
+                    {{ form.desde }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.hasta.label_tag }}
+                    {{ form.hasta }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.filtro1.label_tag }}
+                    {{ form.filtro1 }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    {{ form.modo.label_tag }}
+                    {{ form.modo }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.operacion.label_tag }}
+                    {{ form.operacion }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.filtro2.label_tag }}
+                    {{ form.filtro2 }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    {{ form.vendedor.label_tag }}
+                    {{ form.vendedor }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.tipo_de_operacion.label_tag }}
+                    {{ form.tipo_de_operacion }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.filtro3.label_tag }}
+                    {{ form.filtro3 }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    {{ form.origen.label_tag }}
+                    {{ form.origen }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.destino.label_tag }}
+                    {{ form.destino }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    {{ form.buque.label_tag }}
+                    {{ form.buque }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.consignatario.label_tag }}
+                    {{ form.consignatario }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    {{ form.cliente.label_tag }}
+                    {{ form.cliente }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.embarcador.label_tag }}
+                    {{ form.embarcador }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    {{ form.status.label_tag }}
+                    {{ form.status }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <br>
+                     <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-download"></i> Descargar</button>
+                </div>
+            </div>
+    </form>
+{% endblock formulario %}

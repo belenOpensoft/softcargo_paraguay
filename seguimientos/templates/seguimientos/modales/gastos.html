@@ -1,0 +1,107 @@
+{% load static %}
+{% load widget_tweaks %}
+<div id="gastos_modal"  style="display: none;">
+
+ <form id="gastos_form">
+
+     <table class="table" style="width: 100%">
+         <tbody>
+             <tr>
+                 <td style="text-align: right;">{{ form_gastos.compra_venta.label }}</td>
+                 <td>{{ form_gastos.id }}{{ form_gastos.compra_venta }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_gastos.servicio.label }}</td>
+                 <td>{{ form_gastos.servicio }}</td>
+                  <!-- COLUMNA TREs -->
+                 <td></td>
+                 <td></td>
+                 <td style="text-align: right;">INGRESOS:</td>
+                 <td><input type="number" step="any" style="background-color: #99cc99;text-align: right;" class="form-control" id="gastos_ingresos" required="false"></td>
+             </tr>
+             <tr>
+                 <td style="text-align: right;">{{ form_gastos.moneda.label }}</td>
+                 <td>{{ form_gastos.moneda }}</td>
+                  <!-- COLUMNA DOS -->
+                  <td style="text-align: right;">{{ form_gastos.importe.label }}</td>
+                 <td>{{ form_gastos.importe }}</td>
+                  <!-- COLUMNA TRES -->
+                 <td style="text-align: right;">{{ form_gastos.arbitraje.label }}</td>
+                 <td>{{ form_gastos.arbitraje }}</td>
+                 <td style="text-align: right;">EGRESOS:</td>
+                 <td><input type="number" class="form-control" step="any" style="background-color: #DAD085;text-align: right;" id="gastos_egresos" required="false"></td>
+
+
+             </tr>
+             <tr>
+                 <td style="text-align: right;">{{ form_gastos.tipogasto.label }}</td>
+                 <td>{{ form_gastos.tipogasto }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_gastos.pinformar.label }}</td>
+                 <td>{{ form_gastos.pinformar }}</td>
+                 <!-- COLUMNA TRE -->
+                 <td style="text-align: right;">{{ form_gastos.secomparte.label }}</td>
+                 <td>{{ form_gastos.secomparte }}</td>
+                 <td style="text-align: right;">DIFERENCIA:</td>
+                 <td><input type="number" class="form-control" step="any" style="background-color: #CC9393;text-align: right;" id="gastos_diferencia"></td>
+             </tr>
+             <tr>
+                 <td style="text-align: right;">{{ form_gastos.modo.label }}</td>
+                 <td>{{ form_gastos.modo }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_gastos.socio.label }}</td>
+                 <td>{{ form_gastos.socio }}</td>
+                 <!-- COLUMNA TRE -->
+                 <td style="text-align: right;">{{ form_gastos.notomaprofit.label }}</td>
+                 <td>
+                 <input type="checkbox" id="{{ form_gastos.notomaprofit.id_for_label }}" name="{{ form_gastos.notomaprofit.html_name }}" {% if form_gastos.notomaprofit.value %}checked{% endif %}>
+                 </td>
+                 <!-- COLUMNA TRE -->
+                 <td>
+
+                 </td>
+                 <td></td>
+             </tr>
+             <tr>
+                 <td style="text-align: right;">{{ form_gastos.detalle.label }}</td>
+                 <td colspan="3">{{ form_gastos.detalle }}</td>
+                 <td></td>
+                 <td>
+                     <button class="btn btn-dark" id="ingresar_gasto">Agregar</button>
+                     <button class="btn btn-danger" id="cancelar_gasto">Cancelar</button>
+                 </td>
+                 <td></td>
+                 <td></td>
+             </tr>
+         <tr>
+         </tbody>
+
+     </table>
+
+     <table id="tabla_gastos" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-right">Servicio</th>
+            <th class="text-right">Moneda</th>
+            <th style="text-align: right;">Precio</th>
+            <th style="text-align: right;">Costo</th>
+            <th class="text-left">Detalle</th>
+            <th class="text-left">Pago</th>
+            <th class="text-left">Tipo de gasto</th>
+            <th style="text-align: right;">Arbitraje</th>
+            <th class="text-left">Ex.profit</th>
+            <th class="text-left">Se comparte</th>
+            <th style="text-align: right;">Informar</th>
+            <th class="text-left">Socio comercial</th>
+            <th class="text-left">Notas</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+
+    </form>
+</div>

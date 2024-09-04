@@ -1,0 +1,57 @@
+{% extends 'base_form.html' %}
+
+{% block formulario %}
+<form method="POST">
+        <table class="form-control form-control-a">
+            {% csrf_token %}
+            <tr>
+                <th>{{ form.codigo.label }}</th>
+                <td>{{ form.codigo }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.nombre.label }}</th>
+                <td>{{ form.nombre }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.pais.label }}</th>
+                <td>{{ form.pais }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.simbolo.label }}</th>
+                <td>{{ form.simbolo }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.solicitar.label }}</th>
+                <td>{{ form.solicitar }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.alias.label }}</th>
+                <td>{{ form.alias }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.valorminimo.label }}</th>
+                <td>{{ form.valorminimo }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.valormaximo.label }}</th>
+                <td>{{ form.valormaximo }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.paridadminima.label }}</th>
+                <td>{{ form.paridadminima }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.paridadmaxima.label }}</th>
+                <td>{{ form.paridadmaxima }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.corporativo.label }}</th>
+                <td>{{ form.corporativo }}</td>
+            </tr>
+        </table>
+    <br>
+    <button type="submit" class="btn btn-primary">Modificar</button>
+    <a href="/monedas" class="btn btn-dark" onclick="return(confirm('¿Esta seguro de cancelar?'))">Cancelar</a>
+</form>
+
+{% endblock formulario %}

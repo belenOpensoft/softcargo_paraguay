@@ -1,0 +1,41 @@
+{% extends 'base_table.html' %}
+{% load static %}
+{% block title_page %}Países{% endblock title_page %}
+
+{% block table_datatable %}
+    <table id="tabla_pais" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Nombre</th>
+            <th class="text-left">Continente</th>
+            <th class="text-left">IATA</th>
+            <th class="text-left">Internac.</th>
+            <th class="text-left">Código ISO</th>
+            <th class="text-left">EDI</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Nombre</th>
+            <th class="text-left">Continente</th>
+            <th class="text-left">IATA</th>
+            <th class="text-left">Internac.</th>
+            <th class="text-left">Código ISO</th>
+            <th class="text-left">EDI</th>
+        </tr>
+        </tfoot>
+    </table>
+    <hr>
+{% endblock table_datatable %}
+
+
+{% block script_datatable %}
+<script src="{% static 'grilla/js_paises.js' %}"></script>
+<script src="{% static 'grilla/js_controlador_sidemenu.js' %}"></script>
+{% endblock script_datatable %}

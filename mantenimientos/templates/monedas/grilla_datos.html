@@ -1,0 +1,51 @@
+{% extends 'base_table.html' %}
+{% load static %}
+{% block title_page %}Monedas{% endblock title_page %}
+
+
+{% block table_datatable %}
+    <table id="tabla_moneda" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Codigo</th>
+            <th class="text-left">Nombre</th>
+            <th class="text-left">Pais</th>
+            <th class="text-left">Simbolo</th>
+            <th class="text-left">Solicitar</th>
+            <th class="text-left">Alias</th>
+            <th class="text-left">Valor Mínimo</th>
+            <th class="text-left">Valor Máximo</th>
+            <th class="text-left">Paridad Mínimo</th>
+            <th class="text-left">Paridad Máximo</th>
+            <th class="text-left">Corporativo</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Codigo</th>
+            <th class="text-left">Nombre</th>
+            <th class="text-left">Pais</th>
+            <th class="text-left">Simbolo</th>
+            <th class="text-left">Solicitar</th>
+            <th class="text-left">Alias</th>
+            <th class="text-left">Valor Mínimo</th>
+            <th class="text-left">Valor Máximo</th>
+            <th class="text-left">Paridad Mínimo</th>
+            <th class="text-left">Paridad Máximo</th>
+            <th class="text-left">Corporativo</th>
+        </tr>
+        </tfoot>
+    </table>
+    <hr>
+{% endblock table_datatable %}
+
+
+{% block script_datatable %}
+    <script src="{% static 'grilla/js_monedas.js' %}"></script>
+{% endblock script_datatable %}

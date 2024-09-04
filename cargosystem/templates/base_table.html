@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block script %}
+    <!-- DATATABLES -->
+    <link rel="stylesheet" type="text/css" href="{% static 'datatables/datatables.min.css'  %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'datatables/buttons.dataTables.min.css'  %}">
+    <!--    <link rel="stylesheet" type="text/css" href="{% static 'jquery-ui/jquery-ui.min.css'  %}">-->
+    <link rel="stylesheet" type="text/css" href="{% static 'jquery-ui/jquery-ui-1.10.0.custom.css'  %}">
+    <script src="{% static 'datatables/datatables.min.js' %}"></script>
+    <script src="{% static 'datatables/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script>
+<script src="{% static 'grilla/js_controlador_sidemenu.js' %}"></script>
+    <script type="text/javascript" src="{% static 'summernote/summernote-lite.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'summernote/summernote-lite.css'  %}">
+
+
+{% block script_table %}
+
+{% endblock script_table %}
+
+{% endblock script %}
+
+{% block css %}
+
+    <style>
+            td.details-control {
+                background: url('/static/images/mas.png') no-repeat center center;
+                cursor: pointer;
+            }
+            tr.shown td.details-control {
+                background: url('/static/images/menos.png') no-repeat center center;
+            }
+            .table{
+                white-space: nowrap;
+            }
+            .derecha{
+                text-align: right;
+            }
+            .centro{
+                text-align: center;
+            }
+            .dataTables_filter { display: none; }
+            {% block css_basetable %}
+            {% endblock css_basetable %}
+    </style>
+
+{% endblock css %}
+
+{% block contenido %}
+    <div id="page-wrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+
+                                {% block table_datatable %}
+                                {% endblock table_datatable %}
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% block script_datatable %}
+
+{% endblock script_datatable %}
+
+{% endblock contenido %}
+

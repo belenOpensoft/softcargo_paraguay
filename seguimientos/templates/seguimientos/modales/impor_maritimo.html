@@ -1,0 +1,149 @@
+{% load static %}
+{% load widget_tweaks %}
+<div id="impo_marit_modal" style="display: none;">
+    <form id="impo_marit_form">
+        <br>
+        <table class="table table-lg mimodal">
+            <tbody>
+            <tr>
+                <td style="text-align: right">{{ form.cliente.label }}</td>
+                <td>{{ form.cliente }}{{ form.id }}{{ form.modo }}</td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right">{{ form.origen.label }}</td>
+                <td>{{ form.origen }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.loading.label }}</td>
+                <td>{{ form.loading }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right">{{ form.embarcador.label }}</td>
+                <td>{{ form.embarcador }}</td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right">{{ form.destino.label }}</td>
+                <td>{{ form.destino }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.discharge.label }}</td>
+                <td>{{ form.discharge }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right">{{ form.consignatario.label }}</td>
+                <td>{{ form.consignatario }}</td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right">{{ form.operacion.label }}</td>
+                <td>{{ form.operacion }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.posicion.label }}</td>
+                <td>{{ form.posicion }}</td>
+
+            </tr>
+            <tr>
+                <td style="text-align: right">{{ form.notificar.label }}</td>
+                <td>{{ form.notificar }}</td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right">{{ form.moneda.label }}</td>
+                <td>{{ form.moneda }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.arbitraje.label }}</td>
+                <td>{{ form.arbitraje }}</td>
+
+            </tr>
+            <tr>
+                <td style="text-align: right">{{ form.agente.label }}</td>
+                <td>{{ form.agente }}</td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right">{{ form.vendedor.label }}</td>
+                <td>{{ form.vendedor }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.pago.label }}</td>
+                <td>{{ form.pago }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right">{{ form.transportista.label }}</td>
+                <td>{{ form.transportista }}</td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right">{{ form.vapor.label }}</td>
+                <td>{{ form.vapor }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.viaje.label }}</td>
+                <td>{{ form.viaje }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right">{{ form.armador.label }}</td>
+                <td>{{ form.armador }}</td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right">{{ form.deposito.label }}</td>
+                <td>{{ form.deposito }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.ubicacion.label }}</td>
+                <td>{{ form.ubicacion }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right">{{ form.agecompras.label }}</td>
+                <td>{{ form.agecompras }}</td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right">{{ form.awb.label }}</td>
+                <td>{{ form.awb }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.booking.label }}</td>
+                <td>{{ form.booking }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right">{{ form.ageventas.label }}</td>
+                <td>{{ form.ageventas }}</td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right">{{ form.hawb.label }}</td>
+                <td>{{ form.hawb }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.trackid.label }}</td>
+                <td>{{ form.trackid }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right"></td>
+                <td></td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right"></td>
+                <td></td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.proyecto.label }}</td>
+                <td>{{ form.proyecto }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right"></td>
+                <td></td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right"></td>
+                <td></td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.trafico.label }}</td>
+                <td>{{ form.trafico }}</td>
+            </tr>
+            <tr>
+                <td rowspan="3" style="text-align: right">{{ form.observaciones.label }}</td>
+                <td rowspan="3">
+                    {{ form.observaciones }}
+                </td>
+                <!-- COLUMNA DOS -->
+                <td style="text-align: right">{{ form.wreceipt.label }}</td>
+                <td>{{ form.wreceipt }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.actividad.label }}</td>
+                <td>{{ form.actividad }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right">{{ form.valor.label }}</td>
+                <td>{{ form.valor }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.demora.label }}</td>
+                <td>{{ form.demora }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right">{{ form.status.label }}</td>
+                <td>{{ form.status }}</td>
+                <!-- COLUMNA TRES -->
+                <td style="text-align: right">{{ form.diasalmacenaje.label }}</td>
+                <td>{{ form.diasalmacenaje }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>

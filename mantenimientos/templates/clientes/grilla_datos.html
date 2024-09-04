@@ -1,0 +1,45 @@
+{% extends 'base_table.html' %}
+{% load static %}
+{% block title_page %}Socios comerciales{% endblock title_page %}
+
+
+{% block table_datatable %}
+    <table id="tabla_cliente" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th width="4%"></th>
+                <th class="text-left">Codigo</th>
+                <th class="text-left">Empresa</th>
+                <th class="text-left">Razon social</th>
+                <th class="text-left">RUT</th>
+                <th class="text-left">Direccion</th>
+                <th class="text-left">Localidad</th>
+                <th class="text-left">Pais</th>
+                <th class="text-left">Ciudad</th>
+                <th class="text-left">Tipo</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Codigo</th>
+            <th class="text-left">Empresa</th>
+            <th class="text-left">Razon social</th>
+            <th class="text-left">RUT</th>
+            <th class="text-left">Direccion</th>
+            <th class="text-left">Localidad</th>
+            <th class="text-left">Pais</th>
+            <th class="text-left">Ciudad</th>
+            <th class="text-left">Tipo</th>
+        </tr>
+        </tfoot>
+    </table>
+    <hr>
+{% endblock table_datatable %}
+
+
+{% block script_datatable %}
+    <script src="{% static 'grilla/js_clientes.js' %}"></script>
+{% endblock script_datatable %}

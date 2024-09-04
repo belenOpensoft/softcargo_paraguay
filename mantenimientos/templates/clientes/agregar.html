@@ -1,0 +1,11 @@
+{% extends 'base_form.html' %}
+
+{% block formulario %}
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <br>
+        <button type="submit" class="btn btn-primary">{{ tipo }}</button>
+        <a href="{% url 'vista_socios_comerciales' %}" class="btn btn-dark" onclick="return(confirm('¿Esta seguro de cancelar?'))">Cancelar</a>
+    </form>
+{% endblock formulario %}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        {% block js_datatables_block %}
+            <!-- CSS -->
+        <link rel="stylesheet" href="{% static 'css/arreglos.css' %}">
+<!--        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">-->
+                <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" id="bootstrap-css">
+        <link href="{% static 'css/menu.css' %}" rel="stylesheet" id="base-css">
+        <script src="{% static 'js/ae360af17e.js' %}" crossorigin="anonymous"></script>
+        <!-- JS -->
+
+        <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+<!--            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+<!--        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>-->
+        <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+            <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/css/bootstrap-select.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/js/bootstrap-select.min.js"></script>
+        <!--            <script src="{% static 'js/jquery-3.6.4.min.js' %}"></script>-->
+        <!--            <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>-->
+
+        <style>
+      .modal-dialog:not(.modal-fullscreen) .modal-body {
+          max-height: calc(100vh - 225px);
+          overflow-y: auto;
+      }
+    </style>
+        <script>
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            var alerts = document.querySelectorAll(".alert");
+            // Itera a través de los elementos y oculta cada uno después de 5 segundos
+            alerts.forEach(function(alertElement) {
+                setTimeout(function() {
+                    alertElement.style.display = "none";
+                }, 5000);
+            });
+            const miBoton = document.getElementById("btntoggle");
+            // Verificar si la cookie existe
+            const aux = getCookie('toggle');
+            console.log(aux);
+            if (aux == null) {
+                setCookieToggle();
+                event.preventDefault();
+                miBoton.click();
+            }
+        });
+
+        function setCookieToggle() {
+            aux = getCookie('toggle');
+            console.log(aux);
+            if (aux == null) {
+                 document.cookie = 'toggle=true'; // Establecer la cookie con el valor booleano "true"
+            } else {
+                deleteCookie('toggle');
+            }
+        }
+        function deleteCookie(cookieName) {
+            // Establece la fecha de caducidad en el pasado
+            const pastDate = new Date(0);
+
+            // Crea la cookie con la fecha de caducidad en el pasado
+            document.cookie = cookieName + "=; expires=" + pastDate.toUTCString() + "; path=/";
+
+            // También puedes especificar el dominio si es necesario
+            // document.cookie = cookieName + "=; expires=" + pastDate.toUTCString() + "; path=/; domain=example.com";
+        }
+        function getCookie(cookieName) {
+            const name = cookieName + "=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const cookieArray = decodedCookie.split(';');
+
+            for (let i = 0; i < cookieArray.length; i++) {
+                let cookie = cookieArray[i];
+                while (cookie.charAt(0) === ' ') {
+                    cookie = cookie.substring(1);
+                }
+                if (cookie.indexOf(name) === 0) {
+                    return cookie.substring(name.length, cookie.length);
+                }
+            }
+
+            return null; // Devuelve null si la cookie no se encuentra
+        }
+
+        </script>
+        {% endblock js_datatables_block %}
+
+        {% block script %} {% endblock script %}
+        {% block css %} {% endblock css %}
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title_page %}Cargo System {% endblock title_page %}</title>
+    </head>
+    <body id="body">
+
+        {% block menu %}
+            {% with "menu/"|add:request.session.rol|add:".html" as template %}
+                   <div class="wrapper" style="position: relative;z-index: 1;">
+                <!-- Sidebar -->
+                    {% include template %}
+                <!-- Main Component -->
+                    <div class="main">
+                        <nav class="navbar navbar-expand px-3 border-bottom">
+                            <!-- Button for sidebar toggle -->
+                            <button class="btn" type="button" onclick="return setCookieToggle();" id="btntoggle" data-bs-theme="dark">
+                                <i class="fa-solid fa-bars"></i>
+                            </button>
+                            <h4 class="align-self-center mx-auto">{{ title_page }}</h4>
+                        </nav>
+                        <main class="content px-3 py-2">
+                            <div class="container-fluid">
+                                <div class="mb-3">
+                                   {% block contenido %}
+                                         <div style="display: flex;justify-content: center;align-items: center;height: 20vh;">
+                                            <img src="{% static 'images/oceanlink.png' %}" alt="">
+                                        </div>
+                                      <br>
+                                    {% endblock contenido %}
+                                    <br>
+                                    {% for message in messages %}
+                                        <div class="alert alert-sm {{ message.tags }} alert-dismissible" role="alert">
+                                            {{ message }}
+                                        </div>
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            {% endwith %}
+        {% endblock menu %}
+        <br>
+    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'grilla/js_controlador_sidemenu.js' %}"></script>
+    </body>
+
+</html>

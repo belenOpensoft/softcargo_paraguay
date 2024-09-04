@@ -1,0 +1,76 @@
+{% extends 'base_table.html' %}
+
+{% load static %}
+
+{% block title_page %}Seguimientos{% endblock title_page %}
+
+{% block script_table %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/seguimientos/seguimiento.css'  %}">
+<!--<link rel="stylesheet" type="text/css" href="{% static 'css/select2.min.css'  %}">-->
+{% endblock script_table %}
+
+{% block table_datatable %}
+
+<!--    BOTONES -->
+{% include 'seguimientos/menu.html' %}
+    <table id="tabla_seguimiento" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%">Acciones</th>
+            <th class="text-right">Número</th>
+            <th class="text-left">Modo</th>
+            <th class="text-left">Cliente</th>
+            <th class="text-left">Origen</th>
+            <th class="text-left">Destino</th>
+            <th class="text-left">Fecha</th>
+            <th class="text-left">Estado</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+         <th width="4%">Acciones</th>
+            <th class="text-right">Codigo</th>
+            <th class="text-left">Modo</th>
+            <th class="text-left">Cliente</th>
+            <th class="text-left">Origen</th>
+            <th class="text-left">Destino</th>
+            <th class="text-left">Fecha</th>
+            <th class="text-left">Estado</th>
+        </tr>
+        </tfoot>
+    </table>
+    <div id="toast-container" class="mx-auto text-center">
+      <!-- Aquí se mostrarán los mensajes -->
+    </div>
+
+{% load static %}
+
+{% include 'seguimientos/modales/notas.html' %}
+{% include 'seguimientos/modales/impor_maritimo.html' %}
+{% include 'seguimientos/modales/cronologia.html' %}
+{% include 'seguimientos/modales/envases.html' %}
+{% include 'seguimientos/modales/embarques.html' %}
+{% include 'seguimientos/modales/gastos.html' %}
+{% include 'seguimientos/modales/pdf.html' %}
+{% include 'seguimientos/modales/archivos.html' %}
+{% include 'seguimientos/modales/rutas.html' %}
+{% include 'seguimientos/modales/logs.html' %}
+{% include 'seguimientos/modales/emails.html' %}
+{% include 'seguimientos/modales/clonar.html' %}
+
+
+{% endblock table_datatable %}
+
+
+{% block script_datatable %}
+
+    <script src="{% static 'grilla/js_seguimientos.js' %}"></script>
+    <script src="{% static 'js/select2.min.js' %}"></script>
+    <script>
+       var csrf_token = '{{ csrf_token }}';
+    </script>
+{% endblock script_datatable %}

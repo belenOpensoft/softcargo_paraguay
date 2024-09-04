@@ -1,0 +1,43 @@
+{% extends 'base_table.html' %}
+{% load static %}
+{% block title_page %}Ciudades{% endblock title_page %}
+
+
+{% block table_datatable %}
+    <table id="tabla_ciudad" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Codigo</th>
+            <th class="text-left">Nombre</th>
+            <th class="text-left">Pais</th>
+            <th class="text-left">Codigo EDI</th>
+            <th class="text-left">Codigo Aduana</th>
+            <th class="text-left">ID Pais</th>
+            <th class="text-left">Ultima actualizacion</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Codigo</th>
+            <th class="text-left">Nombre</th>
+            <th class="text-left">Pais</th>
+            <th class="text-left">Codigo EDI</th>
+            <th class="text-left">Codigo Aduana</th>
+            <th class="text-left">ID Pais</th>
+            <th class="text-left">Ultima actualizacion</th>
+        </tr>
+        </tfoot>
+    </table>
+    <hr>
+{% endblock table_datatable %}
+
+
+{% block script_datatable %}
+    <script src="{% static 'grilla/js_ciudades.js' %}"></script>
+{% endblock script_datatable %}

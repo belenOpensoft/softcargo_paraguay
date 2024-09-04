@@ -1,0 +1,72 @@
+{% extends 'base_table.html' %}
+{% load static %}
+
+{% block title_page %}DESCONSOLIDACION{% endblock title_page %}
+
+{% block table_datatable %}
+
+   <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-3">
+                    {{ form.cia.label_tag }}
+                    {{ form.cia }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.numero_vuelo.label_tag }}
+                    {{ form.numero_vuelo }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.llegada.label_tag }}
+                    {{ form.llegada }}
+                </div>
+                <div class="col-md-3">
+                    <br>
+                     <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-search"></i> Buscar</button>
+                </div>
+            </div>
+        </form>
+            {% if datos %}
+                <br>
+                <br>
+                <table id="tabla_transmision" class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Seguimiento</th>
+                            <th>Awb</th>
+                            <th>HAwb</th>
+                            <th>Origen</th>
+                            <th>Tipo transmision</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key,reg in datos.items %}
+                            <tr>
+                                 <td>{{ reg.id }}</td>
+                                 <td>{{ reg.numero }}</td>
+                                 <td>{{ reg.seguimiento.awb }}</td>
+                                 <td>{{ reg.seguimiento.hawb }}</td>
+                                 <td>{{ reg.origen }}</td>
+                                 <td>
+                                     <select>
+                                         <option value="A">ALTA</option>
+                                         <option value="B">BAJA</option>
+                                     </select>
+                                 </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+       <br>
+       <button class="btn btn-primary" id="informar"><i class="fa fa-plane" aria-hidden="true"></i>Transmitir</button>
+            {% endif %}
+{% endblock table_datatable %}
+
+{% block script_datatable %}
+    <script src="{% static 'grilla/js_transmision.js' %}"></script>
+    <script>
+       var csrf_token = '{{ csrf_token }}';
+    </script>
+{% endblock script_datatable %}

@@ -1,0 +1,19 @@
+Obj:1 https://repo.skype.com/deb stable InRelease
+Obj:2 https://linux.teamviewer.com/deb stable InRelease
+Obj:3 http://archive.ubuntu.com/ubuntu jammy InRelease
+Obj:4 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Obj:5 http://ppa.launchpad.net/deadsnakes/ppa/ubuntu jammy InRelease
+Obj:6 http://archive.ubuntu.com/ubuntu jammy-updates InRelease
+Obj:7 http://packages.microsoft.com/repos/code stable InRelease
+Ign:8 http://packages.linuxmint.com vanessa InRelease
+Des:9 http://archive.ubuntu.com/ubuntu jammy-backports InRelease [108 kB]
+Obj:10 http://packages.linuxmint.com vanessa Release
+Ign:11 http://apt.postgresql.org/pub/repos/apt vanessa-pgdg InRelease
+Obj:13 https://packages.microsoft.com/ubuntu/20.04/mssql-server-2022 focal InRelease
+Obj:14 http://ppa.launchpad.net/ondrej/php/ubuntu jammy InRelease
+Err:15 http://apt.postgresql.org/pub/repos/apt vanessa-pgdg Release
+  404  Not Found [IP: 217.196.149.55 80]
+Obj:16 https://packages.microsoft.com/ubuntu/19.04/prod disco InRelease
+Obj:17 https://packages.microsoft.com/repos/ms-teams stable InRelease
+Obj:18 https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/focal pgadmin4 InRelease
+Leyendo lista de paquetes...

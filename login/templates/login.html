@@ -1,0 +1,43 @@
+{% load static %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Cargo system</title>
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" id="bootstrap-css">
+    <link href="{% static 'css/login.css' %}" rel="stylesheet" id="login-css">
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery-3.6.4.min.js' %}"></script>
+
+</head>
+<body class="">
+    <div class="wrapper">
+        <div class="logo">
+            <img src="{% static 'images/oceanlink.png' %}" alt="">
+        </div>
+        <div class="text-center mt-4 name">
+            SISTEMA DE GESTION
+        </div>
+        <form action="." method="POST" class="p-3 mt-3">
+            {% for message in messages %}
+                <div class="alert alert-sm {{ message.tags }} alert-dismissible" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            {% csrf_token %}
+            <div class="form-field d-flex align-items-center">
+                <span class="far fa-user"></span>
+                {{ form.usuario }}
+            </div>
+            <div class="form-field d-flex align-items-center">
+                <span class="fas fa-key"></span>
+<!--                <input  name="password" id="pwd" placeholder="Contraseña">-->
+                {{ form.clave }}
+            </div>
+            <button type="submit" class="btn mt-3">Ingresar</button>
+        </form>
+        <div class="text-center fs-6">
+            <a href="#">Olvido su contraseña?</a>
+        </div>
+    </div>
+</body>
+</html>

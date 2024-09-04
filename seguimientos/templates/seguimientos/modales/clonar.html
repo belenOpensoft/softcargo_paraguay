@@ -1,0 +1,26 @@
+{% load static %}
+{% load widget_tweaks %}
+<div id="clonar_modal" style="display: none;">
+    <form id="clonar_form">
+        <table class="table">
+            <tbody>
+            <tr>
+                <td style="text-align: right;">{{ form_clonar.embarques.label }}</td>
+                <td>{{ form_clonar.embarques }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">{{ form_clonar.envases.label }}</td>
+                <td>{{ form_clonar.envases }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">{{ form_clonar.gastos.label }}</td>
+                <td>{{ form_clonar.gastos }}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">{{ form_clonar.trasbordo.label }}</td>
+                <td>{{ form_clonar.trasbordo }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>

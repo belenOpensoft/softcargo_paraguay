@@ -1,0 +1,78 @@
+{% load static %}
+{% load widget_tweaks %}
+<div id="rutas_modal"  style="display: none;">
+
+ <form id="rutas_form">
+
+     <table class="table" style="width: 100%">
+         <tbody>
+             <tr>
+                 <td style="text-align: right;">{{ form_rutas.origen.label }}</td>
+                 <td>{{ form_rutas.id }}{{ form_rutas.origen }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_rutas.destino.label }}</td>
+                 <td>{{ form_rutas.destino }}</td>
+                  <!-- COLUMNA TREs -->
+                  <td style="text-align: right;">{{ form_rutas.vapor.label }}</td>
+                 <td>{{ form_rutas.vapor }}</td>
+                 <td></td>
+                 <td></td>
+             </tr>
+             <tr>
+                 <td style="text-align: right;">{{ form_rutas.salida.label }}</td>
+                 <td>{{ form_rutas.salida }}</td>
+                  <!-- COLUMNA DOS -->
+                  <td style="text-align: right;">{{ form_rutas.llegada.label }}</td>
+                 <td>{{ form_rutas.llegada }}</td>
+                  <!-- COLUMNA TRES -->
+                 <td style="text-align: right;">{{ form_rutas.viaje.label }}</td>
+                 <td>{{ form_rutas.viaje }}</td>
+                 <td></td>
+                 <td></td>
+             </tr>
+             <tr>
+                 <td style="text-align: right;">{{ form_rutas.cia.label }}</td>
+                 <td>{{ form_rutas.cia }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_rutas.modo.label }}</td>
+                 <td>{{ form_rutas.modo }}</td>
+                 <!-- COLUMNA TRE -->
+                 <td style="text-align: right;">{{ form_rutas.accion.label }}</td>
+                 <td>{{ form_rutas.accion }}</td>
+                 <td>
+                     <button class="btn btn-dark" id="ingresar_ruta">Agregar</button>
+                     <button class="btn btn-danger" id="cancelar_ruta">Cancelar</button>
+                 </td>
+                 <td></td>
+             </tr>
+         <tr>
+         </tbody>
+
+     </table>
+
+     <table id="tabla_rutas" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-right">Origen</th>
+            <th class="text-right">Destino</th>
+            <th class="text-left">Vapor/Vuelo</th>
+            <th class="text-left">Salida</th>
+            <th class="text-left">Llegada</th>
+            <th class="text-left">Viaje</th>
+            <th class="text-left">Cia</th>
+            <th class="text-left">Modo</th>
+            <th class="text-left">Acccion</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+
+    </form>
+</div>
+

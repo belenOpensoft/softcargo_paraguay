@@ -1,0 +1,118 @@
+<aside id="sidebar" style="background-color:#0D6EFD;">
+            <div class="h-100">
+                <div class="sidebar-logo">
+                    <a href="/">{{ request.session.empresa }}</a>
+                </div>
+                <!-- Sidebar Navigation -->
+                <ul class="sidebar-nav">
+                    <li class="sidebar-header">
+                        Mantenimientos
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{% url 'vista_paises' %}" class="sidebar-link">
+                            <i class="fa-solid fa-globe-americas pe-2"></i>Paises
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{% url 'vista_ciudades' %}" class="sidebar-link">
+                            <i class="fa-solid fa-building pe-2"></i>
+                            Ciudades
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{% url 'vista_bancos' %}" class="sidebar-link">
+                            <i class="fa-solid fa-briefcase  pe-2"></i>Bancos
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{% url 'vista_buques' %}" class="sidebar-link">
+                            <i class="fa-solid fa-ship pe-2"></i>Buques
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{% url 'vista_productos' %}" class="sidebar-link">
+                           <i class="fa-solid fa-shopping-cart pe-2"></i>&nbsp;Productos
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{% url 'vista_monedas' %}" class="sidebar-link">
+                           <i class="fa-solid fa-dollar-sign pe-2"></i>&nbsp;Monedas
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{% url 'vista_vendedores' %}" class="sidebar-link">
+                           <i class="fa-solid fa-user pe-2"></i>&nbsp;Vendedores
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{% url 'vista_socios_comerciales' %}" class="sidebar-link">
+                           <i class="fa-solid fa-file-lines pe-2"></i>&nbsp;Socios comerciales
+                        </a>
+                    </li>
+                    <li class="sidebar-header">
+                        Modulo
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" data-bs-toggle="collapse" onclick="toggle_collapse_menu('auth1', this)" >
+                            <i class="fa fa-puzzle-piece pe-2"></i>
+                            {{ request.session.rol }}
+                        </a>
+                        <ul id="auth1" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            {% for modulo in request.session.roles %}
+                                {% if modulo != request.session.rol %}
+                                    <li class="sidebar-item">
+                                        <a href="{% url 'vista_cambiar_modulo' modulo %}" class="sidebar-link">{{ modulo|capfirst }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-header">
+                        Sesion usuario
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" data-bs-toggle="collapse" onclick="toggle_collapse_menu('auth',this)" >
+                            <i class="fa-regular fa-user pe-2"></i>
+                            {{ request.user.first_name }} {{ request.user.last_name }}
+                        </a>
+                        <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link">Cambio clave</a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="{% url 'vista_logout' %}" class="sidebar-link">Salir</a>
+                            </li>
+                        </ul>
+                    </li>
+                    </li>
+<!--                    <li class="sidebar-header">-->
+<!--                        Multi Level Nav-->
+<!--                    </li>-->
+<!--                    <li class="sidebar-item">-->
+<!--                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#multi"-->
+<!--                            aria-expanded="false" aria-controls="multi">-->
+<!--                            <i class="fa-solid fa-share-nodes pe-2"></i>-->
+<!--                            Multi Level-->
+<!--                        </a>-->
+<!--                        <ul id="multi" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">-->
+<!--                            <li class="sidebar-item">-->
+<!--                                <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse"-->
+<!--                                    data-bs-target="#multi-two" aria-expanded="false" aria-controls="multi-two">-->
+<!--                                    Two Links-->
+<!--                                </a>-->
+<!--                                <ul id="multi-two" class="sidebar-dropdown list-unstyled collapse">-->
+<!--                                    <li class="sidebar-item">-->
+<!--                                        <a href="#" class="sidebar-link">Link 1</a>-->
+<!--                                    </li>-->
+<!--                                    <li class="sidebar-item">-->
+<!--                                        <a href="#" class="sidebar-link">Link 2</a>-->
+<!--                                    </li>-->
+<!--                                </ul>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </li>-->
+                </ul>
+            </div>
+        </aside>

@@ -1,0 +1,23 @@
+{% extends 'base_form.html' %}
+
+{% block formulario %}
+
+    <form method="POST">
+        <table class="form-control form-control-a">
+            {% csrf_token %}
+            <tr>
+                <th>{{ form.empresa.label }}</th>
+                <td colspan="3">{{ form.empresa }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.numeracion.label }}</th>
+                <td>{{ form.numeracion }}</td>
+                <th style="text-align:right">{{ form.cantidad.label }}</th>
+                <td>{{ form.cantidad }}</td>
+            </tr>
+        </table>
+        <br>
+        <button type="submit" class="btn btn-primary">Agregar</button>
+        <a href="/guias" class="btn btn-dark" onclick="return(confirm('¿Esta seguro de cancelar?'))">Cancelar</a>
+    </form>
+{% endblock formulario %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block contenido %}
+
+        <div style="display: flex; justify-content:center;">
+            {% block formulario %}
+            {% endblock formulario %}
+        </div>
+
+{% block script_datatable %}
+    <script type="text/javascript" src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+<script src="{% static 'grilla/js_controlador_sidemenu.js' %}"></script>
+{% endblock script_datatable %}
+
+{% endblock contenido %}

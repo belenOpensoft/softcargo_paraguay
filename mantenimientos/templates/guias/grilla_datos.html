@@ -1,0 +1,45 @@
+{% extends 'base_table.html' %}
+{% load static %}
+{% block title_page %}GUIAS{% endblock title_page %}
+
+{% block table_datatable %}
+    <table id="tabla_guias" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Transportista</th>
+            <th class="text-left">AWB</th>
+            <th class="text-left">Estado</th>
+            <th class="text-left">Referencia</th>
+            <th class="text-left">Tipo</th>
+            <th class="text-left">Destino</th>
+            <th class="text-left">Fecha</th>
+            <th class="text-left">Posicion</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Transportista</th>
+            <th class="text-left">AWB</th>
+            <th class="text-left">Estado</th>
+            <th class="text-left">Referencia</th>
+            <th class="text-left">Tipo</th>
+            <th class="text-left">Destino</th>
+            <th class="text-left">Fecha</th>
+            <th class="text-left">Posicion</th>
+        </tr>
+        </tfoot>
+    </table>
+    Ver todo <input type="checkbox" class="" name="vertodo"  id='vertodo' title="Ver todos" style="width:50px;">
+    <hr>
+{% endblock table_datatable %}
+
+
+{% block script_datatable %}
+    <script src="{% static 'grilla/js_guias.js' %}"></script>
+{% endblock script_datatable %}

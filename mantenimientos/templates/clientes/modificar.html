@@ -1,0 +1,37 @@
+{% extends 'base_form.html' %}
+
+{% block formulario %}
+<form method="POST">
+    <table class="form-control form-control-a">
+        {% csrf_token %}
+        <tr>
+            <th>{{ form.codigo.label }}</th>
+            <td>{{ form.codigo }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.nombre.label }}</th>
+            <td>{{ form.nombre }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.pais.label }}</th>
+            <td>{{ form.pais }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.codedi.label }}</th>
+            <td>{{ form.codedi }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.codaduana.label }}</th>
+            <td>{{ form.codaduana }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.paises_idinternacional.label }}</th>
+            <td>{{ form.paises_idinternacional }}</td>
+        </tr>
+    </table>
+    <br>
+    <button type="submit" class="btn btn-primary">Modificar</button>
+    <a href="/ciudades" class="btn btn-dark" onclick="return(confirm('¿Esta seguro de cancelar?'))">Cancelar</a>
+</form>
+
+{% endblock formulario %}

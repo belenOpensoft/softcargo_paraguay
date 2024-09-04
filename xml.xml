@@ -1,0 +1,80 @@
+<?xml version = "1.0" encoding = "ISO-8859-1"?>
+<DAE xmlns="http://www.aduanas.gub.uy/LUCIA/DAE">
+    <TipoDocumento>4</TipoDocumento>
+    <IdDocumento>216803670019</IdDocumento>
+    <FechaHoraDocumentoElectronico>2023-08-07T11:52:09</FechaHoraDocumentoElectronico>
+    <CodigoIntercambio>WS_MANIFIESTO</CodigoIntercambio>
+    <NroTransaccion>CARX0000004521</NroTransaccion>
+    <Objeto>
+        <Manifiestos>
+            <Manifiesto>
+                <TransporteTipo>4</TransporteTipo>
+                <ManifiestoTipo>0</ManifiestoTipo>
+                <ManifiestoNumero>VZ0104</ManifiestoNumero>
+                <Recinto>2081</Recinto>
+                <FechaArribo>20230807</FechaArribo>
+                <AgenteTransportistaTipoDocumento>4</AgenteTransportistaTipoDocumento>
+                <AgenteTransportistaDocumento>213623060013</AgenteTransportistaDocumento>
+                <LugarPartidaCodigo>AR EZE</LugarPartidaCodigo>
+                <LugarDestinoCodigo>UY MVD</LugarDestinoCodigo>
+                <UltimoPuerto>UY MVD</UltimoPuerto>
+                <MedioTransporteMatricula>CXCAR</MedioTransporteMatricula>
+                <MedioTransporteNacionalidad>032</MedioTransporteNacionalidad>
+                <Observacion/>
+                <MedioTransporteNombre>VZ0104</MedioTransporteNombre>
+                <Conocimientos>
+                    <Conocimiento>
+                        <ConocimientoNumeroSecuencial>136</ConocimientoNumeroSecuencial>
+                        <ConocimientoOriginalNumero>08713</ConocimientoOriginalNumero>
+                        <PuertoEmbarque>AR EZE</PuertoEmbarque>
+                        <RegistroTipo>A</RegistroTipo>
+                        <OperacionTipo/>
+                        <ConocimientoTipo>HWB</ConocimientoTipo>
+                        <ConocimientoMasterNumero>27273607520</ConocimientoMasterNumero>
+                        <PuertoDescarga>UY MVD</PuertoDescarga>
+                        <ConsignatarioTipoDocumento>4</ConsignatarioTipoDocumento>
+                        <ConsignatarioDocumento>213556530017</ConsignatarioDocumento>
+                        <MercaderiaDestino>UY MVD</MercaderiaDestino>
+                        <RemitenteTipoDocumento>4</RemitenteTipoDocumento>
+                        <RemitenteDocumento>213556530017</RemitenteDocumento>
+                        <RemitenteNombre>ALFACOR INTERNACIONAL SA</RemitenteNombre>
+                        <RemitenteDireccion>ITUZAINGO 0, FLORIDA/URUGUAY</RemitenteDireccion>
+                        <CargaCubica>1.000</CargaCubica>
+                        <NotificarTipoDocumento>4</NotificarTipoDocumento>
+                        <NotificarDocumento>213556530017</NotificarDocumento>
+                        <NotificarNombre>ALFACOR INTERNACIONAL SA</NotificarNombre>
+                        <NotificarDireccion>ITUZAINGO 0, FLORIDA/URUGUAY</NotificarDireccion>
+                        <NotificarTelefono/>
+                        <ALaOrden>N</ALaOrden>
+                        <FormaPago>C</FormaPago>
+                        <AgenteConocimientoMail>OPERACIONES@CARGONET.COM.UY</AgenteConocimientoMail>
+                        <Trasbordo>N</Trasbordo>
+                        <Liberado/>
+                        <PuertoOrigen>US MIA</PuertoOrigen>
+                        <ConsignatarioPais>858</ConsignatarioPais>
+                        <GuiaDirecta/>
+                        <Lineas>
+                            <Linea>
+                                <LineaNumero>001</LineaNumero>
+                                <RegistroTipo>A</RegistroTipo>
+                                <PesoBruto>189.600</PesoBruto>
+                                <BultoTipo>PCS</BultoTipo>
+                                <BultoCantidad>1.000</BultoCantidad>
+                                <Marcas/>
+                                <MercaderiaDescripcion>TELECOMUNICATIONEQUIPMENT</MercaderiaDescripcion>
+                                <DepositoFinalCodigo/>
+                                <MercaderiaPeligrosaCodigo/>
+                                <OperacionTipo/>
+                                <ContenedoresLinea/>
+                                <PartidasLinea/>
+                                <Asociaciones/>
+                            </Linea>
+                        </Lineas>
+                    </Conocimiento>
+                </Conocimientos>
+                <Contenedores/>
+                <Imagenes/>
+            </Manifiesto>
+        </Manifiestos>
+    </Objeto>
+</DAE>

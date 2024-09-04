@@ -1,0 +1,37 @@
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'modal/bootstrap.min.css' %}">
+</head>
+
+<body>
+
+    <!-- Bootstrap 4 -->
+<!--    <script src="{% static 'modal/jquery.min.js' %}"></script>-->
+    <script src="{% static 'modal/popper.min.js' %}"></script>
+    <script src="{% static 'modal/bootstrap.min.js' %}"></script>
+    <!-- You can alternatively load the minified version -->
+    <script src="{% static 'modal/jquery.bootstrap.modal.forms.min.js' %}"></script>
+
+</body>
+<div class="modal fade" tabindex="-1" role="dialog" id="modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content"></div>
+  </div>
+</div>
+
+<button id="signup-btn" class="btn btn-primary" type="button" name="button">Prueba 1</button>
+
+<script type="text/javascript">
+
+  $(function () {
+    // Sign up button
+        $("#signup-btn2").modalForm({
+            formURL: "{% url 'nuevo_seguir' %}"
+        });
+        $("#notas-btn").modalForm({
+            formURL: "{% url 'seguir_notas' %}"
+        });
+    });
+
+
+</script>
