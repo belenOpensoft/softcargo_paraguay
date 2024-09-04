@@ -342,8 +342,7 @@ def eliminar_socio_comercial(request):
             try:
                 id = request.GET['id']
                 cliente = SociosComerciales.objects.get(id=id)
-                cliente.estado = 1
-                cliente.save()
+                cliente.delete()
                 resultado['resultado'] = 'exito'
             except Exception as e:
                 resultado['resultado'] = str(e)

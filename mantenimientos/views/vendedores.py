@@ -232,8 +232,7 @@ def eliminar_vendedor(request):
             try:
                 id = request.GET['id']
                 vendedor = Vendedores.objects.get(id=id)
-                vendedor.estado = 1
-                vendedor.save()
+                vendedor.delete()
                 resultado['resultado'] = 'exito'
             except Exception as e:
                 resultado['resultado'] = str(e)

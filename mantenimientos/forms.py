@@ -236,7 +236,6 @@ class add_cliente_form(forms.Form):
         self.fields['pais'].choices = [('', 'Seleccione un país')] + [(pais.nombre, pais.nombre) for pais in Paises.objects.all()]
         self.fields['ciudad'].choices = [('', 'Seleccione una ciudad')] + [(ciudad.codigo, ciudad.nombre) for ciudad in Ciudades.objects.all()]
 
-
 class add_banco_form(forms.Form):
     codigo = forms.IntegerField(widget=forms.NumberInput(
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'min': 0, 'max': 99}, ), required=True,

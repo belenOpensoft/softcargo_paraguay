@@ -5,46 +5,50 @@
     <meta charset="UTF-8">
     <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" id="bootstrap-css">
     <link href="{% static 'css/roles.css' %}" rel="stylesheet" id="login-css">
-<!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css">-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/jquery-3.6.4.min.js' %}"></script>
 </head>
 <body >
-    <div class="wrapper">
-        <div class="text-center mt-4 name">
-            Seleccionar modulo
+<div class="text-center mt-4 name">
+    <br>
+    <br>
+           <h2> Seleccione el módulo al que quiere dirigirse: </h2>
         </div>
-        <br>
+    <div class="wrapper">
         <form method="post">
             {% for message in messages %}
                 <div class="alert alert-sm {{ message.tags }} alert-dismissible" role="alert">
                     {{ message }}
                 </div>
             {% endfor %}
-            <div class="row">
+            <div class="">
 
                 <div class="column">
                     {% for rol in roles.0 %}
-
-                        <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" ><img src="{{ baseUrl }}images/{{ rol }}.jpg"></a>
+                    <i class="iconos bi bi-database-fill-gear"></i>
+                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" > <h4>Mantenimientos</h4> </a>
                     {% endfor%}
 
                 </div>
                 <div class="column">
                     {% for rol in roles.1 %}
-                        <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}"><img src="{{ baseUrl }}images/{{ rol }}.jpg"></a>
+                    <i class="iconos bi bi-person-fill-gear"></i>
+                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}"> <h4>Administrador</h4> </a>
                     {% endfor%}
 
                 </div>
                 <div class="column">
                     {% for rol in roles.2 %}
-                        <a href="/login/selecccionarol/{{ rol }}"  title="{{ rol|title }}"><img src="{{ baseUrl }}images/{{ rol }}.jpg"></a>
+                    <i class="iconos bi bi-send-check"></i>
+                        <a href="/login/selecccionarol/{{ rol }}"  title="{{ rol|title }}"><h4>Seguimientos</h4></a>
                     {% endfor%}
 
                 </div>
                 <div class="column">
                     {% for rol in roles.3 %}
-                        <a href="/login/selecccionarol/{{ rol }}"  title="{{ rol|title }}"><img src="{{ baseUrl }}images/{{ rol }}.jpg"></a>
+                    <i class="iconos bi bi-card-checklist"></i>
+                        <a href="/login/selecccionarol/{{ rol }}"  title="{{ rol|title }}"> <h4>Operaciones</h4> </a>
                     {% endfor%}
 
                 </div>
