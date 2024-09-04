@@ -82,7 +82,6 @@ def source_socios_comerciales(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
-
 def get_data(registros_filtrados):
     try:
         data = []
@@ -331,9 +330,8 @@ def agregar_socio_comercial(request, id_socio=None):
             raise PermissionDenied('No tiene permisos para realizar esta acción.')
     except Exception as e:
         messages.error(request, str(e))
-        #logger.error(f"Error en agregar_socio_comercial: {str(e)}")
         return HttpResponseRedirect("/socios_comerciales")
-        #return HttpResponseRedirect("/clientes")
+
 
 @login_required(login_url='/')
 def eliminar_socio_comercial(request):
