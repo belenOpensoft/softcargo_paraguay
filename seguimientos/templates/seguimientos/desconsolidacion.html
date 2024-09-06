@@ -5,28 +5,28 @@
 
 {% block table_datatable %}
 
-   <form method="post">
-            {% csrf_token %}
-            <div class="row">
-                <div class="col-md-3">
-                    {{ form.cia.label_tag }}
-                    {{ form.cia }}
-                </div>
-                <div class="col-md-3">
-                    {{ form.numero_vuelo.label_tag }}
-                    {{ form.numero_vuelo }}
-                </div>
-                <div class="col-md-3">
-                    {{ form.llegada.label_tag }}
-                    {{ form.llegada }}
-                </div>
-                <div class="col-md-3">
-                    <br>
-                     <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-search"></i> Buscar</button>
-                </div>
-            </div>
-        </form>
+   <form method="POST" style="width:fit-content;">
+    <table class="form-control form-control-a">
+        {% csrf_token %}
+        <tr>
+            <th>{{ form.cia.label }}</th>
+            <td>{{ form.cia }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.numero_vuelo.label }}</th>
+            <td>{{ form.numero_vuelo }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.llegada.label }}</th>
+            <td>{{ form.llegada }}</td>
+        </tr>
+    </table>
+    <br>
+    <button type="submit" class="btn btn-primary">
+        <i class="fa fa-search"></i> Buscar
+    </button>
+</form>
+
             {% if datos %}
                 <br>
                 <br>

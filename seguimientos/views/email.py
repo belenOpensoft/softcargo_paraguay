@@ -91,23 +91,23 @@ def get_data_email(request):
                     llegada = ''
                 campos = [
                     ("Referencia", ""),
-                    ("Embarcador", str(row.embarcador)),
-                    ("Consignatario", str(row.consignatario)),
-                    ("Ref.Proveedor", str(row.refproveedor)),
-                    ("Términos", str(row.terminos)),
-                    ("Transportista", str(row.transportista)),
+                    ("Embarcador", str(row.embarcador) if row.embarcador is not None else ""),
+                    ("Consignatario", str(row.consignatario) if row.consignatario is not None else ""),
+                    ("Ref.Proveedor", str(row.refproveedor) if row.refproveedor is not None else ""),
+                    ("Términos", str(row.terminos) if row.terminos is not None else ""),
+                    ("Transportista", str(row.transportista) if row.transportista is not None else ""),
                     ("Vapor", str(row.vapor) if row.vapor is not None else ""),
-                    ("Origen", str(row.origen_text)),
-                    ("Destino", str(row.destino_text)),
-                    ("Destino", str(row.destino_text)),
-                    ("Salida", str(salida)),
-                    ("Llegada", str(llegada)),
-                    ("Llegada estimadas", str(llegada)),
-                    ("Posicion", str(row.posicion)),
-                    ("Agente", str(row.agente)),
-                    ("H B/L", str(row.hawb)),
-                    ("B/L", str(row.awb)),
-                    ("Seguimiento", str(row.numero)),
+                    ("Origen", str(row.origen_text) if row.origen_text is not None else ""),
+                    ("Destino", str(row.destino_text) if row.destino_text is not None else ""),
+                    #("Destino", str(row.destino_text)),
+                    ("Salida", str(salida) if salida is not None else ""),
+                    ("Llegada", str(llegada) if llegada is not None else ""),
+                    ("Llegada estimadas", str(llegada) if llegada is not None else ""),
+                    ("Posicion", str(row.posicion) if row.posicion is not None else ""),
+                    ("Agente", str(row.agente) if row.agente is not None else ""),
+                    ("H B/L", str(row.hawb) if row.hawb is not None else ""),
+                    ("B/L", str(row.awb) if row.awb is not None else ""),
+                    ("Seguimiento", str(row.numero) if row.numero is not None else ""),
                 ]
                 # Agregar campos a la tabla
                 for campo, valor in campos:
@@ -179,7 +179,7 @@ def get_data_email(request):
                     ("Att.", ""),
                     ("Cliente", str(row.cliente)),
                     ("Vapor", str(row.vapor) if row.vapor is not None else ""),
-                    ("Viaje", str(row.viaje)),
+                    ("Viaje", str(row.viaje) if row.viaje is not None else ""),
                     ("Embarque", str(row.etd.strftime("%d/%m/%Y")) if isinstance(row.etd, datetime.datetime) else ""),
                     ("Llegada", str(row.eta.strftime("%d/%m/%Y")) if isinstance(row.eta, datetime.datetime) else ""),
                 ]
@@ -266,13 +266,13 @@ def get_data_email(request):
                 campos = [
                     ("Att.", str("Departamento de operaciones").upper()),
                     ("Cliente", str(row.cliente)),
-                    ("Direccion", str(row.direccion_cliente)),
-                    ("Telefono", str(row.telefono_cliente)),
+                    ("Direccion", str(row.direccion_cliente) if row.direccion_cliente is not None else ""),
+                    ("Telefono", str(row.telefono_cliente) if row.telefono_cliente is not None else ""),
                     ("Vapor", str(row.vapor) if row.vapor is not None else ""),
-                    ("Viaje", str(row.viaje)),
+                    ("Viaje", str(row.viaje) if row.viaje is not None else ""),
                     # ("Embarque", str(row.etd.strftime("%d/%m/%Y")) if isinstance(row.etd, datetime.datetime) else ""),
                     ("Llegada", str(row.eta.strftime("%d/%m/%Y")) if isinstance(row.eta, datetime.datetime) else ""),
-                    ("Posicion", str(row.posicion)),
+                    ("Posicion", str(row.posicion) if row.posicion is not None else ""),
                 ]
                 for campo, valor in campos:
                     tabla_html += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
