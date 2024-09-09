@@ -25,45 +25,64 @@ $(document).ready(function()
              dom: 'Btlipr',
 //             dom: 'Brtl',
              buttons: [
-                    {
-                        text: 'MANTENIMIENTO DE GUIAS AEREAS',
-                        className: 'btn btn-dark',
-                        action: function (e, dt, button, config) {
-
-                        }
-                    },
-                    {
-                        text: 'Agregar',
-                        action: function (e, dt, button, config) {
-                            window.location.replace("/agregar_guias");
-                        }
-                    },
-                    {
-                        text: 'Anular',
-                        action: function (e, dt, button, config) {
-                            if(row = table.row('.selected').data()){
-                                miurl = "/anular_guia";
-                                    var toData = { 'id' : row[0] };
-                                    $.ajax({
-                                        type: "GET",
-                                        url: miurl,
-                                        data: toData,
-                                        success:function(resultado){
-                                            aux = resultado['resultado'];
-                                            if(aux == 'exito'){
-                                                table.ajax.reload();
-                                            }else{
-                                                alert(aux);
-                                            }
-                                        }
-                                    });
-                            }else{
-                                alert('Debe seleccionar un registro');
-                            }
+    {
+        text: 'MANTENIMIENTO DE GUIAS AEREAS',
+        className: 'btn btn-dark',
+        action: function (e, dt, button, config) {
+            // Acción del botón
+        }
+    },
+    {
+        text: 'Agregar',
+        action: function (e, dt, button, config) {
+            window.location.replace("/agregar_guias");
+        }
+    },
+    {
+        text: 'Anular',
+        action: function (e, dt, button, config) {
+            if (row = table.row('.selected').data()) {
+                miurl = "/anular_guia";
+                var toData = { 'id': row[0] };
+                $.ajax({
+                    type: "GET",
+                    url: miurl,
+                    data: toData,
+                    success: function (resultado) {
+                        aux = resultado['resultado'];
+                        if (aux == 'exito') {
+                            table.ajax.reload();
+                        } else {
+                            alert(aux);
                         }
                     }
+                });
+            } else {
+                alert('Debe seleccionar un registro');
+            }
+        }
+    },
+    {
+        text: '<div>Ver todo <input type="checkbox" class="" name="vertodo" id="vertodo" title="Ver todos" style="width:50px;"></div>',
+        action: function (e, dt, button, config) {
+            // Verificar si se hizo clic en el checkbox
+            var checkbox = $('#vertodo');
 
-            ],
+            // Alternar el estado del checkbox (como si se hubiera clickeado)
+            checkbox.prop('checked', !checkbox.prop('checked'));
+
+            // Aplicar la lógica según el estado del checkbox
+            if (checkbox.is(':checked')) {
+                vertodo = true;
+            } else {
+                vertodo = false;
+            }
+
+            // Limpiar y redibujar la tabla
+            table.clear().draw();
+        }
+    }
+],
              "columnDefs": [
                 {
                     "targets": [ 0 ],
@@ -161,15 +180,15 @@ $(document).ready(function()
             }
         });
 
-         $('#vertodo').click(function() {
-            if (this.checked) {
-                vertodo = true;
-            } else {
-                vertodo = false;
-            }
-            table.clear().draw();
-            return true;
-        });
+//         $('#vertodo').click(function() {
+//            if (this.checked) {
+//                vertodo = true;
+//            } else {
+//                vertodo = false;
+//            }
+//            table.clear().draw();
+//            return true;
+//        });
 
 
 

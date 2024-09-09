@@ -80,7 +80,7 @@ def reportes_seguimiento(request):
                         return genero_xls_seguimientos(resultados,desde,hasta)
                     else:
                         messages.info(request,'No se encontraron resultados para la busqueda')
-            return render(request, "seguimientos/reportes.html", ctx)
+            return render(request, "seguimientos/reporteFs.html", ctx)
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
     except Exception as e:

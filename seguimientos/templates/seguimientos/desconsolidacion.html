@@ -4,8 +4,14 @@
 {% block title_page %}DESCONSOLIDACION{% endblock title_page %}
 
 {% block table_datatable %}
-
-   <form method="POST" style="width:fit-content;">
+<style>
+    .col-lg-12 {
+       display:block !important;
+        width: 100%;
+    }
+</style>
+<div style="display:flex; justify-content: center;">
+    <form method="POST" style="width:fit-content;">
     <table class="form-control form-control-a">
         {% csrf_token %}
         <tr>
@@ -26,6 +32,8 @@
         <i class="fa fa-search"></i> Buscar
     </button>
 </form>
+</div>
+
 
             {% if datos %}
                 <br>

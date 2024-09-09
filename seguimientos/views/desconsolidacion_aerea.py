@@ -15,7 +15,7 @@ from seguimientos.models import VGrillaSeguimientos, Conexaerea, Envases
 def desconsolidacion_aerea(request):
     try:
         if request.user.has_perms(["seguimientos.add_", ]):
-            ctx = {'form': desconsolidacion_form(),'title_page': 'Desconsolidacion de importacion aerea'}
+            ctx = {'form': desconsolidacion_form(),'title_page': 'Desconsolidacion de importación aérea'}
             if request.method == 'POST':
                 form = desconsolidacion_form(request.POST)
                 if form.is_valid():
