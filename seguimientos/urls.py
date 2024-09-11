@@ -24,7 +24,7 @@ from seguimientos.views.desconsolidacion_aerea import desconsolidacion_aerea, de
 from seguimientos.views.archivos import source_archivos, guardar_archivo, eliminar_archivo, descargar_archivo
 from seguimientos.views.autocompletes import autocomplete_clientes, autocomplete_ciudades, autocomplete_vendedores, \
     autocomplete_vapores, autocomplete_proyectos, autocomplete_traficos, autocomplete_actividades, \
-    autocomplete_depositos, autocomplete_ciudades_codigo, autocomplete_clientes_codigo
+    autocomplete_depositos, autocomplete_ciudades_codigo
 from seguimientos.views.email import get_data_email
 from seguimientos.views.embarques import source_embarques, guardar_embarques, actualizo_datos_embarque, \
     eliminar_embarque
@@ -67,7 +67,6 @@ urlpatterns = [
     path('guardar_cronologia/', guardar_cronologia, name="guardar_cronologia"),
     path('guardar_seguimiento/', guardar_seguimiento, name="guardar_seguimiento"),
     path('autocomplete_clientes/', autocomplete_clientes, name='autocomplete_clientes'),
-    path('autocomplete_clientes_codigo/', autocomplete_clientes_codigo, name='autocomplete_clientes_codigo'),
     path('autocomplete_ciudades/', autocomplete_ciudades, name='autocomplete_ciudades'),
     path('autocomplete_ciudades_codigo/', autocomplete_ciudades_codigo, name='autocomplete_ciudades_codigo'),
     path('autocomplete_depositos/', autocomplete_depositos, name='autocomplete_depositos'),

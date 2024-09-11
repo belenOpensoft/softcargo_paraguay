@@ -30,12 +30,19 @@ def add_importacion_maritima(request):
             if form.is_valid():
 
                 reserva = Reservas()
+                try:
+                    reserva.transportista = int(form.cleaned_data.get('transportista_i', 0))
+                    reserva.agente = int(form.cleaned_data.get('agente_i', 0))
+                    reserva.consignatario = int(form.cleaned_data.get('consignatario_i', 0))
+                    reserva.armador = int(form.cleaned_data.get('armador_i', 0))
+                except ValueError:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Uno o más campos tienen un formato incorrecto.',
+                        'errors': {}
+                    })
                 reserva.numero = reserva.get_number()
                 reserva.awb = form.cleaned_data['awb']
-                reserva.transportista = form.cleaned_data['transportista']
-                reserva.agente = form.cleaned_data['agente']
-                reserva.consignatario = form.cleaned_data['consignatario']
-                reserva.armador = form.cleaned_data['armador']
                 reserva.vapor = form.cleaned_data['vapor']
                 reserva.viaje = form.cleaned_data['viaje']
                 reserva.aduana = form.cleaned_data['aduana']

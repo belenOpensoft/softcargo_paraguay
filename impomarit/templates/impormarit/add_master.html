@@ -19,21 +19,29 @@
     <table class="table table-condensed table-sm form-control" style="margin-top: 10px; margin-bottom: 10px;" border="1">
         <tr>
             <th>{{ form.transportista.label }}</th>
-            <td>{{ form.transportista }}</td>
-            <th>{{ form.awb.label }}</th>
-            <td>{{ form.awb }}</td>
-        </tr>
-        <tr>
+            <td style="display:flex;" colspan="2">
+                {{ form.transportista_i }}
+                {{ form.transportista }}  <!-- Campo autocompletado o similar -->
+            </td>
+
             <th>{{ form.agente.label }}</th>
-            <td colspan="3">{{ form.agente }}</td>
+            <td style="display:flex;" colspan="2">
+                {{ form.agente_i }}
+                {{ form.agente }}  <!-- Campo autocompletado o similar -->
+            </td>
         </tr>
         <tr>
             <th>{{ form.consignatario.label }}</th>
-            <td colspan="3">{{ form.consignatario }}</td>
-        </tr>
-        <tr>
+            <td style="display:flex;" colspan="2">
+                {{ form.consignatario_i }}
+                {{ form.consignatario }}  <!-- Campo autocompletado o similar -->
+            </td>
+
             <th>{{ form.armador.label }}</th>
-            <td colspan="3">{{ form.armador }}</td>
+            <td style="display:flex;" colspan="2">
+                {{ form.armador_i }}
+                {{ form.armador }}  <!-- Campo autocompletado o similar -->
+            </td>
         </tr>
         <tr>
             <th>{{ form.vapor.label }}</th>
@@ -92,6 +100,8 @@
         <tr>
             <th>{{ form.operacion.label }}</th>
             <td>{{ form.operacion }}</td>
+            <th>{{ form.awb.label }}</th>
+            <td>{{ form.awb }}</td>
         </tr>
     </table>
 

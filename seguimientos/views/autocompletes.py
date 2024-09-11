@@ -21,17 +21,6 @@ def autocomplete_clientes(request):
                          )
         return JsonResponse(lista,safe=False)
 
-def autocomplete_clientes_codigo(request):
-    if 'term' in request.GET:
-        qs = Clientes.objects.filter(empresa__istartswith=request.GET.get('term')).order_by('empresa')
-        lista = []
-        for x in qs:
-            lista.append({'id':x.codigo,
-                          'label':x.empresa,
-                          'value':x.codigo,}
-                         )
-        return JsonResponse(lista,safe=False)
-
 def autocomplete_ciudades(request):
     if 'term' in request.GET:
         qs = Ciudades.objects.filter(nombre__istartswith=request.GET.get('term')).order_by('nombre')

@@ -73,7 +73,6 @@ class add_form(BSModalModelForm):
             'pagoflete',
             'trafico',
             'aduana',
-            'transportista',
             'awb',
             'operacion',
             'arbitraje',
@@ -93,7 +92,7 @@ class add_form(BSModalModelForm):
 
     #codigo = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 5 },),max_length=5,required=True,label="Código")
     agente = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'agente_add',}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'agente_add', 'name':'otro'}),
         required=False)
     aduana = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False }),
@@ -103,14 +102,14 @@ class add_form(BSModalModelForm):
         required=False)
     consignatario = forms.CharField(
         widget=forms.TextInput(
-            attrs={'class': 'form-control', 'required': False, 'id': 'consignatario_add', }),
+            attrs={'class': 'form-control', 'required': False, 'id': 'consignatario_add', 'name':'otro' }),
         required=False)
     armador = forms.CharField(
         widget=forms.TextInput(
-            attrs={'class': 'form-control', 'required': False, 'id': 'armador_add',}),
+            attrs={'class': 'form-control', 'required': False, 'id': 'armador_add', 'name':'otro'}),
         required=False)
     transportista= forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'transportista_add'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'transportista_add', 'name':'otro'}),
         required=False)
     vapor = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'vapor_add'}),
@@ -135,7 +134,46 @@ class add_form(BSModalModelForm):
     status = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 1,"style":"width:100%;"},),required=True,label="Estado",choices=choice_status)
     operacion = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 1,"style":"width:100%;"},),required=True,label="Operacion",choices=choice_op)
     pagoflete = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("C","Collect"),("P","Prepaid")))
-
+    transportista_i = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'style': 'width:50px; margin-right:5px;',
+            'readonly': 'readonly',  # Campo de solo lectura
+            'id': 'transportista_i',
+            'name': 'transportista_i',
+        }),
+        required=False
+    )
+    agente_i = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'style': 'width:50px; margin-right:5px;',
+            'readonly': 'readonly',
+            'id': 'agente_i',
+            'name': 'agente_i',
+        }),
+        required=False
+    )
+    consignatario_i = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'style': 'width:50px; margin-right:5px;',
+            'readonly': 'readonly',
+            'id': 'consignatario_i',
+            'name': 'consignatario_i',
+        }),
+        required=False
+    )
+    armador_i = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'style': 'width:50px; margin-right:5px;',
+            'readonly': 'readonly',
+            'id': 'armador_i',
+            'name': 'armador_i',
+        }),
+        required=False
+    )
 
 
 

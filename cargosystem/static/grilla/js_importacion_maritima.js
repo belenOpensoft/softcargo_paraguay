@@ -264,7 +264,7 @@ $(document).ready(function () {
         }
     });
     $("#transportista_add").autocomplete({
-        source: '/autocomplete_clientes_codigo/',
+        source: '/autocomplete_clientes/',
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
@@ -272,14 +272,18 @@ $(document).ready(function () {
         change: function (event, ui) {
             if (ui.item) {
                 $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#transportista_i').val(ui.item['id']);
+                 $('#transportista_i').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
                 $(this).val('');
+                $('#transportista_i').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#transportista_i').css({"border-color": "", 'box-shadow': ''});
             }
         }
     });
     $("#agente_add").autocomplete({
-        source: '/autocomplete_clientes_codigo/',
+        source: '/autocomplete_clientes/',
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
@@ -287,14 +291,18 @@ $(document).ready(function () {
         change: function (event, ui) {
             if (ui.item) {
                 $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#agente_i').val(ui.item['id']);
+                 $('#agente_i').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
                 $(this).val('');
+                $('#agente_i').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#agente_i').css({"border-color": "", 'box-shadow': ''});
             }
         }
     });
     $("#consignatario_add").autocomplete({
-        source: '/autocomplete_clientes_codigo/',
+        source: '/autocomplete_clientes/',
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
@@ -302,14 +310,18 @@ $(document).ready(function () {
         change: function (event, ui) {
             if (ui.item) {
                 $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                $('#consignatario_i').val(ui.item['id']);
+                $('#consignatario_i').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
                 $(this).val('');
+                $('#consignatario_i').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#consignatario_i').css({"border-color": "", 'box-shadow': ''});
             }
         }
     });
     $("#armador_add").autocomplete({
-        source: '/autocomplete_clientes_codigo/',
+        source: '/autocomplete_clientes/',
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
@@ -317,9 +329,13 @@ $(document).ready(function () {
         change: function (event, ui) {
             if (ui.item) {
                 $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#armador_i').val(ui.item['id']);
+                 $('#armador_i').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
                 $(this).val('');
+                $('#armador_i').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#armador_i').css({"border-color": "", 'box-shadow': ''});
             }
         }
     });
@@ -458,12 +474,19 @@ $(document).ready(function () {
         data: formData,
         success: function(response) {
             if (response.success) {
-                alert(response.message);
-                let table = $('#table_add_im').DataTable();
-                table.clear();
+               table.ajax.reload(null, false);
+                 $('#add_master_modal').dialog('close');
+                 document.getElementById("add_master_form").reset();
+                $('#transportista_add').css({"border-color": "", 'box-shadow': ''});
+                $('#transportista_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#agente_add').css({"border-color": "", 'box-shadow': ''});
+                $('#agente_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#consignatario_add').css({"border-color": "", 'box-shadow': ''});
+                $('#consignatario_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#armador_add').css({"border-color": "", 'box-shadow': ''});
+                $('#armador_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
 
             } else {
-                alert(response.message);
                 console.log(response.errors);
             }
         },
@@ -474,18 +497,6 @@ $(document).ready(function () {
 });
 
 
-
-
-
-
-    // $('select').on('change', function (e) {
-    //     // Remueve cualquier clase de contorno verde previa
-    //     $('.select2-selection').removeClass('selected-border');
-    //     // Agrega la clase de contorno verde solo si hay algún dato seleccionado
-    //     if ($(this).val()) {
-    //         $('.select2-selection').addClass('selected-border');
-    //     }
-    // });
 
 });
 
@@ -511,171 +522,3 @@ posicion=document.getElementById('posicion_g');
 posicion.value=12345;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//     /* MODALES PARA EL FUNCIONAMIENTO DEL SISTEMA */
-//     $('#add_btn').click(function () {
-//         $("#add_master_modal").dialog({
-//                     autoOpen: true,
-//                     open: function (event, ui) {
-//                         $('#id_agente,#id_embarcador,#id_armador,#id_transportista').select2({
-//                             width: '300px',
-//                             language: 'es',
-//                             ajax: {
-//                             url: '/autocomplete_clientes/',
-//                             dataType: 'json',
-//                             delay: 250,
-//                             processResults: function (data) {
-//                               return {
-//                                 results: data.map(function (item) {
-//                                   return {
-//                                     id: item.id,
-//                                     text: item.value
-//                                   }
-//                                 })
-//                               };
-//                             },
-//                             cache: true
-//                           },
-//                           'dropdownParent': $('#add_master_modal'),
-//                           language: {
-//                             noResults: function() {
-//                               return "No hay resultado";
-//                             },
-//                             searching: function() {
-//                               return "Buscando..";
-//                             },
-//                             errorLoading: function () {
-//                               return 'Ingrese un texto a buscar';
-//                             },
-//
-//                           }
-//                         });
-//
-// //                        $("#id_vapor").autocomplete({
-// //                            source: '/autocomplete_vapores/',
-// //                            minLength: 2,
-// //                            select: function (event, ui) {
-// //                                $(this).attr('data-id', ui.item['codigo']);
-// //                            },
-// //                            change: function (event, ui) {
-// //                                if (ui.item) {
-// //                                    $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-// //                                } else {
-// //                                    $(this).val('');
-// //                                    $(this).css({"border-color": "", 'box-shadow': ''});
-// //                                }
-// //                            }
-// //                        });
-//                         $('#id_vapor').select2({
-//                             width: '300px',
-//                             language: 'es',
-//                             ajax: {
-//                             url: '/autocomplete_vapores/',
-//                             dataType: 'json',
-//                             delay: 250,
-//                             processResults: function (data) {
-//                               return {
-//                                 results: data.map(function (item) {
-//                                   return {
-//                                     id: item.id,
-//                                     text: item.value
-//                                   }
-//                                 })
-//                               };
-//                             },
-//                             cache: true
-//                           },
-//                           'dropdownParent': $('#add_master_modal'),
-//                           language: {
-//                             noResults: function() {
-//                               return "No hay resultado";
-//                             },
-//                             searching: function() {
-//                               return "Buscando..";
-//                             },
-//                             errorLoading: function () {
-//                               return 'Ingrese un texto a buscar';
-//                             },
-//
-//                           }
-//                         });
-//                         $('#id_vapor').on('select2:select', function (e) {
-//                             $('#id_vapor').css({"color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-//                         });
-//
-//                         $('#id_moneda').select2({'dropdownParent': $('#add_master_modal')});
-//                         $('#id_origen').select2({'dropdownParent': $('#add_master_modal')});
-//                         $('#id_loading').select2({'dropdownParent': $('#add_master_modal')});
-//                         $('#id_destino').select2({'dropdownParent': $('#add_master_modal')});
-//                         $('#id_discharge').select2({'dropdownParent': $('#add_master_modal')});
-//                         $('#id_status').select2({'dropdownParent': $('#add_master_modal')});
-//                         $('#id_operacion').select2({'dropdownParent': $('#add_master_modal')});
-//                         $(document).on('select2:open', () => {
-//                             document.querySelector('.select2-search__field').focus();
-//                         });
-//                     },
-//                     modal: true,
-//                     title: "Nuevo master",
-//                     height: wHeight * 0.80,
-//                     width: wWidth * 0.80,
-//                     class: 'modal fade',
-//                     buttons: [
-// //                        {
-// //                            text: "Guardar",
-// //                            class: "btn btn-primary",
-// //                            style: "width:100px",
-// //                            click: function () {
-// //                                let formData = $("#notas_form").serializeArray();
-// //                                let data = JSON.stringify(formData);
-// //                                miurl = "/guardar_notas/";
-// //                                var toData = {
-// //                                    'id': row[0][0],
-// //                                    'data': data,
-// //                                    'csrfmiddlewaretoken': csrf_token,
-// //                                };
-// //                                $.ajax({
-// //                                    type: "POST",
-// //                                    url: miurl,
-// //                                    data: toData,
-// //                                    async: true,
-// //                                    success: function (resultado) {
-// //                                        if (resultado['resultado'] === 'exito') {
-// //                                            mostrarToast('¡Notas actualizadas con exito!', 'success');
-// //                                            $(".alert").delay(4000).slideUp(200, function () {
-// //                                                $(this).alert('close');
-// //                                            });
-// //                                            table.ajax.reload();
-// //                                        } else {
-// //                                            alert(resultado['resultado']);
-// //                                        }
-// //                                    }
-// //                                });
-// //                                $(this).dialog("close");
-// //                            },
-// //                        },
-// //                         {
-// //                            text: "Salir",
-// //                            class: "btn btn-dark",
-// //                            style: "width:100px",
-// //                            click: function () {
-// //                                $(this).dialog("close");
-// //                            },
-// //                        }
-//                         ],
-//                     beforeClose: function (event, ui) {
-//                         // table.ajax.reload();
-//                     }
-//                 });
-//         });
