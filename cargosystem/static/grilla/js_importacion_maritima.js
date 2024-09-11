@@ -410,8 +410,9 @@ $(document).ready(function () {
                     },
                     modal: true,
                     title: "Ingresar un nuevo máster",
-                    height: wHeight * 0.80,
-                    width: wWidth * 0.80,
+                     width: 'auto',  // Ajusta el ancho al contenido
+                     height: 'auto', // Ajusta la altura al contenido
+                     position: { my: "center", at: "center", of: window },
                     buttons: [
                         {
                            text: "Salir",

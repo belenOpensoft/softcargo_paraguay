@@ -1,7 +1,7 @@
 <div id="add_master_modal" style="display: none;" tabindex="-1">
-     <div class="form-group col-2" id="segment_search" style="visibility: visible">
+     <div class="form-group col-2" id="segment_search" style="visibility: visible; width:100%;">
             <label for="{{ form_add_master.awb_number.id_for_label }}">{{ form_add_master.awb_number.label }}</label>
-            <div class="input-group">
+            <div class="input-group" style="width:40%;">
                 <div class="col-8">
                     {{ form_search_master.awb_number }}
                 </div>
@@ -16,7 +16,7 @@
         </div>
 <form id="add_master_form" method="POST" action="{% url 'add_master' %}">
     {% csrf_token %}
-    <table class="table table-condensed table-sm form-control" style="margin-top: 10px; margin-bottom: 10px;" border="1">
+    <table class="table table-condensed table-sm form-control" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
         <tr>
             <th>{{ form.transportista.label }}</th>
             <td style="display:flex;" colspan="2">

@@ -46,11 +46,11 @@ choice_op = (('','---'),
 
 class add_im_form(forms.Form):
     awb_number = forms.CharField(
-        label='Número AWB',
+        label='Número de Master',
         max_length=20,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Ingrese el número AWB'
+            'placeholder': 'Ingrese el número Master'
         })
     )
 
