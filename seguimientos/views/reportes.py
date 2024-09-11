@@ -80,7 +80,7 @@ def reportes_seguimiento(request):
                         return genero_xls_seguimientos(resultados,desde,hasta)
                     else:
                         messages.info(request,'No se encontraron resultados para la busqueda')
-            return render(request, "seguimientos/reporteFs.html", ctx)
+            return render(request, "seguimientos/reportes.html", ctx)
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
     except Exception as e:
@@ -263,12 +263,19 @@ def descargar_hawb(request,row_id,draft=None):
                 if seg.tomopeso == 2:
                     if x.medidas is not None and len(x.medidas) > 0:
                         medidas = x.medidas.split('*')
-                        valor = float(medidas[0]) * float(medidas[1]) * float(medidas[2]) * 166.67
-                        aux.append(str(redondear_a_05_o_0(valor)) + ' AS VOL')
+                        if len(medidas) == 3 and all(m is not None and m.isdigit() for m in medidas):
+                            valor = float(medidas[0]) * float(medidas[1]) * float(medidas[2]) * 166.67
+                            aux.append(str(redondear_a_05_o_0(valor)) + ' AS VOL')
+                        else:
+                            # Manejar el caso de error o valores faltantes
+                            aux.append('Error en medidas')
                 else:
                     aux.append(x.bruto)
                 aux.append(seg.tarifaventa)
-                aux.append(round(seg.aplicable * seg.tarifaventa,2))
+                if seg.aplicable is not None:
+                    aux.append(round(seg.aplicable * seg.tarifaventa,2))
+                else:
+                    aux.append(0)
                 aux.append(x.producto.descripcion)
                 rep.mercaderias.append(aux)
 
@@ -315,5 +322,8 @@ def descargar_hawb(request,row_id,draft=None):
 
 
         return rep.descargo_archivo(output)
+
     except Exception as e:
-        raise Http404(e)
+        import traceback
+        print(traceback.format_exc())
+        raise Http404(f"Error: {str(e)}")

@@ -44,7 +44,7 @@ var nombre_form = 'Nuevo'
 
 $(document).ready(function () {
 
-
+    generar_posicion();
     /* COLLAPSE NAVBAR 5 SECONDS AFTER LOADING THE PAGE */
     setTimeout(function(){
         $('.navbar-collapse').collapse('hide');
@@ -247,6 +247,143 @@ $(document).ready(function () {
         }
     });
 
+    //autocompletes tabla nuevo
+    $("#vapor_add").autocomplete({
+        source: '/autocomplete_vapores/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['codigo']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#transportista_add").autocomplete({
+        source: '/autocomplete_clientes_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#agente_add").autocomplete({
+        source: '/autocomplete_clientes_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#consignatario_add").autocomplete({
+        source: '/autocomplete_clientes_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#armador_add").autocomplete({
+        source: '/autocomplete_clientes_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#loading_add").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#discharge_add").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#origen_add").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#destino_add").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+
     /* FIN DATATABLES */
 
 
@@ -256,7 +393,7 @@ $(document).ready(function () {
                     open: function (event, ui) {
                     },
                     modal: true,
-                    title: "Nuevo master",
+                    title: "Ingresar un nuevo máster",
                     height: wHeight * 0.80,
                     width: wWidth * 0.80,
                     buttons: [
@@ -267,47 +404,74 @@ $(document).ready(function () {
                            click: function () {
                                $(this).dialog("close");
                            },
-                       }
+                       },
+
                     ],
                     beforeClose: function (event, ui) {
 
                     }
                 });
         });
+//    $('#add_master_form').submit(function(e) {
+//        e.preventDefault();
+//        e.stopPropagation();
+//        let formData = $(this).serialize();
+//        formData += '&csrfmiddlewaretoken=' + csrf_token;
+//        $.ajax({
+//            type: "POST",
+//            url: "/importacion_maritima/add_master/",
+//            data: formData,
+//            success: function(response) {
+//                let table = $('#table_add_im').DataTable();
+//                table.clear();
+//                if (response.data.length === 0) {
+//                        alert('No se encontraron resultados');
+//                }else{
+//                    $.each(response.data, function(index, seguimiento) {
+//                        table.row.add([
+//                            seguimiento.fecha,
+//                            seguimiento.numero_seguimiento,
+//                            seguimiento.cliente,
+//                            seguimiento.origen,
+//                            seguimiento.destino,
+//                            seguimiento.estado
+//                        ]).draw();
+//                        $('#segment_search').css('visibility', 'hidden');
+//                        $('#segment_response').css('visibility', 'visible');
+//                    });
+//                }
+//            },
+//            error: function(xhr, status, error) {
+//                alert('Ocurrió un error al consultar los seguimientos' + error);
+//            }
+//        });
+//    });
+
     $('#add_master_form').submit(function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        let formData = $(this).serialize();
-        formData += '&csrfmiddlewaretoken=' + csrf_token;
-        $.ajax({
-            type: "POST",
-            url: "/importacion_maritima/consultar_seguimientos/",
-            data: formData,
-            success: function(response) {
+    e.preventDefault();
+    e.stopPropagation();
+    let formData = $(this).serialize();
+    formData += '&csrfmiddlewaretoken=' + csrf_token;
+    $.ajax({
+        type: "POST",
+        url: "/importacion_maritima/add_master/",
+        data: formData,
+        success: function(response) {
+            if (response.success) {
+                alert(response.message);
                 let table = $('#table_add_im').DataTable();
                 table.clear();
-                if (response.data.length === 0) {
-                        alert('No se encontraron resultados');
-                }else{
-                    $.each(response.data, function(index, seguimiento) {
-                        table.row.add([
-                            seguimiento.fecha,
-                            seguimiento.numero_seguimiento,
-                            seguimiento.cliente,
-                            seguimiento.origen,
-                            seguimiento.destino,
-                            seguimiento.estado
-                        ]).draw();
-                        $('#segment_search').css('visibility', 'hidden');
-                        $('#segment_response').css('visibility', 'visible');
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
-                alert('Ocurrió un error al consultar los seguimientos' + error);
+
+            } else {
+                alert(response.message);
+                console.log(response.errors);
             }
-        });
+        },
+        error: function(xhr, status, error) {
+            alert('Ocurrió un error al agregar el master: ' + error);
+        }
     });
+});
 
 
 
@@ -341,7 +505,11 @@ function getCookie(name) {
     }
     return null;
 }
-
+function generar_posicion(){
+posicion=document.getElementById('posicion_g');
+//IM09-00237-2024
+posicion.value=12345;
+}
 
 
 

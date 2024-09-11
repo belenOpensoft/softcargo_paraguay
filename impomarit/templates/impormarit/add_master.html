@@ -1,7 +1,5 @@
 <div id="add_master_modal" style="display: none;" tabindex="-1">
-    <form id="add_master_form">
-        {% csrf_token %}
-        <div class="form-group col-2" id="segment_search" style="visibility: visible">
+     <div class="form-group col-2" id="segment_search" style="visibility: visible">
             <label for="{{ form_add_master.awb_number.id_for_label }}">{{ form_add_master.awb_number.label }}</label>
             <div class="input-group">
                 <div class="col-8">
@@ -16,102 +14,105 @@
                 </div>
             </div>
         </div>
-<form method="POST">
-        <table class="table table-condensed table-sm form-control" style="margin-top: 10px; margin-bottom: 10px;" border="1">
-            {% csrf_token %}
-            <tr>
-                <th>{{ form.transportista.label }}</th>
-                <td>{{ form.transportista }}</td>
-                <th>{{ form.awb.label }}</th>
-                <td>{{ form.awb }}</td>
-            </tr>
-            <tr>
-                <th>{{ form.agente.label }}</th>
-                <td colspan="3">{{ form.agente }}</td>
-<!--                <th>{{ form.origen.label }}</th>-->
-<!--                <td>{{ form.origen }}</td>-->
-<!--                <th>{{ form.loading.label }}</th>-->
-<!--                <td>{{ form.loading }}</td>-->
-            </tr>
-            <tr>
-                <th>{{ form.embarcador.label }}</th>
-                <td colspan="3">{{ form.embarcador }}</td>
-<!--                <th>{{ form.destino.label }}</th>-->
-<!--                <td>{{ form.destino }}</td>-->
-<!--                <th>{{ form.discharge.label }}</th>-->
-<!--                <td>{{ form.discharge }}</td>-->
-            </tr>
-            <tr>
-                <th>{{ form.armador.label }}</th>
-                <td colspan="3">{{ form.armador }}</td>
-<!--                <th>{{ form.fecha.label }}</th>-->
-<!--                <td>{{ form.fecha }}</td>.-->
-<!--                <th>{{ form.cotizacion.label }}</th>-->
-<!--                <td>{{ form.cotizacion }}</td>-->
-            </tr>
-            <tr>
-                <th>{{ form.vapor.label }}</th>
-                <td>{{ form.vapor }}</td>
-                <th>{{ form.viaje.label }}</th>
-                <td>{{ form.viaje }}</td>
-<!--                <th>{{ form.status.label }}</th>-->
-<!--                <td>{{ form.status }}</td>-->
-            </tr>
-            <tr>
-                <th>{{ form.aduana.label }}</th>
-                <td>{{ form.aduana }}</td>
-                <th>{{ form.arbitraje.label }}</th>
-                <td>{{ form.arbitraje }}</td>
-<!--                <th>{{ form.posicion.label }}</th>-->
-<!--                <td>{{ form.posicion }}</td>-->
-            </tr> <tr>
-                <th>{{ form.moneda.label }}</th>
-                <td>{{ form.moneda }}</td>
-                <th>{{ form.arbitraje.label }}</th>
-                <td>{{ form.arbitraje }}</td>
-<!--                <th>{{ form.posicion.label }}</th>-->
-<!--                <td>{{ form.posicion }}</td>-->
-            </tr>
-            <tr>
-<!--                <th>{{ form.aduana.label }}</th>-->
-<!--                <td>{{ form.aduana }}</td>-->
-<!--                <th>{{ form.manifiesto.label }}</th>-->
-<!--                <td>{{ form.manifiesto }}</td>-->
-<!--                <th>{{ form.operacion.label }}</th>-->
-<!--                <td>{{ form.operacion }}</td>-->
-            </tr>
-            <tr>
-                <th>{{ form.tarifa.label }}</th>
-                <td>{{ form.tarifa }}</td>
-                <th>{{ form.kilosmadre.label }}</th>
-                <td>{{ form.kilosmadre }}</td>
-                <th>{{ form.bultosmadre.label }}</th>
-                <td>{{ form.bultosmadre }}</td>
-            </tr>
-            <tr>
-                <th>{{ form.pagoflete.label }}</th>
-                <td>{{ form.pagoflete }}</td>
-                <th>{{ form.trafico.label }}</th>
-                <td>{{ form.trafico }}</td>
-            </tr>
-        </table>
-        <br>
-        <button type="submit" class="btn btn-primary"  onclick="return(confirm('¿Confirma guardado del M B/L?'))">Guardar</button>
-        <a href="/" class="btn btn-dark" onclick="return(confirm('¿Esta seguro de cancelar?'))">Cancelar</a>
-    </form>
-        <div class="col-12" id="segment_response" style="visibility:hidden">
-            <table class="table tab-content" id="table_add_im">
-                <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>N° Seguimiento</th>
-                    <th>Cliente</th>
-                    <th>Origen</th>
-                    <th>Destino</th>
-                    <th>Estado</th>
-                </tr>
-                </thead>
-            </table>
-        </div>
-    </form>
+<form id="add_master_form" method="POST" action="{% url 'add_master' %}">
+    {% csrf_token %}
+    <table class="table table-condensed table-sm form-control" style="margin-top: 10px; margin-bottom: 10px;" border="1">
+        <tr>
+            <th>{{ form.transportista.label }}</th>
+            <td>{{ form.transportista }}</td>
+            <th>{{ form.awb.label }}</th>
+            <td>{{ form.awb }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.agente.label }}</th>
+            <td colspan="3">{{ form.agente }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.consignatario.label }}</th>
+            <td colspan="3">{{ form.consignatario }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.armador.label }}</th>
+            <td colspan="3">{{ form.armador }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.vapor.label }}</th>
+            <td>{{ form.vapor }}</td>
+            <th>{{ form.viaje.label }}</th>
+            <td>{{ form.viaje }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.aduana.label }}</th>
+            <td>{{ form.aduana }}</td>
+            <th>{{ form.tarifa.label }}</th>
+            <td>{{ form.tarifa }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.moneda.label }}</th>
+            <td>{{ form.moneda }}</td>
+            <th>{{ form.arbitraje.label }}</th>
+            <td>{{ form.arbitraje }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.kilosmadre.label }}</th>
+            <td>{{ form.kilosmadre }}</td>
+            <th>{{ form.bultosmadre.label }}</th>
+            <td>{{ form.bultosmadre }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.pagoflete.label }}</th>
+            <td>{{ form.pagoflete }}</td>
+            <th>{{ form.trafico.label }}</th>
+            <td>{{ form.trafico }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.origen.label }}</th>
+            <td>{{ form.origen }}</td>
+            <th>{{ form.loading.label }}</th>
+            <td>{{ form.loading }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.destino.label }}</th>
+            <td>{{ form.destino }}</td>
+            <th>{{ form.discharge.label }}</th>
+            <td>{{ form.discharge }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.fecha.label }}</th>
+            <td>{{ form.fecha }}</td>
+            <th>{{ form.cotizacion.label }}</th>
+            <td>{{ form.cotizacion }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.status.label }}</th>
+            <td>{{ form.status }}</td>
+            <th>{{ form.posicion.label }}</th>
+            <td>{{ form.posicion }}</td>
+        </tr>
+        <tr>
+            <th>{{ form.operacion.label }}</th>
+            <td>{{ form.operacion }}</td>
+        </tr>
+    </table>
+
+    <br>
+    <button type="submit" class="btn btn-primary" onclick="return confirm('¿Confirma el guardado del M B/L?')">Guardar</button>
+</form>
+
+<div class="col-12" id="segment_response" style="visibility:hidden">
+    <table class="table tab-content" id="table_add_im">
+        <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>N° Seguimiento</th>
+            <th>Cliente</th>
+            <th>Origen</th>
+            <th>Destino</th>
+            <th>Estado</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+
 </div>

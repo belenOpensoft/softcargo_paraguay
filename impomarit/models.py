@@ -403,8 +403,8 @@ class Nietos(models.Model):
     tipo = models.CharField(db_column='Tipo', max_length=12, blank=True, null=True)  
     producto = models.CharField(db_column='Producto', max_length=150, blank=True, null=True)  
     envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)
+    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True, null=True)
 
-discharge = models.CharField(db_column='Discharge', max_length=5, blank=True, null=True)
 class Reservas(models.Model):
     numero = models.IntegerField(db_column='Numero', unique=True)
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)
@@ -424,10 +424,6 @@ class Reservas(models.Model):
     volumen = models.FloatField(db_column='Volumen', blank=True, null=True)
     cotizacion = models.IntegerField(blank=True, null=True)
     status = models.CharField(max_length=20, blank=True, null=True)
-
-
-
-
     aduana = models.CharField(max_length=30, blank=True, null=True)
     preaviso = models.CharField(max_length=1, blank=True, null=True)
     notirecibo = models.DateTimeField(blank=True, null=True)
@@ -464,6 +460,20 @@ class Reservas(models.Model):
     viajefluvial = models.CharField(db_column='ViajeFluvial', max_length=30, blank=True, null=True)
     awbfluvial = models.CharField(db_column='AwbFluvial', max_length=30, blank=True, null=True)
     prefijofluvial = models.CharField(db_column='PrefijoFluvial', max_length=5, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'impmarit_reservas'
+
+    def get_number(self):
+        reserva_l = Reservas.objects.order_by('id').last()
+        if reserva_l:
+            nuevo_numero = reserva_l.numero + 1
+        else:
+            nuevo_numero = 1
+
+        return nuevo_numero
+
 
 class Servireserva(models.Model):
     numero = models.IntegerField(blank=True, null=True)

@@ -1380,6 +1380,7 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
             if(row[0][2] == 'EXPORT AEREO'){
+//            console.log('row da esto: ' +row[0][0]);
                    window.open('/descargar_hawb/' + row[0][0], '_blank');
 
             }else{

@@ -1400,6 +1400,7 @@ class Reservas(models.Model):
     contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
                                    null=True)  # Field name made lowercase.
 
+
 class VGrillaSeguimientos(models.Model):
     numero = models.IntegerField()
     modo = models.CharField(max_length=20, blank=True, null=True)

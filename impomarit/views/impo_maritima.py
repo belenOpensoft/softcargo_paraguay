@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from impomarit.forms import add_im_form, add_form
-from impomarit.models import Master
+from impomarit.models import Master, Reservas
 from seguimientos.models import Seguimiento
 
 
@@ -42,12 +42,16 @@ def master_importacion_maritima(request):
 
 param_busqueda = {
     1: 'numero__icontains',
-    2: 'modo__icontains',
-    3: 'cliente__icontains',
-    4: 'origen__icontains',
-    5: 'destino__icontains',
-    6: 'fecha__icontains',
-    7: 'status__icontains',
+    2: 'llegada__icontains',
+    3: 'transportista__icontains',
+    4: 'awb__icontains',
+    5: 'agente__icontains',
+    6: 'consignatario__icontains',
+    7: 'armador__icontains',
+    8: 'vapor__icontains',
+    9: 'origen__icontains',
+    10: 'destino__icontains',
+    11: 'status__icontains',
 }
 """ TABLA PUERTO """
 columns_table = {
@@ -57,7 +61,7 @@ columns_table = {
     3: 'transportista',
     4: 'awb',
     5: 'agente',
-    6: 'embarcador',
+    6: 'consignatario',
     7: 'armador',
     8: 'vapor',
     9: 'origen',
@@ -213,33 +217,6 @@ def is_ajax(request):
     except Exception as e:
         messages.error(request,e)
 
-def consultar_seguimientos(request):
-    if request.method == 'POST':
-        awb_number = request.POST.get('awb_number')
-        seguimientos = Seguimiento.objects.filter(awb=awb_number).values('fecha', 'numero', 'cliente', 'origen', 'destino', 'status')
-        data = list(seguimientos)
-        return JsonResponse({'data': data})
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-#
-# @login_required(login_url="/")
-# def add_importacion_maritima(request):
-#     try:
-#         ctx = {'form': add_operacion_im_form(), 'title_page': 'Ingreso de conocimientos madre M B/L', }
-#         if request.method == 'POST':
-#             form = add_operacion_im_form(request.POST)
-#             if form.is_valid():
-#                 reserva = Reservas()
-#                 reserva.numero = form.cleaned_data['numero']
-#                 reserva.fechaingreso = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-#                 reserva.save()
-#                 messages.success(request, 'Ciudad agregada con èxito')
-#                 return HttpResponseRedirect('/ciudades')
-#             else:
-#                 messages.error(request, 'Formulario invalido, intente nuevamente.')
-#                 return HttpResponseRedirect('/')
-#         return render(request, "mbl/add_mbl.html", ctx)
-#     except Exception as e:
-#         messages.error(request, str(e))
-#         return HttpResponseRedirect("/")
+
 
