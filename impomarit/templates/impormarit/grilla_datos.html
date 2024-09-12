@@ -7,6 +7,7 @@
 {% block script_table %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/select2.min.css'  %}">
 <link rel="stylesheet" type="text/css" href="{% static 'css/importacion_maritima/importacion_maritima.css'  %}">
+<meta name="csrf-token" content="{{ csrf_token }}">
 
 {% endblock script_table %}
 
@@ -60,6 +61,7 @@
 {% load static %}
 
 {% include 'impormarit/add_master.html' %}
+{% include 'impormarit/add_house.html' %}
 
 
 {% endblock table_datatable %}

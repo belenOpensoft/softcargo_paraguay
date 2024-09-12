@@ -175,7 +175,39 @@ class Embarqueaereo(models.Model):
     emitebloriginal = models.CharField(db_column='EmiteBLOriginal', max_length=1, blank=True, null=True)  
     trackid = models.CharField(db_column='TrackID', max_length=50, blank=True, null=True)  
     etd = models.DateTimeField(db_column='ETD', blank=True, null=True)  
-    eta = models.DateTimeField(db_column='ETA', blank=True, null=True)  
+    eta = models.DateTimeField(db_column='ETA', blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'VEmbarqueAereo'
+
+class VEmbarqueaereo(models.Model):
+    numero = models.IntegerField(unique=True)
+    transportista = models.CharField(max_length=255, blank=True, null=True)  # Nombre del transportista
+    awb = models.CharField(max_length=40, blank=True, null=True)
+    hawb = models.CharField(max_length=50, blank=True, null=True)
+    agente = models.CharField(max_length=255, blank=True, null=True)  # Nombre del agente
+    consignatario = models.CharField(max_length=255, blank=True, null=True)  # Nombre del consignatario
+    armador = models.CharField(max_length=255, blank=True, null=True)  # Nombre del armador
+    vapor = models.CharField(max_length=30, blank=True, null=True)
+    posicion = models.CharField(max_length=20, blank=True, null=True)
+    operacion = models.CharField(max_length=25, blank=True, null=True)
+    origen = models.CharField(max_length=5, blank=True, null=True)
+    destino = models.CharField(max_length=5, blank=True, null=True)
+    status = models.CharField(max_length=20, blank=True, null=True)
+    fecha_embarque = models.DateTimeField(blank=True, null=True)
+    fecha_retiro = models.DateTimeField(blank=True, null=True)
+    valor_transporte = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    valor_aduana = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    tarifa_venta = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    tarifa_compra = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    volumen_cubico = models.FloatField(blank=True, null=True)
+    notas = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'VEmbarqueAereo'
+
 
 class Entregadoc(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  

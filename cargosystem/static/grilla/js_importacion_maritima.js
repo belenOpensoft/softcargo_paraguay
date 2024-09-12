@@ -43,8 +43,6 @@ var nombre_form = 'Nuevo'
 
 
 $(document).ready(function () {
-
-    generar_posicion();
     /* COLLAPSE NAVBAR 5 SECONDS AFTER LOADING THE PAGE */
     setTimeout(function(){
         $('.navbar-collapse').collapse('hide');
@@ -70,6 +68,7 @@ $(document).ready(function () {
         }
     });
 
+    //tabla general
     table = $('#tabla_importmarit').DataTable({
         "stateSave": true,
         "dom": 'Btlipr',
@@ -233,7 +232,6 @@ $(document).ready(function () {
         });
         table.draw();
     }
-
     $('#tabla_importmarit tbody').on('click', 'tr', function () {
         if ($(this).hasClass('table-secondary')) {
             $(this).removeClass('table-secondary');
@@ -247,7 +245,8 @@ $(document).ready(function () {
         }
     });
 
-    //autocompletes tabla nuevo
+
+    //autocompletes add master form
     $("#vapor_add").autocomplete({
         source: '/autocomplete_vapores/',
         minLength: 2,
@@ -400,10 +399,11 @@ $(document).ready(function () {
         }
     });
 
-    /* FIN DATATABLES */
 
+    //botones funcionalidades
 
     $('#add_btn').click(function () {
+        generar_posicion();
         $("#add_master_modal").dialog({
                     autoOpen: true,
                     open: function (event, ui) {
@@ -419,6 +419,8 @@ $(document).ready(function () {
                            class: "btn btn-dark",
                            style: "width:100px",
                            click: function () {
+                                $('#agregar_hijo').css({'visibility':'hidden'});
+                                $('#segment_response').css({'visibility':'hidden'});
                                $(this).dialog("close");
                            },
                        },
@@ -429,42 +431,7 @@ $(document).ready(function () {
                     }
                 });
         });
-//    $('#add_master_form').submit(function(e) {
-//        e.preventDefault();
-//        e.stopPropagation();
-//        let formData = $(this).serialize();
-//        formData += '&csrfmiddlewaretoken=' + csrf_token;
-//        $.ajax({
-//            type: "POST",
-//            url: "/importacion_maritima/add_master/",
-//            data: formData,
-//            success: function(response) {
-//                let table = $('#table_add_im').DataTable();
-//                table.clear();
-//                if (response.data.length === 0) {
-//                        alert('No se encontraron resultados');
-//                }else{
-//                    $.each(response.data, function(index, seguimiento) {
-//                        table.row.add([
-//                            seguimiento.fecha,
-//                            seguimiento.numero_seguimiento,
-//                            seguimiento.cliente,
-//                            seguimiento.origen,
-//                            seguimiento.destino,
-//                            seguimiento.estado
-//                        ]).draw();
-//                        $('#segment_search').css('visibility', 'hidden');
-//                        $('#segment_response').css('visibility', 'visible');
-//                    });
-//                }
-//            },
-//            error: function(xhr, status, error) {
-//                alert('Ocurrió un error al consultar los seguimientos' + error);
-//            }
-//        });
-//    });
-
-    $('#add_master_form').submit(function(e) {
+    $('#add_master_form').submit(function(e){
     e.preventDefault();
     e.stopPropagation();
     let formData = $(this).serialize();
@@ -475,8 +442,10 @@ $(document).ready(function () {
         data: formData,
         success: function(response) {
             if (response.success) {
+            $('#agregar_hijo').css({'visibility':'visible'});
+            cargar_hauses_master();
                table.ajax.reload(null, false);
-                 $('#add_master_modal').dialog('close');
+                 //$('#add_master_modal').dialog('close');
                  document.getElementById("add_master_form").reset();
                 $('#transportista_add').css({"border-color": "", 'box-shadow': ''});
                 $('#transportista_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
@@ -486,6 +455,11 @@ $(document).ready(function () {
                 $('#consignatario_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#armador_add').css({"border-color": "", 'box-shadow': ''});
                 $('#armador_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#vapor_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#origen_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#destino_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#loading_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#discharge_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
 
             } else {
                 console.log(response.errors);
@@ -497,6 +471,34 @@ $(document).ready(function () {
     });
 });
 
+    $('#agregar_hijo').click(function () {
+        $("#add_house_modal").dialog({
+                    autoOpen: true,
+                    open: function (event, ui) {
+                    },
+                    modal: true,
+                    title: "Ingresar un nuevo hijo/house",
+                     width: 'auto',
+                     height: 'auto',
+                     position: { my: "center", at: "center", of: window },
+                    buttons: [
+                        {
+                           text: "Salir",
+                           class: "btn btn-dark",
+                           style: "width:100px",
+                           click: function () {
+//                                $('#agregar_hijo').css({'visibility':'hidden'});
+//                                $('#segment_response').css({'visibility':'hidden'});
+                               $(this).dialog("close");
+                           },
+                       },
+
+                    ],
+                    beforeClose: function (event, ui) {
+
+                    }
+                });
+        });
 
 
 });
@@ -516,6 +518,96 @@ function getCookie(name) {
         row_selected = c.split('=')[1];
     }
     return null;
+}
+function getCookie2(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        let cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            // Verifica si esta cookie comienza con el nombre que buscamos
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+function cargar_hauses_master(){
+//tabla dentro del add-master form
+let master = document.getElementById('id_awb').value;
+//let master='MOLU13000250048';
+let csrftoken = getCookie2('csrftoken');
+let table_add_im = $('#table_add_im').DataTable({
+    "stateSave": true,
+    "dom": 'Btlipr',
+    "scrollX": true,
+     "autoWidth": true,  // Permitir ajuste automático de las columnas
+    "bAutoWidth": true,
+    "scrollY": wHeight * 0.60,
+    "columnDefs": [
+    {
+        "targets": [0],  // Fecha
+        "className": 'details-control',  // Clase similar a la segunda tabla
+        "orderable": false,
+        "data": null,
+        "defaultContent": '',  // Permitir contenido por defecto
+        "render": function (data, type, row) {
+            // Aquí puedes definir el contenido que debe aparecer en la columna
+        }
+    },
+    {
+        "targets": [1],  // N° Seguimiento
+        "className": 'derecha archivos',  // Mismo estilo que la segunda tabla
+    },
+    {
+        "targets": [2],  // Cliente
+    },
+    {
+        "targets": [3],  // Origen
+    },
+    {
+        "targets": [4],  // Destino
+    },
+    {
+        "targets": [5],  // Estado
+    }
+],
+    "order": [[0, "desc"]],
+    "processing": true,
+    "serverSide": true,
+    "pageLength": 100,
+    "ajax": {
+        "url": `/importacion_maritima/source_embarque_aereo/${master}/`,
+        "type": 'POST',
+        "headers": {
+            "X-CSRFToken": csrftoken
+        },
+        "dataSrc": function (json) {
+         $('#table_add_im th').css({'width':'auto'});
+         $('#table_add_im_wrapper .dataTables_scrollBody').css({
+        'height': 'fit-content',
+        });
+
+         if (json.data.length === 0) {
+            console.log('No se encontraron datos.');
+            $('#segment_response').text('No se encontraron datos.');
+        } else {
+      $('#segment_response').css({'visibility':'visible'});
+        }
+
+        return json.data;
+        },
+        "error": function(xhr, status, error) {
+            console.error('Error en la llamada AJAX:', error);
+        }
+    },
+    "language": {
+        "url": "/static/datatables/es_ES.json"
+    }
+});
+
 }
 function generar_posicion(){
 posicion=document.getElementById('posicion_g');

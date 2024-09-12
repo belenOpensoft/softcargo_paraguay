@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from impomarit.forms import add_im_form, add_form
-from impomarit.models import Master, Reservas
+from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo
 from seguimientos.models import Seguimiento
 
 
@@ -217,6 +217,51 @@ def is_ajax(request):
     except Exception as e:
         messages.error(request,e)
 
+
+def source_embarque_aereo(request, master):
+    if is_ajax(request):
+        start = int(request.POST.get('start', 0))  # Usa 0 como valor predeterminado si 'start' no está presente
+        length = int(request.POST.get('length', 10))  # Usa 10 como valor predeterminado si 'length' no está presente
+        draw = int(request.POST.get('draw', 1))
+        registros = VEmbarqueaereo.objects.filter(awb=master)[start:start + length]
+        data = get_data_embarque_aereo(registros)
+        resultado = {
+            'draw': draw,  # Enviar 'draw' para asegurarnos de que la solicitud y respuesta coincidan
+            'recordsTotal': VEmbarqueaereo.objects.all().count(),  # Total de registros sin filtrar
+            'recordsFiltered': registros.count(),  # Total de registros después del filtro
+            'data': data  # Los datos filtrados
+        }
+
+        data_json = json.dumps(resultado)
+    else:
+        data_json = 'fail'
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+
+
+def get_data_embarque_aereo(registros_filtrados):
+    try:
+        data = []
+        for registro in registros_filtrados:
+            registro_json = []
+            registro_json.append('' if registro.fecha_embarque is None else str(registro.fecha_embarque)[:10])  # Fecha
+            registro_json.append('' if registro.fecha_retiro is None else str(registro.fecha_retiro)[:10])  # Fecha
+            registro_json.append('' if registro.numero is None else str(registro.numero))  # N° Seguimiento
+            registro_json.append('' if registro.consignatario is None else str(registro.consignatario))  # Cliente
+            registro_json.append('' if registro.origen is None else str(registro.origen))  # Origen
+            registro_json.append('' if registro.destino is None else str(registro.destino))  # Destino
+            registro_json.append('' if registro.status is None else str(registro.status))  # Estado
+            registro_json.append('' if registro.posicion is None else str(registro.posicion))  # Estado
+            registro_json.append('' if registro.operacion is None else str(registro.operacion))  # Estado
+            registro_json.append('' if registro.awb is None else str(registro.awb))  # Estado
+            registro_json.append('' if registro.hawb is None else str(registro.hawb))  # Estado
+            registro_json.append('' if registro.vapor is None else str(registro.vapor))  # Estado
+
+
+            data.append(registro_json)
+        return data
+    except Exception as e:
+        raise TypeError(e)
 
 
 
