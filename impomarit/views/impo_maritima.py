@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from impomarit.forms import add_im_form, add_form
+from impomarit.forms import add_im_form, add_form, add_house
 from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo
 from seguimientos.models import Seguimiento
 
@@ -29,6 +29,7 @@ def master_importacion_maritima(request):
             }
             return render(request, 'impormarit/grilla_datos.html',{
                 'form': add_form(),
+                'form_house': add_house(),
                 'form_search_master': add_im_form(),
                 'opciones_busqueda': opciones_busqueda,
             })

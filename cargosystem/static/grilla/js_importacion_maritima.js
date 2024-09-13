@@ -41,8 +41,11 @@ var buscar = '';
 var que_buscar = '';
 var nombre_form = 'Nuevo'
 
+let table_add_im;
 
 $(document).ready(function () {
+
+
     /* COLLAPSE NAVBAR 5 SECONDS AFTER LOADING THE PAGE */
     setTimeout(function(){
         $('.navbar-collapse').collapse('hide');
@@ -399,11 +402,226 @@ $(document).ready(function () {
         }
     });
 
+    // auto completes add house form
+    $("#armador_addh").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#armador_ih').val(ui.item['id']);
+                 $('#armador_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#armador_ih').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#armador_ih').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#transportista_addh").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#transportista_ih').val(ui.item['id']);
+                 $('#transportista_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#transportista_ih').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#transportista_ih').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#consignatario_addh").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#consignatario_ih').val(ui.item['id']);
+                 $('#consignatario_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#consignatario_ih').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#consignatario_ih').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#agente_addh").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#agente_ih').val(ui.item['id']);
+                 $('#agente_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#agente_ih').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#agente_ih').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#cliente_addh").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#cliente_ih').val(ui.item['id']);
+                 $('#cliente_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#cliente_ih').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#cliente_ih').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#embarcador_addh").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#embarcador_ih').val(ui.item['id']);
+                 $('#embarcador_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#embarcador_ih').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#embarcador_ih').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#agecompras_addh").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#agecompras_ih').val(ui.item['id']);
+                 $('#agecompras_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#agecompras_ih').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#agecompras_ih').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#ageventas_addh").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#ageventas_ih').val(ui.item['id']);
+                 $('#ageventas_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#ageventas_ih').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#ageventas_ih').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#loading_addh").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#discharge_addh").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#origen_addh").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#destino_addh").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+
 
     //botones funcionalidades
 
+    //form addmaster
     $('#add_btn').click(function () {
-        generar_posicion();
+        //generar_posicion();
         $("#add_master_modal").dialog({
                     autoOpen: true,
                     open: function (event, ui) {
@@ -432,6 +650,7 @@ $(document).ready(function () {
                 });
         });
     $('#add_master_form').submit(function(e){
+
     e.preventDefault();
     e.stopPropagation();
     let formData = $(this).serialize();
@@ -444,9 +663,12 @@ $(document).ready(function () {
             if (response.success) {
             $('#agregar_hijo').css({'visibility':'visible'});
             cargar_hauses_master();
-               table.ajax.reload(null, false);
+            table.ajax.reload(null, false);
                  //$('#add_master_modal').dialog('close');
-                 document.getElementById("add_master_form").reset();
+                 //guardar master en la sesion
+                 let master = document.getElementById('id_awb').value;
+                 localStorage.setItem('master',master );
+                document.getElementById("add_master_form").reset();
                 $('#transportista_add').css({"border-color": "", 'box-shadow': ''});
                 $('#transportista_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#agente_add').css({"border-color": "", 'box-shadow': ''});
@@ -471,6 +693,7 @@ $(document).ready(function () {
     });
 });
 
+    //form add house
     $('#agregar_hijo').click(function () {
         $("#add_house_modal").dialog({
                     autoOpen: true,
@@ -498,7 +721,64 @@ $(document).ready(function () {
 
                     }
                 });
+                //cargar con la id desde la sesion
+                let master = localStorage.getItem('master');
+                $('#id_awbhijo').val(master);
+
+                $('#cliente_addh').addClass('input-sobrepasar');
+                $('#embarcador_addh').addClass('input-sobrepasar');
+                $('#consignatario_addh').addClass('input-sobrepasar');
+                $('#agente_addh').addClass('input-sobrepasar');
+                $('#transportista_addh').addClass('input-sobrepasar');
+                $('#armador_addh').addClass('input-sobrepasar');
+                $('#agecompras_addh').addClass('input-sobrepasar');
+                $('#ageventas_addh').addClass('input-sobrepasar');
+
+
+
         });
+    $('#add_house_form').submit(function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    let formData = $(this).serialize();
+    formData += '&csrfmiddlewaretoken=' + csrf_token;
+    $.ajax({
+        type: "POST",
+        url: "/importacion_maritima/add_house/",
+        data: formData,
+        success: function(response) {
+            if (response.success) {
+//            $('#agregar_hijo').css({'visibility':'visible'});
+//            cargar_hauses_master();
+               table_add_im.ajax.reload(null, false);
+              // let master = document.getElementById('id_awb').value;
+               // $('#id_awbhijo').val(master);
+                 $('#add_houses_modal').dialog('close');
+                 document.getElementById("add_houses_form").reset();
+
+                $('#transportista_add').css({"border-color": "", 'box-shadow': ''});
+                $('#transportista_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#agente_add').css({"border-color": "", 'box-shadow': ''});
+                $('#agente_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#consignatario_add').css({"border-color": "", 'box-shadow': ''});
+                $('#consignatario_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#armador_add').css({"border-color": "", 'box-shadow': ''});
+                $('#armador_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#vapor_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#origen_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#destino_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#loading_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#discharge_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+
+            } else {
+                console.log(response.errors);
+            }
+        },
+        error: function(xhr, status, error) {
+            alert('Ocurrió un error al agregar el house: ' + error);
+        }
+    });
+});
 
 
 });
@@ -536,10 +816,10 @@ function getCookie2(name) {
 }
 function cargar_hauses_master(){
 //tabla dentro del add-master form
-let master = document.getElementById('id_awb').value;
+let master = localStorage.getItem('master');
 //let master='MOLU13000250048';
 let csrftoken = getCookie2('csrftoken');
-let table_add_im = $('#table_add_im').DataTable({
+table_add_im = $('#table_add_im').DataTable({
     "stateSave": true,
     "dom": 'Btlipr',
     "scrollX": true,
@@ -609,6 +889,11 @@ let table_add_im = $('#table_add_im').DataTable({
 });
 
 }
+
+document.getElementById('posicion_g').addEventListener('focus', function() {
+    generar_posicion();
+});
+
 function generar_posicion(){
 posicion=document.getElementById('posicion_g');
 //IM09-00237-2024

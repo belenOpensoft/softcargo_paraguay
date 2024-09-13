@@ -1,146 +1,139 @@
 <style>
-    .table-th th{
+    #table_house_style td{
     text-align:end;
     }
-    #table_add_im th{
-    width:auto !important;
+     .input-sobrepasar{
+    max-width:fit-content;
+    padding: .375rem .75rem !important;
     }
-    table_add_im{
-    height:fit-content !important;
-    }
+
 
 </style>
 <div id="add_house_modal" style="display: none;" tabindex="-1">
-<!--     <div class="form-group col-2" id="segment_search" style="visibility: visible; width:100%;">-->
-<!--            <label for="{{ form_add_master.awb_number.id_for_label }}">{{ form_add_master.awb_number.label }}</label>-->
-<!--            <div class="input-group" style="width:40%;">-->
-<!--                <div class="col-8">-->
-<!--                    {{ form_search_master.awb_number }}-->
-<!--                </div>-->
-<!--                <div class="col-4 d-flex align-items-center">-->
-<!--                    <div class="input-group-append me-2 ms-2">-->
-<!--                        <button type="submit" class="btn btn-primary btn-sm">Buscar</button>-->
-<!--                    </div>-->
-<!--                    &nbsp;-->
-<!--                    <div id="alert-container"></div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
 <form id="add_house_form" method="POST" action="{% url 'add_house' %}">
     {% csrf_token %}
-    <table class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
-<!--        <tr>-->
-<!--            <th>{{ form.transportista.label }}</th>-->
-<!--            <td style="display:flex;" colspan="2">-->
-<!--                {{ form.transportista_i }}-->
-<!--                {{ form.transportista }}  &lt;!&ndash; Campo autocompletado o similar &ndash;&gt;-->
-<!--            </td>-->
+    <table id="table_house_style" class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
 
-<!--            <th>{{ form.agente.label }}</th>-->
-<!--            <td style="display:flex;" colspan="2">-->
-<!--                {{ form.agente_i }}-->
-<!--                {{ form.agente }}  &lt;!&ndash; Campo autocompletado o similar &ndash;&gt;-->
-<!--            </td>-->
+        <tbody>
+            <tr>
+                <td>{{ form_house.cliente.label }}</td>
+               <td> {{ form_house.cliente_i }}
+                {{ form_house.cliente }}</td>
 
-<!--            <th>{{ form.consignatario.label }}</th>-->
-<!--            <td style="display:flex;" colspan="2">-->
-<!--                {{ form.consignatario_i }}-->
-<!--                {{ form.consignatario }}  &lt;!&ndash; Campo autocompletado o similar &ndash;&gt;-->
-<!--            </td>-->
+                <td>{{ form_house.consignatario.label }}</td>
+               <td> {{ form_house.consignatario_i }}
+                {{ form_house.consignatario }}</td>
 
-<!--            <th>{{ form.armador.label }}</th>-->
-<!--            <td style="display:flex;" colspan="2">-->
-<!--                {{ form.armador_i }}-->
-<!--                {{ form.armador }}  &lt;!&ndash; Campo autocompletado o similar &ndash;&gt;-->
-<!--            </td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <th>{{ form.vapor.label }}</th>-->
-<!--            <td>{{ form.vapor }}</td>-->
-<!--            <th>{{ form.viaje.label }}</th>-->
-<!--            <td>{{ form.viaje }}</td>-->
+                <td >{{ form_house.agente.label }}</td>
+              <td>  {{ form_house.agente_i }}
+                {{ form_house.agente }}</td>
 
-<!--            <th>{{ form.aduana.label }}</th>-->
-<!--            <td>{{ form.aduana }}</td>-->
-<!--            <th>{{ form.tarifa.label }}</th>-->
-<!--            <td>{{ form.tarifa }}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <th>{{ form.moneda.label }}</th>-->
-<!--            <td>{{ form.moneda }}</td>-->
-<!--            <th>{{ form.arbitraje.label }}</th>-->
-<!--            <td>{{ form.arbitraje }}</td>-->
+                <td >{{ form_house.vendedor.label }}</td>
+               <td> {{ form_house.vendedor_i }}
+                {{ form_house.vendedor }}</td>
 
-<!--            <th>{{ form.kilosmadre.label }}</th>-->
-<!--            <td>{{ form.kilosmadre }}</td>-->
-<!--            <th>{{ form.bultosmadre.label }}</th>-->
-<!--            <td>{{ form.bultosmadre }}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <th>{{ form.pagoflete.label }}</th>-->
-<!--            <td>{{ form.pagoflete }}</td>-->
-<!--            <th>{{ form.trafico.label }}</th>-->
-<!--            <td>{{ form.trafico }}</td>-->
+            </tr>
 
-<!--            <th>{{ form.fecha.label }}</th>-->
-<!--            <td>{{ form.fecha }}</td>-->
-<!--            <th>{{ form.cotizacion.label }}</th>-->
-<!--            <td>{{ form.cotizacion }}</td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <th>{{ form.destino.label }}</th>-->
-<!--            <td>{{ form.destino }}</td>-->
-<!--            <th>{{ form.discharge.label }}</th>-->
-<!--            <td>{{ form.discharge }}</td>-->
+            <tr>
+                <td>{{ form_house.origen.label }}</td>
+                <td>{{ form_house.origen }}</td>
 
-<!--            <th>{{ form.origen.label }}</th>-->
-<!--            <td>{{ form.origen }}</td>-->
-<!--            <th>{{ form.loading.label }}</th>-->
-<!--            <td>{{ form.loading }}</td>-->
+                <td >{{ form_house.destino.label }}</td>
+                <td>{{ form_house.destino }}</td>
 
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <th>{{ form.status.label }}</th>-->
-<!--            <td>{{ form.status }}</td>-->
-<!--            <th>{{ form.posicion.label }}</th>-->
-<!--            <td>{{ form.posicion }}</td>-->
+                <td >{{ form_house.loading.label }}</td>
+                <td>{{ form_house.loading }}</td>
 
-<!--            <th>{{ form.operacion.label }}</th>-->
-<!--            <td>{{ form.operacion }}</td>-->
-<!--            <th>{{ form.awb.label }}</th>-->
-<!--            <td>{{ form.awb }}</td>-->
-<!--        </tr>-->
+                <td >{{ form_house.discharge.label }}</td>
+                <td>{{ form_house.discharge }}</td>
+
+            </tr>
+            <tr>
+                <td >{{ form_house.awb.label }}</td>
+                <td>{{ form_house.awb }}</td>
+                <td >{{ form_house.hawb.label }}</td>
+                <td>{{ form_house.hawb }}</td>
+
+                <td >{{ form_house.operacion.label }}</td>
+                <td>{{ form_house.operacion }}</td>
+
+                <td >{{ form_house.posicion.label }}</td>
+                <td>{{ form_house.posicion }}</td>
+
+            </tr>
+            <tr>
+                 <td >{{ form_house.pago.label }}</td>
+                <td>{{ form_house.pago }}</td>
+
+                <td >{{ form_house.moneda.label }}</td>
+                <td>{{ form_house.moneda }}</td>
+
+                <td >{{ form_house.arbitraje.label }}</td>
+                <td>{{ form_house.arbitraje }}</td>
+
+                 <td >{{ form_house.demora.label }}</td>
+                <td>{{ form_house.demora }}</td>
+            </tr>
+
+            <tr>
+                <td >{{ form_house.embarcador.label }}</td>
+               <td> {{ form_house.embarcador_i }}
+                {{ form_house.embarcador }}</td>
+
+                <td >{{ form_house.transportista.label }}</td>
+                <td>{{ form_house.transportista_i }}
+                {{ form_house.transportista }}</td>
+
+                <td >{{ form_house.vapor.label }}</td>
+                <td>{{ form_house.vapor }}</td>
+
+                <td >{{ form_house.viaje.label }}</td>
+                <td>{{ form_house.viaje }}</td>
+            </tr>
+            <tr>
+                <td >{{ form_house.armador.label }}</td>
+               <td> {{ form_house.armador_i }}
+                {{ form_house.armador }}</td>
+
+                <td >{{ form_house.deposito.label }}</td>
+                <td>{{ form_house.deposito }}</td>
+
+                <td >{{ form_house.agecompras.label }}</td>
+               <td> {{ form_house.agcompras_i }}
+                {{ form_house.agecompras }}</td>
+
+                <td >{{ form_house.ageventas.label }}</td>
+              <td>  {{ form_house.agventas_i }}
+                {{ form_house.ageventas }}</td>
+
+            </tr>
+            <tr>
+                <td >{{ form_house.notificar_cliente.label }}</td>
+                <td>{{ form_house.notificar_cliente }}</td>
+
+                <td >{{ form_house.notificar_agente.label }}</td>
+                <td>{{ form_house.notificar_agente }}</td>
+            </tr>
+            <tr>
+
+
+                <td >{{ form_house.status.label }}</td>
+                <td>{{ form_house.status }}</td>
+
+                <td >{{ form_house.wreceipt.label }}</td>
+                <td>{{ form_house.wreceipt }}</td>
+
+                <td >{{ form_house.trackid.label }}</td>
+                <td>{{ form_house.trackid }}</td>
+
+            </tr>
+
+            </tbody>
     </table>
 
     <br>
-<!--    <button type="submit" class="btn btn-primary" onclick="return confirm('¿Confirma el guardado del M B/L?')">Guardar</button>-->
+   <button type="submit" class="btn btn-primary" onclick="return confirm('¿Confirma el guardado del H B/L?')">Guardar hijo</button>
 <!--    <button type="submit" class="btn btn-secondary" onclick="" style="visibility:hidden;" id="agregar_hijo">Agregar hijo</button>-->
 </form>
-
-<!--<div class="col-12" id="segment_response" style="visibility:hidden">-->
-<!--    <table class="table tab-content" id="table_add_im">-->
-<!--        <thead>-->
-<!--            <tr>-->
-<!--                <th class="text-right">Fecha Embarque</th>-->
-<!--                <th class="text-right">Fecha Retiro</th>-->
-<!--                <th class="text-right">N° Seguimiento</th>-->
-<!--                <th class="text-right">Cliente</th>-->
-<!--                <th class="text-right">Origen</th>-->
-<!--                <th class="text-right">Destino</th>-->
-<!--                <th class="text-right">Estado</th>-->
-<!--                <th class="text-right">Posición</th>-->
-<!--                <th class="text-right">Operación</th>-->
-<!--                <th class="text-right">Master</th>-->
-<!--                <th class="text-right">House</th>-->
-<!--                <th class="text-right">Vapor</th>-->
-<!--            </tr>-->
-<!--        </thead>-->
-<!--         <tbody>-->
-
-<!--        </tbody>-->
-<!--    </table>-->
-<!--</div>-->
-
-
 
 </div>
