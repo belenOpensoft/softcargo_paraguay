@@ -201,9 +201,7 @@ class add_house(BSModalModelForm):
                   'discharge',
                   'pago',
                   'vendedor',
-                  'deposito',
                   'vapor',
-                  'hawb',
                   'operacion',
                   'arbitraje',
                   'trackid',
@@ -213,7 +211,6 @@ class add_house(BSModalModelForm):
                   ]  # Agrega los campos que deseas actualizar
         labels = {
             'awb': 'Master',
-            'hawb': 'House',
             'wreceipt': 'WR',
             'Trackid': 'Track ID',
             'pago': 'Pago flete',
@@ -226,7 +223,6 @@ class add_house(BSModalModelForm):
             'modo': forms.HiddenInput(),
         }
         attrs = {
-            'deposito' : "tabindex=16;",
             'awb' : "id=id_awbhijo",
             'wreceipt' : "tabindex=18;",
             'status' : "tabindex=19;",
@@ -264,8 +260,9 @@ class add_house(BSModalModelForm):
                  )
     # primer columna
     awb = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'id_awbhijo'}),label='Master')
+    deposito = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'deposito_addh','required':False,"tabindex":"1"}))
     cliente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'cliente_addh','required':True,"tabindex":"1"}))
-    house = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'house_addh', "tabindex": "1"}))
+    house = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'house_addh', "tabindex": "1"}),required=False)
     embarcador = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'embarcador_addh',"tabindex":"2", 'required':True}))
     consignatario = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'consignatario_addh',"tabindex":"3", 'required':True}))
     notificar_cliente = forms.DateField(
@@ -287,12 +284,32 @@ class add_house(BSModalModelForm):
         }),
         label='Notificar Agente'
     )
-    posicion = forms.CharField(
+    fecha_embarque = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'id': 'fecha_embarque',
+            'tabindex': '4',
+            'type': 'date'
+        }),
+        label='Fecha Embarque'
+    )
+
+    fecha_retiro = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'id': 'fecha_retiro',
+            'tabindex': '5',
+            'type': 'date'
+        }),
+        label='Fecha Retiro'
+    )
+    posicion_h = forms.CharField(
         widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
                 'autocomplete': 'off',
                 'required': True,
+                'name':'posicion_h',
                 'maxlength': 20,
                 'readonly': True,
                 'id': 'posicion_gh'
@@ -311,13 +328,13 @@ class add_house(BSModalModelForm):
     destino = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'destino_addh',"tabindex":"11"}))
     operacion = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True,"tabindex":"12",'id':'id_operacion'}),required=True,label="Operacion",choices=choice_op,initial='')
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True,"tabindex":"13"}),required=True,label="Moneda", choices=(),initial='')
-    vendedor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'vendedor_addh','type': 'number'}))
+    vendedor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'vendedor_addh','type': 'number','required':False}),required=False)
     vapor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'vapor_addh',"tabindex":"15"}),required=False)
     # tercer columna
-    demora = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': False,'max_length': 20, 'type': 'number' },),max_length=20,required=True,label="Días de demora")
-    status = forms.ChoiceField(widget=forms.Select(
+    demora = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': False,'max_length': 20, 'type': 'number' },),max_length=20,required=False,label="Días de demora")
+    status_h = forms.ChoiceField(widget=forms.Select(
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 1,
-               "style": "width:100%;"}, ), required=True, label="Estado", choices=choice_status)
+               "style": "width:100%;", 'name':'status_h'}, ), required=True, label="Estado", choices=choice_status)
     loading = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'loading_addh', 'required': False, "tabindex": "25"}),required=False)
     discharge = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'discharge_addh', 'required': False, "tabindex": "26"}),required=False)
     trafico = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'trafico_addh', 'required': False, "tabindex": "35"}),required=False)
@@ -402,6 +419,16 @@ class add_house(BSModalModelForm):
             'readonly': 'readonly',
             'id': 'embarcador_ih',
             'name': 'embarcador_ih',
+        }),
+        required=False
+    )
+    deposito_i = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'style': 'width:50px; margin-right:2px;',
+            'readonly': 'readonly',
+            'id': 'deposito_ih',
+            'name': 'deposito_ih',
         }),
         required=False
     )

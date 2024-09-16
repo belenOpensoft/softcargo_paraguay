@@ -233,7 +233,7 @@ def source_embarque_aereo(request, master):
             'data': data  # Los datos filtrados
         }
 
-        data_json = json.dumps(resultado)
+        return JsonResponse(resultado)
     else:
         data_json = 'fail'
     mimetype = "application/json"
@@ -245,6 +245,7 @@ def get_data_embarque_aereo(registros_filtrados):
         data = []
         for registro in registros_filtrados:
             registro_json = []
+            registro_json.append('' if registro.id is None else str(registro.id))  # Fecha
             registro_json.append('' if registro.fecha_embarque is None else str(registro.fecha_embarque)[:10])  # Fecha
             registro_json.append('' if registro.fecha_retiro is None else str(registro.fecha_retiro)[:10])  # Fecha
             registro_json.append('' if registro.numero is None else str(registro.numero))  # N° Seguimiento
@@ -257,6 +258,8 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append('' if registro.awb is None else str(registro.awb))  # Estado
             registro_json.append('' if registro.hawb is None else str(registro.hawb))  # Estado
             registro_json.append('' if registro.vapor is None else str(registro.vapor))  # Estado
+            registro_json.append('' if registro.notificar_agente is None else str(registro.notificar_agente)[:10])  # Estado
+            registro_json.append('' if registro.notificar_cliente is None else str(registro.notificar_cliente)[:10])  # Estado
 
 
             data.append(registro_json)

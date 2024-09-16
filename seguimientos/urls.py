@@ -75,6 +75,7 @@ urlpatterns = [
     path('autocomplete_proyectos/', autocomplete_proyectos, name='autocomplete_proyectos'),
     path('autocomplete_traficos/', autocomplete_traficos, name='autocomplete_traficos'),
     path('autocomplete_actividades/', autocomplete_actividades, name='autocomplete_actividades'),
+    path('autocomplete_depositos/', autocomplete_depositos, name='autocomplete_depositos'),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
     path('get_data_cronologia/<int:id>/', get_data_cronologia, name='get_data_cronologia'),
     path('get_data_seguimiento/<int:id>/', get_data_seguimiento, name='get_data_seguimiento'),

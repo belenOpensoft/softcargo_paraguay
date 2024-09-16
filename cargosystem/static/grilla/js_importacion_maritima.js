@@ -45,8 +45,10 @@ let table_add_im;
 
 $(document).ready(function () {
 
+        if (localStorage.getItem('master')) {
+        document.getElementById('agregar_hijo').style.visibility = 'visible';
+        }
 
-    /* COLLAPSE NAVBAR 5 SECONDS AFTER LOADING THE PAGE */
     setTimeout(function(){
         $('.navbar-collapse').collapse('hide');
     }, 5000);
@@ -526,13 +528,13 @@ $(document).ready(function () {
         change: function (event, ui) {
             if (ui.item) {
                 $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-                 $('#agecompras_ih').val(ui.item['id']);
-                 $('#agecompras_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+                 $('#agcompras_ih').val(ui.item['id']);
+                 $('#agcompras_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
                 $(this).val('');
-                $('#agecompras_ih').val('');
+                $('#agcompras_ih').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
-                $('#agecompras_ih').css({"border-color": "", 'box-shadow': ''});
+                $('#agcompras_ih').css({"border-color": "", 'box-shadow': ''});
             }
         }
     });
@@ -545,13 +547,13 @@ $(document).ready(function () {
         change: function (event, ui) {
             if (ui.item) {
                 $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-                 $('#ageventas_ih').val(ui.item['id']);
-                 $('#ageventas_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+                 $('#agventas_ih').val(ui.item['id']);
+                 $('#agventas_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
                 $(this).val('');
-                $('#ageventas_ih').val('');
+                $('#agventas_ih').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
-                $('#ageventas_ih').css({"border-color": "", 'box-shadow': ''});
+                $('#agventas_ih').css({"border-color": "", 'box-shadow': ''});
             }
         }
     });
@@ -615,16 +617,38 @@ $(document).ready(function () {
             }
         }
     });
-
+    $("#vapor_addh").autocomplete({
+        source: '/autocomplete_vapores/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['codigo']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
 
     //botones funcionalidades
 
     //form addmaster
     $('#add_btn').click(function () {
         //generar_posicion();
+        if (localStorage.getItem('master')) {
+            document.getElementById('id_awb').value=localStorage.getItem('master');
+            cargar_hauses_master();
+        }
         $("#add_master_modal").dialog({
                     autoOpen: true,
                     open: function (event, ui) {
+
+                    var contentWidth = $('#add_master_modal #add_master_form').outerWidth(true);
+                    $(this).dialog("option", "width", contentWidth);
+
                     },
                     modal: true,
                     title: "Ingresar un nuevo máster",
@@ -668,6 +692,8 @@ $(document).ready(function () {
                  //guardar master en la sesion
                  let master = document.getElementById('id_awb').value;
                  localStorage.setItem('master',master );
+                 let posicion = document.getElementById('posicion_g').value;
+                 localStorage.setItem('posicion',posicion );
                 document.getElementById("add_master_form").reset();
                 $('#transportista_add').css({"border-color": "", 'box-shadow': ''});
                 $('#transportista_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
@@ -724,6 +750,8 @@ $(document).ready(function () {
                 //cargar con la id desde la sesion
                 let master = localStorage.getItem('master');
                 $('#id_awbhijo').val(master);
+                let posicion = localStorage.getItem('posicion');
+                $('#posicion_gh').val(posicion);
 
                 $('#cliente_addh').addClass('input-sobrepasar');
                 $('#embarcador_addh').addClass('input-sobrepasar');
@@ -733,6 +761,8 @@ $(document).ready(function () {
                 $('#armador_addh').addClass('input-sobrepasar');
                 $('#agecompras_addh').addClass('input-sobrepasar');
                 $('#ageventas_addh').addClass('input-sobrepasar');
+                $('#deposito_addh').addClass('input-sobrepasar');
+
 
 
 
@@ -748,27 +778,37 @@ $(document).ready(function () {
         data: formData,
         success: function(response) {
             if (response.success) {
-//            $('#agregar_hijo').css({'visibility':'visible'});
-//            cargar_hauses_master();
-               table_add_im.ajax.reload(null, false);
-              // let master = document.getElementById('id_awb').value;
-               // $('#id_awbhijo').val(master);
-                 $('#add_houses_modal').dialog('close');
-                 document.getElementById("add_houses_form").reset();
+               if ($('#table_add_im').length) {
+                    table_add_im.ajax.reload(null, false);
+                } else {
+                    cargar_hauses_master();
+                }
+                 $('#add_house_modal').dialog('close');
+                 document.getElementById("add_house_form").reset();
 
-                $('#transportista_add').css({"border-color": "", 'box-shadow': ''});
-                $('#transportista_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
-                $('#agente_add').css({"border-color": "", 'box-shadow': ''});
-                $('#agente_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
-                $('#consignatario_add').css({"border-color": "", 'box-shadow': ''});
-                $('#consignatario_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
-                $('#armador_add').css({"border-color": "", 'box-shadow': ''});
-                $('#armador_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
-                $('#vapor_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
-                $('#origen_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
-                $('#destino_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
-                $('#loading_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
-                $('#discharge_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#transportista_addh').css({"border-color": "", 'box-shadow': ''});
+                $('#transportista_ih').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#agente_addh').css({"border-color": "", 'box-shadow': ''});
+                $('#agente_ih').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#consignatario_addh').css({"border-color": "", 'box-shadow': ''});
+                $('#consignatario_ih').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#armador_addh').css({"border-color": "", 'box-shadow': ''});
+                $('#armador_ih').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#embarcador_addh').css({"border-color": "", 'box-shadow': ''});
+                $('#embarcador_ih').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#cliente_addh').css({"border-color": "", 'box-shadow': ''});
+                $('#cliente_ih').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#agecompras_addh').css({"border-color": "", 'box-shadow': ''});
+                $('#agcompras_ih').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#ageventas_addh').css({"border-color": "", 'box-shadow': ''});
+                $('#agventas_ih').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#vapor_addh').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#origen_addh').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#destino_addh').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#loading_addh').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#discharge_addh').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#deposito_addh').css({"border-color": "", 'box-shadow': ''});
+                $('#deposito_ih').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
 
             } else {
                 console.log(response.errors);
@@ -822,38 +862,27 @@ let csrftoken = getCookie2('csrftoken');
 table_add_im = $('#table_add_im').DataTable({
     "stateSave": true,
     "dom": 'Btlipr',
+    "bAutoWidth": false,
     "scrollX": true,
-     "autoWidth": true,  // Permitir ajuste automático de las columnas
-    "bAutoWidth": true,
     "scrollY": wHeight * 0.60,
-    "columnDefs": [
-    {
-        "targets": [0],  // Fecha
-        "className": 'details-control',  // Clase similar a la segunda tabla
-        "orderable": false,
-        "data": null,
-        "defaultContent": '',  // Permitir contenido por defecto
-        "render": function (data, type, row) {
-            // Aquí puedes definir el contenido que debe aparecer en la columna
-        }
-    },
-    {
-        "targets": [1],  // N° Seguimiento
-        "className": 'derecha archivos',  // Mismo estilo que la segunda tabla
-    },
-    {
-        "targets": [2],  // Cliente
-    },
-    {
-        "targets": [3],  // Origen
-    },
-    {
-        "targets": [4],  // Destino
-    },
-    {
-        "targets": [5],  // Estado
-    }
-],
+   "columnDefs": [
+            {
+                "targets": [0],  // Nueva columna para detalles
+                "className": 'details-control',
+                "orderable": false,
+                "data": null,
+                "defaultContent": '',  // Contenido por defecto
+                "render": function (data, type, row) {
+                    // Define el contenido para la columna de detalles
+                   // return '<button class="btn btn-info btn-sm">Detalles</button>';  // Ejemplo de contenido
+                }
+            },
+            {
+                "targets": [3],
+                'class': 'derecha',
+            },
+
+        ],
     "order": [[0, "desc"]],
     "processing": true,
     "serverSide": true,
@@ -865,6 +894,7 @@ table_add_im = $('#table_add_im').DataTable({
             "X-CSRFToken": csrftoken
         },
         "dataSrc": function (json) {
+        console.log(json.data);
          $('#table_add_im th').css({'width':'auto'});
          $('#table_add_im_wrapper .dataTables_scrollBody').css({
         'height': 'fit-content',

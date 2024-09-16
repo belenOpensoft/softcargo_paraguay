@@ -139,7 +139,7 @@ class Embarqueaereo(models.Model):
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  
     tieneacta = models.CharField(db_column='TieneActa', max_length=1, blank=True, null=True)  
     refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True, null=True)  
-    deaddocumentos = models.DateTimeField(db_column='DeadDocumentos', blank=True, null=True)  
+    deaddocumentos = models.DateTimeField(db_column='DeadDocumentos', blank=True, null=True)
     deadentrega = models.DateTimeField(db_column='DeadEntrega', blank=True, null=True)  
     hblcorp = models.IntegerField(db_column='HBLCorp', blank=True, null=True)  
     envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  
@@ -179,7 +179,16 @@ class Embarqueaereo(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'VEmbarqueAereo'
+        db_table = 'impmarit_embarqueaereo'
+
+    def get_number(self):
+        embarque_l = Embarqueaereo.objects.order_by('id').last()
+        if embarque_l:
+            nuevo_numero = embarque_l.numero + 1
+        else:
+            nuevo_numero = 1
+
+        return nuevo_numero
 
 class VEmbarqueaereo(models.Model):
     numero = models.IntegerField(unique=True)
@@ -197,6 +206,8 @@ class VEmbarqueaereo(models.Model):
     status = models.CharField(max_length=20, blank=True, null=True)
     fecha_embarque = models.DateTimeField(blank=True, null=True)
     fecha_retiro = models.DateTimeField(blank=True, null=True)
+    notificar_agente = models.DateTimeField(blank=True, null=True)
+    notificar_cliente = models.DateTimeField(blank=True, null=True)
     valor_transporte = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     valor_aduana = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     tarifa_venta = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)

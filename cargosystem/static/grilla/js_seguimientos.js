@@ -106,6 +106,7 @@ $(document).ready(function () {
             "url": "/source_seguimientos",
             'type': 'GET',
             "data": function (d) {
+                console.log(d);
                 return $.extend({}, d, {
                     "buscar": buscar,
                     "que_buscar": que_buscar,
