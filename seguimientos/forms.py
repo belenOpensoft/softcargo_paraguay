@@ -6,6 +6,7 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
+
 class notasForm(BSModalModelForm):
     class Meta:
         model = Seguimiento
@@ -19,6 +20,7 @@ class notasForm(BSModalModelForm):
         self.helper.add_input(Submit('submit', 'Actualizar'))
 
     observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'notas_add_input',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"25"," cols":"100","class":"form-control"}, ), required=False,label="Notas", max_length=500)
+
 class emailsForm(forms.Form):
     # class Meta:
     #     model = Seguimiento
@@ -360,7 +362,7 @@ class embarquesForm(BSModalModelForm):
             'materialreceipt': 'MR',
             'cbm': 'Volumen',
             'bruto': 'Peso bruto',
-
+            'tipo': 'Tipo',
         }
         widgets = {
             # 'id': forms.HiddenInput(attrs={'id':'id_embarque_id',}),
