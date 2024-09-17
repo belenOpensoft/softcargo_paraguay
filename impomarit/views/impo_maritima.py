@@ -2,12 +2,13 @@ import datetime
 import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, Http404
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from impomarit.forms import add_im_form, add_form, add_house
+from impomarit.forms import add_im_form, add_form, add_house, edit_form
 from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo
+from mantenimientos.models import Clientes
 from seguimientos.models import Seguimiento
 
 
@@ -31,6 +32,7 @@ def master_importacion_maritima(request):
                 'form': add_form(),
                 'form_house': add_house(),
                 'form_search_master': add_im_form(),
+                'form_edit_master':edit_form(),
                 'opciones_busqueda': opciones_busqueda,
             })
         else:
@@ -218,6 +220,58 @@ def is_ajax(request):
     except Exception as e:
         messages.error(request,e)
 
+def master_detail(request):
+    if request.method == 'GET':
+        master_id = request.GET.get('id', None)
+        if master_id:
+            try:
+                master = Reservas.objects.get(id=master_id)
+                # Convierte el objeto en un diccionario
+                data = {
+                    'id': master.id,
+                    'transportista_e': master.transportista,
+                    'agente_e': master.agente,
+                    'consignatario_e': master.consignatario,
+                    'armador_e': master.armador,
+                    'vapor_e': master.vapor,
+                    'viaje_e': master.viaje,
+                    'aduana_e': master.aduana,
+                    'tarifa_e': master.tarifa,
+                    'moneda_e': master.moneda,
+                    'arbitraje_e': master.arbitraje,
+                    'kilosmadre_e': master.kilosmadre,
+                    'bultosmadre_e': master.bultosmadre,
+                    'pagoflete_e': master.pagoflete,
+                    'trafico_e': master.trafico,
+                    'fecha_e': master.fecha,
+                    'cotizacion_e': master.cotizacion,
+                    'destino_e': master.destino,
+                    'discharge_e': master.discharge,
+                    'origen_e': master.origen,
+                    'loading_e': master.loading,
+                    'status_e': master.status,
+                    'posicion_e': master.posicion,
+                    'operacion_e': master.operacion,
+                    'awd_e': master.awb,
+                }
+                return JsonResponse(data)
+            except Reservas.DoesNotExist:
+                raise Http404("Master does not exist")
+        else:
+            return JsonResponse({'error': 'No ID provided'}, status=400)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+def get_name_by_id(request):
+    if request.method == 'GET':
+        client_id = request.GET.get('id')
+
+        if client_id:
+            cliente = Clientes.objects.get(id=client_id)
+            name = cliente.empresa
+
+            return JsonResponse({'name': name})
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def source_embarque_aereo(request, master):
     if is_ajax(request):

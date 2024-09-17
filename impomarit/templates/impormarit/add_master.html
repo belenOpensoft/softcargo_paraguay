@@ -12,21 +12,6 @@
 
 </style>
 <div id="add_master_modal" style="display: none;" tabindex="-1">
-<!--     <div class="form-group col-2" id="segment_search" style="visibility: visible; width:100%;">-->
-<!--            <label for="{{ form_add_master.awb_number.id_for_label }}">{{ form_add_master.awb_number.label }}</label>-->
-<!--            <div class="input-group" style="width:40%;">-->
-<!--                <div class="col-8">-->
-<!--                    {{ form_search_master.awb_number }}-->
-<!--                </div>-->
-<!--                <div class="col-4 d-flex align-items-center">-->
-<!--                    <div class="input-group-append me-2 ms-2">-->
-<!--                        <button type="submit" class="btn btn-primary btn-sm">Buscar</button>-->
-<!--                    </div>-->
-<!--                    &nbsp;-->
-<!--                    <div id="alert-container"></div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
 <form id="add_master_form" method="POST" style="width:fit-content;" action="{% url 'add_master' %}">
     {% csrf_token %}
     <table class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">

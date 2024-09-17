@@ -17,10 +17,6 @@ def consultar_seguimientos(request):
         return JsonResponse({'data': data})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-def calcular_acumulados(request):
-    pass
-
-
 @login_required(login_url="/")
 def add_importacion_maritima(request):
 
@@ -80,3 +76,6 @@ def add_importacion_maritima(request):
             'message': f'Ocurrió un error: {str(e)}',
             'errors': {}
         })
+
+def edit_master(request):
+    pass

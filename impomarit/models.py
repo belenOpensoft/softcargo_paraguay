@@ -452,6 +452,7 @@ class Reservas(models.Model):
     numero = models.IntegerField(db_column='Numero', unique=True)
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)
     loading = models.CharField(db_column='Loading', max_length=5, blank=True, null=True)
+    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True, null=True)
     fecha = models.DateField(db_column='Fecha', blank=True, null=True)
     kilos = models.FloatField(db_column='Kilos', blank=True, null=True)
     origen = models.CharField(max_length=5, blank=True, null=True)
