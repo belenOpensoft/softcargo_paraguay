@@ -59,14 +59,22 @@ def add_importacion_maritima(request):
                 reserva.status = form.cleaned_data['status']
                 reserva.posicion = form.cleaned_data['posicion']
                 reserva.operacion = form.cleaned_data['operacion']
+
                 reserva.save()
                 messages.success(request, 'Master agregado con éxito.')
                 return JsonResponse({'success': True, 'message': 'Master agregado con éxito.'})
 
             else:
+                if 'awb' in form.errors:
+                    return JsonResponse({
+                        'success': False,
+                        'code': 'DUPLICATE_AWB',
+                        'message': 'Ya existe un registro con el Master digitado.',
+                        'errors': form.errors.as_json()
+                    })
                 return JsonResponse({
                     'success': False,
-                    'message': 'Formulario invalido, intente nuevamente.',
+                    'message': 'Formulario inválido, intente nuevamente.',
                     'errors': form.errors.as_json()
                 })
 
@@ -77,13 +85,7 @@ def add_importacion_maritima(request):
             'message': f'Ocurrió un error: {str(e)}',
             'errors': {}
         })
-    except IntegrityError:
-        messages.error(request, 'Error: Ya existe un registro con el mismo valor para Master.')
-        return JsonResponse({
-            'success': False,
-            'message': 'Error: Ya existe un registro con el mismo valor para Master.',
-            'errors': {}
-        })
+
 
 def master_detail(request):
     if request.method == 'GET':

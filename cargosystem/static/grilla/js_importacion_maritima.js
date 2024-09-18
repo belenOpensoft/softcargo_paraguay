@@ -854,6 +854,11 @@ $(document).ready(function () {
 
     e.preventDefault();
     e.stopPropagation();
+    if(document.getElementById('posicion_g').value==null||document.getElementById('posicion_g').value==''){
+    alert('El campo de posición está vacío, por favor pulse sobre él para generar un valor.');
+    }else if(document.getElementById('id_viaje_master').value<0){
+    alert('No se admiten valores negativos para el campo "viaje"');
+    }else{
     let formData = $(this).serialize();
     formData += '&csrfmiddlewaretoken=' + csrf_token;
     $.ajax({
@@ -888,13 +893,19 @@ $(document).ready(function () {
                 $('#discharge_add').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
 
             } else {
-                console.log(response.errors);
+            if (response.code === 'DUPLICATE_MASTER') {
+                alert('Ya existe un registro con el mismo valor para Master.');
+            } else {
+                alert('Error: ' + response.message);
+            }
+
             }
         },
         error: function(xhr, status, error) {
             alert('Ocurrió un error al agregar el master: ' + error);
         }
     });
+    }
 });
         //ver mas
     $('#tabla_importmarit tbody').on('click', 'td.details-control', function () {
@@ -1090,6 +1101,9 @@ $(document).ready(function () {
     $('#add_house_form').submit(function(e){
     e.preventDefault();
     e.stopPropagation();
+    if(document.getElementById('pago_house').value<0||document.getElementById('arbitraje_house').value<0||document.getElementById('dias_demora').value<0||document.getElementById('viaje_house').value<0){
+    alert('No se admiten valores negativos en los campos numéricos.')
+    }else{
     let formData = $(this).serialize();
     formData += '&csrfmiddlewaretoken=' + csrf_token;
     $.ajax({
@@ -1138,6 +1152,7 @@ $(document).ready(function () {
             alert('Ocurrió un error al agregar el house: ' + error);
         }
     });
+    }
 });
 
 
