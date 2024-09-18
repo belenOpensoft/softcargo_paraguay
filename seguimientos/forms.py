@@ -21,6 +21,7 @@ class notasForm(BSModalModelForm):
 
     observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'notas_add_input',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"25"," cols":"100","class":"form-control"}, ), required=False,label="Notas", max_length=500)
 
+
 class emailsForm(forms.Form):
     # class Meta:
     #     model = Seguimiento
@@ -38,6 +39,7 @@ class emailsForm(forms.Form):
     cco = forms.EmailField(label='CCO',widget=forms.EmailInput(attrs={'class': 'form-control'}), required=False)
     subject = forms.CharField(label='Asunto',widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
     email = forms.CharField(widget=forms.Textarea(attrs={"id": 'email_add_input',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"100","class":"form-control"}, ), required=False,label="Email", max_length=500)
+
 
 class pdfForm(BSModalModelForm):
     class Meta:
@@ -114,8 +116,6 @@ class seguimientoForm(BSModalModelForm):
             'status' : "tabindex=19;",
             'operacion' : "tabindex=12;",
         }
-
-
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -213,6 +213,7 @@ class seguimientoForm(BSModalModelForm):
     # observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'notas_seguimiento',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"10","class":"form-control"}, ), required=False,label="Notas", max_length=500)
     id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete":"off",'required': False}),required=False,label="ID")
 
+
 class cronologiaForm(BSModalModelForm):
     class Meta:
         model = Seguimiento
@@ -297,6 +298,7 @@ class cronologiaForm(BSModalModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
 
+
 class envasesForm(BSModalModelForm):
     class Meta:
         model = Envases
@@ -342,6 +344,7 @@ class envasesForm(BSModalModelForm):
             self.fields[field].widget.attrs['class'] = 'form-control'
 
     id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False,'id':'id_envase_id'}), required=False,label="ID")
+
 
 class embarquesForm(BSModalModelForm):
     class Meta:
@@ -415,6 +418,7 @@ class embarquesForm(BSModalModelForm):
     )
     tarifafija = forms.BooleanField(label="Tarifa fija")
 
+
 class gastosForm(BSModalModelForm):
     class Meta:
         model = Serviceaereo
@@ -482,6 +486,7 @@ class gastosForm(BSModalModelForm):
     socio = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13"}),
                                required=True, label="Socio comercial", choices=(), initial='')
 
+
 class archivosForm(forms.ModelForm):
     class Meta:
         model = Attachhijo
@@ -520,6 +525,7 @@ class archivosForm(forms.ModelForm):
         widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "12", 'id': 'id_operacion'}),
         required=True, label="Detalle (tipo archivo)", choices=choice_detalle, initial='')
 
+
 class rutasForm(forms.ModelForm):
     class Meta:
         model = Conexaerea
@@ -550,6 +556,7 @@ class rutasForm(forms.ModelForm):
             self.fields[field].widget.attrs['class'] = 'form-control'
 
     id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False, 'id': 'id_ruta_id'}), required=False,label="ID")
+
 
 class clonarForm(forms.Form):
     yes_no_choices = [
