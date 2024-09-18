@@ -446,6 +446,7 @@ $(document).ready(function () {
                 let data = JSON.stringify(formData);
                 let data_extra = JSON.stringify(formDataExtra);
                 miurl = "/guardar_embarques/";
+                localStorage.setItem('numero_embarque',row[0][1]);
                 var toData = {
                     'numero': row[0][1],
                     'data': data,
@@ -473,7 +474,8 @@ $(document).ready(function () {
 
                             });
                         } else {
-                            alert(resultado['resultado']);
+                            //alert(resultado['resultado']);
+                            console.log(resultado['resultado']);
                         }
                     }
                 });
@@ -1546,7 +1548,8 @@ $(document).ready(function () {
 
                                                 });
                                             } else {
-                                                alert(aux);
+                                                //alert(aux);
+                                                console.log(resultado['resultado']);
                                             }
                                         }
                                     });
@@ -1563,8 +1566,9 @@ $(document).ready(function () {
                             miurl = "/actualizo_datos_embarque/";
                             let formDataExtra = $("#embarques_extra_form").serializeArray();
                             let data_extra = JSON.stringify(formDataExtra);
+                            let numero= localStorage.getItem('numero_embarque');
                             var toData = {
-                                'numero': row[0][1],
+                                'numero': numero, //row[0][1]
                                 'data': data_extra,
                                 'csrfmiddlewaretoken': csrf_token,
                             };
@@ -1578,7 +1582,8 @@ $(document).ready(function () {
                                         mostrarToast('¡Datos de embarques actualizados con exito!', 'success');
                                         table.ajax.reload();
                                     } else {
-                                        alert(resultado['resultado']);
+                                    console.log(resultado['resultado']);
+                                        //alert(resultado['resultado']);
                                     }
                                 }
                             });
@@ -1655,7 +1660,8 @@ $(document).ready(function () {
                                         }
                                         table.ajax.reload();
                                     } else {
-                                        alert(resultado['resultado']);
+                                        //alert(resultado['resultado']);
+                                        consolelog(resultado['resultado']);
                                     }
                                 },
                                 error: function (e) {
