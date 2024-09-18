@@ -11,34 +11,52 @@
 body {
     background: #ecf0f3;
 }
+
 .iconos{
-font-size: 3rem;
-padding: 5px;
+    font-size: 3rem;
+    padding: 5px;
 }
+
 .column{
-display:flex;
-height: fit-content;
-border: 1px #0124 solid;
-border-radius: 10px;
-align-items: center;
-  flex: 25%;
-  padding: 0 4px;
-  margin:10px;
+    display:flex;
+    height: fit-content;
+    border: 1px #0124 solid;
+    border-radius: 10px;
+    align-items: center;
+    flex: 25%;
+    padding: 0 4px;
+    margin:10px;
 }
+
 .column h4{
-margin-top: 10px;
-padding: 10px;
+    margin-top: 10px;
+    padding: 10px;
 }
+
+@media (max-width: 1365px) {
+    .hidden-mobile {
+        display: none; /* Oculta los elementos con esta clase */
+    }
+
+    .column {
+        display: inline-flex; /* Se ajusta al contenido */
+        height: fit-content; /* Mantiene el alto al contenido */
+        border: 1px #0124 solid; /* Borde alrededor del div */
+        border-radius: 10px; /* Bordes redondeados */
+        align-items: center; /* Centra los íconos verticalmente */
+        padding: 0 4px; /* Espaciado interno */
+        margin: 10px; /* Espaciado externo */
+    }
+}
+
 .wrapper {
-    max-width: 25%;
-    margin: 50px auto;
-    padding: 30px 30px 30px 30px;
+    width: fit-content; /* Se adapta al tamaño del contenido */
+    margin: 50px auto; /* Centra el contenedor horizontalmente */
+    padding: 30px; /* Padding uniforme */
     background-color: #ecf0f3;
     border-radius: 15px;
     box-shadow: 13px 13px 20px #cbced1, -13px -13px 20px #fff;
 }
-
-
 
 .wrapper .name {
     font-weight: 600;
@@ -71,10 +89,6 @@ padding: 10px;
     color: #555;
 }
 
-
-
-
-
 .wrapper a {
     text-decoration: none;
     font-size: 0.8rem;
@@ -91,7 +105,6 @@ padding: 10px;
         padding: 40px 15px 15px 15px;
     }
 }
-
 
 
 /* Responsive layout - makes a two column-layout instead of four columns */

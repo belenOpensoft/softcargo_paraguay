@@ -1,6 +1,8 @@
 {% load static %}
 {% static "" as baseUrl %}
+
 <html>
+
 <head>
     <meta charset="UTF-8">
     <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" id="bootstrap-css">
@@ -9,6 +11,7 @@
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/jquery-3.6.4.min.js' %}"></script>
 </head>
+
 <body >
 <div class="text-center mt-4 name">
     <br>
@@ -23,40 +26,43 @@
                 </div>
             {% endfor %}
             <div class="">
-
                 <div class="column">
                     {% for rol in roles.0 %}
-                    <i class="iconos bi bi-database-fill-gear"></i>
-                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" > <h4>Mantenimientos</h4> </a>
-                    {% endfor%}
-
+                    <a href="/login/selecccionarol/{{ rol }}">
+                        <i class="iconos bi bi-database-fill-gear"></i>
+                    </a>
+                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" class="hidden-mobile"> <h4>Mantenimientos</h4> </a>
+                    {% endfor %}
                 </div>
+
                 <div class="column">
                     {% for rol in roles.1 %}
-                    <i class="iconos bi bi-person-fill-gear"></i>
-                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}"> <h4>Administrador</h4> </a>
-                    {% endfor%}
-
+                    <a href="/login/selecccionarol/{{ rol }}">
+                        <i class="iconos bi bi-person-fill-gear"></i>
+                    </a>
+                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" class="hidden-mobile"> <h4>Administrador</h4> </a>
+                    {% endfor %}
                 </div>
+
                 <div class="column">
                     {% for rol in roles.2 %}
-                    <i class="iconos bi bi-send-check"></i>
-                        <a href="/login/selecccionarol/{{ rol }}"  title="{{ rol|title }}"><h4>Seguimientos</h4></a>
-                    {% endfor%}
-
+                    <a href="/login/selecccionarol/{{ rol }}">
+                        <i class="iconos bi bi-send-check"></i>
+                    </a>
+                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" class="hidden-mobile"> <h4>Seguimientos</h4></a>
+                    {% endfor %}
                 </div>
+
                 <div class="column">
                     {% for rol in roles.3 %}
-                    <i class="iconos bi bi-card-checklist"></i>
-                        <a href="/login/selecccionarol/{{ rol }}"  title="{{ rol|title }}"> <h4>Operaciones</h4> </a>
-                    {% endfor%}
-
+                    <a href="/login/selecccionarol/{{ rol }}">
+                        <i class="iconos bi bi-card-checklist"></i>
+                    </a>
+                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" class="hidden-mobile"> <h4>Operaciones</h4> </a>
+                    {% endfor %}
                 </div>
-
             </div>
             {% csrf_token %}
-
-
         </form>
     </div>
   </body>
