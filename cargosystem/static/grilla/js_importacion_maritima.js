@@ -45,10 +45,10 @@ let table_add_im;
 
 $(document).ready(function () {
 
-        if (localStorage.getItem('master')) {
-        document.getElementById('agregar_hijo').style.visibility = 'visible';
-        }
-
+//        if (localStorage.getItem('master')) {
+//        document.getElementById('agregar_hijo').style.visibility = 'visible';
+//        }
+    //cargar_hauses_master();
     setTimeout(function(){
         $('.navbar-collapse').collapse('hide');
     }, 5000);
@@ -427,6 +427,25 @@ $(document).ready(function () {
             }
         }
     });
+    $("#vendedor_addh").autocomplete({
+        source: '/autocomplete_vendedores/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#vendedor_ih').val(ui.item['id']);
+                 $('#vendedor_ih').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#vendedor_ih').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#vendedor_ih').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
     $("#transportista_addh").autocomplete({
         source: '/autocomplete_clientes/',
         minLength: 2,
@@ -794,10 +813,12 @@ $(document).ready(function () {
     //form addmaster
     $('#add_btn').click(function () {
         //generar_posicion();
-        if (localStorage.getItem('master')) {
-            document.getElementById('id_awb').value=localStorage.getItem('master');
-            cargar_hauses_master();
-        }
+//        if (localStorage.getItem('master')) {
+//            document.getElementById('id_awb').value=localStorage.getItem('master');
+//            cargar_hauses_master();
+//        }
+        document.getElementById("add_master_form").reset();
+        $('#agregar_master').css({'display':'block'});
         $("#add_master_modal").dialog({
                     autoOpen: true,
                     open: function (event, ui) {
@@ -842,7 +863,8 @@ $(document).ready(function () {
         success: function(response) {
             if (response.success) {
             $('#agregar_hijo').css({'visibility':'visible'});
-            cargar_hauses_master();
+            $('#agregar_master').css({'display':'none'});
+            //cargar_hauses_master();
             table.ajax.reload(null, false);
                  //$('#add_master_modal').dialog('close');
                  //guardar master en la sesion
@@ -850,7 +872,7 @@ $(document).ready(function () {
                  localStorage.setItem('master',master );
                  let posicion = document.getElementById('posicion_g').value;
                  localStorage.setItem('posicion',posicion );
-                document.getElementById("add_master_form").reset();
+                //document.getElementById("add_master_form").reset();
                 $('#transportista_add').css({"border-color": "", 'box-shadow': ''});
                 $('#transportista_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#agente_add').css({"border-color": "", 'box-shadow': ''});
@@ -990,6 +1012,31 @@ $(document).ready(function () {
     });
     return name;
 }
+    $('#edit_master_form').submit(function(e){
+       e.preventDefault();
+        var id_master = localStorage.getItem('id_master_editar');
+        var formData = $(this).serialize();
+        $('#edit_master_form').attr('action', '/importacion_maritima/edit_master/' + id_master + '/');
+
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    alert('Datos actualizados con éxito');
+                    table.ajax.reload(null, false);
+                    $('#edit_master_modal').dialog('close');
+                } else {
+                    alert('Error: ' + response.error_message);
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('Error en la solicitud: ' + error);
+            }
+        });
+    });
 
     //form add house
     $('#agregar_hijo').click(function () {
@@ -1034,6 +1081,7 @@ $(document).ready(function () {
                 $('#agecompras_addh').addClass('input-sobrepasar');
                 $('#ageventas_addh').addClass('input-sobrepasar');
                 $('#deposito_addh').addClass('input-sobrepasar');
+                $('#vendedor_addh').addClass('input-sobrepasar');
 
 
 
@@ -1050,7 +1098,7 @@ $(document).ready(function () {
         data: formData,
         success: function(response) {
             if (response.success) {
-               if ($('#table_add_im').length) {
+               if (table_add_im instanceof $.fn.dataTable.Api) {
                     table_add_im.ajax.reload(null, false);
                 } else {
                     cargar_hauses_master();

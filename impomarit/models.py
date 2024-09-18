@@ -457,7 +457,7 @@ class Reservas(models.Model):
     kilos = models.FloatField(db_column='Kilos', blank=True, null=True)
     origen = models.CharField(max_length=5, blank=True, null=True)
     destino = models.CharField(max_length=5, blank=True, null=True)
-    awb = models.CharField(max_length=40, blank=True, null=True)
+    awb = models.CharField(max_length=40, blank=True, null=True, unique=True)
     agente = models.IntegerField(blank=True, null=True)
     consignatario = models.IntegerField(blank=True, null=True)
     pagoflete = models.CharField(db_column='Pagoflete', max_length=1, blank=True, null=True)

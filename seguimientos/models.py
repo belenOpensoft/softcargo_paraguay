@@ -1366,7 +1366,7 @@ class Reservas(models.Model):
     fecha = models.DateTimeField(blank=True, null=True)
     origen = models.CharField(max_length=5, blank=True, null=True)
     destino = models.CharField(max_length=5, blank=True, null=True)
-    awb = models.CharField(max_length=40, blank=True, null=True)
+    awb = models.CharField(max_length=40, blank=True, null=True, unique=True)
     cotizacion = models.SmallIntegerField(blank=True, null=True)
     status = models.CharField(max_length=20, blank=True, null=True)
     vapor = models.CharField(max_length=30, blank=True, null=True)

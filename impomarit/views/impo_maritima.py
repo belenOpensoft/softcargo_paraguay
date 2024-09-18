@@ -41,7 +41,6 @@ def master_importacion_maritima(request):
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
 
-""" VISTA """
 
 param_busqueda = {
     1: 'numero__icontains',
@@ -56,7 +55,7 @@ param_busqueda = {
     10: 'destino__icontains',
     11: 'status__icontains',
 }
-""" TABLA PUERTO """
+
 columns_table = {
     0: 'id',
     1: 'numero',
@@ -220,59 +219,9 @@ def is_ajax(request):
     except Exception as e:
         messages.error(request,e)
 
-def master_detail(request):
-    if request.method == 'GET':
-        master_id = request.GET.get('id', None)
-        if master_id:
-            try:
-                master = Reservas.objects.get(id=master_id)
-                # Convierte el objeto en un diccionario
-                data = {
-                    'id': master.id,
-                    'transportista_e': master.transportista,
-                    'agente_e': master.agente,
-                    'consignatario_e': master.consignatario,
-                    'armador_e': master.armador,
-                    'vapor_e': master.vapor,
-                    'viaje_e': master.viaje,
-                    'aduana_e': master.aduana,
-                    'tarifa_e': master.tarifa,
-                    'moneda_e': master.moneda,
-                    'arbitraje_e': master.arbitraje,
-                    'kilosmadre_e': master.kilosmadre,
-                    'bultosmadre_e': master.bultosmadre,
-                    'pagoflete_e': master.pagoflete,
-                    'trafico_e': master.trafico,
-                    'fecha_e': master.fecha,
-                    'cotizacion_e': master.cotizacion,
-                    'destino_e': master.destino,
-                    'discharge_e': master.discharge,
-                    'origen_e': master.origen,
-                    'loading_e': master.loading,
-                    'status_e': master.status,
-                    'posicion_e': master.posicion,
-                    'operacion_e': master.operacion,
-                    'awd_e': master.awb,
-                }
-                return JsonResponse(data)
-            except Reservas.DoesNotExist:
-                raise Http404("Master does not exist")
-        else:
-            return JsonResponse({'error': 'No ID provided'}, status=400)
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
-def get_name_by_id(request):
-    if request.method == 'GET':
-        client_id = request.GET.get('id')
 
-        if client_id:
-            cliente = Clientes.objects.get(id=client_id)
-            name = cliente.empresa
 
-            return JsonResponse({'name': name})
-
-    return JsonResponse({'error': 'Invalid request'}, status=400)
-
+#traer datos houses tabla
 def source_embarque_aereo(request, master):
     if is_ajax(request):
         start = int(request.POST.get('start', 0))  # Usa 0 como valor predeterminado si 'start' no está presente
@@ -292,7 +241,6 @@ def source_embarque_aereo(request, master):
         data_json = 'fail'
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
-
 
 def get_data_embarque_aereo(registros_filtrados):
     try:

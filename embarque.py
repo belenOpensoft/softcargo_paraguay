@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class Reservas(models.Model):
+class Reservas (models.Model):
     numero = models.IntegerField(db_column='Numero', unique=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.

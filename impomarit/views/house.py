@@ -26,7 +26,6 @@ def add_house_impmarit(request):
                 reserva.loading = form.cleaned_data['loading']
                 reserva.discharge = form.cleaned_data['discharge']
                 reserva.pago = form.cleaned_data['pago']
-                reserva.vendedor = form.cleaned_data['vendedor']
                 reserva.vapor = form.cleaned_data['vapor']
                 reserva.hawb = form.cleaned_data['house']
                 reserva.operacion = form.cleaned_data['operacion']
@@ -42,6 +41,7 @@ def add_house_impmarit(request):
                 reserva.armador = form.cleaned_data.get('armador', None)
                 reserva.cliente = form.cleaned_data.get('cliente', None)
                 try:
+                    reserva.vendedor = int(form.cleaned_data.get('vendedor_i', 0)) if form.cleaned_data.get('vendedor_i', 0) is not None else 0
                     reserva.transportista = int(form.cleaned_data.get('transportista_i', 0)) if form.cleaned_data.get('transportista_i', 0) is not None else 0
                     reserva.agente = int(form.cleaned_data.get('agente_i', 0)) if form.cleaned_data.get('agente_i', 0) is not None else 0
                     reserva.consignatario = int(form.cleaned_data.get('consignatario_i', 0)) if form.cleaned_data.get('consignatario_i', 0) is not None else 0

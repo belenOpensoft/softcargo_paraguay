@@ -90,6 +90,7 @@ class add_form(BSModalModelForm):
                     'placeholder': 'Pulse sobre el campo para generar'
                 }
             ),
+        required=True,
         )
 
     #codigo = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 5 },),max_length=5,required=True,label="Código")
@@ -99,9 +100,9 @@ class add_form(BSModalModelForm):
     aduana = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False }),
         required=False)
-    awd = forms.CharField(
+    awb = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': True}),
-        required=False)
+        required=True)
     consignatario = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':True, 'id': 'consignatario_add', 'name':'otro' }),
@@ -207,15 +208,52 @@ class edit_form(BSModalModelForm):
 
                 }
             ),
+        required=True,
     label = "Posición"
         )
 
-    tarifa_e = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20, 'type': 'number' },),max_length=20,required=True,label="Tarifa")
-    arbitraje_e = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20, 'type': 'number' },),max_length=20,required=True,label="Arbitraje")
-    kilosmadre_e = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20, 'type': 'number' },),max_length=20,required=True,label="Kilos")
-    bultosmadre_e = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20, 'type': 'number' },),max_length=20,required=True,label="Bultos")
-    trafico_e = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20, 'type': 'number' },),max_length=20,required=True,label="Tráfico")
-    cotizacion_e = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20, 'type': 'number' },),max_length=20,required=True,label="Cotización")
+    tarifa_e = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
+        max_length=20,
+        required=False,  # No obligatorio
+        label="Tarifa"
+    )
+    arbitraje_e = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
+        max_length=20,
+        required=False,  # No obligatorio
+        label="Arbitraje"
+    )
+    kilosmadre_e = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
+        max_length=20,
+        required=False,  # Obligatorio
+        label="Kilos"
+    )
+    bultosmadre_e = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
+        max_length=20,
+        required=False,  # Obligatorio
+        label="Bultos"
+    )
+    trafico_e = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
+        max_length=20,
+        required=False,  # No obligatorio
+        label="Tráfico"
+    )
+    cotizacion_e = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
+        max_length=20,
+        required=False,  # No obligatorio
+        label="Cotización"
+    )
     agente_e = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required':True, 'id': 'agente_edit', 'name':'otro'}),
         required=False,label="Agente")
@@ -318,7 +356,6 @@ class add_house(BSModalModelForm):
                   'loading',
                   'discharge',
                   'pago',
-                  'vendedor',
                   'vapor',
                   'operacion',
                   'arbitraje',
@@ -328,7 +365,6 @@ class add_house(BSModalModelForm):
 
                   ]  # Agrega los campos que deseas actualizar
         labels = {
-            'awb': 'Master',
             'wreceipt': 'WR',
             'Trackid': 'Track ID',
             'pago': 'Pago flete',
@@ -341,7 +377,6 @@ class add_house(BSModalModelForm):
             'modo': forms.HiddenInput(),
         }
         attrs = {
-            'awb' : "id=id_awbhijo",
             'wreceipt' : "tabindex=18;",
             'status' : "tabindex=19;",
             'operacion' : "tabindex=12;",
@@ -378,10 +413,10 @@ class add_house(BSModalModelForm):
                  )
     # primer columna
     awb = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'id_awbhijo'}),label='Master')
-    deposito = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'deposito_addh','required':False,"tabindex":"1"}))
     cliente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'cliente_addh','required':True,"tabindex":"1"}))
     house = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'house_addh', "tabindex": "1"}),required=False)
     embarcador = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'embarcador_addh',"tabindex":"2", 'required':True}))
+    vendedor = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control input-sobrepasar', 'id': 'vendedor_addh', "tabindex": "2", 'required': True}), required=False, label='Vendedor')
     consignatario = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'consignatario_addh',"tabindex":"3", 'required':True}))
     notificar_cliente = forms.DateField(
         widget=forms.DateInput(attrs={
@@ -441,12 +476,10 @@ class add_house(BSModalModelForm):
     ageventas = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'ageventas_addh',"required":False,"tabindex":"9"}),required=False,label='Ag.Ventas')
     # segunda columna
     viaje = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20, 'type': 'number' },),max_length=20,required=True,label="Viaje")
-    deposito = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'deposito_addh',"tabindex":"19"}),required=False)
     origen = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'origen_addh',"tabindex":"10"}))
     destino = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'destino_addh',"tabindex":"11"}))
     operacion = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True,"tabindex":"12",'id':'id_operacion'}),required=True,label="Operacion",choices=choice_op,initial='')
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True,"tabindex":"13"}),required=True,label="Moneda", choices=(),initial='')
-    vendedor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'vendedor_addh','type': 'number','required':False}),required=False)
     vapor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'vapor_addh',"tabindex":"15"}),required=False)
     # tercer columna
     demora = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': False,'max_length': 20, 'type': 'number' },),max_length=20,required=False,label="Días de demora")
@@ -467,6 +500,16 @@ class add_house(BSModalModelForm):
             'readonly': 'readonly',  # Campo de solo lectura
             'id': 'transportista_ih',
             'name': 'transportista_ih',
+        }),
+        required=False
+    )
+    vendedor_i = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'style': 'width:50px; margin-right:2px;',
+            'readonly': 'readonly',  # Campo de solo lectura
+            'id': 'vendedor_ih',
+            'name': 'vendedor_ih',
         }),
         required=False
     )
