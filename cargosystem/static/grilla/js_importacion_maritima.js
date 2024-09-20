@@ -48,7 +48,7 @@ $(document).ready(function () {
 //        if (localStorage.getItem('master')) {
 //        document.getElementById('agregar_hijo').style.visibility = 'visible';
 //        }
-    //cargar_hauses_master();
+  //cargar_hauses_master();
     setTimeout(function(){
         $('.navbar-collapse').collapse('hide');
     }, 5000);
@@ -62,7 +62,7 @@ $(document).ready(function () {
     let contador = 0;
 
     /* DATATABLES */
-
+    //buscadores
     $('#tabla_importmarit tfoot th').each(function () {
         let title = $(this).text();
         if (title !== '') {
@@ -971,58 +971,6 @@ $(document).ready(function () {
         alert('Por favor, selecciona una fila para editar.');
     }
 });
-    function fillFormWithData(data) {
-
-        $('#transportista_edit').val(getNameById(data.transportista_e));
-        $('#agente_edit').val(getNameById(data.agente_e));
-        $('#consignatario_edit').val(getNameById(data.consignatario_e));
-        $('#armador_edit').val(getNameById(data.armador_e));
-
-        $('#edit_master_form [name="transportista_ie"]').val(data.transportista_e);
-        $('#edit_master_form [name="agente_ie"]').val(data.agente_e);
-        $('#edit_master_form [name="consignatario_ie"]').val(data.consignatario_e);
-        $('#edit_master_form [name="armador_ie"]').val(data.armador_e);
-        $('#edit_master_form [name="vapor_e"]').val(data.vapor_e);
-        $('#edit_master_form [name="viaje_e"]').val(data.viaje_e);
-        $('#edit_master_form [name="aduana_e"]').val(data.aduana_e);
-        $('#edit_master_form [name="tarifa_e"]').val(data.tarifa_e);
-        $('#edit_master_form [name="moneda_e"]').val(data.moneda_e);
-        $('#edit_master_form [name="arbitraje_e"]').val(data.arbitraje_e);
-        $('#edit_master_form [name="kilosmadre_e"]').val(data.kilosmadre_e);
-        $('#edit_master_form [name="bultosmadre_e"]').val(data.bultosmadre_e);
-        $('#edit_master_form [name="pagoflete_e"]').val(data.pagoflete_e);
-        $('#edit_master_form [name="trafico_e"]').val(data.trafico_e);
-        $('#edit_master_form [name="fecha_e"]').val(formatDateToYYYYMMDD(data.fecha_e));
-        $('#edit_master_form [name="cotizacion_e"]').val(data.cotizacion_e);
-        $('#edit_master_form [name="destino_e"]').val(data.destino_e);
-        $('#edit_master_form [name="discharge_e"]').val(data.discharge_e);
-        $('#edit_master_form [name="origen_e"]').val(data.origen_e);
-        $('#edit_master_form [name="loading_e"]').val(data.loading_e);
-        $('#edit_master_form [name="status_e"]').val(data.status_e);
-        $('#edit_master_form [name="posicion_e"]').val(data.posicion_e);
-        $('#edit_master_form [name="operacion_e"]').val(data.operacion_e);
-        $('#edit_master_form [name="awd_e"]').val(data.awd_e);
-    }
-    function formatDateToYYYYMMDD(isoDate) {
-        // Asegúrate de que la fecha esté en formato ISO
-        const date = new Date(isoDate);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-    function getNameById(id) {
-    var name = "";
-    $.ajax({
-        url: '/importacion_maritima/get_name_by_id',
-        data: { id: id},
-        async: false,
-        success: function (response) {
-            name = response.name;
-        }
-    });
-    return name;
-}
     $('#edit_master_form').submit(function(e){
        e.preventDefault();
         var id_master = localStorage.getItem('id_master_editar');
@@ -1154,8 +1102,32 @@ $(document).ready(function () {
     });
     }
 });
+   //modificar house
+    $('#edit_house_form').submit(function(e){
+       e.preventDefault();
+        var numero = localStorage.getItem('numero_embarque');
+        var formData = $(this).serialize();
+        $('#edit_house_form').attr('action', '/importacion_maritima/edit_house/' + numero + '/');
 
-
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    alert('Datos actualizados con éxito');
+                    table_add_im.ajax.reload(null, false);
+                  $('#edit_house_modal').dialog('close');
+                } else {
+                    alert('Error: ' + response.error_message);
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('Error en la solicitud: ' + error);
+            }
+        });
+    });
 });
 
 $(document).on('select2:open', () => {
@@ -1229,7 +1201,6 @@ table_add_im = $('#table_add_im').DataTable({
             "X-CSRFToken": csrftoken
         },
         "dataSrc": function (json) {
-        console.log(json.data);
          $('#table_add_im th').css({'width':'auto'});
          $('#table_add_im_wrapper .dataTables_scrollBody').css({
         'height': 'fit-content',
@@ -1250,6 +1221,71 @@ table_add_im = $('#table_add_im').DataTable({
     },
     "language": {
         "url": "/static/datatables/es_ES.json"
+    },
+    "initComplete": function() {
+     //doble click modificar house en add_master form
+    $('#table_add_im tbody').on('dblclick', 'tr', function () {
+        var tr = $(this).closest('tr');
+        var row = table_add_im.row(tr);
+        var rowData = row.data();
+
+        if (rowData) {
+            var selectedRowId = rowData[3];
+            localStorage.setItem('numero_embarque', selectedRowId);
+
+            $.ajax({
+            url: '/importacion_maritima/house-detail',
+            data: { id: selectedRowId },
+            method: 'GET',
+            success: function (data) {
+                $("#edit_house_modal").dialog({
+                    autoOpen: true,
+                    open: function (event, ui) {
+                    },
+                    modal: true,
+                    title: "Editar house",
+                     width: 'auto',  // Ajusta el ancho al contenido
+                     height: 'auto', // Ajusta la altura al contenido
+                     position: { my: "center", at: "center", of: window },
+                    buttons: [
+                        {
+                           text: "Salir",
+                           class: "btn btn-dark",
+                           style: "width:100px",
+                           click: function () {
+//                                $('#agregar_hijo').css({'visibility':'hidden'});
+//                                $('#segment_response').css({'visibility':'hidden'});
+                               $(this).dialog("close");
+                           },
+                       },
+
+                    ],
+                    beforeClose: function (event, ui) {
+
+                    }
+
+                });
+
+                fillFormWithDataHouse(data);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching data:", error);
+            }
+        });
+                    $('#cliente_addh_e').addClass('input-sobrepasar');
+                    $('#embarcador_addh_e').addClass('input-sobrepasar');
+                    $('#consignatario_addh_e').addClass('input-sobrepasar');
+                    $('#agente_addh_e').addClass('input-sobrepasar');
+                    $('#transportista_addh_e').addClass('input-sobrepasar');
+                    $('#armador_addh_e').addClass('input-sobrepasar');
+                    $('#agecompras_addh_e').addClass('input-sobrepasar');
+                    $('#ageventas_addh_e').addClass('input-sobrepasar');
+                    $('#deposito_addh_e').addClass('input-sobrepasar');
+                    $('#vendedor_addh_e').addClass('input-sobrepasar');
+        }else{
+        alert('Seleccione una fila.');
+        }
+    });
     }
 });
 
@@ -1264,4 +1300,117 @@ posicion=document.getElementById('posicion_g');
 //IM09-00237-2024
 posicion.value=12345;
 }
+
+function fillFormWithDataHouse(data) {
+
+        $('#transportista_addh_e').val(getNameById(data.transportista_e));
+        $('#agente_addh_e').val(getNameById(data.agente_e));
+        $('#consignatario_addh_e').val(getNameById(data.consignatario_e));
+        $('#armador_addh_e').val(getNameById(data.armador_e));
+        $('#cliente_addh_e').val(getNameById(data.cliente_e));
+        $('#vendedor_addh_e').val(getNameByIdVendedor(data.vendedor_e));
+        $('#embarcador_addh_e').val(getNameById(data.embarcador_e));
+        $('#agecompras_addh_e').val(getNameById(data.agcompras_e));
+        $('#ageventas_addh_e').val(getNameById(data.agventas_e));
+
+        $('#armador_ih_e').val(data.armador_e);
+        $('#transportista_ih_e').val(data.transportista_e);
+        $('#agente_ih_e').val(data.agente_e);
+        $('#consignatario_ih_e').val(data.consignatario_e);
+        $('#cliente_ih_e').val(data.cliente_e);
+        $('#vendedor_ih_e').val(data.vendedor_e);
+        $('#embarcador_ih_e').val(data.embarcador_e);
+        $('#agcompras_ih_e').val(data.agcompras_e);
+        $('#agventas_ih_e').val(data.agventas_e);
+
+        $('#origen_addh_e').val(data.origen_e);
+        $('#destino_addh_e').val(data.destino_e);
+        $('#loading_addh_e').val(data.loading_e);
+        $('#discharge_addh_e').val(data.discharge_e);
+        $('#viaje_house_e').val(data.viaje_e);
+        $('#vapor_addh_e').val(data.vapor_e);
+        $('#dias_demora_e').val(data.demora_e);
+        $('#moneda_e').val(data.moneda_e);
+        $('#arbitraje_house_e').val(data.arbitraje_e);
+        $('#pago_house_e').val(data.pagoflete_e);
+        $('#status_h_e').val(data.status_e);
+        $('#wreceipt_he').val(data.wreceipt_e);
+        $('#trackid_he').val(data.trackid_e);
+        $('#id_awbhijo_e').val(data.awb_e);
+        $('#house_addh_e').val(data.hawb_e);
+        $('#posicion_gh_e').val(data.posicion_e);
+        $('#operacion_editar').val(data.operacion_e);
+
+        $('#notificar_cliente_e').val(formatDateToYYYYMMDD(data.notifcliente_e));
+        $('#notificar_agente_e').val(formatDateToYYYYMMDD(data.notifagente_e));
+        $('#fecha_embarque_e').val(formatDateToYYYYMMDD(data.fechaembarque_e));
+        $('#fecha_retiro_e').val(formatDateToYYYYMMDD(data.fecharetiro_e));
+
+    }
+function getNameByIdVendedor(id) {
+    var name = "";
+    $.ajax({
+        url: '/importacion_maritima/get_name_by_id_vendedor',
+        data: { id: id},
+        async: false,
+        success: function (response) {
+            name = response.name;
+        }
+    });
+    return name;
+}
+function fillFormWithData(data) {
+
+    $('#transportista_edit').val(getNameById(data.transportista_e));
+    $('#agente_edit').val(getNameById(data.agente_e));
+    $('#consignatario_edit').val(getNameById(data.consignatario_e));
+    $('#armador_edit').val(getNameById(data.armador_e));
+
+    $('#edit_master_form [name="transportista_ie"]').val(data.transportista_e);
+    $('#edit_master_form [name="agente_ie"]').val(data.agente_e);
+    $('#edit_master_form [name="consignatario_ie"]').val(data.consignatario_e);
+    $('#edit_master_form [name="armador_ie"]').val(data.armador_e);
+    $('#edit_master_form [name="vapor_e"]').val(data.vapor_e);
+    $('#edit_master_form [name="viaje_e"]').val(data.viaje_e);
+    $('#edit_master_form [name="aduana_e"]').val(data.aduana_e);
+    $('#edit_master_form [name="tarifa_e"]').val(data.tarifa_e);
+    $('#edit_master_form [name="moneda_e"]').val(data.moneda_e);
+    $('#edit_master_form [name="arbitraje_e"]').val(data.arbitraje_e);
+    $('#edit_master_form [name="kilosmadre_e"]').val(data.kilosmadre_e);
+    $('#edit_master_form [name="bultosmadre_e"]').val(data.bultosmadre_e);
+    $('#edit_master_form [name="pagoflete_e"]').val(data.pagoflete_e);
+    $('#edit_master_form [name="trafico_e"]').val(data.trafico_e);
+    $('#edit_master_form [name="fecha_e"]').val(formatDateToYYYYMMDD(data.fecha_e));
+    $('#edit_master_form [name="cotizacion_e"]').val(data.cotizacion_e);
+    $('#edit_master_form [name="destino_e"]').val(data.destino_e);
+    $('#edit_master_form [name="discharge_e"]').val(data.discharge_e);
+    $('#edit_master_form [name="origen_e"]').val(data.origen_e);
+    $('#edit_master_form [name="loading_e"]').val(data.loading_e);
+    $('#edit_master_form [name="status_e"]').val(data.status_e);
+    $('#edit_master_form [name="posicion_e"]').val(data.posicion_e);
+    $('#edit_master_form [name="operacion_e"]').val(data.operacion_e);
+    $('#edit_master_form [name="awd_e"]').val(data.awd_e);
+}
+function formatDateToYYYYMMDD(isoDate) {
+    // Asegúrate de que la fecha esté en formato ISO
+    const date = new Date(isoDate);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+function getNameById(id) {
+var name = "";
+$.ajax({
+    url: '/importacion_maritima/get_name_by_id',
+    data: { id: id},
+    async: false,
+    success: function (response) {
+        name = response.name;
+    }
+});
+return name;
+}
+
+
 
