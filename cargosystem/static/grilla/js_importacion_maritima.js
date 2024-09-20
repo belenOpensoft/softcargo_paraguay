@@ -962,6 +962,8 @@ $(document).ready(function () {
 
                 // Llenar el formulario con los datos
                 fillFormWithData(data);
+                //cargar tabla de houses
+                cargar_hauses_master_edit();
             },
             error: function (xhr, status, error) {
                 console.error("Error fetching data:", error);
@@ -997,7 +999,7 @@ $(document).ready(function () {
         });
     });
 
-    //form add house
+   //form add house
     $('#agregar_hijo').click(function () {
         $("#add_house_modal").dialog({
                     autoOpen: true,
@@ -1091,6 +1093,7 @@ $(document).ready(function () {
                 $('#discharge_addh').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#deposito_addh').css({"border-color": "", 'box-shadow': ''});
                 $('#deposito_ih').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#vendedor_addh').css({"border-color": "", 'box-shadow': ''});
 
             } else {
                 console.log(response.errors);
@@ -1104,6 +1107,7 @@ $(document).ready(function () {
 });
    //modificar house
     $('#edit_house_form').submit(function(e){
+    let lugar=localStorage.getItem('lugar');
        e.preventDefault();
         var numero = localStorage.getItem('numero_embarque');
         var formData = $(this).serialize();
@@ -1117,7 +1121,14 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     alert('Datos actualizados con éxito');
+                    if(lugar==='add_master'){
                     table_add_im.ajax.reload(null, false);
+                    }else if(lugar==='edit_master'){
+                    table_edit_im.ajax.reload(null, false);
+                    }else{
+                    console.log('error en el lugar '+lugar);
+                    }
+
                   $('#edit_house_modal').dialog('close');
                 } else {
                     alert('Error: ' + response.error_message);
@@ -1163,6 +1174,7 @@ function getCookie2(name) {
 }
 function cargar_hauses_master(){
 //tabla dentro del add-master form
+localStorage.setItem('lugar','add_master');
 let master = localStorage.getItem('master');
 //let master='MOLU13000250048';
 let csrftoken = getCookie2('csrftoken');
@@ -1235,7 +1247,7 @@ table_add_im = $('#table_add_im').DataTable({
 
             $.ajax({
             url: '/importacion_maritima/house-detail',
-            data: { id: selectedRowId },
+            data: { id: selectedRowId},
             method: 'GET',
             success: function (data) {
                 $("#edit_house_modal").dialog({
@@ -1361,6 +1373,7 @@ function getNameByIdVendedor(id) {
 }
 function fillFormWithData(data) {
 
+    localStorage.setItem('master_editar',data.awd_e);
     $('#transportista_edit').val(getNameById(data.transportista_e));
     $('#agente_edit').val(getNameById(data.agente_e));
     $('#consignatario_edit').val(getNameById(data.consignatario_e));
@@ -1411,6 +1424,134 @@ $.ajax({
 });
 return name;
 }
+function cargar_hauses_master_edit(){
+//tabla dentro del edit-master form
+localStorage.setItem('lugar','edit_master');
+let master = localStorage.getItem('master_editar');
+//let master='MOLU13000250048';
+let csrftoken = getCookie2('csrftoken');
+table_edit_im = $('#table_edit_im').DataTable({
+    "stateSave": true,
+    "dom": 'Btlipr',
+    "bAutoWidth": false,
+    "scrollX": true,
+    "scrollY": wHeight * 0.60,
+   "columnDefs": [
+            {
+                "targets": [0],  // Nueva columna para detalles
+                "className": 'details-control',
+                "orderable": false,
+                "data": null,
+                "defaultContent": '',  // Contenido por defecto
+                "render": function (data, type, row) {
+                    // Define el contenido para la columna de detalles
+                   // return '<button class="btn btn-info btn-sm">Detalles</button>';  // Ejemplo de contenido
+                }
+            },
+            {
+                "targets": [3],
+                'class': 'derecha',
+            },
 
+        ],
+    "order": [[0, "desc"]],
+    "processing": true,
+    "serverSide": true,
+    "pageLength": 100,
+    "ajax": {
+        "url": `/importacion_maritima/source_embarque_aereo/${master}/`,
+        "type": 'POST',
+        "headers": {
+            "X-CSRFToken": csrftoken
+        },
+        "dataSrc": function (json) {
+        console.log(json.data);
+         $('#table_edit_im th').css({'width':'auto'});
+         $('#table_edit_im_wrapper .dataTables_scrollBody').css({
+        'height': 'fit-content',
+        });
+
+         if (json.data.length === 0) {
+            console.log('No se encontraron datos.');
+            $('#segment_response_2').text('No se encontraron datos.');
+        } else {
+      $('#segment_response_2').css({'visibility':'visible'});
+        }
+
+        return json.data;
+        },
+        "error": function(xhr, status, error) {
+            console.error('Error en la llamada AJAX:', error);
+        }
+    },
+    "language": {
+        "url": "/static/datatables/es_ES.json"
+    },
+    "initComplete": function() {
+     //doble click modificar house en edit_master form
+    $('#table_edit_im tbody').on('dblclick', 'tr', function () {
+        var tr = $(this).closest('tr');
+        var row = table_edit_im.row(tr);
+        var rowData = row.data();
+
+        if (rowData) {
+            var selectedRowId = rowData[3];
+            localStorage.setItem('numero_embarque', selectedRowId);
+
+            $.ajax({
+            url: '/importacion_maritima/house-detail',
+            data: { id: selectedRowId },
+            method: 'GET',
+            success: function (data) {
+                $("#edit_house_modal").dialog({
+                    autoOpen: true,
+                    open: function (event, ui) {
+                    },
+                    modal: true,
+                    title: "Editar house",
+                     width: 'auto',
+                     height: 'auto',
+                     position: { my: "center", at: "center", of: window },
+                    buttons: [
+                        {
+                           text: "Salir",
+                           class: "btn btn-dark",
+                           style: "width:100px",
+                           click: function () {
+                               $(this).dialog("close");
+                           },
+                       },
+
+                    ],
+                    beforeClose: function (event, ui) {
+
+                    }
+
+                });
+
+                fillFormWithDataHouse(data);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching data:", error);
+            }
+        });
+                    $('#cliente_addh_e').addClass('input-sobrepasar');
+                    $('#embarcador_addh_e').addClass('input-sobrepasar');
+                    $('#consignatario_addh_e').addClass('input-sobrepasar');
+                    $('#agente_addh_e').addClass('input-sobrepasar');
+                    $('#transportista_addh_e').addClass('input-sobrepasar');
+                    $('#armador_addh_e').addClass('input-sobrepasar');
+                    $('#agecompras_addh_e').addClass('input-sobrepasar');
+                    $('#ageventas_addh_e').addClass('input-sobrepasar');
+                    $('#deposito_addh_e').addClass('input-sobrepasar');
+                    $('#vendedor_addh_e').addClass('input-sobrepasar');
+        }else{
+        alert('Seleccione una fila.');
+        }
+    });
+    }
+});
+
+}
 
 
