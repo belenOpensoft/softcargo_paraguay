@@ -1032,6 +1032,7 @@ $(document).ready(function () {
                 $('#id_awbhijo').val(master);
                 let posicion = localStorage.getItem('posicion');
                 $('#posicion_gh').val(posicion);
+                localStorage.setItem('lugar_editar','agregar');
 
                 $('#cliente_addh').addClass('input-sobrepasar');
                 $('#embarcador_addh').addClass('input-sobrepasar');
@@ -1051,6 +1052,7 @@ $(document).ready(function () {
     $('#add_house_form').submit(function(e){
     e.preventDefault();
     e.stopPropagation();
+    lugar_editar=localStorage.getItem('lugar_editar');
     if(document.getElementById('pago_house').value<0||document.getElementById('arbitraje_house').value<0||document.getElementById('dias_demora').value<0||document.getElementById('viaje_house').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
@@ -1062,11 +1064,21 @@ $(document).ready(function () {
         data: formData,
         success: function(response) {
             if (response.success) {
-               if (table_add_im instanceof $.fn.dataTable.Api) {
+
+            if(lugar_editar==='agregar'){
+            if (table_add_im instanceof $.fn.dataTable.Api) {
                     table_add_im.ajax.reload(null, false);
                 } else {
                     cargar_hauses_master();
                 }
+            }else if(lugar_editar==='editar'){
+            if (table_edit_im instanceof $.fn.dataTable.Api) {
+                    table_edit_im.ajax.reload(null, false);
+                } else {
+                    cargar_hauses_master_edit();
+                }
+            }
+
                  $('#add_house_modal').dialog('close');
                  document.getElementById("add_house_form").reset();
 
@@ -1094,6 +1106,7 @@ $(document).ready(function () {
                 $('#deposito_addh').css({"border-color": "", 'box-shadow': ''});
                 $('#deposito_ih').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#vendedor_addh').css({"border-color": "", 'box-shadow': ''});
+                $('#vendedor_ih').css({"border-color": "", 'box-shadow': ''});
 
             } else {
                 console.log(response.errors);
@@ -1139,6 +1152,54 @@ $(document).ready(function () {
             }
         });
     });
+
+    //agregar house desde edit master
+    $('#agregar_hijo_edit_master').click(function () {
+        $("#add_house_modal").dialog({
+                    autoOpen: true,
+                    open: function (event, ui) {
+                    },
+                    modal: true,
+                    title: "Ingresar un nuevo hijo/house",
+                     width: 'auto',
+                     height: 'auto',
+                     position: { my: "center", at: "center", of: window },
+                    buttons: [
+                        {
+                           text: "Salir",
+                           class: "btn btn-dark",
+                           style: "width:100px",
+                           click: function () {
+//                                $('#agregar_hijo').css({'visibility':'hidden'});
+//                                $('#segment_response').css({'visibility':'hidden'});
+                               $(this).dialog("close");
+                           },
+                       },
+
+                    ],
+                    beforeClose: function (event, ui) {
+
+                    }
+                });
+                //cargar con la id desde la sesion
+                let master = localStorage.getItem('master_editar');
+                $('#id_awbhijo').val(master);
+                let posicion = localStorage.getItem('posicion_editar');
+                $('#posicion_gh').val(posicion);
+                localStorage.setItem('lugar_editar','editar');
+
+                $('#cliente_addh').addClass('input-sobrepasar');
+                $('#embarcador_addh').addClass('input-sobrepasar');
+                $('#consignatario_addh').addClass('input-sobrepasar');
+                $('#agente_addh').addClass('input-sobrepasar');
+                $('#transportista_addh').addClass('input-sobrepasar');
+                $('#armador_addh').addClass('input-sobrepasar');
+                $('#agecompras_addh').addClass('input-sobrepasar');
+                $('#ageventas_addh').addClass('input-sobrepasar');
+                $('#deposito_addh').addClass('input-sobrepasar');
+                $('#vendedor_addh').addClass('input-sobrepasar');
+
+        });
 });
 
 $(document).on('select2:open', () => {
@@ -1374,6 +1435,7 @@ function getNameByIdVendedor(id) {
 function fillFormWithData(data) {
 
     localStorage.setItem('master_editar',data.awd_e);
+    localStorage.setItem('posicion_editar',data.posicion_e);
     $('#transportista_edit').val(getNameById(data.transportista_e));
     $('#agente_edit').val(getNameById(data.agente_e));
     $('#consignatario_edit').val(getNameById(data.consignatario_e));
