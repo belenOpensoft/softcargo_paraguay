@@ -519,6 +519,9 @@ class Reservas(models.Model):
         return nuevo_numero
 
 
+
+
+
 class Servireserva(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     servicio = models.SmallIntegerField(blank=True, null=True)

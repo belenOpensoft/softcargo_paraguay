@@ -78,20 +78,20 @@ class add_form(BSModalModelForm):
             'operacion',
             'arbitraje',
         )
-    posicion = forms.CharField(
-            widget=forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'autocomplete': 'off',
-                    'required': True,
-                    'maxlength': 20,
-                    'readonly': True,
-                    'id': 'posicion_g',
-                    'placeholder': 'Pulse sobre el campo para generar'
-                }
-            ),
-        required=True,
-        )
+    # posicion = forms.CharField(
+    #         widget=forms.TextInput(
+    #             attrs={
+    #                 'class': 'form-control',
+    #                 'autocomplete': 'off',
+    #                 'required': True,
+    #                 'maxlength': 20,
+    #                 'readonly': True,
+    #                 'id': 'posicion_g',
+    #                 'placeholder': 'Pulse sobre el campo para generar'
+    #             }
+    #         ),
+    #     required=True,
+    #     )
 
     #codigo = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 5 },),max_length=5,required=True,label="Código")
     agente = forms.CharField(

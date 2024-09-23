@@ -45,10 +45,6 @@ let table_add_im;
 
 $(document).ready(function () {
 
-//        if (localStorage.getItem('master')) {
-//        document.getElementById('agregar_hijo').style.visibility = 'visible';
-//        }
-  //cargar_hauses_master();
     setTimeout(function(){
         $('.navbar-collapse').collapse('hide');
     }, 5000);
@@ -1102,9 +1098,8 @@ $(document).ready(function () {
 
     e.preventDefault();
     e.stopPropagation();
-    if(document.getElementById('posicion_g').value==null||document.getElementById('posicion_g').value==''){
-    alert('El campo de posición está vacío, por favor pulse sobre él para generar un valor.');
-    }else if(document.getElementById('id_viaje_master').value<0){
+
+    if(document.getElementById('id_viaje_master').value<0){
     alert('No se admiten valores negativos para el campo "viaje"');
     }else{
     let formData = $(this).serialize();
@@ -1115,16 +1110,17 @@ $(document).ready(function () {
         data: formData,
         success: function(response) {
             if (response.success) {
+            alert('Posición generada: ' + response.posicion);
             $('#agregar_hijo').css({'visibility':'visible'});
             $('#agregar_master').css({'display':'none'});
-            //cargar_hauses_master();
+
             table.ajax.reload(null, false);
-                 //$('#add_master_modal').dialog('close');
+
                  //guardar master en la sesion
                  let master = document.getElementById('id_awb').value;
                  localStorage.setItem('master',master );
-                 let posicion = document.getElementById('posicion_g').value;
-                 localStorage.setItem('posicion',posicion );
+                 //let posicion = document.getElementById('posicion_g').value;
+                 localStorage.setItem('posicion',response.posicion );
                 //document.getElementById("add_master_form").reset();
                 $('#transportista_add').css({"border-color": "", 'box-shadow': ''});
                 $('#transportista_i').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
@@ -1239,6 +1235,7 @@ $(document).ready(function () {
                     alert('Datos actualizados con éxito');
                     table.ajax.reload(null, false);
                     $('#edit_master_modal').dialog('close');
+                    $('#table_edit_im').DataTable().destroy();
                 } else {
                     alert('Error: ' + response.error_message);
                 }
@@ -1247,6 +1244,19 @@ $(document).ready(function () {
                 alert('Error en la solicitud: ' + error);
             }
         });
+                $('#transportista_edit').css({"border-color": "", 'box-shadow': ''});
+                $('#transportista_ie').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#agente_edit').css({"border-color": "", 'box-shadow': ''});
+                $('#agente_ie').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#consignatario_edit').css({"border-color": "", 'box-shadow': ''});
+                $('#consignatario_ie').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#armador_edit').css({"border-color": "", 'box-shadow': ''});
+                $('#armador_ie').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#vapor_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#origen_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#destino_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#loading_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#discharge_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
     });
 
    //form add house
@@ -1316,7 +1326,6 @@ $(document).ready(function () {
         data: formData,
         success: function(response) {
             if (response.success) {
-
             if(lugar_editar==='agregar'){
             if (table_add_im instanceof $.fn.dataTable.Api) {
                     table_add_im.ajax.reload(null, false);
@@ -1547,7 +1556,7 @@ table_add_im = $('#table_add_im').DataTable({
     },
     "initComplete": function() {
      //doble click modificar house en add_master form
-    $('#table_add_im tbody').on('dblclick', 'tr', function () {
+    $('#table_add_im tbody').off('dblclick').on('dblclick', 'tr', function () {
         var tr = $(this).closest('tr');
         var row = table_add_im.row(tr);
         var rowData = row.data();
@@ -1612,15 +1621,10 @@ table_add_im = $('#table_add_im').DataTable({
 
 }
 
-document.getElementById('posicion_g').addEventListener('focus', function() {
-    generar_posicion();
-});
+//document.getElementById('posicion_g').addEventListener('focus', function() {
+//    generar_posicion('impo','maritima');
+//});
 
-function generar_posicion(){
-posicion=document.getElementById('posicion_g');
-//IM09-00237-2024
-posicion.value=12345;
-}
 
 function fillFormWithDataHouse(data) {
 
@@ -1798,7 +1802,7 @@ table_edit_im = $('#table_edit_im').DataTable({
     },
     "initComplete": function() {
      //doble click modificar house en edit_master form
-    $('#table_edit_im tbody').on('dblclick', 'tr', function () {
+    $('#table_edit_im tbody').off('dblclick').on('dblclick', 'tr', function () {
         var tr = $(this).closest('tr');
         var row = table_edit_im.row(tr);
         var rowData = row.data();
