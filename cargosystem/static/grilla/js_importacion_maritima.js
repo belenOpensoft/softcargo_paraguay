@@ -1152,10 +1152,44 @@ $(document).ready(function () {
     }
 });
         //ver mas
+//    $('#tabla_importmarit tbody').on('click', 'td.details-control', function () {
+//        var tr = $(this).closest('tr');
+//        var row = table.row(tr);
+//        var rowData = row.data();
+//        alert('ver mas detalles'+rowData[1]);
+//    });
+var expandedRow;
     $('#tabla_importmarit tbody').on('click', 'td.details-control', function () {
         var tr = $(this).closest('tr');
         var row = table.row(tr);
-        alert('ver mas detalles');
+
+        if (row.child.isShown()) {
+        row.child.hide();
+        tr.removeClass('shown');
+        } else {
+
+            if (expandedRow && expandedRow !== row) {
+                expandedRow.child.hide();
+                expandedRow.node().classList.remove('shown');
+            }
+            var rowData = row.data();
+            var selectedRowId = rowData[4];
+
+            $.ajax({
+                url: '/importacion_maritima/source_embarque_aereo/' + selectedRowId + '/',
+                type: 'GET',
+                success: function (response) {
+               // console.log(data);
+                    row.child(format(response.data)).show();
+                    tr.addClass('shown');
+                    expandedRow = row;
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error al cargar los detalles:', error);
+                }
+            });
+        }
     });
         //modificar
     $('#tabla_importmarit tbody').on('click', 'td', function () {
@@ -1620,12 +1654,6 @@ table_add_im = $('#table_add_im').DataTable({
 });
 
 }
-
-//document.getElementById('posicion_g').addEventListener('focus', function() {
-//    generar_posicion('impo','maritima');
-//});
-
-
 function fillFormWithDataHouse(data) {
 
         $('#transportista_addh_e').val(getNameById(data.transportista_e));
@@ -1866,5 +1894,56 @@ table_edit_im = $('#table_edit_im').DataTable({
 });
 
 }
+function format(data) {
+    var tableContent = `
+         <table id="tabla_detalles" class="table table-striped" style="font-size:12px; margin:0; padding:0;">
+            <thead>
+                <tr style="color: #3392a1">
+                    <th class="text-right">Fecha Embarque</th>
+                    <th class="text-right">Fecha Retiro</th>
+                    <th class="text-right">N° Embarque</th>
+                    <th class="text-right">Cliente</th>
+                    <th class="text-right">Origen</th>
+                    <th class="text-right">Destino</th>
+                    <th class="text-right">Estado</th>
+                    <th class="text-right">Posición</th>
+                    <th class="text-right">Operación</th>
+                    <th class="text-right">Master</th>
+                    <th class="text-right">House</th>
+                    <th class="text-right">Vapor</th>
+                    <th class="text-right">Notificar Agente</th>
+                    <th class="text-right">Notificar Cliente</th>
+                </tr>
+            </thead>
+            <tbody style="border-style:none; border: solid transparent;">`;
+
+    data.forEach(function (item) {
+        tableContent += `
+            <tr>
+                <td>${item[1]}</td>
+                <td>${item[2]}</td>
+                <td>${item[3]}</td>
+                <td>${item[4]}</td>
+                <td>${item[5]}</td>
+                <td>${item[6]}</td>
+                <td>${item[7]}</td>
+                <td>${item[8]}</td>
+                <td>${item[9]}</td>
+                <td>${item[10]}</td>
+                <td>${item[11]}</td>
+                <td>${item[12]}</td>
+                <td>${item[13]}</td>
+                <td>${item[14]}</td>
+            </tr>`;
+    });
+
+    tableContent += `
+            </tbody>
+        </table>`;
+    return tableContent;
+}
+
+
+
 
 
