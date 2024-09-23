@@ -1152,12 +1152,6 @@ $(document).ready(function () {
     }
 });
         //ver mas
-//    $('#tabla_importmarit tbody').on('click', 'td.details-control', function () {
-//        var tr = $(this).closest('tr');
-//        var row = table.row(tr);
-//        var rowData = row.data();
-//        alert('ver mas detalles'+rowData[1]);
-//    });
 var expandedRow;
     $('#tabla_importmarit tbody').on('click', 'td.details-control', function () {
         var tr = $(this).closest('tr');
@@ -1895,7 +1889,14 @@ table_edit_im = $('#table_edit_im').DataTable({
 
 }
 function format(data) {
-    var tableContent = `
+var tableContent;
+ if (data.length === 0) {
+        tableContent = `
+            <div style="text-align:center; color:red; font-size:14px; margin:20px;">
+                No existen houses para este máster.
+            </div>`;
+    } else {
+    tableContent = `
          <table id="tabla_detalles" class="table table-striped" style="font-size:12px; margin:0; padding:0;">
             <thead>
                 <tr style="color: #3392a1">
@@ -1940,6 +1941,7 @@ function format(data) {
     tableContent += `
             </tbody>
         </table>`;
+    }
     return tableContent;
 }
 
