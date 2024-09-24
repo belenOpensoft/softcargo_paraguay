@@ -1,5 +1,18 @@
 {% load static %}
 {% load widget_tweaks %}
+<style>
+
+    #tabla_embarques tr:hover::after {
+    content: 'Doble click para editar';
+    color: #f9edbe;
+    position: absolute;
+    right: 10px;
+    background-color: #333;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 3px;
+    }
+</style>
 <div id="embarques_modal" style="display: none;">
 
         <div class="container">
