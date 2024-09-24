@@ -1193,7 +1193,9 @@ var expandedRow;
 
         if (rowData) {
             var selectedRowId = rowData[0];
+            var selectedRowNumber = rowData[1];
             localStorage.setItem('id_master_editar', selectedRowId);
+            localStorage.setItem('numero_master_seleccionado', selectedRowNumber);
         }
     });
     $('#editar_btn').on('click', function () {
@@ -1488,6 +1490,157 @@ var expandedRow;
                 $('#vendedor_addh').addClass('input-sobrepasar');
 
         });
+
+    //gastos master
+    $('#gastos_btn_master').click(function () {
+        //row = table.rows('.table-secondary').data();
+        let selectedRowN = localStorage.getItem('numero_master_seleccionado');
+       get_datos_gastos();
+        if (selectedRowN!=null) {
+            $('#gastos_form').trigger("reset");
+            $("#gastos_modal").dialog({
+                autoOpen: true,
+                open: function () {
+
+                },
+                modal: true,
+                title: "Gastos para el master N°: " + selectedRowN,
+                height: wHeight * 0.90,
+                width: wWidth * 0.90,
+                class: 'modal fade',
+                buttons: [
+                    {
+                        text: "Eliminar",
+                        class: "btn btn-danger",
+                        style: "width:100px",
+                        click: function () {
+                            if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
+                                row = table_gastos.rows('.selected').data();
+                                if (row.length === 1) {
+                                    miurl = "/importacion_maritima/eliminar_gasto_master/";
+                                    var toData = {
+                                        'id': row[0][0],
+                                        'csrfmiddlewaretoken': csrf_token,
+                                    };
+                                    $.ajax({
+                                        type: "POST",
+                                        url: miurl,
+                                        data: toData,
+                                        success: function (resultado) {
+                                            aux = resultado['resultado'];
+                                            if (aux === 'exito') {
+                                                $("#table_gastos").dataTable().fnDestroy();
+                                                get_datos_gastos();
+                                                alert('Eliminado correctamente');
+                                               // $('#gastos_btn_master').addClass('triggered').trigger('click');
+                                               // mostrarToast('¡Gasto eliminado correctamente!', 'success');
+                                            } else {
+                                                alert(aux);
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    alert('Debe seleccionar un unico registro');
+                                }
+                            }
+                        },
+                    }, {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        },
+                    }],
+                beforeClose: function (event, ui) {
+                    // table.ajax.reload();
+                    // $("#tabla_gastos").dataTable().fnDestroy();
+                }
+            })
+            document.getElementById('numero_gasto_master').value=selectedRowN;
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+    });
+    $('#ingresar_gasto_master').click(function (event) {
+    event.preventDefault();
+    if (confirm("¿Confirma guardar el gasto?")) {
+        var form = $('#gastos_form');
+        var formData = new FormData(form[0]);
+        if (form[0].checkValidity()) {
+        let numero=localStorage.getItem('numero_master_seleccionado');
+            //row = table.rows('.table-secondary').data();
+            let formData = $("#gastos_form").serializeArray();
+            let data = JSON.stringify(formData);
+            miurl = "/importacion_maritima/add_gasto_master/";
+            var toData = {
+                'numero':numero ,
+                'data': data,
+                'csrfmiddlewaretoken': csrf_token,
+            };
+            $.ajax({
+                type: "POST",
+                url: miurl,
+                data: toData,
+                async: false,
+                success: function (resultado) {
+                    if (resultado['resultado'] === 'exito') {
+
+                        alert('Guardado con éxito.');
+                        $("#tabla_gastos").dataTable().fnDestroy();
+                        $("#ingresar_gasto_master").html('Agregar');
+                        //$('#gastos_btn_master').addClass('triggered').trigger('click');
+                       // $("#id_gasto_id").val('');
+                       get_datos_gastos();
+                       $('#gastos_form').trigger("reset");
+
+                        //table.ajax.reload();
+                    } else {
+                        alert(resultado['resultado']);
+                    }
+                }
+            });
+        }else{
+        alert('Debe completar todos los campos.');
+        }
+    }
+});
+    $('#tabla_gastos tbody').on('dblclick', 'tr', function () {
+        var data = table_gastos.row(this).data();
+        $("#id_gasto_id").val(data[0]);
+        if(data[3] > 0){
+
+            $("#id_costo").val(data[3]);
+        }else{
+
+            $("#id_costo").val(data[4]);
+        }
+        $("#id_detalle").val(data[5]);
+        if(data[6] === 'Collect'){
+            $("#id_modo_id").val('C');
+        }else{
+            $("#id_modo_id").val('P');
+        }
+        $("#id_tipogasto").val(data[7]);
+        $("#id_arbitraje_id").val(data[8]);
+        if(data[9] === 'SI'){
+            $("#id_notomaprofit").prop("checked",true);
+        }else{
+            $("#id_notomaprofit").prop("checked",false);
+        }
+        $("#id_secomparte").val(data[10].substr(0,1));
+        $("#id_pinformar").val(data[11]);
+        $("#id_servicio").val(data[14]);
+        $("#id_moneda_id").val(data[15]);
+        $("#id_socio").val(data[16]);
+        $("#ingresar_gasto_master").html('Modificar');
+        $("#cancelar_gasto_master").show();
+    });
+     $('#tabla_gastos tbody').on('click', 'tr', function () {
+        $('#tabla_gastos tbody tr').removeClass('selected');
+        $(this).addClass('selected');
+    });
+
 });
 
 $(document).on('select2:open', () => {
@@ -1943,6 +2096,68 @@ var tableContent;
         </table>`;
     }
     return tableContent;
+}
+function get_datos_gastos() {
+let numero=localStorage.getItem('numero_master_seleccionado');
+    ingresos = 0
+    egresos = 0
+    diferencia = 0
+    $("#tabla_gastos").dataTable().fnDestroy();
+    table_gastos = $('#tabla_gastos').DataTable({
+        "order": [[1, "desc"], [1, "desc"]],
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 10,
+        "language": {
+            url: "/static/datatables/es_ES.json"
+        },
+        "ajax": {
+            "url": "/importacion_maritima/source_gastos/",
+            'type': 'GET',
+            "data": function (d) {
+                return $.extend({}, d, {
+                    "numero": numero,
+                });
+            }
+        }, "columnDefs": [
+            {
+                "targets": [0],
+                "orderable": false,
+            },
+            {
+                "targets": [3],
+                "className": 'derecha',
+            },
+            {
+                "targets": [4],
+                "className": 'derecha',
+            },{
+                "targets": [8],
+                "className": 'derecha',
+            },
+            {
+                "targets": [11],
+                "className": 'derecha',
+            },
+        ],"rowCallback": function (row, data) {
+                $(row).find('td:eq(3)').css('background-color', '#99cc99');
+                $(row).find('td:eq(4)').css('background-color', '#CC9393');
+                if (parseFloat(data[3]) > 0){
+                    ingresos += parseFloat(data[3]);
+                    diferencia += parseFloat(data[3]);
+                }else{
+                    egresos += parseFloat(data[4]);
+                    diferencia -= parseFloat(data[3]);
+                }
+        },"initComplete": function( settings, json ) {
+            $('#gastos_ingresos').val(ingresos.toFixed(2));
+            $('#gastos_egresos').val(egresos.toFixed(2));
+            $('#gastos_diferencia').val((ingresos-egresos).toFixed(2));
+        }
+    });
+    console.log(ingresos.toFixed(2));
+    console.log(egresos.toFixed(2));
+    console.log(ingresos-egresos.toFixed(2));
 }
 
 

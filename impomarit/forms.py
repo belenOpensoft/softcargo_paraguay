@@ -2,8 +2,10 @@
 from bootstrap_modal_forms.forms import BSModalModelForm
 from django import forms
 
-from impomarit.models import Reservas, Embarqueaereo
-from mantenimientos.models import Clientes, Vapores, Ciudades, Monedas
+from impomarit.models import Reservas, Embarqueaereo, Servireserva
+from mantenimientos.models import Clientes, Vapores, Ciudades, Monedas, Servicios
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
 
 choice_SINO = (('SI','Si'),('NO','No'))
 choice_SN = (('S','Si'),('N','No'))
@@ -78,22 +80,6 @@ class add_form(BSModalModelForm):
             'operacion',
             'arbitraje',
         )
-    # posicion = forms.CharField(
-    #         widget=forms.TextInput(
-    #             attrs={
-    #                 'class': 'form-control',
-    #                 'autocomplete': 'off',
-    #                 'required': True,
-    #                 'maxlength': 20,
-    #                 'readonly': True,
-    #                 'id': 'posicion_g',
-    #                 'placeholder': 'Pulse sobre el campo para generar'
-    #             }
-    #         ),
-    #     required=True,
-    #     )
-
-    #codigo = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 5 },),max_length=5,required=True,label="Código")
     agente = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required':True, 'id': 'agente_add', 'name':'otro'}),
         required=False)
@@ -752,5 +738,111 @@ class edit_house(BSModalModelForm):
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'deposito_ih_e', 'name': 'deposito_ih'}), required=False)
 
+class gastosForm(BSModalModelForm):
+    class Meta:
+        model = Servireserva
+        fields = [
+            'numero',
+            'servicio',
+            'moneda',
+            'modo',
+           # 'costo',
+            'detalle',
+            'tipogasto',
+            'arbitraje',
+            'notomaprofit',
+            'secomparte',
+            'pinformar',
+            'descripcion',
+            'precio',
+            'prorrateo',
+            'empresa',
+            'reembolsable',
+            'socio',
+        ]
+        # Agrega los campos que deseas actualizar
+        labels = {
+            'pinformar': 'A informar',
+            'modo': 'Pago',
+            'notomaprofit': 'Excluir del profit share',
+            'secomparte' : 'Se comparte',
+        }
+        #widgets = {
+        #   'modo': forms.Select(attrs={'id': 'id_modo_id'}),
+        #}
 
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'envases-form'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Actualizar'))
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+        servicios = [("", "---------"), ] + list(Servicios.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
+        self.fields['servicio'].choices = servicios
+        monedas = [("", "---------"), ] + list(Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
+        self.fields['moneda'].choices = monedas
+        socios = [("", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa'))
+        self.fields['socio'].choices = socios
+
+    CHOICES = [
+        ('C', 'Compra'),
+        ('V', 'Venta '),
+    ]
+    CHOICES_R = [
+        ('S', 'Si'),
+        ('N', 'No '),
+    ]
+    CHOICES_P = [
+        ('COLLECT', 'COLLECT'),
+        ('TODOS', 'TODOS '),
+        ('PREPAID', 'PREPAID'),
+    ]
+    CHOICES_M = [
+        ('C', 'COLLECT'),
+        ('P', 'PREPAID'),
+    ]
+    CHOICES_SC = [
+        ('S', 'Si'),
+        ('N', 'No '),
+    ]
+    CHOICES_E = [
+        ('1', 'Si'),
+        ('0', 'No '),
+    ]
+    CHOICES_TG = [
+        ('DUE AGENT', 'DUE AGENT'),
+        ('DUE CARRIER', 'DUE CARRIER '),
+        ('TAX', 'TAX '),
+        ('VALUATION CHARGES', 'VALUATION CHARGES '),
+        ('OTHER', 'OTHER '),
+        ('LOCAL CHARGES', 'LOCAL CHARGES '),
+    ]
+    Servicios()
+    numero = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'id': 'numero_gasto_master',
+            'readonly': 'readonly'
+        }),
+        label='Numero'
+    )
+    #id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False,'id':'id_gasto_id'}), required=False,label="ID")
+    #compra_venta = forms.CharField(widget=forms.Select(choices=CHOICES),label='Tipo movimiento')
+    tipogasto = forms.CharField(widget=forms.Select(choices=CHOICES_TG),label='Tipo')
+    reembolsable = forms.CharField(widget=forms.Select(choices=CHOICES_R), label='Reembolsable')
+    secomparte = forms.CharField(widget=forms.Select(choices=CHOICES_SC), label='Se comparte')
+    prorrateo = forms.CharField(widget=forms.Select(choices=CHOICES_P), label='Prorrateo')
+    empresa = forms.CharField(widget=forms.Select(choices=CHOICES_E), label='Empresa')
+    modo = forms.CharField(widget=forms.Select(choices=CHOICES_M))
+    servicio = forms.ChoiceField(choices=list(), widget=forms.Select(
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': True, }), label="Servicio", required=True)
+    costo = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"required":True}, ), max_digits=12,decimal_places=4, required=True, label="Costo")
+    arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"id":"id_arbitraje_id","required":False}, ), max_digits=12,decimal_places=4, required=False, label="Arbitraje")
+    moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13","id":"id_moneda_id"}),
+                               required=True, label="Moneda", choices=(), initial='')
+    socio = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13"}),
+                               required=True, label="Socio comercial", choices=(), initial='')
 
