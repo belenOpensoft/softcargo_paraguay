@@ -1052,6 +1052,23 @@ $(document).ready(function () {
         }
     });
 
+    //autocomplete cliente importar house
+    $("#filtro_cliente").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+
     //botones funcionalidades
 
     //form addmaster
@@ -1636,9 +1653,51 @@ var expandedRow;
         $("#ingresar_gasto_master").html('Modificar');
         $("#cancelar_gasto_master").show();
     });
-     $('#tabla_gastos tbody').on('click', 'tr', function () {
+    $('#tabla_gastos tbody').on('click', 'tr', function () {
         $('#tabla_gastos tbody tr').removeClass('selected');
         $(this).addClass('selected');
+    });
+
+    //importar hijo desde seguimeintos
+    var table_seg;
+    $('#importar_hijo_edit_master').click(function () {
+        importar_hijo_tabla();
+
+        $("#importar_hijo_modal").dialog({
+            autoOpen: true,
+            open: function () {
+
+            },
+            modal: true,
+            title: "Importar hijo desde seguimientos",
+            height: wHeight * 0.90,
+            width: wWidth * 0.90,
+            class: 'modal fade',
+            buttons: [
+                {
+                    text: "Salir",
+                    class: "btn btn-dark",
+                    style: "width:100px",
+                    click: function () {
+                        $(this).dialog("close");
+                    },
+                }
+            ],
+            beforeClose: function (event, ui) {
+                // Optional actions before closing
+            }
+        });
+    });
+    $('#filtrar_seguimientos').click(function () {
+        var filtroNumero = $('#filtro_numero').val();
+        var filtroCliente = $('#filtro_cliente').val();
+
+        // Aplicar filtros a la tabla
+        var table = $('#tabla_seguimiento_IH').DataTable();
+        table
+            .column(1).search(filtroNumero)
+            .column(3).search(filtroCliente)
+            .draw();
     });
 
 });
@@ -1954,7 +2013,6 @@ table_edit_im = $('#table_edit_im').DataTable({
             "X-CSRFToken": csrftoken
         },
         "dataSrc": function (json) {
-        console.log(json.data);
          $('#table_edit_im th').css({'width':'auto'});
          $('#table_edit_im_wrapper .dataTables_scrollBody').css({
         'height': 'fit-content',
@@ -2097,6 +2155,73 @@ var tableContent;
     }
     return tableContent;
 }
+// importar hijos seguimientos
+function importar_hijo_tabla(){
+table_seg = $('#tabla_seguimiento_IH').DataTable({
+//        "stateSave": true,
+        "dom": 'Btlipr',
+        "scrollX": true,
+        "bAutoWidth": false,
+        "scrollY": wHeight * 0.60,
+        "columnDefs": [
+            {
+                "targets": [0],
+                "className": 'details-control',
+                "orderable": false,
+                "data": null,
+                "defaultContent": '',
+                render: function (data, type, row) {
+
+                }
+            },
+            {
+                "targets": [1],
+                "className": 'derecha archivos',
+            },
+            {
+                "targets": [2],
+
+            },
+            {
+                "targets": [3],
+            },
+            {
+                "targets": [4],
+            },
+            {
+                "targets": [5],
+            },
+            {
+                "targets": [6],
+            },
+            {
+                "targets": [7],
+            },
+        ],
+        "order": [[1, "desc"],],
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 100,
+        "ajax": {
+            "url": "/importacion_maritima/source_seguimientos",
+            'type': 'GET',
+            "data": function (d) {
+                console.log(d);
+                return $.extend({}, d, {
+                    "buscar": buscar,
+                    "que_buscar": que_buscar,
+                });
+            }
+        },
+        "language": {
+            url: "/static/datatables/es_ES.json"
+        },
+        "rowCallback": function (row, data) {
+
+        },
+    });
+}
+//gastos master
 function get_datos_gastos() {
 let numero=localStorage.getItem('numero_master_seleccionado');
     ingresos = 0
