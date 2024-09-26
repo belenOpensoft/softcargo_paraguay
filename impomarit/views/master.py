@@ -1,8 +1,8 @@
-
+import re
+from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, Http404, HttpResponseRedirect
-from django.shortcuts import redirect
 from django.db import IntegrityError
 from impomarit.forms import add_form, edit_form
 from impomarit.models import Reservas
@@ -57,12 +57,13 @@ def add_importacion_maritima(request):
                 reserva.fecha = form.cleaned_data['fecha'].strftime("%Y-%m-%d")
                 reserva.cotizacion = form.cleaned_data['cotizacion']
                 reserva.status = form.cleaned_data['status']
-                reserva.posicion = form.cleaned_data['posicion']
                 reserva.operacion = form.cleaned_data['operacion']
-
+                reserva.fechaingreso = datetime.now()
+                reserva.posicion=generar_posicion()
                 reserva.save()
                 messages.success(request, 'Master agregado con éxito.')
-                return JsonResponse({'success': True, 'message': 'Master agregado con éxito.'})
+               # return JsonResponse({'success': True, 'message': 'Master agregado con éxito.'})
+                return JsonResponse({'success': True, 'posicion': reserva.posicion})
 
             else:
                 if 'awb' in form.errors:
@@ -86,6 +87,28 @@ def add_importacion_maritima(request):
             'errors': {}
         })
 
+def generar_posicion():
+        fecha_actual = datetime.now()
+        anio_actual = fecha_actual.year
+        mes_actual = fecha_actual.strftime('%m')
+
+        ultima_reserva = Reservas.objects.filter(fechaingreso__year=anio_actual).order_by('-id').first()
+
+        if ultima_reserva and ultima_reserva.posicion:
+            ultima_posicion = ultima_reserva.posicion
+            match = re.match(rf"IM{mes_actual}-(\d+)-\d{{4}}", ultima_posicion)
+
+            if match:
+                # Incrementar el código numérico
+                ultimo_codigo = int(match.group(1))
+                nuevo_codigo = str(ultimo_codigo + 1).zfill(5)
+            else:
+                nuevo_codigo = "00001"
+        else:
+            nuevo_codigo = "00001"
+
+        nueva_posicion = f"IM{mes_actual}-{nuevo_codigo}-{anio_actual}"
+        return nueva_posicion
 
 def master_detail(request):
     if request.method == 'GET':

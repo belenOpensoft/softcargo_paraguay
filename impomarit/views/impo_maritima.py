@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, Http40
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from impomarit.forms import add_im_form, add_form, add_house, edit_form
+from impomarit.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm
 from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo
 from mantenimientos.models import Clientes
 from seguimientos.models import Seguimiento
@@ -33,7 +33,9 @@ def master_importacion_maritima(request):
                 'form_house': add_house(),
                 'form_search_master': add_im_form(),
                 'form_edit_master':edit_form(),
+                'form_edit_house': edit_house(),
                 'opciones_busqueda': opciones_busqueda,
+                'form_gastos': gastosForm(),
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')

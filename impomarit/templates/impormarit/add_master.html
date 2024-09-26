@@ -8,6 +8,16 @@
     table_add_im{
     height:fit-content !important;
     }
+    #table_add_im tr:hover::after {
+    content: 'Doble click para editar';
+    color: #f9edbe;
+    position: absolute;
+    right: 10px;  /* Ajusta la posición según lo necesites */
+    background-color: #333;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 3px;
+}
 
 
 </style>
@@ -86,11 +96,6 @@
 
         </tr>
         <tr>
-            <th>{{ form.status.label }}</th>
-            <td>{{ form.status }}</td>
-            <th>{{ form.posicion.label }}</th>
-            <td>{{ form.posicion }}</td>
-
             <th>{{ form.operacion.label }}</th>
             <td>{{ form.operacion }}</td>
             <th>{{ form.awb.label }}</th>
@@ -102,16 +107,17 @@
     <button type="submit" id="agregar_master" class="btn btn-primary" onclick="return confirm('¿Confirma el guardado del M B/L?')">Guardar</button>
 <!--  acordarse de cambiar el visibility a hidden  -->
     <button type="button" class="btn btn-primary" onclick="" style="visibility:hidden;" id="agregar_hijo">Agregar hijo</button>
+    <button type="button" class="btn btn-secondary" style="visibility:hidden;" id="importar_hijo_add_master" >Importar hijo</button>
 </form>
 
-<div class="col-12 flex-wrap" id="segment_response" style="visibility:hidden">
+<div class="col-12 flex-wrap" id="segment_response" style="display:none">
     <table class="table table-striped table-bordered dataTable flex-wrap"  id="table_add_im">
         <thead class="">
             <tr>
                 <th class="text-right">Ver más</th>
                 <th class="text-right">Fecha Embarque</th>
                 <th class="text-right">Fecha Retiro</th>
-                <th class="text-right">N° Seguimiento</th>
+                <th class="text-right">N° Embarque</th>
                 <th class="text-right">Cliente</th>
                 <th class="text-right">Origen</th>
                 <th class="text-right">Destino</th>

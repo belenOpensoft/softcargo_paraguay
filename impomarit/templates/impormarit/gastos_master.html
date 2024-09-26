@@ -20,14 +20,15 @@
      <table class="table" style="width: 100%">
          <tbody>
              <tr>
-                 <td style="text-align: right;">{{ form_gastos.compra_venta.label }}</td>
-                 <td>{{ form_gastos.id }}{{ form_gastos.compra_venta }}</td>
+                 <input type="hidden" id="id_gasto_id" name="id_gasto_id">
+                 <td style="text-align: right;">{{ form_gastos.numero.label }}</td>
+                 <td>{{ form_gastos.numero }}</td>
                   <!-- COLUMNA DOS -->
                  <td style="text-align: right;">{{ form_gastos.servicio.label }}</td>
                  <td>{{ form_gastos.servicio }}</td>
                   <!-- COLUMNA TREs -->
-                 <td></td>
-                 <td></td>
+                  <td style="text-align: right;">{{ form_gastos.secomparte.label }}</td>
+                 <td>{{ form_gastos.secomparte }}</td>
                  <td style="text-align: right;">INGRESOS:</td>
                  <td><input type="number" step="any" style="background-color: #99cc99;text-align: right;" class="form-control" id="gastos_ingresos" required="false"></td>
              </tr>
@@ -35,8 +36,8 @@
                  <td style="text-align: right;">{{ form_gastos.moneda.label }}</td>
                  <td>{{ form_gastos.moneda }}</td>
                   <!-- COLUMNA DOS -->
-                  <td style="text-align: right;">{{ form_gastos.importe.label }}</td>
-                 <td>{{ form_gastos.importe }}</td>
+                  <td style="text-align: right;">{{ form_gastos.costo.label }}</td>
+                 <td>{{ form_gastos.costo }}</td>
                   <!-- COLUMNA TRES -->
                  <td style="text-align: right;">{{ form_gastos.arbitraje.label }}</td>
                  <td>{{ form_gastos.arbitraje }}</td>
@@ -52,8 +53,10 @@
                  <td style="text-align: right;">{{ form_gastos.pinformar.label }}</td>
                  <td>{{ form_gastos.pinformar }}</td>
                  <!-- COLUMNA TRE -->
-                 <td style="text-align: right;">{{ form_gastos.secomparte.label }}</td>
-                 <td>{{ form_gastos.secomparte }}</td>
+                <td style="text-align: right;">{{ form_gastos.notomaprofit.label }}</td>
+                 <td>
+                 <input type="checkbox" id="{{ form_gastos.notomaprofit.id_for_label }}" name="{{ form_gastos.notomaprofit.html_name }}" {% if form_gastos.notomaprofit.value %}checked{% endif %}>
+                 </td>
                  <td style="text-align: right;">DIFERENCIA:</td>
                  <td><input type="number" class="form-control" step="any" style="background-color: #CC9393;text-align: right;" id="gastos_diferencia"></td>
              </tr>
@@ -64,23 +67,28 @@
                  <td style="text-align: right;">{{ form_gastos.socio.label }}</td>
                  <td>{{ form_gastos.socio }}</td>
                  <!-- COLUMNA TRE -->
-                 <td style="text-align: right;">{{ form_gastos.notomaprofit.label }}</td>
-                 <td>
-                 <input type="checkbox" id="{{ form_gastos.notomaprofit.id_for_label }}" name="{{ form_gastos.notomaprofit.html_name }}" {% if form_gastos.notomaprofit.value %}checked{% endif %}>
-                 </td>
-                 <!-- COLUMNA TRE -->
-                 <td>
 
-                 </td>
-                 <td></td>
+                 <!-- COLUMNA TRE -->
+                 <td style="text-align: right;">{{ form_gastos.reembolsable.label }}</td>
+                 <td>{{ form_gastos.reembolsable }}</td>
+             </tr>
+              <tr>
+                 <td style="text-align: right;">{{ form_gastos.prorrateo.label }}</td>
+                 <td>{{ form_gastos.prorrateo }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_gastos.empresa.label }}</td>
+                 <td>{{ form_gastos.empresa }}</td>
+                 <!-- COLUMNA TRE -->
+
+
              </tr>
              <tr>
                  <td style="text-align: right;">{{ form_gastos.detalle.label }}</td>
                  <td colspan="3">{{ form_gastos.detalle }}</td>
                  <td></td>
                  <td>
-                     <button class="btn btn-dark" id="ingresar_gasto">Agregar</button>
-                     <button class="btn btn-danger" id="cancelar_gasto">Cancelar</button>
+                     <button class="btn btn-dark" id="ingresar_gasto_master">Agregar</button>
+                     <button class="btn btn-danger" id="cancelar_gasto_master">Cancelar</button>
                  </td>
                  <td></td>
                  <td></td>
