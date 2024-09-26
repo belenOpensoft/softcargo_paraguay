@@ -1696,6 +1696,30 @@ var expandedRow;
         });
     });
 
+    //menu sobre la lista de houses en editmaster y addmaster
+    document.addEventListener('DOMContentLoaded', function () {
+    const dropdownToggle = document.getElementById('navbarScrollingDropdown3');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+
+    dropdownToggle.addEventListener('click', function (event) {
+        event.preventDefault();  // Evita el comportamiento predeterminado del enlace
+
+        // Verifica si el dropdown está abierto
+        if (dropdownMenu.classList.contains('show')) {
+            dropdownMenu.classList.remove('show');  // Cierra el dropdown
+        } else {
+            dropdownMenu.classList.add('show');  // Abre el dropdown
+        }
+    });
+
+    // Cerrar el menú si se hace clic fuera de él
+    document.addEventListener('click', function (event) {
+        if (!dropdownToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
+            dropdownMenu.classList.remove('show');  // Cierra el dropdown si se hace clic fuera de él
+        }
+    });
+});
+
 });
 
 $(document).on('select2:open', () => {
@@ -2232,7 +2256,6 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
 
             $(row).find('.checkbox_seleccion').on('change', function () {
                 let id = $(this).val();
-                alert(id);
                 let seleccionados = JSON.parse(localStorage.getItem('seleccionados')) || [];
 
                 if (this.checked) {
