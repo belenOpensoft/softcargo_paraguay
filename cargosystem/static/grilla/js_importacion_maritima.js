@@ -1040,6 +1040,7 @@ $(document).ready(function () {
                            style: "width:100px",
                            click: function () {
                                 $('#agregar_hijo').css({'visibility':'hidden'});
+                                $('#importar_hijo_add_master').css({'visibility':'hidden'});
                                 $('#segment_response').css({'display':'none'});
                                $(this).dialog("close");
                            },
@@ -1069,6 +1070,7 @@ $(document).ready(function () {
             if (response.success) {
             alert('Posición generada: ' + response.posicion);
             $('#agregar_hijo').css({'visibility':'visible'});
+            $('#importar_hijo_add_master').css({'visibility':'visible'});
             $('#agregar_master').css({'display':'none'});
 
             table.ajax.reload(null, false);
@@ -1601,6 +1603,7 @@ var expandedRow;
     //importar hijo desde seguimeintos edit master form
     var table_seg;
     $('#importar_hijo_edit_master').click(function () {
+    localStorage.setItem('lugar_importarhijo','editmaster');
         importar_hijo_tabla();
 
         $("#importar_hijo_modal").dialog({
@@ -1660,6 +1663,38 @@ var expandedRow;
         alert('Desea importar '+cant+'house/s?');
         traer_seguimientos();
         });
+
+    //importar hijos desde seguimientos add master form
+    $('#importar_hijo_add_master').click(function () {
+    localStorage.setItem('lugar_importarhijo','addmaster');
+        importar_hijo_tabla();
+
+        $("#importar_hijo_modal").dialog({
+            autoOpen: true,
+            open: function () {
+
+            },
+            modal: true,
+            title: "Importar hijo desde seguimientos",
+            height: wHeight * 0.90,
+            width: wWidth * 0.90,
+            class: 'modal fade',
+            buttons: [
+                {
+                    text: "Salir",
+                    class: "btn btn-dark",
+                    style: "width:100px",
+                    click: function () {
+                        $(this).dialog("close");
+                        $('#tabla_seguimiento_IH').DataTable().destroy();
+                    },
+                }
+            ],
+            beforeClose: function (event, ui) {
+                // Optional actions before closing
+            }
+        });
+    });
 
 });
 
@@ -2119,7 +2154,15 @@ var tableContent;
 }
 // importar hijos seguimientos
 function importar_hijo_tabla(){
-    let master = localStorage.getItem('master_editar');
+    let master;
+    if(localStorage.getItem('lugar_importarhijo')==='editmaster'){
+     master = localStorage.getItem('master_editar');
+    }else if(localStorage.getItem('lugar_importarhijo')==='addmaster'){
+     master = localStorage.getItem('master');
+    }else{
+    alert('ocurrio error con lugar_importarhijo');
+    }
+
     let agregados = JSON.parse(localStorage.getItem('agregados')) || [];
     let agregadosMaster = [];
     let masterData = agregados.find(item => item.master === master);
@@ -2233,8 +2276,18 @@ function traer_seguimientos() {
         success: function(response) {
 
             if (response.data) {
-            let posicion=localStorage.getItem('posicion_editar');
-            let master = localStorage.getItem('master_editar');
+            let master;
+            let posicion;
+            if(localStorage.getItem('lugar_importarhijo')==='editmaster'){
+             master = localStorage.getItem('master_editar');
+             posicion=localStorage.getItem('posicion_editar');
+            }else if(localStorage.getItem('lugar_importarhijo')==='addmaster'){
+             master = localStorage.getItem('master');
+             posicion=localStorage.getItem('posicion');
+            }else{
+            alert('ocurrio error con lugar_importarhijo');
+            }
+
             response.data.forEach(function (item) {
             item.awb = master;
             item.posicion = posicion;
