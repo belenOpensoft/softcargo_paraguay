@@ -115,6 +115,54 @@ def source_seguimientos(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+
+def source_seguimientos_modo(request, modo):
+    if is_ajax(request):
+        """ BUSCO ORDEN """
+        args = {
+            '1': request.GET['columns[1][search][value]'],
+            '2': request.GET['columns[2][search][value]'],
+            '3': request.GET['columns[3][search][value]'],
+            '4': request.GET['columns[4][search][value]'],
+            '5': request.GET['columns[5][search][value]'],
+            '6': request.GET['columns[6][search][value]'],
+            '7': request.GET['columns[7][search][value]'],
+        }
+        """PROCESO FILTRO Y ORDEN BY"""
+        filtro = get_argumentos_busqueda(**args)
+        start = int(request.GET['start'])
+        length = int(request.GET['length'])
+
+        # Agrega el filtro de modo
+        filtro['modo'] = modo  # Aquí se asegura que solo traiga registros que coincidan con el modo
+
+        end = start + length
+        order = get_order(request, columns_table)
+
+        """FILTRO REGISTROS"""
+        if filtro:
+            registros = Seguimiento.objects.filter(**filtro).order_by(*order)
+        else:
+            registros = Seguimiento.objects.all().order_by(*order)
+
+        """PREPARO DATOS"""
+        resultado = {}
+        data = get_data(registros[start:end])
+
+        """Devuelvo parametros"""
+        resultado['data'] = data
+        resultado['length'] = length
+        resultado['draw'] = request.GET['draw']
+        resultado['recordsTotal'] = Seguimiento.objects.all().count()
+        resultado['recordsFiltered'] = str(registros.count())
+
+        data_json = json.dumps(resultado)
+    else:
+        data_json = 'fail'
+
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+
 def get_data(registros_filtrados):
     try:
         data = []

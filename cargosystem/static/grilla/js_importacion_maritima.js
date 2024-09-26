@@ -1699,6 +1699,18 @@ var expandedRow;
             .column(3).search(filtroCliente)
             .draw();
     });
+    $('#limpiar_filtros').click(function () {
+    // Limpiar los valores de los inputs
+    $('#filtro_numero').val('');
+    $('#filtro_cliente').val('');
+    $('#filtro_cliente').css({"border-color": "", 'box-shadow': ''});
+    // Resetear los filtros de la tabla
+    var table = $('#tabla_seguimiento_IH').DataTable();
+    table
+        .search('')  // Limpia la búsqueda general
+        .columns().search('')  // Limpia las búsquedas por columna
+        .draw();  // Redibuja la tabla
+});
 
 });
 
@@ -2165,13 +2177,12 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
         "scrollY": wHeight * 0.60,
         "columnDefs": [
             {
-                "targets": [0],
-                "className": 'details-control',
-                "orderable": false,
-                "data": null,
-                "defaultContent": '',
-                render: function (data, type, row) {
-
+                "targets": [0], // La primera columna, donde se colocará el checkbox
+                "orderable": false, // Desactivar la ordenación en esta columna
+                "className": 'dt-body-center', // Alinear al centro
+                "render": function (data, type, row) {
+                    // El checkbox, donde el valor del checkbox será la ID del registro
+                    return '<input type="checkbox" class="checkbox_seleccion" value="' + row[0] + '">';
                 }
             },
             {
@@ -2180,7 +2191,6 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
             },
             {
                 "targets": [2],
-
             },
             {
                 "targets": [3],
@@ -2203,7 +2213,7 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
         "serverSide": true,
         "pageLength": 100,
         "ajax": {
-            "url": "/importacion_maritima/source_seguimientos",
+            "url": "/importacion_maritima/source_seguimientos_modo/IMPORT%20MARITIMO/",
             'type': 'GET',
             "data": function (d) {
                 console.log(d);

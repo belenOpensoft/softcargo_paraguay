@@ -5,7 +5,7 @@ from impomarit.views.gastos import add_gasto_master, source_gastos, eliminar_gas
 from impomarit.views.house import add_house, add_house_impmarit, edit_house_function, house_detail, get_name_by_id_vendedores
 from impomarit.views.impo_maritima import master_importacion_maritima, source_importacion_master, source_embarque_aereo
 from impomarit.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
-from seguimientos.views.seguimientos import source_seguimientos
+from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
 
@@ -24,7 +24,7 @@ urlpatterns = [
     path('house-detail/', house_detail, name='house_detail'),
     path('get_name_by_id/', get_name_by_id, name='get_name_by_id'),
     path('get_name_by_id_vendedor/', get_name_by_id_vendedores, name='get_name_by_id_vendedor'),
-    path('source_seguimientos', source_seguimientos, name="source_seguimientos"),
+    path('source_seguimientos_modo/<str:modo>/', source_seguimientos_modo, name="source_seguimientos_modo"),
 
 ]
 
