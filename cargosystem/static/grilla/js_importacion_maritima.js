@@ -1680,6 +1680,7 @@ var expandedRow;
                     style: "width:100px",
                     click: function () {
                         $(this).dialog("close");
+                        $('#tabla_seguimiento_IH').DataTable().destroy();
                     },
                 }
             ],
@@ -1711,6 +1712,14 @@ var expandedRow;
         .columns().search('')  // Limpia las búsquedas por columna
         .draw();  // Redibuja la tabla
 });
+    $('#guardar_importados').click(function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        let seleccionados = JSON.parse(localStorage.getItem('seleccionados'));
+        let cant = seleccionados ? seleccionados.length : 0;
+        alert('Desea importar '+cant+'house/s?');
+        traer_seguimientos();
+        });
 
 });
 
@@ -2169,6 +2178,15 @@ var tableContent;
 }
 // importar hijos seguimientos
 function importar_hijo_tabla(){
+    let master = localStorage.getItem('master_editar');
+    let agregados = JSON.parse(localStorage.getItem('agregados')) || [];
+
+    let agregadosMaster = [];
+    let masterData = agregados.find(item => item.master === master);
+    if (masterData) {
+        agregadosMaster = masterData.agregados;
+    }
+
 table_seg = $('#tabla_seguimiento_IH').DataTable({
 //        "stateSave": true,
         "dom": 'Btlipr',
@@ -2220,6 +2238,7 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
                 return $.extend({}, d, {
                     "buscar": buscar,
                     "que_buscar": que_buscar,
+                    "ids_agregados": agregadosMaster
                 });
             }
         },
@@ -2228,9 +2247,125 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
         },
         "rowCallback": function (row, data) {
 
-        },
+            $(row).find('.checkbox_seleccion').on('change', function () {
+                let id = $(this).val();
+                alert(id);
+                let seleccionados = JSON.parse(localStorage.getItem('seleccionados')) || [];
+
+                if (this.checked) {
+                    if (!seleccionados.includes(id)) {
+                        seleccionados.push(id);
+                    }
+                } else {
+                    seleccionados = seleccionados.filter(item => item !== id);
+                }
+                localStorage.setItem('seleccionados', JSON.stringify(seleccionados));
+            });
+
+            let seleccionados = JSON.parse(localStorage.getItem('seleccionados')) || [];
+            if (seleccionados.includes(data[0])) {
+                $(row).find('.checkbox_seleccion').prop('checked', true);
+            }
+        }
     });
 }
+function traer_seguimientos() {
+    // Recupera el array de IDs del localStorage (asegúrate que esté guardado como JSON string)
+    let ids_seleccionados = JSON.parse(localStorage.getItem('seleccionados')) || [];
+
+    // Verifica si el array tiene datos
+    if (ids_seleccionados.length === 0) {
+        alert("No hay seguimientos seleccionados.");
+        return;
+    }
+
+    // Hacer la solicitud AJAX para enviar los IDs al servidor
+     const csrftoken = getCookie2('csrftoken');
+    $.ajax({
+        url: '/importacion_maritima/source_seguimientos_importado/',
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({ ids: ids_seleccionados }),
+        beforeSend: function(xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        },
+        success: function(response) {
+
+            if (response.data) {
+            let posicion=localStorage.getItem('posicion_editar');
+            let master = localStorage.getItem('master_editar');
+            response.data.forEach(function (item) {
+            item.awb = master;
+            item.posicion = posicion;
+            });
+            guardar_importado_house(response.data);
+
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error al traer los seguimientos:", error);
+        }
+    });
+}
+function guardar_importado_house(data) {
+    $.ajax({
+        url: '/importacion_maritima/add_house_importado/',
+        type: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function (response) {
+            if (response.success) {
+                alert('House/s importado/s con éxito');
+               agregarASeleccionados();
+                $("#importar_hijo_modal").dialog('close');
+                $('#tabla_seguimiento_IH').DataTable().destroy();
+                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                    table_edit_im.ajax.reload(null, false);
+                } else {
+                    cargar_hauses_master_edit();
+                }
+            } else {
+                console.log(response.message);
+                alert('Error: ' + response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error al guardar el house:', error);
+            alert('Ocurrió un error al intentar guardar el house.');
+        }
+    });
+}
+function agregarASeleccionados() {
+let master=localStorage.getItem('master_editar');
+    let nuevosAgregados=localStorage.getItem('seleccionados');
+    let seleccionados = JSON.parse(localStorage.getItem('agregados')) || [];
+
+    // Busca si ya existe un objeto para el master actual
+    let masterExistente = seleccionados.find(item => item.master === master);
+
+    if (masterExistente) {
+        // Si ya existe, agrega los nuevos IDs si no están ya en el array
+        nuevosAgregados.forEach(id => {
+            if (!masterExistente.agregados.includes(id)) {
+                masterExistente.agregados.push(id);
+            }
+        });
+    } else {
+        // Si no existe, crea una nueva entrada para ese master
+        seleccionados.push({
+            master: master,
+            agregados: nuevosAgregados
+        });
+    }
+
+    localStorage.setItem('agregados', JSON.stringify(seleccionados));
+    localStorage.removeItem('seleccionados');
+}
+
 //gastos master
 function get_datos_gastos() {
 let numero=localStorage.getItem('numero_master_seleccionado');

@@ -116,7 +116,7 @@ def source_seguimientos(request):
     return HttpResponse(data_json, mimetype)
 
 
-def source_seguimientos_modo(request, modo):
+def source_seguimientos_modo_old(request, modo):
     if is_ajax(request):
         """ BUSCO ORDEN """
         args = {
@@ -155,6 +155,61 @@ def source_seguimientos_modo(request, modo):
         resultado['draw'] = request.GET['draw']
         resultado['recordsTotal'] = Seguimiento.objects.all().count()
         resultado['recordsFiltered'] = str(registros.count())
+
+        data_json = json.dumps(resultado)
+    else:
+        data_json = 'fail'
+
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+
+def source_seguimientos_modo(request, modo):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        """ BUSCO ORDEN """
+        args = {
+            '1': request.GET['columns[1][search][value]'],
+            '2': request.GET['columns[2][search][value]'],
+            '3': request.GET['columns[3][search][value]'],
+            '4': request.GET['columns[4][search][value]'],
+            '5': request.GET['columns[5][search][value]'],
+            '6': request.GET['columns[6][search][value]'],
+            '7': request.GET['columns[7][search][value]'],
+        }
+
+        """PROCESO FILTRO Y ORDEN BY"""
+        filtro = get_argumentos_busqueda(**args)
+        start = int(request.GET['start'])
+        length = int(request.GET['length'])
+
+        # Agrega el filtro de modo
+        filtro['modo'] = modo
+
+        end = start + length
+        order = get_order(request, columns_table)
+
+        # Obtener el array de IDs agregados desde la solicitud
+        ids_agregados = request.GET.getlist('ids_agregados[]')
+
+        """FILTRO REGISTROS"""
+        if filtro:
+            registros = Seguimiento.objects.filter(**filtro).order_by(*order)
+        else:
+            registros = Seguimiento.objects.all().order_by(*order)
+
+        # Excluir los registros que están en el array de 'agregados', solo si no está vacío
+        if ids_agregados:
+            registros = registros.exclude(id__in=ids_agregados)
+
+        """PREPARO DATOS"""
+        resultado = {}
+        data = get_data(registros[start:end])
+
+        """Devuelvo parametros"""
+        resultado['data'] = data
+        resultado['length'] = length
+        resultado['draw'] = request.GET['draw']
+        resultado['recordsTotal'] = Seguimiento.objects.all().count()
+        resultado['recordsFiltered'] = registros.count()
 
         data_json = json.dumps(resultado)
     else:

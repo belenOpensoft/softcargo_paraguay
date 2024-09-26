@@ -1,12 +1,14 @@
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-
+import json
 from impomarit.models import Embarqueaereo
 from mantenimientos.models import Vendedores
 from django.http import JsonResponse, Http404, HttpResponseRedirect
 from django.contrib import messages
 from django.db import IntegrityError
 from impomarit.forms import add_house, edit_house
+from seguimientos.models import Seguimiento
+
 
 @login_required(login_url="/")
 def add_house_impmarit(request):
@@ -84,6 +86,114 @@ def add_house_impmarit(request):
             'message': f'Ocurrió un error: {str(e)}',
             'errors': {}
         })
+
+def add_house_importado(request):
+    try:
+        if request.method == 'POST':
+            # Asumimos que el array de datos llega en formato JSON
+            data = json.loads(request.body)
+
+            if isinstance(data, list):
+                # Iteramos sobre cada elemento en la lista
+                for house_data in data:
+                    # Crear la instancia de Embarqueaereo para cada registro
+                    reserva = Embarqueaereo()
+
+                    reserva.numero = reserva.get_number()
+                    reserva.awb = house_data.get('awb')
+                    reserva.notifcliente = house_data.get('notificar_cliente')
+                    reserva.notifagente = house_data.get('notificar_agente')
+                    reserva.fecharetiro = house_data.get('fecha_retiro')
+                    reserva.fechaembarque = house_data.get('fecha_embarque')
+                    reserva.origen = house_data.get('origen')
+                    reserva.destino = house_data.get('destino')
+                    reserva.moneda = house_data.get('moneda')
+                    reserva.loading = house_data.get('loading')
+                    reserva.discharge = house_data.get('discharge')
+                    reserva.vapor = house_data.get('vapor')
+                    reserva.viaje = house_data.get('viaje')
+                    reserva.hawb = house_data.get('house')
+                    reserva.demora = house_data.get('demora')
+                    reserva.operacion = house_data.get('operacion')
+                    reserva.arbitraje = house_data.get('arbitraje')
+                    reserva.trackid = house_data.get('trackid')
+                    reserva.wreceipt = house_data.get('wreceipt')
+                    reserva.posicion = house_data.get('posicion_h')
+                    reserva.status = house_data.get('status_h')
+
+                    reserva.transportista = house_data.get('transportista')
+                    reserva.agente = house_data.get('agente')
+                    reserva.consignatario = house_data.get('consignatario')
+                    reserva.armador = house_data.get('armador')
+                    reserva.cliente = house_data.get('cliente')
+                    reserva.vendedor = house_data.get('vendedor')
+                    reserva.agecompras = house_data.get('agcompras')
+                    reserva.ageventas = house_data.get('agventas')
+                    reserva.embarcador = house_data.get('embarcador')
+
+                    reserva.save()
+
+                return JsonResponse({'success': True, 'message': 'Todos los houses agregados con éxito'})
+            else:
+                return JsonResponse({'success': False, 'message': 'Los datos enviados no son una lista válida.'})
+
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Método no permitido.'
+            })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Ocurrió un error: {str(e)}',
+            'errors': {}
+        })
+
+def source_seguimientos_importado(request):
+
+        try:
+            data = json.loads(request.body)
+            ids = data.get('ids', [])
+
+            registros = Seguimiento.objects.filter(id__in=ids)
+
+
+            resultado = []
+            for registro in registros:
+                resultado.append({
+                    "awb": 0,
+                    "posicion": 0,
+                    "origen": registro.origen,
+                    "destino": registro.destino,
+                    "moneda": registro.moneda,
+                    "loading": registro.loading,
+                    "discharge": registro.discharge,
+                    "vapor": registro.vapor,
+                    "viaje": registro.viaje,
+                    "house": registro.hawb,
+                    "demora": registro.demora,
+                    "operacion": registro.operacion,
+                    "arbitraje": registro.arbitraje,
+                    "trackid": registro.trackid,
+                    "wreceipt": registro.wreceipt,
+                    "status": registro.status,
+                    "vendedor": registro.vendedor,
+                    "transportista": registro.transportista,
+                    "agente": registro.agente,
+                    "consignatario": registro.consignatario,
+                    "armador": registro.armador,
+                    "cliente": registro.cliente,
+                    "agcompras": registro.agecompras,
+                    "embarcador": registro.embarcador,
+                    "agventas": registro.ageventas
+                })
+
+            return JsonResponse({"data": resultado}, safe=False)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
 
 def house_detail(request):
     if request.method == 'GET':
