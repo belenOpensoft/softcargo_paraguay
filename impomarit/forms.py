@@ -103,7 +103,7 @@ class add_form(BSModalModelForm):
     vapor = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'vapor_add'}),
         required=False)
-    viaje = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20, 'type': 'number','id':'id_viaje_master' },),max_length=20,required=True,label="Viaje")
+    viaje = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20,'id':'id_viaje_master' },),max_length=20,required=True,label="Viaje")
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True,"class":'form-control'}),
                      required=True, label="Moneda", choices=((1,'USD'),(2,'EURO'),(3,'PESOS')), initial='')
     fecha = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': True,"onkeypress":"return tabular(event,this)","class":"form-control mb-3",}),label="Llegada",required=True)
@@ -120,7 +120,7 @@ class add_form(BSModalModelForm):
     discharge = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'discharge_add'}),
         required=False)
-    status = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 1,"style":"width:100%;"},),required=True,label="Estado",choices=choice_status)
+    status = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 1,"style":"width:100%;"},),required=False,label="Estado",choices=choice_status)
     operacion = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 1,"style":"width:100%;"},),required=True,label="Operacion",choices=choice_op)
     pagoflete = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("C","Collect"),("P","Prepaid")))
     transportista_i = forms.CharField(
@@ -263,7 +263,7 @@ class edit_form(BSModalModelForm):
     vapor_e = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'vapor_edit'}),
         required=False,label="Vapor")
-    viaje_e = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20, 'type': 'number' },),max_length=20,required=True,label="Viaje")
+    viaje_e = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20},),max_length=20,required=True,label="Viaje")
     moneda_e = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True,"class":'form-control'}),
                      required=True, label="Moneda", choices=((1,'USD'),(2,'EURO'),(3,'PESOS')), initial='')
     fecha_e = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': True,"onkeypress":"return tabular(event,this)","class":"form-control mb-3",}),label="Llegada",required=True)
@@ -453,7 +453,7 @@ class add_house(BSModalModelForm):
     agecompras = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'agecompras_addh',"required":False}),required=False,label='Ag.Compras')
     ageventas = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'ageventas_addh',"required":False}),required=False,label='Ag.Ventas')
     # segunda columna
-    viaje = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20, 'type': 'number','id':'viaje_house' },),max_length=20,required=True,label="Viaje")
+    viaje = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': True,'max_length': 20,'id':'viaje_house' },),max_length=20,required=True,label="Viaje")
     origen = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'origen_addh'}))
     destino = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'destino_addh'}))
     operacion = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True,'id':'id_operacion'}),required=True,label="Operacion",choices=choice_op,initial='')
@@ -668,15 +668,15 @@ class edit_house(BSModalModelForm):
     armador = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control input-sobrepasar', 'id': 'armador_addh_e', 'required': True}), required=False)
     agecompras = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control input-sobrepasar', 'id': 'agecompras_addh_e', 'required': False}), required=False,
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'agecompras_addh_e', 'required': False}), required=True,
                                  label='Ag.Compras')
     ageventas = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control input-sobrepasar', 'id': 'ageventas_addh_e', 'required': False}), required=False,
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'ageventas_addh_e', 'required': False}), required=True,
                                 label='Ag.Ventas')
 
     # segunda columna
     viaje = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'maxlength': 20, 'type': 'number',
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'maxlength': 20,
                'id': 'viaje_house_e'}), max_length=20, required=True, label="Viaje")
     origen = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'origen_addh_e'}))
     destino = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'destino_addh_e'}))
@@ -692,7 +692,7 @@ class edit_house(BSModalModelForm):
     # tercer columna
     demora = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'maxlength': 20, 'type': 'number',
-               'id': 'dias_demora_e'}), max_length=20, required=False, label="Días de demora")
+               'id': 'dias_demora_e'}), max_length=20, required=True, label="Días de demora")
     status_h = forms.ChoiceField(widget=forms.Select(
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'maxlength': 1, "style": "width:100%;",
                'name': 'status_h_e','id':'status_h_e'}), required=True, label="Estado", choices=choice_status)

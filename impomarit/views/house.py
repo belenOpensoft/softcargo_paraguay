@@ -101,10 +101,6 @@ def add_house_importado(request):
 
                     reserva.numero = reserva.get_number()
                     reserva.awb = house_data.get('awb')
-                    reserva.notifcliente = house_data.get('notificar_cliente')
-                    reserva.notifagente = house_data.get('notificar_agente')
-                    reserva.fecharetiro = house_data.get('fecha_retiro')
-                    reserva.fechaembarque = house_data.get('fecha_embarque')
                     reserva.origen = house_data.get('origen')
                     reserva.destino = house_data.get('destino')
                     reserva.moneda = house_data.get('moneda')
@@ -118,7 +114,7 @@ def add_house_importado(request):
                     reserva.arbitraje = house_data.get('arbitraje')
                     reserva.trackid = house_data.get('trackid')
                     reserva.wreceipt = house_data.get('wreceipt')
-                    reserva.posicion = house_data.get('posicion_h')
+                    reserva.posicion = house_data.get('posicion')
                     reserva.status = house_data.get('status_h')
 
                     reserva.transportista = house_data.get('transportista')

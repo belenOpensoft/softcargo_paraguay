@@ -251,21 +251,6 @@ $(document).ready(function () {
 
 
     //autocompletes add master form
-    $("#vapor_add").autocomplete({
-        source: '/autocomplete_vapores/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['codigo']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-            } else {
-                $(this).val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
     $("#transportista_add").autocomplete({
         source: '/autocomplete_clientes/',
         minLength: 2,
@@ -635,38 +620,8 @@ $(document).ready(function () {
             }
         }
     });
-    $("#vapor_addh").autocomplete({
-        source: '/autocomplete_vapores/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['codigo']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-            } else {
-                $(this).val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
 
         //autocompletes edit master form
-    $("#vapor_edit").autocomplete({
-        source: '/autocomplete_vapores/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['codigo']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-            } else {
-                $(this).val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
     $("#transportista_edit").autocomplete({
         source: '/autocomplete_clientes/',
         minLength: 2,
@@ -1036,21 +991,6 @@ $(document).ready(function () {
             }
         }
     });
-    $("#vapor_addh_e").autocomplete({
-        source: '/autocomplete_vapores/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['codigo']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-            } else {
-                $(this).val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
 
     //autocomplete cliente importar house
     $("#filtro_cliente").autocomplete({
@@ -1362,7 +1302,7 @@ var expandedRow;
     e.preventDefault();
     e.stopPropagation();
     lugar_editar=localStorage.getItem('lugar_editar');
-    if(document.getElementById('pago_house').value<0||document.getElementById('arbitraje_house').value<0||document.getElementById('dias_demora').value<0||document.getElementById('viaje_house').value<0){
+    if(document.getElementById('pago_house').value<0||document.getElementById('arbitraje_house').value<0||document.getElementById('dias_demora').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
     let formData = $(this).serialize();
@@ -1658,7 +1598,7 @@ var expandedRow;
         $(this).addClass('selected');
     });
 
-    //importar hijo desde seguimeintos
+    //importar hijo desde seguimeintos edit master form
     var table_seg;
     $('#importar_hijo_edit_master').click(function () {
         importar_hijo_tabla();
@@ -1921,10 +1861,11 @@ function fillFormWithDataHouse(data) {
         $('#posicion_gh_e').val(data.posicion_e);
         $('#operacion_editar').val(data.operacion_e);
 
-        $('#notificar_cliente_e').val(formatDateToYYYYMMDD(data.notifcliente_e));
-        $('#notificar_agente_e').val(formatDateToYYYYMMDD(data.notifagente_e));
-        $('#fecha_embarque_e').val(formatDateToYYYYMMDD(data.fechaembarque_e));
-        $('#fecha_retiro_e').val(formatDateToYYYYMMDD(data.fecharetiro_e));
+        $('#notificar_cliente_e').val(data.notifcliente_e ? formatDateToYYYYMMDD(data.notifcliente_e) : '');
+        $('#notificar_agente_e').val(data.notifagente_e ? formatDateToYYYYMMDD(data.notifagente_e) : '');
+        $('#fecha_embarque_e').val(data.fechaembarque_e ? formatDateToYYYYMMDD(data.fechaembarque_e) : '');
+        $('#fecha_retiro_e').val(data.fecharetiro_e ? formatDateToYYYYMMDD(data.fecharetiro_e) : '');
+
 
     }
 function getNameByIdVendedor(id) {
@@ -2180,7 +2121,6 @@ var tableContent;
 function importar_hijo_tabla(){
     let master = localStorage.getItem('master_editar');
     let agregados = JSON.parse(localStorage.getItem('agregados')) || [];
-
     let agregadosMaster = [];
     let masterData = agregados.find(item => item.master === master);
     if (masterData) {
@@ -2340,15 +2280,20 @@ function guardar_importado_house(data) {
     });
 }
 function agregarASeleccionados() {
-let master=localStorage.getItem('master_editar');
-    let nuevosAgregados=localStorage.getItem('seleccionados');
+    let master = localStorage.getItem('master_editar');
+    let nuevosAgregados = JSON.parse(localStorage.getItem('seleccionados')) || []; // Asegúrate de que sea un array
     let seleccionados = JSON.parse(localStorage.getItem('agregados')) || [];
 
     // Busca si ya existe un objeto para el master actual
     let masterExistente = seleccionados.find(item => item.master === master);
 
     if (masterExistente) {
-        // Si ya existe, agrega los nuevos IDs si no están ya en el array
+        // Asegúrate de que masterExistente.agregados sea un array
+        if (!Array.isArray(masterExistente.agregados)) {
+            masterExistente.agregados = [];
+        }
+
+        // Verifica que nuevosAgregados es un array antes de iterarlo
         nuevosAgregados.forEach(id => {
             if (!masterExistente.agregados.includes(id)) {
                 masterExistente.agregados.push(id);
@@ -2358,13 +2303,15 @@ let master=localStorage.getItem('master_editar');
         // Si no existe, crea una nueva entrada para ese master
         seleccionados.push({
             master: master,
-            agregados: nuevosAgregados
+            agregados: nuevosAgregados // Debe ser un array
         });
     }
 
+    // Guarda los datos actualizados en localStorage
     localStorage.setItem('agregados', JSON.stringify(seleccionados));
-    localStorage.removeItem('seleccionados');
+    localStorage.removeItem('seleccionados'); // Limpia 'seleccionados' después de agregar
 }
+
 
 //gastos master
 function get_datos_gastos() {
