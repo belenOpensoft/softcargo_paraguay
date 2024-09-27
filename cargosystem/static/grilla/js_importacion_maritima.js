@@ -1132,7 +1132,7 @@ var expandedRow;
             });
         }
     });
-        //modificar
+     //modificar
     $('#tabla_importmarit tbody').on('click', 'td', function () {
 
 
@@ -1147,32 +1147,6 @@ var expandedRow;
             localStorage.setItem('numero_master_seleccionado', selectedRowNumber);
         }
     });
-    //evento fila marcada
-    $(document).on('click', function (event) {
-    // Si haces clic fuera de la tabla, elimina la clase 'table-secondary'
-    if (!$(event.target).closest('#tabla_importmarit').length) {
-        $('#tabla_importmarit tbody tr').removeClass('table-secondary');
-    }
-});
-    $('#tabla_importmarit tbody').on('click', 'tr', function (event) {
-    // Evita que el clic en la tabla dispare la eliminación de la clase
-    event.stopPropagation();
-
-    if ($(this).hasClass('table-secondary')) {
-        // Aquí puedes decidir si la fila debe desmarcarse o no
-    } else {
-        let row = table.row($(this).closest('tr')).data();
-        row_selected = row[0];
-        row_number = row[1];
-        setCookie(row_selected);
-
-        // Quita la clase 'table-secondary' de cualquier fila previamente seleccionada
-        $('#tabla_importmarit tbody tr').removeClass('table-secondary');
-        // Agrega la clase 'table-secondary' a la fila seleccionada
-        $(this).addClass('table-secondary');
-    }
-});
-    //
     $('#editar_btn').on('click', function () {
     let selectedRowId = localStorage.getItem('id_master_editar');
 
@@ -1263,9 +1237,39 @@ var expandedRow;
                 $('#loading_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#discharge_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
     });
-    $('#tabla_importmarit tbody').on('focusout', 'tr', function () {
-    // Al perder el foco, elimina la clase 'selected'
-    $(this).removeClass('selected');
+
+    //evento fila marcada
+    $(document).on('click', function (event) {
+    // tabla general
+    if (!$(event.target).closest('#tabla_importmarit').length) {
+        $('#tabla_importmarit tbody tr').removeClass('table-secondary');
+    }
+    //tabla de houses en edit master
+    if (!$(event.target).closest('#table_edit_im').length) {
+        $('#table_edit_im tbody tr').removeClass('table-secondary');
+    }
+    //tabla de houses en add master
+    if (!$(event.target).closest('#table_add_im').length) {
+        $('#table_add_im tbody tr').removeClass('table-secondary');
+    }
+});
+    $('#tabla_importmarit tbody').on('click', 'tr', function (event) {
+    // Evita que el clic en la tabla dispare la eliminación de la clase
+    event.stopPropagation();
+
+    if ($(this).hasClass('table-secondary')) {
+        // Aquí puedes decidir si la fila debe desmarcarse o no
+    } else {
+        let row = table.row($(this).closest('tr')).data();
+        row_selected = row[0];
+        row_number = row[1];
+        setCookie(row_selected);
+
+        // Quita la clase 'table-secondary' de cualquier fila previamente seleccionada
+        $('#tabla_importmarit tbody tr').removeClass('table-secondary');
+        // Agrega la clase 'table-secondary' a la fila seleccionada
+        $(this).addClass('table-secondary');
+    }
 });
 
    //form add house
@@ -1472,7 +1476,7 @@ var expandedRow;
 
     //gastos master
     $('#gastos_btn_master').click(function () {
-        //row = table.rows('.table-secondary').data();
+        $("#id_gasto_id_").val('');
         let selectedRowN = localStorage.getItem('numero_master_seleccionado');
        get_datos_gastos();
         if (selectedRowN!=null) {
@@ -1480,7 +1484,7 @@ var expandedRow;
             $("#gastos_modal").dialog({
                 autoOpen: true,
                 open: function () {
-
+                document.getElementById('numero_gasto_master').value=selectedRowN;
                 },
                 modal: true,
                 title: "Gastos para el master N°: " + selectedRowN,
@@ -1536,7 +1540,7 @@ var expandedRow;
                     // $("#tabla_gastos").dataTable().fnDestroy();
                 }
             })
-            document.getElementById('numero_gasto_master').value=selectedRowN;
+
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -1564,16 +1568,15 @@ var expandedRow;
                 async: false,
                 success: function (resultado) {
                     if (resultado['resultado'] === 'exito') {
-
+                          $("#id_gasto_id_").val('');
                         alert('Guardado con éxito.');
                         $("#tabla_gastos").dataTable().fnDestroy();
                         $("#ingresar_gasto_master").html('Agregar');
-                        //$('#gastos_btn_master').addClass('triggered').trigger('click');
-                       // $("#id_gasto_id").val('');
                        get_datos_gastos();
+                       let aux= document.getElementById('numero_gasto_master').value;
                        $('#gastos_form').trigger("reset");
+                       document.getElementById('numero_gasto_master').value=aux;
 
-                        //table.ajax.reload();
                     } else {
                         alert(resultado['resultado']);
                     }
@@ -1617,6 +1620,85 @@ var expandedRow;
     });
     $('#tabla_gastos tbody').on('click', 'tr', function () {
         $('#tabla_gastos tbody tr').removeClass('selected');
+        $(this).addClass('selected');
+    });
+
+    //gastos house
+    $('#ingresar_gasto_house').off('click').click(function (event) {
+    event.preventDefault();
+    if (confirm("¿Confirma guardar el gasto?")) {
+        var form = $('#gastos_form_house');
+        var formData = new FormData(form[0]);
+        if (form[0].checkValidity()) {
+        let numero=localStorage.getItem('num_house_gasto');
+            let formData = $("#gastos_form_house").serializeArray();
+            let data = JSON.stringify(formData);
+            miurl = "/importacion_maritima/add_gasto_house/";
+            var toData = {
+                'numero':numero ,
+                'data': data,
+                'csrfmiddlewaretoken': csrf_token,
+            };
+            console.log(data);
+            $.ajax({
+                type: "POST",
+                url: miurl,
+                data: toData,
+                async: false,
+                success: function (resultado) {
+                    if (resultado['resultado'] === 'exito') {
+                        $("#id_gasto_id_house").val('');
+                        alert('Guardado con éxito.');
+                        $("#tabla_gastos_house").dataTable().fnDestroy();
+                        $("#ingresar_gasto_houdr").html('Agregar');
+                       get_datos_gastos_house();
+                       let aux= document.getElementById('numero_gasto_house').value;
+                       $('#gastos_form_house').trigger("reset");
+                       document.getElementById('numero_gasto_house').value=aux;
+
+                    } else {
+                        alert(resultado['resultado']);
+                    }
+                }
+            });
+        }else{
+            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+            invalidFields.forEach(field => {
+                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+            });
+
+            alert('Debe completar todos los campos.');
+        }
+    }
+});
+    $('#tabla_gastos_house tbody').off('dblclick').on('dblclick', 'tr', function () {
+        var data = table_gastos.row(this).data();
+        console.log(data);
+        $("#id_gasto_id_house").val(data[0]);
+        $("#id_precio_h").val(data[3]);
+        $("#id_detalle_h").val(data[5]);
+        if(data[6] === 'Collect'){
+            $("#id_modo_h").val('C');
+        }else{
+            $("#id_modo_h").val('P');
+        }
+        $("#id_tipogasto_h").val(data[7]);
+        $("#id_arbitraje_h").val(data[8]);
+        if(data[9] === 'SI'){
+            $("#id_notomaprofit_h").prop("checked",true);
+        }else{
+            $("#id_notomaprofit_h").prop("checked",false);
+        }
+        $("#id_secomparte_h").val(data[10].substr(0,1));
+        $("#id_pinformar_h").val(data[11]);
+        $("#id_servicio_h").val(data[14]);
+        $("#id_moneda_h").val(data[15]);
+        $("#id_socio_h").val(data[16]);
+        $("#ingresar_gasto_house").html('Modificar');
+        $("#cancelar_gasto_house").show();
+    });
+    $('#tabla_gastos_house tbody').off('click').on('click', 'tr', function () {
+        $('#tabla_gastos_house tbody tr').removeClass('selected');
         $(this).addClass('selected');
     });
 
@@ -1788,7 +1870,7 @@ table_add_im = $('#table_add_im').DataTable({
    "columnDefs": [
             {
                 "targets": [0],  // Nueva columna para detalles
-                "className": 'details-control',
+                "className": '',
                 "orderable": false,
                 "data": null,
                 "defaultContent": '',  // Contenido por defecto
@@ -1896,6 +1978,26 @@ table_add_im = $('#table_add_im').DataTable({
         alert('Seleccione una fila.');
         }
     });
+    $('#table_add_im tbody').off('click').on('click', 'tr', function (event) {
+    event.stopPropagation();
+    if ($(this).hasClass('table-secondary')) {
+    } else {
+        $('#table_add_im tbody tr').removeClass('table-secondary');
+        $(this).addClass('table-secondary');
+    }
+
+    var tr = $(this).closest('tr');
+    var row = table_edit_im.row(tr);
+    var rowData = row.data();
+
+    if (rowData) {
+        var selectedRowId = rowData[0];
+        var selectedRowN = rowData[3];
+        localStorage.setItem('id_house_gasto', selectedRowId);
+        localStorage.setItem('num_house_gasto', selectedRowN);
+    }
+});
+    fun_gastos_house();
     }
 });
 
@@ -2028,7 +2130,7 @@ table_edit_im = $('#table_edit_im').DataTable({
    "columnDefs": [
             {
                 "targets": [0],  // Nueva columna para detalles
-                "className": 'details-control',
+                "className": '',
                 "orderable": false,
                 "data": null,
                 "defaultContent": '',  // Contenido por defecto
@@ -2136,6 +2238,26 @@ table_edit_im = $('#table_edit_im').DataTable({
         alert('Seleccione una fila.');
         }
     });
+    $('#table_edit_im tbody').off('click').on('click', 'tr', function (event) {
+    event.stopPropagation();
+    if ($(this).hasClass('table-secondary')) {
+    } else {
+        $('#table_edit_im tbody tr').removeClass('table-secondary');
+        $(this).addClass('table-secondary');
+    }
+
+    var tr = $(this).closest('tr');
+    var row = table_edit_im.row(tr);
+    var rowData = row.data();
+
+    if (rowData) {
+        var selectedRowId = rowData[0];
+        var selectedRowN = rowData[3];
+        localStorage.setItem('id_house_gasto', selectedRowId);
+        localStorage.setItem('num_house_gasto', selectedRowN);
+    }
+});
+    fun_gastos_house();
     }
 });
 
@@ -2408,7 +2530,6 @@ function agregarASeleccionados() {
     localStorage.removeItem('seleccionados'); // Limpia 'seleccionados' después de agregar
 }
 
-
 //gastos master
 function get_datos_gastos() {
 let numero=localStorage.getItem('numero_master_seleccionado');
@@ -2473,7 +2594,144 @@ let numero=localStorage.getItem('numero_master_seleccionado');
     console.log(ingresos-egresos.toFixed(2));
 }
 
+//gastos house
+function get_datos_gastos_house() {
+    let numero=localStorage.getItem('num_house_gasto');
+    ingresos = 0
+    egresos = 0
+    diferencia = 0
+    $("#tabla_gastos_house").dataTable().fnDestroy();
+    table_gastos = $('#tabla_gastos_house').DataTable({
+        "order": [[1, "desc"], [1, "desc"]],
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 10,
+        "language": {
+            url: "/static/datatables/es_ES.json"
+        },
+        "ajax": {
+            "url": "/importacion_maritima/source_gastos_house/",
+            'type': 'GET',
+            "data": function (d) {
+                return $.extend({}, d, {
+                    "numero": numero,
+                });
+            }
+        }, "columnDefs": [
+            {
+                "targets": [0],
+                "orderable": false,
+            },
+            {
+                "targets": [3],
+                "className": 'derecha',
+            },
+            {
+                "targets": [4],
+                "className": 'derecha',
+            },{
+                "targets": [8],
+                "className": 'derecha',
+            },
+            {
+                "targets": [11],
+                "className": 'derecha',
+            },
+        ],"rowCallback": function (row, data) {
+                $(row).find('td:eq(3)').css('background-color', '#99cc99');
+                $(row).find('td:eq(4)').css('background-color', '#CC9393');
+                if (parseFloat(data[3]) > 0){
+                    ingresos += parseFloat(data[3]);
+                    diferencia += parseFloat(data[3]);
+                }else{
+                    egresos += parseFloat(data[4]);
+                    diferencia -= parseFloat(data[3]);
+                }
+        },"initComplete": function( settings, json ) {
+            $('#gastos_ingresos').val(ingresos.toFixed(2));
+            $('#gastos_egresos').val(egresos.toFixed(2));
+            $('#gastos_diferencia').val((ingresos-egresos).toFixed(2));
+        }
+    });
+}
+function gastos_btn_h_click(){
+        $("#id_gasto_id_house").val('');
+        let selectedRowId = localStorage.getItem('id_house_gasto');
+        let selectedRowN = localStorage.getItem('num_house_gasto');
+       get_datos_gastos_house();
+        if (selectedRowN!=null) {
+            $('#gastos_form_house').trigger("reset");
+            $("#gastos_modal_house").dialog({
+                autoOpen: true,
+                open: function () {
+                document.getElementById('numero_gasto_house').value=selectedRowN;
+                },
+                modal: true,
+                title: "Gastos para el House N°: " + selectedRowN,
+                height: wHeight * 0.90,
+                width: wWidth * 0.90,
+                class: 'modal fade',
+                buttons: [
+                    {
+                        text: "Eliminar",
+                        class: "btn btn-danger",
+                        style: "width:100px",
+                        click: function () {
+                            if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
+                                row = table_gastos.rows('.selected').data();
+                                if (row.length === 1) {
+                                    miurl = "/importacion_maritima/eliminar_gasto_house/";
+                                    var toData = {
+                                        'id': row[0][0],
+                                        'csrfmiddlewaretoken': csrf_token,
+                                    };
+                                    $.ajax({
+                                        type: "POST",
+                                        url: miurl,
+                                        data: toData,
+                                        success: function (resultado) {
+                                            aux = resultado['resultado'];
+                                            if (aux === 'exito') {
+                                                $("#table_gastos_house").dataTable().fnDestroy();
+                                                get_datos_gastos_house();
+                                                alert('Eliminado correctamente');
+                                               // $('#gastos_btn_master').addClass('triggered').trigger('click');
+                                               // mostrarToast('¡Gasto eliminado correctamente!', 'success');
+                                            } else {
+                                                alert(aux);
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    alert('Debe seleccionar un unico registro');
+                                }
+                            }
+                        },
+                    }, {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        },
+                    }],
+                beforeClose: function (event, ui) {
+                    // table.ajax.reload();
+                    // $("#tabla_gastos").dataTable().fnDestroy();
+                }
+            })
 
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+}
+function fun_gastos_house(){
+
+
+}
+
+
+//lo limpio despues de guardar el gasto y tambien al abrir el modal al campo hidden id_gasto
 
 
 
