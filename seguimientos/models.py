@@ -676,6 +676,7 @@ class Entregasocc(models.Model):
                                   null=True)  # Field name made lowercase.
     boxpeso = models.FloatField(db_column='BoxPeso', blank=True, null=True)  # Field name made lowercase.
 
+
 class Envases(models.Model):
     choice_unidad = (
         ("20","20"),

@@ -10,6 +10,7 @@ from urllib.request import urlopen
 from mantenimientos.forms import desconsolidacion_form
 from mantenimientos.models import Clientes
 from seguimientos.models import VGrillaSeguimientos, Conexaerea, Envases
+from cargosystem.webservice import enviar_xml
 
 
 def desconsolidacion_aerea(request):
@@ -49,7 +50,7 @@ def desconsolidar_aereo(request):
             print(d[0])
             seg = VGrillaSeguimientos.objects.get(numero=d[1])
             con = Conexaerea.objects.get(id=d[0])
-            aux = genero_xml_desconsolidacion(seg,con)
+            aux = genero_xml_desconsolidacion(seg, con)
         resultado['resultado'] = aux
     except Exception as e:
         resultado['resultado'] = str(e)
@@ -57,8 +58,9 @@ def desconsolidar_aereo(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+
 @csrf_exempt
-def genero_xml_desconsolidacion(seg,con):
+def genero_xml_desconsolidacion(seg, con):
     tipo_documento = "4"
     id_documento = "216803670019"
     fecha_hora_documento = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
@@ -82,6 +84,7 @@ def genero_xml_desconsolidacion(seg,con):
     nombre_consignatario = consignatario[0].razonsocial
     origen = con.origen
     destino = con.destino
+
     # Obtener datos de los contenedores y calcular los valores
     envases = Envases.objects.filter(numero=seg.numero).values('tipo','bultos', 'peso', 'envase', 'volumen').annotate(total=Count('id'))
     volumen = 0
@@ -188,9 +191,13 @@ def genero_xml_desconsolidacion(seg,con):
             </Manifiestos>
         </Objeto>
     </DAE>'''
-    return xml_str
 
-def envioMsj(url,datos):
+    result = enviar_xml(xml_str)
+
+    return HttpResponse(result)
+
+
+def envioMsj(url, datos):
     try:
         s = urlopen(url, datos)
         sl = s.read()
