@@ -236,18 +236,6 @@ $(document).ready(function () {
         });
         table.draw();
     }
-    $('#tabla_importmarit tbody').on('click', 'tr', function () {
-        if ($(this).hasClass('table-secondary')) {
-            $(this).removeClass('table-secondary');
-        } else {
-            let row = table.row($(this).closest('tr')).data();
-            row_selected = row[0];
-            row_number = row[1];
-            setCookie(row_selected);
-            table.$('tr.table-secondary').removeClass('table-secondary');
-            $(this).addClass('table-secondary');
-        }
-    });
 
 
     //autocompletes add master form
@@ -1146,6 +1134,8 @@ var expandedRow;
     });
         //modificar
     $('#tabla_importmarit tbody').on('click', 'td', function () {
+
+
         var tr = $(this).closest('tr');
         var row = table.row(tr);
         var rowData = row.data();
@@ -1157,6 +1147,32 @@ var expandedRow;
             localStorage.setItem('numero_master_seleccionado', selectedRowNumber);
         }
     });
+    //evento fila marcada
+    $(document).on('click', function (event) {
+    // Si haces clic fuera de la tabla, elimina la clase 'table-secondary'
+    if (!$(event.target).closest('#tabla_importmarit').length) {
+        $('#tabla_importmarit tbody tr').removeClass('table-secondary');
+    }
+});
+    $('#tabla_importmarit tbody').on('click', 'tr', function (event) {
+    // Evita que el clic en la tabla dispare la eliminación de la clase
+    event.stopPropagation();
+
+    if ($(this).hasClass('table-secondary')) {
+        // Aquí puedes decidir si la fila debe desmarcarse o no
+    } else {
+        let row = table.row($(this).closest('tr')).data();
+        row_selected = row[0];
+        row_number = row[1];
+        setCookie(row_selected);
+
+        // Quita la clase 'table-secondary' de cualquier fila previamente seleccionada
+        $('#tabla_importmarit tbody tr').removeClass('table-secondary');
+        // Agrega la clase 'table-secondary' a la fila seleccionada
+        $(this).addClass('table-secondary');
+    }
+});
+    //
     $('#editar_btn').on('click', function () {
     let selectedRowId = localStorage.getItem('id_master_editar');
 
@@ -1247,6 +1263,10 @@ var expandedRow;
                 $('#loading_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#discharge_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
     });
+    $('#tabla_importmarit tbody').on('focusout', 'tr', function () {
+    // Al perder el foco, elimina la clase 'selected'
+    $(this).removeClass('selected');
+});
 
    //form add house
     $('#agregar_hijo').click(function () {
