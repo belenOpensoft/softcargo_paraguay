@@ -2,13 +2,15 @@ import json
 
 import simplejson
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
-from seguimientos.models import VGrillaServiceaereo as Serviceaereo,Serviceaereo as ServiceaereoReal
-from impomarit.models import Servireserva, VGastosMaster
+#from seguimientos.models import VGrillaServiceaereo as ServiceServiceaereo as ServiceaereoReal
+from impomarit.models import Servireserva, VGastosMaster, VGastosHouse, Serviceaereo
 import json
 
-""" TABLA PUERTO """
+from mantenimientos.models import Clientes
+
 columns_table = {
     1: 'servicio',
     2: 'moneda',
@@ -43,6 +45,31 @@ def source_gastos(request):
         resultado['length'] = length
         resultado['draw'] = request.GET['draw']
         resultado['recordsTotal'] = VGastosMaster.objects.filter(numero=numero).count()
+        resultado['recordsFiltered'] = str(registros.count())
+        data_json = json.dumps(resultado)
+    else:
+        data_json = 'fail'
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+def source_gastos_house(request):
+    if is_ajax(request):
+        """ BUSCO ORDEN """
+        """PROCESO FILTRO Y ORDEN BY"""
+        start = int(request.GET['start'])
+        numero = request.GET['numero']
+        length = int(request.GET['length'])
+        end = start + length
+        order = get_order(request, columns_table)
+        """FILTRO REGISTROS"""
+        registros = VGastosHouse.objects.filter(numero=numero).order_by(*order)
+        """PREPARO DATOS"""
+        resultado = {}
+        data = get_data(registros[start:end])
+        """Devuelvo parametros"""
+        resultado['data'] = data
+        resultado['length'] = length
+        resultado['draw'] = request.GET['draw']
+        resultado['recordsTotal'] = VGastosHouse.objects.filter(numero=numero).count()
         resultado['recordsFiltered'] = str(registros.count())
         data_json = json.dumps(resultado)
     else:
@@ -170,7 +197,6 @@ def add_gasto_master_o(request):
     # Retornar el resultado en formato JSON
     return JsonResponse(resultado)
 
-
 def add_gasto_master(request):
     resultado = {}
     try:
@@ -239,12 +265,90 @@ def add_gasto_master(request):
     # Retornar el resultado en formato JSON
     return JsonResponse(resultado)
 
-
 def eliminar_gasto_master(request):
     resultado = {}
     try:
         id = request.POST['id']
         Servireserva.objects.get(id=id).delete()
+        resultado['resultado'] = 'exito'
+    except IntegrityError as e:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+    data_json = json.dumps(resultado)
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+
+def add_gasto_house(request):
+    resultado = {}
+    try:
+        # Recibir los datos JSON enviados por AJAX
+        data = json.loads(request.POST.get('data'))
+
+        # Crear un diccionario para acceder fácilmente a los valores
+        form_data = {item['name']: item['value'] for item in data}
+
+        # Acceder a los valores del formulario usando el diccionario
+        numero = form_data.get('numero')
+        servicio = form_data.get('servicio')
+        secomparte = form_data.get('secomparte')
+        moneda = form_data.get('moneda')
+        precio = form_data.get('precio')
+        arbitraje = form_data.get('arbitraje', 0)  # valor opcional
+        tipogasto = form_data.get('tipogasto')
+        pinformar = form_data.get('pinformar', 0)  # valor opcional
+        notomaprofit = form_data.get('notomaprofit') == 'on'
+        modo = form_data.get('modo')
+        socio = form_data.get('socio')
+        detalle = form_data.get('detalle')
+        empresa = form_data.get('empresa')
+        reembolsable = form_data.get('reembolsable')
+
+        # Verificar si el registro ya existe
+        if 'id_gasto_id_house' in form_data and form_data['id_gasto_id_house']:
+            # Modificar el registro existente
+            registro = Serviceaereo.objects.get(id=form_data['id_gasto_id_house'])
+
+        else:
+            # Crear un nuevo registro si no existe
+            registro = Serviceaereo()
+
+        registro.numero = numero
+        registro.servicio = servicio
+        registro.secomparte = secomparte
+        registro.moneda = moneda
+        registro.precio = precio if precio else 0
+        registro.arbitraje = arbitraje
+        registro.tipogasto = tipogasto
+        registro.pinformar = pinformar
+        registro.notomaprofit = notomaprofit
+        registro.modo = modo
+        registro.socio = socio
+        registro.detalle = detalle
+        registro.empresa = empresa
+        registro.reembolsable = reembolsable
+
+        registro.save()
+        # Devolver el resultado de éxito
+        resultado['resultado'] = 'exito'
+        resultado['numero'] = registro.numero
+
+    except Servireserva.DoesNotExist:
+        resultado['resultado'] = 'Registro no encontrado.'
+    except IntegrityError:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+
+    # Retornar el resultado en formato JSON
+    return JsonResponse(resultado)
+
+
+def eliminar_gasto_house(request):
+    resultado = {}
+    try:
+        id = request.POST['id']
+        Serviceaereo.objects.get(id=id).delete()
         resultado['resultado'] = 'exito'
     except IntegrityError as e:
         resultado['resultado'] = 'Error de integridad, intente nuevamente.'

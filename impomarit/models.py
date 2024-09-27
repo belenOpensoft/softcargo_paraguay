@@ -623,8 +623,11 @@ class Serviceaereo(models.Model):
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  
     reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  
-    socio = models.IntegerField(db_column='Socio', blank=True, null=True)  
+    socio = models.IntegerField(db_column='Socio', blank=False, null=False)
 
+    class Meta:
+        managed = False
+        db_table = 'impmarit_serviceaereo'
 
 """ VISTAS """
 
@@ -674,3 +677,29 @@ class VGastosMaster(models.Model):
     class Meta:
         managed = False
         db_table = 'VGastosMaster'
+
+class VGastosHouse(models.Model):
+    numero = models.IntegerField(blank=True, null=True)
+    modo = models.CharField(max_length=1, blank=True, null=True,choices=(("P","Prepaid"),("C","Collect")))
+    servicio = models.CharField(max_length=500,blank=True, null=True)
+    moneda = models.SmallIntegerField(blank=True, null=True)
+    tipogasto = models.CharField(max_length=30, blank=True, null=True)
+    arbitraje = models.FloatField(blank=True, null=True)
+    precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    costo = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    detalle = models.CharField(max_length=100, blank=True, null=True)
+    secomparte = models.CharField(max_length=1, blank=True, null=True)
+    notomaprofit = models.BooleanField()
+    pinformar = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
+    id_servicio = models.SmallIntegerField()
+    id_moneda = models.SmallIntegerField()
+    id_socio = models.SmallIntegerField()
+
+    def __str__(self,):
+        return self.modo + ' - ' + str(self.numero)
+
+    class Meta:
+        managed = False
+        db_table = 'VGastosHouse'
