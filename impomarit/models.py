@@ -594,6 +594,12 @@ class Traceop(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  
 
 class Conexaerea(models.Model):
+    choice_modo = (
+        ("MARITIMO", "MARITIMO"),
+        ("FLUVIAL", "FLUVIAL"),
+        ("TERRESTRE", "TERRESTRE"),
+        ("AEREO", "AEREO"),
+    )
     numero = models.IntegerField(blank=True, null=True)
     origen = models.CharField(max_length=5, blank=True, null=True)
     destino = models.CharField(max_length=5, blank=True, null=True)
@@ -601,10 +607,15 @@ class Conexaerea(models.Model):
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
     cia = models.CharField(max_length=50, blank=True, null=True)
-    viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  
-    modo = models.CharField(max_length=15, blank=True, null=True)
+    viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)
+    modo = models.CharField(max_length=15,choices=choice_modo)
     horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  
-    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)  
+    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'impmarit_conexaerea'
+
 
 class Serviceaereo(models.Model):
     numero = models.IntegerField(blank=True, null=True)
