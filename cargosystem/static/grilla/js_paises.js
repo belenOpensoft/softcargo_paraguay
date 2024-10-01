@@ -45,7 +45,7 @@ $(document).ready(function()
                         text: 'Eliminar',
                         action: function (e, dt, button, config) {
                             if(row = table.row('.selected').data()){
-                                if(confirm('Esta seguro de eliminar: ' + row[2])){
+                                if(confirm('Esta seguro de eliminar: ' + row[1])){
                                     miurl = "/eliminar_pais";
                                     var toData = { 'id' : row[0] };
                                     $.ajax({

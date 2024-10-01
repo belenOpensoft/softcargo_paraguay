@@ -320,11 +320,94 @@ class Entregadoc(models.Model):
     detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True, null=True)  
 
 class Envases(models.Model):
+    choice_unidad = (
+        ("20","20"),
+        ("40","40"),
+        ("45","45"),
+        ("CBM","CBM"),
+        ("CF","CF"),
+        ("TON","TON"),
+        ("M/T","M/T"),
+        ("MIN","MIN"),
+        ("FLAT","FLAT"),
+        ("UNIT","UNIT"),
+        ("LBS","LBS"),
+    )
+    choice_tipo = (
+        ("Reefer","Reefer"),
+        ("Hi Cube Reefer","Hi Cube Reefer"),
+        ("Box","Box"),
+        ("N.O.R.","N.O.R."),
+        ("Hi Cube","Hi Cube"),
+        ("Dry","Dry"),
+        ("Standard","Standard"),
+        ("Part Container","Part Container"),
+        ("CBM","CBM"),
+        ("Open Top","Open Top"),
+    )
+    choice_movimiento = (
+        ("FCL/FCL","FCL/FCL"),
+        ("FCL/LCL","FCL/LCL"),
+        ("LCL/FCL","LCL/FCL"),
+        ("LCL/LCL","LCL/LCL"),
+        ("CY/CY","CY/CY"),
+        ("CY/SD","CY/SD"),
+        ("SD/SD","SD/SD"),
+        ("SD/CY","SD/CY"),
+        ("SD/CY","SD/CY"),
+        ("Break Bulk","Break Bulk"),
+        ("Ro/Ro","Ro/Ro"),
+    )
+    choice_terminos = (
+        ("FILO","FILO"),
+        ("FIOS","FIOS"),
+        ("FLT","FLT"),
+        ("LIFO","LIFO"),
+        ("LT","LT"),
+    )
+    choice_envase = (
+        ("Bags","Bags"),
+        ("Bales","Bales"),
+        ("Big bags","Big bags"),
+        ("Bing","Bing"),
+        ("Boxes","Boxes"),
+        ("Bulk","Bulk"),
+        ("Bundles","Bundles"),
+        ("Cartons","Cartons"),
+        ("Cases","Cases"),
+        ("Container","Container"),
+        ("Crates","Crates"),
+        ("Cylinder","Cylinder"),
+        ("Declared","Declared"),
+        ("Drums","Drums"),
+        ("Envelope","Envelope"),
+        ("Fireboard","Fireboard"),
+        ("Flexitank","Flexitank"),
+        ("Gallons","Gallons"),
+        ("Jumbo","Jumbo"),
+        ("Lot","Lot"),
+        ("Packages","Packages"),
+        ("Pallets","Pallets"),
+        ("Pieces","Pieces"),
+        ("Pipe","Pipe"),
+        ("Platforms","Platforms"),
+        ("Plywood case","Plywood case"),
+        ("Reels","Reels"),
+        ("Rolls","Rolls"),
+        ("Sacks","Sacks"),
+        ("Set","Set"),
+        ("Skids","Skids"),
+        ("Steel Pallets","Steel Pallets"),
+        ("Tank","Tank"),
+        ("Units","Units"),
+        ("Wooden case","Wooden case"),
+        ("Wooden rack","Wooden rack"),
+    )
     numero = models.IntegerField(blank=True, null=True)
-    unidad = models.CharField(max_length=5, blank=True, null=True)
-    tipo = models.CharField(max_length=20, blank=True, null=True)
-    movimiento = models.CharField(max_length=10, blank=True, null=True)
-    terminos = models.CharField(max_length=5, blank=True, null=True)
+    unidad = models.CharField(max_length=25,choices=choice_unidad)
+    tipo = models.CharField(max_length=20, choices=choice_tipo)
+    movimiento = models.CharField(max_length=30, choices=choice_movimiento)
+    terminos = models.CharField(max_length=5, choices=choice_terminos)
     cantidad = models.FloatField(blank=True, null=True)
     precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     costo = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
@@ -332,7 +415,7 @@ class Envases(models.Model):
     precinto = models.CharField(max_length=100, blank=True, null=True)
     tara = models.FloatField(blank=True, null=True)
     bonifcli = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    envase = models.CharField(db_column='Envase', max_length=15, blank=True, null=True)  
+    envase = models.CharField(db_column='Envase', max_length=15,choices=choice_envase)  # Field name made lowercase.
     bultos = models.IntegerField(blank=True, null=True)
     peso = models.FloatField(db_column='Peso', blank=True, null=True)  
     profit = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
