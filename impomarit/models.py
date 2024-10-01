@@ -31,7 +31,11 @@ class Cargaaerea(models.Model):
     fechaembarque = models.DateTimeField(blank=True, null=True)
     cbm = models.FloatField(blank=True, null=True)
     mercaderia = models.TextField( blank=True, null=True)  # This field type is a guess.
-    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=400, blank=True, null=True)  
+    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=400, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'impmarit_cargaaerea'
 
 class Clavenrohouse(models.Model):
     numero = models.IntegerField(db_column='Numero', unique=True)
@@ -337,7 +341,11 @@ class Envases(models.Model):
     status = models.SmallIntegerField(db_column='Status', blank=True, null=True)  
     fechadevol = models.DateTimeField(db_column='FechaDevol', blank=True, null=True)  
     autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True, null=True)  
-    empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  
+    empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'impmarit_envases'
 
 class Faxes(models.Model):
     numero = models.IntegerField(blank=True, null=True)
@@ -594,6 +602,12 @@ class Traceop(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  
 
 class Conexaerea(models.Model):
+    choice_modo = (
+        ("MARITIMO", "MARITIMO"),
+        ("FLUVIAL", "FLUVIAL"),
+        ("TERRESTRE", "TERRESTRE"),
+        ("AEREO", "AEREO"),
+    )
     numero = models.IntegerField(blank=True, null=True)
     origen = models.CharField(max_length=5, blank=True, null=True)
     destino = models.CharField(max_length=5, blank=True, null=True)
@@ -601,10 +615,15 @@ class Conexaerea(models.Model):
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
     cia = models.CharField(max_length=50, blank=True, null=True)
-    viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  
-    modo = models.CharField(max_length=15, blank=True, null=True)
+    viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)
+    modo = models.CharField(max_length=15,choices=choice_modo)
     horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  
-    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)  
+    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'impmarit_conexaerea'
+
 
 class Serviceaereo(models.Model):
     numero = models.IntegerField(blank=True, null=True)

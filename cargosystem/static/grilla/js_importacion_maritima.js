@@ -997,6 +997,38 @@ $(document).ready(function () {
         }
     });
 
+    //autocomplete rutas house
+    $("#id_origen").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#id_destino").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+
     //botones funcionalidades
 
     //form addmaster
@@ -1244,14 +1276,14 @@ var expandedRow;
     if (!$(event.target).closest('#tabla_importmarit').length) {
         $('#tabla_importmarit tbody tr').removeClass('table-secondary');
     }
-    //tabla de houses en edit master
-    if (!$(event.target).closest('#table_edit_im').length) {
-        $('#table_edit_im tbody tr').removeClass('table-secondary');
-    }
-    //tabla de houses en add master
-    if (!$(event.target).closest('#table_add_im').length) {
-        $('#table_add_im tbody tr').removeClass('table-secondary');
-    }
+//    //tabla de houses en edit master
+//    if (!$(event.target).closest('#table_edit_im').length) {
+//        $('#table_edit_im tbody tr').removeClass('table-secondary');
+//    }
+//    //tabla de houses en add master
+//    if (!$(event.target).closest('#table_add_im').length) {
+//        $('#table_add_im tbody tr').removeClass('table-secondary');
+//    }
 });
     $('#tabla_importmarit tbody').on('click', 'tr', function (event) {
     // Evita que el clic en la tabla dispare la eliminación de la clase
@@ -1650,7 +1682,7 @@ var expandedRow;
                         $("#id_gasto_id_house").val('');
                         alert('Guardado con éxito.');
                         $("#tabla_gastos_house").dataTable().fnDestroy();
-                        $("#ingresar_gasto_houdr").html('Agregar');
+                        $("#ingresar_gasto_house").html('Agregar');
                        get_datos_gastos_house();
                        let aux= document.getElementById('numero_gasto_house').value;
                        $('#gastos_form_house').trigger("reset");
@@ -1673,7 +1705,6 @@ var expandedRow;
 });
     $('#tabla_gastos_house tbody').off('dblclick').on('dblclick', 'tr', function () {
         var data = table_gastos.row(this).data();
-        console.log(data);
         $("#id_gasto_id_house").val(data[0]);
         $("#id_precio_h").val(data[3]);
         $("#id_detalle_h").val(data[5]);
@@ -1701,6 +1732,76 @@ var expandedRow;
         $('#tabla_gastos_house tbody tr').removeClass('selected');
         $(this).addClass('selected');
     });
+
+    //rutas house
+    $('#ingresar_ruta_house').off('click').click(function (event) {
+    event.preventDefault();
+    if (confirm("¿Confirma guardar la ruta?")) {
+        var form = $('#rutas_form_house');
+        var formData = new FormData(form[0]);
+        if (form[0].checkValidity()) {
+        let numero=localStorage.getItem('num_house_gasto');
+            let formData = $("#rutas_form_house").serializeArray();
+            let data = JSON.stringify(formData);
+            miurl = "/importacion_maritima/add_ruta_house/";
+            var toData = {
+                'numero':numero ,
+                'data': data,
+                'csrfmiddlewaretoken': csrf_token,
+            };
+            console.log(data);
+            $.ajax({
+                type: "POST",
+                url: miurl,
+                data: toData,
+                async: false,
+                success: function (resultado) {
+                    if (resultado['resultado'] === 'exito') {
+                        $("#id_house_ruta").val('');
+                        alert('Guardado con éxito.');
+                        $("#tabla_rutas_house").dataTable().fnDestroy();
+                        $("#ingresar_ruta_house").html('Agregar');
+                       get_datos_rutas_house();
+                       let aux= document.getElementById('id_ruta_id').value;
+                       $('#rutas_form_house').trigger("reset");
+                       document.getElementById('id_ruta_id').value=aux;
+                       $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
+                    } else {
+                        alert(resultado['resultado']);
+                    }
+                }
+            });
+        }else{
+            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+            invalidFields.forEach(field => {
+                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+            });
+
+            alert('Debe completar todos los campos.');
+        }
+    }
+});
+    $('#tabla_rutas_house tbody').off('click').on('click', 'tr', function () {
+        $('#tabla_rutas_house tbody tr').removeClass('selected');
+        $(this).addClass('selected');
+    });
+    $('#tabla_rutas_house tbody').off('dblclick').on('dblclick', 'tr', function () {
+        var data = table_rutas.row(this).data();
+        console.log(data);
+        $("#id_house_ruta").val(data[0]);
+        $("#id_origen").val(data[1]);
+        $("#id_destino").val(data[2]);
+        $("#id_vapor").val(data[3]);
+        $("#id_salida").val(data[4]);
+        $("#id_llegada").val(data[5]);
+        $("#id_viaje_ruta").val(data[6]);
+        $("#id_modo_ruta").val(data[8]);
+        $("#id_cia").val(data[7]);
+
+        $("#ingresar_ruta_house").html('Modificar');
+        $("#cancelar_ruta_house").show();
+    });
+
 
     //importar hijo desde seguimeintos edit master form
     var table_seg;
@@ -1997,7 +2098,6 @@ table_add_im = $('#table_add_im').DataTable({
         localStorage.setItem('num_house_gasto', selectedRowN);
     }
 });
-    fun_gastos_house();
     }
 });
 
@@ -2257,7 +2357,6 @@ table_edit_im = $('#table_edit_im').DataTable({
         localStorage.setItem('num_house_gasto', selectedRowN);
     }
 });
-    fun_gastos_house();
     }
 });
 
@@ -2328,7 +2427,6 @@ function importar_hijo_tabla(){
     }else{
     alert('ocurrio error con lugar_importarhijo');
     }
-
     let agregados = JSON.parse(localStorage.getItem('agregados')) || [];
     let agregadosMaster = [];
     let masterData = agregados.find(item => item.master === master);
@@ -2484,7 +2582,14 @@ function guardar_importado_house(data) {
                 if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                     table_edit_im.ajax.reload(null, false);
                 } else {
-                    cargar_hauses_master_edit();
+
+                    if(localStorage.getItem('lugar_importarhijo')==='editmaster'){
+                     cargar_hauses_master_edit();
+                    }else if(localStorage.getItem('lugar_importarhijo')==='addmaster'){
+                     cargar_hauses_master();
+                    }else{
+                    alert('ocurrio error con lugar_importarhijo');
+                    }
                 }
             } else {
                 console.log(response.message);
@@ -2725,13 +2830,230 @@ function gastos_btn_h_click(){
             alert('Debe seleccionar al menos un registro');
         }
 }
-function fun_gastos_house(){
+
+//rutas house
+function get_datos_rutas_house() {
+    let numero=localStorage.getItem('num_house_gasto');
+
+   $("#tabla_rutas_house").dataTable().fnDestroy();
+    table_rutas = $('#tabla_rutas_house').DataTable({
+        "order": [[1, "desc"], [1, "desc"]],
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 10,
+        "language": {
+            url: "/static/datatables/es_ES.json"
+        },
+        "ajax": {
+            "url": "/importacion_maritima/source_rutas_house/",
+            'type': 'GET',
+            "data": function (d) {
+                return $.extend({}, d, {
+                    "numero": numero,
+                });
+            }
+        },
+    });
+}
+function rutas_btn_h_click(){
+  $("#id_house_ruta").val('');
+        let selectedRowId = localStorage.getItem('id_house_gasto');
+        let selectedRowN = localStorage.getItem('num_house_gasto');
+       get_datos_rutas_house();
+        if (selectedRowN!=null) {
+            $('#rutas_form_house').trigger("reset");
+            $("#rutas_modal_house").dialog({
+                autoOpen: true,
+                open: function () {
+                document.getElementById('id_ruta_id').value=selectedRowN;
+                },
+                modal: true,
+                title: "Rutas para el House N°: " + selectedRowN,
+                height: wHeight * 0.90,
+                width: wWidth * 0.50,
+                class: 'modal fade',
+                buttons: [
+                    {
+                        text: "Eliminar",
+                        class: "btn btn-danger",
+                        style: "width:100px",
+                        click: function () {
+                            if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
+                                var row = $('#tabla_rutas_house').DataTable().rows('.selected').data();
+                                if (row.length === 1) {
+                                    miurl = "/importacion_maritima/eliminar_ruta_house/";
+                                    var toData = {
+                                        'id': row[0][0],
+                                        'csrfmiddlewaretoken': csrf_token,
+                                    };
+                                    $.ajax({
+                                        type: "POST",
+                                        url: miurl,
+                                        data: toData,
+                                        success: function (resultado) {
+                                            aux = resultado['resultado'];
+                                            if (aux === 'exito') {
+                                                $("#tabla_rutas_house").dataTable().fnDestroy();
+                                                get_datos_rutas_house();
+                                                alert('Eliminado correctamente');
+                                               // $('#gastos_btn_master').addClass('triggered').trigger('click');
+                                               // mostrarToast('¡Gasto eliminado correctamente!', 'success');
+                                            } else {
+                                                alert(aux);
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    alert('Debe seleccionar un unico registro');
+                                }
+                            }
+                        },
+                    }, {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        },
+                    }],
+                beforeClose: function (event, ui) {
+                   $("#table_rutas_house").dataTable().fnDestroy();
+                }
+            })
+
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+}
+
+//acciones mails house
+$('.email').click(function () {
+        let id = localStorage.getItem('id_house_gasto');
+        let numero = localStorage.getItem('num_house_gasto');
+
+        let title = this.getAttribute('data-tt');
+        var row = $('#table_edit_im').DataTable().rows('.table-secondary').data();
+        $("#id_to").val('');
+        $("#id_cc").val('');
+        $("#id_cco").val('');
+        cco = $("#id_subject").val('');
+        $('#email_add_input').summernote('destroy');
+        $("#arhivos_adjuntos").html('');
+        archivos_adjuntos = {};
+        if (row.length === 1) {
+            get_data_email(row,title,numero,id);
+            $("#id_to").val(row[0][50]);
+            $("#emails_modal").dialog({
+                autoOpen: true,
+                open: function (event, ui) {
+                    $('#email_add_input').summernote('destroy');
+                    $('#email_add_input').summernote({
+                        placeholder: 'Ingrese su texto aqui',
+                        tabsize: 10,
+                        height: wHeight * 0.60,
+                        width: wWidth * 0.88,
+                        toolbar: [
+                            ['style', ['style']],
+                            ['font', ['bold', 'underline', 'clear']],
+                            ['color', ['color']],
+                            ['para', ['ul', 'ol', 'paragraph']],
+                            ['table', ['table']],
+                            ['insert', ['link', 'picture', 'video']],
+                            ['view', ['fullscreen', 'codeview']]
+                        ]
+                    });
+                    $('#email_add_input').focus();
+                },
+                modal: true,
+                title:   title  + " para el house N°: " + numero,
+                height: wHeight * 0.90,
+                width: wWidth * 0.90,
+                class: 'modal fade',
+                buttons: [
+                    {
+                        text: "Enviar",
+                        class: "btn btn-primary",
+                        style: "width:100px",
+                        click: function () {
+                            to = $("#id_to").val();
+                            cc = $("#id_cc").val();
+                            cco = $("#id_cco").val();
+                            subject = $("#id_subject").val();
+                            message = $("#email_add_input").summernote('code');
+                            sendEmail(to,cc,cco,subject,message,title,numero);
+                            $(this).dialog("close");
+                        },
+                    }, {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        },
+                    },],
+                beforeClose: function (event, ui) {
+                    // table.ajax.reload();
+                }
+            })
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+    });
+function get_data_email(row,title,numero,id) {
+    let miurl = "/importacion_maritima/get_data_email/";
+    var toData = {
+        'title': title,
+        'row_number': numero,
+        'id':id,
+        'csrfmiddlewaretoken': csrf_token,
+    };
+    $.ajax({
+        type: "POST",
+        url: miurl,
+        data: toData,
+        async: false,
+        success: function (resultado) {
+            if (resultado['resultado'] === 'exito') {
+                let textarea = document.getElementById("email_add_input");
+//                textarea.innerHTML = resultado['mensaje'];
+                textarea.value = resultado['mensaje'];
+                $("#id_subject").val(resultado['asunto']);
+            } else {
+                alert(resultado['resultado']);
+            }
+        }
+    });
+}
+function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
+    let miurl = "/importacion_maritima/envio_notificacion_seguimiento/";
+    var toData = {
+        'to': to,
+        'cc': cc,
+        'cco': cco,
+        'subject': subject,
+        'message': message,
+        'tipo': title,
+        'seguimiento': seguimiento,
+        'archivos_adjuntos': JSON.stringify(archivos_adjuntos),
+        'csrfmiddlewaretoken': csrf_token,
+    };
+    $.ajax({
+        type: "POST",
+        url: miurl,
+        data: toData,
+        async: false,
+        success: function (resultado) {
+            if (resultado['resultado'] === 'exito') {
+                alert('¡Mensaje enviado con exito!');
+                return true;
+            } else {
+                alert(resultado['resultado']);
+            }
+        }
+    });
 
 
 }
-
-
-//lo limpio despues de guardar el gasto y tambien al abrir el modal al campo hidden id_gasto
 
 
 

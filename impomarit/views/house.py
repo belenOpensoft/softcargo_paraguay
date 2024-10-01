@@ -100,6 +100,7 @@ def add_house_importado(request):
                     reserva = Embarqueaereo()
 
                     reserva.numero = reserva.get_number()
+                    reserva.seguimiento = house_data.get('seguimiento')
                     reserva.awb = house_data.get('awb')
                     reserva.origen = house_data.get('origen')
                     reserva.destino = house_data.get('destino')
@@ -160,6 +161,7 @@ def source_seguimientos_importado(request):
                 resultado.append({
                     "awb": 0,
                     "posicion": 0,
+                    "seguimiento":registro.numero,
                     "origen": registro.origen,
                     "destino": registro.destino,
                     "moneda": registro.moneda,

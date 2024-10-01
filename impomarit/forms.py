@@ -2,7 +2,7 @@
 from bootstrap_modal_forms.forms import BSModalModelForm
 from django import forms
 
-from impomarit.models import Reservas, Embarqueaereo, Servireserva
+from impomarit.models import Reservas, Embarqueaereo, Servireserva, Conexaerea
 from mantenimientos.models import Clientes, Vapores, Ciudades, Monedas, Servicios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -961,3 +961,53 @@ class gastosFormHouse(BSModalModelForm):
     arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'id': 'id_arbitraje_h', 'required': False}), max_digits=12, decimal_places=4, required=True, label='Arbitraje')
     moneda = forms.ChoiceField(widget=forms.Select(attrs={'autocomplete': 'off', 'required': True, 'tabindex': '13', 'id': 'id_moneda_h'}), required=True, label='Moneda', choices=(), initial='')
     socio = forms.ChoiceField(widget=forms.Select(attrs={'autocomplete': 'off', 'required': True, 'tabindex': '13', 'id': 'id_socio_h'}), required=True, label='Socio comercial', choices=(), initial='')
+
+
+class rutasFormHouse(forms.ModelForm):
+    class Meta:
+        model = Conexaerea
+        fields = ('origen',
+                  'destino',
+                  'vapor',
+                  'salida',
+                  'llegada',
+                  'cia',
+                  'viaje',
+                  'modo',
+                  )
+
+        widgets = {
+            'salida': forms.DateInput(attrs={'type': 'date'}),
+            'llegada': forms.DateInput(attrs={'type': 'date'}),
+            'viaje': forms.TextInput(attrs={'id': 'id_viaje_ruta'}),
+            'modo': forms.Select(attrs={'id': 'id_modo_ruta'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+#ocultar este campo
+    numero = forms.IntegerField(
+        widget=forms.TextInput(attrs={"autocomplete": "off", 'required': True, 'id': 'id_ruta_id','readonly': 'readonly',}), required=True,
+        label="Numero")
+
+class emailsForm(forms.Form):
+    # class Meta:
+    #     model = Seguimiento
+    #     fields = ['observaciones',]  # Agrega los campos que deseas actualizar
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.helper = FormHelper()
+    #     self.helper.form_id = 'update-form'
+    #     self.helper.form_method = 'post'
+    #     self.helper.add_input(Submit('submit', 'Actualizar'))
+
+    to = forms.EmailField(label='Para',widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    cc = forms.EmailField(label='CC',widget=forms.EmailInput(attrs={'class': 'form-control'}), required=False)
+    cco = forms.EmailField(label='CCO',widget=forms.EmailInput(attrs={'class': 'form-control'}), required=False)
+    subject = forms.CharField(label='Asunto',widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
+    email = forms.CharField(widget=forms.Textarea(attrs={"id": 'email_add_input',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"100","class":"form-control"}, ), required=False,label="Email", max_length=500)
