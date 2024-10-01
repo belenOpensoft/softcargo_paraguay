@@ -1,0 +1,26 @@
+{% load static %}
+<div id="emails_modal"  style="display: none;">
+ <form id="emails_form">
+     <div>
+         <p>Archivos adjuntos</p>
+         <div id="arhivos_adjuntos_contenedor">
+             <table>
+                 <tr>
+                     <td>
+                         <button type="button" class="btn btn-sm btn-dark" id="adjuntar_btn" aria-label="Adjuntar">Adjuntar archivo</button>
+                     </td>
+                     <td id="arhivos_adjuntos">
+
+                     </td>
+                 </tr>
+             </table>
+
+         </div>
+     </div>
+     <br>
+     {{ form_emails }}
+
+     {{ form.media }}
+    </form>
+</div>
+

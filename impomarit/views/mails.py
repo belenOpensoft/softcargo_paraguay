@@ -31,8 +31,8 @@ def get_data_email_op(request):
     resultado = {}
     if is_ajax(request):
         try:
-            title = 'Routing Order' #title = request.POST['title']
-            row_number = 9155   #request.POST['row_number']
+            title = request.POST['title']
+            row_number = 9155 #request.POST['row_number']
             row = VEmbarqueaereo.objects.get(numero=row_number)
             row2 = Cargaaerea.objects.get(numero=row_number)
             row3 = Envases.objects.get(numero=row_number)
@@ -180,7 +180,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado):
                               '/ CS: ' + str(row.seguimiento) + '- Shipper: ' + str(row.embarcador) + \
                               '; Consignee: ' + str(row.consignatario)
         # CUERPO DEL MENSAJE
-        texto += f'{hora_actual} + <br>'
+        texto += f'{hora_actual} <br>'
         tabla_html1 = "<table border= '1' style='width: 40%; border-collapse: collapse;'>"
         campos1 = [
             ("Fecha: ", format_fecha(fecha_actual)),

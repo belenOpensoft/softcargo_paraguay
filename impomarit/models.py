@@ -31,7 +31,11 @@ class Cargaaerea(models.Model):
     fechaembarque = models.DateTimeField(blank=True, null=True)
     cbm = models.FloatField(blank=True, null=True)
     mercaderia = models.TextField( blank=True, null=True)  # This field type is a guess.
-    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=400, blank=True, null=True)  
+    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=400, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'impmarit_cargaaerea'
 
 class Clavenrohouse(models.Model):
     numero = models.IntegerField(db_column='Numero', unique=True)
@@ -337,7 +341,11 @@ class Envases(models.Model):
     status = models.SmallIntegerField(db_column='Status', blank=True, null=True)  
     fechadevol = models.DateTimeField(db_column='FechaDevol', blank=True, null=True)  
     autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True, null=True)  
-    empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  
+    empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'impmarit_envases'
 
 class Faxes(models.Model):
     numero = models.IntegerField(blank=True, null=True)

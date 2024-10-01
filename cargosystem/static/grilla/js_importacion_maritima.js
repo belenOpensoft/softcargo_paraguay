@@ -1276,14 +1276,14 @@ var expandedRow;
     if (!$(event.target).closest('#tabla_importmarit').length) {
         $('#tabla_importmarit tbody tr').removeClass('table-secondary');
     }
-    //tabla de houses en edit master
-    if (!$(event.target).closest('#table_edit_im').length) {
-        $('#table_edit_im tbody tr').removeClass('table-secondary');
-    }
-    //tabla de houses en add master
-    if (!$(event.target).closest('#table_add_im').length) {
-        $('#table_add_im tbody tr').removeClass('table-secondary');
-    }
+//    //tabla de houses en edit master
+//    if (!$(event.target).closest('#table_edit_im').length) {
+//        $('#table_edit_im tbody tr').removeClass('table-secondary');
+//    }
+//    //tabla de houses en add master
+//    if (!$(event.target).closest('#table_add_im').length) {
+//        $('#table_add_im tbody tr').removeClass('table-secondary');
+//    }
 });
     $('#tabla_importmarit tbody').on('click', 'tr', function (event) {
     // Evita que el clic en la tabla dispare la eliminación de la clase
@@ -1801,6 +1801,7 @@ var expandedRow;
         $("#ingresar_ruta_house").html('Modificar');
         $("#cancelar_ruta_house").show();
     });
+
 
     //importar hijo desde seguimeintos edit master form
     var table_seg;
@@ -2925,6 +2926,134 @@ function rutas_btn_h_click(){
         }
 }
 
+//acciones mails house
+$('.email').click(function () {
+        let id = localStorage.getItem('id_house_gasto');
+        let numero = localStorage.getItem('num_house_gasto');
+
+        let title = this.getAttribute('data-tt');
+        var row = $('#table_edit_im').DataTable().rows('.table-secondary').data();
+        $("#id_to").val('');
+        $("#id_cc").val('');
+        $("#id_cco").val('');
+        cco = $("#id_subject").val('');
+        $('#email_add_input').summernote('destroy');
+        $("#arhivos_adjuntos").html('');
+        archivos_adjuntos = {};
+        if (row.length === 1) {
+            get_data_email(row,title,numero,id);
+            $("#id_to").val(row[0][50]);
+            $("#emails_modal").dialog({
+                autoOpen: true,
+                open: function (event, ui) {
+                    $('#email_add_input').summernote('destroy');
+                    $('#email_add_input').summernote({
+                        placeholder: 'Ingrese su texto aqui',
+                        tabsize: 10,
+                        height: wHeight * 0.60,
+                        width: wWidth * 0.88,
+                        toolbar: [
+                            ['style', ['style']],
+                            ['font', ['bold', 'underline', 'clear']],
+                            ['color', ['color']],
+                            ['para', ['ul', 'ol', 'paragraph']],
+                            ['table', ['table']],
+                            ['insert', ['link', 'picture', 'video']],
+                            ['view', ['fullscreen', 'codeview']]
+                        ]
+                    });
+                    $('#email_add_input').focus();
+                },
+                modal: true,
+                title:   title  + " para el house N°: " + numero,
+                height: wHeight * 0.90,
+                width: wWidth * 0.90,
+                class: 'modal fade',
+                buttons: [
+                    {
+                        text: "Enviar",
+                        class: "btn btn-primary",
+                        style: "width:100px",
+                        click: function () {
+                            to = $("#id_to").val();
+                            cc = $("#id_cc").val();
+                            cco = $("#id_cco").val();
+                            subject = $("#id_subject").val();
+                            message = $("#email_add_input").summernote('code');
+                            sendEmail(to,cc,cco,subject,message,title,numero);
+                            $(this).dialog("close");
+                        },
+                    }, {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        },
+                    },],
+                beforeClose: function (event, ui) {
+                    // table.ajax.reload();
+                }
+            })
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+    });
+function get_data_email(row,title,numero,id) {
+    let miurl = "/importacion_maritima/get_data_email/";
+    var toData = {
+        'title': title,
+        'row_number': numero,
+        'id':id,
+        'csrfmiddlewaretoken': csrf_token,
+    };
+    $.ajax({
+        type: "POST",
+        url: miurl,
+        data: toData,
+        async: false,
+        success: function (resultado) {
+            if (resultado['resultado'] === 'exito') {
+                let textarea = document.getElementById("email_add_input");
+//                textarea.innerHTML = resultado['mensaje'];
+                textarea.value = resultado['mensaje'];
+                $("#id_subject").val(resultado['asunto']);
+            } else {
+                alert(resultado['resultado']);
+            }
+        }
+    });
+}
+function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
+    let miurl = "/importacion_maritima/envio_notificacion_seguimiento/";
+    var toData = {
+        'to': to,
+        'cc': cc,
+        'cco': cco,
+        'subject': subject,
+        'message': message,
+        'tipo': title,
+        'seguimiento': seguimiento,
+        'archivos_adjuntos': JSON.stringify(archivos_adjuntos),
+        'csrfmiddlewaretoken': csrf_token,
+    };
+    $.ajax({
+        type: "POST",
+        url: miurl,
+        data: toData,
+        async: false,
+        success: function (resultado) {
+            if (resultado['resultado'] === 'exito') {
+                alert('¡Mensaje enviado con exito!');
+                return true;
+            } else {
+                alert(resultado['resultado']);
+            }
+        }
+    });
+
+
+}
 
 
 

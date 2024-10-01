@@ -65,6 +65,7 @@ def envio_notificacion_seguimiento(request):
     return HttpResponse(data_json, mimetype)
 
 
+
 def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave=None,seguimiento=None,usuario=None,empresa='', tipo='PRUEBA', archivos=None, emisor=None,name_firma=None):
     correo = CorreoEnviado()
     try:
