@@ -19,6 +19,7 @@ def add_house_impmarit(request):
                 reserva = Embarqueaereo()
 
                 reserva.numero = reserva.get_number()
+                reserva.consolidado=0
                 reserva.awb = form.cleaned_data['awb']
                 reserva.notifcliente = form.cleaned_data['notificar_cliente']
                 reserva.notifagente = form.cleaned_data['notificar_agente']
@@ -100,6 +101,7 @@ def add_house_importado(request):
                     reserva = Embarqueaereo()
 
                     reserva.numero = reserva.get_number()
+                    reserva.consolidado = 0
                     reserva.seguimiento = house_data.get('seguimiento')
                     reserva.awb = house_data.get('awb')
                     reserva.origen = house_data.get('origen')
