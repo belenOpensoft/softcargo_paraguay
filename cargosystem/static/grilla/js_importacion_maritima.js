@@ -1671,7 +1671,6 @@ var expandedRow;
                 'data': data,
                 'csrfmiddlewaretoken': csrf_token,
             };
-            console.log(data);
             $.ajax({
                 type: "POST",
                 url: miurl,
@@ -1749,7 +1748,6 @@ var expandedRow;
                 'data': data,
                 'csrfmiddlewaretoken': csrf_token,
             };
-            console.log(data);
             $.ajax({
                 type: "POST",
                 url: miurl,
@@ -1787,7 +1785,6 @@ var expandedRow;
     });
     $('#tabla_rutas_house tbody').off('dblclick').on('dblclick', 'tr', function () {
         var data = table_rutas.row(this).data();
-        console.log(data);
         $("#id_house_ruta").val(data[0]);
         $("#id_origen").val(data[1]);
         $("#id_destino").val(data[2]);
@@ -1801,6 +1798,82 @@ var expandedRow;
         $("#ingresar_ruta_house").html('Modificar');
         $("#cancelar_ruta_house").show();
     });
+
+    //envases house
+    $('#ingresar_envase_house').off('click').click(function (event) {
+    event.preventDefault();
+    if (confirm("¿Confirma guardar el envase?")) {
+        var form = $('#envases_form_house');
+        var formData = new FormData(form[0]);
+        if (form[0].checkValidity()) {
+        let numero=localStorage.getItem('num_house_gasto');
+            let formData = $("#envases_form_house").serializeArray();
+            let data = JSON.stringify(formData);
+            miurl = "/importacion_maritima/add_envase_house/";
+            var toData = {
+                'numero':numero ,
+                'data': data,
+                'csrfmiddlewaretoken': csrf_token,
+            };
+            $.ajax({
+                type: "POST",
+                url: miurl,
+                data: toData,
+                async: false,
+                success: function (resultado) {
+                    if (resultado['resultado'] === 'exito') {
+                        $("#id_envase_id").val('');
+                        alert('Guardado con éxito.');
+                        $("#tabla_envases_house").dataTable().fnDestroy();
+                        $("#ingresar_envase_house").html('Agregar');
+                       get_datos_envases_house();
+                       let aux= document.getElementById('numero_envase').value;
+                       $('#envases_form_house').trigger("reset");
+                       document.getElementById('numero_envase').value=aux;
+                     //  $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
+                    } else {
+                        alert(resultado['resultado']);
+                    }
+                }
+            });
+        }else{
+            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+            invalidFields.forEach(field => {
+                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+            });
+
+            alert('Debe completar todos los campos.');
+        }
+    }
+});
+    $('#tabla_envases_house tbody').off('click').on('click', 'tr', function () {
+        $('#tabla_envases_house tbody tr').removeClass('selected');
+        $(this).addClass('selected');
+    });
+    $('#tabla_envases_house tbody').off('dblclick').on('dblclick', 'tr', function () {
+    var data = table_envases.row(this).data();
+    $("#id_envase_id").val(data[0]);         // ID del registro
+    $("#id_unidad").val(data[2]);                // Unidad
+    $("#id_tipo").val(data[3]);                  // Tipo
+    $("#id_movimiento").val(data[4]);            // Movimiento
+    $("#id_terminos").val(data[5]);              // Términos
+    $("#id_cantidad").val(data[6]);              // Cantidad
+    $("#id_precio").val(data[7]);                // Precio
+    $("#id_marcas").val(data[8]);                // Marcas
+    $("#id_precinto").val(data[9]);             // Precinto
+    $("#id_tara").val(data[10]);                 // Tara
+    $("#id_bonifcli").val(data[11]);             // Bonificación cliente
+    $("#id_envase").val(data[12]);               // Envase
+    $("#id_bultos").val(data[13]);               // Bultos
+    $("#id_peso").val(data[14]);                 // Peso
+    $("#id_profit").val(data[15]);               // Profit
+    $("#id_nrocontenedor").val(data[16]);        // Número de contenedor
+    $("#id_volumen").val(data[17]);              // Volumen
+
+
+    $("#ingresar_envase_house").html('Modificar');
+    $("#cancelar_envase_house").show();
+});
 
 
     //importar hijo desde seguimeintos edit master form
@@ -1957,6 +2030,7 @@ function getCookie2(name) {
     return cookieValue;
 }
 function cargar_hauses_master(){
+$('#table_add_im').DataTable().destroy();
 //tabla dentro del add-master form
 localStorage.setItem('lugar','add_master');
 let master = localStorage.getItem('master');
@@ -2088,7 +2162,7 @@ table_add_im = $('#table_add_im').DataTable({
     }
 
     var tr = $(this).closest('tr');
-    var row = table_edit_im.row(tr);
+    var row = table_add_im.row(tr);
     var rowData = row.data();
 
     if (rowData) {
@@ -2216,6 +2290,7 @@ $.ajax({
 return name;
 }
 function cargar_hauses_master_edit(){
+$('#table_edit_im').DataTable().destroy();
 //tabla dentro del edit-master form
 localStorage.setItem('lugar','edit_master');
 let master = localStorage.getItem('master_editar');
@@ -2918,6 +2993,101 @@ function rutas_btn_h_click(){
                     }],
                 beforeClose: function (event, ui) {
                    $("#table_rutas_house").dataTable().fnDestroy();
+                }
+            })
+
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+}
+
+//envases house
+function get_datos_envases_house(){
+   let numero=localStorage.getItem('num_house_gasto');
+
+   $("#tabla_envases_house").dataTable().fnDestroy();
+    table_envases = $('#tabla_envases_house').DataTable({
+        "order": [[1, "desc"], [1, "desc"]],
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 10,
+        "language": {
+            url: "/static/datatables/es_ES.json"
+        },
+        "ajax": {
+            "url": "/importacion_maritima/source_envases_house/",
+            'type': 'GET',
+            "data": function (d) {
+                return $.extend({}, d, {
+                    "numero": numero,
+                });
+            }
+        },
+    });
+}
+function envases_btn_h_click(){
+$("#id_envase_id").val('');
+        let selectedRowId = localStorage.getItem('id_house_gasto');
+        let selectedRowN = localStorage.getItem('num_house_gasto');
+       get_datos_envases_house();
+        if (selectedRowN!=null) {
+            $('#envases_form_house').trigger("reset");
+            $("#envases_modal_house").dialog({
+                autoOpen: true,
+                open: function () {
+                document.getElementById('numero_envase').value=selectedRowN;
+                },
+                modal: true,
+                title: "Envases para el House N°: " + selectedRowN,
+                height: wHeight * 0.90,
+                width: wWidth * 0.70,
+                class: 'modal fade',
+                buttons: [
+                    {
+                        text: "Eliminar",
+                        class: "btn btn-danger",
+                        style: "width:100px",
+                        click: function () {
+                            if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
+                                var row = $('#tabla_envases_house').DataTable().rows('.selected').data();
+                                if (row.length === 1) {
+                                    miurl = "/importacion_maritima/eliminar_envases_house/";
+                                    var toData = {
+                                        'id': row[0][0],
+                                        'csrfmiddlewaretoken': csrf_token,
+                                    };
+                                    $.ajax({
+                                        type: "POST",
+                                        url: miurl,
+                                        data: toData,
+                                        success: function (resultado) {
+                                            aux = resultado['resultado'];
+                                            if (aux === 'exito') {
+                                                $("#tabla_envases_house").dataTable().fnDestroy();
+                                                get_datos_envases_house();
+                                                alert('Eliminado correctamente');
+                                               // $('#gastos_btn_master').addClass('triggered').trigger('click');
+                                               // mostrarToast('¡Gasto eliminado correctamente!', 'success');
+                                            } else {
+                                                alert(aux);
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    alert('Debe seleccionar un unico registro');
+                                }
+                            }
+                        },
+                    }, {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        },
+                    }],
+                beforeClose: function (event, ui) {
+                   $("#tabla_envases_house").dataTable().fnDestroy();
                 }
             })
 

@@ -1,4 +1,6 @@
 from django.urls import path
+
+from impomarit.views.envases import source_envases, eliminar_envase, guardar_envases
 from impomarit.views.gastos import add_gasto_master, source_gastos, eliminar_gasto_master, source_gastos_house, \
     eliminar_gasto_house, add_gasto_house
 from impomarit.views.house import add_house, add_house_impmarit, edit_house_function, house_detail, \
@@ -18,9 +20,12 @@ urlpatterns = [
     path(r'source_gastos/', source_gastos, name="source_gastos"),
     path(r'source_gastos_house/', source_gastos_house, name="source_gastos_house"),
     path(r'source_rutas_house/', source_rutas_house, name="source_rutas_house"),
+    path(r'source_envases_house/', source_envases, name="source_envases_house"),
     path(r'source_seguimientos_importado/', source_seguimientos_importado, name="source_seguimientos_importado"),
     path(r'eliminar_gasto_master/', eliminar_gasto_master, name="source_gastos"),
     path(r'eliminar_gasto_house/', eliminar_gasto_house, name="eliminar_gasto_house"),
+    path(r'eliminar_envases_house/', eliminar_envase, name="eliminar_envase_house"),
+    path('add_envase_house/', guardar_envases, name='add_envase_house'),
     path(r'eliminar_ruta_house/', eliminar_ruta, name="eliminar_ruta_house"),
     path(r'source_embarque_aereo/<str:master>/', source_embarque_aereo, name="source_embarque_aereo"), #hauses
     path(r'add_master/', add_importacion_maritima, name="add_master"),

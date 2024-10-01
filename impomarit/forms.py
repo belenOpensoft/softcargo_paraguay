@@ -2,7 +2,7 @@
 from bootstrap_modal_forms.forms import BSModalModelForm
 from django import forms
 
-from impomarit.models import Reservas, Embarqueaereo, Servireserva, Conexaerea
+from impomarit.models import Reservas, Embarqueaereo, Servireserva, Conexaerea, Envases
 from mantenimientos.models import Clientes, Vapores, Ciudades, Monedas, Servicios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -1011,3 +1011,52 @@ class emailsForm(forms.Form):
     cco = forms.EmailField(label='CCO',widget=forms.EmailInput(attrs={'class': 'form-control'}), required=False)
     subject = forms.CharField(label='Asunto',widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
     email = forms.CharField(widget=forms.Textarea(attrs={"id": 'email_add_input',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"100","class":"form-control"}, ), required=False,label="Email", max_length=500)
+
+class envasesFormHouse(BSModalModelForm):
+    class Meta:
+        model = Envases
+        fields = [
+            'id',
+            'numero',
+            'unidad',
+            'tipo',
+            'precio',
+            'movimiento',
+            'terminos',
+            'nrocontenedor',
+            'precio',
+            'marcas',
+            'precinto',
+            'cantidad',
+            'bultos',
+            'envase',
+            'volumen',
+            'peso',
+            'tara',
+            'bonifcli',
+            'tara',
+            'profit',
+        ]  # Agrega los campos que deseas actualizar
+        labels = {
+            'nrocontenedor': 'Contenedor',
+            'bonifcli': 'Bonif',
+            'profit': 'A informar',
+            'unidad': 'Unid/Vta',
+        }
+        widgets = {
+            # 'id': forms.HiddenInput(attrs={'id':'id_envase_id',}),
+             'numero': forms.TextInput(attrs={'id':'numero_envase','readonly':'readonly'}),
+
+        }
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'envases-form'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Actualizar'))
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+    id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False,'id':'id_envase_id'}), required=False,label="ID")

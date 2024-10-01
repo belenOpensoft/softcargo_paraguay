@@ -1,0 +1,113 @@
+{% load static %}
+{% load widget_tweaks %}
+<style>
+
+    #tabla_envases tr:hover::after {
+    content: 'Doble click para editar';
+    color: #f9edbe;
+    position: absolute;
+    right: 30px;
+    background-color: #333;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 3px;
+    }
+</style>
+<div id="envases_modal_house"  style="display: none;">
+
+ <form id="envases_form_house">
+
+   <table class="table">
+    <tbody>
+        <tr>
+            <!-- Primera columna: Numero, Unidad, Tipo -->
+            <td style="text-align: right;">{{ form_envases_house.numero.label }}</td>
+            <td>{{ form_envases_house.numero }}</td>
+            <td style="text-align: right;">{{ form_envases_house.unidad.label }}</td>
+            <td>{{ form_envases_house.id }}{{ form_envases_house.unidad }}</td>
+            <td style="text-align: right;">{{ form_envases_house.tipo.label }}</td>
+            <td>{{ form_envases_house.tipo }}</td>
+        </tr>
+        <tr>
+            <!-- Segunda columna: Movimiento, Terminos, Bonifcli -->
+            <td style="text-align: right;">{{ form_envases_house.movimiento.label }}</td>
+            <td>{{ form_envases_house.movimiento }}</td>
+            <td style="text-align: right;">{{ form_envases_house.terminos.label }}</td>
+            <td>{{ form_envases_house.terminos }}</td>
+            <td style="text-align: right;">{{ form_envases_house.bonifcli.label }}</td>
+            <td>{{ form_envases_house.bonifcli }}</td>
+        </tr>
+        <tr>
+            <!-- Tercera columna: Profit, Precio, Nrocontenedor -->
+            <td style="text-align: right;">{{ form_envases_house.profit.label }}</td>
+            <td>{{ form_envases_house.profit }}</td>
+            <td style="text-align: right;">{{ form_envases_house.precio.label }}</td>
+            <td>{{ form_envases_house.precio }}</td>
+            <td style="text-align: right;">{{ form_envases_house.nrocontenedor.label }}</td>
+            <td>{{ form_envases_house.nrocontenedor }}</td>
+        </tr>
+        <tr>
+            <!-- Cuarta columna: Precinto, Envase, Bultos -->
+            <td style="text-align: right;">{{ form_envases_house.precinto.label }}</td>
+            <td>{{ form_envases_house.precinto }}</td>
+            <td style="text-align: right;">{{ form_envases_house.envase.label }}</td>
+            <td>{{ form_envases_house.envase }}</td>
+            <td style="text-align: right;">{{ form_envases_house.bultos.label }}</td>
+            <td>{{ form_envases_house.bultos }}</td>
+        </tr>
+        <tr>
+            <!-- Quinta columna: Volumen, Peso, Tara -->
+            <td style="text-align: right;">{{ form_envases_house.volumen.label }}</td>
+            <td>{{ form_envases_house.volumen }}</td>
+            <td style="text-align: right;">{{ form_envases_house.peso.label }}</td>
+            <td>{{ form_envases_house.peso }}</td>
+            <td style="text-align: right;">{{ form_envases_house.tara.label }}</td>
+            <td>{{ form_envases_house.tara }}</td>
+        </tr>
+        <tr>
+            <!-- Sexta columna: Marcas, Botones -->
+            <td style="text-align: right;">{{ form_envases_house.marcas.label }}</td>
+            <td>{{ form_envases_house.marcas }}</td>
+             <td style="text-align: right;">{{ form_envases_house.cantidad.label }}</td>
+            <td>{{ form_envases_house.cantidad }}</td>
+            <td colspan="3" class="text-center">
+                <button class="btn btn-dark" id="ingresar_envase_house">Agregar</button>
+                <button class="btn btn-danger" id="cancelar_envase_house">Cancelar</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+     <table id="tabla_envases_house" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+         <tr>
+    <th width="4%"></th>
+    <th class="text-right">Número</th>
+    <th class="text-right">Unidad</th>
+    <th class="text-right">Tipo</th>
+    <th class="text-left">Movimiento</th>
+    <th class="text-left">Términos</th>
+    <th class="text-left">Cantidad</th>
+    <th class="text-left">Precio</th>
+    <th class="text-left">Marcas</th>
+    <th class="text-left">Precinto</th>
+    <th class="text-left">Tara</th>
+    <th class="text-left">Bonifcli</th>
+    <th class="text-left">Envase</th>
+    <th class="text-left">Bultos</th>
+    <th class="text-left">Peso</th>
+    <th class="text-left">Profit</th>
+    <th class="text-left">Contenedor</th>
+    <th class="text-left">Volumen</th>
+</tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+
+    </form>
+</div>
