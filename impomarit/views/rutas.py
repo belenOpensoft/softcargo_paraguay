@@ -3,7 +3,7 @@ import json
 import simplejson
 from django.contrib import messages
 from django.db import IntegrityError
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from impomarit.models import Conexaerea
 
 """ TABLA PUERTO """
@@ -132,6 +132,44 @@ def guardar_ruta(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
+def add_ruta_importado(request):
+    resultado = {}
+    try:
+        # Recibir el número desde el POST o desde los datos JSON
+        data = json.loads(request.body)  # Carga los datos del cuerpo de la solicitud como JSON
+
+        if isinstance(data, list):
+            for envase_data in data:
+                # Crear el registro del modelo Envases
+                registro = Conexaerea()
+
+                # Obtener los campos disponibles del modelo
+                campos = [f.name for f in Conexaerea._meta.fields]
+
+                # Iterar sobre el diccionario y asignar los valores al modelo
+                for nombre_campo, valor_campo in envase_data.items():
+                    if nombre_campo in campos:  # Verificar si el campo existe en el modelo
+                        if valor_campo is not None and len(str(valor_campo)) > 0:
+                            setattr(registro, nombre_campo, valor_campo)
+                        else:
+                            setattr(registro, nombre_campo, None)
+
+                # Guardar el registro en la base de datos
+                registro.save()
+
+            # Retornar el resultado de éxito
+            resultado['resultado'] = 'exito'
+        else:
+            resultado['resultado'] = 'Los datos enviados no son una lista válida.'
+
+    except IntegrityError as e:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = f'Ocurrió un error: {str(e)}'
+
+    # Devolver el resultado en formato JSON
+    return JsonResponse(resultado)
 
 
 def eliminar_ruta(request):

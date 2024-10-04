@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from impomarit.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
-    rutasFormHouse, emailsForm, envasesFormHouse
+    rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse
 from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo
 from mantenimientos.models import Clientes
 from seguimientos.models import Seguimiento
@@ -41,6 +41,7 @@ def master_importacion_maritima(request):
                 'form_rutas_house': rutasFormHouse(),
                 'form_emails': emailsForm(),
                 'form_envases_house': envasesFormHouse(),
+                'form_embarques_house': embarquesFormHouse(),
 
             })
         else:
@@ -48,7 +49,38 @@ def master_importacion_maritima(request):
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
+def house_importacion_maritima(request):
+    try:
+        if request.user.has_perms(["mantenimientos.view_seguimientos",]):
+            opciones_busqueda = {
+                'cliente__icontains': 'CLIENTE',
+                'embarcador__icontains': 'EMBARCADOR',
+                'consignatario__icontains': 'CONSIGNATARIO',
+                'origen_text__icontains': 'ORIGEN',
+                'destino_text__icontains': 'DESTINO',
+                'awb__icontains': 'BL',
+                'hawb__icontains': 'HBL',
+                'vapor__icontains': 'Vapor',
+                'posicion__icontains': 'Posicion',
+                # 'contenedores__icontains': 'Contenedor',
+            }
+            return render(request, 'impormarit/grilla_datos_hd.html',{
+                'form_house': add_house(),
+                'form_edit_house': edit_house(),
+                'opciones_busqueda': opciones_busqueda,
+                'form_gastos': gastosForm(),
+                'form_gastos_house': gastosFormHouse(),
+                'form_rutas_house': rutasFormHouse(),
+                'form_emails': emailsForm(),
+                'form_envases_house': envasesFormHouse(),
+                'form_embarques_house': embarquesFormHouse(),
 
+            })
+        else:
+            raise TypeError('No tiene permisos para realizar esta accion.')
+    except Exception as e:
+        messages.error(request, str(e))
+        return HttpResponseRedirect('/')
 
 param_busqueda = {
     1: 'numero__icontains',
@@ -277,5 +309,35 @@ def get_data_embarque_aereo(registros_filtrados):
     except Exception as e:
         raise TypeError(e)
 
+def source_embarque_consolidado(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        start = int(request.GET.get('start', 0))  # Cambiado a GET
+        length = int(request.GET.get('length', 10))  # Cambiado a GET con un valor por defecto
+        draw = int(request.GET.get('draw', 1))  # Cambiado a GET
+        buscar = request.GET.get('buscar', '')  # Obteniendo el valor de búsqueda
+        que_buscar = request.GET.get('que_buscar', '')  # Otro parámetro de búsqueda
 
+        # Filtrar registros en base a la búsqueda
+        registros = VEmbarqueaereo.objects.filter(consolidado=1)
 
+        if buscar and que_buscar:
+            # Suponiendo que 'que_buscar' sea un campo específico en el modelo, aplicamos filtro dinámico
+            filtros = {f"{que_buscar}__icontains": buscar}
+            registros = registros.filter(**filtros)
+
+        total_records = VEmbarqueaereo.objects.filter(consolidado=1).count()
+        filtered_records = registros.count()
+
+        registros = registros[start:start + length]  # Paginación
+        data = get_data_embarque_aereo(registros)  # Tu función para estructurar los datos
+
+        resultado = {
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': filtered_records,
+            'data': data
+        }
+
+        return JsonResponse(resultado)
+    else:
+        return JsonResponse({"error": "Invalid request"}, status=400)

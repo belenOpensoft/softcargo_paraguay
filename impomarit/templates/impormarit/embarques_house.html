@@ -1,0 +1,136 @@
+{% load static %}
+{% load widget_tweaks %}
+<style>
+
+    #tabla_embarques_house tr:hover::after {
+    content: 'Doble click para editar';
+    color: #f9edbe;
+    position: absolute;
+    right: 30px;
+    background-color: #333;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 3px;
+    }
+</style>
+<div id="embarques_modal_house" style="display: none;">
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Contenido de la primera columna -->
+                    <form id="embarques_form_house">
+                        <table class="table table-sm">
+                           <tbody>
+                                <tr>
+                                    <td style="text-align: right;">{{ form_embarques_house.numero.label }}</td>
+                                    <td>{{ form_embarques_house.numero }}</td>
+                                    <!-- Primera columna: Producto, Bultos, Tipo -->
+                                    <td style="text-align: right;">{{ form_embarques_house.producto.label }}</td>
+                                    <td>{{ form_embarques_house.producto }}</td>
+
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right;">{{ form_embarques_house.bultos.label }}</td>
+                                    <td>{{ form_embarques_house.bultos }}</td>
+                                    <td style="text-align: right;">{{ form_embarques_house.tipo.label }}</td>
+                                    <td>{{ form_embarques_house.tipo }}</td>
+                                </tr>
+                                <tr>
+                                    <!-- Segunda columna: Bruto, Medidas, CBM -->
+                                    <td style="text-align: right;">{{ form_embarques_house.bruto.label }}</td>
+                                    <td>{{ form_embarques_house.bruto }}</td>
+                                    <td style="text-align: right;">{{ form_embarques_house.medidas.label }}</td>
+                                    <td>{{ form_embarques_house.medidas }}</td>
+
+                                </tr>
+                                <tr>
+                                    <!-- Cuarta columna: Mercadería (ocupando todas las columnas) -->
+                                    <td style="text-align: right;">{{ form_embarques_house.mercaderia.label }}</td>
+                                    <td colspan="5">{{ form_embarques_house.mercaderia }}</td>
+                                </tr>
+                                <tr>
+                                    <!-- Quinta columna: Botones -->
+                                    <td style="text-align: right;">{{ form_embarques_house.cbm.label }}</td>
+                                    <td>{{ form_embarques_house.cbm }}</td>
+                                    <td colspan="6" class="text-center">
+                                        <button class="btn btn-dark" id="ingresar_embarque_house">Agregar</button>
+                                        <button class="btn btn-danger" id="cancelar_embarque_house">Cancelar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </form>
+                </div>
+                <div class="col-md-6" style="background-color:#ede1e1">
+                    <!-- Contenido de la segunda columna -->
+                    <br>
+                    <form id="embarques_extra_form">
+                        <table class="table table-sm" border="0">
+                            <tbody>
+                                <tr>
+                                    <!-- Primera columna: Volumen, Tomo Peso, Muestra Flete -->
+                                    <td style="text-align: right;">{{ form_embarques_house.volumen.label }}</td>
+                                    <td>{{ form_embarques_house.volumen }}</td>
+                                    <td rowspan="2">{{ form_embarques_house.tomopeso.label }}{{ form_embarques_house.tomopeso }}</td>
+                                    <td style="text-align: right;">{{ form_embarques_house.muestroflete.label }}</td>
+                                    <td>{{ form_embarques_house.muestroflete }}</td>
+                                </tr>
+                                <tr>
+                                    <!-- Segunda columna: Tarifa Venta, Aplicable -->
+                                    <td style="text-align: right;">{{ form_embarques_house.tarifaventa.label }}</td>
+                                    <td>{{ form_embarques_house.tarifaventa }}</td>
+                                    <td style="text-align: right;">{{ form_embarques_house.aplicable.label }}</td>
+                                    <td>{{ form_embarques_house.aplicable }}</td>
+                                </tr>
+                                <tr>
+                                    <!-- Tercera columna: Tarifa Compra, Tipo Bonificación Cliente, Número -->
+                                    <td style="text-align: right;">{{ form_embarques_house.tarifacompra.label }}</td>
+                                    <td>{{ form_embarques_house.tarifacompra }}</td>
+                                    <td rowspan="2">{{ form_embarques_house.tipobonifcli.label }}{{ form_embarques_house.tipobonifcli }}</td>
+                                    <td style="text-align: right;">{{ form_embarques_house.numero_e.label }}</td>
+                                    <td>{{ form_embarques_house.numero_e }}</td>
+                                </tr>
+                                <tr>
+                                    <!-- Cuarta columna: Tarifa Profit, Bonificación Cliente -->
+                                    <td style="text-align: right;">{{ form_embarques_house.tarifaprofit.label }}</td>
+                                    <td>{{ form_embarques_house.tarifaprofit }}</td>
+                                    <td style="text-align: right;"></td>
+                                    <td>{{ form_embarques_house.bonifcli }}</td>
+                                </tr>
+                                <tr>
+                                    <!-- Quinta columna: Tarifa Fija -->
+                                    <td style="text-align: right;">{{ form_embarques_house.tarifafija.label }}</td>
+                                    <td colspan="4">{{ form_embarques_house.tarifafija }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <table id="tabla_embarques_house" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+            <tr>
+                <th width="4%"></th>
+                <th class="text-right">Producto</th>
+                <th class="text-right">Bultos</th>
+                <th class="text-left">Tipo</th>
+                <th class="text-left">Peso bruto</th>
+                <th class="text-left">Medidas</th>
+                <th class="text-left">Volumen</th>
+                <th class="text-left">Descripcion</th>
+                <th class="text-left">MR</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
+
+</div>
