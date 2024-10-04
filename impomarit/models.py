@@ -22,6 +22,45 @@ class Attachmadre(models.Model):
     restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  
 
 class Cargaaerea(models.Model):
+    choice_tipo = (
+        ("", "---------"),
+        ("Bags", "Bags"),
+        ("Bales", "Bales"),
+        ("Big bags", "Big bags"),
+        ("Bing", "Bing"),
+        ("Boxes", "Boxes"),
+        ("Bulk", "Bulk"),
+        ("Bundles", "Bundles"),
+        ("Cartons", "Cartons"),
+        ("Cases", "Cases"),
+        ("Container", "Container"),
+        ("Crates", "Crates"),
+        ("Cylinder", "Cylinder"),
+        ("Declared", "Declared"),
+        ("Drums", "Drums"),
+        ("Envelope", "Envelope"),
+        ("Fireboard", "Fireboard"),
+        ("Flexitank", "Flexitank"),
+        ("Gallons", "Gallons"),
+        ("Jumbo", "Jumbo"),
+        ("Lot", "Lot"),
+        ("Packages", "Packages"),
+        ("Pallets", "Pallets"),
+        ("Pieces", "Pieces"),
+        ("Pipe", "Pipe"),
+        ("Platforms", "Platforms"),
+        ("Plywood case", "Plywood case"),
+        ("Reels", "Reels"),
+        ("Rolls", "Rolls"),
+        ("Sacks", "Sacks"),
+        ("Set", "Set"),
+        ("Skids", "Skids"),
+        ("Steel Pallets", "Steel Pallets"),
+        ("Tank", "Tank"),
+        ("Units", "Units"),
+        ("Wooden case", "Wooden case"),
+        ("Wooden rack", "Wooden rack"),
+    )
     numero = models.IntegerField(blank=True, null=True)
     producto = models.SmallIntegerField(blank=True, null=True)
     bultos = models.IntegerField(blank=True, null=True)
@@ -261,6 +300,7 @@ class VEmbarqueaereo(models.Model):
     pais_consignatario = models.CharField(max_length=50, null=True, blank=True, default=None)
     terminos = models.CharField(max_length=3, null=True, blank=True, default=None)
     pago_flete = models.CharField(max_length=1, null=True, blank=True, default=None)
+    consolidado = models.CharField(max_length=1, null=True, blank=True, default=None)
 
     class Meta:
         managed = False

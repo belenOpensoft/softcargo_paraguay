@@ -1,13 +1,14 @@
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
 import json
-from impomarit.models import Embarqueaereo
+from impomarit.models import Embarqueaereo, Reservas
 from mantenimientos.models import Vendedores
-from django.http import JsonResponse, Http404, HttpResponseRedirect
+from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from django.db import IntegrityError
 from impomarit.forms import add_house, edit_house
-from seguimientos.models import Seguimiento
+from seguimientos.models import Seguimiento, Serviceaereo, Envases, Conexaerea
+import re
+from datetime import datetime
 
 
 @login_required(login_url="/")
@@ -17,8 +18,9 @@ def add_house_impmarit(request):
             form = add_house(request.POST)
             if form.is_valid():
                 reserva = Embarqueaereo()
-
+                reserva.fechaingreso = datetime.now()
                 reserva.numero = reserva.get_number()
+                reserva.consolidado = request.POST.get('consolidado', 0)
                 reserva.awb = form.cleaned_data['awb']
                 reserva.notifcliente = form.cleaned_data['notificar_cliente']
                 reserva.notifagente = form.cleaned_data['notificar_agente']
@@ -87,6 +89,32 @@ def add_house_impmarit(request):
             'errors': {}
         })
 
+def generar_posicion(request):
+    fecha_actual = datetime.now()
+    anio_actual = fecha_actual.year
+    mes_actual = fecha_actual.strftime('%m')
+
+    ultima_reserva = Embarqueaereo.objects.filter(fechaingreso__year=anio_actual).order_by('-id').first()
+
+    if ultima_reserva and ultima_reserva.posicion:
+        ultima_posicion = ultima_reserva.posicion
+        match = re.match(rf"IM{mes_actual}-(\d+)-\d{{4}}", ultima_posicion)
+
+        if match:
+            # Incrementar el código numérico
+            ultimo_codigo = int(match.group(1))
+            nuevo_codigo = str(ultimo_codigo + 1).zfill(5)
+        else:
+            nuevo_codigo = "00001"
+    else:
+        nuevo_codigo = "00001"
+
+    nueva_posicion = f"IM{mes_actual}-{nuevo_codigo}-{anio_actual}"
+
+    # Devolver la posición generada como JSON
+    return JsonResponse({'posicion': nueva_posicion})
+
+#importados#
 def add_house_importado(request):
     try:
         if request.method == 'POST':
@@ -94,12 +122,14 @@ def add_house_importado(request):
             data = json.loads(request.body)
 
             if isinstance(data, list):
+                numeros_guardados = []
                 # Iteramos sobre cada elemento en la lista
                 for house_data in data:
                     # Crear la instancia de Embarqueaereo para cada registro
                     reserva = Embarqueaereo()
-
+                    reserva.fechaingreso = datetime.now()
                     reserva.numero = reserva.get_number()
+                    reserva.consolidado = house_data.get('consolidado', 0)
                     reserva.seguimiento = house_data.get('seguimiento')
                     reserva.awb = house_data.get('awb')
                     reserva.origen = house_data.get('origen')
@@ -130,7 +160,12 @@ def add_house_importado(request):
 
                     reserva.save()
 
-                return JsonResponse({'success': True, 'message': 'Todos los houses agregados con éxito'})
+                    numeros_guardados.append({
+                        "numero": reserva.numero,
+                        "seguimiento": reserva.seguimiento
+                    })
+
+                return JsonResponse({'success': True, 'message': 'Todos los houses agregados con éxito','numeros_guardados': numeros_guardados})
             else:
                 return JsonResponse({'success': False, 'message': 'Los datos enviados no son una lista válida.'})
 
@@ -192,6 +227,119 @@ def source_seguimientos_importado(request):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
+def source_gastos_importado(request):
+    try:
+        data = json.loads(request.body)
+        #numeros de los seguimientos
+        ids = data.get('ids', [])
+
+        registros = Serviceaereo.objects.filter(numero__in=ids)
+
+        if not registros.exists():
+            # Si no hay registros, devolver un array vacío
+            return JsonResponse({"data": []}, safe=False)
+
+        resultado = []
+        for registro in registros:
+            resultado.append({
+                "numero": 0,
+                "seguimiento_control":registro.numero,
+                "servicio": registro.servicio,
+                "secomparte": registro.secomparte,
+                "moneda": registro.moneda,
+                "precio": registro.precio,
+                "arbitraje": registro.arbitraje,
+                "tipogasto": registro.tipogasto,
+                "pinformar": registro.pinformar,
+                "notomaprofit": registro.notomaprofit,
+                "modo": registro.modo,
+                "socio": registro.socio,
+                "detalle": registro.detalle,
+            })
+
+        return JsonResponse({"data": resultado}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+def source_envases_importado(request):
+    try:
+        data = json.loads(request.body)
+        #numeros de los seguimientos
+        ids = data.get('ids', [])
+
+        registros = Envases.objects.filter(numero__in=ids)
+
+        if not registros.exists():
+            # Si no hay registros, devolver un array vacío
+            return JsonResponse({"data": []}, safe=False)
+
+        resultado = []
+        for registro in registros:
+            resultado.append({
+                "numero": 0,
+                "seguimiento_control": registro.numero,
+                "unidad": registro.unidad,
+                "tipo": registro.tipo,
+                "movimiento": registro.movimiento,
+                "precio": registro.precio,
+                "costo": registro.costo,
+                "marcas": registro.marcas,
+                "precinto": registro.precinto,
+                "tara": registro.tara,
+                "envase": registro.envase,
+                "terminos": registro.terminos,
+                "cantidad": registro.cantidad,
+                "bultos": registro.bultos,
+                "peso": registro.peso,
+                "profit": registro.profit,
+                "volumen": registro.volumen,
+            })
+
+        #field_names = [field.name for field in Envases._meta.fields]
+       # resultado = list(registros.values(*field_names))
+
+        return JsonResponse({"data": resultado}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+def source_rutas_importado(request):
+    try:
+        data = json.loads(request.body)
+        #numeros de los seguimientos
+        ids = data.get('ids', [])
+
+        registros = Conexaerea.objects.filter(numero__in=ids)
+
+        if not registros.exists():
+            # Si no hay registros, devolver un array vacío
+            return JsonResponse({"data": []}, safe=False)
+
+        resultado = []
+        for registro in registros:
+            resultado.append({
+                "numero": 0,
+                "seguimiento_control": registro.numero,
+                "origen": registro.origen,
+                "destino": registro.destino,
+                "vapor": registro.vapor,
+                "salida": registro.salida,
+                "llegada": registro.llegada,
+                "cia": registro.cia,
+                "viaje": registro.viaje,
+                "modo": registro.modo,
+            })
+
+        # field_names = [field.name for field in Conexaerea._meta.fields]
+        # resultado = list(registros.values(*field_names))
+
+        return JsonResponse({"data": resultado}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+###
 
 def house_detail(request):
     if request.method == 'GET':
@@ -266,15 +414,16 @@ def edit_house_function(request, numero):
         if form.is_valid():
             #30 campos
             house.transportista = form.cleaned_data['transportista_i']
+            house.vendedor = form.cleaned_data['vendedor_i']
             house.agente = form.cleaned_data['agente_i']
             house.consignatario = form.cleaned_data['consignatario_i']
             house.armador = form.cleaned_data['armador_i']
-            house.transportista = form.cleaned_data['embarcador_i']
-            house.agente = form.cleaned_data['cliente_i']
-            house.consignatario = form.cleaned_data['vendedor_i']
+            house.embarcador = form.cleaned_data['embarcador_i']
+            house.cliente = form.cleaned_data['cliente_i']
             house.ageventas = form.cleaned_data['agventas_i']
             house.agecompras = form.cleaned_data['agcompras_i']
 
+            house.consolidado = request.POST.get('consolidado', 0)
             house.vapor = form.cleaned_data['vapor']
             house.viaje = form.cleaned_data.get('viaje', 0) if form.cleaned_data.get('viaje') not in [None,''] else 0
             house.moneda = form.cleaned_data['moneda']
@@ -315,3 +464,61 @@ def edit_house_function(request, numero):
                     'message': f'Error: {str(e)}',
                     'errors': {}
                 })
+
+def eliminar_house(request):
+    resultado = {}
+    try:
+        id = request.POST['id']
+        Embarqueaereo.objects.get(id=id).delete()
+        resultado['resultado'] = 'exito'
+    except IntegrityError as e:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+    data_json = json.dumps(resultado)
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+
+def source_embarque_id(request):
+    try:
+        if request.method == 'POST':
+            id_embarque = request.POST.get('id')
+
+            if not id_embarque:
+                return JsonResponse({'error': 'ID no proporcionada'}, status=400)
+
+            try:
+                embarque = Embarqueaereo.objects.get(id=id_embarque)
+                seguimiento = embarque.seguimiento
+                return JsonResponse({'seguimiento': seguimiento})
+
+            except Embarqueaereo.DoesNotExist:
+                return JsonResponse({'error': 'Embarque no encontrado'}, status=404)
+
+        else:
+            return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+def source_seguimiento_id(request):
+    try:
+        if request.method == 'POST':
+            numero_seg = request.POST.get('id')
+
+            if not numero_seg:
+                return JsonResponse({'error': 'ID no proporcionada'}, status=400)
+
+            try:
+                seguimiento = Seguimiento.objects.get(numero=numero_seg)
+                id = seguimiento.id
+                return JsonResponse({'id': id})
+
+            except Embarqueaereo.DoesNotExist:
+                return JsonResponse({'error': 'Embarque no encontrado'}, status=404)
+
+        else:
+            return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

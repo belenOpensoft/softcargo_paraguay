@@ -301,7 +301,7 @@ def add_gasto_house(request):
         modo = form_data.get('modo')
         socio = form_data.get('socio')
         detalle = form_data.get('detalle')
-        empresa = form_data.get('empresa')
+        empresa = form_data.get('empresa',0)
         reembolsable = form_data.get('reembolsable')
 
         # Verificar si el registro ya existe
@@ -342,6 +342,53 @@ def add_gasto_house(request):
 
     # Retornar el resultado en formato JSON
     return JsonResponse(resultado)
+
+def add_gasto_importado(request):
+    try:
+        if request.method == 'POST':
+            # Asumimos que el array de datos llega en formato JSON
+            data = json.loads(request.body)
+
+            if isinstance(data, list):
+                # Iteramos sobre cada elemento en la lista
+                for gasto_data in data:
+                    # Crear la instancia de Serviceaereo para cada registro
+                    registro = Serviceaereo()
+
+                    # Asignar los valores desde el JSON al modelo
+                    registro.numero = gasto_data.get('numero')
+                    registro.servicio = gasto_data.get('servicio')
+                    registro.secomparte = gasto_data.get('secomparte')
+                    registro.moneda = gasto_data.get('moneda')
+                    registro.precio = gasto_data.get('precio')
+                    registro.arbitraje = gasto_data.get('arbitraje')
+                    registro.tipogasto = gasto_data.get('tipogasto')
+                    registro.pinformar = gasto_data.get('pinformar')
+                    registro.notomaprofit = gasto_data.get('notomaprofit')
+                    registro.modo = gasto_data.get('modo')
+                    registro.socio = gasto_data.get('socio')
+                    registro.detalle = gasto_data.get('detalle')
+
+                    # Guardar el registro en la base de datos
+                    registro.save()
+
+
+                return JsonResponse({'success': True, 'message': 'Todos los gastos agregados con éxito'})
+            else:
+                return JsonResponse({'success': False, 'message': 'Los datos enviados no son una lista válida.'})
+
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Método no permitido.'
+            })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Ocurrió un error: {str(e)}',
+            'errors': {}
+        })
 
 
 def eliminar_gasto_house(request):
