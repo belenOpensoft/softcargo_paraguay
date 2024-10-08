@@ -2045,7 +2045,7 @@ var expandedRow;
                 row.addClass('highlighted');
             } else {
                 seleccionados = seleccionados.filter(item => item !== id);
-                row.removeClass('highlighted');  /
+                row.removeClass('highlighted');
             }
 
             localStorage.setItem('seleccionados', JSON.stringify(seleccionados));
