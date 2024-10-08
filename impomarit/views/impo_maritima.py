@@ -489,3 +489,27 @@ def descargar_archivo(request,id):
         return response
     except Exception as e:
         resultado['resultado'] = str(e)
+
+def modificar_fecha_retiro(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+
+            master = data.get('master')
+            fecha = data.get('fecha')
+
+            registros = Embarqueaereo.objects.filter(awb=master)
+
+            if not registros.exists():
+                return JsonResponse({'status': 'error', 'message': 'No se encontraron registros con el master especificado.'}, status=404)
+
+            for registro in registros:
+                registro.fecharetiro = fecha
+                registro.save()
+
+            return JsonResponse({'status': 'success', 'message': f'Se actualizaron {registros.count()} registros correctamente.'})
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)

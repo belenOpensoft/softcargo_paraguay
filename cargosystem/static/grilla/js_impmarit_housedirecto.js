@@ -167,7 +167,7 @@ $(document).ready(function () {
                     localStorage.removeItem('lugar_editar');
                     }
                 });
-
+                $("td:contains('Master')").css('visibility', 'hidden');
                 $('#id_awbhijo').css('display','none');
                 $('#id_awbhijo').val(0);
                 generar_posicion();

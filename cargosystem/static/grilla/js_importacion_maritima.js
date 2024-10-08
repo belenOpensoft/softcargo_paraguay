@@ -1163,7 +1163,7 @@ var expandedRow;
             });
         }
     });
-     //modificar
+     //modificar master
     $('#tabla_importmarit tbody').on('click', 'td', function () {
 
 
@@ -1212,7 +1212,7 @@ var expandedRow;
                         },
                     ],
                     beforeClose: function (event, ui) {
-                        // Optional: Clear localStorage or perform other actions before closing
+                        localStorage.removeItem('fecha_editada_master');
                     }
                 });
 
@@ -1243,6 +1243,13 @@ var expandedRow;
             success: function (response) {
                 if (response.success) {
                     alert('Datos actualizados con éxito');
+                    if(localStorage.getItem('fecha_editada_master')){
+                        if(confirm('Desea modificar la fecha en los houses (si existen)?')){
+                        modificar_fecha_retiro(0);
+                        }else{
+                        localStorage.removeItem('fecha_editada_master');
+                        }
+                    }
                     table.ajax.reload(null, false);
                     $('#edit_master_modal').dialog('close');
                     $('#table_edit_im').DataTable().destroy();
@@ -1268,6 +1275,40 @@ var expandedRow;
                 $('#loading_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#discharge_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
     });
+    //evento al modificar fecha del master
+   $('#id_fecha_e').on('change', function() {
+
+        let vector = JSON.parse(localStorage.getItem('fecha_editada_master')) || [];
+        var nuevaFecha = $(this).val();
+        let master = localStorage.getItem('master_editar');
+
+        let itemEncontrado = vector.find(item => item.master === master);
+
+        if (!itemEncontrado) {
+            vector.push({ master: master, fecha: nuevaFecha });
+        } else {
+            itemEncontrado.fecha = nuevaFecha;
+        }
+       localStorage.setItem('fecha_editada_master', JSON.stringify(vector));
+
+});
+    //evento modificar fecha del house
+   $('#fecha_retiro_e').on('change', function() {
+
+   let vector = JSON.parse(localStorage.getItem('fecha_editada_house')) || [];
+    var nuevaFecha = $(this).val();
+    let master = $('#id_awbhijo_e').val();
+
+    let itemEncontrado = vector.find(item => item.master === master);
+
+    if (!itemEncontrado) {
+        vector.push({ master: master, fecha: nuevaFecha });
+    } else {
+        itemEncontrado.fecha = nuevaFecha;
+    }
+    localStorage.setItem('fecha_editada_house', JSON.stringify(vector));
+
+});
 
     //evento fila marcada
     $(document).on('click', function (event) {
@@ -1448,6 +1489,13 @@ var expandedRow;
             success: function (response) {
                 if (response.success) {
                     alert('Datos actualizados con éxito');
+                    if(localStorage.getItem('fecha_editada_house')){
+                        if(confirm('Desea modificar la fecha en los demás houses (si existen)?')){
+                        modificar_fecha_retiro(1);
+                        }else{
+                        localStorage.removeItem('fecha_editada_house');
+                        }
+                    }
                     if(lugar==='add_master'){
                     table_add_im.ajax.reload(null, false);
                     }else if(lugar==='edit_master'){
@@ -2385,7 +2433,7 @@ table_add_im = $('#table_add_im').DataTable({
 
                     ],
                     beforeClose: function (event, ui) {
-
+                    localStorage.removeItem('fecha_editada_house');
                     }
 
                 });
@@ -2435,15 +2483,17 @@ table_add_im = $('#table_add_im').DataTable({
 }
 function fillFormWithDataHouse(data) {
 
-        $('#transportista_addh_e').val(getNameById(data.transportista_e));
-        $('#agente_addh_e').val(getNameById(data.agente_e));
-        $('#consignatario_addh_e').val(getNameById(data.consignatario_e));
-        $('#armador_addh_e').val(getNameById(data.armador_e));
-        $('#cliente_addh_e').val(getNameById(data.cliente_e));
-        $('#vendedor_addh_e').val(getNameByIdVendedor(data.vendedor_e));
-        $('#embarcador_addh_e').val(getNameById(data.embarcador_e));
-        $('#agecompras_addh_e').val(getNameById(data.agcompras_e));
-        $('#ageventas_addh_e').val(getNameById(data.agventas_e));
+        $('#transportista_addh_e').val(!data.transportista_e || data.transportista_e === 0 ? '' : getNameById(data.transportista_e));
+        $('#agente_addh_e').val(!data.agente_e || data.agente_e === 0 ? '' : getNameById(data.agente_e));
+        $('#consignatario_addh_e').val(!data.consignatario_e || data.consignatario_e === 0 ? '' : getNameById(data.consignatario_e));
+        $('#armador_addh_e').val(!data.armador_e || data.armador_e === 0 ? '' : getNameById(data.armador_e));
+        $('#cliente_addh_e').val(!data.cliente_e || data.cliente_e === 0 ? '' : getNameById(data.cliente_e));
+        $('#vendedor_addh_e').val(!data.vendedor_e || data.vendedor_e === 0 ? '' : getNameByIdVendedor(data.vendedor_e));
+        $('#embarcador_addh_e').val(!data.embarcador_e || data.embarcador_e === 0 ? '' : getNameById(data.embarcador_e));
+        $('#agecompras_addh_e').val(!data.agcompras_e || data.agcompras_e === 0 ? '' : getNameById(data.agcompras_e));
+        $('#ageventas_addh_e').val(!data.agventas_e || data.agventas_e === 0 ? '' : getNameById(data.agventas_e));
+
+
 
         $('#armador_ih_e').val(data.armador_e);
         $('#transportista_ih_e').val(data.transportista_e);
@@ -2496,10 +2546,10 @@ function fillFormWithData(data) {
 
     localStorage.setItem('master_editar',data.awd_e);
     localStorage.setItem('posicion_editar',data.posicion_e);
-    $('#transportista_edit').val(getNameById(data.transportista_e));
-    $('#agente_edit').val(getNameById(data.agente_e));
-    $('#consignatario_edit').val(getNameById(data.consignatario_e));
-    $('#armador_edit').val(getNameById(data.armador_e));
+    $('#transportista_edit').val(!data.transportista_e || data.transportista_e === 0 ? '' : getNameById(data.transportista_e));
+    $('#agente_edit').val(!data.agente_e || data.agente_e === 0 ? '' : getNameById(data.agente_e));
+    $('#consignatario_edit').val(!data.consignatario_e || data.consignatario_e === 0 ? '' : getNameById(data.consignatario_e));
+    $('#armador_edit').val(!data.armador_e || data.armador_e === 0 ? '' : getNameById(data.armador_e));
 
     $('#edit_master_form [name="transportista_ie"]').val(data.transportista_e);
     $('#edit_master_form [name="agente_ie"]').val(data.agente_e);
@@ -2516,6 +2566,7 @@ function fillFormWithData(data) {
     $('#edit_master_form [name="pagoflete_e"]').val(data.pagoflete_e);
     $('#edit_master_form [name="trafico_e"]').val(data.trafico_e);
     $('#edit_master_form [name="fecha_e"]').val(formatDateToYYYYMMDD(data.fecha_e));
+    $('#edit_master_form [name="fecha_e"]').val(data.fecha_e ? formatDateToYYYYMMDD(data.fecha_e) : '');
     $('#edit_master_form [name="cotizacion_e"]').val(data.cotizacion_e);
     $('#edit_master_form [name="destino_e"]').val(data.destino_e);
     $('#edit_master_form [name="discharge_e"]').val(data.discharge_e);
@@ -3944,7 +3995,7 @@ function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
 
 
 }
-
+//adjuntar archivos mails
 function get_datos_archivos() {
    let table_archivos = $('#tabla_archivos').DataTable({
         "order": [[1, "desc"], [1, "desc"]],
@@ -3988,6 +4039,48 @@ function eliminar_adjunto(id) {
       mostrarToast('¡Adjunto eliminado con exito!', 'danger');
   }
 }
+
+//modificar fechas
+function modificar_fecha_retiro(x){
+    let vector = null;
+    let master = null;
+    let fecha = null;
+    const csrftoken = getCookie2('csrftoken');
+    if (x == 0) {
+        // master
+        vector = JSON.parse(localStorage.getItem('fecha_editada_master'));
+    } else {
+        // house
+        vector = JSON.parse(localStorage.getItem('fecha_editada_house'));
+    }
+    if (vector && vector.length > 0) {
+        let objeto = vector[0];
+        master = objeto.master;
+        fecha = objeto.fecha;
+    }
+    $.ajax({
+        type: "POST",
+        url: "/importacion_maritima/modificar_fecha_retiro/",
+        data: JSON.stringify({ master: master, fecha: fecha }),
+        contentType: "application/json",
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        success: function(response) {
+
+            if (x == 0) {
+                localStorage.removeItem('fecha_editada_master');
+            } else {
+                localStorage.removeItem('fecha_editada_house');
+            }
+
+        },
+        error: function(error) {
+            console.log('Error:', error);
+        }
+    });
+}
+
 
 //}else if(lugar==='edit_directo'){
 //$('#tabla_house_directo').DataTable().ajax.reload(null, false);
