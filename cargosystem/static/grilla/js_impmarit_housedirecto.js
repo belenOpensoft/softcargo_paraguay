@@ -451,6 +451,7 @@ function guardar_importado_house_directo(data, seguimientos) {
                 traer_envases_importado(seguimientos,response.numeros_guardados);
                 traer_rutas_importado(seguimientos, response.numeros_guardados);
                 traer_embarques_importado(seguimientos, response.numeros_guardados);
+                traer_archivos_importado(seguimientos, response.numeros_guardados);
                 //traer embarques
                 alert('House/s importado/s con éxito');
                 $("#importar_hijo_modal").dialog('close');

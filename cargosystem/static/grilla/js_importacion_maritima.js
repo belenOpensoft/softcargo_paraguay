@@ -2019,40 +2019,36 @@ var expandedRow;
 
         });
     $('#tabla_seguimiento_IH tbody').on('click', 'tr', function () {
-    let table = $('#tabla_seguimiento_IH').DataTable();
+        let table = $('#tabla_seguimiento_IH').DataTable();
 
-    // Si la fila ya tiene la clase 'highlighted', quítasela y desmarca el checkbox
-    if ($(this).hasClass('highlighted') ) {
-        $(this).removeClass('highlighted');
-        // Encuentra el checkbox en la fila y desmárcalo
-        $(this).find('input[type="checkbox"]').prop('checked', false);
-    } else {
+        // Si la fila ya tiene la clase 'highlighted', quítasela y desmarca el checkbox
+        if ($(this).hasClass('highlighted') ) {
+            $(this).removeClass('highlighted');
+        } else {
+            $(this).addClass('highlighted');
+        }
 
-        $(this).addClass('highlighted');
-        // Marca el checkbox en la fila seleccionada
-        $(this).find('input[type="checkbox"]').prop('checked', true);
-    }
+            let checkbox = $(this).find('.checkbox_seleccion');
+            checkbox.prop('checked', !checkbox.prop('checked'));
+            checkbox.trigger('change');
+
 });
     $('#tabla_seguimiento_IH tbody').on('change', '.checkbox_seleccion', function () {
-            let id = $(this).val();  // Obtener el valor del checkbox
+            let id = $(this).val();
             let seleccionados = JSON.parse(localStorage.getItem('seleccionados')) || [];
-            let row = $(this).closest('tr');  // Obtener la fila (row) que contiene el checkbox
+            let row = $(this).closest('tr');
 
             if (this.checked) {
-                // Si el checkbox está marcado, agregar el ID al array y la clase 'highlighted'
                 if (!seleccionados.includes(id)) {
                     seleccionados.push(id);
                 }
-                row.addClass('highlighted');  // Agregar clase a la fila
+                row.addClass('highlighted');
             } else {
-                // Si el checkbox está desmarcado, eliminar el ID del array y quitar la clase 'highlighted'
                 seleccionados = seleccionados.filter(item => item !== id);
-                row.removeClass('highlighted');  // Quitar clase de la fila
+                row.removeClass('highlighted');  /
             }
 
-            // Guardar el estado actualizado en localStorage
             localStorage.setItem('seleccionados', JSON.stringify(seleccionados));
-            console.log(seleccionados);
         });
 
     //importar hijos desde seguimientos add master form
@@ -2951,7 +2947,8 @@ function guardar_importado_house(data, seguimientos) {
                 traer_envases_importado(seguimientos,response.numeros_guardados);
                 traer_rutas_importado(seguimientos, response.numeros_guardados);
                 traer_embarques_importado(seguimientos, response.numeros_guardados);
-                //traer archivos desde el seguimiento
+                traer_archivos_importado(seguimientos, response.numeros_guardados);
+
                 alert('House/s importado/s con éxito');
                agregarASeleccionados();
                 $("#importar_hijo_modal").dialog('close');
@@ -3226,6 +3223,63 @@ function guardar_embarque_importado(data){
             console.log('Error en la solicitud:', error);
         }
     });
+}
+//archivos importado
+function traer_archivos_importado(numeros, numeros_guardados){
+
+    if (numeros.length === 0) {
+        console.log("No hay seguimientos seleccionados. archivos");
+        return;
+    }
+
+    // Hacer la solicitud AJAX para enviar los IDs al servidor
+     const csrftoken = getCookie2('csrftoken');
+    $.ajax({
+        url: '/importacion_maritima/source_archivos_importado/',
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({ ids: numeros }),
+        beforeSend: function(xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        },
+        success: function(response) {
+            if (response.data.length > 0) {
+                    response.data.forEach(function(item) {
+                        numeros_guardados.forEach(function(guardado) {
+                            if (item.seguimiento_control === guardado.seguimiento) {
+                                // Si coinciden los seguimientos, asignar el numero
+                                item.numero = guardado.numero;
+                            }
+                        });
+                    });
+                    console.log(response.data);
+                    guardar_archivo_importado(response.data);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error al traer los seguimientos:", error);
+        }
+    });
+}
+function guardar_archivo_importado(data) {
+    const miurl = "/importacion_maritima/add_archivo_importado/";
+
+        // Enviar los datos como JSON (ruta del archivo, número y detalle)
+        $.ajax({
+            type: "POST",
+            url: miurl,
+            contentType: "application/json",
+            data: JSON.stringify({data}),
+            headers: { 'X-CSRFToken': csrf_token },  // Enviar token CSRF
+            success: function (resultado) {
+                console.log('Archivo guardado correctamente:', resultado);
+            },
+            error: function (error) {
+                console.log('Error en la solicitud:', error);
+            }
+        });
+
 }
 
 //eliminar houses de un master

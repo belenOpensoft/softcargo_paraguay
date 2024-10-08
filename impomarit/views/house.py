@@ -6,7 +6,7 @@ from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpRespons
 from django.contrib import messages
 from django.db import IntegrityError
 from impomarit.forms import add_house, edit_house
-from seguimientos.models import Seguimiento, Serviceaereo, Envases, Conexaerea, Cargaaerea
+from seguimientos.models import Seguimiento, Serviceaereo, Envases, Conexaerea, Cargaaerea, Attachhijo
 import re
 from datetime import datetime
 
@@ -449,6 +449,32 @@ def source_embarque_importado(request):
 
         # field_names = [field.name for field in Cargaaerea._meta.fields]
         # resultado = list(registros.values(*field_names))
+
+        return JsonResponse({"data": resultado}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+def source_archivos_importado(request):
+    try:
+        data = json.loads(request.body)
+        # Números de los seguimientos
+        ids = data.get('ids', [])
+
+        registros = Attachhijo.objects.filter(numero__in=ids)
+
+        if not registros.exists():
+            # Si no hay registros, devolver un array vacío
+            return JsonResponse({"data": []}, safe=False)
+
+        resultado = []
+        for registro in registros:
+            resultado.append({
+                "numero": 0,
+                "seguimiento_control": registro.numero,
+                "archivo": str(registro.archivo),
+                "fecha": registro.fecha
+            })
 
         return JsonResponse({"data": resultado}, safe=False)
 

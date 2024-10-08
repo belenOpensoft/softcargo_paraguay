@@ -7,10 +7,10 @@ from impomarit.views.gastos import add_gasto_master, source_gastos, eliminar_gas
 from impomarit.views.house import add_house, add_house_impmarit, edit_house_function, house_detail, \
     get_name_by_id_vendedores, source_seguimientos_importado, add_house_importado, source_gastos_importado, \
     eliminar_house, source_envases_importado, source_rutas_importado, source_embarque_id, source_seguimiento_id, \
-    generar_posicion, source_embarque_importado
+    generar_posicion, source_embarque_importado, source_archivos_importado
 from impomarit.views.impo_maritima import master_importacion_maritima, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
-    descargar_archivo, modificar_fecha_retiro
+    descargar_archivo, modificar_fecha_retiro, add_archivo_importado
 from impomarit.views.mails import get_data_email_op
 from impomarit.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
 from impomarit.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado
@@ -39,10 +39,12 @@ urlpatterns = [
     path(r'source_embarques_house/', source_embarques, name="source_embarques_house"),
     path(r'source_seguimientos_importado/', source_seguimientos_importado, name="source_seguimientos_importado"),
     path(r'source_gastos_importado/', source_gastos_importado, name="source_gastos_importado"),
+    path(r'source_archivos_importado/', source_archivos_importado, name="source_archivos_importado"),
     path(r'source_embarque_importado/', source_embarque_importado, name="source_embarque_importado"),
     path(r'source_envases_importado/', source_envases_importado, name="source_envases_importado"),
     path(r'source_rutas_importado/', source_rutas_importado, name="source_rutas_importado"),
     path('add_ruta_importado/', add_ruta_importado, name='add_ruta_importado'),
+    path('add_archivo_importado/', add_archivo_importado, name='add_archivo_importado'),
     path('add_envase_importado/', add_envase_importado, name='add_envase_importado'),
     path(r'eliminar_gasto_master/', eliminar_gasto_master, name="source_gastos"),
     path(r'eliminar_gasto_house/', eliminar_gasto_house, name="eliminar_gasto_house"),
