@@ -44,7 +44,6 @@ var nombre_form = 'Nuevo'
 let table_add_im;
 
 $(document).ready(function () {
-
     setTimeout(function(){
         $('.navbar-collapse').collapse('hide');
     }, 5000);
@@ -1888,7 +1887,70 @@ var expandedRow;
 });
 
     //embarques house
+    $('#ingresar_embarque_house').off('click').click(function (event) {
+    event.preventDefault();
+    if (confirm("¿Confirma guardar el envase?")) {
+        var form = $('#embarques_form_house');
+        var formData = new FormData(form[0]);
+        if (form[0].checkValidity()) {
+        let numero=localStorage.getItem('num_house_gasto');
+            let formData = $("#embarques_form_house").serializeArray();
+            let data = JSON.stringify(formData);
+            miurl = "/importacion_maritima/add_embarque_house/";
+            var toData = {
+                'numero':numero ,
+                'data': data,
+                'csrfmiddlewaretoken': csrf_token,
+            };
+            $.ajax({
+                type: "POST",
+                url: miurl,
+                data: toData,
+                async: false,
+                success: function (resultado) {
+                    if (resultado['resultado'] === 'exito') {
+                        $("#id_embarque_id").val('');
+                        alert('Guardado con éxito.');
+                        $("#tabla_embarques_house").dataTable().fnDestroy();
+                        $("#ingresar_embarque_house").html('Agregar');
+                       get_datos_embarques_house();
+                       let aux= document.getElementById('numero_embarque').value;
+                       $('#embarques_form_house').trigger("reset");
+                       document.getElementById('numero_embarque').value=aux;
+                    } else {
+                        alert(resultado['resultado']);
+                    }
+                }
+            });
+        }else{
+            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+            invalidFields.forEach(field => {
+                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+            });
 
+            alert('Debe completar todos los campos.');
+        }
+    }
+});
+    $('#tabla_embarques_house tbody').off('click').on('click', 'tr', function () {
+        $('#tabla_embarques_house tbody tr').removeClass('selected');
+        $(this).addClass('selected');
+    });
+    $('#tabla_embarques_house tbody').off('dblclick').on('dblclick', 'tr', function () {
+    var data = table_embarques.row(this).data();
+    $("#id_embarque_id").val(data[0]);         // ID del registro
+    $("#id_producto").val(data[8]);                // Unidad
+    $("#id_bultos_embarque").val(data[2]);                  // Tipo
+    $("#id_tipo_embarque").val(data[3]);            // Movimiento
+    $("#id_bruto_embarque").val(data[4]);              // Términos
+    $("#id_medidas").val(data[5]);              // Cantidad
+    $("#id_mercaderia").val(data[7]);                // Precio
+    $("#id_cbm").val(data[6]);                // Marcas
+
+
+    $("#ingresar_embarque_house").html('Modificar');
+    $("#cancelar_embarque_house").show();
+});
     //importar hijo desde seguimeintos edit master form
     var table_seg;
     $('#importar_hijo_edit_master').click(function () {
@@ -1949,8 +2011,46 @@ var expandedRow;
         e.stopPropagation();
         let seleccionados = JSON.parse(localStorage.getItem('seleccionados'));
         let cant = seleccionados ? seleccionados.length : 0;
-        alert('Desea importar '+cant+'house/s?');
+        if(confirm('Desea importar '+cant+'house/s?')){
         traer_seguimientos();
+        }
+
+        });
+    $('#tabla_seguimiento_IH tbody').on('click', 'tr', function () {
+    let table = $('#tabla_seguimiento_IH').DataTable();
+
+    // Si la fila ya tiene la clase 'highlighted', quítasela y desmarca el checkbox
+    if ($(this).hasClass('highlighted') ) {
+        $(this).removeClass('highlighted');
+        // Encuentra el checkbox en la fila y desmárcalo
+        $(this).find('input[type="checkbox"]').prop('checked', false);
+    } else {
+
+        $(this).addClass('highlighted');
+        // Marca el checkbox en la fila seleccionada
+        $(this).find('input[type="checkbox"]').prop('checked', true);
+    }
+});
+    $('#tabla_seguimiento_IH tbody').on('change', '.checkbox_seleccion', function () {
+            let id = $(this).val();  // Obtener el valor del checkbox
+            let seleccionados = JSON.parse(localStorage.getItem('seleccionados')) || [];
+            let row = $(this).closest('tr');  // Obtener la fila (row) que contiene el checkbox
+
+            if (this.checked) {
+                // Si el checkbox está marcado, agregar el ID al array y la clase 'highlighted'
+                if (!seleccionados.includes(id)) {
+                    seleccionados.push(id);
+                }
+                row.addClass('highlighted');  // Agregar clase a la fila
+            } else {
+                // Si el checkbox está desmarcado, eliminar el ID del array y quitar la clase 'highlighted'
+                seleccionados = seleccionados.filter(item => item !== id);
+                row.removeClass('highlighted');  // Quitar clase de la fila
+            }
+
+            // Guardar el estado actualizado en localStorage
+            localStorage.setItem('seleccionados', JSON.stringify(seleccionados));
+            console.log(seleccionados);
         });
 
     //importar hijos desde seguimientos add master form
@@ -2008,6 +2108,150 @@ var expandedRow;
         }
     });
 });
+
+    //mails acciones adjuntar
+    $('#adjuntar_btn').click(function () {
+    $("#tabla_archivos").dataTable().fnDestroy();
+    row = table.rows('.table-secondary').data();
+    get_datos_archivos();
+
+        $("#archivos_modal").dialog({
+            autoOpen: true,
+            open: function (event, ui) {
+
+            },
+            modal: true,
+            title: "Archivos para el seguimiento N°: " + localStorage.getItem('num_house_gasto') ,
+            height: wHeight * 0.70,
+            width: wWidth * 0.70,
+            class: 'modal fade',
+            buttons: [
+             {
+                        text: "Adjuntar",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            if (confirm('¿Confirma adjuntar el archivo seleccionado?')) {
+                                    let table = $('#tabla_archivos').DataTable();
+                                    let row = table.rows('.selected').data();
+                                let nombre = row[0][2].split("/")[1];
+                                let id = row[0][0];
+                                if(id in archivos_adjuntos) {
+                                    alert('El archivo adjunto ya se encuentra seleccionado');
+                                }else{
+                                    archivos_adjuntos[id] = nombre;
+                                    alert('¡Archivo adjuntado correctamente!');
+                                    let archivoHTML = '<div class="archivo" id="' + id + '">' +
+                                        '<span>' + nombre + '</span>' +
+                                        '<button type="button" class="btn btn-sm eliminar-archivo bg-dark" onclick="return eliminar_adjunto(' + id + ')" aria-label="Eliminar">' +
+                                        '&nbsp;<span class="badge badge-light" aria-hidden="true">&times;</span>' +
+                                        '</button>' +
+                                        '</div>';
+                                    $("#arhivos_adjuntos").append(archivoHTML);
+                                }
+                            }
+                        },
+                    },
+                {
+                    text: "Descargar",
+                    class: "btn btn-dark",
+                    style: "width:100px",
+                    click: function () {
+                        if (confirm('¿Confirma descargar el archivo seleccionado?')) {
+                            var url = '/importacion_maritima/descargar_archivo/' + localStorage.getItem('id_archivo');  // Ruta de la vista que devuelve el archivo
+                            window.open(url, '_blank');
+                        }
+                    },
+                },{
+                    text: "Eliminar",
+                    class: "btn btn-danger",
+                    style: "width:100px",
+                    click: function () {
+                        if (confirm('¿Confirma eliminar archivo?')) {
+                            if (localStorage.getItem('id_archivo')) {
+                                miurl = "/importacion_maritima/eliminar_archivo/";
+                                var toData = {
+                                    'id': localStorage.getItem('id_archivo'),
+                                    'csrfmiddlewaretoken': csrf_token,
+                                };
+                                $.ajax({
+                                    type: "POST",
+                                    url: miurl,
+                                    data: toData,
+                                    success: function (resultado) {
+                                        aux = resultado['resultado'];
+                                        if (aux == 'exito') {
+                                            var idx = table.cell('.selected', 0).index();
+                                            $("#tabla_archivos tr.selected").removeClass('selected');
+                                            $('#tabla_archivos').DataTable().ajax.reload(null, false);
+                                        } else {
+                                            alert(aux);
+                                        }
+                                    }
+                                });
+                            } else {
+                                alert('Debe seleccionar un unico registro');
+                            }
+                        }
+                    },
+                },
+                {
+                    text: "Cerrar",
+                    class: "btn btn-info",
+                    style: "width:100px",
+                    click: function () {
+                        $(this).dialog("close");
+                    },
+                },
+            ],
+            beforeClose: function (event, ui) {
+                // table.ajax.reload();
+                $("#tabla_archivos").dataTable().fnDestroy();
+            }
+        })
+
+});
+    $('#guardar_archivo').click(function () {
+        if (confirm("¿Confirma guardar archivo?")) {
+            var formData = new FormData(document.getElementById("archivos_form"));
+            formData.append('numero',localStorage.getItem('num_house_gasto'));
+            miurl = "/importacion_maritima/guardar_archivo/";
+            $.ajax({
+                type: "POST",
+                url: miurl,
+                data: formData,
+                processData: false,
+                contentType: false,
+                async:false,
+                success: function (resultado) {
+                    if (resultado['resultado'] === 'exito') {
+                        $('#tabla_archivos').DataTable().ajax.reload(null, false);
+                    } else {
+                        alert(resultado['resultado']);
+                    }
+                }, error: function (xhr, status, error) {
+                    // Manejar el error en caso de que ocurra
+                }
+            });
+
+        }
+    })
+    $('#tabla_archivos tbody').on('click', 'tr', function () {
+    let table = $('#tabla_archivos').DataTable();
+
+    if ($(this).hasClass('selected')) {
+        $(this).removeClass('selected');
+    } else {
+        table.$('tr.selected').removeClass('selected');
+        $(this).addClass('selected');
+    }
+    let datos_fila = $('#tabla_archivos').DataTable().row(this).data();
+
+    if (datos_fila) {
+      localStorage.setItem('id_archivo',datos_fila[0]);
+    }
+});
+
 
 });
 
@@ -2580,27 +2824,36 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
         "language": {
             url: "/static/datatables/es_ES.json"
         },
-        "rowCallback": function (row, data) {
+       "rowCallback": function (row, data) {
+//        let seleccionados = JSON.parse(localStorage.getItem('seleccionados')) || [];
+//
+//        if (seleccionados.includes(data[0])) {
+//            $(row).addClass('highlighted');
+//            $(row).find('.checkbox_seleccion').prop('checked', true);
+//        } else {
+//            $(row).removeClass('highlighted');
+//            $(row).find('.checkbox_seleccion').prop('checked', false);
+//        }
+//
+//
+//        $(row).find('.checkbox_seleccion').off('change').on('change', function () {
+//            let id = $(this).val();
+//            let seleccionados = JSON.parse(localStorage.getItem('seleccionados')) || [];
+//
+//            if (this.checked) {
+//                if (!seleccionados.includes(id)) {
+//                    seleccionados.push(id);
+//                }
+//                $(row).addClass('highlighted');
+//            } else {
+//                seleccionados = seleccionados.filter(item => item !== id);
+//                $(row).removeClass('highlighted');
+//            }
+//
+//            localStorage.setItem('seleccionados', JSON.stringify(seleccionados));
+//        });
+    }
 
-            $(row).find('.checkbox_seleccion').on('change', function () {
-                let id = $(this).val();
-                let seleccionados = JSON.parse(localStorage.getItem('seleccionados')) || [];
-
-                if (this.checked) {
-                    if (!seleccionados.includes(id)) {
-                        seleccionados.push(id);
-                    }
-                } else {
-                    seleccionados = seleccionados.filter(item => item !== id);
-                }
-                localStorage.setItem('seleccionados', JSON.stringify(seleccionados));
-            });
-
-            let seleccionados = JSON.parse(localStorage.getItem('seleccionados')) || [];
-            if (seleccionados.includes(data[0])) {
-                $(row).find('.checkbox_seleccion').prop('checked', true);
-            }
-        }
     });
 }
 function traer_seguimientos() {
@@ -2692,7 +2945,8 @@ function guardar_importado_house(data, seguimientos) {
                 traer_gastos_importado(seguimientos, response.numeros_guardados);
                 traer_envases_importado(seguimientos,response.numeros_guardados);
                 traer_rutas_importado(seguimientos, response.numeros_guardados);
-                //traer embarques
+                traer_embarques_importado(seguimientos, response.numeros_guardados);
+                //traer archivos desde el seguimiento
                 alert('House/s importado/s con éxito');
                agregarASeleccionados();
                 $("#importar_hijo_modal").dialog('close');
@@ -2914,7 +3168,61 @@ function guardar_ruta_importado(data){
         }
     });
 }
-//embarques importado pausado
+//embarques importado
+function traer_embarques_importado(numeros, numeros_guardados){
+
+    if (numeros.length === 0) {
+        console.log("No hay seguimientos seleccionados. embarque");
+        return;
+    }
+
+    // Hacer la solicitud AJAX para enviar los IDs al servidor
+     const csrftoken = getCookie2('csrftoken');
+    $.ajax({
+        url: '/importacion_maritima/source_embarque_importado/',
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({ ids: numeros }),
+        beforeSend: function(xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        },
+        success: function(response) {
+            if (response.data.length > 0) {
+                    response.data.forEach(function(item) {
+                        numeros_guardados.forEach(function(guardado) {
+                            if (item.seguimiento_control === guardado.seguimiento) {
+                                // Si coinciden los seguimientos, asignar el numero
+                                item.numero = guardado.numero;
+                            }
+                        });
+                    });
+
+                    guardar_embarque_importado(response.data);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error al traer los seguimientos:", error);
+        }
+    });
+}
+function guardar_embarque_importado(data){
+    miurl = "/importacion_maritima/add_embarque_importado/";
+
+    $.ajax({
+        type: "POST",
+        url: miurl,
+        contentType: "application/json", // Enviar datos como JSON
+        data: JSON.stringify(data),
+        headers: { 'X-CSRFToken': csrf_token }, // Enviar token CSRF en el encabezado
+        success: function (resultado) {
+        },
+        error: function (error) {
+            console.log('Error en la solicitud:', error);
+        }
+    });
+}
+
 //eliminar houses de un master
 function eliminar_house(){
     if(localStorage.getItem('lugar_importarhijo')==='editmaster'){
@@ -3367,10 +3675,10 @@ $("#id_envase_id").val('');
                         class: "btn btn-danger",
                         style: "width:100px",
                         click: function () {
-                            if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                var row = $('#tabla_envases_house').DataTable().rows('.selected').data();
+                            if (confirm('¿Confirma eliminar el seleccionado?')) {
+                                var row = $('#tabla_embarques_house').DataTable().rows('.selected').data();
                                 if (row.length === 1) {
-                                    miurl = "/importacion_maritima/eliminar_envases_house/";
+                                    miurl = "/importacion_maritima/eliminar_embarques_house/";
                                     var toData = {
                                         'id': row[0][0],
                                         'csrfmiddlewaretoken': csrf_token,
@@ -3382,8 +3690,8 @@ $("#id_envase_id").val('');
                                         success: function (resultado) {
                                             aux = resultado['resultado'];
                                             if (aux === 'exito') {
-                                                $("#tabla_envases_house").dataTable().fnDestroy();
-                                                get_datos_envases_house();
+                                                $("#tabla_embarques_house").dataTable().fnDestroy();
+                                                get_datos_embarques_house();
                                                 alert('Eliminado correctamente');
                                                // $('#gastos_btn_master').addClass('triggered').trigger('click');
                                                // mostrarToast('¡Gasto eliminado correctamente!', 'success');
@@ -3415,12 +3723,12 @@ $("#id_envase_id").val('');
         }
 }
 
-//embarques house pausado
+//embarques house
 function get_datos_embarques_house(){
  let numero=localStorage.getItem('num_house_gasto');
 
    $("#tabla_embarques_house").dataTable().fnDestroy();
-    table_envases = $('#tabla_embarques_house').DataTable({
+    table_embarques = $('#tabla_embarques_house').DataTable({
         "order": [[1, "desc"], [1, "desc"]],
         "processing": true,
         "serverSide": true,
@@ -3443,7 +3751,7 @@ function embarques_btn_h_click(){
 $("#id_embarque_id").val('');
         let selectedRowId = localStorage.getItem('id_house_gasto');
         let selectedRowN = localStorage.getItem('num_house_gasto');
-      // get_datos_embarques_house();
+       get_datos_embarques_house();
         if (selectedRowN!=null) {
             $('#embarques_form_house').trigger("reset");
             $("#embarques_modal_house").dialog({
@@ -3637,6 +3945,49 @@ function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
 
 }
 
+function get_datos_archivos() {
+   let table_archivos = $('#tabla_archivos').DataTable({
+        "order": [[1, "desc"], [1, "desc"]],
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 100,
+        "language": {
+            url: "/static/datatables/es_ES.json"
+        },
+        "ajax": {
+            "url": "/importacion_maritima/source_archivos/",
+            'type': 'GET',
+            "data": function (d) {
+                return $.extend({}, d, {
+                    "numero": localStorage.getItem('num_house_gasto'),
+                });
+            }
+        }, "columnDefs": [
+            {
+                "targets": [0],
+                "orderable": false,
+                "data": null,
+                "visible":false,
+                "defaultContent": '',
+                render: function (data, type, row) {
+                }
+            },
+        ]
+    });
+
+}
+function eliminar_adjunto(id) {
+  // Eliminar el elemento del diccionario
+  if(confirm('¿Confirma eliminar archivo adjunto?')){
+      delete archivos_adjuntos[id];
+      // Eliminar el elemento HTML del DOM
+      var elementoHTML = document.getElementById(id);
+      if (elementoHTML) {
+        elementoHTML.remove();
+      }
+      mostrarToast('¡Adjunto eliminado con exito!', 'danger');
+  }
+}
 
 //}else if(lugar==='edit_directo'){
 //$('#tabla_house_directo').DataTable().ajax.reload(null, false);

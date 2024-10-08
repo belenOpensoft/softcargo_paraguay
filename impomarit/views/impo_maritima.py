@@ -1,16 +1,24 @@
 import datetime
 import json
+import os
+import traceback
+import unicodedata
+
+from django.contrib.auth.models import User
+from django.core.files.storage import default_storage
+from django.db import IntegrityError
+from cargosystem import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, Http404
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, Http404, FileResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
+from cargosystem.settings import RUTA_PROYECTO
 from impomarit.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
     rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse
-from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo
-from mantenimientos.models import Clientes
-from seguimientos.models import Seguimiento
+from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo, Attachhijo
+from seguimientos.forms import archivosForm
 
 
 @login_required(login_url='/')
@@ -42,6 +50,7 @@ def master_importacion_maritima(request):
                 'form_emails': emailsForm(),
                 'form_envases_house': envasesFormHouse(),
                 'form_embarques_house': embarquesFormHouse(),
+                'form_archivos': archivosForm(),
 
             })
         else:
@@ -74,7 +83,7 @@ def house_importacion_maritima(request):
                 'form_emails': emailsForm(),
                 'form_envases_house': envasesFormHouse(),
                 'form_embarques_house': embarquesFormHouse(),
-
+                'form_archivos': archivosForm(),
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
@@ -341,3 +350,142 @@ def source_embarque_consolidado(request):
         return JsonResponse(resultado)
     else:
         return JsonResponse({"error": "Invalid request"}, status=400)
+
+#mails archivo
+def guardar_archivo_im(request):
+    resultado = {}
+    try:
+        numero = request.POST['numero']
+        detalle = request.POST['detalle']
+        myfile = request.FILES['archivo']
+        registro = Attachhijo()
+        registro.idusuario = request.user.id
+        from django.core.files.storage import default_storage
+        nombre = formatear_texto(myfile.name).replace(' ', '')
+        ruta = settings.RUTA_ARCHIVOS + nombre
+        ruta = default_storage.save(ruta, myfile)
+        registro.archivo = ruta
+        registro.numero = numero
+        registro.detalle = detalle
+        registro.fecha = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        registro.save()
+        resultado['resultado'] = 'exito'
+        resultado['numero'] = str(registro.numero)
+    except IntegrityError as e:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+        print(e)
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(tb)
+        resultado['resultado'] = str(e)
+        print(e)
+    data_json = json.dumps(resultado)
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+
+def formatear_texto(cadena: str):
+    try:
+        cadena = str(unicodedata.normalize('NFKD', str(cadena)).encode('ASCII', 'ignore').upper())
+        # for letra in cadena:
+        #     re.match('\W', letra)
+        cadena = str(cadena)[2:-1]
+        return cadena.replace("  "," ")
+    except Exception as e:
+        raise TypeError(e)
+
+def source_archivos(request):
+    if is_ajax(request):
+        """ BUSCO ORDEN """
+        """PROCESO FILTRO Y ORDEN BY"""
+        start = int(request.GET['start'])
+        numero = request.GET['numero']
+        length = int(request.GET['length'])
+        end = start + length
+        order = get_order_a(request, columns_table)
+        """FILTRO REGISTROS"""
+        registros = Attachhijo.objects.filter(numero=numero).order_by(*order)
+        """PREPARO DATOS"""
+        resultado = {}
+        data = get_data_a(registros[start:end])
+        """Devuelvo parametros"""
+        resultado['data'] = data
+        resultado['length'] = length
+        resultado['draw'] = request.GET['draw']
+        resultado['recordsTotal'] = Attachhijo.objects.filter(numero=numero).count()
+        resultado['recordsFiltered'] = str(registros.count())
+        data_json = json.dumps(resultado)
+    else:
+        data_json = 'fail'
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+
+def get_data_a(registros_filtrados):
+    try:
+        data = []
+        for registro in registros_filtrados:
+            registro_json = []
+            registro_json.append(str(registro.id))
+            registro_json.append('' if registro.fecha is None else str(registro.fecha.strftime("%d/%m/%Y %H:%M")))
+            registro_json.append('' if registro.archivo is None else str(registro.archivo))
+            registro_json.append('' if registro.detalle is None else str(registro.detalle))
+            data.append(registro_json)
+        return data
+    except Exception as e:
+        raise TypeError(e)
+
+def get_order_a(request, columns):
+    try:
+        result = []
+        order_column = request.GET['order[0][column]']
+        order_dir = request.GET['order[0][dir]']
+        order = columns[int(order_column)]
+        if order_dir == 'desc':
+            order = '-' + columns[int(order_column)]
+        result.append(order)
+        i = 1
+        while i > 0:
+            try:
+                order_column = request.GET['order[' + str(i) + '][column]']
+                order_dir = request.GET['order[' + str(i) + '][dir]']
+                order = columns[int(order_column)]
+                if order_dir == 'desc':
+                    order = '-' + columns[int(order_column)]
+                result.append(order)
+                i += 1
+            except Exception as e:
+                i = 0
+        result.append('id')
+        return result
+    except Exception as e:
+        raise TypeError(e)
+
+def eliminar_archivo(request):
+    resultado = {}
+    try:
+        id = request.POST['id']
+        att = Attachhijo.objects.get(id=id)
+        ruta = str(RUTA_PROYECTO) + '/' + att.archivo
+        if os.path.isfile(ruta):
+            os.remove(ruta)
+        att.delete()
+        resultado['resultado'] = 'exito'
+    except IntegrityError as e:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+    data_json = json.dumps(resultado)
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+
+def descargar_archivo(request,id):
+    resultado = {}
+    try:
+        # id = request.POST['id']
+        att = Attachhijo.objects.get(id=id)
+        ruta_archivo = default_storage.path(att.archivo)
+        response = FileResponse(open(ruta_archivo, 'rb'), as_attachment=True)
+        archivo = att.archivo[25:]
+        response['Content-Disposition'] = 'attachment; filename="' + archivo + '"'
+        return response
+    except Exception as e:
+        resultado['resultado'] = str(e)

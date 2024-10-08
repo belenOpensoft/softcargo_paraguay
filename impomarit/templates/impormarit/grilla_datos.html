@@ -8,7 +8,15 @@
 <link rel="stylesheet" type="text/css" href="{% static 'css/select2.min.css'  %}">
 <link rel="stylesheet" type="text/css" href="{% static 'css/importacion_maritima/importacion_maritima.css'  %}">
 <meta name="csrf-token" content="{{ csrf_token }}">
+<style>
+    #tabla_seguimiento_IH tr.highlighted {
+    background-color: #ffc107;
+}
 
+#tabla_seguimiento_IH tr.highlighted input[type="checkbox"] {
+    background-color: #ffc107;
+}
+</style>
 {% endblock script_table %}
 
 {% block table_datatable %}
@@ -69,6 +77,7 @@
 {% include 'impormarit/importar_house.html' %}
 {% include 'impormarit/rutas_house.html' %}
 {% include 'impormarit/emails_house.html' %}
+{% include 'impormarit/archivos.html' %}
 {% include 'impormarit/envases_house.html' %}
 {% include 'impormarit/embarques_house.html' %}
 

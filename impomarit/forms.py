@@ -2,7 +2,7 @@
 from bootstrap_modal_forms.forms import BSModalModelForm
 from django import forms
 
-from impomarit.models import Reservas, Embarqueaereo, Servireserva, Conexaerea, Envases, Cargaaerea
+from impomarit.models import Reservas, Embarqueaereo, Servireserva, Conexaerea, Envases, Cargaaerea, Attachhijo
 from mantenimientos.models import Clientes, Vapores, Ciudades, Monedas, Servicios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -1011,6 +1011,44 @@ class emailsForm(forms.Form):
     cco = forms.EmailField(label='CCO',widget=forms.EmailInput(attrs={'class': 'form-control'}), required=False)
     subject = forms.CharField(label='Asunto',widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
     email = forms.CharField(widget=forms.Textarea(attrs={"id": 'email_add_input',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"100","class":"form-control"}, ), required=False,label="Email", max_length=500)
+
+class archivosForm(forms.ModelForm):
+    class Meta:
+        model = Attachhijo
+        fields = ('numero', 'archivo','detalle', 'restringido' )
+
+
+
+    def __init__(self, *args, **kwargs):
+
+        super(archivosForm, self).__init__(*args, **kwargs)
+        self.fields['detalle'].widget.attrs['class'] = 'form-control'
+        self.fields['detalle'].widget.attrs['style'] = 'width:400px'
+        self.fields['restringido'].widget.attrs['class'] = 'form-control'
+        self.fields['restringido'].widget.attrs['style'] = 'width:400px'
+        self.fields['archivo'].widget.attrs['class'] = 'form-control'
+        self.fields['archivo'].label = 'Documento'
+        self.fields['archivo'].widget.attrs['style'] = 'width:400px'
+        self.fields['numero'].widget.attrs['style'] = 'visibility:hidden'
+        self.fields['numero'].widget = forms.HiddenInput()
+
+    choice_detalle = (
+        ("OTR", "Otro tipo"),
+        ("CRF", "Certificacion de fecha"),
+        ("CAR", "Carta de reclamo"),
+        ("EDD", "Entrega de documentos"),
+        ("SDA", "SDA"),
+        ("CHO", "Canje House"),
+        ("FAG", "Factura agente"),
+        ("DAD", "Documento aduanero"),
+        ("VAE", "Validacion electronica"),
+        ("ODP", "Comprobante electronico"),
+        ("PKL", "Packing list"),
+    )
+    prueba = list(choice_detalle).sort(key = lambda x: x[1], reverse=True)
+    detalle = forms.ChoiceField(
+        widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "12", 'id': 'id_operacion'}),
+        required=True, label="Detalle (tipo archivo)", choices=choice_detalle, initial='')
 
 class envasesFormHouse(BSModalModelForm):
     class Meta:
