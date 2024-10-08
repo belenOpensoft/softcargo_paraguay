@@ -10,54 +10,63 @@ $(document).ready(function () {
 //        console.log('Error:', error);
 //    }
 //});
-//buscadores
+    //buscadores
     $('#tabla_house_directo tfoot th').each(function () {
-    let title = $(this).text();
-    if (title !== '') {
-        $(this).html('<input type="text" class="form-control"  autocomplete="off" id="buscoid_' + contador + '" type="text" placeholder="Buscar ' + title + '"  autocomplete="off" />');
-        contador++;
-    } else {
-        $(this).html('<button class="btn" title="Borrar filtros" id="clear" ><span class="glyphicon glyphicon-erase"></span></button> ');
-    }
-});
-//tabla general
+        let title = $(this).text();
+        if (title !== '') {
+            $(this).html('<input type="text" class="form-control" autocomplete="off" id="buscoid_' + contador + '" placeholder="Buscar ' + title + '" />');
+            contador++;
+        } else {
+            $(this).html('<button class="btn" title="Borrar filtros" id="clear"><span class="glyphicon glyphicon-erase"></span></button>');
+        }
+    });
+    // Tabla general
     table = $('#tabla_house_directo').DataTable({
-    "stateSave": true,
-    "dom": 'Btlipr',
-    "scrollX": true,
-    "bAutoWidth": false,
-    "scrollY": wHeight * 0.60,
-    "order": [[1, "desc"]],
-    "processing": true,
-    "serverSide": true,
-    "pageLength": 100,
-    "ajax": {
-        "url": "/importacion_maritima/source_embarque_consolidado/",
-        'type': 'GET',
-        "data": function (d) {
-            return $.extend({}, d, {
-                "buscar": buscar,  // Variable de búsqueda que estás enviando
-                "que_buscar": que_buscar  // Otra variable que estás enviando
+        "stateSave": true,
+        "dom": 'Btlipr',
+        "scrollX": true,
+        "bAutoWidth": false,
+        "scrollY": wHeight * 0.60,
+        "order": [[1, "desc"]],
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 100,
+        "ajax": {
+            "url": "/importacion_maritima/source_embarque_consolidado/",
+            'type': 'GET',
+            "data": function (d) {
+                // Obtener los valores de búsqueda de los inputs del footer
+                $('#tabla_house_directo tfoot input').each(function() {
+                    const index = $(this).parent().index();  // Obtener el índice de la columna
+                    d['columns[' + index + '][search][value]'] = this.value;  // Asignar el valor de búsqueda
+                });
+
+                return $.extend({}, d, {
+                    "buscar": buscar,
+                    "que_buscar": que_buscar
+                });
+            }
+        },
+        "columnDefs": [
+            { "orderable": true, "targets": "_all" }
+        ],
+        "language": {
+            url: "/static/datatables/es_ES.json"
+        },
+        "initComplete": function() {
+            var api = this.api();
+            api.columns().every(function () {
+                var that = this;
+                $('input', this.footer()).on('keyup change', function () {
+                    if (that.search() !== this.value) {
+                        that
+                            .search(this.value)
+                            .draw();
+                    }
+                });
             });
         }
-    },
-    "language": {
-        url: "/static/datatables/es_ES.json"
-    },
-     "initComplete": function() {
-     var api = this.api();
-        api.columns().every(function () {
-            var that = this;
-            $('input', this.footer()).on('keyup change', function () {
-                if (that.search() !== this.value) {
-                    that
-                        .search(this.value)
-                        .draw();
-                }
-            });
-        });
-    }
-});
+    });
     $('#tabla_house_directo tbody').off('dblclick').on('dblclick', 'tr', function () {
                     var table = $('#tabla_house_directo').DataTable();
                     var row = table.row($(this));
@@ -139,7 +148,7 @@ $(document).ready(function () {
                     localStorage.setItem('num_house_gasto', selectedRowN);
                 }
             });
-//add house
+    //add house
     $('#nuevo_directo').click(function () {
         $("#add_house_modal").dialog({
                     autoOpen: true,
@@ -186,112 +195,110 @@ $(document).ready(function () {
 
 
         });
-//importar house
-    $('#nuevo_directo_importado').click(function () {
-    localStorage.setItem('lugar_importarhijo','directo');
-        importar_hijo_tabla_directo();
+    //importar house
+        $('#nuevo_directo_importado').click(function () {
+        localStorage.setItem('lugar_importarhijo','directo');
+            importar_hijo_tabla_directo();
 
-        $("#importar_hijo_modal").dialog({
-            autoOpen: true,
-            open: function () {
+            $("#importar_hijo_modal").dialog({
+                autoOpen: true,
+                open: function () {
 
-            },
-            modal: true,
-            title: "Importar hijo desde seguimientos",
-            height: wHeight * 0.90,
-            width: wWidth * 0.90,
-            class: 'modal fade',
-            buttons: [
-                {
-                    text: "Salir",
-                    class: "btn btn-dark",
-                    style: "width:100px",
-                    click: function () {
-                        $(this).dialog("close");
-                        $('#tabla_seguimiento_IH').DataTable().destroy();
-                    },
-                }
-            ],
-            beforeClose: function (event, ui) {
-              localStorage.removeItem('lugar_importarhijo');
-            }
-        });
-    });
-
-
-//mails
-    $('.email2').click(function () {
-            let id = localStorage.getItem('id_house_gasto');
-            let numero = localStorage.getItem('num_house_gasto');
-
-            let title = this.getAttribute('data-tt');
-            var row = $('#tabla_house_directo').DataTable().rows('.table-secondary').data();
-            $("#id_to").val('');
-            $("#id_cc").val('');
-            $("#id_cco").val('');
-            cco = $("#id_subject").val('');
-            $('#email_add_input').summernote('destroy');
-            $("#arhivos_adjuntos").html('');
-            archivos_adjuntos = {};
-            if (row.length === 1) {
-                get_data_email(row,title,numero,id);
-                $("#id_to").val(row[0][50]);
-                $("#emails_modal").dialog({
-                    autoOpen: true,
-                    open: function (event, ui) {
-                        $('#email_add_input').summernote('destroy');
-                        $('#email_add_input').summernote({
-                            placeholder: 'Ingrese su texto aqui',
-                            tabsize: 10,
-                            height: wHeight * 0.60,
-                            width: wWidth * 0.88,
-                            toolbar: [
-                                ['style', ['style']],
-                                ['font', ['bold', 'underline', 'clear']],
-                                ['color', ['color']],
-                                ['para', ['ul', 'ol', 'paragraph']],
-                                ['table', ['table']],
-                                ['insert', ['link', 'picture', 'video']],
-                                ['view', ['fullscreen', 'codeview']]
-                            ]
-                        });
-                        $('#email_add_input').focus();
-                    },
-                    modal: true,
-                    title:   title  + " para el house N°: " + numero,
-                    height: wHeight * 0.90,
-                    width: wWidth * 0.90,
-                    class: 'modal fade',
-                    buttons: [
-                        {
-                            text: "Enviar",
-                            class: "btn btn-primary",
-                            style: "width:100px",
-                            click: function () {
-                                to = $("#id_to").val();
-                                cc = $("#id_cc").val();
-                                cco = $("#id_cco").val();
-                                subject = $("#id_subject").val();
-                                message = $("#email_add_input").summernote('code');
-                                sendEmail(to,cc,cco,subject,message,title,numero);
-                                $(this).dialog("close");
-                            },
-                        }, {
-                            text: "Salir",
-                            class: "btn btn-dark",
-                            style: "width:100px",
-                            click: function () {
-                                $(this).dialog("close");
-                            },
-                        },],
-                    beforeClose: function (event, ui) {
-                        // table.ajax.reload();
+                },
+                modal: true,
+                title: "Importar hijo desde seguimientos",
+                height: wHeight * 0.90,
+                width: wWidth * 0.90,
+                class: 'modal fade',
+                buttons: [
+                    {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                            $('#tabla_seguimiento_IH').DataTable().destroy();
+                        },
                     }
-                })
-            } else {
-                alert('Debe seleccionar al menos un registro');
-            }
+                ],
+                beforeClose: function (event, ui) {
+                  localStorage.removeItem('lugar_importarhijo');
+                }
+            });
         });
+    //mails
+        $('.email2').click(function () {
+                let id = localStorage.getItem('id_house_gasto');
+                let numero = localStorage.getItem('num_house_gasto');
+
+                let title = this.getAttribute('data-tt');
+                var row = $('#tabla_house_directo').DataTable().rows('.table-secondary').data();
+                $("#id_to").val('');
+                $("#id_cc").val('');
+                $("#id_cco").val('');
+                cco = $("#id_subject").val('');
+                $('#email_add_input').summernote('destroy');
+                $("#arhivos_adjuntos").html('');
+                archivos_adjuntos = {};
+                if (row.length === 1) {
+                    get_data_email(row,title,numero,id);
+                    $("#id_to").val(row[0][50]);
+                    $("#emails_modal").dialog({
+                        autoOpen: true,
+                        open: function (event, ui) {
+                            $('#email_add_input').summernote('destroy');
+                            $('#email_add_input').summernote({
+                                placeholder: 'Ingrese su texto aqui',
+                                tabsize: 10,
+                                height: wHeight * 0.60,
+                                width: wWidth * 0.88,
+                                toolbar: [
+                                    ['style', ['style']],
+                                    ['font', ['bold', 'underline', 'clear']],
+                                    ['color', ['color']],
+                                    ['para', ['ul', 'ol', 'paragraph']],
+                                    ['table', ['table']],
+                                    ['insert', ['link', 'picture', 'video']],
+                                    ['view', ['fullscreen', 'codeview']]
+                                ]
+                            });
+                            $('#email_add_input').focus();
+                        },
+                        modal: true,
+                        title:   title  + " para el house N°: " + numero,
+                        height: wHeight * 0.90,
+                        width: wWidth * 0.90,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Enviar",
+                                class: "btn btn-primary",
+                                style: "width:100px",
+                                click: function () {
+                                    to = $("#id_to").val();
+                                    cc = $("#id_cc").val();
+                                    cco = $("#id_cco").val();
+                                    subject = $("#id_subject").val();
+                                    message = $("#email_add_input").summernote('code');
+                                    sendEmail(to,cc,cco,subject,message,title,numero);
+                                    $(this).dialog("close");
+                                },
+                            }, {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                },
+                            },],
+                        beforeClose: function (event, ui) {
+                            // table.ajax.reload();
+                        }
+                    })
+                } else {
+                    alert('Debe seleccionar al menos un registro');
+                }
+            });
 })
 function generar_posicion(){
     return $.ajax({
