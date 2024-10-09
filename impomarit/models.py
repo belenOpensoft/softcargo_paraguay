@@ -1,5 +1,7 @@
 from django.db import models
 
+from mantenimientos.models import Productos
+
 
 class Anulados(models.Model):
     fecha = models.DateTimeField(blank=True, null=True)
@@ -12,8 +14,12 @@ class Attachhijo(models.Model):
     detalle = models.CharField(max_length=50, blank=True, null=True)
     web = models.CharField(max_length=1, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  
-    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True, null=True)  
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)
+    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'impmarit_attachhijo'
 
 class Attachmadre(models.Model):
     numero = models.IntegerField(blank=True, null=True)
@@ -62,11 +68,11 @@ class Cargaaerea(models.Model):
         ("Wooden rack", "Wooden rack"),
     )
     numero = models.IntegerField(blank=True, null=True)
-    producto = models.SmallIntegerField(blank=True, null=True)
+    producto = models.ForeignKey(Productos, to_field='codigo', on_delete=models.PROTECT, db_column='producto',related_name='prod_carga_im')
     bultos = models.IntegerField(blank=True, null=True)
     bruto = models.FloatField(blank=True, null=True)
     medidas = models.CharField(max_length=30, blank=True, null=True)
-    tipo = models.CharField(max_length=25, blank=True, null=True)
+    tipo = models.CharField(max_length=25, blank=True, null=True,choices=choice_tipo)
     fechaembarque = models.DateTimeField(blank=True, null=True)
     cbm = models.FloatField(blank=True, null=True)
     mercaderia = models.TextField( blank=True, null=True)  # This field type is a guess.

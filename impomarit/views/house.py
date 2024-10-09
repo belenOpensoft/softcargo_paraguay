@@ -6,12 +6,89 @@ from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpRespons
 from django.contrib import messages
 from django.db import IntegrityError
 from impomarit.forms import add_house, edit_house
-from seguimientos.models import Seguimiento, Serviceaereo, Envases, Conexaerea
+from seguimientos.models import Seguimiento, Serviceaereo, Envases, Conexaerea, Cargaaerea, Attachhijo
 import re
 from datetime import datetime
 
 
 @login_required(login_url="/")
+# def add_house_impmarit(request):
+#     try:
+#         if request.method == 'POST':
+#             form = add_house(request.POST)
+#             if form.is_valid():
+#                 reserva = Embarqueaereo()
+#                 reserva.fechaingreso = datetime.now()
+#                 reserva.numero = reserva.get_number()
+#                 reserva.consolidado = request.POST.get('consolidado', 0)
+#                 reserva.awb = form.cleaned_data['awb']
+#                 reserva.notifcliente = form.cleaned_data['notificar_cliente']
+#                 reserva.notifagente = form.cleaned_data['notificar_agente']
+#                 reserva.fecharetiro = form.cleaned_data['fecha_retiro']
+#                 reserva.fechaembarque = form.cleaned_data['fecha_embarque']
+#                 reserva.origen = form.cleaned_data['origen']
+#                 reserva.destino = form.cleaned_data['destino']
+#                 reserva.moneda = form.cleaned_data['moneda']
+#                 reserva.loading = form.cleaned_data['loading']
+#                 reserva.discharge = form.cleaned_data['discharge']
+#                 reserva.pago = form.cleaned_data['pago']
+#                 reserva.vapor = form.cleaned_data['vapor']
+#                 reserva.viaje = form.cleaned_data['viaje']
+#                 reserva.hawb = form.cleaned_data['house']
+#                 reserva.demora = form.cleaned_data['demora']
+#                 reserva.operacion = form.cleaned_data['operacion']
+#                 reserva.arbitraje = form.cleaned_data['arbitraje']
+#                 reserva.trackid = form.cleaned_data['trackid']
+#                 reserva.wreceipt = form.cleaned_data['wreceipt']
+#                 reserva.posicion = form.cleaned_data['posicion_h']
+#                 reserva.status = form.cleaned_data['status_h']
+#
+#                 reserva.transportista = form.cleaned_data.get('transportista', None)
+#                 reserva.agente = form.cleaned_data.get('agente', None)
+#                 reserva.consignatario = form.cleaned_data.get('consignatario', None)
+#                 reserva.armador = form.cleaned_data.get('armador', None)
+#                 reserva.cliente = form.cleaned_data.get('cliente', None)
+#                 try:
+#                     reserva.vendedor = int(form.cleaned_data.get('vendedor_i', 0)) if form.cleaned_data.get('vendedor_i', 0) is not None else 0
+#                     reserva.transportista = int(form.cleaned_data.get('transportista_i', 0)) if form.cleaned_data.get('transportista_i', 0) is not None else 0
+#                     reserva.agente = int(form.cleaned_data.get('agente_i', 0)) if form.cleaned_data.get('agente_i', 0) is not None else 0
+#                     reserva.consignatario = int(form.cleaned_data.get('consignatario_i', 0)) if form.cleaned_data.get('consignatario_i', 0) is not None else 0
+#                     reserva.armador = int(form.cleaned_data.get('armador_i', 0)) if form.cleaned_data.get('armador_i', 0) is not None else 0
+#                     reserva.cliente = int(form.cleaned_data.get('cliente_i', 0)) if form.cleaned_data.get('cliente_i', 0) is not None else 0
+#                     reserva.agecompras = int(form.cleaned_data.get('agcompras_i', 0)) if form.cleaned_data.get('agcompras_i', 0) is not None else 0
+#                     reserva.embarcador = int(form.cleaned_data.get('embarcador_i', 0)) if form.cleaned_data.get('embarcador_i', 0) is not None else 0
+#                     agev = form.cleaned_data.get('agventas_i', 0)
+#                     if agev is not None and len(agev) > 0:
+#                         reserva.ageventas = int(agev)
+#
+#                 except ValueError as e:
+#                     return JsonResponse({
+#                         'success': False,
+#                         'message': 'Uno o más campos tienen un formato incorrecto.',
+#                         'errors': {}
+#                     })
+#
+#                 reserva.save()
+#                 if reserva.pk:
+#                     return JsonResponse({'success': True, 'message': 'house agregado'})
+#                 else:
+#                     return JsonResponse({'success': False, 'message': 'no'})
+#
+#             else:
+#                 return JsonResponse({
+#                     'success': False,
+#                     'message': 'Formulario inválido, por favor revise los campos.',
+#                     'errors': form.errors.as_json()
+#                 })
+#
+#     except Exception as e:
+#         messages.error(request, str(e))
+#         return JsonResponse({
+#             'success': False,
+#             'message': f'Ocurrió un error: {str(e)}',
+#             'errors': {}
+#         })
+
 def add_house_impmarit(request):
     try:
         if request.method == 'POST':
@@ -20,46 +97,50 @@ def add_house_impmarit(request):
                 reserva = Embarqueaereo()
                 reserva.fechaingreso = datetime.now()
                 reserva.numero = reserva.get_number()
-                reserva.consolidado = request.POST.get('consolidado', 0)
-                reserva.awb = form.cleaned_data['awb']
-                reserva.notifcliente = form.cleaned_data['notificar_cliente']
-                reserva.notifagente = form.cleaned_data['notificar_agente']
-                reserva.fecharetiro = form.cleaned_data['fecha_retiro']
-                reserva.fechaembarque = form.cleaned_data['fecha_embarque']
-                reserva.origen = form.cleaned_data['origen']
-                reserva.destino = form.cleaned_data['destino']
-                reserva.moneda = form.cleaned_data['moneda']
-                reserva.loading = form.cleaned_data['loading']
-                reserva.discharge = form.cleaned_data['discharge']
-                reserva.pago = form.cleaned_data['pago']
-                reserva.vapor = form.cleaned_data['vapor']
-                reserva.viaje = form.cleaned_data['viaje']
-                reserva.hawb = form.cleaned_data['house']
-                reserva.demora = form.cleaned_data['demora']
-                reserva.operacion = form.cleaned_data['operacion']
-                reserva.arbitraje = form.cleaned_data['arbitraje']
-                reserva.trackid = form.cleaned_data['trackid']
-                reserva.wreceipt = form.cleaned_data['wreceipt']
-                reserva.posicion = form.cleaned_data['posicion_h']
-                reserva.status = form.cleaned_data['status_h']
 
-                reserva.transportista = form.cleaned_data.get('transportista', None)
-                reserva.agente = form.cleaned_data.get('agente', None)
-                reserva.consignatario = form.cleaned_data.get('consignatario', None)
-                reserva.armador = form.cleaned_data.get('armador', None)
-                reserva.cliente = form.cleaned_data.get('cliente', None)
+                # Para campos de texto o numéricos, se asegura de proporcionar valores predeterminados.
+                reserva.consolidado = request.POST.get('consolidado', 0)
+                reserva.awb = form.cleaned_data.get('awb', "")
+                reserva.notifcliente = form.cleaned_data.get('notificar_cliente', None)
+                reserva.notifagente = form.cleaned_data.get('notificar_agente', None)
+                reserva.fecharetiro = form.cleaned_data.get('fecha_retiro', None)
+                reserva.fechaembarque = form.cleaned_data.get('fecha_embarque', None)
+                reserva.origen = form.cleaned_data.get('origen', "")
+                reserva.destino = form.cleaned_data.get('destino', "")
+                reserva.moneda = form.cleaned_data.get('moneda', 0)
+                reserva.loading = form.cleaned_data.get('loading', "")
+                reserva.discharge = form.cleaned_data.get('discharge', "")
+                reserva.pago = form.cleaned_data.get('pago', 0)
+                reserva.vapor = form.cleaned_data.get('vapor', "")
+                reserva.viaje = form.cleaned_data.get('viaje', "")
+                reserva.hawb = form.cleaned_data.get('house', "")
+                reserva.demora = form.cleaned_data.get('demora', 0)
+                reserva.operacion = form.cleaned_data.get('operacion', "")
+                reserva.arbitraje = form.cleaned_data.get('arbitraje', "")
+                reserva.trackid = form.cleaned_data.get('trackid', "")
+                reserva.wreceipt = form.cleaned_data.get('wreceipt', "")
+                reserva.posicion = form.cleaned_data.get('posicion_h', 0)
+                reserva.status = form.cleaned_data.get('status_h', "")
+                #
+                # # Para los campos relacionales o numéricos
+                # reserva.transportista = form.cleaned_data.get('transportista', None)
+                # reserva.agente = form.cleaned_data.get('agente', None)
+                # reserva.consignatario = form.cleaned_data.get('consignatario', None)
+                # reserva.armador = form.cleaned_data.get('armador', None)
+                # reserva.cliente = form.cleaned_data.get('cliente', None)
+
                 try:
-                    reserva.vendedor = int(form.cleaned_data.get('vendedor_i', 0)) if form.cleaned_data.get('vendedor_i', 0) is not None else 0
-                    reserva.transportista = int(form.cleaned_data.get('transportista_i', 0)) if form.cleaned_data.get('transportista_i', 0) is not None else 0
-                    reserva.agente = int(form.cleaned_data.get('agente_i', 0)) if form.cleaned_data.get('agente_i', 0) is not None else 0
-                    reserva.consignatario = int(form.cleaned_data.get('consignatario_i', 0)) if form.cleaned_data.get('consignatario_i', 0) is not None else 0
-                    reserva.armador = int(form.cleaned_data.get('armador_i', 0)) if form.cleaned_data.get('armador_i', 0) is not None else 0
-                    reserva.cliente = int(form.cleaned_data.get('cliente_i', 0)) if form.cleaned_data.get('cliente_i', 0) is not None else 0
-                    reserva.agecompras = int(form.cleaned_data.get('agcompras_i', 0)) if form.cleaned_data.get('agcompras_i', 0) is not None else 0
-                    reserva.embarcador = int(form.cleaned_data.get('embarcador_i', 0)) if form.cleaned_data.get('embarcador_i', 0) is not None else 0
-                    agev = form.cleaned_data.get('agventas_i', 0)
-                    if agev is not None and len(agev) > 0:
-                        reserva.ageventas = int(agev)
+                    # Validar campos numéricos con valores predeterminados
+                    reserva.vendedor = int(form.cleaned_data.get('vendedor_i', 0)) if form.cleaned_data.get('vendedor_i') else 0
+                    reserva.transportista = int(form.cleaned_data.get('transportista_i', 0)) if form.cleaned_data.get('transportista_i') else 0
+                    reserva.agente = int(form.cleaned_data.get('agente_i', 0)) if form.cleaned_data.get('agente_i') else 0
+                    reserva.consignatario = int(form.cleaned_data.get('consignatario_i', 0)) if form.cleaned_data.get('consignatario_i') else 0
+                    reserva.armador = int(form.cleaned_data.get('armador_i', 0)) if form.cleaned_data.get('armador_i') else 0
+                    reserva.cliente = int(form.cleaned_data.get('cliente_i', 0)) if form.cleaned_data.get('cliente_i') else 0
+                    reserva.agecompras = int(form.cleaned_data.get('agcompras_i', 0)) if form.cleaned_data.get('agcompras_i') else 0
+                    reserva.ageventas = int(form.cleaned_data.get('agventas_i', 0)) if form.cleaned_data.get('agventas_i') else 0
+                    reserva.embarcador = int(form.cleaned_data.get('embarcador_i', 0)) if form.cleaned_data.get('embarcador_i') else 0
+
 
                 except ValueError as e:
                     return JsonResponse({
@@ -68,11 +149,13 @@ def add_house_impmarit(request):
                         'errors': {}
                     })
 
+                # Guardar el registro
                 reserva.save()
+
                 if reserva.pk:
-                    return JsonResponse({'success': True, 'message': 'house agregado'})
+                    return JsonResponse({'success': True, 'message': 'House agregado'})
                 else:
-                    return JsonResponse({'success': False, 'message': 'no'})
+                    return JsonResponse({'success': False, 'message': 'No se pudo agregar el house'})
 
             else:
                 return JsonResponse({
@@ -82,12 +165,12 @@ def add_house_impmarit(request):
                 })
 
     except Exception as e:
-        messages.error(request, str(e))
         return JsonResponse({
             'success': False,
             'message': f'Ocurrió un error: {str(e)}',
             'errors': {}
         })
+
 
 def generar_posicion(request):
     fecha_actual = datetime.now()
@@ -339,6 +422,65 @@ def source_rutas_importado(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+def source_embarque_importado(request):
+    try:
+        data = json.loads(request.body)
+        #numeros de los seguimientos
+        ids = data.get('ids', [])
+
+        registros = Cargaaerea.objects.filter(numero__in=ids)
+
+        if not registros.exists():
+            # Si no hay registros, devolver un array vacío
+            return JsonResponse({"data": []}, safe=False)
+
+        resultado = []
+        for registro in registros:
+            resultado.append({
+                "numero": 0,
+                "seguimiento_control": registro.numero,
+                "producto": registro.producto.codigo,
+                "bultos": registro.bultos,
+                "bruto": registro.bruto,
+                "tipo": registro.tipo,
+                "medidas": registro.medidas,
+                "cbm": registro.cbm,
+            })
+
+        # field_names = [field.name for field in Cargaaerea._meta.fields]
+        # resultado = list(registros.values(*field_names))
+
+        return JsonResponse({"data": resultado}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+def source_archivos_importado(request):
+    try:
+        data = json.loads(request.body)
+        # Números de los seguimientos
+        ids = data.get('ids', [])
+
+        registros = Attachhijo.objects.filter(numero__in=ids)
+
+        if not registros.exists():
+            # Si no hay registros, devolver un array vacío
+            return JsonResponse({"data": []}, safe=False)
+
+        resultado = []
+        for registro in registros:
+            resultado.append({
+                "numero": 0,
+                "seguimiento_control": registro.numero,
+                "archivo": str(registro.archivo),
+                "fecha": registro.fecha
+            })
+
+        return JsonResponse({"data": resultado}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
 ###
 
 def house_detail(request):
@@ -412,39 +554,39 @@ def edit_house_function(request, numero):
     if request.method == 'POST':
         form = edit_house(request.POST)
         if form.is_valid():
-            #30 campos
-            house.transportista = form.cleaned_data['transportista_i']
-            house.vendedor = form.cleaned_data['vendedor_i']
-            house.agente = form.cleaned_data['agente_i']
-            house.consignatario = form.cleaned_data['consignatario_i']
-            house.armador = form.cleaned_data['armador_i']
-            house.embarcador = form.cleaned_data['embarcador_i']
-            house.cliente = form.cleaned_data['cliente_i']
-            house.ageventas = form.cleaned_data['agventas_i']
-            house.agecompras = form.cleaned_data['agcompras_i']
+            # Asignar valores predeterminados para campos de texto o numéricos
+            house.vendedor = int(form.cleaned_data.get('vendedor_i', 0)) if form.cleaned_data.get('vendedor_i') else 0
+            house.transportista = int(form.cleaned_data.get('transportista_i', 0)) if form.cleaned_data.get('transportista_i') else 0
+            house.agente = int(form.cleaned_data.get('agente_i', 0)) if form.cleaned_data.get('agente_i') else 0
+            house.consignatario = int(form.cleaned_data.get('consignatario_i', 0)) if form.cleaned_data.get('consignatario_i') else 0
+            house.armador = int(form.cleaned_data.get('armador_i', 0)) if form.cleaned_data.get('armador_i') else 0
+            house.cliente = int(form.cleaned_data.get('cliente_i', 0)) if form.cleaned_data.get('cliente_i') else 0
+            house.agecompras = int(form.cleaned_data.get('agcompras_i', 0)) if form.cleaned_data.get('agcompras_i') else 0
+            house.ageventas = int(form.cleaned_data.get('agventas_i', 0)) if form.cleaned_data.get('agventas_i') else 0
+            house.embarcador = int(form.cleaned_data.get('embarcador_i', 0)) if form.cleaned_data.get('embarcador_i') else 0
 
             house.consolidado = request.POST.get('consolidado', 0)
-            house.vapor = form.cleaned_data['vapor']
-            house.viaje = form.cleaned_data.get('viaje', 0) if form.cleaned_data.get('viaje') not in [None,''] else 0
-            house.moneda = form.cleaned_data['moneda']
+            house.vapor = form.cleaned_data.get('vapor', "")
+            house.viaje = form.cleaned_data.get('viaje', "") if form.cleaned_data.get('viaje') not in [None, ''] else 0
+            house.moneda = form.cleaned_data.get('moneda', 0)
             house.arbitraje = form.cleaned_data.get('arbitraje', 0) if form.cleaned_data.get('arbitraje') not in [None, ''] else 0
-            house.pago = form.cleaned_data['pago']
-            house.destino = form.cleaned_data['destino']
-            house.origen = form.cleaned_data['origen']
-            house.loading = form.cleaned_data['loading']
-            house.discharge = form.cleaned_data['discharge']
-            house.status = form.cleaned_data['status_h']
-            house.posicion = form.cleaned_data['posicion_h']
-            house.operacion = form.cleaned_data['operacion']
-            house.awd = form.cleaned_data['awb']
-            house.hawd = form.cleaned_data['house']
-            house.demora = form.cleaned_data['demora']
-            house.wreceipt = form.cleaned_data['wreceipt']
-            house.trackid = form.cleaned_data['trackid']
-            house.fecharetiro = form.cleaned_data['fecha_retiro']
-            house.fechaembarque = form.cleaned_data['fecha_embarque']
-            house.notifagente = form.cleaned_data['notificar_agente']
-            house.notifcliente = form.cleaned_data['notificar_cliente']
+            house.pago = form.cleaned_data.get('pago', 0)
+            house.destino = form.cleaned_data.get('destino', "")
+            house.origen = form.cleaned_data.get('origen', "")
+            house.loading = form.cleaned_data.get('loading', "")
+            house.discharge = form.cleaned_data.get('discharge', "")
+            house.status = form.cleaned_data.get('status_h', "")
+            house.posicion = form.cleaned_data.get('posicion_h', 0)
+            house.operacion = form.cleaned_data.get('operacion', "")
+            house.awd = form.cleaned_data.get('awb', "")
+            house.hawb = form.cleaned_data.get('house', "")
+            house.demora = form.cleaned_data.get('demora', 0) if form.cleaned_data.get('demora') else 0
+            house.wreceipt = form.cleaned_data.get('wreceipt', "")
+            house.trackid = form.cleaned_data.get('trackid', "")
+            house.fecharetiro = form.cleaned_data.get('fecha_retiro', None)
+            house.fechaembarque = form.cleaned_data.get('fecha_embarque', None)
+            house.notifagente = form.cleaned_data.get('notificar_agente', None)
+            house.notifcliente = form.cleaned_data.get('notificar_cliente', None)
 
             try:
                 house.save()
@@ -464,6 +606,12 @@ def edit_house_function(request, numero):
                     'message': f'Error: {str(e)}',
                     'errors': {}
                 })
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Formulario inválido, por favor revise los campos.',
+                'errors': form.errors.as_json()
+            })
 
 def eliminar_house(request):
     resultado = {}

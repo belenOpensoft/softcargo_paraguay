@@ -27,6 +27,13 @@
     font-size: 12px;
     border-radius: 3px;
     }
+    #tabla_seguimiento_IH tr.highlighted {
+    background-color: #ffc107;
+}
+
+#tabla_seguimiento_IH tr.highlighted input[type="checkbox"] {
+    background-color: #ffc107;
+}
 </style>
     <table id="tabla_house_directo" class="table table-striped table-bordered" cellspacing="0" width="100%">
         <thead>
@@ -84,6 +91,7 @@
 {% include 'impormarit/importar_house.html' %}
 {% include 'impormarit/rutas_house.html' %}
 {% include 'impormarit/emails_house.html' %}
+{% include 'impormarit/archivos.html' %}
 {% include 'impormarit/envases_house.html' %}
 {% include 'impormarit/embarques_house.html' %}
 

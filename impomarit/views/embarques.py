@@ -3,8 +3,9 @@ import simplejson
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import HttpResponse
-from seguimientos.models import Cargaaerea, VCargaaerea, VGrillaSeguimientos, Seguimiento
+from django.http import HttpResponse, JsonResponse
+from impomarit.models import Cargaaerea
+from mantenimientos.models import Productos
 
 """ TABLA PUERTO """
 columns_table = {
@@ -27,24 +28,10 @@ def source_embarques(request):
         end = start + length
         order = get_order(request, columns_table)
         registros = Cargaaerea.objects.filter(numero=numero).order_by(*order)
-        se = VGrillaSeguimientos.objects.get(numero=numero)
-        data_extra = {
-            'tarifaprofit': float(se.tarifaprofit) if se.tarifaprofit is not None else '',
-            'muestroflete': float(se.muestroflete) if se.muestroflete is not None else '',
-            'tarifaventa': float(se.tarifaventa) if se.tarifaventa is not None else '',
-            'tarifacompra': float(se.tarifacompra) if se.tarifacompra is not None else '',
-            'volumen': float(se.volumen) if se.volumen is not None else '',
-            'tipobonifcli': str(se.tipobonifcli) if se.tipobonifcli is not None else '',
-            'tarifafija': str(se.tarifafija) if se.tarifafija is not None else '',
-            'tomopeso': float(se.tomopeso) if se.tomopeso is not None else '',
-            'bonifcli': float(se.bonifcli) if se.bonifcli is not None else '',
-        }
-        if se.aplicable is not None:
-            data_extra['aplicable'] = float(se.aplicable),
+
         resultado = {}
         data = get_data(registros[start:end])
         resultado['data'] = data
-        resultado['data_extra'] = data_extra
         resultado['length'] = length
         resultado['draw'] = request.GET['draw']
         resultado['recordsTotal'] = Cargaaerea.objects.filter(numero=numero).count()
@@ -61,14 +48,13 @@ def get_data(registros_filtrados):
         for registro in registros_filtrados:
             registro_json = []
             registro_json.append(str(registro.id))
-            registro_json.append('' if registro.producto is None else str(registro.producto.nombre))
+            registro_json.append('' if registro.producto is None else str(registro.producto))
             registro_json.append('' if registro.bultos is None else str(registro.bultos))
             registro_json.append('' if registro.tipo is None else str(registro.tipo))
             registro_json.append('' if registro.bruto is None else str(registro.bruto))
             registro_json.append('' if registro.medidas is None else str(registro.medidas))
             registro_json.append('' if registro.cbm is None else str(registro.cbm))
             registro_json.append('' if registro.mercaderia is None else str(registro.mercaderia))
-            registro_json.append('' if registro.materialreceipt is None else str(registro.materialreceipt))
             registro_json.append('' if registro.producto is None else str(registro.producto.id))
             data.append(registro_json)
         return data
@@ -110,73 +96,117 @@ def is_ajax(request):
         messages.error(request,e)
 
 
-
-
-
 @login_required(login_url='/login/')
 def guardar_embarques(request):
     resultado = {}
     try:
         numero = request.POST['numero']
         data = simplejson.loads(request.POST['data'])
-        seg = Seguimiento.objects.get(numero=numero)
-        registro = VCargaaerea()
+
+        # Verificar si el registro ya existe, utilizando el identificador si está presente
+        if 'id_embarque' in data and data['id_embarque']:
+            # Modificar el registro existente
+            try:
+                registro = Cargaaerea.objects.get(id=data['id_embarque'])
+            except Cargaaerea.DoesNotExist:
+                resultado['resultado'] = 'El embarque no existe.'
+                data_json = json.dumps(resultado)
+                mimetype = "application/json"
+                return HttpResponse(data_json, mimetype)
+        else:
+            # Crear un nuevo registro si no existe
+            registro = Cargaaerea()
+
         campos = vars(registro)
+
         for x in data:
             k = x['name']
             v = x['value']
+
+            # Procesar el campo 'producto' de manera especial
+            if k == 'producto' and v:
+                try:
+                    # Buscar el producto en la base de datos usando el valor proporcionado (código del producto)
+                    producto = Productos.objects.get(codigo=v)
+                    setattr(registro, 'producto', producto)  # Asignar la instancia del producto
+                except Productos.DoesNotExist:
+                    resultado['resultado'] = 'El producto con ese código no existe.'
+                    data_json = json.dumps(resultado)
+                    mimetype = "application/json"
+                    return HttpResponse(data_json, mimetype)
+                continue  # Saltar al siguiente campo, ya que hemos manejado 'producto'
+
+            # Para otros campos, continuar con el proceso habitual
             for name in campos:
                 if name == k:
                     if v is not None and len(v) > 0:
-                        if v is not None:
-                            setattr(registro, name, v)
-                        else:
-                            if len(v) > 0:
-                                setattr(registro, name, v)
+                        setattr(registro, name, v)
                     else:
                         setattr(registro, name, None)
                     continue
+
         registro.numero = numero
         registro.save()
-        """ ACTUALIZO DATOS EN SEGUIMIENTO """
-        volumen = 0
-        montoflete = 0
-        aplicable = 0
-        data_extra = simplejson.loads(request.POST['data_extra'])
-        registros = Cargaaerea.objects.filter(numero=numero)
-        for x in registros:
-            if x.cbm is not None:
-                volumen += x.cbm
-            if data_extra[1]['value'] == '1':
-                montoflete += redondear_a_05_o_0(float(x.bruto)) * float(data_extra[3]['value'])
-                aplicable += float(x.bruto)
-            elif data_extra[1]['value'] == '2':
-                try:
-                    params = x.medidas.split('*')
-                    value = float(params[0]) * float(params[1]) * float(params[2])
-                    ap = redondear_a_05_o_0(value * 166.67)
-                    aplicable += ap
-                    montoflete += ap * float(data_extra[3]['value'])
-                except:
-                    aplicable += 0
-        seg.volumen = volumen
-        seg.muestroflete = montoflete
-        seg.aplicable = redondear_a_05_o_0(aplicable)
-        seg.tomopeso = data_extra[1]['value']
-        seg.tarifaprofit = data_extra[8]['value']
-        seg.tarifacompra = data_extra[5]['value']
-        # seg.numero = data_extra[7]['value']
-        seg.tarifaventa = data_extra[3]['value']
-        seg.save()
+
         resultado['resultado'] = 'exito'
         resultado['numero'] = str(registro.numero)
     except IntegrityError as e:
         resultado['resultado'] = 'Error de integridad, intente nuevamente.'
     except Exception as e:
         resultado['resultado'] = str(e)
+
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
+def add_embarque_importado(request):
+    resultado = {}
+    try:
+        # Recibir el número desde el POST o desde los datos JSON
+        data = json.loads(request.body)  # Carga los datos del cuerpo de la solicitud como JSON
+
+        if isinstance(data, list):
+            for envase_data in data:
+                # Crear el registro del modelo Cargaaerea
+                registro = Cargaaerea()
+
+                # Obtener los campos disponibles del modelo
+                campos = [f.name for f in Cargaaerea._meta.fields]
+
+                # Iterar sobre el diccionario y asignar los valores al modelo
+                for nombre_campo, valor_campo in envase_data.items():
+                    if nombre_campo == 'producto' and valor_campo:
+                        # Procesar el campo 'producto' de manera especial
+                        try:
+                            # Buscar el producto en la base de datos usando el valor proporcionado (código del producto)
+                            producto = Productos.objects.get(codigo=valor_campo)
+                            setattr(registro, 'producto', producto)  # Asignar la instancia del producto
+                        except Productos.DoesNotExist:
+                            resultado['resultado'] = f'El producto con el código {valor_campo} no existe.'
+                            return JsonResponse(resultado)
+                        continue  # Saltar al siguiente campo, ya que hemos manejado 'producto'
+
+                    if nombre_campo in campos:  # Verificar si el campo existe en el modelo
+                        if valor_campo is not None and len(str(valor_campo)) > 0:
+                            setattr(registro, nombre_campo, valor_campo)
+                        else:
+                            setattr(registro, nombre_campo, None)
+
+                # Guardar el registro en la base de datos
+                registro.save()
+
+            # Retornar el resultado de éxito
+            resultado['resultado'] = 'exito'
+        else:
+            resultado['resultado'] = 'Los datos enviados no son una lista válida.'
+
+    except IntegrityError as e:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = f'Ocurrió un error: {str(e)}'
+
+    # Devolver el resultado en formato JSON
+    return JsonResponse(resultado)
 
 def redondear_a_05_o_0(numero):
     # Redondea el número a 1 decimal
@@ -193,68 +223,36 @@ def redondear_a_05_o_0(numero):
     else:
         return int(numero_redondeado) + 1
 
-def actualizo_datos_embarque(request):
-    resultado = {}
-    try:
-        numero = request.POST['numero']
-        data = simplejson.loads(request.POST['data'])
-        seg = Seguimiento.objects.get(numero=numero)
-        seg.volumen = data[0]['value']
-        seg.muestroflete = data[2]['value']
-        seg.aplicable = data[4]['value']
-        seg.tomopeso = data[1]['value']
-        seg.tarifaprofit = data[8]['value']
-        seg.tarifacompra = data[5]['value']
-        # seg.numero = data_extra[7]['value']
-        seg.tarifaventa = data[3]['value']
-        seg.save()
-        resultado['resultado'] = 'exito'
-        resultado['numero'] = str(numero)
-    except IntegrityError as e:
-        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
-    except Exception as e:
-        resultado['resultado'] = str(e)
-    data_json = json.dumps(resultado)
-    mimetype = "application/json"
-    return HttpResponse(data_json, mimetype)
+# def actualizo_datos_embarque(request):
+#     resultado = {}
+#     try:
+#         numero = request.POST['numero']
+#         data = simplejson.loads(request.POST['data'])
+#         seg = Seguimiento.objects.get(numero=numero)
+#         seg.volumen = data[0]['value']
+#         seg.muestroflete = data[2]['value']
+#         seg.aplicable = data[4]['value']
+#         seg.tomopeso = data[1]['value']
+#         seg.tarifaprofit = data[8]['value']
+#         seg.tarifacompra = data[5]['value']
+#         # seg.numero = data_extra[7]['value']
+#         seg.tarifaventa = data[3]['value']
+#         seg.save()
+#         resultado['resultado'] = 'exito'
+#         resultado['numero'] = str(numero)
+#     except IntegrityError as e:
+#         resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+#     except Exception as e:
+#         resultado['resultado'] = str(e)
+#     data_json = json.dumps(resultado)
+#     mimetype = "application/json"
+#     return HttpResponse(data_json, mimetype)
 
 def eliminar_embarque(request):
     resultado = {}
     try:
         id = request.POST['id']
-        micarga = Cargaaerea.objects.get(id=id)
-        numero = micarga.numero
-        micarga.delete()
-        seg = Seguimiento.objects.get(numero=numero)
-        data_extra = simplejson.loads(request.POST['data_extra'])
-        registros = Cargaaerea.objects.filter(numero=numero)
-        volumen = 0
-        aplicable = 0
-        montoflete = 0
-        for x in registros:
-            if x.cbm is not None:
-                volumen += x.cbm
-            if data_extra[1]['value'] == '1':
-                montoflete += redondear_a_05_o_0(float(x.bruto)) * float(data_extra[3]['value'])
-                aplicable += float(x.bruto)
-            elif data_extra[1]['value'] == '2':
-                try:
-                    params = x.medidas.split('*')
-                    value = float(params[0]) * float(params[1]) * float(params[2])
-                    ap = redondear_a_05_o_0(value * 166.67)
-                    aplicable += ap
-                    montoflete += ap * float(data_extra[3]['value'])
-                except:
-                    aplicable += 0
-        seg.volumen = volumen
-        seg.muestroflete = montoflete
-        seg.aplicable = redondear_a_05_o_0(aplicable)
-        seg.tomopeso = data_extra[1]['value']
-        seg.tarifaprofit = data_extra[8]['value']
-        seg.tarifacompra = data_extra[5]['value']
-        # seg.numero = data_extra[7]['value']
-        seg.tarifaventa = data_extra[3]['value']
-        seg.save()
+        Cargaaerea.objects.get(id=id).delete()
         resultado['resultado'] = 'exito'
     except IntegrityError as e:
         resultado['resultado'] = 'Error de integridad, intente nuevamente.'
