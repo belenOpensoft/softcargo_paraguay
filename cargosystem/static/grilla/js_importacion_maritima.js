@@ -3452,7 +3452,7 @@ let numero=localStorage.getItem('numero_master_seleccionado');
         },"initComplete": function( settings, json ) {
             $('#gastos_form #gastos_ingresos').val(0);
             $('#gastos_form #gastos_egresos').val(egresos.toFixed(2));
-            $('#gastos_form #gastos_diferencia').val((ingresos-egresos).toFixed(2));
+            $('#gastos_form #gastos_diferencia').val(0);
         }
     });
     console.log(ingresos.toFixed(2));
@@ -3509,14 +3509,11 @@ function get_datos_gastos_house() {
                 if (parseFloat(data[3]) > 0){
                     ingresos += parseFloat(data[3]);
                     diferencia += parseFloat(data[3]);
-                }else{
-                    egresos += parseFloat(data[4]);
-                    diferencia -= parseFloat(data[3]);
                 }
         },"initComplete": function( settings, json ) {
-            $('#gastos_ingresos').val(ingresos.toFixed(2));
-            $('#gastos_egresos').val(egresos.toFixed(2));
-            $('#gastos_diferencia').val((ingresos-egresos).toFixed(2));
+            $('#gastos_form_house #gastos_ingresos').val(ingresos.toFixed(2));
+            $('#gastos_form_house #gastos_egresos').val(0);
+            $('#gastos_form_house #gastos_diferencia').val(0);
         }
     });
 }
