@@ -1167,6 +1167,7 @@ var expandedRow;
                     ],
                     beforeClose: function (event, ui) {
                         localStorage.removeItem('fecha_editada_master');
+                        localStorage.removeItem('id_master_editar');
                     }
                 });
 
@@ -1523,8 +1524,9 @@ var expandedRow;
     $('#gastos_btn_master').click(function () {
         $("#id_gasto_id_").val('');
         let selectedRowN = localStorage.getItem('numero_master_seleccionado');
-       get_datos_gastos();
+
         if (selectedRowN!=null) {
+        get_datos_gastos();
             $('#gastos_form').trigger("reset");
             $("#gastos_modal").dialog({
                 autoOpen: true,
@@ -1581,6 +1583,7 @@ var expandedRow;
                         },
                     }],
                 beforeClose: function (event, ui) {
+                localStorage.removeItem('numero_master_seleccionado');
                     // table.ajax.reload();
                     // $("#tabla_gastos").dataTable().fnDestroy();
                 }
@@ -1953,6 +1956,7 @@ var expandedRow;
     $("#ingresar_embarque_house").html('Modificar');
     $("#cancelar_embarque_house").show();
 });
+
     //importar hijo desde seguimeintos edit master form
     var table_seg;
     $('#importar_hijo_edit_master').click(function () {
@@ -3521,8 +3525,8 @@ function gastos_btn_h_click(){
         $("#id_gasto_id_house").val('');
         let selectedRowId = localStorage.getItem('id_house_gasto');
         let selectedRowN = localStorage.getItem('num_house_gasto');
-       get_datos_gastos_house();
         if (selectedRowN!=null) {
+        get_datos_gastos_house();
             $('#gastos_form_house').trigger("reset");
             $("#gastos_modal_house").dialog({
                 autoOpen: true,
@@ -3579,8 +3583,12 @@ function gastos_btn_h_click(){
                         },
                     }],
                 beforeClose: function (event, ui) {
+                localStorage.removeItem('num_house_gasto');
+                $('#table_add_im tbody tr').removeClass('table-secondary');
+                $('#table_edit_im tbody tr').removeClass('table-secondary');
+                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                     // table.ajax.reload();
-                    // $("#tabla_gastos").dataTable().fnDestroy();
+                $("#tabla_gastos").dataTable().fnDestroy();
                 }
             })
 
@@ -3617,8 +3625,8 @@ function rutas_btn_h_click(){
   $("#id_house_ruta").val('');
         let selectedRowId = localStorage.getItem('id_house_gasto');
         let selectedRowN = localStorage.getItem('num_house_gasto');
-       get_datos_rutas_house();
         if (selectedRowN!=null) {
+        get_datos_rutas_house();
             $('#rutas_form_house').trigger("reset");
             $("#rutas_modal_house").dialog({
                 autoOpen: true,
@@ -3675,7 +3683,11 @@ function rutas_btn_h_click(){
                         },
                     }],
                 beforeClose: function (event, ui) {
-                   $("#table_rutas_house").dataTable().fnDestroy();
+                localStorage.removeItem('num_house_gasto');
+                 $("#table_rutas_house").dataTable().fnDestroy();
+                 $('#table_add_im tbody tr').removeClass('table-secondary');
+                $('#table_edit_im tbody tr').removeClass('table-secondary');
+                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -3712,8 +3724,9 @@ function envases_btn_h_click(){
 $("#id_envase_id").val('');
         let selectedRowId = localStorage.getItem('id_house_gasto');
         let selectedRowN = localStorage.getItem('num_house_gasto');
-       get_datos_envases_house();
+
         if (selectedRowN!=null) {
+        get_datos_envases_house();
             $('#envases_form_house').trigger("reset");
             $("#envases_modal_house").dialog({
                 autoOpen: true,
@@ -3770,7 +3783,11 @@ $("#id_envase_id").val('');
                         },
                     }],
                 beforeClose: function (event, ui) {
+                localStorage.removeItem('num_house_gasto');
                    $("#tabla_envases_house").dataTable().fnDestroy();
+                 $('#table_add_im tbody tr').removeClass('table-secondary');
+                $('#table_edit_im tbody tr').removeClass('table-secondary');
+                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -3807,8 +3824,9 @@ function embarques_btn_h_click(){
 $("#id_embarque_id").val('');
         let selectedRowId = localStorage.getItem('id_house_gasto');
         let selectedRowN = localStorage.getItem('num_house_gasto');
-       get_datos_embarques_house();
+
         if (selectedRowN!=null) {
+         get_datos_embarques_house();
             $('#embarques_form_house').trigger("reset");
             $("#embarques_modal_house").dialog({
                 autoOpen: true,
@@ -3863,7 +3881,11 @@ $("#id_embarque_id").val('');
                         },
                     }],
                 beforeClose: function (event, ui) {
+                localStorage.removeItem('num_house_gasto');
                    $("#tabla_embarques_house").dataTable().fnDestroy();
+                 $('#table_add_im tbody tr').removeClass('table-secondary');
+                $('#table_edit_im tbody tr').removeClass('table-secondary');
+                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -3938,7 +3960,10 @@ $('.email').click(function () {
                         },
                     },],
                 beforeClose: function (event, ui) {
-                    // table.ajax.reload();
+                localStorage.removeItem('num_house_gasto');
+                $('#table_add_im tbody tr').removeClass('table-secondary');
+                $('#table_edit_im tbody tr').removeClass('table-secondary');
+                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
         } else {
