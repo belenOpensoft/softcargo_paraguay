@@ -106,7 +106,6 @@ $(document).ready(function () {
             "url": "/source_seguimientos",
             'type': 'GET',
             "data": function (d) {
-                console.log(d);
                 return $.extend({}, d, {
                     "buscar": buscar,
                     "que_buscar": que_buscar,
@@ -131,6 +130,7 @@ $(document).ready(function () {
             });
         },
         "rowCallback": function (row, data) {
+        $('td:eq(1)', row).html('');
             let texto = ''
             if (data[8].length > 0 && data[8] !== 'S/I') {
             //notas
@@ -191,6 +191,7 @@ $(document).ready(function () {
             }
         },
     });
+
 
     $('#tabla_seguimiento tbody').on('click', 'td.details-control', function () {
         var tr = $(this).closest('tr');
@@ -333,7 +334,8 @@ $(document).ready(function () {
     });
 
     /* FUNCIONES MODALES */
-    $('#ingresar_envase').click(function () {
+    $('#ingresar_envase').click(function (event) {
+    event.preventDefault();
         if (confirm("¿Confirma guardar datos?")) {
             var form = $('#envases_form');
             var formData = new FormData(form[0]);
@@ -371,7 +373,8 @@ $(document).ready(function () {
             }
         }
     });
-    $('#ingresar_ruta').click(function () {
+    $('#ingresar_ruta').click(function (event) {
+        event.preventDefault();
         if (confirm("¿Confirma guardar datos?")) {
             var form = $('#rutas_form');
             if (form[0].checkValidity()) {
@@ -391,6 +394,7 @@ $(document).ready(function () {
                     async: false,
                     success: function (resultado) {
                         if (resultado['resultado'] === 'exito') {
+                            $('#rutas_form')[0].reset();
                             mostrarToast('¡Ruta guardado con exito!', 'success');
                             $(".alert").delay(4000).slideUp(200, function () {
                                 $(this).alert('close');
@@ -400,6 +404,7 @@ $(document).ready(function () {
                             $('#rutas_btn').addClass('triggered').trigger('click');
                             $("#id_ruta_id").val('');
                             table.ajax.reload();
+                            $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
                         } else {
                             alert(resultado['resultado']);
                         }
@@ -408,7 +413,8 @@ $(document).ready(function () {
             }
         }
     });
-    $('#ingresar_gasto').click(function () {
+    $('#ingresar_gasto').click(function (event) {
+    event.preventDefault();
         if (confirm("¿Confirma guardar el gasto?")) {
             var form = $('#gastos_form');
             var formData = new FormData(form[0]);
@@ -437,8 +443,9 @@ $(document).ready(function () {
                             $("#ingresar_gasto").html('Agregar');
                             $('#gastos_btn').addClass('triggered').trigger('click');
                             $("#id_gasto_id").val('');
-                            table_gastos.ajax.reload();
-                            table.ajax.reload();
+                            $('#tabla_gastos').DataTable().ajax.reload();
+                            $('#tabla_seguimiento').DataTable().ajax.reload();
+
                         } else {
                             alert(resultado['resultado']);
                         }
@@ -447,7 +454,8 @@ $(document).ready(function () {
             }
         }
     });
-    $('#ingresar_embarque').click(function () {
+    $('#ingresar_embarque').click(function (event) {
+    event.preventDefault();
         if (confirm("¿Confirma guardar datos?")) {
             var form = $('#embarques_form');
             var formData = new FormData(form[0]);
@@ -471,7 +479,7 @@ $(document).ready(function () {
                     data: toData,
                     async: false,
                     success: function (resultado) {
-                        if (resultado['resultado'] === 'exito') {
+
                             mostrarToast('¡Embarque guardado con exito!', 'success');
                             $(".alert").delay(4000).slideUp(200, function () {
                                 $(this).alert('close');
@@ -480,35 +488,39 @@ $(document).ready(function () {
                             $("#ingresar_embarque").html('Agregar');
                             $('#embarques_btn').addClass('triggered').trigger('click');
                             $('#id_embarque_id').val("");
+                           // $('#tabla_embarques').DataTable().ajax.reload();
                             table.ajax.reload(function(json) {
                                 // Callback function to handle the response data
                                 console.log('Data reloaded:', json);
 
                             });
-                        } else {
+
                             //alert(resultado['resultado']);
                             console.log(resultado['resultado']);
-                        }
+
                     }
                 });
             }
         }
     });
-    $('#cancelar_envase').click(function () {
+    $('#cancelar_envase').click(function (event) {
+    event.preventDefault();
         if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_envase").html('Agregar');
             $("#tabla_envases").dataTable().fnDestroy();
             $('#envases_btn').addClass('triggered').trigger('click');
         }
     })
-    $('#cancelar_gasto').click(function () {
+    $('#cancelar_gasto').click(function (event) {
+    event.preventDefault();
         if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_gasto").html('Agregar');
             $("#tabla_gastos").dataTable().fnDestroy();
             $('#gastos_btn').addClass('triggered').trigger('click');
         }
     })
-    $('#cancelar_ruta').click(function () {
+    $('#cancelar_ruta').click(function (event) {
+    event.preventDefault();
         if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_ruta").html('Agregar');
             $("#tabla_rutas").dataTable().fnDestroy();
@@ -520,14 +532,16 @@ $(document).ready(function () {
         que_buscar =  $("#que_buscar").val();
         table.ajax.reload();
     })
-    $('#cancelar_embarque').click(function () {
+    $('#cancelar_embarque').click(function (event) {
+    event.preventDefault();
         if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_embarque").html('Agregar');
             $("#tabla_embarques").dataTable().fnDestroy();
             $('#embarques_btn').addClass('triggered').trigger('click');
         }
     })
-    $('#guardar_archivo').click(function () {
+    $('#guardar_archivo').click(function (event) {
+    event.preventDefault();
         if (confirm("¿Confirma guardar archivo?")) {
             row = table.rows('.table-secondary').data();
             var formData = new FormData(document.getElementById("archivos_form"));
@@ -1084,6 +1098,7 @@ $(document).ready(function () {
                                                 var idx = table.cell('.selected', 0).index();
                                                 table_envases.$("tr.selected").removeClass('selected');
                                                 table_envases.row(idx).remove().draw(true);
+                                                $('#tabla_seguimiento').DataTable().ajax.reload();
                                                 mostrarToast('¡Envase eliminado correctamente!', 'success');
                                             } else {
                                                 alert(aux);
@@ -1193,7 +1208,7 @@ $(document).ready(function () {
             $("#rutas_modal").dialog({
                 autoOpen: true,
                 open: function () {
-
+                $('#rutas_form')[0].reset();
                 },
                 modal: true,
                 title: "Ingreso de datos para transbordos en el seguimiento N°: " + row[0][1],
@@ -1224,6 +1239,8 @@ $(document).ready(function () {
                                                 var idx = table.cell('.selected', 0).index();
                                                 table_rutas.$("tr.selected").removeClass('selected');
                                                 table_rutas.row(idx).remove().draw(true);
+                                                $('#tabla_gastos').DataTable().ajax.reload();
+                                                $('#tabla_seguimiento').DataTable().ajax.reload();
                                                 mostrarToast('¡Ruta eliminada correctamente!', 'success');
                                             } else {
                                                 alert(aux);
@@ -1317,19 +1334,9 @@ $(document).ready(function () {
                                         success: function (resultado) {
                                             aux = resultado['resultado'];
                                             if (aux === 'exito') {
-                                                // table_gastos.ajax.reload();
-                                                // if (parseFloat(data[3]) > 0){
-                                                //     ingresos += parseFloat(data[3]);
-                                                //     diferencia += parseFloat(data[3]);
-                                                // }else{
-                                                //     egresos += parseFloat(data[4]);
-                                                //     diferencia -= parseFloat(data[3]);
-                                                // }
-                                                // var idx = table.cell('.selected', 0).index();
-                                                // table_gastos.$("tr.selected").removeClass('selected');
-                                                // table_gastos.row(idx).remove().draw(true);
                                                 $("#table_gastos").dataTable().fnDestroy();
                                                 $('#gastos_btn').addClass('triggered').trigger('click');
+                                                $('#tabla_seguimiento').DataTable().ajax.reload();
                                                 mostrarToast('¡Gasto eliminado correctamente!', 'success');
                                             } else {
                                                 alert(aux);
@@ -1433,7 +1440,7 @@ $(document).ready(function () {
         $("#id_bultos").val(data[5]);
         $("#id_precio").val(data[6]);
         $("#id_profit").val(data[7]);
-        $("#id_bonifcli").val(data[8]);
+        $("#envases_form #id_bonifcli").val(data[8]);
         $("#id_nrocontenedor").val(data[9]);
         $("#id_marcas").val(data[10]);
         $("#id_precio").val(data[11]);
@@ -1559,6 +1566,7 @@ $(document).ready(function () {
                                                     console.log('Data reloaded:', json);
 
                                                 });
+                                                $('#tabla_seguimiento').DataTable().ajax.reload();
                                             } else {
                                                 //alert(aux);
                                                 console.log(resultado['resultado']);
@@ -1979,6 +1987,38 @@ $(document).ready(function () {
     });
     $("#actividad_add").autocomplete({
         source: '/autocomplete_actividades/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+
+    //autocomplete rutas
+    $("#id_origen").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#id_destino").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
