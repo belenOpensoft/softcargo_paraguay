@@ -32,10 +32,11 @@ def get_data_email_op(request):
     if is_ajax(request):
         try:
             title = request.POST['title']
-            row_number = 9155 #request.POST['row_number']
+            row_number = request.POST['row_number']
+            #9155
             row = VEmbarqueaereo.objects.get(numero=row_number)
-            row2 = Cargaaerea.objects.get(numero=row_number)
-            row3 = Envases.objects.get(numero=row_number)
+            row2 = Cargaaerea.objects.filter(numero=row_number)
+            row3 = Envases.objects.filter(numero=row_number)
             texto = ''
             # image_path = str(settings.BASE_DIR) +  "/cargosystem/static/images/oceanlink.png"  # Cambia esto a la ruta de tu imagen
             # base64_string = image_to_base64(image_path)
@@ -63,7 +64,12 @@ def get_data_email_op(request):
 
 
 def get_data_html(row_number, row, row2, row3, title, texto, resultado):
-    merca = Productos.objects.get(codigo=row2.producto)
+    # merca = Productos.objects.get(codigo=row2.producto.codigo)
+    if row2 is not None:
+        merca = []
+        for m in row2:
+            merca.append(m.producto)
+
     fecha_actual = datetime.now()
     if title == 'Notificación de transbordo de carga':
         fecha_actual = datetime.now()
@@ -76,7 +82,20 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado):
         texto += fecha_formateada.capitalize().upper() + '<br><br>'
         tabla_html = "<table border= '1' style='width: 40%; border-collapse: collapse;'>"
 
-        campos = [
+        campos = []
+
+        cont = 1
+        for b in row2:
+            campos.append((f"Bultos {cont}: ", b.bultos if b.bultos is not None else "S/I"))
+            campos.append((f"Peso {cont}: ", b.bruto if b.bruto is not None else "S/I"))
+            cont = cont + 1
+
+        cont = 1
+        for e in row3:
+            campos.append((f"Nro. Contenedor {cont}: ", str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I"))
+            cont = cont + 1
+
+        campos.extend([
             ("Vapor: ", str(row.vapor) if row.vapor is not None else "S/I"),
             ("Viaje: ", str(row.viaje) if row.viaje is not None else "S/I"),
             ("Llegada estimada: ", format_fecha(row.fecha_retiro)),
@@ -90,11 +109,8 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado):
             ("Embarcador: ", str(row.embarcador) if row.embarcador is not None else "S/I"),
             ("Orden cliente: ", str(row.orden_cliente) if row.orden_cliente is not None else "S/I"),
             ("Ref. proveedor: ", str(row.ref_proveedor) if row.ref_proveedor is not None else "S/I"),
-            ("Nro. Contenedor: ", str(row3.nrocontenedor) if row3.nrocontenedor is not None else "S/I"),
-            ("Bultos: ", str(row2.bultos) if row2.bultos is not None else "S/I"),
-            ("Peso: ", str(row2.bruto) if row2.bruto is not None else "S/I"),
             ("Mercadería: ", str(merca) if merca is not None else "S/I"),
-        ]
+        ])
 
         for campo, valor in campos:
             tabla_html += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
@@ -145,7 +161,27 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado):
         texto += fecha_formateada.capitalize().upper() + '<br><br>'
         tabla_html = "<table border= '1' style='width: 40%; border-collapse: collapse;'>"
 
-        campos = [
+        campos = []
+
+        cont = 1
+        for m in merca:
+            campos.append((f"Mercadería {cont}: ", str(m.nombre) if m.nombre is not None else "S/I"))
+            cont = cont + 1
+
+        cont = 1
+        for b in row2:
+            campos.append((f"Bultos {cont}: ", b.bultos if b.bultos is not None else "S/I"))
+            campos.append((f"Peso {cont}: ", b.bruto if b.bruto is not None else "S/I"))
+            campos.append((f"CBM {cont}: ", b.cbm if b.cbm is not None else "S/I"))
+            cont = cont + 1
+
+        cont = 1
+        for e in row3:
+            campos.append((f"Nro. Contenedor {cont}: ", str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I"))
+            campos.append((f"Precintos {cont}: ", str(e.precinto) if e.precinto is not None else "S/I"))
+            cont = cont + 1
+
+        campos.extend([
             ("Embarque: ", str(row_number) if row_number is not None else "S/I"),
             ("Posición: ", str(row.posicion) if row.posicion is not None else "S/I"),
             ("Salida: ", format_fecha(row.fecha_embarque)),
@@ -156,14 +192,24 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado):
             ("H B/L: ", str(row.hawb) if row.hawb is not None else "S/I"),
             ("Embarcador: ", str(row.embarcador) if row.embarcador is not None else "S/I"),
             ("Consignatario: ", str(row.consignatario) if row.consignatario is not None else "S/I"),
-            #("Depósito: ", str() if  is not None else "S/I"),
-            ("Mercadería: ", str(merca) if merca is not None else "S/I"),
-            ("Bultos: ", str(row2.bultos) if row2.bultos is not None else "S/I"),
-            ("Peso: ", str(row2.bruto) if row2.bruto is not None else "S/I"),
-            ("CBM: ", f"{row2.cbm:.4f}" if row2.cbm is not None else "S/I"),
-            ("Nro. Contenedor: ", str(row3.nrocontenedor) if row3.nrocontenedor is not None else "S/I"),
-            ("Precintos: ", str(row3.precinto) if row3.precinto is not None else "S/I"),
-        ]
+        ])
+
+
+        # campos = [
+        #     ("Embarque: ", str(row_number) if row_number is not None else "S/I"),
+        #     ("Posición: ", str(row.posicion) if row.posicion is not None else "S/I"),
+        #     ("Salida: ", format_fecha(row.fecha_embarque)),
+        #     ("LLegada: ", format_fecha(row.fecha_retiro)),
+        #     ("Origen: ", str(row.origen) if row.origen is not None else "S/I"),
+        #     ("Destino: ", str(row.destino) if row.destino is not None else "S/I"),
+        #     ("Vapor: ", str(row.vapor) if row.vapor is not None else "S/I"),
+        #     ("H B/L: ", str(row.hawb) if row.hawb is not None else "S/I"),
+        #     ("Embarcador: ", str(row.embarcador) if row.embarcador is not None else "S/I"),
+        #     ("Consignatario: ", str(row.consignatario) if row.consignatario is not None else "S/I"),
+        #     #("Depósito: ", str() if  is not None else "S/I"),
+        #
+        #
+        # ]
 
         for campo, valor in campos:
             tabla_html += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
@@ -240,14 +286,21 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado):
         texto += tabla_html4
 
         tabla_html5 = "<table border= '1' style='width: 40%; border-collapse: collapse;'>"
-        campos5 = [
-            ("Mercadería: ", str(merca) if merca is not None else "S/I"),
-            ("Bultos: ", str(row2.bultos) if row2.bultos is not None else "S/I"),
-            ("Peso: ", str(row2.bruto) if row2.bruto is not None else "S/I"),
-            ("Condiciones de pago: ", str(row.pago_flete) if row.pago_flete is not None else "S/I"),
-            ("Términos de compra: ", str(row.terminos) if row.terminos is not None else "S/I"),
-            ("Modo de embarque: ", "MARITIMO"),
-        ]
+        campos5 = []
+        cont = 1
+        for m in merca:
+            campos5.append((f"Mercadería {cont}: ", str(m.nombre) if m.nombre is not None else "S/I"))
+            cont = cont + 1
+
+        cont = 1
+        for b in row2:
+            campos5.append((f"Bultos {cont}: ", b.bultos if b.bultos is not None else "S/I"))
+            campos5.append((f"Peso {cont}: ", b.bruto if b.bruto is not None else "S/I"))
+            cont = cont + 1
+
+        campos5.append(("Condiciones de pago: ", str(row.pago_flete) if row.pago_flete is not None else "S/I"))
+        campos5.append(("Términos de compra: ", str(row.terminos) if row.terminos is not None else "S/I"))
+        campos5.append(("Modo de embarque: ", "MARITIMO"))
 
         for campo, valor in campos5:
             tabla_html5 += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
