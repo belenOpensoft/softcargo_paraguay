@@ -17,7 +17,8 @@ from django.views.decorators.csrf import csrf_exempt
 from cargosystem.settings import RUTA_PROYECTO
 from impomarit.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
     rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse
-from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo, Attachhijo
+from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo, Attachhijo, Cargaaerea, Envases, \
+    Serviceaereo, Conexaerea
 from seguimientos.forms import archivosForm
 
 
@@ -312,6 +313,16 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append('' if registro.notificar_agente is None else str(registro.notificar_agente)[:10])  # Estado
             registro_json.append('' if registro.notificar_cliente is None else str(registro.notificar_cliente)[:10])  # Estado
 
+            archivos = Attachhijo.objects.filter(numero=registro.numero).count()
+            embarques = Cargaaerea.objects.filter(numero=registro.numero).count()
+            envases = Envases.objects.filter(numero=registro.numero).count()
+            gastos = Serviceaereo.objects.filter(numero=registro.numero).count()
+            rutas = Conexaerea.objects.filter(numero=registro.numero).count()
+            registro_json.append(archivos)
+            registro_json.append(embarques)
+            registro_json.append(envases)
+            registro_json.append(gastos)
+            registro_json.append(rutas)
 
             data.append(registro_json)
         return data

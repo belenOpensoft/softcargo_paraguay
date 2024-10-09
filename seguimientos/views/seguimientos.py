@@ -308,6 +308,7 @@ def get_data(registros_filtrados):
             envases = Envases.objects.filter(numero=registro.numero).count()
             gastos = Serviceaereo.objects.filter(numero=registro.numero).count()
             rutas = Conexaerea.objects.filter(numero=registro.numero).count()
+            #falta historial
             registro_json.append(archivos)
             registro_json.append(embarques)
             registro_json.append(envases)
@@ -337,6 +338,8 @@ def get_data(registros_filtrados):
                 registro_json.append(registro.emailet)
             else:
                 registro_json.append('')
+
+            #registro_json.append(historial)
             data.append(registro_json)
         return data
     except Exception as e:
