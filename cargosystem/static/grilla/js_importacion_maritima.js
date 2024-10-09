@@ -3442,17 +3442,17 @@ let numero=localStorage.getItem('numero_master_seleccionado');
         ],"rowCallback": function (row, data) {
                 $(row).find('td:eq(3)').css('background-color', '#99cc99');
                 $(row).find('td:eq(4)').css('background-color', '#CC9393');
-                if (parseFloat(data[3]) > 0){
-                    ingresos += parseFloat(data[3]);
-                    diferencia += parseFloat(data[3]);
-                }else{
-                    egresos += parseFloat(data[4]);
-                    diferencia -= parseFloat(data[3]);
+                console.log(data[3]);
+                console.log(data[4]);
+                if (parseFloat(data[4]) > 0){
+                 //ingresos += parseFloat(data[4]);
+                 egresos += parseFloat(data[4]);
+                 diferencia += parseFloat(data[4]);
                 }
         },"initComplete": function( settings, json ) {
-            $('#gastos_ingresos').val(ingresos.toFixed(2));
-            $('#gastos_egresos').val(egresos.toFixed(2));
-            $('#gastos_diferencia').val((ingresos-egresos).toFixed(2));
+            $('#gastos_form #gastos_ingresos').val(0);
+            $('#gastos_form #gastos_egresos').val(egresos.toFixed(2));
+            $('#gastos_form #gastos_diferencia').val((ingresos-egresos).toFixed(2));
         }
     });
     console.log(ingresos.toFixed(2));
