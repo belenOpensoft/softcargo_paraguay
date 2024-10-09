@@ -122,6 +122,7 @@ $(document).ready(function () {
                 var that = this;
                 $('input', this.footer()).on('keyup change', function () {
                     if (that.search() !== this.value) {
+                    //aca esta teniendo problema busqueda seguimientos nuevos
                         that
                             .search(this.value)
                             .draw();

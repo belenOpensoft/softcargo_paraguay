@@ -73,6 +73,7 @@ columns_table = {
     7: 'status',
 }
 
+
 def source_seguimientos(request):
     if is_ajax(request):
         """ BUSCO ORDEN """
