@@ -3829,9 +3829,9 @@ $("#id_envase_id").val('');
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar el seleccionado?')) {
-                                var row = $('#tabla_embarques_house').DataTable().rows('.selected').data();
+                                var row = $('#tabla_envases_house').DataTable().rows('.selected').data();
                                 if (row.length === 1) {
-                                    miurl = "/importacion_maritima/eliminar_embarques_house/";
+                                    miurl = "/importacion_maritima/eliminar_envases_house/";
                                     var toData = {
                                         'id': row[0][0],
                                         'csrfmiddlewaretoken': csrf_token,
@@ -3843,8 +3843,8 @@ $("#id_envase_id").val('');
                                         success: function (resultado) {
                                             aux = resultado['resultado'];
                                             if (aux === 'exito') {
-                                                $("#tabla_embarques_house").dataTable().fnDestroy();
-                                                get_datos_embarques_house();
+                                                $("#tabla_envases_house").dataTable().fnDestroy();
+                                                get_datos_envases_house();
                                                 alert('Eliminado correctamente');
                                                // $('#gastos_btn_master').addClass('triggered').trigger('click');
                                                // mostrarToast('¡Gasto eliminado correctamente!', 'success');
