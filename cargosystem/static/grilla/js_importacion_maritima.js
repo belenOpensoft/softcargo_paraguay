@@ -1702,7 +1702,16 @@ var expandedRow;
                        let aux= document.getElementById('numero_gasto_house').value;
                        $('#gastos_form_house').trigger("reset");
                        document.getElementById('numero_gasto_house').value=aux;
+                        if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        }
 
+                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        }
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        }
                     } else {
                         alert(resultado['resultado']);
                     }
@@ -1780,6 +1789,16 @@ var expandedRow;
                        $('#rutas_form_house').trigger("reset");
                        document.getElementById('id_ruta_id').value=aux;
                        $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
+                       if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        }
+
+                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        }
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        }
                     } else {
                         alert(resultado['resultado']);
                     }
@@ -1846,6 +1865,16 @@ var expandedRow;
                        let aux= document.getElementById('numero_envase').value;
                        $('#envases_form_house').trigger("reset");
                        document.getElementById('numero_envase').value=aux;
+                       if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        }
+
+                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        }
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        }
                      //  $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
                     } else {
                         alert(resultado['resultado']);
@@ -1922,6 +1951,16 @@ var expandedRow;
                        let aux= document.getElementById('numero_embarque').value;
                        $('#embarques_form_house').trigger("reset");
                        document.getElementById('numero_embarque').value=aux;
+                       if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        }
+
+                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        }
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        }
                     } else {
                         alert(resultado['resultado']);
                     }
@@ -3646,8 +3685,16 @@ function gastos_btn_h_click(){
                                                 $("#table_gastos_house").dataTable().fnDestroy();
                                                 get_datos_gastos_house();
                                                 alert('Eliminado correctamente');
-                                               // $('#gastos_btn_master').addClass('triggered').trigger('click');
-                                               // mostrarToast('¡Gasto eliminado correctamente!', 'success');
+                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                }
+
+                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                }
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                }
                                             } else {
                                                 alert(aux);
                                             }
@@ -3746,8 +3793,16 @@ function rutas_btn_h_click(){
                                                 $("#tabla_rutas_house").dataTable().fnDestroy();
                                                 get_datos_rutas_house();
                                                 alert('Eliminado correctamente');
-                                               // $('#gastos_btn_master').addClass('triggered').trigger('click');
-                                               // mostrarToast('¡Gasto eliminado correctamente!', 'success');
+                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                }
+
+                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                }
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                }
                                             } else {
                                                 alert(aux);
                                             }
@@ -3846,8 +3901,16 @@ $("#id_envase_id").val('');
                                                 $("#tabla_envases_house").dataTable().fnDestroy();
                                                 get_datos_envases_house();
                                                 alert('Eliminado correctamente');
-                                               // $('#gastos_btn_master').addClass('triggered').trigger('click');
-                                               // mostrarToast('¡Gasto eliminado correctamente!', 'success');
+                                                 if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                }
+
+                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                }
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                }
                                             } else {
                                                 alert(aux);
                                             }
@@ -3946,6 +4009,16 @@ $("#id_embarque_id").val('');
                                                 $("#tabla_embarques_house").dataTable().fnDestroy();
                                                 get_datos_embarques_house();
                                                 alert('Eliminado correctamente');
+                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                }
+
+                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                }
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                }
                                             } else {
                                                 alert(aux);
                                             }
@@ -3966,7 +4039,7 @@ $("#id_embarque_id").val('');
                     }],
                 beforeClose: function (event, ui) {
                 localStorage.removeItem('num_house_gasto');
-                   $("#tabla_embarques_house").dataTable().fnDestroy();
+                 $("#tabla_embarques_house").dataTable().fnDestroy();
                  $('#table_add_im tbody tr').removeClass('table-secondary');
                 $('#table_edit_im tbody tr').removeClass('table-secondary');
                 $('#tabla_house_directo tbody tr').removeClass('table-secondary');
