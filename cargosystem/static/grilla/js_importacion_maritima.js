@@ -1030,8 +1030,8 @@ $(document).ready(function () {
     e.preventDefault();
     e.stopPropagation();
 
-    if(document.getElementById('id_viaje_master').value<0){
-    alert('No se admiten valores negativos para el campo "viaje"');
+    if(document.getElementById('id_viaje_master').value<0||document.getElementById('id_tarifa').value<0||document.getElementById('id_arbitraje').value<0||document.getElementById('id_trafico').value<0||document.getElementById('id_bultosmadre').value<0||document.getElementById('id_kilosmadre').value<0||document.getElementById('id_cotizacion').value<0){
+    alert('No se admiten valores negativos.');
     }else{
     let formData = $(this).serialize();
     formData += '&csrfmiddlewaretoken=' + csrf_token;
@@ -1186,6 +1186,10 @@ var expandedRow;
 });
     $('#edit_master_form').submit(function(e){
        e.preventDefault();
+    if(document.getElementById('id_tarifa_e').value<0||document.getElementById('id_arbitraje_e').value<0||document.getElementById('id_trafico_e').value<0||document.getElementById('id_bultosmadre_e').value<0||document.getElementById('id_kilosmadre_e').value<0||document.getElementById('id_cotizacion_e').value<0){
+    alert('No se admiten valores negativos.');
+    }else{
+
         var id_master = localStorage.getItem('id_master_editar');
         var formData = $(this).serialize();
         $('#edit_master_form').attr('action', '/importacion_maritima/edit_master/' + id_master + '/');
@@ -1229,6 +1233,7 @@ var expandedRow;
                 $('#destino_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#loading_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#discharge_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+        }
     });
     //evento al modificar fecha del master
    $('#id_fecha_e').on('change', function() {
@@ -1429,6 +1434,9 @@ var expandedRow;
     $('#edit_house_form').submit(function(e){
     let lugar=localStorage.getItem('lugar');
        e.preventDefault();
+        if(document.getElementById('pago_house_e').value<0||document.getElementById('arbitraje_house_e').value<0||document.getElementById('dias_demora_e').value<0){
+    alert('No se admiten valores negativos en los campos numéricos.')
+    }else{
         var numero = localStorage.getItem('numero_embarque');
         var formData = $(this).serialize();
         $('#edit_house_form').attr('action', '/importacion_maritima/edit_house/' + numero + '/');
@@ -1471,6 +1479,7 @@ var expandedRow;
                 alert('Error en la solicitud: ' + error);
             }
         });
+        }
     });
 
     //agregar house desde edit master
@@ -1595,6 +1604,9 @@ var expandedRow;
     });
     $('#ingresar_gasto_master').click(function (event) {
     event.preventDefault();
+     if(document.getElementById('id_pinformar').value<0||document.getElementById('id_arbitraje_id').value<0||document.getElementById('id_costo').value<0){
+    alert('No se admiten valores negativos en los campos numéricos.')
+    }else{
     if (confirm("¿Confirma guardar el gasto?")) {
         var form = $('#gastos_form');
         var formData = new FormData(form[0]);
@@ -1633,6 +1645,7 @@ var expandedRow;
         }else{
         alert('Debe completar todos los campos.');
         }
+    }
     }
 });
     $('#tabla_gastos tbody').on('dblclick', 'tr', function () {
@@ -1674,6 +1687,9 @@ var expandedRow;
     //gastos house
     $('#ingresar_gasto_house').off('click').click(function (event) {
     event.preventDefault();
+    if(document.getElementById('id_pinformar_h').value<0||document.getElementById('id_arbitraje_h').value<0||document.getElementById('id_precio_h').value<0){
+    alert('No se admiten valores negativos en los campos numéricos.')
+    }else{
     if (confirm("¿Confirma guardar el gasto?")) {
         var form = $('#gastos_form_house');
         var formData = new FormData(form[0]);
@@ -1726,6 +1742,7 @@ var expandedRow;
             alert('Debe completar todos los campos.');
         }
     }
+    }
 });
     $('#tabla_gastos_house tbody').off('dblclick').on('dblclick', 'tr', function () {
         var data = table_gastos.row(this).data();
@@ -1760,6 +1777,7 @@ var expandedRow;
     //rutas house
     $('#ingresar_ruta_house').off('click').click(function (event) {
     event.preventDefault();
+
     if (confirm("¿Confirma guardar la ruta?")) {
         var form = $('#rutas_form_house');
         var formData = new FormData(form[0]);
@@ -1837,6 +1855,9 @@ var expandedRow;
     //envases house
     $('#ingresar_envase_house').off('click').click(function (event) {
     event.preventDefault();
+    if(document.getElementById('id_profit').value<0||document.getElementById('id_volumen').value<0||document.getElementById('id_precio').value<0||document.getElementById('id_peso').value<0||document.getElementById('id_cantidad').value<0||document.getElementById('id_bonifcli').value<0||document.getElementById('id_bultod').value<0||document.getElementById('id_tara').value<0){
+    alert('No se admiten valores negativos en los campos numéricos.')
+    }else{
     if (confirm("¿Confirma guardar el envase?")) {
         var form = $('#envases_form_house');
         var formData = new FormData(form[0]);
@@ -1890,6 +1911,7 @@ var expandedRow;
             alert('Debe completar todos los campos.');
         }
     }
+    }
 });
     $('#tabla_envases_house tbody').off('click').on('click', 'tr', function () {
         $('#tabla_envases_house tbody tr').removeClass('selected');
@@ -1923,6 +1945,9 @@ var expandedRow;
     //embarques house
     $('#ingresar_embarque_house').off('click').click(function (event) {
     event.preventDefault();
+    if(document.getElementById('id_bruto_embarque').value<0||document.getElementById('id_cbm').value<0||document.getElementById('id_bruto_embarque').value<0){
+    alert('No se admiten valores negativos en los campos numéricos.')
+    }else{
     if (confirm("¿Confirma guardar el envase?")) {
         var form = $('#embarques_form_house');
         var formData = new FormData(form[0]);
@@ -1974,6 +1999,7 @@ var expandedRow;
 
             alert('Debe completar todos los campos.');
         }
+    }
     }
 });
     $('#tabla_embarques_house tbody').off('click').on('click', 'tr', function () {
