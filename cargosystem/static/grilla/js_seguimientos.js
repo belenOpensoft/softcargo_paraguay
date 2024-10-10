@@ -796,6 +796,7 @@ $(document).ready(function () {
             alert('Debe seleccionar al menos un registro');
         }
     });
+
     $('#archivos_btn').click(function () {
         $("#tabla_archivos").dataTable().fnDestroy();
         row = table.rows('.table-secondary').data();
@@ -2680,19 +2681,23 @@ function get_datos_gastos() {
 }
 function imprimirPDF() {
     var contenido = $('#pdf_add_input').summernote('code'); // Obtener el HTML del Summernote
-    // Crear una nueva ventana emergente
-    var ventanaImpresion = window.open('', '_blank');
+    var ventanaImpresion = window.open('', '_blank'); // Crear una nueva ventana emergente
+
     // Escribir el HTML del Summernote en la ventana emergente
-    ventanaImpresion.document.write('<html><head><title></title></head><body>');
+    ventanaImpresion.document.write('<html><head><title>Impresión</title>');
+    ventanaImpresion.document.write('<style>body { font-family: Arial; }</style></head><body>');
     ventanaImpresion.document.write(contenido);
     ventanaImpresion.document.write('</body></html>');
-    ventanaImpresion.document.addEventListener('DOMContentLoaded', function () {
-        setTimeout(function () {
-        }, 2000);
-    });
-    ventanaImpresion.print();
-    ventanaImpresion.close();
+    ventanaImpresion.document.close(); // Cerrar el flujo de escritura del documento
+
+    // Esperar a que la nueva ventana se cargue completamente antes de imprimir
+    ventanaImpresion.onload = function () {
+        ventanaImpresion.focus(); // Asegurarse de que la ventana esté en foco
+        ventanaImpresion.print(); // Iniciar la impresión
+        ventanaImpresion.close(); // Cerrar la ventana después de la impresión
+    };
 }
+
 function get_datos_pdf() {
     row = table.rows('.table-secondary').data();
     miurl = "/get_datos_caratula/";
