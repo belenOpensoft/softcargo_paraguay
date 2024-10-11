@@ -51,27 +51,27 @@ def source_envases(request):
 
 def get_data(registros_filtrados):
     try:
-
         data = []
         for registro in registros_filtrados:
             registro_json = []
-            registro_json.append(str(registro.id))
-            registro_json.append('' if registro.unidad is None else str(registro.unidad))
-            registro_json.append('' if registro.tipo is None else str(registro.tipo))
-            registro_json.append('' if registro.movimiento is None else str(registro.movimiento))
-            registro_json.append('' if registro.terminos is None else str(registro.terminos))
-            registro_json.append('' if registro.bultos is None else str(registro.bultos))
-            registro_json.append('' if registro.precio is None else str(registro.precio))
-            registro_json.append('' if registro.profit is None else str(registro.profit))
-            registro_json.append('' if registro.bonifcli is None else str(registro.bonifcli))
-            registro_json.append('' if registro.nrocontenedor is None else str(registro.nrocontenedor))
-            registro_json.append('' if registro.marcas is None else str(registro.marcas))
-            registro_json.append('' if registro.precio is None else str(registro.precio))
-            registro_json.append('' if registro.envase is None else str(registro.envase))
-            registro_json.append('' if registro.tara is None else str(registro.tara))
-            registro_json.append('' if registro.peso is None else str(registro.peso))
-            registro_json.append('' if registro.volumen is None else str(registro.volumen))
-            registro_json.append('' if registro.precinto is None else str(registro.precinto))
+            registro_json.append(str(registro.id))  # data[0] - ID
+            registro_json.append('' if registro.numero is None else str(registro.numero))  # data[1] - Número
+            registro_json.append('' if registro.unidad is None else str(registro.unidad))  # data[2] - Unidad
+            registro_json.append('' if registro.tipo is None else str(registro.tipo))  # data[3] - Tipo
+            registro_json.append('' if registro.movimiento is None else str(registro.movimiento))  # data[4] - Movimiento
+            registro_json.append('' if registro.terminos is None else str(registro.terminos))  # data[5] - Términos
+            registro_json.append('' if registro.cantidad is None else str(registro.cantidad))  # data[6] - Cantidad
+            registro_json.append('' if registro.precio is None else str(registro.precio))  # data[7] - Precio
+            registro_json.append('' if registro.marcas is None else str(registro.marcas))  # data[9] - Marcas
+            registro_json.append('' if registro.precinto is None else str(registro.precinto))  # data[10] - Precinto
+            registro_json.append('' if registro.tara is None else str(registro.tara))  # data[11] - Tara
+            registro_json.append('' if registro.bonifcli is None else str(registro.bonifcli))  # data[12] - Bonificación cliente
+            registro_json.append('' if registro.envase is None else str(registro.envase))  # data[13] - Envase
+            registro_json.append('' if registro.bultos is None else str(registro.bultos))  # data[14] - Bultos
+            registro_json.append('' if registro.peso is None else str(registro.peso))  # data[15] - Peso
+            registro_json.append('' if registro.profit is None else str(registro.profit))  # data[16] - Profit
+            registro_json.append('' if registro.nrocontenedor is None else str(registro.nrocontenedor))  # data[17] - Número de contenedor
+            registro_json.append('' if registro.volumen is None else str(registro.volumen))  # data[18] - Volumen
             data.append(registro_json)
         return data
     except Exception as e:

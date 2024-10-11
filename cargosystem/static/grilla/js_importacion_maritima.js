@@ -1855,7 +1855,7 @@ var expandedRow;
     //envases house
     $('#ingresar_envase_house').off('click').click(function (event) {
     event.preventDefault();
-    if(document.getElementById('id_profit').value<0||document.getElementById('id_volumen').value<0||document.getElementById('id_precio').value<0||document.getElementById('id_peso').value<0||document.getElementById('id_cantidad').value<0||document.getElementById('id_bonifcli').value<0||document.getElementById('id_bultod').value<0||document.getElementById('id_tara').value<0){
+    if(document.getElementById('id_profit').value<0||document.getElementById('id_volumen').value<0||document.getElementById('id_precio').value<0||document.getElementById('id_peso').value<0||document.getElementById('id_cantidad').value<0||document.getElementById('id_bonifcli').value<0||document.getElementById('id_bultos').value<0||document.getElementById('id_tara').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
     if (confirm("¿Confirma guardar el envase?")) {
@@ -4255,6 +4255,7 @@ function eliminar_adjunto(id) {
 
 //modificar fechas
 function modificar_fecha_retiro(x){
+let lugar=localStorage.getItem('lugar');
     let vector = null;
     let master = null;
     let fecha = null;
@@ -4280,7 +4281,16 @@ function modificar_fecha_retiro(x){
             'X-CSRFToken': csrftoken
         },
         success: function(response) {
-
+            if(lugar==='add_master'){
+            table_add_im.ajax.reload(null, false);
+            }else if(lugar==='edit_master'){
+            table_edit_im.ajax.reload(null, false);
+            }else if(lugar==='edit_directo'){
+            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+            }
+            else{
+            console.log('error en el lugar '+lugar);
+            }
             if (x == 0) {
                 localStorage.removeItem('fecha_editada_master');
             } else {
