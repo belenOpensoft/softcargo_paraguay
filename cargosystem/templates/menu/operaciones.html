@@ -1,3 +1,49 @@
+<style>
+  .custom-icon {
+    fill: white; /* Cambia el color del SVG a blanco */
+        width: 1em; /* Ajusta al tamaño del icono de Font Awesome */
+    height: 1em;
+  }
+
+/* Estilo inicial: Submenu links y sidebar links con colores normales */
+.sidebar-link, .submenu-link {
+    color: white;
+    text-decoration: none;
+}
+
+/* Submenu oculto inicialmente */
+.submenu {
+    color: white;
+    max-height: 0; /* Altura inicial cero para ocultar */
+    overflow: hidden; /* Evitar mostrar contenido desbordado */
+    transition: max-height 0.4s ease-in-out; /* Animación de altura */
+}
+
+/* Mostrar el submenú cuando se hace hover sobre el sidebar-link */
+.sidebar-item.has-submenu:hover .submenu {
+    color: white;
+    max-height: 500px; /* Altura suficiente para mostrar los enlaces del submenú */
+}
+
+/* Cambiar el color de los submenu-link a blanco solo cuando se hace hover sobre el sidebar-link */
+.sidebar-item.has-submenu:hover .submenu-link {
+    color: white;
+}
+
+/* Cambiar también el color del sidebar-link y el ícono a blanco al hacer hover */
+.sidebar-item.has-submenu:hover .sidebar-link,
+.sidebar-item.has-submenu:hover .custom-icon {
+    color: white;
+    fill: white;
+}
+
+/* Efecto hover en los submenu-link: oscurecer un poco */
+.sidebar-item.has-submenu:hover .submenu-link:hover {
+    color: #cccccc; /* Un tono de blanco más oscuro para resaltar el hover */
+}
+
+
+</style>
 <aside id="sidebar" style="background-color:#0D6EFD;">
             <div class="h-100">
                 <div class="sidebar-logo">
@@ -5,21 +51,133 @@
                 </div>
                 <!-- Sidebar Navigation -->
                 <ul class="sidebar-nav">
-                    <li class="sidebar-header">
-                        Opciones
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="/importacion_maritima/masters" class="sidebar-link">
-                            <i class="fa-solid fa-list pe-2"></i>
-                            Master's
+                                        <!-- Operaciones -->
+                    <li class="sidebar-header">Operaciones</li>
+
+                    <!-- Importación Marítima (con menú desplegable) -->
+                    <li class="sidebar-item has-submenu">
+                        <a href="javascript:void(0)" class="sidebar-link">
+                            <i class="fa-solid fa-ship pe-2"></i>
+                            &nbsp; Impo Marítima
                         </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="/importacion_maritima/masters" class="submenu-link">
+                                    Master's
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="/importacion_maritima/house_directo" class="submenu-link">
+                                    House's Directos
+                                </a>
+                            </li>
+                        </ul>
                     </li>
-                    <li class="sidebar-item">
-                        <a href="/importacion_maritima/house_directo" class="sidebar-link">
-                            <i class="fa-solid fa-list pe-2"></i>
-                            House's directos
+
+                    <!-- Exportación Marítima (con menú desplegable) -->
+                    <li class="sidebar-item has-submenu">
+                        <a href="javascript:void(0)" class="sidebar-link">
+                           <i class="fa-solid fa-ship pe-2"></i>
+                            &nbsp; Expo Marítima
                         </a>
+                       <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="" class="submenu-link">
+                                    Master's
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="" class="submenu-link">
+                                    House's Directos
+                                </a>
+                            </li>
+                        </ul>
                     </li>
+
+                     <!-- Importación Aérea (con menú desplegable) -->
+                    <li class="sidebar-item has-submenu">
+                        <a href="javascript:void(0)" class="sidebar-link">
+                            <i class="fa-solid fa-plane pe-2"></i>&nbsp;Impo Aérea
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="" class="submenu-link">
+                                    Master's
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="" class="submenu-link">
+                                    House's Directos
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Exportación Aérea (con menú desplegable) -->
+                    <li class="sidebar-item has-submenu">
+                        <a href="javascript:void(0)" class="sidebar-link">
+                            <i class="fa-solid fa-plane pe-2"></i>&nbsp;Expo Aérea
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="" class="submenu-link">
+                                    Master's
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="" class="submenu-link">
+                                    House's Directos
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Importación Terrestre (con menú desplegable) -->
+                    <li class="sidebar-item has-submenu">
+                        <a href="javascript:void(0)" class="sidebar-link">
+                            <svg class="custom-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="1em" height="1em" style="vertical-align: middle;">
+                                <path d="M48 0C21.5 0 0 21.5 0 48L0 368c0 26.5 21.5 48 48 48l16 0c0 53 43 96 96 96s96-43 96-96l128 0c0 53 43 96 96 96s96-43 96-96l32 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l0-64 0-32 0-18.7c0-17-6.7-33.3-18.7-45.3L512 114.7c-12-12-28.3-18.7-45.3-18.7L416 96l0-48c0-26.5-21.5-48-48-48L48 0zM416 160l50.7 0L544 237.3l0 18.7-128 0 0-96zM112 416a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm368-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/>
+                            </svg>
+                            &nbsp;Impo Terrestre
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="" class="submenu-link">
+                                    Master's
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="" class="submenu-link">
+                                    House's Directos
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Exportación Terrestre (con menú desplegable) -->
+                    <li class="sidebar-item has-submenu">
+                        <a href="javascript:void(0)" class="sidebar-link">
+                            <svg class="custom-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="1em" height="1em" style="vertical-align: middle;">
+                                <path d="M48 0C21.5 0 0 21.5 0 48L0 368c0 26.5 21.5 48 48 48l16 0c0 53 43 96 96 96s96-43 96-96l128 0c0 53 43 96 96 96s96-43 96-96l32 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l0-64 0-32 0-18.7c0-17-6.7-33.3-18.7-45.3L512 114.7c-12-12-28.3-18.7-45.3-18.7L416 96l0-48c0-26.5-21.5-48-48-48L48 0zM416 160l50.7 0L544 237.3l0 18.7-128 0 0-96zM112 416a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm368-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/>
+                            </svg>
+                            &nbsp;Expo Terrestre
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="" class="submenu-link">
+                                    Master's
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="" class="submenu-link">
+                                    House's Directos
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+
+
                     <li class="sidebar-item">
                         <a href="{% url 'vista_correos' %}" class="sidebar-link">
                             <i class="fa-solid fa-folder pe-2"></i>Correos enviados
@@ -30,6 +188,8 @@
                            <i class="fa-solid fa-file-lines pe-2"></i>&nbsp;Reportes
                         </a>
                     </li>
+                    <!-- Fin de operaciones -->
+
                     <li class="sidebar-header">
                         Modulo
                     </li>
