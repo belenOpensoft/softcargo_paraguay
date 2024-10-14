@@ -13,6 +13,7 @@ urlpatterns = [
     path('', include('seguimientos.urls')),
     path('', include('notificaciones.urls')),
     path('importacion_maritima/', include('impomarit.urls')),
+    path('exportacion_maritima/', include('expmarit.urls')),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='vista_logout'),
     path('login/selecccionarol/', select_rol, name="vista_roles"),

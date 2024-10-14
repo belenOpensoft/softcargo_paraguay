@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'notificaciones',
     'informedna',
     'impomarit',
+    'expmarit'
 ]
 CSRF_COOKIE_SECURE = False
 CKEDITOR_UPLOAD_PATH = "uploads/"

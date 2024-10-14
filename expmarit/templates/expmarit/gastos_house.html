@@ -1,0 +1,124 @@
+{% load static %}
+{% load widget_tweaks %}
+<style>
+
+    #tabla_gastos tr:hover::after {
+    content: 'Doble click para editar';
+    color: #f9edbe;
+    position: absolute;
+    right: 10px;
+    background-color: #333;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 3px;
+    }
+</style>
+<div id="gastos_modal_house"  style="display: none;">
+
+ <form id="gastos_form_house">
+
+     <table class="table" style="width: 100%">
+         <tbody>
+             <tr>
+                 <input type="hidden" id="id_gasto_id_house" name="id_gasto_id_house">
+                 <td style="text-align: right;">{{ form_gastos_house.numero.label }}</td>
+                 <td>{{ form_gastos_house.numero }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_gastos_house.servicio.label }}</td>
+                 <td>{{ form_gastos_house.servicio }}</td>
+                  <!-- COLUMNA TREs -->
+                  <td style="text-align: right;">{{ form_gastos_house.secomparte.label }}</td>
+                 <td>{{ form_gastos_house.secomparte }}</td>
+                 <td style="text-align: right;">INGRESOS:</td>
+                 <td><input type="number" step="any" style="background-color: #99cc99;text-align: right;" class="form-control" id="gastos_ingresos"></td>
+             </tr>
+             <tr>
+                 <td style="text-align: right;">{{ form_gastos_house.moneda.label }}</td>
+                 <td>{{ form_gastos_house.moneda }}</td>
+                  <!-- COLUMNA DOS -->
+                  <td style="text-align: right;">{{ form_gastos_house.precio.label }}</td>
+                 <td>{{ form_gastos_house.precio }}</td>
+                  <!-- COLUMNA TRES -->
+                 <td style="text-align: right;">{{ form_gastos_house.arbitraje.label }}</td>
+                 <td>{{ form_gastos_house.arbitraje }}</td>
+                 <td style="text-align: right;">EGRESOS:</td>
+                 <td><input type="number" class="form-control" step="any" style="background-color: #DAD085;text-align: right;" id="gastos_egresos"></td>
+
+
+             </tr>
+             <tr>
+                 <td style="text-align: right;">{{ form_gastos_house.tipogasto.label }}</td>
+                 <td>{{ form_gastos_house.tipogasto }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_gastos_house.pinformar.label }}</td>
+                 <td>{{ form_gastos_house.pinformar }}</td>
+                 <!-- COLUMNA TRE -->
+                <td style="text-align: right;">{{ form_gastos_house.notomaprofit.label }}</td>
+                 <td>
+                 <input type="checkbox" id="{{ form_gastos_house.notomaprofit.id_for_label }}" name="{{ form_gastos_house.notomaprofit.html_name }}" {% if form_gastos_house.notomaprofit.value %}checked{% endif %}>
+                 </td>
+                 <td style="text-align: right;">DIFERENCIA:</td>
+                 <td><input type="number" class="form-control" step="any" style="background-color: #CC9393;text-align: right;" id="gastos_diferencia"></td>
+             </tr>
+             <tr>
+                 <td style="text-align: right;">{{ form_gastos_house.modo.label }}</td>
+                 <td>{{ form_gastos_house.modo }}</td>
+                  <!-- COLUMNA DOS -->
+                 <td style="text-align: right;">{{ form_gastos_house.socio.label }}</td>
+                 <td>{{ form_gastos_house.socio }}</td>
+                 <!-- COLUMNA TRE -->
+
+                 <!-- COLUMNA TRE -->
+                 <td style="text-align: right;">{{ form_gastos_house.reembolsable.label }}</td>
+                 <td>{{ form_gastos_house.reembolsable }}</td>
+             </tr>
+              <tr>
+
+                 <td style="text-align: right;">{{ form_gastos_house.empresa.label }}</td>
+                 <td>{{ form_gastos_house.empresa }}</td>
+
+             </tr>
+             <tr>
+                 <td style="text-align: right;">{{ form_gastos_house.detalle.label }}</td>
+                 <td colspan="3">{{ form_gastos_house.detalle }}</td>
+                 <td></td>
+                 <td>
+                     <button class="btn btn-dark" id="ingresar_gasto_house">Agregar</button>
+                     <button class="btn btn-danger" id="cancelar_gasto_house">Cancelar</button>
+                 </td>
+                 <td></td>
+                 <td></td>
+             </tr>
+         <tr>
+         </tbody>
+
+     </table>
+
+     <table id="tabla_gastos_house" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-right">Servicio</th>
+            <th class="text-right">Moneda</th>
+            <th style="text-align: right;">Precio</th>
+            <th style="text-align: right;">Costo</th>
+            <th class="text-left">Detalle</th>
+            <th class="text-left">Pago</th>
+            <th class="text-left">Tipo de gasto</th>
+            <th style="text-align: right;">Arbitraje</th>
+            <th class="text-left">Ex.profit</th>
+            <th class="text-left">Se comparte</th>
+            <th style="text-align: right;">Informar</th>
+            <th class="text-left">Socio comercial</th>
+            <th class="text-left">Notas</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+
+    </form>
+</div>
