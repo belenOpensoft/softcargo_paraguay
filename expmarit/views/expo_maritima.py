@@ -21,7 +21,7 @@ from expmarit.forms import add_im_form, add_form, add_house, edit_form, edit_hou
 from expmarit.models import Master, VEmbarqueaereo, ExpmaritEmbarqueaereo
 
 from expmarit.models import ExpmaritConexaerea, ExpmaritEnvases, ExpmaritCargaaerea, ExpmaritAttachhijo, ExpmaritServiceaereo
-from seguimientos.forms import archivosForm
+from seguimientos.forms import archivosForm, pdfForm
 
 
 @login_required(login_url='/')
@@ -54,7 +54,7 @@ def master_expo_maritima(request):
                 'form_envases_house': envasesFormHouse(),
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
-
+                'form_pdf': pdfForm(),
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
@@ -92,6 +92,7 @@ def house_importacion_maritima(request):
                 'form_envases_house': envasesFormHouse(),
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
+                'form_pdf': pdfForm(),
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')

@@ -13,12 +13,13 @@ from impomarit.views.impo_maritima import master_importacion_maritima, source_im
     descargar_archivo, modificar_fecha_retiro, add_archivo_importado
 from impomarit.views.mails import get_data_email_op
 from impomarit.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
+from impomarit.views.pdf import get_datos_caratula
 from impomarit.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado
 from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
-
+    path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
     path(r'masters/', master_importacion_maritima, name="master_importacion_maritima"),
     path('descargar_archivo/<int:id>', descargar_archivo, name="descargar_archivo"),
     path('eliminar_archivo/', eliminar_archivo, name="eliminar_archivo"),

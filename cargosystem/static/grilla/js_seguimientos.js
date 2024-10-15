@@ -816,8 +816,8 @@ $(document).ready(function () {
                 },
                 modal: true,
                 title: "Archivo para imprimir seguimiento N°: " + row[0][1],
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
+                height: wHeight * 0.70,
+                width: wWidth * 0.60,
                 class: 'modal fade',
                 buttons: [
                     {
@@ -2750,9 +2750,48 @@ function imprimirPDF() {
 
     // Escribir el HTML del Summernote en la ventana emergente
     ventanaImpresion.document.write('<html><head><title>Impresión</title>');
-    ventanaImpresion.document.write('<style>body { font-family: Arial; }</style></head><body>');
-    ventanaImpresion.document.write(contenido);
-    ventanaImpresion.document.write('</body></html>');
+    ventanaImpresion.document.write('<style>');
+    ventanaImpresion.document.write(`
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            font-size:12px;
+        }
+        @media print {
+            @page {
+                size: portrait; /* Establece la orientación en vertical (portrait) */
+                margin: 20mm;   /* Márgenes alrededor del contenido */
+            }
+            body {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                display: block;
+                width: 100%;
+                text-align: left;
+            }
+        }
+        .container {
+            margin: 20px; /* Margen interior para el contenido */
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        p {
+            text-align: left;
+        }
+        hr {
+            border: 1px solid #000;
+        }
+    `);
+    ventanaImpresion.document.write('</style></head><body>');
+    ventanaImpresion.document.write('<div class="container">'); // Aplicar un contenedor con estilo
+    ventanaImpresion.document.write(contenido); // Insertar el contenido de Summernote
+    ventanaImpresion.document.write('</div></body></html>');
     ventanaImpresion.document.close(); // Cerrar el flujo de escritura del documento
 
     // Esperar a que la nueva ventana se cargue completamente antes de imprimir

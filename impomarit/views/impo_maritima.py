@@ -19,7 +19,7 @@ from impomarit.forms import add_im_form, add_form, add_house, edit_form, edit_ho
     rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse
 from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo, Attachhijo, Cargaaerea, Envases, \
     Serviceaereo, Conexaerea
-from seguimientos.forms import archivosForm
+from seguimientos.forms import archivosForm, pdfForm
 
 
 @login_required(login_url='/')
@@ -52,7 +52,7 @@ def master_importacion_maritima(request):
                 'form_envases_house': envasesFormHouse(),
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
-
+                'form_pdf': pdfForm(),
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
@@ -85,6 +85,7 @@ def house_importacion_maritima(request):
                 'form_envases_house': envasesFormHouse(),
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
+                'form_pdf': pdfForm(),
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
