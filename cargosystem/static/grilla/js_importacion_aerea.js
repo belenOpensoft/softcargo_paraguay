@@ -58,7 +58,7 @@ $(document).ready(function () {
 
     /* DATATABLES */
     //buscadores
-    $('#tabla_expomarit tfoot th').each(function () {
+    $('#tabla_importaerea tfoot th').each(function () {
         let title = $(this).text();
         if (title !== '') {
             $(this).html('<input type="text" class="form-control"  autocomplete="off" id="buscoid_' + contador + '" type="text" placeholder="Buscar ' + title + '"  autocomplete="off" />');
@@ -69,7 +69,7 @@ $(document).ready(function () {
     });
 
     //tabla general master
-    table = $('#tabla_expomarit').DataTable({
+    table = $('#tabla_importaerea').DataTable({
         "stateSave": true,
         "dom": 'Btlipr',
         "scrollX": true,
@@ -115,19 +115,13 @@ $(document).ready(function () {
             {
                 "targets": [9],
             },
-            {
-                "targets": [10],
-            },
-            {
-                "targets": [11],
-            },
         ],
         "order": [[1, "desc"],],
         "processing": true,
         "serverSide": true,
         "pageLength": 100,
         "ajax": {
-            "url": "/exportacion_maritima/source_master",
+            "url": "/importacion_aerea/source_master",
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
@@ -246,25 +240,6 @@ $(document).ready(function () {
                 $('#consignatario_i').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
                 $('#consignatario_i').css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
-    $("#armador_add").autocomplete({
-        source: '/autocomplete_clientes/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['id']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-                 $('#armador_i').val(ui.item['id']);
-                 $('#armador_i').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
-            } else {
-                $(this).val('');
-                $('#armador_i').val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-                $('#armador_i').css({"border-color": "", 'box-shadow': ''});
             }
         }
     });
@@ -617,25 +592,6 @@ $(document).ready(function () {
                 $('#consignatario_ie').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
                 $('#consignatario_ie').css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
-    $("#armador_edit").autocomplete({
-        source: '/autocomplete_clientes/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['id']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-                 $('#armador_ie').val(ui.item['id']);
-                 $('#armador_ie').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
-            } else {
-                $(this).val('');
-                $('#armador_ie').val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-                $('#armador_ie').css({"border-color": "", 'box-shadow': ''});
             }
         }
     });
@@ -1030,14 +986,14 @@ $(document).ready(function () {
     e.preventDefault();
     e.stopPropagation();
 
-    if(document.getElementById('id_viaje_master').value<0||document.getElementById('id_tarifa').value<0||document.getElementById('id_arbitraje').value<0||document.getElementById('id_trafico').value<0||document.getElementById('id_cotizacion').value<0){
+    if(document.getElementById('id_tarifa').value<0||document.getElementById('id_arbitraje').value<0||document.getElementById('id_trafico').value<0||document.getElementById('id_bultosmadre').value<0||document.getElementById('id_kilosmadre').value<0||document.getElementById('id_cotizacion').value<0){
     alert('No se admiten valores negativos.');
     }else{
     let formData = $(this).serialize();
     formData += '&csrfmiddlewaretoken=' + csrf_token;
     $.ajax({
         type: "POST",
-        url: "/exportacion_maritima/add_master/",
+        url: "/importacion_aerea/add_master/",
         data: formData,
         success: function(response) {
             if (response.success) {
@@ -1085,7 +1041,7 @@ $(document).ready(function () {
 });
         //ver mas
 var expandedRow;
-    $('#tabla_expomarit tbody').on('click', 'td.details-control', function () {
+    $('#tabla_importaerea tbody').on('click', 'td.details-control', function () {
         var tr = $(this).closest('tr');
         var row = table.row(tr);
 
@@ -1102,7 +1058,7 @@ var expandedRow;
             var selectedRowId = rowData[4];
 
             $.ajax({
-                url: '/exportacion_maritima/source_embarque_aereo/' + selectedRowId + '/',
+                url: '/importacion_aerea/source_embarque_aereo/' + selectedRowId + '/',
                 type: 'GET',
                 success: function (response) {
                // console.log(data);
@@ -1118,7 +1074,7 @@ var expandedRow;
         }
     });
      //modificar master
-    $('#tabla_expomarit tbody').on('click', 'td', function () {
+    $('#tabla_importaerea tbody').on('click', 'td', function () {
 
 
         var tr = $(this).closest('tr');
@@ -1134,9 +1090,10 @@ var expandedRow;
     });
     $('#editar_btn').on('click', function () {
     let selectedRowId = localStorage.getItem('id_master_editar');
+
     if (selectedRowId !== null) {
         $.ajax({
-            url: '/exportacion_maritima/master-detail',
+            url: '/importacion_aerea/master-detail',
             data: { id: selectedRowId },
             method: 'GET',
             success: function (data) {
@@ -1185,13 +1142,13 @@ var expandedRow;
 });
     $('#edit_master_form').submit(function(e){
        e.preventDefault();
-    if(document.getElementById('id_tarifa_e').value<0||document.getElementById('id_arbitraje_e').value<0||document.getElementById('id_trafico_e').value<0||document.getElementById('id_cotizacion_e').value<0){
+    if(document.getElementById('id_tarifa_e').value<0||document.getElementById('id_arbitraje_e').value<0||document.getElementById('id_trafico_e').value<0||document.getElementById('id_bultosmadre_e').value<0||document.getElementById('id_kilosmadre_e').value<0||document.getElementById('id_cotizacion_e').value<0){
     alert('No se admiten valores negativos.');
     }else{
 
         var id_master = localStorage.getItem('id_master_editar');
         var formData = $(this).serialize();
-        $('#edit_master_form').attr('action', '/exportacion_maritima/edit_master/' + id_master + '/');
+        $('#edit_master_form').attr('action', '/importacion_aerea/edit_master/' + id_master + '/');
 
         $.ajax({
             url: $(this).attr('action'),
@@ -1272,8 +1229,8 @@ var expandedRow;
     //evento fila marcada
     $(document).on('click', function (event) {
     // tabla general
-    if (!$(event.target).closest('#tabla_expomarit').length) {
-        $('#tabla_expomarit tbody tr').removeClass('table-secondary');
+    if (!$(event.target).closest('#tabla_importaerea').length) {
+        $('#tabla_importaerea tbody tr').removeClass('table-secondary');
     }
 //    //tabla de houses en edit master
 //    if (!$(event.target).closest('#table_edit_im').length) {
@@ -1284,7 +1241,7 @@ var expandedRow;
 //        $('#table_add_im tbody tr').removeClass('table-secondary');
 //    }
 });
-    $('#tabla_expomarit tbody').on('click', 'tr', function (event) {
+    $('#tabla_importaerea tbody').on('click', 'tr', function (event) {
     // Evita que el clic en la tabla dispare la eliminación de la clase
     event.stopPropagation();
 
@@ -1297,7 +1254,7 @@ var expandedRow;
         setCookie(row_selected);
 
         // Quita la clase 'table-secondary' de cualquier fila previamente seleccionada
-        $('#tabla_expomarit tbody tr').removeClass('table-secondary');
+        $('#tabla_importaerea tbody tr').removeClass('table-secondary');
         // Agrega la clase 'table-secondary' a la fila seleccionada
         $(this).addClass('table-secondary');
     }
@@ -1359,7 +1316,7 @@ var expandedRow;
     e.preventDefault();
     e.stopPropagation();
     lugar_editar=localStorage.getItem('lugar_editar');
-    if(document.getElementById('pago_house').value<0||document.getElementById('arbitraje_house').value<0||document.getElementById('dias_demora').value<0){
+    if(document.getElementById('pago_house').value<0||document.getElementById('arbitraje_house').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
     let formData = $(this).serialize();
@@ -1370,7 +1327,7 @@ var expandedRow;
         }
     $.ajax({
         type: "POST",
-        url: "/exportacion_maritima/add_house/",
+        url: "/importacion_aerea/add_house/",
         data: formData,
         success: function(response) {
             if (response.success) {
@@ -1433,12 +1390,12 @@ var expandedRow;
     $('#edit_house_form').submit(function(e){
     let lugar=localStorage.getItem('lugar');
        e.preventDefault();
-        if(document.getElementById('pago_house_e').value<0||document.getElementById('arbitraje_house_e').value<0||document.getElementById('dias_demora_e').value<0){
+        if(document.getElementById('pago_house_e').value<0||document.getElementById('arbitraje_house_e').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
         var numero = localStorage.getItem('numero_embarque');
         var formData = $(this).serialize();
-        $('#edit_house_form').attr('action', '/exportacion_maritima/edit_house/' + numero + '/');
+        $('#edit_house_form').attr('action', '/importacion_aerea/edit_house/' + numero + '/');
         if(lugar==='edit_directo'){
         formData += '&consolidado=1';
         }
@@ -1555,7 +1512,7 @@ var expandedRow;
                             if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
                                 row = table_gastos.rows('.selected').data();
                                 if (row.length === 1) {
-                                    miurl = "/exportacion_maritima/eliminar_gasto_master/";
+                                    miurl = "/importacion_aerea/eliminar_gasto_master/";
                                     var toData = {
                                         'id': row[0][0],
                                         'csrfmiddlewaretoken': csrf_token,
@@ -1614,7 +1571,7 @@ var expandedRow;
             //row = table.rows('.table-secondary').data();
             let formData = $("#gastos_form").serializeArray();
             let data = JSON.stringify(formData);
-            miurl = "/exportacion_maritima/add_gasto_master/";
+            miurl = "/importacion_aerea/add_gasto_master/";
             var toData = {
                 'numero':numero ,
                 'data': data,
@@ -1696,7 +1653,7 @@ var expandedRow;
         let numero=localStorage.getItem('num_house_gasto');
             let formData = $("#gastos_form_house").serializeArray();
             let data = JSON.stringify(formData);
-            miurl = "/exportacion_maritima/add_gasto_house/";
+            miurl = "/importacion_aerea/add_gasto_house/";
             var toData = {
                 'numero':numero ,
                 'data': data,
@@ -1784,7 +1741,7 @@ var expandedRow;
         let numero=localStorage.getItem('num_house_gasto');
             let formData = $("#rutas_form_house").serializeArray();
             let data = JSON.stringify(formData);
-            miurl = "/exportacion_maritima/add_ruta_house/";
+            miurl = "/importacion_aerea/add_ruta_house/";
             var toData = {
                 'numero':numero ,
                 'data': data,
@@ -1840,110 +1797,22 @@ var expandedRow;
         $("#id_house_ruta").val(data[0]);
         $("#id_origen").val(data[1]);
         $("#id_destino").val(data[2]);
-        $("#id_vapor").val(data[3]);
+        $("#id_vuelo").val(data[3]);
         $("#id_salida").val(data[4]);
         $("#id_llegada").val(data[5]);
         $("#id_viaje_ruta").val(data[6]);
         $("#id_modo_ruta").val(data[8]);
-        $("#id_cia").val(data[7]);
+        $("#id_ciavuelo").val(data[7]);
 
         $("#ingresar_ruta_house").html('Modificar');
         $("#cancelar_ruta_house").show();
     });
 
-    //envases house
-    $('#ingresar_envase_house').off('click').click(function (event) {
-    event.preventDefault();
-    if(document.getElementById('id_volumen').value<0||document.getElementById('id_precio').value<0||document.getElementById('id_peso').value<0||document.getElementById('id_cantidad').value<0||document.getElementById('id_bonifcli').value<0||document.getElementById('id_bultos').value<0||document.getElementById('id_tara').value<0){
-    alert('No se admiten valores negativos en los campos numéricos.')
-    }else{
-    if (confirm("¿Confirma guardar el envase?")) {
-        var form = $('#envases_form_house');
-        var formData = new FormData(form[0]);
-        if (form[0].checkValidity()) {
-        let numero=localStorage.getItem('num_house_gasto');
-            let formData = $("#envases_form_house").serializeArray();
-            let data = JSON.stringify(formData);
-            miurl = "/exportacion_maritima/add_envase_house/";
-            var toData = {
-                'numero':numero ,
-                'data': data,
-                'csrfmiddlewaretoken': csrf_token,
-            };
-            $.ajax({
-                type: "POST",
-                url: miurl,
-                data: toData,
-                async: false,
-                success: function (resultado) {
-                    if (resultado['resultado'] === 'exito') {
-                        $("#id_envase_id").val('');
-                        alert('Guardado con éxito.');
-                        $("#tabla_envases_house").dataTable().fnDestroy();
-                        $("#ingresar_envase_house").html('Agregar');
-                       get_datos_envases_house();
-                       let aux= document.getElementById('numero_envase').value;
-                       $('#envases_form_house').trigger("reset");
-                       document.getElementById('numero_envase').value=aux;
-                       if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                            $('#table_add_im').DataTable().ajax.reload(null, false);
-                        }
-
-                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                            $('#table_edit_im').DataTable().ajax.reload(null, false);
-                        }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
-                        }
-                     //  $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
-                    } else {
-                        alert(resultado['resultado']);
-                    }
-                }
-            });
-        }else{
-            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
-            invalidFields.forEach(field => {
-                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
-            });
-
-            alert('Debe completar todos los campos.');
-        }
-    }
-    }
-});
-    $('#tabla_envases_house tbody').off('click').on('click', 'tr', function () {
-        $('#tabla_envases_house tbody tr').removeClass('selected');
-        $(this).addClass('selected');
-    });
-    $('#tabla_envases_house tbody').off('dblclick').on('dblclick', 'tr', function () {
-    var data = table_envases.row(this).data();
-    $("#id_envase_id").val(data[0]);         // ID del registro
-    $("#id_unidad").val(data[2]);                // Unidad
-    $("#id_tipo").val(data[3]);                  // Tipo
-    $("#id_movimiento").val(data[4]);            // Movimiento
-    $("#id_terminos").val(data[5]);              // Términos
-    $("#id_cantidad").val(data[6]);              // Cantidad
-    $("#id_precio").val(data[7]);                // Precio
-    $("#id_marcas").val(data[8]);                // Marcas
-    $("#id_precinto").val(data[9]);             // Precinto
-    $("#id_tara").val(data[10]);                 // Tara
-    $("#id_bonifcli").val(data[11]);             // Bonificación cliente
-    $("#id_envase").val(data[12]);               // Envase
-    $("#id_bultos").val(data[13]);               // Bultos
-    $("#id_peso").val(data[14]);                 // Peso
-    $("#id_nrocontenedor").val(data[15]);        // Número de contenedor
-    $("#id_volumen").val(data[16]);              // Volumen
-
-
-    $("#ingresar_envase_house").html('Modificar');
-    $("#cancelar_envase_house").show();
-});
 
     //embarques house
     $('#ingresar_embarque_house').off('click').click(function (event) {
     event.preventDefault();
-    if(document.getElementById('id_bruto_embarque').value<0||document.getElementById('id_cbm').value<0||document.getElementById('id_bruto_embarque').value<0){
+    if(document.getElementById('id_bruto_embarque').value<0||document.getElementById('id_bultos_embarque').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
     if (confirm("¿Confirma guardar el embarque?")) {
@@ -1953,7 +1822,7 @@ var expandedRow;
         let numero=localStorage.getItem('num_house_gasto');
             let formData = $("#embarques_form_house").serializeArray();
             let data = JSON.stringify(formData);
-            miurl = "/exportacion_maritima/add_embarque_house/";
+            miurl = "/importacion_aerea/add_embarque_house/";
             var toData = {
                 'numero':numero ,
                 'data': data,
@@ -2007,13 +1876,11 @@ var expandedRow;
     $('#tabla_embarques_house tbody').off('dblclick').on('dblclick', 'tr', function () {
     var data = table_embarques.row(this).data();
     $("#id_embarque_id").val(data[0]);         // ID del registro
-    $("#id_producto").val(data[8]);                // Unidad
+    $("#id_producto").val(data[6]);                // Unidad
     $("#id_bultos_embarque").val(data[2]);                  // Tipo
     $("#id_tipo_embarque").val(data[3]);            // Movimiento
     $("#id_bruto_embarque").val(data[4]);              // Términos
     $("#id_medidas").val(data[5]);              // Cantidad
-    $("#id_mercaderia").val(data[7]);                // Precio
-    $("#id_cbm").val(data[6]);                // Marcas
 
 
     $("#ingresar_embarque_house").html('Modificar');
@@ -2186,7 +2053,7 @@ var expandedRow;
 
             },
             modal: true,
-            title: "Archivos para el seguimiento N°: " + localStorage.getItem('num_house_gasto') ,
+            title: "Archivos para el House N°: " + localStorage.getItem('num_house_gasto') ,
             height: wHeight * 0.70,
             width: wWidth * 0.70,
             class: 'modal fade',
@@ -2223,7 +2090,7 @@ var expandedRow;
                     style: "width:100px",
                     click: function () {
                         if (confirm('¿Confirma descargar el archivo seleccionado?')) {
-                            var url = '/exportacion_maritima/descargar_archivo/' + localStorage.getItem('id_archivo');  // Ruta de la vista que devuelve el archivo
+                            var url = '/importacion_aerea/descargar_archivo/' + localStorage.getItem('id_archivo');  // Ruta de la vista que devuelve el archivo
                             window.open(url, '_blank');
                         }
                     },
@@ -2234,7 +2101,7 @@ var expandedRow;
                     click: function () {
                         if (confirm('¿Confirma eliminar archivo?')) {
                             if (localStorage.getItem('id_archivo')) {
-                                miurl = "/exportacion_maritima/eliminar_archivo/";
+                                miurl = "/importacion_aerea/eliminar_archivo/";
                                 var toData = {
                                     'id': localStorage.getItem('id_archivo'),
                                     'csrfmiddlewaretoken': csrf_token,
@@ -2249,7 +2116,7 @@ var expandedRow;
                                             var idx = table.cell('.selected', 0).index();
                                             $("#tabla_archivos tr.selected").removeClass('selected');
                                             $('#tabla_archivos').DataTable().ajax.reload(null, false);
-                                              if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
                                                     $('#table_add_im').DataTable().ajax.reload(null, false);
                                                 }
 
@@ -2290,7 +2157,7 @@ var expandedRow;
         if (confirm("¿Confirma guardar archivo?")) {
             var formData = new FormData(document.getElementById("archivos_form"));
             formData.append('numero',localStorage.getItem('num_house_gasto'));
-            miurl = "/exportacion_maritima/guardar_archivo/";
+            miurl = "/importacion_aerea/guardar_archivo/";
             $.ajax({
                 type: "POST",
                 url: miurl,
@@ -2301,7 +2168,7 @@ var expandedRow;
                 success: function (resultado) {
                     if (resultado['resultado'] === 'exito') {
                         $('#tabla_archivos').DataTable().ajax.reload(null, false);
-                        if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                         if ($.fn.DataTable.isDataTable('#table_add_im')) {
                             $('#table_add_im').DataTable().ajax.reload(null, false);
                         }
 
@@ -2407,7 +2274,7 @@ table_add_im = $('#table_add_im').DataTable({
     "serverSide": true,
     "pageLength": 100,
     "ajax": {
-        "url": `/exportacion_maritima/source_embarque_aereo/${master}/`,
+        "url": `/importacion_aerea/source_embarque_aereo/${master}/`,
         "type": 'POST',
         "headers": {
             "X-CSRFToken": csrftoken
@@ -2436,13 +2303,13 @@ table_add_im = $('#table_add_im').DataTable({
     "rowCallback": function (row, data) {
         $('td:eq(3)', row).html('');
             let texto = ''
-            if (data[13] > 0) {
+            if (data[14] > 0) {
             //archivo
                 texto += ' <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-filetype-docx" viewBox="0 0 16 16"' +
                             '><path fill-rule="evenodd" d="M14 4.5V11h-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5Zm-6.839 9.688v-.522a1.54 1.54 0 0 0-.117-.641.861.861 0 0 0-.322-.387.862.862 0 0 0-.469-.129.868.868 0 0 0-.471.13.868.868 0 0 0-.32.386 1.54 1.54 0 0 0-.117.641v.522c0 .256.04.47.117.641a.868.868 0 0 0 .32.387.883.883 0 0 0 .471.126.877.877 0 0 0 .469-.126.861.861 0 0 0 .322-.386 1.55 1.55 0 0 0 .117-.642Zm.803-.516v.513c0 .375-.068.7-.205.973a1.47 1.47 0 0 1-.589.627c-.254.144-.56.216-.917.216a1.86 1.86 0 0 1-.92-.216 1.463 1.463 0 0 1-.589-.627 2.151 2.151 0 0 1-.205-.973v-.513c0-.379.069-.704.205-.975.137-.274.333-.483.59-.627.257-.147.564-.22.92-.22.357 0 .662.073.916.22.256.146.452.356.59.63.136.271.204.595.204.972ZM1 15.925v-3.999h1.459c.406 0 .741.078 1.005.235.264.156.46.382.589.68.13.296.196.655.196 1.074 0 .422-.065.784-.196 1.084-.131.301-.33.53-.595.689-.264.158-.597.237-.999.237H1Zm1.354-3.354H1.79v2.707h.563c.185 0 .346-.028.483-.082a.8.8 0 0 0 .334-.252c.088-.114.153-.254.196-.422a2.3 2.3 0 0 0 .068-.592c0-.3-.04-.552-.118-.753a.89.89 0 0 0-.354-.454c-.158-.102-.361-.152-.61-.152Zm6.756 1.116c0-.248.034-.46.103-.633a.868.868 0 0 1 .301-.398.814.814 0 0 1 .475-.138c.15 0 .283.032.398.097a.7.7 0 0 1 .273.26.85.85 0 0 1 .12.381h.765v-.073a1.33 1.33 0 0 0-.466-.964 1.44 1.44 0 0 0-.49-.272 1.836 1.836 0 0 0-.606-.097c-.355 0-.66.074-.911.223-.25.148-.44.359-.571.633-.131.273-.197.6-.197.978v.498c0 .379.065.704.194.976.13.271.321.48.571.627.25.144.555.216.914.216.293 0 .555-.054.785-.164.23-.11.414-.26.551-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.765a.8.8 0 0 1-.117.364.699.699 0 0 1-.273.248.874.874 0 0 1-.401.088.845.845 0 0 1-.478-.131.834.834 0 0 1-.298-.393 1.7 1.7 0 0 1-.103-.627v-.495Zm5.092-1.76h.894l-1.275 2.006 1.254 1.992h-.908l-.85-1.415h-.035l-.852 1.415h-.862l1.24-2.015-1.228-1.984h.932l.832 1.439h.035l.823-1.439Z"' +
                             '/></svg>';
             }
-            if (data[14] > 0) {
+            if (data[15] > 0) {
             //embarque
             texto += '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-truck" viewBox="0 0 16 16">\n' +
                          '<path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5zm1.294 7.456A2 2 0 0 1 4.732 11h5.536a2 2 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456M12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>\n' +
@@ -2450,14 +2317,7 @@ table_add_im = $('#table_add_im').DataTable({
 
 
             }
-            if (data[15] > 0) {
-            //envase
-                texto += ' <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16"' +
-                            '><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.' +
-                            '961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16' +
-                            ' 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/> </svg>';
-            }
-            if (data[16] > 0) {
+            if (data[17] > 0) {
             //gastos
                 texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16"' +
                     '><path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.18' +
@@ -2465,7 +2325,7 @@ table_add_im = $('#table_add_im').DataTable({
                     '661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05z' +
                     'm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73l.348.086z"/>sss</svg>';
             }
-            if (data[17] > 0) {
+            if (data[18] > 0) {
             //rutas
                 texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">\n' +
                     '<path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>\n' +
@@ -2487,7 +2347,7 @@ table_add_im = $('#table_add_im').DataTable({
             localStorage.setItem('numero_embarque', selectedRowId);
 
             $.ajax({
-            url: '/exportacion_maritima/house-detail',
+            url: '/importacion_aerea/house-detail',
             data: { id: selectedRowId},
             method: 'GET',
             success: function (data) {
@@ -2602,6 +2462,8 @@ function fillFormWithDataHouse(data) {
         $('#posicion_gh_e').val(data.posicion_e);
         $('#operacion_editar').val(data.operacion_e);
 
+        $('#notificar_cliente_e').val(data.notifcliente_e ? formatDateToYYYYMMDD(data.notifcliente_e) : '');
+        $('#notificar_agente_e').val(data.notifagente_e ? formatDateToYYYYMMDD(data.notifagente_e) : '');
         $('#fecha_embarque_e').val(data.fechaembarque_e ? formatDateToYYYYMMDD(data.fechaembarque_e) : '');
         $('#fecha_retiro_e').val(data.fecharetiro_e ? formatDateToYYYYMMDD(data.fecharetiro_e) : '');
 
@@ -2610,7 +2472,7 @@ function fillFormWithDataHouse(data) {
 function getNameByIdVendedor(id) {
     var name = "";
     $.ajax({
-        url: '/exportacion_maritima/get_name_by_id_vendedor',
+        url: '/importacion_aerea/get_name_by_id_vendedor',
         data: { id: id},
         async: false,
         success: function (response) {
@@ -2620,6 +2482,7 @@ function getNameByIdVendedor(id) {
     return name;
 }
 function fillFormWithData(data) {
+
     localStorage.setItem('master_editar',data.awd_e);
     localStorage.setItem('posicion_editar',data.posicion_e);
     $('#transportista_edit').val(!data.transportista_e || data.transportista_e === 0 ? '' : getNameById(data.transportista_e));
@@ -2637,6 +2500,8 @@ function fillFormWithData(data) {
     $('#edit_master_form [name="tarifa_e"]').val(data.tarifa_e);
     $('#edit_master_form [name="moneda_e"]').val(data.moneda_e);
     $('#edit_master_form [name="arbitraje_e"]').val(data.arbitraje_e);
+    $('#edit_master_form [name="kilosmadre_e"]').val(data.kilosmadre_e);
+    $('#edit_master_form [name="bultosmadre_e"]').val(data.bultosmadre_e);
     $('#edit_master_form [name="pagoflete_e"]').val(data.pagoflete_e);
     $('#edit_master_form [name="trafico_e"]').val(data.trafico_e);
     $('#edit_master_form [name="fecha_e"]').val(formatDateToYYYYMMDD(data.fecha_e));
@@ -2662,7 +2527,7 @@ function formatDateToYYYYMMDD(isoDate) {
 function getNameById(id) {
 var name = "";
 $.ajax({
-    url: '/exportacion_maritima/get_name_by_id',
+    url: '/importacion_aerea/get_name_by_id',
     data: { id: id},
     async: false,
     success: function (response) {
@@ -2707,7 +2572,7 @@ table_edit_im = $('#table_edit_im').DataTable({
     "serverSide": true,
     "pageLength": 100,
     "ajax": {
-        "url": `/exportacion_maritima/source_embarque_aereo/${master}/`,
+        "url": `/importacion_aerea/source_embarque_aereo/${master}/`,
         "type": 'POST',
         "headers": {
             "X-CSRFToken": csrftoken
@@ -2736,13 +2601,13 @@ table_edit_im = $('#table_edit_im').DataTable({
     "rowCallback": function (row, data) {
         $('td:eq(3)', row).html('');
             let texto = ''
-            if (data[13] > 0) {
+            if (data[14] > 0) {
             //archivo
                 texto += ' <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-filetype-docx" viewBox="0 0 16 16"' +
                             '><path fill-rule="evenodd" d="M14 4.5V11h-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5Zm-6.839 9.688v-.522a1.54 1.54 0 0 0-.117-.641.861.861 0 0 0-.322-.387.862.862 0 0 0-.469-.129.868.868 0 0 0-.471.13.868.868 0 0 0-.32.386 1.54 1.54 0 0 0-.117.641v.522c0 .256.04.47.117.641a.868.868 0 0 0 .32.387.883.883 0 0 0 .471.126.877.877 0 0 0 .469-.126.861.861 0 0 0 .322-.386 1.55 1.55 0 0 0 .117-.642Zm.803-.516v.513c0 .375-.068.7-.205.973a1.47 1.47 0 0 1-.589.627c-.254.144-.56.216-.917.216a1.86 1.86 0 0 1-.92-.216 1.463 1.463 0 0 1-.589-.627 2.151 2.151 0 0 1-.205-.973v-.513c0-.379.069-.704.205-.975.137-.274.333-.483.59-.627.257-.147.564-.22.92-.22.357 0 .662.073.916.22.256.146.452.356.59.63.136.271.204.595.204.972ZM1 15.925v-3.999h1.459c.406 0 .741.078 1.005.235.264.156.46.382.589.68.13.296.196.655.196 1.074 0 .422-.065.784-.196 1.084-.131.301-.33.53-.595.689-.264.158-.597.237-.999.237H1Zm1.354-3.354H1.79v2.707h.563c.185 0 .346-.028.483-.082a.8.8 0 0 0 .334-.252c.088-.114.153-.254.196-.422a2.3 2.3 0 0 0 .068-.592c0-.3-.04-.552-.118-.753a.89.89 0 0 0-.354-.454c-.158-.102-.361-.152-.61-.152Zm6.756 1.116c0-.248.034-.46.103-.633a.868.868 0 0 1 .301-.398.814.814 0 0 1 .475-.138c.15 0 .283.032.398.097a.7.7 0 0 1 .273.26.85.85 0 0 1 .12.381h.765v-.073a1.33 1.33 0 0 0-.466-.964 1.44 1.44 0 0 0-.49-.272 1.836 1.836 0 0 0-.606-.097c-.355 0-.66.074-.911.223-.25.148-.44.359-.571.633-.131.273-.197.6-.197.978v.498c0 .379.065.704.194.976.13.271.321.48.571.627.25.144.555.216.914.216.293 0 .555-.054.785-.164.23-.11.414-.26.551-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.765a.8.8 0 0 1-.117.364.699.699 0 0 1-.273.248.874.874 0 0 1-.401.088.845.845 0 0 1-.478-.131.834.834 0 0 1-.298-.393 1.7 1.7 0 0 1-.103-.627v-.495Zm5.092-1.76h.894l-1.275 2.006 1.254 1.992h-.908l-.85-1.415h-.035l-.852 1.415h-.862l1.24-2.015-1.228-1.984h.932l.832 1.439h.035l.823-1.439Z"' +
                             '/></svg>';
             }
-            if (data[14] > 0) {
+            if (data[15] > 0) {
             //embarque
             texto += '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-truck" viewBox="0 0 16 16">\n' +
                          '<path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5zm1.294 7.456A2 2 0 0 1 4.732 11h5.536a2 2 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456M12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>\n' +
@@ -2750,14 +2615,7 @@ table_edit_im = $('#table_edit_im').DataTable({
 
 
             }
-            if (data[15] > 0) {
-            //envase
-                texto += ' <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16"' +
-                            '><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.' +
-                            '961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16' +
-                            ' 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/> </svg>';
-            }
-            if (data[16] > 0) {
+            if (data[17] > 0) {
             //gastos
                 texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16"' +
                     '><path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.18' +
@@ -2765,7 +2623,7 @@ table_edit_im = $('#table_edit_im').DataTable({
                     '661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05z' +
                     'm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73l.348.086z"/>sss</svg>';
             }
-            if (data[17] > 0) {
+            if (data[18] > 0) {
             //rutas
                 texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">\n' +
                     '<path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>\n' +
@@ -2787,7 +2645,7 @@ table_edit_im = $('#table_edit_im').DataTable({
             localStorage.setItem('numero_embarque', selectedRowId);
 
             $.ajax({
-            url: '/exportacion_maritima/house-detail',
+            url: '/importacion_aerea/house-detail',
             data: { id: selectedRowId },
             method: 'GET',
             success: function (data) {
@@ -2884,7 +2742,8 @@ var tableContent;
                     <th class="text-right">Master</th>
                     <th class="text-right">House</th>
                     <th class="text-right">Vapor</th>
-                    <th class="text-right">Agente Portuario</th>
+                    <th class="text-right">Notificar Agente</th>
+                    <th class="text-right">Notificar Cliente</th>
                 </tr>
             </thead>
             <tbody style="border-style:none; border: solid transparent;">`;
@@ -2976,7 +2835,7 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
         "serverSide": true,
         "pageLength": 100,
         "ajax": {
-            "url": "/exportacion_maritima/source_seguimientos_modo/IMPORT%20MARITIMO/",
+            "url": "/importacion_aerea/source_seguimientos_modo/IMPORT%20MARITIMO/",
             'type': 'GET',
             "data": function (d) {
                 console.log(d);
@@ -3035,7 +2894,7 @@ function traer_seguimientos() {
     // Hacer la solicitud AJAX para enviar los IDs al servidor
      const csrftoken = getCookie2('csrftoken');
     $.ajax({
-        url: '/exportacion_maritima/source_seguimientos_importado/',
+        url: '/importacion_aerea/source_seguimientos_importado/',
         type: 'POST',
         dataType: 'json',
         contentType: 'application/json',
@@ -3057,7 +2916,7 @@ function traer_seguimientos() {
              master = 0;
              $.ajax({
                 type: "GET",
-                url: "/exportacion_maritima/generar_posicion/",
+                url: "/importacion_aerea/generar_posicion/",
                 success: function(res) {
                 posicion = String(res.posicion);
                 let posicionInicial = posicion; // El formato inicial de la posición
@@ -3099,7 +2958,7 @@ function traer_seguimientos() {
 }
 function guardar_importado_house(data, seguimientos) {
     $.ajax({
-        url: '/exportacion_maritima/add_house_importado/',
+        url: '/importacion_aerea/add_house_importado/',
         type: 'POST',
         data: JSON.stringify(data),
         contentType: 'application/json',
@@ -3109,7 +2968,6 @@ function guardar_importado_house(data, seguimientos) {
         success: function (response) {
             if (response.success) {
                 traer_gastos_importado(seguimientos, response.numeros_guardados);
-                traer_envases_importado(seguimientos,response.numeros_guardados);
                 traer_rutas_importado(seguimientos, response.numeros_guardados);
                 traer_embarques_importado(seguimientos, response.numeros_guardados);
                 traer_archivos_importado(seguimientos, response.numeros_guardados);
@@ -3118,6 +2976,7 @@ function guardar_importado_house(data, seguimientos) {
                agregarASeleccionados();
                 $("#importar_hijo_modal").dialog('close');
                 $('#tabla_seguimiento_IH').DataTable().destroy();
+                //location.reload();
                 if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                     table_edit_im.ajax.reload(null, false);
                 } else {
@@ -3130,6 +2989,7 @@ function guardar_importado_house(data, seguimientos) {
                     alert('ocurrio error con lugar_importarhijo');
                     }
                 }
+
             } else {
                 console.log(response.message);
                 alert('Error: ' + response.message);
@@ -3184,7 +3044,7 @@ function traer_gastos_importado(numeros, numeros_guardados){
     // Hacer la solicitud AJAX para enviar los IDs al servidor
      const csrftoken = getCookie2('csrftoken');
     $.ajax({
-        url: '/exportacion_maritima/source_gastos_importado/',
+        url: '/importacion_aerea/source_gastos_importado/',
         type: 'POST',
         dataType: 'json',
         contentType: 'application/json',
@@ -3212,7 +3072,7 @@ function traer_gastos_importado(numeros, numeros_guardados){
     });
 }
 function guardar_gasto_importado(data){
-    miurl = "/exportacion_maritima/add_gasto_importado/";
+    miurl = "/importacion_aerea/add_gasto_importado/";
 
     $.ajax({
         type: "POST",
@@ -3227,60 +3087,7 @@ function guardar_gasto_importado(data){
         }
     });
 }
-//envases importado
-function traer_envases_importado(numeros, numeros_guardados){
 
-    if (numeros.length === 0) {
-        console.log("No hay seguimientos seleccionados. envase");
-        return;
-    }
-
-    // Hacer la solicitud AJAX para enviar los IDs al servidor
-     const csrftoken = getCookie2('csrftoken');
-    $.ajax({
-        url: '/exportacion_maritima/source_envases_importado/',
-        type: 'POST',
-        dataType: 'json',
-        contentType: 'application/json',
-        data: JSON.stringify({ ids: numeros }),
-        beforeSend: function(xhr, settings) {
-            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        },
-        success: function(response) {
-            if (response.data.length > 0) {
-                    response.data.forEach(function(item) {
-                        numeros_guardados.forEach(function(guardado) {
-                            if (item.seguimiento_control === guardado.seguimiento) {
-                                // Si coinciden los seguimientos, asignar el numero
-                                item.numero = guardado.numero;
-                            }
-                        });
-                    });
-
-                    guardar_envase_importado(response.data);
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("Error al traer los seguimientos:", error);
-        }
-    });
-}
-function guardar_envase_importado(data){
-    miurl = "/exportacion_maritima/add_envase_importado/";
-
-    $.ajax({
-        type: "POST",
-        url: miurl,
-        contentType: "application/json", // Enviar datos como JSON
-        data: JSON.stringify(data),
-        headers: { 'X-CSRFToken': csrf_token }, // Enviar token CSRF en el encabezado
-        success: function (resultado) {
-        },
-        error: function (error) {
-            console.log('Error en la solicitud:', error);
-        }
-    });
-}
 //rutas importado
 function traer_rutas_importado(numeros, numeros_guardados){
 
@@ -3292,7 +3099,7 @@ function traer_rutas_importado(numeros, numeros_guardados){
     // Hacer la solicitud AJAX para enviar los IDs al servidor
      const csrftoken = getCookie2('csrftoken');
     $.ajax({
-        url: '/exportacion_maritima/source_rutas_importado/',
+        url: '/importacion_aerea/source_rutas_importado/',
         type: 'POST',
         dataType: 'json',
         contentType: 'application/json',
@@ -3320,7 +3127,7 @@ function traer_rutas_importado(numeros, numeros_guardados){
     });
 }
 function guardar_ruta_importado(data){
-    miurl = "/exportacion_maritima/add_ruta_importado/";
+    miurl = "/importacion_aerea/add_ruta_importado/";
 
     $.ajax({
         type: "POST",
@@ -3346,7 +3153,7 @@ function traer_embarques_importado(numeros, numeros_guardados){
     // Hacer la solicitud AJAX para enviar los IDs al servidor
      const csrftoken = getCookie2('csrftoken');
     $.ajax({
-        url: '/exportacion_maritima/source_embarque_importado/',
+        url: '/importacion_aerea/source_embarque_importado/',
         type: 'POST',
         dataType: 'json',
         contentType: 'application/json',
@@ -3374,7 +3181,7 @@ function traer_embarques_importado(numeros, numeros_guardados){
     });
 }
 function guardar_embarque_importado(data){
-    miurl = "/exportacion_maritima/add_embarque_importado/";
+    miurl = "/importacion_aerea/add_embarque_importado/";
 
     $.ajax({
         type: "POST",
@@ -3400,7 +3207,7 @@ function traer_archivos_importado(numeros, numeros_guardados){
     // Hacer la solicitud AJAX para enviar los IDs al servidor
      const csrftoken = getCookie2('csrftoken');
     $.ajax({
-        url: '/exportacion_maritima/source_archivos_importado/',
+        url: '/importacion_aerea/source_archivos_importado/',
         type: 'POST',
         dataType: 'json',
         contentType: 'application/json',
@@ -3428,7 +3235,7 @@ function traer_archivos_importado(numeros, numeros_guardados){
     });
 }
 function guardar_archivo_importado(data) {
-    const miurl = "/exportacion_maritima/add_archivo_importado/";
+    const miurl = "/importacion_aerea/add_archivo_importado/";
 
         // Enviar los datos como JSON (ruta del archivo, número y detalle)
         $.ajax({
@@ -3456,7 +3263,7 @@ function eliminar_house(){
             let master = localStorage.getItem('master_editar');
             eliminar_agregado(master,row[0][0]);
 
-            miurl = "/exportacion_maritima/eliminar_house/";
+            miurl = "/importacion_aerea/eliminar_house/";
             var toData = {
                 'id': row[0][0],
                 'csrfmiddlewaretoken': csrf_token,
@@ -3485,7 +3292,7 @@ function eliminar_house(){
          if (confirm('¿Confirma eliminar seleccionado?')) {
       let row = table_add_im.rows('.table-secondary').data();
         if (row.length === 1) {
-            miurl = "/exportacion_maritima/eliminar_house/";
+            miurl = "/importacion_aerea/eliminar_house/";
             var toData = {
                 'id': row[0][0],
                 'csrfmiddlewaretoken': csrf_token,
@@ -3523,7 +3330,7 @@ function eliminar_agregado(master,id_house){
         let csrftoken = getCookie2('csrftoken');
         $.ajax({
         type: "POST",
-        url: "/exportacion_maritima/source_embarque_id/",
+        url: "/importacion_aerea/source_embarque_id/",
         data: {
             id: id_house,
             csrfmiddlewaretoken: csrftoken
@@ -3531,7 +3338,7 @@ function eliminar_agregado(master,id_house){
         success: function(response) {
             $.ajax({
                 type: "POST",
-                url: "/exportacion_maritima/source_seguimiento_id/",
+                url: "/importacion_aerea/source_seguimiento_id/",
                 data: {
                     id: response.seguimiento,
                     csrfmiddlewaretoken: csrftoken
@@ -3577,7 +3384,7 @@ let numero=localStorage.getItem('numero_master_seleccionado');
             url: "/static/datatables/es_ES.json"
         },
         "ajax": {
-            "url": "/exportacion_maritima/source_gastos/",
+            "url": "/importacion_aerea/source_gastos/",
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
@@ -3641,7 +3448,7 @@ function get_datos_gastos_house() {
             url: "/static/datatables/es_ES.json"
         },
         "ajax": {
-            "url": "/exportacion_maritima/source_gastos_house/",
+            "url": "/importacion_aerea/source_gastos_house/",
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
@@ -3708,7 +3515,7 @@ function gastos_btn_h_click(){
                             if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
                                 row = table_gastos.rows('.selected').data();
                                 if (row.length === 1) {
-                                    miurl = "/exportacion_maritima/eliminar_gasto_house/";
+                                    miurl = "/importacion_aerea/eliminar_gasto_house/";
                                     var toData = {
                                         'id': row[0][0],
                                         'csrfmiddlewaretoken': csrf_token,
@@ -3780,7 +3587,7 @@ function get_datos_rutas_house() {
             url: "/static/datatables/es_ES.json"
         },
         "ajax": {
-            "url": "/exportacion_maritima/source_rutas_house/",
+            "url": "/importacion_aerea/source_rutas_house/",
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
@@ -3816,7 +3623,7 @@ function rutas_btn_h_click(){
                             if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
                                 var row = $('#tabla_rutas_house').DataTable().rows('.selected').data();
                                 if (row.length === 1) {
-                                    miurl = "/exportacion_maritima/eliminar_ruta_house/";
+                                    miurl = "/importacion_aerea/eliminar_ruta_house/";
                                     var toData = {
                                         'id': row[0][0],
                                         'csrfmiddlewaretoken': csrf_token,
@@ -3873,113 +3680,6 @@ function rutas_btn_h_click(){
         }
 }
 
-//envases house
-function get_datos_envases_house(){
-   let numero=localStorage.getItem('num_house_gasto');
-
-   $("#tabla_envases_house").dataTable().fnDestroy();
-    table_envases = $('#tabla_envases_house').DataTable({
-        "order": [[1, "desc"], [1, "desc"]],
-        "processing": true,
-        "serverSide": true,
-        "pageLength": 10,
-        "language": {
-            url: "/static/datatables/es_ES.json"
-        },
-        "ajax": {
-            "url": "/exportacion_maritima/source_envases_house/",
-            'type': 'GET',
-            "data": function (d) {
-                return $.extend({}, d, {
-                    "numero": numero,
-                });
-            }
-        },
-    });
-}
-function envases_btn_h_click(){
-$("#id_envase_id").val('');
-        let selectedRowId = localStorage.getItem('id_house_gasto');
-        let selectedRowN = localStorage.getItem('num_house_gasto');
-
-        if (selectedRowN!=null) {
-        get_datos_envases_house();
-            $('#envases_form_house').trigger("reset");
-            $("#envases_modal_house").dialog({
-                autoOpen: true,
-                open: function () {
-                document.getElementById('numero_envase').value=selectedRowN;
-                },
-                modal: true,
-                title: "Envases para el House N°: " + selectedRowN,
-                height: wHeight * 0.90,
-                width: wWidth * 0.70,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Eliminar",
-                        class: "btn btn-danger",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma eliminar el seleccionado?')) {
-                                var row = $('#tabla_envases_house').DataTable().rows('.selected').data();
-                                if (row.length === 1) {
-                                    miurl = "/exportacion_maritima/eliminar_envases_house/";
-                                    var toData = {
-                                        'id': row[0][0],
-                                        'csrfmiddlewaretoken': csrf_token,
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        url: miurl,
-                                        data: toData,
-                                        success: function (resultado) {
-                                            aux = resultado['resultado'];
-                                            if (aux === 'exito') {
-                                                $("#tabla_envases_house").dataTable().fnDestroy();
-                                                get_datos_envases_house();
-                                                alert('Eliminado correctamente');
-                                                 if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
-                                                }
-
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
-                                                }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
-                                                }
-                                            } else {
-                                                alert(aux);
-                                            }
-                                        }
-                                    });
-                                } else {
-                                    alert('Debe seleccionar un unico registro');
-                                }
-                            }
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    }],
-                beforeClose: function (event, ui) {
-                localStorage.removeItem('num_house_gasto');
-                   $("#tabla_envases_house").dataTable().fnDestroy();
-                 $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
-                }
-            })
-
-        } else {
-            alert('Debe seleccionar al menos un registro');
-        }
-}
 
 //embarques house
 function get_datos_embarques_house(){
@@ -3995,7 +3695,7 @@ function get_datos_embarques_house(){
             url: "/static/datatables/es_ES.json"
         },
         "ajax": {
-            "url": "/exportacion_maritima/source_embarques_house/",
+            "url": "/importacion_aerea/source_embarques_house/",
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
@@ -4032,7 +3732,7 @@ $("#id_embarque_id").val('');
                             if (confirm('¿Confirma eliminar el embarque seleccionado?')) {
                                 var row = $('#tabla_embarques_house').DataTable().rows('.selected').data();
                                 if (row.length === 1) {
-                                    miurl = "/exportacion_maritima/eliminar_embarques_house/";
+                                    miurl = "/importacion_aerea/eliminar_embarques_house/";
                                     var toData = {
                                         'id': row[0][0],
                                         'csrfmiddlewaretoken': csrf_token,
@@ -4166,7 +3866,7 @@ $('.email').click(function () {
         }
     });
 function get_data_email(row,title,numero,id) {
-    let miurl = "/exportacion_maritima/get_data_email/";
+    let miurl = "/importacion_aerea/get_data_email/";
     var toData = {
         'title': title,
         'row_number': numero,
@@ -4191,7 +3891,7 @@ function get_data_email(row,title,numero,id) {
     });
 }
 function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
-    let miurl = "/exportacion_maritima/envio_notificacion_seguimiento/";
+    let miurl = "/importacion_aerea/envio_notificacion_seguimiento/";
     var toData = {
         'to': to,
         'cc': cc,
@@ -4231,7 +3931,7 @@ function get_datos_archivos() {
             url: "/static/datatables/es_ES.json"
         },
         "ajax": {
-            "url": "/exportacion_maritima/source_archivos/",
+            "url": "/importacion_aerea/source_archivos/",
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
@@ -4286,7 +3986,7 @@ let lugar=localStorage.getItem('lugar');
     }
     $.ajax({
         type: "POST",
-        url: "/exportacion_maritima/modificar_fecha_retiro/",
+        url: "/importacion_aerea/modificar_fecha_retiro/",
         data: JSON.stringify({ master: master, fecha: fecha }),
         contentType: "application/json",
         headers: {
@@ -4339,7 +4039,7 @@ function archivos_btn_h_click(){
                     style: "width:100px",
                     click: function () {
                         if (confirm('¿Confirma descargar el archivo seleccionado?')) {
-                            var url = '/importacion_maritima/descargar_archivo/' + localStorage.getItem('id_archivo');  // Ruta de la vista que devuelve el archivo
+                            var url = '/importacion_aerea/descargar_archivo/' + localStorage.getItem('id_archivo');  // Ruta de la vista que devuelve el archivo
                             window.open(url, '_blank');
                         }
                     },
@@ -4350,7 +4050,7 @@ function archivos_btn_h_click(){
                     click: function () {
                         if (confirm('¿Confirma eliminar archivo?')) {
                             if (localStorage.getItem('id_archivo')) {
-                                miurl = "/exportacion_maritima/eliminar_archivo/";
+                                miurl = "/importacion_aerea/eliminar_archivo/";
                                 var toData = {
                                     'id': localStorage.getItem('id_archivo'),
                                     'csrfmiddlewaretoken': csrf_token,
@@ -4404,6 +4104,7 @@ function archivos_btn_h_click(){
             }
         })
 }
+
 
 //imprimir caratula house
 function pdf_btn_h_click(){
@@ -4529,7 +4230,7 @@ function imprimirPDF() {
 }
 function get_datos_pdf() {
     let selectedRowN = localStorage.getItem('num_house_gasto');
-    miurl = "/exportacion_maritima/get_datos_caratula/";
+    miurl = "/importacion_aerea/get_datos_caratula/";
     var toData = {
         'numero': selectedRowN,
         'csrfmiddlewaretoken': csrf_token,

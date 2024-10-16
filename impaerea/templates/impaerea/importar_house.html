@@ -1,0 +1,79 @@
+<style>
+    .contenedorseg{
+    padding-top:0px;
+     padding: 0 4%;
+      width:100%;
+        }
+.filtros {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.filtros input {
+    width: 15%;
+    margin: 0;
+}
+
+.wrapper-filtros {
+font-size:14px;
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    margin:auto;
+    margin-bottom:1%;
+}
+
+#filtrar_seguimientos {
+    height: fit-content;
+    width: 100px;
+    margin-left: 10px;
+}
+
+
+</style>
+
+<div id="importar_hijo_modal" style="display: none;" tabindex="-1">
+
+    <div class="contenedorseg">
+
+        <div class="wrapper-filtros">
+       <div class="filtros">
+          <label>Número</label>
+          <input class="form-control filtro-input" id="filtro_numero" placeholder="Numero de seguimiento">
+
+          <label>Cliente</label>
+          <input class="form-control filtro-input" id="filtro_cliente">
+
+          <button type="button" class="btn btn-primary btn-filtro" id="filtrar_seguimientos">Filtrar</button>
+           <button type="button" class="btn btn-secondary" id="limpiar_filtros">Limpiar Filtros</button>
+       </div>
+    </div>
+        <button type="button" class="btn btn-warning" id="guardar_importados" >Importar seleccionados</button>
+
+        <table id="tabla_seguimiento_IH" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%">Seleccionar</th>
+            <th class="text-right">Número</th>
+            <th class="text-left">Modo</th>
+            <th class="text-left">Cliente</th>
+            <th class="text-left">Origen</th>
+            <th class="text-left">Destino</th>
+            <th class="text-left">Fecha</th>
+            <th class="text-left">Estado</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+
+    </table>
+
+    </div>
+
+
+
+</div>
