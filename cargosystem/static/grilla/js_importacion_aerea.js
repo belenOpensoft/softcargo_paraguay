@@ -1167,7 +1167,7 @@ var expandedRow;
                     }
                     table.ajax.reload(null, false);
                     $('#edit_master_modal').dialog('close');
-                    $('#table_edit_im').DataTable().destroy();
+//                    $('#table_edit_im').DataTable().destroy();
                 } else {
                     alert('Error: ' + response.error_message);
                 }
@@ -2835,7 +2835,7 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
         "serverSide": true,
         "pageLength": 100,
         "ajax": {
-            "url": "/importacion_aerea/source_seguimientos_modo/IMPORT%20MARITIMO/",
+            "url": "/importacion_aerea/source_seguimientos_modo/IMPORT%20AEREO/",
             'type': 'GET',
             "data": function (d) {
                 console.log(d);

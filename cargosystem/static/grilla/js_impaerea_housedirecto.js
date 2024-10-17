@@ -430,7 +430,7 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
         "serverSide": true,
         "pageLength": 100,
         "ajax": {
-            "url": "/importacion_aerea/source_seguimientos_modo/IMPORT%20MARITIMO/",
+            "url": "/importacion_aerea/source_seguimientos_modo/IMPORT%20AEREO/",
             'type': 'GET',
             "data": function (d) {
                 console.log(d);

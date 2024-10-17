@@ -1983,21 +1983,21 @@ $(document).ready(function () {
             }
         }
     });
-    $("#vapor_add").autocomplete({
-        source: '/autocomplete_vapores/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['codigo']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-            } else {
-                $(this).val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
+//    $("#vapor_add").autocomplete({
+//        source: '/autocomplete_vapores/',
+//        minLength: 2,
+//        select: function (event, ui) {
+//            $(this).attr('data-id', ui.item['codigo']);
+//        },
+//        change: function (event, ui) {
+//            if (ui.item) {
+//                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+//            } else {
+//                $(this).val('');
+//                $(this).css({"border-color": "", 'box-shadow': ''});
+//            }
+//        }
+//    });
     $("#loading_add").autocomplete({
         source: '/autocomplete_ciudades/',
         minLength: 2,

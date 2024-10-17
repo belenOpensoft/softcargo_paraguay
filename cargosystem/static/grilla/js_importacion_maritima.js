@@ -1211,7 +1211,7 @@ var expandedRow;
                     }
                     table.ajax.reload(null, false);
                     $('#edit_master_modal').dialog('close');
-                    $('#table_edit_im').DataTable().destroy();
+//                    $('#table_edit_im').DataTable().destroy();
                 } else {
                     alert('Error: ' + response.error_message);
                 }

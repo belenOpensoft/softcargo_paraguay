@@ -437,7 +437,7 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
         "serverSide": true,
         "pageLength": 100,
         "ajax": {
-            "url": "/exportacion_maritima/source_seguimientos_modo/IMPORT%20MARITIMO/",
+            "url": "/exportacion_maritima/source_seguimientos_modo/EXPORT%20MARITIMO/",
             'type': 'GET',
             "data": function (d) {
                 console.log(d);

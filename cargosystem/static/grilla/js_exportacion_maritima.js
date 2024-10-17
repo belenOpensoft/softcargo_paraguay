@@ -1210,7 +1210,7 @@ var expandedRow;
                     }
                     table.ajax.reload(null, false);
                     $('#edit_master_modal').dialog('close');
-                    $('#table_edit_im').DataTable().destroy();
+//                    $('#table_edit_im').DataTable().destroy();
                 } else {
                     alert('Error: ' + response.error_message);
                 }
@@ -2976,7 +2976,7 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
         "serverSide": true,
         "pageLength": 100,
         "ajax": {
-            "url": "/exportacion_maritima/source_seguimientos_modo/IMPORT%20MARITIMO/",
+            "url": "/exportacion_maritima/source_seguimientos_modo/EXPORT%20MARITIMO/",
             'type': 'GET',
             "data": function (d) {
                 console.log(d);
@@ -4296,9 +4296,9 @@ let lugar=localStorage.getItem('lugar');
             if(lugar==='add_master'){
             table_add_im.ajax.reload(null, false);
             }else if(lugar==='edit_master'){
-            table_edit_im.ajax.reload(null, false);
+            table_edit_im.ajax.reload(false);
             }else if(lugar==='edit_directo'){
-            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+            $('#tabla_house_directo').DataTable().ajax.reload(false);
             }
             else{
             console.log('error en el lugar '+lugar);
