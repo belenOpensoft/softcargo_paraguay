@@ -851,3 +851,19 @@ class VGastosHouse(models.Model):
     class Meta:
         managed = False
         db_table = 'VGastosHouse'
+
+class VistaEventosCalendario(models.Model):
+    posicion = models.CharField(max_length=255, null=True)
+    awb = models.CharField(max_length=255, null=True)
+    hawb = models.CharField(max_length=255, null=True)
+    status = models.CharField(max_length=255, null=True)
+    origen = models.CharField(max_length=255, null=True)
+    destino = models.CharField(max_length=255, null=True)
+    fecharetiro = models.DateField(null=True)
+    consignatario = models.CharField(max_length=255, null=True)
+    transportista = models.CharField(max_length=255, null=True)
+    source = models.CharField(max_length=255, null=True)
+
+    class Meta:
+        managed = False  # No intentes modificar la tabla
+        db_table = 'vista_eventos_calendario'
