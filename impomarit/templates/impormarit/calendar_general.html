@@ -11,6 +11,7 @@
     <script src="{% static 'datatables/dataTables.buttons.min.js' %}"></script>
     <script src="{% static 'js/jquery-ui.min.js' %}"></script>
     <script src="{% static 'grilla/js_controlador_sidemenu.js' %}"></script>
+    <script src="{% static 'grilla/js_calendar.js' %}"></script>
     <script type="text/javascript" src="{% static 'summernote/summernote-lite.js' %}"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'summernote/summernote-lite.css'  %}">
 
@@ -43,6 +44,48 @@
         .centro {
             text-align: center;
         }
+        .filtros {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .filtros input {
+            width: 15%;
+            margin: 0;
+        }
+
+        .wrapper-filtros {
+        font-size:14px;
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+            margin:auto;
+            margin-bottom:3%;
+        }
+
+        #filtrar_seguimientos {
+            height: fit-content;
+            width: 100px;
+            margin-left: 10px;
+        }
+        #filtros_rep input{
+        margin:10px;
+        width:200px;
+        }
+        #filtros_rep{
+        padding:10px;
+        margin-bottom:20px;
+        }
+        #filtros_rep button{
+        margin:5px;
+        }
+        #modal-content_r{
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        }
         .dataTables_filter { display: none; }
         {% block css_basetable %}
         {% endblock css_basetable %}
@@ -57,6 +100,24 @@
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-lg-12">
+                                <div class="wrapper-filtros">
+                                <div class="filtros">
+                                  <label>Modo</label>
+                                  <select style="width:250px;" class="form-control" id="modo_filtro">
+                                      <option value="">...</option>
+                                      <option value="import">IMPO AEREO</option>
+                                      <option value="impmarit">IMPO MARITIMO</option>
+                                      <option value="terrestre">IMPO TERRESTRE</option>
+                                  </select>
+
+                                  <label>Consignatario</label>
+                                  <input style="padding: .375rem .75rem !important;font-size: 1rem !important;font-weight: 400 !important;line-height: 1.5 !important;" class="form-control filtro-input" id="filtro_cliente">
+
+                                  <button type="button" class="btn btn-primary btn-filtro" id="filtrar_seguimientos">Filtrar</button>
+                                    <button type="button" class="btn btn-secondary" id="limpiar_filtros">Limpiar Filtros</button>
+                                     <button type="button" class="btn btn-secondary" id="reporte_excel_filtrado">Reporte excel</button>
+                               </div>
+                                </div>
                                 {% block table_datatable %}
                                 <div id="calendar"></div> <!-- Aquí es donde se mostrará el calendario -->
                                 {% endblock table_datatable %}
@@ -73,51 +134,28 @@
     <button id="close-modal-btn" class="btn btn-secondary">Cerrar</button>
 </div>
 
+<!-- Modal para seleccionar el rango de fechas -->
+<div id="reporte" style="display:none;">
+    <div id="modal-content_r">
+        <div id="filtros_rep">
+            <p id="que_filtra" style="display:none;">El reporte mantendrá los filtros:</p>
+            <label for="desde_filtro">Desde:</label>
+            <input class="form-control" type="date" id="desde_filtro">
+
+            <label for="hasta_filtro">Hasta:</label>
+            <input class="form-control" type="date" id="hasta_filtro">
+        </div>
+    </div>
+    <div style="text-align:right;">
+    <button class="btn btn-primary" id="reporte_fechas">Descargar reporte</button>
+    <button id="close-modal-btn_r" class="btn btn-secondary">Cerrar</button>
+    </div>
+
+</div>
+
+
 {% block script_datatable %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var calendarEl = document.getElementById('calendar');
 
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            events: '/importacion_maritima/eventos-calendario/',  // Ruta a la vista que devuelve los eventos
-            locale: 'es',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            },
-            eventClick: function (info) {
-                // Crear el contenido del modal con los datos del evento
-                var modalContent = `
-                    <p><strong>Transportista:</strong> ${info.event.extendedProps.transportista}</p>
-                    <p><strong>Consignatario:</strong> ${info.event.extendedProps.consignatario}</p>
-                    <p><strong>AWB:</strong> ${info.event.extendedProps.awb}</p>
-                    <p><strong>HAWB:</strong> ${info.event.extendedProps.hawb}</p>
-                    <p><strong>Status:</strong> ${info.event.extendedProps.status}</p>
-                    <p><strong>Origen:</strong> ${info.event.extendedProps.origen}</p>
-                    <p><strong>Destino:</strong> ${info.event.extendedProps.destino}</p>
-                    <p><strong>Tipo:</strong> ${info.event.extendedProps.source_formatted}</p>
-                    <p><strong>Posición:</strong> ${info.event.extendedProps.posicion}</p>
-                `;
-
-                // Mostrar el contenido en un modal o una sección del HTML
-                // Aquí vamos a mostrarlo en un modal de jQuery UI, pero puedes adaptarlo a lo que necesites.
-                $("#modal-content").html(modalContent);
-                $("#myModal").dialog({
-                    title: "Detalles del Evento",
-                    width: 400,
-                    modal: true
-                });
-            }
-        });
-
-        calendar.render();
-        $("#close-modal-btn").click(function() {
-            $("#myModal").dialog("close");
-        });
-    });
-</script>
 
 
 {% endblock script_datatable %}

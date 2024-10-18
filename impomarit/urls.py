@@ -1,6 +1,6 @@
 from django.urls import path
 
-from impomarit.views.calendar import calendario, eventos_calendario
+from impomarit.views.calendar import calendario, eventos_calendario, generar_reporte_excel
 from impomarit.views.embarques import source_embarques, eliminar_embarque, guardar_embarques, add_embarque_importado
 from impomarit.views.envases import source_envases, eliminar_envase, guardar_envases, add_envase_importado
 from impomarit.views.gastos import add_gasto_master, source_gastos, eliminar_gasto_master, source_gastos_house, \
@@ -21,6 +21,7 @@ from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
+    path('generar_reporte_excel/', generar_reporte_excel, name='generar_reporte_excel'),
     path('calendario/', calendario, name='calendario'),
     path('eventos-calendario/', eventos_calendario, name='eventos_calendario'),
     path(r'masters/', master_importacion_maritima, name="master_importacion_maritima"),
