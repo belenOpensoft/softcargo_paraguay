@@ -15,6 +15,7 @@ urlpatterns = [
     path('importacion_maritima/', include('impomarit.urls')),
     path('exportacion_maritima/', include('expmarit.urls')),
     path('importacion_aerea/', include('impaerea.urls')),
+    path('exportacion_aerea/', include('expaerea.urls')),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='vista_logout'),
     path('login/selecccionarol/', select_rol, name="vista_roles"),

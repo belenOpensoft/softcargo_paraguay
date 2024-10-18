@@ -1,11 +1,11 @@
 from django.contrib.auth.decorators import login_required
 import json
-from impaerea.models import ImportEmbarqueaereo
+from expaerea.models import ExportEmbarqueaereo
 from mantenimientos.models import Vendedores
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from django.db import IntegrityError
-from impaerea.forms import add_house, edit_house
+from expaerea.forms import add_house, edit_house
 from seguimientos.models import Seguimiento, Serviceaereo, Envases, Conexaerea, Cargaaerea, Attachhijo
 import re
 from datetime import datetime
@@ -18,15 +18,13 @@ def add_house_impmarit(request):
         if request.method == 'POST':
             form = add_house(request.POST)
             if form.is_valid():
-                reserva = ImportEmbarqueaereo()
+                reserva = ExportEmbarqueaereo()
                 reserva.fechaingreso = datetime.now()
                 reserva.numero = reserva.get_number()
 
                 # Para campos de texto o numéricos, se asegura de proporcionar valores predeterminados.
                 reserva.consolidado = request.POST.get('consolidado', 0)
                 reserva.awb = form.cleaned_data.get('awb', "")
-                reserva.notifcliente = form.cleaned_data.get('notificar_cliente', None)
-                reserva.notifagente = form.cleaned_data.get('notificar_agente', None)
                 reserva.fecharetiro = form.cleaned_data.get('fecha_retiro', None)
                 reserva.fechaembarque = form.cleaned_data.get('fecha_embarque', None)
                 reserva.origen = form.cleaned_data.get('origen', "")
@@ -55,7 +53,6 @@ def add_house_impmarit(request):
                     reserva.transportista = int(form.cleaned_data.get('transportista_i', 0)) if form.cleaned_data.get('transportista_i') else 0
                     reserva.agente = int(form.cleaned_data.get('agente_i', 0)) if form.cleaned_data.get('agente_i') else 0
                     reserva.consignatario = int(form.cleaned_data.get('consignatario_i', 0)) if form.cleaned_data.get('consignatario_i') else 0
-                    reserva.armador = int(form.cleaned_data.get('armador_i', 0)) if form.cleaned_data.get('armador_i') else 0
                     reserva.cliente = int(form.cleaned_data.get('cliente_i', 0)) if form.cleaned_data.get('cliente_i') else 0
                     reserva.agecompras = int(form.cleaned_data.get('agcompras_i', 0)) if form.cleaned_data.get('agcompras_i') else 0
                     reserva.ageventas = int(form.cleaned_data.get('agventas_i', 0)) if form.cleaned_data.get('agventas_i') else 0
@@ -97,11 +94,11 @@ def generar_posicion(request):
     anio_actual = fecha_actual.year
     mes_actual = fecha_actual.strftime('%m')
 
-    ultima_reserva = ImportEmbarqueaereo.objects.filter(fechaingreso__year=anio_actual).order_by('-numero').first()
+    ultima_reserva = ExportEmbarqueaereo.objects.filter(fechaingreso__year=anio_actual).order_by('-numero').first()
 
     if ultima_reserva and ultima_reserva.posicion:
         ultima_posicion = ultima_reserva.posicion
-        match = re.match(rf"IA{mes_actual}-(\d+)-\d{{4}}", ultima_posicion)
+        match = re.match(rf"EA{mes_actual}-(\d+)-\d{{4}}", ultima_posicion)
 
         if match:
             # Incrementar el código numérico
@@ -112,7 +109,7 @@ def generar_posicion(request):
     else:
         nuevo_codigo = "00001"
 
-    nueva_posicion = f"IA{mes_actual}-{nuevo_codigo}-{anio_actual}"
+    nueva_posicion = f"EA{mes_actual}-{nuevo_codigo}-{anio_actual}"
 
     # Devolver la posición generada como JSON
     return JsonResponse({'posicion': nueva_posicion})
@@ -129,7 +126,7 @@ def add_house_importado(request):
                 # Iteramos sobre cada elemento en la lista
                 for house_data in data:
                     # Crear la instancia de Embarqueaereo para cada registro
-                    reserva = ImportEmbarqueaereo()
+                    reserva = ExportEmbarqueaereo()
                     reserva.fechaingreso = datetime.now()
                     reserva.numero = reserva.get_number()
                     reserva.consolidado = house_data.get('consolidado', 0)
@@ -198,10 +195,6 @@ def source_seguimientos_importado(request):
                     "origen": registro.origen,
                     "destino": registro.destino,
                     "moneda": registro.moneda,
-                    "loading": registro.loading,
-                    "discharge": registro.discharge,
-                    "vapor": registro.vapor,
-                    "viaje": registro.viaje,
                     "house": registro.hawb,
                     "demora": registro.demora,
                     "operacion": registro.operacion,
@@ -213,7 +206,6 @@ def source_seguimientos_importado(request):
                     "transportista": registro.transportista,
                     "agente": registro.agente,
                     "consignatario": registro.consignatario,
-                    "armador": registro.armador,
                     "cliente": registro.cliente,
                     "agcompras": registro.agecompras,
                     "embarcador": registro.embarcador,
@@ -403,7 +395,7 @@ def house_detail(request):
         numero = request.GET.get('id', None)
         if numero:
             try:
-                house = ImportEmbarqueaereo.objects.get(numero=numero)
+                house = ExportEmbarqueaereo.objects.get(numero=numero)
                 data = {
                     'id': house.numero,
                     'cliente_e': house.cliente,
@@ -423,8 +415,6 @@ def house_detail(request):
                     'embarcador_e': house.embarcador,
                     'agventas_e': house.ageventas,
                     'agcompras_e': house.agecompras,
-                    'notifcliente_e': house.notifcliente,
-                    'notifagente_e': house.notifagente,
                     'fecharetiro_e': house.fecharetiro,
                     'fechaembarque_e': house.fechaembarque,
                     'status_e': house.status,
@@ -432,7 +422,7 @@ def house_detail(request):
                     'trackid_e': house.trackid,
                 }
                 return JsonResponse(data)
-            except ImportEmbarqueaereo.DoesNotExist:
+            except ExportEmbarqueaereo.DoesNotExist:
                 raise Http404("House does not exist")
         else:
             return JsonResponse({'error': 'No ID provided'}, status=400)
@@ -459,7 +449,7 @@ def edit_house_function(request, numero):
             'errors': {}
         })
 
-    house = ImportEmbarqueaereo.objects.get(numero=numero)
+    house = ExportEmbarqueaereo.objects.get(numero=numero)
     if request.method == 'POST':
         form = edit_house(request.POST)
         if form.is_valid():
@@ -489,8 +479,6 @@ def edit_house_function(request, numero):
             house.trackid = form.cleaned_data.get('trackid', "")
             house.fecharetiro = form.cleaned_data.get('fecha_retiro', None)
             house.fechaembarque = form.cleaned_data.get('fecha_embarque', None)
-            house.notifagente = form.cleaned_data.get('notificar_agente', None)
-            house.notifcliente = form.cleaned_data.get('notificar_cliente', None)
 
             try:
                 house.save()
@@ -521,7 +509,7 @@ def eliminar_house(request):
     resultado = {}
     try:
         id = request.POST['id']
-        ImportEmbarqueaereo.objects.get(numero=id).delete()
+        ExportEmbarqueaereo.objects.get(numero=id).delete()
         resultado['resultado'] = 'exito'
     except IntegrityError as e:
         resultado['resultado'] = 'Error de integridad, intente nuevamente.'
@@ -540,11 +528,11 @@ def source_embarque_id(request):
                 return JsonResponse({'error': 'ID no proporcionada'}, status=400)
 
             try:
-                embarque = ImportEmbarqueaereo.objects.get(numero=id_embarque)
+                embarque = ExportEmbarqueaereo.objects.get(numero=id_embarque)
                 seguimiento = embarque.seguimiento
                 return JsonResponse({'seguimiento': seguimiento})
 
-            except ImportEmbarqueaereo.DoesNotExist:
+            except ExportEmbarqueaereo.DoesNotExist:
                 return JsonResponse({'error': 'Embarque no encontrado'}, status=404)
 
         else:
@@ -566,7 +554,7 @@ def source_seguimiento_id(request):
                 id = seguimiento.id
                 return JsonResponse({'id': id})
 
-            except ImportEmbarqueaereo.DoesNotExist:
+            except ExportEmbarqueaereo.DoesNotExist:
                 return JsonResponse({'error': 'Embarque no encontrado'}, status=404)
 
         else:

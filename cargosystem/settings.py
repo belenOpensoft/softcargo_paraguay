@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'informedna',
     'impomarit',
     'expmarit',
-    'impaerea'
+    'impaerea',
+    'expaerea'
 ]
 CSRF_COOKIE_SECURE = False
 CKEDITOR_UPLOAD_PATH = "uploads/"

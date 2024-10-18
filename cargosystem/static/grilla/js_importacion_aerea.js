@@ -1408,12 +1408,14 @@ var expandedRow;
             success: function (response) {
                 if (response.success) {
                     alert('Datos actualizados con éxito');
+                    if(lugar!='edit_directo'){
                     if(localStorage.getItem('fecha_editada_house')){
                         if(confirm('Desea modificar la fecha en los demás houses (si existen)?')){
                         modificar_fecha_retiro(1);
                         }else{
                         localStorage.removeItem('fecha_editada_house');
                         }
+                    }
                     }
                     if(lugar==='add_master'){
                     table_add_im.ajax.reload(null, false);

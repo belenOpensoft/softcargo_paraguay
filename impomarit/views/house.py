@@ -513,7 +513,7 @@ def house_detail(request):
                     'embarcador_e': house.embarcador,
                     'armador_e': house.armador,
                     'agventas_e': house.ageventas,
-                    'agcompras_e': house.arbitraje,
+                    'agcompras_e': house.agecompras,
                     'notifcliente_e': house.notifcliente,
                     'notifagente_e': house.notifagente,
                     'fecharetiro_e': house.fecharetiro,
