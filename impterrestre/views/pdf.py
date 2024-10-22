@@ -3,7 +3,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
-from expaerea.models import (VEmbarqueaereo, ExportEmbarqueaereo, ExportCargaaerea)
+from impterrestre.models import (VEmbarqueaereo, ImpterraEmbarqueaereo, ImpterraCargaaerea)
 from mantenimientos.models import Clientes
 from mantenimientos.views.bancos import is_ajax
 from seguimientos.models import VGrillaSeguimientos, Envases
@@ -16,7 +16,7 @@ def get_datos_caratula(request):
         try:
             id = request.POST['numero']
             Vembarque = VEmbarqueaereo.objects.get(numero=id)
-            embarque = ExportEmbarqueaereo.objects.get(numero=id)
+            embarque = ImpterraEmbarqueaereo.objects.get(numero=id)
             embarcador = Clientes.objects.get(codigo=embarque.embarcador)
             consignatario = Clientes.objects.get(codigo=embarque.consignatario)
             try:
@@ -67,7 +67,7 @@ def get_datos_caratula(request):
             texto = texto + '<b>Deposito: </b>'+str(seguimiento.deposito if seguimiento.deposito is not None else '')
             # Detalle del embarque
             texto = texto + '<hr><b>Detalle del embarque</b>'
-            embarque = ExportCargaaerea.objects.filter(numero=id)
+            embarque = ImpterraCargaaerea.objects.filter(numero=id)
 
             if embarque.count()>0:
                 for e in embarque:

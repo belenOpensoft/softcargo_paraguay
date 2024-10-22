@@ -56,11 +56,9 @@ def eventos_calendario(request):
         titulo = f"{evento.posicion}"
 
         if evento.source == 'impmarit':
-            titulo += " (IMPORT MARÍTIMO)"
             color = '#ADD8E6'  # Azul claro para marítimo
             source_formatted = "IMPO MARÍTIMO"
         elif evento.source == 'import':
-            titulo += " (IMPORT AÉREO)"
             color = '#90EE90'  # Verde claro para aéreo
             source_formatted = "IMPO AÉREO"
 
