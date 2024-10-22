@@ -2,8 +2,6 @@ from inspect import getmembers
 from django.db import models
 
 
-
-
 class Actividades(models.Model):
     numero = models.SmallIntegerField(db_column='Numero', unique=True)  # Field name made lowercase.
     nombre = models.CharField(db_column='Nombre', max_length=50, blank=True, null=True)  # Field name made lowercase.
@@ -182,6 +180,7 @@ class Depositos(models.Model):
 
     class Meta:
         verbose_name_plural = "Depositos"
+
 
 class Direccionentregas(models.Model):
     codigo = models.IntegerField(blank=True, null=True)
@@ -428,6 +427,7 @@ class Empresa(models.Model):
 
     def __str__(self):
         return self.dnombre
+
 
 class Estados(models.Model):
     numero = models.SmallIntegerField(db_column='Numero', unique=True)  # Field name made lowercase.
@@ -1070,6 +1070,7 @@ class Servicios(models.Model):
     def __str__(self):
         return self.nombre
 
+
 class Sociosweb(models.Model):
     codigo = models.IntegerField(db_column='Codigo', blank=True, null=True)  # Field name made lowercase.
     codigoweb = models.IntegerField(db_column='CodigoWeb', blank=True, null=True)  # Field name made lowercase.
@@ -1630,11 +1631,11 @@ class Ciudades(models.Model):
     codaduana = models.CharField(db_column='Codaduana', max_length=10, blank=True,null=True)  # Field name made lowercase.
     paises_idinternacional = models.CharField(db_column='Paises_IdInternacional', max_length=5, blank=True,null=True)  # Field name made lowercase.
     estado = models.SmallIntegerField(db_column='Estado', blank=True, null=True)  # Field name made lowercase.
-    fechaactualizado = models.DateTimeField(db_column='FechaActualizado', blank=True,
-                                            null=True)  # Field name made lowercase.
+    fechaactualizado = models.DateTimeField(db_column='FechaActualizado', blank=True, null=True)  # Field name made lowercase.
 
     def __str__(self):
         return self.codigo
+
 
 class Clientes(models.Model):
     codigo = models.IntegerField(unique=True)
@@ -1895,6 +1896,7 @@ class Clientes(models.Model):
             nuevo_codigo = '1'
 
         return nuevo_codigo
+
 
 class VSociosComerciales(models.Model):
     codigo = models.IntegerField(unique=True)
@@ -2197,6 +2199,7 @@ class Guias(models.Model):
     sucursal = models.SmallIntegerField(db_column='Sucursal', blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
 
+
 class VGrillaGuias(models.Model):
     transportista = models.IntegerField(blank=True, null=True)
     empresa = models.CharField(db_column="nom_empresa",max_length=250,blank=True, null=True)
@@ -2227,6 +2230,7 @@ class Paises(models.Model):
 
     def __str__(self):
         return  self.nombre
+
 
 class Productos(models.Model):
 
@@ -2275,6 +2279,7 @@ class Productos(models.Model):
     def __str__(self):
         return self.nombre
 
+
 class Sysregisedits(models.Model):
     numerolic = models.IntegerField(db_column='NumeroLic', unique=True)  # Field name made lowercase.
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
@@ -2315,11 +2320,9 @@ class Textos(models.Model):
                                          null=True)  # Field name made lowercase. This field type is a guess.
 
 
-
 from inspect import getmembers
 from auditlog.registry import auditlog
 from mantenimientos import models
-
 
 
 tablas = getmembers(models)

@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'notificaciones',
     'informedna',
     'impomarit',
+    'administracion_contabilidad',
+    # 'expmarit'
 ]
 CSRF_COOKIE_SECURE = False
 CKEDITOR_UPLOAD_PATH = "uploads/"
@@ -176,6 +178,7 @@ STATICFILES_DIRS = (
     os.path.join(RUTA_PROYECTO,'media'),
     os.path.join(BASE_DIR, 'mantenimientos/static'),
     os.path.join(BASE_DIR, 'seguimientos/static'),
+    os.path.join(BASE_DIR, 'administracion_contabilidad/static'),
 
 )
 RUTA_ARCHIVOS = str(RUTA_PROYECTO) + '/media/archivos_adjuntos/'

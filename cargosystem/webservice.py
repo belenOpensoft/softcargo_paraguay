@@ -6,10 +6,9 @@ import base64
 def enviar_xml(xml_str):
     url = 'http://www.importsys.com.uy/ws/wsOcean.exe'  # URL del servicio web
 
-    # Reemplaza 'tu_usuario' y 'tu_contraseña' con tus credenciales reales
     usuario = 'Oceanlink'
-    contraseña = 'ocean99'
-    credenciales = f"{usuario}:{contraseña}"
+    contrasena = 'ocean99'
+    credenciales = f"{usuario}:{contrasena}"
     credenciales_b64 = base64.b64encode(credenciales.encode()).decode()
 
     headers = {
