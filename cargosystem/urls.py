@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from cargosystem import settings
-from login.views.correos import source_correo,correos
+from login.views.correos import source_correo, correos
 from login.views.home import home_view
 from login.views.login import login_view, select_rol, logout_view, cambiar_modulo
 from django.conf.urls.static import static
@@ -12,6 +12,7 @@ urlpatterns = [
     path('', include('mantenimientos.urls')),
     path('', include('seguimientos.urls')),
     path('', include('notificaciones.urls')),
+    path('', include('administracion_contabilidad.urls')),
     path('importacion_maritima/', include('impomarit.urls')),
     path('exportacion_maritima/', include('expmarit.urls')),
     path('importacion_aerea/', include('impaerea.urls')),

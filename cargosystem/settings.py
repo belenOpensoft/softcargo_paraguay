@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'impaerea',
     'expaerea',
     'impterrestre',
+    'administracion_contabilidad'
     'expterrestre'
 ]
 CSRF_COOKIE_SECURE = False
@@ -181,6 +182,7 @@ STATICFILES_DIRS = (
     os.path.join(RUTA_PROYECTO,'media'),
     os.path.join(BASE_DIR, 'mantenimientos/static'),
     os.path.join(BASE_DIR, 'seguimientos/static'),
+    os.path.join(BASE_DIR, 'administracion_contabilidad/static'),
 
 )
 RUTA_ARCHIVOS = str(RUTA_PROYECTO) + '/media/archivos_adjuntos/'
