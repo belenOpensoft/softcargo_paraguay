@@ -330,7 +330,14 @@ class envasesForm(BSModalModelForm):
             'unidad': 'Unid/Vta',
         }
         widgets = {
-            # 'id': forms.HiddenInput(attrs={'id':'id_envase_id',}),
+            'precio': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'cantidad': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'peso': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'volumen': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'bultos': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'tara': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'bonifcli': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'profit': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
         }
 
 
@@ -342,6 +349,7 @@ class envasesForm(BSModalModelForm):
         self.helper.add_input(Submit('submit', 'Actualizar'))
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+            self.fields[field].widget.required = True
 
     id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False,'id':'id_envase_id'}), required=False,label="ID")
 
@@ -371,8 +379,9 @@ class embarquesForm(BSModalModelForm):
             # 'id': forms.HiddenInput(attrs={'id':'id_embarque_id',}),
             'tipo': forms.Select(attrs={'id':'id_tipo_embarque',}),
             'mercaderia': forms.Textarea(attrs={'rows':'2',}),
-            'bultos': forms.NumberInput(attrs={'id':'id_bultos_embarque',}),
-            'bruto': forms.NumberInput(attrs={'id':'id_bruto_embarque',}),
+            'bultos': forms.NumberInput(attrs={'id':'id_bultos_embarque','min': '0'}),
+            'bruto': forms.NumberInput(attrs={'id':'id_bruto_embarque','min': '0'}),
+            'cbm': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
         }
 
 
@@ -443,6 +452,8 @@ class gastosForm(BSModalModelForm):
         }
         widgets = {
             'modo': forms.Select(attrs={'id': 'id_modo_id'}),
+            'arbitraje': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'pinformar': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
         }
 
 
@@ -454,6 +465,7 @@ class gastosForm(BSModalModelForm):
         self.helper.add_input(Submit('submit', 'Actualizar'))
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+            self.fields[field].widget.required = True
         servicios = [("", "---------"), ] + list(Servicios.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
         self.fields['servicio'].choices = servicios
         monedas = [("", "---------"), ] + list(Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
@@ -479,8 +491,8 @@ class gastosForm(BSModalModelForm):
     tipogasto = forms.CharField(widget=forms.Select(choices=CHOICES_TG),label='Tipo')
     servicio = forms.ChoiceField(choices=list(), widget=forms.Select(
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, }), label="Servicio", required=True)
-    importe = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"required":True}, ), max_digits=12,decimal_places=4, required=True, label="Importe")
-    arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"id":"id_arbitraje_id","required":False}, ), max_digits=12,decimal_places=4, required=False, label="Arbitraje")
+    importe = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"required":True,'min': '0'}, ), max_digits=12,decimal_places=4, required=True, label="Importe")
+    arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"id":"id_arbitraje_id","required":False,'min': '0'}, ), max_digits=12,decimal_places=4, required=False, label="Arbitraje")
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13","id":"id_moneda_id"}),
                                required=True, label="Moneda", choices=(), initial='')
     socio = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13"}),

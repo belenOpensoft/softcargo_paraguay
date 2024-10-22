@@ -1,0 +1,89 @@
+{% load static %}
+{% load widget_tweaks %}
+<style>
+
+    #tabla_rutas_house tr:hover::after {
+    content: 'Doble click para editar';
+    color: #f9edbe;
+    position: absolute;
+    right: 30px;
+    background-color: #333;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 3px;
+    }
+
+
+</style>
+<div id="rutas_modal_house"  style="display: none;">
+
+ <form id="rutas_form_house">
+
+     <table id="rutas_tabla" class="table" style="width: 100%">
+        <tbody>
+    <tr>
+        <input type="hidden" id="id_house_ruta" name="id_house_ruta">
+        <!-- Primera columna: Origen y Destino -->
+        <td style="text-align: right;">{{ form_rutas_house.numero.label }}</td>
+        <td>{{ form_rutas_house.numero }}</td>
+        <td style="text-align: right;">{{ form_rutas_house.origen.label }}</td>
+        <td>{{ form_rutas_house.origen }}</td>
+        <td style="text-align: right;">{{ form_rutas_house.destino.label }}</td>
+        <td>{{ form_rutas_house.destino }}</td>
+        <!-- Segunda columna: Cía -->
+        <td style="text-align: right;">{{ form_rutas_house.cia.label }}</td>
+        <td>{{ form_rutas_house.cia }}</td>
+    </tr>
+    <tr>
+        <!-- Primera columna: Salida y Llegada -->
+        <td style="text-align: right;">{{ form_rutas_house.salida.label }}</td>
+        <td>{{ form_rutas_house.salida }}</td>
+        <td style="text-align: right;">{{ form_rutas_house.llegada.label }}</td>
+        <td>{{ form_rutas_house.llegada }}</td>
+        <!-- Segunda columna: Viaje -->
+        <td style="text-align: right;">{{ form_rutas_house.viaje.label }}</td>
+        <td>{{ form_rutas_house.viaje }}</td>
+    </tr>
+    <tr>
+        <!-- Primera columna: Modo y Vapor -->
+        <td style="text-align: right;">{{ form_rutas_house.modo.label }}</td>
+        <td>{{ form_rutas_house.modo }}</td>
+        <td style="text-align: right;">{{ form_rutas_house.vapor.label }}</td>
+        <td>{{ form_rutas_house.vapor }}</td>
+        <!-- Segunda columna: Botones -->
+        <td></td>
+        <td colspan="2">
+            <button class="btn btn-dark" id="ingresar_ruta_house">Agregar</button>
+            <button class="btn btn-danger" id="cancelar_ruta_house">Cancelar</button>
+        </td>
+    </tr>
+</tbody>
+
+
+     </table>
+
+     <table id="tabla_rutas_house" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-right">Origen</th>
+            <th class="text-right">Destino</th>
+            <th class="text-left">Vapor</th>
+            <th class="text-left">Salida</th>
+            <th class="text-left">Llegada</th>
+            <th class="text-left">Viaje</th>
+            <th class="text-left">Cia</th>
+            <th class="text-left">Modo</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+
+    </form>
+</div>
+

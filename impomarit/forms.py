@@ -771,6 +771,11 @@ class gastosForm(BSModalModelForm):
         #widgets = {
         #   'modo': forms.Select(attrs={'id': 'id_modo_id'}),
         #}
+        widgets = {
+            'arbitraje': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'pinformar': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'costo': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+        }
 
 
     def __init__(self, *args, **kwargs):
@@ -874,6 +879,11 @@ class gastosFormHouse(BSModalModelForm):
             'notomaprofit': 'Excluir del profit share',
             'secomparte': 'Se comparte',
         }
+        widgets = {
+            'arbitraje': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'precio': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'pinformar': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -962,7 +972,6 @@ class gastosFormHouse(BSModalModelForm):
     arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'id': 'id_arbitraje_h', 'required': False}), max_digits=12, decimal_places=4, required=True, label='Arbitraje')
     moneda = forms.ChoiceField(widget=forms.Select(attrs={'autocomplete': 'off', 'required': True, 'tabindex': '13', 'id': 'id_moneda_h'}), required=True, label='Moneda', choices=(), initial='')
     socio = forms.ChoiceField(widget=forms.Select(attrs={'autocomplete': 'off', 'required': True, 'tabindex': '13', 'id': 'id_socio_h'}), required=True, label='Socio comercial', choices=(), initial='')
-
 
 class rutasFormHouse(forms.ModelForm):
     class Meta:
@@ -1085,7 +1094,14 @@ class envasesFormHouse(BSModalModelForm):
         widgets = {
             # 'id': forms.HiddenInput(attrs={'id':'id_envase_id',}),
              'numero': forms.TextInput(attrs={'id':'numero_envase','readonly':'readonly'}),
-
+            'precio': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'cantidad': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'peso': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'volumen': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'bultos': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'tara': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'bonifcli': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'profit': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
         }
 
 
@@ -1119,11 +1135,19 @@ class embarquesFormHouse(BSModalModelForm):
             'bruto': 'Peso bruto',
             'tipo': 'Tipo',
         }
+        # widgets = {
+        #     'tipo': forms.Select(attrs={'id':'id_tipo_embarque',}),
+        #     'mercaderia': forms.Textarea(attrs={'rows':'2',}),
+        #     'bultos': forms.NumberInput(attrs={'id':'id_bultos_embarque',}),
+        #     'bruto': forms.NumberInput(attrs={'id':'id_bruto_embarque',}),
+        # }
         widgets = {
+            # 'id': forms.HiddenInput(attrs={'id':'id_embarque_id',}),
             'tipo': forms.Select(attrs={'id':'id_tipo_embarque',}),
             'mercaderia': forms.Textarea(attrs={'rows':'2',}),
-            'bultos': forms.NumberInput(attrs={'id':'id_bultos_embarque',}),
-            'bruto': forms.NumberInput(attrs={'id':'id_bruto_embarque',}),
+            'bultos': forms.NumberInput(attrs={'id':'id_bultos_embarque','min': '0'}),
+            'bruto': forms.NumberInput(attrs={'id':'id_bruto_embarque','min': '0'}),
+            'cbm': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
         }
 
 

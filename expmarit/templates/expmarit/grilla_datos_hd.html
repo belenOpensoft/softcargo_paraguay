@@ -1,0 +1,122 @@
+{% extends 'base_table_old.html' %}
+
+{% load static %}
+
+{% block title_page %}Exportacion maritima{% endblock title_page %}
+
+{% block script_table %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/select2.min.css'  %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/importacion_maritima/importacion_maritima.css'  %}">
+<meta name="csrf-token" content="{{ csrf_token }}">
+
+{% endblock script_table %}
+
+{% block table_datatable %}
+
+<!--    BOTONES -->
+{% include 'master_impo_maritima/menu_hd.html' %}
+<style>
+
+    #tabla_house_directo tr:hover::after {
+    content: 'Doble click para editar';
+    color: #f9edbe;
+    position: absolute;
+    right: 30px;
+    background-color: #333;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 3px;
+    }
+    #tabla_seguimiento_IH tr.highlighted {
+    background-color: #ffc107;
+}
+
+#tabla_seguimiento_IH tr.highlighted input[type="checkbox"] {
+    background-color: #ffc107;
+}
+
+    table.dataTable.table-striped>tbody>tr.odd.selected>* {
+     box-shadow: inset 0 0 0 9999px #b1caed;!important;
+        color: #333;
+        background-color: #b1caed !important;
+    }
+        table.dataTable.table-striped>tbody>tr.even.selected>* {
+     box-shadow: inset 0 0 0 9999px #b1caed;!important;
+        color: #333;
+        background-color: #b1caed !important;
+    }
+
+</style>
+    <table id="tabla_house_directo" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+                <th class="text-right"></th>
+                <th class="text-right">Fecha Embarque</th>
+                <th class="text-right">Fecha Retiro</th>
+                <th class="text-right">N° Embarque</th>
+                <th class="text-right">Cliente</th>
+                <th class="text-right">Origen</th>
+                <th class="text-right">Destino</th>
+                <th class="text-right">Estado</th>
+                <th class="text-right">Posición</th>
+                <th class="text-right">Operación</th>
+                <th class="text-right">Master</th>
+                <th class="text-right">House</th>
+                <th class="text-right">Vapor</th>
+                <th class="text-right">Notificar Agente</th>
+                <th class="text-right">Notificar Cliente</th>
+            </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-right">Fecha Embarque</th>
+            <th class="text-right">Fecha Retiro</th>
+            <th class="text-right">N° Embarque</th>
+            <th class="text-right">Cliente</th>
+            <th class="text-right">Origen</th>
+            <th class="text-right">Destino</th>
+            <th class="text-right">Estado</th>
+            <th class="text-right">Posición</th>
+            <th class="text-right">Operación</th>
+            <th class="text-right">Master</th>
+            <th class="text-right">House</th>
+            <th class="text-right">Vapor</th>
+            <th class="text-right">Notificar Agente</th>
+            <th class="text-right">Notificar Cliente</th>
+        </tr>
+        </tfoot>
+    </table>
+    <div id="toast-container" class="mx-auto text-center">
+      <!-- Aquí se mostrarán los mensajes -->
+    </div>
+
+{% load static %}
+
+{% include 'expmarit/add_house.html' %}
+{% include 'expmarit/edit_house.html' %}
+{% include 'expmarit/gastos_house.html' %}
+{% include 'expmarit/importar_house.html' %}
+{% include 'expmarit/rutas_house.html' %}
+{% include 'expmarit/emails_house.html' %}
+{% include 'expmarit/archivos.html' %}
+{% include 'expmarit/envases_house.html' %}
+{% include 'expmarit/embarques_house.html' %}
+{% include 'expmarit/pdf.html' %}
+
+{% endblock table_datatable %}
+
+
+{% block script_datatable %}
+    <script src="{% static 'grilla/js_expmarit_housedirecto.js' %}"></script>
+    <script src="{% static 'grilla/js_exportacion_maritima.js' %}"></script>
+    <script src="{% static 'js/select2.min.js' %}"></script>
+    <script src="{% static 'js/select2/es.js'  %}"></script>
+    <script>
+       var csrf_token = '{{ csrf_token }}';
+    </script>
+{% endblock script_datatable %}

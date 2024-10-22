@@ -1,0 +1,117 @@
+<style>
+    #table_house_style td{
+    text-align:end;
+    }
+     .input-sobrepasar{
+    max-width:fit-content;
+    padding: .375rem .75rem !important;
+    }
+
+
+</style>
+<div id="add_house_modal" style="display: none;" tabindex="-1">
+<form id="add_house_form" method="POST" action="{% url 'add_house' %}">
+    {% csrf_token %}
+    <table id="table_house_style" class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
+
+       <tbody>
+            <tr>
+                <td>{{ form_house.cliente.label }}</td>
+               <td> {{ form_house.cliente_i }}
+                {{ form_house.cliente }}</td>
+
+                <td>{{ form_house.consignatario.label }}</td>
+               <td> {{ form_house.consignatario_i }}
+                {{ form_house.consignatario }}</td>
+
+                <td >{{ form_house.agente.label }}</td>
+              <td>  {{ form_house.agente_i }}
+                {{ form_house.agente }}</td>
+
+                <td>{{ form_house.vendedor.label }}</td>
+               <td> {{ form_house.vendedor_i }}
+                {{ form_house.vendedor }}</td>
+
+            </tr>
+
+            <tr>
+                <td>{{ form_house.origen.label }}</td>
+                <td>{{ form_house.origen }}</td>
+
+                <td >{{ form_house.destino.label }}</td>
+                <td>{{ form_house.destino }}</td>
+
+                        <td >{{ form_house.embarcador.label }}</td>
+               <td> {{ form_house.embarcador_i }}
+                {{ form_house.embarcador }}</td>
+
+                <td >{{ form_house.transportista.label }}</td>
+                <td>{{ form_house.transportista_i }}
+                {{ form_house.transportista }}</td>
+
+            </tr>
+            <tr>
+                <td >{{ form_house.awb.label }}</td>
+                <td>{{ form_house.awb }}</td>
+                <td >{{ form_house.house.label }}</td>
+                <td>{{ form_house.house }}</td>
+
+                <td >{{ form_house.operacion.label }}</td>
+                <td>{{ form_house.operacion }}</td>
+
+                <td >{{ form_house.posicion_h.label }}</td>
+                <td>{{ form_house.posicion_h }}</td>
+
+            </tr>
+            <tr>
+                 <td >{{ form_house.pago.label }}</td>
+                <td>{{ form_house.pago }}</td>
+
+                <td >{{ form_house.moneda.label }}</td>
+                <td>{{ form_house.moneda }}</td>
+
+                <td >{{ form_house.arbitraje.label }}</td>
+                <td>{{ form_house.arbitraje }}</td>
+
+                <td >{{ form_house.status_h.label }}</td>
+                <td>{{ form_house.status_h }}</td>
+
+            </tr>
+
+            <tr>
+
+                <td >{{ form_house.ageventas.label }}</td>
+              <td>  {{ form_house.agventas_i }}
+                {{ form_house.ageventas }}</td>
+
+               <td >{{ form_house.agecompras.label }}</td>
+               <td> {{ form_house.agcompras_i }}
+                {{ form_house.agecompras }}</td>
+
+                 <td >{{ form_house.wreceipt.label }}</td>
+                <td>{{ form_house.wreceipt }}</td>
+
+                <td >{{ form_house.trackid.label }}</td>
+                <td>{{ form_house.trackid }}</td>
+
+
+
+            </tr>
+            <tr>
+
+                <td >{{ form_house.fecha_embarque.label }}</td>
+                <td>{{ form_house.fecha_embarque }}</td>
+
+                <td >{{ form_house.fecha_retiro.label }}</td>
+                <td>{{ form_house.fecha_retiro }}</td>
+            </tr>
+
+            </tbody>
+    </table>
+
+    <br>
+   <button type="submit" class="btn btn-primary" onclick="return confirm('¿Confirma el guardado del H B/L?')">Guardar hijo</button>
+<!--    <button type="submit" class="btn btn-secondary" onclick="" style="visibility:hidden;" id="agregar_hijo">Agregar hijo</button>-->
+</form>
+
+</div>

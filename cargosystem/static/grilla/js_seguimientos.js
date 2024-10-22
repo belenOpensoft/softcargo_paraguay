@@ -343,7 +343,10 @@ $(document).ready(function () {
     /* FUNCIONES MODALES */
     $('#ingresar_envase').click(function (event) {
     event.preventDefault();
-        if (confirm("¿Confirma guardar datos?")) {
+    if(document.getElementById('id_profit').value<0||document.getElementById('id_volumen').value<0||document.getElementById('id_precio').value<0||document.getElementById('id_peso').value<0||document.getElementById('id_cantidad').value<0||document.getElementById('id_bonifcli').value<0||document.getElementById('id_bultos').value<0||document.getElementById('id_tara').value<0){
+    alert('No se admiten valores negativos en los campos numéricos.')
+    }else{
+    if (confirm("¿Confirma guardar datos?")) {
             var form = $('#envases_form');
             var formData = new FormData(form[0]);
             if (form[0].checkValidity()) {
@@ -377,11 +380,22 @@ $(document).ready(function () {
                         }
                     }
                 });
-            }
+            }else{
+            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+            invalidFields.forEach(field => {
+                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+            });
+
+            alert('Debe completar todos los campos.');
         }
+        }
+    }
+
     });
     $('#ingresar_ruta').click(function (event) {
-        event.preventDefault();
+    event.preventDefault();
+
+
         if (confirm("¿Confirma guardar datos?")) {
             var form = $('#rutas_form');
             if (form[0].checkValidity()) {
@@ -417,11 +431,22 @@ $(document).ready(function () {
                         }
                     }
                 });
-            }
+            }else{
+            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+            invalidFields.forEach(field => {
+                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+            });
+
+            alert('Debe completar todos los campos.');
         }
+        }
+
     });
     $('#ingresar_gasto').click(function (event) {
     event.preventDefault();
+    if(document.getElementById('id_pinformar').value<0||document.getElementById('id_arbitraje').value<0||document.getElementById('id_precio').value<0){
+    alert('No se admiten valores negativos en los campos numéricos.')
+    }else{
         if (confirm("¿Confirma guardar el gasto?")) {
             var form = $('#gastos_form');
             var formData = new FormData(form[0]);
@@ -458,11 +483,22 @@ $(document).ready(function () {
                         }
                     }
                 });
-            }
+            }else{
+            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+            invalidFields.forEach(field => {
+                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+            });
+
+            alert('Debe completar todos los campos.');
         }
+        }
+    }
     });
     $('#ingresar_embarque').click(function (event) {
     event.preventDefault();
+    if(document.getElementById('id_bruto_embarque').value<0||document.getElementById('id_cbm').value<0||document.getElementById('id_bruto_embarque').value<0){
+    alert('No se admiten valores negativos en los campos numéricos.')
+    }else{
         if (confirm("¿Confirma guardar datos?")) {
             var form = $('#embarques_form');
             var formData = new FormData(form[0]);
@@ -507,32 +543,47 @@ $(document).ready(function () {
 
                     }
                 });
-            }
+            }else{
+            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+            invalidFields.forEach(field => {
+                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+            });
+
+            alert('Debe completar todos los campos.');
         }
+        }
+    }
     });
     $('#cancelar_envase').click(function (event) {
     event.preventDefault();
-        if (confirm('¿Desea cancelar la modificacion?')) {
+
+    if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_envase").html('Agregar');
             $("#tabla_envases").dataTable().fnDestroy();
             $('#envases_btn').addClass('triggered').trigger('click');
         }
+
+
     })
     $('#cancelar_gasto').click(function (event) {
     event.preventDefault();
+
         if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_gasto").html('Agregar');
             $("#tabla_gastos").dataTable().fnDestroy();
             $('#gastos_btn').addClass('triggered').trigger('click');
         }
+
     })
     $('#cancelar_ruta').click(function (event) {
     event.preventDefault();
+
         if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_ruta").html('Agregar');
             $("#tabla_rutas").dataTable().fnDestroy();
             $('#rutas_btn').addClass('triggered').trigger('click');
         }
+
     })
     $('#busqueda_manual').click(function () {
         buscar =  $("#buscar").val();
@@ -541,11 +592,13 @@ $(document).ready(function () {
     })
     $('#cancelar_embarque').click(function (event) {
     event.preventDefault();
+
         if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_embarque").html('Agregar');
             $("#tabla_embarques").dataTable().fnDestroy();
             $('#embarques_btn').addClass('triggered').trigger('click');
         }
+
     })
     $('#guardar_archivo').click(function (event) {
     event.preventDefault();
@@ -763,8 +816,8 @@ $(document).ready(function () {
                 },
                 modal: true,
                 title: "Archivo para imprimir seguimiento N°: " + row[0][1],
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
+                height: wHeight * 0.70,
+                width: wWidth * 0.60,
                 class: 'modal fade',
                 buttons: [
                     {
@@ -799,9 +852,10 @@ $(document).ready(function () {
 
     $('#archivos_btn').click(function () {
         $("#tabla_archivos").dataTable().fnDestroy();
-        row = table.rows('.table-secondary').data();
-        get_datos_archivos();
+       row = table.rows('.table-secondary').data();
         if (row.length === 1) {
+
+        get_datos_archivos();
             $("#archivos_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
@@ -880,9 +934,10 @@ $(document).ready(function () {
     });
     $('#adjuntar_btn').click(function () {
         $("#tabla_archivos").dataTable().fnDestroy();
-        row = table.rows('.table-secondary').data();
-        get_datos_archivos();
+               row = table.rows('.table-secondary').data();
         if (row.length === 1) {
+
+        get_datos_archivos();
             $("#archivos_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
@@ -1027,7 +1082,8 @@ $(document).ready(function () {
                         class: "btn btn-primary",
                         style: "width:100px",
                         click: function () {
-                            let formData = $("#cronologia_form").serializeArray();
+                        if(!document.getElementById('id_prima').value<0){
+                        let formData = $("#cronologia_form").serializeArray();
                             let data = JSON.stringify(formData);
                             miurl = "/guardar_cronologia/";
                             var toData = {
@@ -1050,6 +1106,10 @@ $(document).ready(function () {
                                 }
                             });
                             $(this).dialog("close");
+                        }else{
+                        alert('No se admiten valores negativos.');
+                        }
+
                         },
                     }, {
                         text: "Salir",
@@ -1069,8 +1129,9 @@ $(document).ready(function () {
     });
     $('#envases_btn').click(function () {
         row = table.rows('.table-secondary').data();
-        get_datos_envases();
         if (row.length === 1) {
+        get_datos_envases();
+
             $('#envases_form').trigger("reset");
             $("#envases_modal").dialog({
                 autoOpen: true,
@@ -1205,8 +1266,8 @@ $(document).ready(function () {
     });
     $('#rutas_btn').click(function () {
         row = table.rows('.table-secondary').data();
-        get_datos_rutas();
         if (row.length === 1) {
+        get_datos_rutas();
             $('#rutas_form').trigger("reset");
             $("#id_origen").val(row[0][5]);
             $("#id_destino").val(row[0][5]);
@@ -1278,8 +1339,8 @@ $(document).ready(function () {
     });
     $('#logs_btn').click(function () {
         row = table.rows('.table-secondary').data();
-        get_datos_logs();
         if (row.length === 1) {
+                get_datos_logs();
             $("#logs_modal").dialog({
                 autoOpen: true,
                 open: function () {
@@ -1308,8 +1369,9 @@ $(document).ready(function () {
     });
     $('#gastos_btn').click(function () {
         row = table.rows('.table-secondary').data();
-        get_datos_gastos();
+
         if (row.length === 1) {
+                get_datos_gastos();
             $('#gastos_form').trigger("reset");
             $("#gastos_modal").dialog({
                 autoOpen: true,
@@ -1440,23 +1502,25 @@ $(document).ready(function () {
     /* ACCIONES DE LAS TABLAS AUXILIARES */
     $('#tabla_envases tbody').on('dblclick', 'tr', function () {
         var data = table_envases.row(this).data();
-        $("#id_envase_id").val(data[0]);
-        $("#id_unidad").val(data[1]);
-        $("#id_tipo").val(data[2]);
-        $("#id_movimiento").val(data[3]);
-        $("#id_terminos").val(data[4]);
-        $("#id_bultos").val(data[5]);
-        $("#id_precio").val(data[6]);
-        $("#id_profit").val(data[7]);
-        $("#envases_form #id_bonifcli").val(data[8]);
-        $("#id_nrocontenedor").val(data[9]);
-        $("#id_marcas").val(data[10]);
-        $("#id_precio").val(data[11]);
-        $("#id_envase").val(data[12]);
-        $("#id_tara").val(data[13]);
-        $("#id_peso").val(data[14]);
-        $("#id_volumen").val(data[15]);
-        $("#id_precinto").val(data[16]);
+
+        $("#id_envase_id").val(data[0]);         // ID del registro
+        $("#id_unidad").val(data[2]);                // Unidad
+        $("#id_tipo").val(data[3]);                  // Tipo
+        $("#id_movimiento").val(data[4]);            // Movimiento
+        $("#id_terminos").val(data[5]);              // Términos
+        $("#id_cantidad").val(data[6]);              // Cantidad
+        $("#id_precio").val(data[7]);                // Precio
+        $("#id_marcas").val(data[8]);                // Marcas
+        $("#id_precinto").val(data[9]);             // Precinto
+        $("#id_tara").val(data[10]);                 // Tara
+        $("#envases_form #id_bonifcli").val(data[11]);             // Bonificación cliente
+        $("#id_envase").val(data[12]);               // Envase
+        $("#id_bultos").val(data[13]);               // Bultos
+        $("#id_peso").val(data[14]);                 // Peso
+        $("#id_profit").val(data[15]);               // Profit
+        $("#id_nrocontenedor").val(data[16]);        // Número de contenedor
+        $("#id_volumen").val(data[17]);
+
         $("#ingresar_envase").html('Modificar');
         $("#cancelar_envase").show();
     });
@@ -1526,8 +1590,9 @@ $(document).ready(function () {
 
     $('#embarques_btn').click(function () {
         row = table.rows('.table-secondary').data();
-        get_datos_embarques();
+
         if (row.length === 1) {
+                get_datos_embarques();
             $('#embarques_form').trigger("reset");
             // get_datos_cronologia(row[0][0]);
             $("#embarques_modal").dialog({
@@ -1563,7 +1628,7 @@ $(document).ready(function () {
                                         data: toData,
                                         success: function (resultado) {
                                             aux = resultado['resultado'];
-                                            if (aux == 'exito') {
+
                                                 mostrarToast('¡Embarque eliminado correctamente!', 'success');
                                                $("#tabla_embarques").dataTable().fnDestroy();
                                                 $("#ingresar_embarque").html('Agregar');
@@ -1574,11 +1639,11 @@ $(document).ready(function () {
                                                     console.log('Data reloaded:', json);
 
                                                 });
+                                                $('#tabla_embarques').DataTable().ajax.reload();
                                                 $('#tabla_seguimiento').DataTable().ajax.reload();
-                                            } else {
-                                                //alert(aux);
+
                                                 console.log(resultado['resultado']);
-                                            }
+
                                         }
                                     });
                                 } else {
@@ -1918,21 +1983,21 @@ $(document).ready(function () {
             }
         }
     });
-    $("#vapor_add").autocomplete({
-        source: '/autocomplete_vapores/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['codigo']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-            } else {
-                $(this).val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
+//    $("#vapor_add").autocomplete({
+//        source: '/autocomplete_vapores/',
+//        minLength: 2,
+//        select: function (event, ui) {
+//            $(this).attr('data-id', ui.item['codigo']);
+//        },
+//        change: function (event, ui) {
+//            if (ui.item) {
+//                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+//            } else {
+//                $(this).val('');
+//                $(this).css({"border-color": "", 'box-shadow': ''});
+//            }
+//        }
+//    });
     $("#loading_add").autocomplete({
         source: '/autocomplete_ciudades/',
         minLength: 2,
@@ -2685,9 +2750,48 @@ function imprimirPDF() {
 
     // Escribir el HTML del Summernote en la ventana emergente
     ventanaImpresion.document.write('<html><head><title>Impresión</title>');
-    ventanaImpresion.document.write('<style>body { font-family: Arial; }</style></head><body>');
-    ventanaImpresion.document.write(contenido);
-    ventanaImpresion.document.write('</body></html>');
+    ventanaImpresion.document.write('<style>');
+    ventanaImpresion.document.write(`
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            font-size:12px;
+        }
+        @media print {
+            @page {
+                size: portrait; /* Establece la orientación en vertical (portrait) */
+                margin: 20mm;   /* Márgenes alrededor del contenido */
+            }
+            body {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                display: block;
+                width: 100%;
+                text-align: left;
+            }
+        }
+        .container {
+            margin: 20px; /* Margen interior para el contenido */
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        p {
+            text-align: left;
+        }
+        hr {
+            border: 1px solid #000;
+        }
+    `);
+    ventanaImpresion.document.write('</style></head><body>');
+    ventanaImpresion.document.write('<div class="container">'); // Aplicar un contenedor con estilo
+    ventanaImpresion.document.write(contenido); // Insertar el contenido de Summernote
+    ventanaImpresion.document.write('</div></body></html>');
     ventanaImpresion.document.close(); // Cerrar el flujo de escritura del documento
 
     // Esperar a que la nueva ventana se cargue completamente antes de imprimir
@@ -2870,3 +2974,4 @@ function redondear_a_05_o_0(numero) {
         return parseInt(numero_redondeado) + 1;
     }
 }
+

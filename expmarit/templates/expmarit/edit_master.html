@@ -1,0 +1,143 @@
+<style>
+    .table-th th{
+    text-align:end;
+    }
+    #table_edit_im th{
+    width:auto !important;
+    }
+    table_edit_im{
+    height:fit-content !important;
+    }
+    #table_edit_im tr:hover::after {
+    content: 'Doble click para editar';
+    color: #f9edbe;
+    position: absolute;
+    right: 10px;
+    background-color: #333;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 3px;
+    }
+
+</style>
+
+<div id="edit_master_modal" style="display: none;" tabindex="-1">
+<form id="edit_master_form" method="POST" style="width:fit-content;" >
+    {% csrf_token %}
+    <table class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
+        <tr>
+            <th>{{ form_edit_master.transportista_e.label }}</th>
+            <td style="display:flex;" colspan="2">
+                {{ form_edit_master.transportista_ie }}
+                {{ form_edit_master.transportista_e }}
+            </td>
+
+            <th>{{ form_edit_master.agente_e.label }}</th>
+            <td style="display:flex;" colspan="2">
+                {{ form_edit_master.agente_ie }}
+                {{ form_edit_master.agente_e }}
+            </td>
+
+            <th>{{ form_edit_master.consignatario_e.label }}</th>
+            <td style="display:flex;" colspan="2">
+                {{ form_edit_master.consignatario_ie }}
+                {{ form_edit_master.consignatario_e }}
+            </td>
+
+            <th>{{ form_edit_master.armador_e.label }}</th>
+            <td style="display:flex;" colspan="2">
+                {{ form_edit_master.armador_ie }}
+                {{ form_edit_master.armador_e }}
+            </td>
+        </tr>
+        <tr>
+            <th>{{ form_edit_master.vapor_e.label }}</th>
+            <td>{{ form_edit_master.vapor_e }}</td>
+            <th>{{ form_edit_master.viaje_e.label }}</th>
+            <td>{{ form_edit_master.viaje_e }}</td>
+
+            <th>{{ form_edit_master.aduana_e.label }}</th>
+            <td>{{ form_edit_master.aduana_e }}</td>
+            <th>{{ form_edit_master.tarifa_e.label }}</th>
+            <td>{{ form_edit_master.tarifa_e }}</td>
+        </tr>
+        <tr>
+            <th>{{ form_edit_master.moneda_e.label }}</th>
+            <td>{{ form_edit_master.moneda_e }}</td>
+            <th>{{ form_edit_master.arbitraje_e.label }}</th>
+            <td>{{ form_edit_master.arbitraje_e }}</td>
+
+<!--            <th>{{ form_edit_master.kilosmadre_e.label }}</th>-->
+<!--            <td>{{ form_edit_master.kilosmadre_e }}</td>-->
+<!--            <th>{{ form_edit_master.bultosmadre_e.label }}</th>-->
+<!--            <td>{{ form_edit_master.bultosmadre_e }}</td>-->
+            <th>{{ form_edit_master.operacion_e.label }}</th>
+            <td>{{ form_edit_master.operacion_e }}</td>
+            <th>{{ form_edit_master.awd_e.label }}</th>
+            <td>{{ form_edit_master.awd_e }}</td>
+        </tr>
+        <tr>
+            <th>{{ form_edit_master.pagoflete_e.label }}</th>
+            <td>{{ form_edit_master.pagoflete_e }}</td>
+            <th>{{ form_edit_master.trafico_e.label }}</th>
+            <td>{{ form_edit_master.trafico_e }}</td>
+
+            <th>{{ form_edit_master.fecha_e.label }}</th>
+            <td>{{ form_edit_master.fecha_e }}</td>
+            <th>{{ form_edit_master.cotizacion_e.label }}</th>
+            <td>{{ form_edit_master.cotizacion_e }}</td>
+        </tr>
+        <tr>
+            <th>{{ form_edit_master.destino_e.label }}</th>
+            <td>{{ form_edit_master.destino_e }}</td>
+            <th>{{ form_edit_master.discharge_e.label }}</th>
+            <td>{{ form_edit_master.discharge_e }}</td>
+
+            <th>{{ form_edit_master.origen_e.label }}</th>
+            <td>{{ form_edit_master.origen_e }}</td>
+            <th>{{ form_edit_master.loading_e.label }}</th>
+            <td>{{ form_edit_master.loading_e }}</td>
+
+        </tr>
+        <tr>
+            <th>{{ form_edit_master.status_e.label }}</th>
+            <td>{{ form_edit_master.status_e }}</td>
+            <th>{{ form_edit_master.posicion_e.label }}</th>
+            <td>{{ form_edit_master.posicion_e }}</td>
+
+
+        </tr>
+    </table>
+
+    <br>
+    <button type="submit" class="btn btn-primary" onclick="return confirm('¿Confirma la acción de modificar el M B/L?')">Actualizar</button>
+    <button type="button" class="btn btn-secondary" id="agregar_hijo_edit_master" >Agregar hijo</button>
+    <button type="button" class="btn btn-secondary" id="importar_hijo_edit_master" >Importar hijo</button>
+</form>
+    <div class="col-12 flex-wrap" id="segment_response_2" style="display:none">
+        {% include 'master_impo_maritima/menu_houses.html' %}
+    <table class="table table-striped table-bordered dataTable flex-wrap"  id="table_edit_im">
+        <thead class="">
+            <tr>
+                <th class="text-right"></th>
+                <th class="text-right">Fecha Embarque</th>
+                <th class="text-right">Fecha Retiro</th>
+                <th class="text-right">N° Embarque</th>
+                <th class="text-right">Cliente</th>
+                <th class="text-right">Origen</th>
+                <th class="text-right">Destino</th>
+                <th class="text-right">Estado</th>
+                <th class="text-right">Posición</th>
+                <th class="text-right">Operación</th>
+                <th class="text-right">Master</th>
+                <th class="text-right">House</th>
+                <th class="text-right">Vapor</th>
+                <th class="text-right">Notificar Agente</th>
+                <th class="text-right">Notificar Cliente</th>
+            </tr>
+        </thead>
+
+
+    </table>
+</div>
+</div>

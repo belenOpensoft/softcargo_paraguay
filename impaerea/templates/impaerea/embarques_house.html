@@ -1,0 +1,85 @@
+{% load static %}
+{% load widget_tweaks %}
+<style>
+
+    #tabla_embarques_house tr:hover::after {
+    content: 'Doble click para editar';
+    color: #f9edbe;
+    position: absolute;
+    right: 30px;
+    background-color: #333;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 3px;
+    }
+
+</style>
+<div id="embarques_modal_house" style="display: none;">
+
+        <div class="container">
+            <div class="row">
+
+                    <!-- Contenido de la primera columna -->
+                    <form id="embarques_form_house">
+                        <table class="table table-sm">
+                           <tbody>
+                                <tr>
+                                    <td style="text-align: right;">{{ form_embarques_house.numero.label }}</td>
+                                    <td>{{ form_embarques_house.id }}{{ form_embarques_house.numero }}</td>
+                                    <!-- Primera columna: Producto, Bultos, Tipo -->
+                                    <td style="text-align: right;">{{ form_embarques_house.producto.label }}</td>
+                                    <td>{{ form_embarques_house.producto }}</td>
+
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right;">{{ form_embarques_house.bultos.label }}</td>
+                                    <td>{{ form_embarques_house.bultos }}</td>
+                                    <td style="text-align: right;">{{ form_embarques_house.tipo.label }}</td>
+                                    <td>{{ form_embarques_house.tipo }}</td>
+                                </tr>
+                                <tr>
+                                    <!-- Segunda columna: Bruto, Medidas, CBM -->
+                                    <td style="text-align: right;">{{ form_embarques_house.bruto.label }}</td>
+                                    <td>{{ form_embarques_house.bruto }}</td>
+                                    <td style="text-align: right;">{{ form_embarques_house.medidas.label }}</td>
+                                    <td>{{ form_embarques_house.medidas }}</td>
+
+                                </tr>
+                                <tr>
+
+                                </tr>
+                                <tr>
+
+                                    <td colspan="6" class="text-center">
+                                        <button class="btn btn-dark" id="ingresar_embarque_house">Agregar</button>
+                                        <button class="btn btn-danger" id="cancelar_embarque_house">Cancelar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </form>
+
+            </div>
+        </div>
+
+
+        <table id="tabla_embarques_house" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+            <tr>
+                <th width="4%"></th>
+                <th class="text-right">Producto</th>
+                <th class="text-right">Bultos</th>
+                <th class="text-left">Tipo</th>
+                <th class="text-left">Peso bruto</th>
+                <th class="text-left">Medidas</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
+
+</div>

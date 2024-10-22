@@ -1,0 +1,90 @@
+{% extends 'base_table_old.html' %}
+
+{% load static %}
+
+{% block title_page %}Exportación aérea{% endblock title_page %}
+
+{% block script_table %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/select2.min.css'  %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/importacion_maritima/importacion_maritima.css'  %}">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<style>
+    #tabla_seguimiento_IH tr.highlighted {
+    background-color: #ffc107;
+}
+
+#tabla_seguimiento_IH tr.highlighted input[type="checkbox"] {
+    background-color: #ffc107;
+}
+</style>
+{% endblock script_table %}
+
+{% block table_datatable %}
+
+<!--    BOTONES -->
+{% include 'master_exp_aerea/menu.html' %}
+
+    <table id="tabla_exportaerea" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%">Acciones</th>
+            <th class="text-right">Número</th>
+            <th class="text-right">Llegada</th>
+            <th class="text-left">Transportista</th>
+            <th class="text-left">MASTER</th>
+            <th class="text-left">Agente</th>
+            <th class="text-left">Consignatario</th>
+            <th class="text-left">Origen</th>
+            <th class="text-left">Destino</th>
+            <th class="text-left">Status</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+          <th width="4%">Acciones</th>
+            <th class="text-right">Número</th>
+            <th class="text-right">Llegada</th>
+            <th class="text-left">Transportista</th>
+            <th class="text-left">MASTER</th>
+            <th class="text-left">Agente</th>
+            <th class="text-left">Consignatario</th>
+            <th class="text-left">Origen</th>
+            <th class="text-left">Destino</th>
+            <th class="text-left">Status</th>
+        </tr>
+        </tfoot>
+    </table>
+    <div id="toast-container" class="mx-auto text-center">
+      <!-- Aquí se mostrarán los mensajes -->
+    </div>
+
+{% load static %}
+
+{% include 'expaerea/add_master.html' %}
+{% include 'expaerea/add_house.html' %}
+{% include 'expaerea/edit_master.html' %}
+{% include 'expaerea/edit_house.html' %}
+{% include 'expaerea/gastos_master.html' %}
+{% include 'expaerea/gastos_house.html' %}
+{% include 'expaerea/importar_house.html' %}
+{% include 'expaerea/rutas_house.html' %}
+{% include 'expaerea/emails_house.html' %}
+{% include 'expaerea/archivos.html' %}
+{% include 'expaerea/embarques_house.html' %}
+{% include 'expaerea/pdf.html' %}
+
+{% endblock table_datatable %}
+
+
+{% block script_datatable %}
+    <script src="{% static 'grilla/js_exportacion_aerea.js' %}"></script>
+    <script src="{% static 'js/select2.min.js' %}"></script>
+    <script src="{% static 'js/select2/es.js'  %}"></script>
+    <script>
+       var csrf_token = '{{ csrf_token }}';
+    </script>
+{% endblock script_datatable %}
