@@ -431,6 +431,7 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
         "pageLength": 100,
         "ajax": {
             "url": "/exportacion_terrestre/source_seguimientos_modo/EXPORT%20TERRESTRE/",
+
             'type': 'GET',
             "data": function (d) {
                 console.log(d);
