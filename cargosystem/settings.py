@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'expmarit',
     'impaerea',
     'expaerea',
-    'impterrestre'
+    'impterrestre',
+    'expterrestre'
 ]
 CSRF_COOKIE_SECURE = False
 CKEDITOR_UPLOAD_PATH = "uploads/"
