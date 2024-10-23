@@ -222,9 +222,10 @@ $(document).ready(function () {
                     localStorage.removeItem('lugar_editar');
                     }
                 });
-                $("td:contains('Master')").css('visibility', 'hidden');
-                $('#id_awbhijo').css('display','none');
-                $('#id_awbhijo').val(0);
+                    if (!$('#id_awbhijo').val()) {
+                        $('#id_awbhijo').val(0);
+                    }
+
                 generar_posicion();
                 $('#cliente_addh').addClass('input-sobrepasar');
                 $('#embarcador_addh').addClass('input-sobrepasar');
@@ -354,6 +355,7 @@ function generar_posicion(){
         type: "GET",
         url: "/importacion_maritima/generar_posicion/",
         success: function(response) {
+        console.log(response);
             $('#posicion_gh').val(response.posicion);
         },
         error: function(error) {
