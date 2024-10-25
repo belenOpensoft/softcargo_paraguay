@@ -7,7 +7,7 @@ from django.db import IntegrityError
 from expaerea.forms import add_form, edit_form
 from expaerea.models import ExportReservas
 from seguimientos.models import Seguimiento
-from mantenimientos.models import Clientes
+from mantenimientos.models import Clientes, Guias
 
 
 def consultar_seguimientos(request):
@@ -27,17 +27,10 @@ def add_importacion_maritima(request):
                 reserva = ExportReservas()
 
                 # Validar y asignar valores numéricos, asegurando que se asignen '0' si los campos están vacíos
-                try:
-                    reserva.transportista = int(form.cleaned_data.get('transportista_i', 0)) if form.cleaned_data.get('transportista_i') else 0
-                    reserva.agente = int(form.cleaned_data.get('agente_i', 0)) if form.cleaned_data.get('agente_i') else 0
-                    reserva.consignatario = int(form.cleaned_data.get('consignatario_i', 0)) if form.cleaned_data.get('consignatario_i') else 0
-                except ValueError:
-                    return JsonResponse({
-                        'success': False,
-                        'message': 'Uno o más campos tienen un formato incorrecto.',
-                        'errors': {}
-                    })
 
+                reserva.transportista = int(form.cleaned_data.get('transportista_i', 0)) if form.cleaned_data.get('transportista_i') else 0
+                reserva.agente = int(form.cleaned_data.get('agente_i', 0)) if form.cleaned_data.get('agente_i') else 0
+                reserva.consignatario = int(form.cleaned_data.get('consignatario_i', 0)) if form.cleaned_data.get('consignatario_i') else 0
                 # Asignar campos de texto y numéricos, rellenando con '' o 0 cuando sea necesario
                 reserva.numero = reserva.get_number()
                 reserva.awb = form.cleaned_data.get('awb', "")  # Si vacío, asignar ""
@@ -54,9 +47,25 @@ def add_importacion_maritima(request):
                 reserva.cotizacion = form.cleaned_data.get('cotizacion', 0)  # Si vacío, asignar 0
                 reserva.status = form.cleaned_data.get('status', "")  # Si vacío, asignar ""
                 reserva.operacion = form.cleaned_data.get('operacion', "")  # Si vacío, asignar ""
+                reserva.volumen = form.cleaned_data.get('volumen',0)
+                reserva.aplicable = form.cleaned_data.get('aplicable',0)
                 reserva.fechaingreso = datetime.now()
                 reserva.posicion = generar_posicion()
+                numero=form.cleaned_data.get('numero_guia',0)
+                prefijo = form.cleaned_data.get('prefijo_guia', 0)
+                reserva.notas = form.cleaned_data.get('radio', "")
 
+                if reserva.status != 'CANCELADO':
+                    try:
+                        guia = Guias.objects.get(numero=numero, prefijo=prefijo)
+                    except Guias.DoesNotExist:
+                        # Manejar el caso en que no se encuentra la guía
+                        guia = None
+
+                    guia.estado = 1
+                    guia.save()
+                else:
+                    reserva.awb+='singuia'
                 # Guardar el registro
                 reserva.save()
 
@@ -124,6 +133,9 @@ def master_detail(request):
                     'moneda_e': master.moneda,
                     'arbitraje_e': master.arbitraje,
                     'kilos_e': master.kilos,
+                    'aplicable_e':master.aplicable,
+                    'volumen_e':master.volumen,
+                    'radio':master.notas,
                     'pagoflete_e': master.pagoflete,
                     'trafico_e': master.trafico,
                     'fecha_e': master.fecha,
@@ -147,7 +159,7 @@ def get_name_by_id(request):
         client_id = request.GET.get('id')
 
         if client_id:
-            cliente = Clientes.objects.get(id=client_id)
+            cliente = Clientes.objects.get(codigo=client_id)
             name = cliente.empresa
 
             return JsonResponse({'name': name})
@@ -189,9 +201,41 @@ def edit_master(request, id_master):
                 master.status = form.cleaned_data.get('status_e', "")  # Asignar "" si está vacío
                 master.posicion = form.cleaned_data.get('posicion_e', "")  # Asignar "" si está vacío
                 master.operacion = form.cleaned_data.get('operacion_e', "")  # Asignar "" si está vacío
-                master.awd = form.cleaned_data.get('awd_e', "")  # Asignar "" si está vacío
+                master.awb = form.cleaned_data.get('awd_e', "")  # Asignar "" si está vacío
+                numero=form.cleaned_data.get('numero_guia',0)
+                prefijo = form.cleaned_data.get('prefijo_guia', 0)
+                numero_old=form.cleaned_data.get('numero_old',0)
+                prefijo_old = form.cleaned_data.get('prefijo_old', 0)
+                master.notas=form.cleaned_data.get('radio',"")
 
-                # Guardar los cambios en la base de datos
+                if numero_old != numero or prefijo_old !=prefijo:
+                    #si cambio el master
+                    try:
+                        guia = Guias.objects.get(numero=numero, prefijo=prefijo)
+                    except Guias.DoesNotExist:
+                        guia = None
+
+                    guia.estado = 1
+                    guia.save()
+
+                    try:
+                        guia_old = Guias.objects.get(numero=numero_old, prefijo=prefijo_old)
+                    except Guias.DoesNotExist:
+                        guia_old = None
+
+                    guia_old.estado = 0
+                    guia_old.save()
+
+                if master.status == 'CANCELADO':
+                    # si cambio el master a cancelado
+                    try:
+                        guia = Guias.objects.get(numero=numero, prefijo=prefijo)
+                    except Guias.DoesNotExist:
+                        guia = None
+
+                    guia.estado = 0
+                    guia.save()
+
                 try:
                     master.save()
                     messages.success(request, 'Datos actualizados con éxito.')

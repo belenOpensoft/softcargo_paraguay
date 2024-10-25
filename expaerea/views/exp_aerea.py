@@ -297,6 +297,35 @@ def source_embarque_aereo(request, master):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+def source_embarque_aereo_full(request, master):
+    if is_ajax(request):
+        # Buscar todos los embarques en ExportEmbarqueaereo con el awb igual a master
+        try:
+            embarques = ExportEmbarqueaereo.objects.filter(awb=master)
+            numeros = [embarque.numero for embarque in embarques]  # Obtener una lista de números
+
+            # Usar los números para buscar registros en ExportCargaaerea
+            registros_cargaaerea = ExportCargaaerea.objects.filter(numero__in=numeros)
+            vector_registros = list(registros_cargaaerea.values()) if registros_cargaaerea.exists() else []
+
+            # Preparar el resultado
+            resultado = {
+                'recordsFiltered': embarques.count(),  # Total de registros en ExportEmbarqueaereo
+                'data': vector_registros
+            }
+
+            return JsonResponse(resultado)
+
+        except ExportEmbarqueaereo.DoesNotExist:
+            # Si no se encuentra el embarque, devolver mensaje de error
+            return JsonResponse({
+                'success': False,
+                'message': 'No se encontró un embarque con ese master.'
+            })
+
+    else:
+        return HttpResponse("fail", content_type="application/json")
+
 def get_data_embarque_aereo(registros_filtrados):
     try:
         data = []

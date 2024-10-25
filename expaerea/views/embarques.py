@@ -52,6 +52,9 @@ def get_data(registros_filtrados):
             registro_json.append('' if registro.bruto is None else str(registro.bruto))
             registro_json.append('' if registro.medidas is None else str(registro.medidas))
             registro_json.append('' if registro.producto is None else str(registro.producto.id))
+            registro_json.append('' if registro.producto is None else str(registro.aplicable))
+            registro_json.append('' if registro.producto is None else str(registro.tarifa))
+
             data.append(registro_json)
         return data
     except Exception as e:

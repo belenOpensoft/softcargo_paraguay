@@ -16,15 +16,15 @@
 </style>
 <div id="embarques_modal_house" style="display: none;">
 
-        <div class="container">
-            <div class="row">
+        <div class="container-fluid" style="width:100%">
+            <div class="row text-left">
 
                     <!-- Contenido de la primera columna -->
                     <form id="embarques_form_house">
-                        <table class="table table-sm">
+                        <table class="table table-sm table-borderless">
                            <tbody>
                                 <tr>
-                                    <td style="text-align: right;">{{ form_embarques_house.numero.label }}</td>
+                                    <td style="text-align: right;width:20%">{{ form_embarques_house.numero.label }}</td>
                                     <td>{{ form_embarques_house.id }}{{ form_embarques_house.numero }}</td>
                                     <!-- Primera columna: Producto, Bultos, Tipo -->
                                     <td style="text-align: right;">{{ form_embarques_house.producto.label }}</td>
@@ -32,28 +32,60 @@
 
                                 </tr>
                                 <tr>
-                                    <td style="text-align: right;">{{ form_embarques_house.bultos.label }}</td>
+                                    <td style="text-align: right;width:20%">{{ form_embarques_house.bultos.label }}</td>
                                     <td>{{ form_embarques_house.bultos }}</td>
-                                    <td style="text-align: right;">{{ form_embarques_house.tipo.label }}</td>
+                                    <td style="text-align: right;width:20%">{{ form_embarques_house.tipo.label }}</td>
                                     <td>{{ form_embarques_house.tipo }}</td>
-                                </tr>
-                                <tr>
-                                    <!-- Segunda columna: Bruto, Medidas, CBM -->
-                                    <td style="text-align: right;">{{ form_embarques_house.bruto.label }}</td>
-                                    <td>{{ form_embarques_house.bruto }}</td>
-                                    <td style="text-align: right;">{{ form_embarques_house.medidas.label }}</td>
-                                    <td>{{ form_embarques_house.medidas }}</td>
 
                                 </tr>
-                                <tr>
+<tr>
+    <th style="text-align: right;"><label>Calculados:</label></th>
+</tr>
+                               <tr>
+                                   <td style="width:20%"></td>
+                            <td style="text-align: right;">
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" class="form-check-input" name="opciones" id="peso_radio_embarque">
+                                    <label class="form-check-label" for="peso_radio_embarque">Peso</label>
+                                </div>
 
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" class="form-check-input" name="opciones" id="volumen_radio_embarque">
+                                    <label class="form-check-label" for="volumen_radio_embarque">Volumen</label>
+                                </div>
+
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" class="form-check-input" name="opciones" id="manual_radio_embarque">
+                                    <label class="form-check-label" for="manual_radio_embarque">Manual</label>
+                                </div>
+                            </td>
+                        </tr>
+
+
+                            <tr>
+                                <!-- Segunda fila: Bruto, Medidas, CBM -->
+                                <th style="text-align: right;width:20%">{{ form_embarques_house.bruto.label }}</th>
+                                <td class="col-md-3">{{ form_embarques_house.bruto }}</td>
+
+                                <th style="text-align: right;width:20%">{{ form_embarques_house.medidas.label }}</th>
+                                <td class="col-md-3">{{ form_embarques_house.medidas }}</td>
+                            </tr>
+                                <tr>
+                                      <!-- Tercera fila: Tarifa, Aplicable -->
+                                <th style="text-align: right;width:20%">{{ form_embarques_house.tarifa.label }}</th>
+                                <td class="col-md-3">{{ form_embarques_house.tarifa }}</td>
+                                    <th style="text-align: right;">{{ form_embarques_house.aplicable.label }}</th>
+                                    <td class="col-md-3">
+                                    {{ form_embarques_house.aplicable }}
+                                    {{ form_edit_master.radio }}
+                                </td>
                                 </tr>
-                                <tr>
 
-                                    <td colspan="6" class="text-center">
+                                    <td colspan="2" class="text-center">
                                         <button class="btn btn-dark" id="ingresar_embarque_house">Agregar</button>
                                         <button class="btn btn-danger" id="cancelar_embarque_house">Cancelar</button>
                                     </td>
+
                                 </tr>
                             </tbody>
 

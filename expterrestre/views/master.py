@@ -147,7 +147,7 @@ def get_name_by_id(request):
         client_id = request.GET.get('id')
 
         if client_id:
-            cliente = Clientes.objects.get(id=client_id)
+            cliente = Clientes.objects.get(codigo=client_id)
             name = cliente.empresa
 
             return JsonResponse({'name': name})

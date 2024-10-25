@@ -64,6 +64,8 @@ class add_form(BSModalModelForm):
             'aduana',
             'operacion',
              'kilos',
+            'volumen',
+            'aplicable',
             'tarifa',
             # 'bultosmadre',
             'origen',
@@ -85,8 +87,21 @@ class add_form(BSModalModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False }),
         required=False)
     awb = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'required': True}),
-        required=True)
+        widget=forms.HiddenInput(attrs={'required': True}),
+        required=True
+    )
+    numero_guia = forms.CharField(
+        widget=forms.HiddenInput(attrs={'required': True, 'id':'numero_guia_add'}),
+        required=True
+    )
+    prefijo_guia = forms.CharField(
+        widget=forms.HiddenInput(attrs={'required': True, 'id':'prefijo_guia_add'}),
+        required=True
+    )
+    radio = forms.CharField(
+        widget=forms.HiddenInput(attrs={'required': True, 'id': 'radio'}),
+        required=True
+    )
     consignatario = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'consignatario_add', 'name':'otro' }),
@@ -155,8 +170,13 @@ class edit_form(BSModalModelForm):
     class Meta:
         model = ExportReservas
         fields = (
-
+            'volumen',
+            'aplicable',
         )
+        widgets = {
+            'volumen': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_volumen_e'}),
+            'aplicable': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_aplicable_e'}),
+        }
     posicion_e = forms.CharField(
             widget=forms.TextInput(
                 attrs={
@@ -215,8 +235,29 @@ class edit_form(BSModalModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False }),
         required=False,label="Aduana")
     awd_e = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'required': True}),
-        required=False,label="Máster")
+        widget=forms.HiddenInput(attrs={'required': True}),
+        required=True
+    )
+    numero_guia = forms.CharField(
+        widget=forms.HiddenInput(attrs={'required': True, 'id':'numero_guia'}),
+        required=True
+    )
+    prefijo_guia = forms.CharField(
+        widget=forms.HiddenInput(attrs={'required': True, 'id':'prefijo_guia'}),
+        required=True
+    )
+    numero_old = forms.CharField(
+        widget=forms.HiddenInput(attrs={'required': True, 'id':'numero_old'}),
+        required=True
+    )
+    prefijo_old = forms.CharField(
+        widget=forms.HiddenInput(attrs={'required': True, 'id':'prefijo_old'}),
+        required=True
+    )
+    radio = forms.CharField(
+        widget=forms.HiddenInput(attrs={'required': True, 'id': 'radio_e'}),
+        required=True
+    )
     consignatario_e = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'consignatario_edit', 'name':'otro' }),
@@ -951,6 +992,7 @@ class embarquesFormHouse(BSModalModelForm):
             'bruto',
             'medidas',
             'tipo',
+            'tarifa'
 
 
         ]  # Agrega los campos que deseas actualizar
@@ -969,6 +1011,9 @@ class embarquesFormHouse(BSModalModelForm):
             'tipo': forms.Select(attrs={'id':'id_tipo_embarque',}),
             'bultos': forms.NumberInput(attrs={'id':'id_bultos_embarque','min': '0'}),
             'bruto': forms.NumberInput(attrs={'id':'id_bruto_embarque','min': '0'}),
+            'aplicable': forms.NumberInput(attrs={'id': 'id_aplicable_embarque', 'min': '0'}),
+            'tarifa': forms.NumberInput(attrs={'id': 'id_tarifa_embarque', 'min': '0'}),
+            'medidas': forms.TextInput(attrs={'id': 'id_medidas_embarque', 'min': '0'}),
         }
 
 
@@ -981,13 +1026,16 @@ class embarquesFormHouse(BSModalModelForm):
         for field in self.fields:
             if field not in ['tomopeso','tipobonifcli','tarifafija']:
                 self.fields[field].widget.attrs['class'] = 'form-control'
-
+    radio = forms.CharField(
+        widget=forms.HiddenInput(attrs={'required': True, 'id': 'radio_embarque'}),
+        required=True
+    )
     numero = forms.IntegerField(widget=forms.TextInput(attrs={"autocomplete": "off", 'id':'numero_embarque', 'readonly':'readonly'}), required=False,label="Número")
     id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False,'id':'id_embarque_id'}), required=False,label="ID")
-    aplicable = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12,'decimal_places': 1,"required":False}, ), max_digits=12,decimal_places=4, required=False, label="Aplicable")
-    tarifaprofit = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 1,"required":False}, ), max_digits=12,decimal_places=4, required=False, label="Tarifa informar")
-    tarifaventa = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 1,"required":False,'onchange':'return recalculo_embarques();'}, ), max_digits=12,decimal_places=4, required=False, label="Tarifa venta")
-    tarifacompra = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 1,"required":False}, ), max_digits=12,decimal_places=4, required=False, label="Tarifa compra")
+    aplicable = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12,'decimal_places': 1,"required":False,'id':'id_aplicable_embarque'}, ), max_digits=12,decimal_places=4, required=False, label="Aplicable")
+    # tarifaprofit = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 1,"required":False}, ), max_digits=12,decimal_places=4, required=False, label="Tarifa informar")
+    # tarifaventa = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 1,"required":False,'onchange':'return recalculo_embarques();'}, ), max_digits=12,decimal_places=4, required=False, label="Tarifa venta")
+    # tarifacompra = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 1,"required":False}, ), max_digits=12,decimal_places=4, required=False, label="Tarifa compra")
     muestroflete = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 1,"required":False}, ), max_digits=12,decimal_places=4, required=False, label="Flete")
     numero_e = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 1,"required":False}, ), max_digits=12,decimal_places=4, required=False, label="Numero")
     volumen = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'id':'volumen','max_digits': 12, 'decimal_places': 1,"required":False}, ), max_digits=12,decimal_places=4, required=False, label="Volumen")
