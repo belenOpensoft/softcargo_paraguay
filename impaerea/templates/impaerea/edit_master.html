@@ -24,7 +24,7 @@
 <div id="edit_master_modal" style="display: none;" tabindex="-1">
 <form id="edit_master_form" method="POST" style="width:fit-content;" >
     {% csrf_token %}
-    <table class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
+    <table class="table table-borderless table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
     <tr>
         <th>{{ form_edit_master.transportista_e.label }}</th>
         <td style="display:flex;" colspan="2">
