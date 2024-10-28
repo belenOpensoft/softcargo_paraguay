@@ -1025,7 +1025,7 @@ $(document).ready(function () {
     e.preventDefault();
     e.stopPropagation();
 
-    if(document.getElementById('id_tarifa').value<0||document.getElementById('id_arbitraje').value<0||document.getElementById('id_trafico').value<0||document.getElementById('id_bultosmadre').value<0||document.getElementById('id_kilosmadre').value<0||document.getElementById('id_cotizacion').value<0){
+    if(document.getElementById('id_tarifa').value<0||document.getElementById('id_arbitraje').value<0||document.getElementById('id_trafico').value<0||document.getElementById('id_cotizacion').value<0){
     alert('No se admiten valores negativos.');
     }else{
     let formData = $(this).serialize();
@@ -1181,7 +1181,7 @@ var expandedRow;
 });
     $('#edit_master_form').submit(function(e){
        e.preventDefault();
-    if(document.getElementById('id_tarifa_e').value<0||document.getElementById('id_arbitraje_e').value<0||document.getElementById('id_trafico_e').value<0||document.getElementById('id_bultosmadre_e').value<0||document.getElementById('id_kilosmadre_e').value<0||document.getElementById('id_cotizacion_e').value<0){
+    if(document.getElementById('id_tarifa_e').value<0||document.getElementById('id_arbitraje_e').value<0||document.getElementById('id_trafico_e').value<0||document.getElementById('id_cotizacion_e').value<0){
     alert('No se admiten valores negativos.');
     }else{
 
@@ -2653,6 +2653,16 @@ function fillFormWithData(data) {
     $('#edit_master_form [name="posicion_e"]').val(data.posicion_e);
     $('#edit_master_form [name="operacion_e"]').val(data.operacion_e);
     $('#edit_master_form [name="awd_e"]').val(data.awd_e);
+                    acumulados(data.awd_e, function(result) {
+            // Asegúrate de que estos elementos están disponibles en el DOM
+            if ($("#cantidad_acumulados").length && $("#peso_acumulados").length && $("#volumen_acumulados").length) {
+                $('#cantidad_acumulados').val(result.cantidad);
+                $('#peso_acumulados').val(result.peso);
+                $('#volumen_acumulados').val(result.volumen);
+            } else {
+                console.log("Elementos de entrada no encontrados en el DOM.");
+            }
+        });
 }
 function formatDateToYYYYMMDD(isoDate) {
     // Asegúrate de que la fecha esté en formato ISO
@@ -4557,3 +4567,44 @@ function get_datos_pdf() {
 //}else if(lugar==='edit_directo'){
 //$('#tabla_house_directo').DataTable().ajax.reload(null, false);
 //}
+
+//acumulados
+function acumulados(master, callback) {
+    let peso = 0, volumen = 0;
+
+    $.ajax({
+        url: '/importacion_terrestre/source_embarque_aereo_full/' + master + '/',
+        method: 'GET',
+        success: function(response) {
+                let cant = response.recordsFiltered;
+            if (response.data && response.data.length > 0) {
+
+                response.data.forEach(function(item) {
+                    peso += item.bruto ? parseFloat(item.bruto) : 0;
+
+                    let volumen_aux = 0;
+                    if (item.medidas && item.medidas.includes('*')) {
+                        let medidasArray = item.medidas.split('*');
+                        volumen_aux = medidasArray.reduce((total, num) => total * parseFloat(num), 1);
+                    }
+
+                    if (isNaN(volumen_aux) || volumen_aux === 0) {
+                        volumen_aux = item.cbm;
+                    }
+
+                    volumen += volumen_aux ? parseFloat(volumen_aux) : 0;
+                });
+
+                // Llamada al callback con los resultados
+                callback({ 'volumen': volumen, 'peso': peso, 'cantidad': cant });
+            } else {
+                console.log("No se encontraron datos.");
+                // Callback con valores por defecto
+                callback({ 'volumen': 0, 'peso': 0, 'cantidad': cant });
+            }
+        },
+        error: function(error) {
+            console.error('Error al obtener las guías:', error);
+        }
+    });
+}
