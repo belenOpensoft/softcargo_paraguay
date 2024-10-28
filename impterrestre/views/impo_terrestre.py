@@ -339,10 +339,10 @@ def get_data_embarque_aereo(registros_filtrados):
             embarques = ImpterraCargaaerea.objects.filter(numero=registro.numero).count()
             envases = ImpterraEnvases.objects.filter(numero=registro.numero).count()
             gastos = ImpterraServiceaereo.objects.filter(numero=registro.numero).count()
-            rutas = ImpterraConexaerea.objects.filter(numero=registro.numero).count()
+            rutas = ImpterraConexaerea.objects.filter(numero=registro.numero).count() #18
             registro_json.append(archivos)
             registro_json.append(embarques)
-            registro_json.append(envases)
+            registro_json.append(0)
             registro_json.append(gastos)
             registro_json.append(rutas)
 

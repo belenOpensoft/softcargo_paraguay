@@ -4185,6 +4185,7 @@ $('.email').click(function () {
         }
     });
 function get_data_email(row,title,numero,id) {
+console.log(title);
     let miurl = "/importacion_maritima/get_data_email/";
     var toData = {
         'title': title,
@@ -4200,7 +4201,6 @@ function get_data_email(row,title,numero,id) {
         success: function (resultado) {
             if (resultado['resultado'] === 'exito') {
                 let textarea = document.getElementById("email_add_input");
-//                textarea.innerHTML = resultado['mensaje'];
                 textarea.value = resultado['mensaje'];
                 $("#id_subject").val(resultado['asunto']);
             } else {

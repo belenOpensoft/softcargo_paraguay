@@ -1,11 +1,15 @@
+import locale
 from datetime import datetime
 import json
+
+from django.db.models import Count
 from django.http import HttpResponse
 import base64
 from django.views.decorators.csrf import csrf_exempt
-from impomarit.models import VEmbarqueaereo, Cargaaerea, Envases
+from impomarit.models import VEmbarqueaereo, Cargaaerea, Envases, Serviceaereo
 from mantenimientos.views.bancos import is_ajax
 from mantenimientos.models import Productos
+from seguimientos .models import VGrillaSeguimientos
 
 DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
 MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre',
@@ -37,12 +41,18 @@ def get_data_email_op(request):
             row = VEmbarqueaereo.objects.get(numero=row_number)
             row2 = Cargaaerea.objects.filter(numero=row_number)
             row3 = Envases.objects.filter(numero=row_number)
+            gastos = Serviceaereo.objects.filter(numero=row_number)
+
+            try:
+                seguimiento = VGrillaSeguimientos.objects.get(numero=row.seguimiento)
+
+            except VGrillaSeguimientos.DoesNotExist:
+
+                seguimiento = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='', deposito='', pago='',vendedor='')
+
             texto = ''
-            # image_path = str(settings.BASE_DIR) +  "/cargosystem/static/images/oceanlink.png"  # Cambia esto a la ruta de tu imagen
-            # base64_string = image_to_base64(image_path)
-            # texto += f'<img src="data:image/jpeg;base64,{base64_string}" alt="Imagen Base64">' + '<br><br><br><br>'
             texto += f'<br>'
-            texto, resultado = get_data_html(row_number, row, row2, row3, title, texto, resultado)
+            texto, resultado = get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos)
             texto += '<b>OCEANLINK,</b><br>'
             # texto += str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>'
             texto += 'DEPARTAMENTO DE IMPORTACION MARITIMA, <br>'
@@ -63,7 +73,8 @@ def get_data_email_op(request):
     return HttpResponse(data_json, mimetype)
 
 
-def get_data_html(row_number, row, row2, row3, title, texto, resultado):
+
+def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimiento,gastos):
     # merca = Productos.objects.get(codigo=row2.producto.codigo)
     if row2 is not None:
         merca = []
@@ -310,6 +321,108 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado):
 
         return texto, resultado
 
+    elif title == 'Notificación de llegada de carga':
+
+        resultado['asunto'] = 'NOTIFICACION DE LLEGADA DE CARGA - Ref.: ' + str(seguimiento.refproveedor) + ' - CS: ' + str(
+            row.seguimiento) + \
+                              '- HB/l: ' + str(row.hawb) + ' - Ship: ' + str(row.embarcador) + ' - Consig: ' \
+                                                                                               '' + str(
+            row.consignatario) + '; Vapor: ' + str(row.vapor)
+        # # TEXTO DE CUERPO DEL MENSAJE
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+
+        texto += fecha_formateada + '<br><br>'
+        tabla_html = "<table style='width:40%'>"
+        campos = [
+            ("Att.", ""),
+            ("Cliente", str(seguimiento.cliente)),
+            ("Vapor", str(row.vapor) if row.vapor is not None else ""),
+            ("Viaje", str(row.viaje) if row.viaje is not None else ""),
+            ("Embarque", str(row.fecha_embarque.strftime("%d/%m/%Y")) if isinstance(row.fecha_embarque, datetime) else ""),
+            ("Llegada", str(row.fecha_retiro.strftime("%d/%m/%Y")) if isinstance(row.fecha_retiro, datetime) else ""),
+        ]
+        for campo, valor in campos:
+            tabla_html += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Origen</th><td>{str(row.origen)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Destino</th><td>{str(row.destino)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Transportista</th><td>{str(row.transportista)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>B/L</th><td>{str(row.awb)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>H B/L</th><td>{str(row.hawb)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Referencia</th><td>{str(seguimiento.refproveedor)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Posicion</th><td>{str(row.posicion)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Nro embarque</th><td>{str(row.numero)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Embarcador</th><td>{str(row.embarcador)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Consignatario</th><td>{str(row.consignatario)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Notificante</th><td>{str(row.consignatario)}</td></tr>"
+
+        # Detalles de los contenedores
+        cantidad_cntr = ""
+        contenedores = ""
+        precintos = ""
+        movimiento = ""
+        mercaderias = ""
+        bultos = 0
+        peso = 0
+        volumen = 0
+        cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto',
+                                                                     'bultos', 'peso', 'envase',
+                                                                     'movimiento', 'volumen').annotate(total=Count('id'))
+        if cant_cntr.count() > 0:
+            for cn in cant_cntr:
+                cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - '
+                contenedores += f' {cn["nrocontenedor"]} - '
+                if cn['precinto'] is not None and len(cn['precinto']) > 0:
+                    precintos += f'{cn["precinto"]} - '
+                bultos += cn['bultos']
+                if cn['peso'] is not None:
+                    peso += cn['peso']
+                if cn['volumen'] is not None:
+                    volumen += cn['volumen']
+                movimiento += cn['movimiento'] + ' - '
+                mercaderias += cn['envase'] + ' - '
+
+        tabla_html += f"<tr><th align='left'>Contenedores</th><td>{cantidad_cntr[:-3]}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Nro.Contenedor/es</th><td>{contenedores[:-3]}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Precintos/sellos</th><td>{precintos[:-3]}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Movimiento</th><td>{movimiento[:-3]}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Mercaderia</th><td>{mercaderias[:-3]}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Bultos</th><td>{bultos}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Peso</th><td>{peso} KGS</td></tr>"
+        tabla_html += f"<tr><th align='left'>CBM</th><td>{volumen} M³</td></tr>"
+        tabla_html += "</table><br><br>"
+        texto += tabla_html
+
+        texto += '<b>Detalle de gastos  en Dólares</b><br><br>'
+        tabla_html = "<table border='1'>"
+
+        # Definimos los campos de gasto con sus respectivos valores
+        for g in gastos:
+
+            tabla_html += f"<tr><th align='left'>Servicio</th><td>{str(g.servicio)}</td></tr>"
+            tabla_html += f"<tr><th align='left'>Moneda</th><td>{str(g.moneda)}</td></tr>"
+            tabla_html += f"<tr><th align='left'>Modo</th><td>{str(g.modo)}</td></tr>"
+            tabla_html += f"<tr><th align='left'>Precio</th><td>{str(g.precio)}</td></tr>"
+            tabla_html += f"<tr><th align='left'>Costo</th><td>{str(g.costo)}</td></tr>"
+            tabla_html += f"<tr><th align='left'>Detalle</th><td>{str(g.detalle)}</td></tr>"
+            tabla_html += f"<tr><th align='left'>Tipo de Gasto</th><td>{str(g.tipogasto)}</td></tr>"
+            tabla_html +="<tr><th></th><td></td></tr><br>"
+
+        tabla_html += "</table><br>"
+        texto += tabla_html
+
+        texto += 'Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar. <br>' \
+                 'Agradeciendo vuestra preferencia, le saludamos muy atentamente.<br><br>'
+        texto += '<b>OCEANLINK,</b><br>'
+        texto += 'MISIONES 1574 OF 201 <br>'
+        texto += 'OPERACIONES <br>'
+        texto += 'EMAIL: <br>'
+        texto += 'TEL: 598 2917 0501 <br>'
+        texto += 'FAX: 598 2916 8215 <br><br><br><br>'
+        texto += '</table>'
+
+        return texto, resultado
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:
