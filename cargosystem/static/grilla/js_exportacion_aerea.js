@@ -1089,8 +1089,11 @@ $(document).ready(function () {
     let peso_e =  $('#id_kilos_e').val();
 
     let medidas =  $('#id_medidas_embarque').val();
-    let medidasArray = medidas.split('*');
-    let volumen_embarque = medidasArray.reduce((total, num) => total * parseFloat(num), 1);
+    let volumen_embarque=0;
+    if(medidas){
+        let medidasArray = medidas.split('*');
+        volumen_embarque = medidasArray.reduce((total, num) => total * parseFloat(num), 1);
+    }
     let peso_embarque =  $('#id_bruto_embarque').val();
 
     let aplicable1;
@@ -4526,19 +4529,23 @@ function guia_master_edit() {
 //acumulables
 function acumulados(master, callback) {
     let peso = 0, volumen = 0;
+    let volumen_aux;
 
     $.ajax({
         url: '/exportacion_aerea/source_embarque_aereo_full/' + master + '/',
         method: 'GET',
         success: function(response) {
-
-            if (response.data && response.data.length > 0) {
                 let cant = response.recordsFiltered;
+            if (response.data && response.data.length > 0) {
 
                 response.data.forEach(function(item) {
                     peso += item.bruto ? parseFloat(item.bruto) : 0;
-                    let medidasArray = item.medidas.split('*');
-                    let volumen_aux = medidasArray.reduce((total, num) => total * parseFloat(num), 1);
+                    if (item.medidas && item.medidas.includes('*')) {
+                        let medidasArray = item.medidas.split('*');
+                        volumen_aux = medidasArray.reduce((total, num) => total * parseFloat(num), 1);
+                    }else{
+                    volumen_aux=0;
+                    }
                     volumen += volumen_aux ? parseFloat(volumen_aux) : 0;
                 });
 
@@ -4547,7 +4554,7 @@ function acumulados(master, callback) {
             } else {
                 console.log("No se encontraron datos.");
                 // Callback con valores por defecto
-                callback({ 'volumen': 0, 'peso': 0, 'cantidad': 0 });
+                callback({ 'volumen': 0, 'peso': 0, 'cantidad': cant });
             }
         },
         error: function(error) {

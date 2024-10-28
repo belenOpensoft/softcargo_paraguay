@@ -9,7 +9,7 @@ from impaerea.views.house import add_house, add_house_impmarit, edit_house_funct
     generar_posicion, source_embarque_importado, source_archivos_importado
 from impaerea.views.imp_aerea import master_importacion_maritima, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
-    descargar_archivo, modificar_fecha_retiro, add_archivo_importado
+    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full
 from impaerea.views.mails import get_data_email_op
 from impaerea.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
 from impaerea.views.pdf import get_datos_caratula
@@ -18,6 +18,7 @@ from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
+    path(r'source_embarque_aereo_full/<str:master>/', source_embarque_aereo_full, name="source_embarque_aereo_full"),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
     path(r'masters/', master_importacion_maritima, name="master_importacion_maritima"),
     path('descargar_archivo/<int:id>', descargar_archivo, name="descargar_archivo"),

@@ -4580,14 +4580,22 @@ function acumulados(master, callback) {
         url: '/importacion_maritima/source_embarque_aereo_full/' + master + '/',
         method: 'GET',
         success: function(response) {
-
+        let cant = response.recordsFiltered;
             if (response.data && response.data.length > 0) {
-                let cant = response.recordsFiltered;
 
                 response.data.forEach(function(item) {
                     peso += item.bruto ? parseFloat(item.bruto) : 0;
-                    let medidasArray = item.medidas.split('*');
-                    let volumen_aux = medidasArray.reduce((total, num) => total * parseFloat(num), 1);
+
+                    let volumen_aux = 0;
+                    if (item.medidas && item.medidas.includes('*')) {
+                        let medidasArray = item.medidas.split('*');
+                        volumen_aux = medidasArray.reduce((total, num) => total * parseFloat(num), 1);
+                    }
+
+                    if (isNaN(volumen_aux) || volumen_aux === 0) {
+                        volumen_aux = item.cbm;
+                    }
+
                     volumen += volumen_aux ? parseFloat(volumen_aux) : 0;
                 });
 
@@ -4596,7 +4604,7 @@ function acumulados(master, callback) {
             } else {
                 console.log("No se encontraron datos.");
                 // Callback con valores por defecto
-                callback({ 'volumen': 0, 'peso': 0, 'cantidad': 0 });
+                callback({ 'volumen': 0, 'peso': 0, 'cantidad': cant });
             }
         },
         error: function(error) {

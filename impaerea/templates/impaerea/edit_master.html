@@ -24,78 +24,131 @@
 <div id="edit_master_modal" style="display: none;" tabindex="-1">
 <form id="edit_master_form" method="POST" style="width:fit-content;" >
     {% csrf_token %}
-    <table class="table table-borderless table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
+ <table class="table table-condensed table-sm form-control table-th table-borderless" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
     <tr>
         <th>{{ form_edit_master.transportista_e.label }}</th>
         <td style="display:flex;" colspan="2">
             {{ form_edit_master.transportista_ie }}
             {{ form_edit_master.transportista_e }}  <!-- Campo autocompletado o similar -->
         </td>
-
-        <th>{{ form_edit_master.agente_e.label }}</th>
-        <td style="display:flex;" colspan="2">
-            {{ form_edit_master.agente_ie }}
-            {{ form_edit_master.agente_e }}  <!-- Campo autocompletado o similar -->
+        <td style="display:none;">
+            {{ form_edit_master.radio }}
         </td>
+            <th>{{ form_edit_master.awd_e.label }}</th>
+            <td>{{ form_edit_master.awd_e }}</td>
+
+        <th>{{ form_edit_master.operacion_e.label }}</th>
+        <td>{{ form_edit_master.operacion_e }}</td>
 
         <th>{{ form_edit_master.consignatario_e.label }}</th>
         <td style="display:flex;" colspan="2">
             {{ form_edit_master.consignatario_ie }}
             {{ form_edit_master.consignatario_e }}  <!-- Campo autocompletado o similar -->
         </td>
+
     </tr>
 
     <tr>
-        <th>{{ form_edit_master.aduana_e.label }}</th>
-        <td>{{ form_edit_master.aduana_e }}</td>
-        <th>{{ form_edit_master.tarifa_e.label }}</th>
-        <td>{{ form_edit_master.tarifa_e }}</td>
+        <th>{{ form_edit_master.agente_e.label }}</th>
+        <td style="display:flex;" colspan="2">
+            {{ form_edit_master.agente_ie }}
+            {{ form_edit_master.agente_e }}  <!-- Campo autocompletado o similar -->
+        </td>
         <th>{{ form_edit_master.moneda_e.label }}</th>
         <td>{{ form_edit_master.moneda_e }}</td>
-    </tr>
 
-    <tr>
+        <th>{{ form_edit_master.cotizacion_e.label }}</th>
+        <td>{{ form_edit_master.cotizacion_e }}</td>
+
         <th>{{ form_edit_master.arbitraje_e.label }}</th>
         <td>{{ form_edit_master.arbitraje_e }}</td>
-        <th>{{ form_edit_master.kilosmadre_e.label }}</th>
-        <td>{{ form_edit_master.kilosmadre_e }}</td>
-        <th>{{ form_edit_master.bultosmadre_e.label }}</th>
-        <td>{{ form_edit_master.bultosmadre_e }}</td>
-    </tr>
 
-    <tr>
-        <th>{{ form_edit_master.pagoflete_e.label }}</th>
-        <td>{{ form_edit_master.pagoflete_e }}</td>
+    </tr>
         <th>{{ form_edit_master.trafico_e.label }}</th>
         <td>{{ form_edit_master.trafico_e }}</td>
         <th>{{ form_edit_master.fecha_e.label }}</th>
         <td>{{ form_edit_master.fecha_e }}</td>
-    </tr>
-
-    <tr>
         <th>{{ form_edit_master.destino_e.label }}</th>
         <td>{{ form_edit_master.destino_e }}</td>
 
         <th>{{ form_edit_master.origen_e.label }}</th>
         <td>{{ form_edit_master.origen_e }}</td>
-
-        <th>{{ form_edit_master.operacion_e.label }}</th>
-        <td>{{ form_edit_master.operacion_e }}</td>
-
+    <tr>
+        <th>{{ form_edit_master.aduana_e.label }}</th>
+        <td>{{ form_edit_master.aduana_e }}</td>
+        <th>{{ form_edit_master.status_e.label }}</th>
+        <td>{{ form_edit_master.status_e }}</td>
     </tr>
 
     <tr>
-        <th>{{ form_edit_master.awd_e.label }}</th>
-        <td>{{ form_edit_master.awd_e }}</td>
-        <th>{{ form_edit_master.status_e.label }}</th>
-        <td>{{ form_edit_master.status_e }}</td>
-        <th>{{ form_edit_master.cotizacion_e.label }}</th>
-        <td>{{ form_edit_master.cotizacion_e }}</td>
+        <th><label>Calculados</label></th>
+        <td colspan="6"></td>
     </tr>
+
+    <tr>
+            <th><label for="peso_radio_e">Peso</label></th>
+            <td>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="opciones" id="peso_radio_e">
+                    <label class="form-check-label" for="peso_radio_e"></label>
+                </div>
+            </td>
+
+            <th><label for="volumen_radio_e">Volumen</label></th>
+            <td>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="opciones" id="volumen_radio_e">
+                    <label class="form-check-label" for="volumen_radio_e"></label>
+                </div>
+            </td>
+
+            <th><label for="manual_radio_e">Manual</label></th>
+            <td>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="opciones" id="manual_radio_e">
+                    <label class="form-check-label" for="manual_radio_e"></label>
+                </div>
+            </td>
+        </tr>
+
+    <tr>
+        <th>{{ form_edit_master.tarifa_e.label }}</th>
+        <td>{{ form_edit_master.tarifa_e }}</td>
+
+        <th>{{ form_edit_master.kilos_e.label }}</th>
+        <td>{{ form_edit_master.kilos_e }}</td>
+
+        <th>{{ form_edit_master.volumen.label }}</th>
+        <td>{{ form_edit_master.volumen }}</td>
+    </tr>
+
+    <tr>
+        <th>{{ form_edit_master.pagoflete_e.label }}</th>
+        <td>{{ form_edit_master.pagoflete_e }}</td>
+        <th>{{ form_edit_master.aplicable.label }}</th>
+        <td>{{ form_edit_master.aplicable }}</td>
+
+    </tr>
+
         <tr>
          <th>{{ form_edit_master.posicion_e.label }}</th>
         <td>{{ form_edit_master.posicion_e }}</td>
         </tr>
+        <tr>
+            <th><label for="cantidad_acumulados">Acumulados:</label></th>
+        </tr>
+        <tr>
+
+            <th><label for="cantidad_acumulados">Cantidad de HAWB:</label></th>
+            <td><input readonly type="number" class="form-control" name="" id="cantidad_acumulados"></td>
+
+            <th><label for="peso_acumulados">Peso:</label></th>
+            <td><input readonly type="number" class="form-control" name="" id="peso_acumulados"></td>
+
+            <th><label for="volumen_acumulados">Volumen:</label></th>
+            <td><input readonly type="number" class="form-control" name="" id="volumen_acumulados"></td>
+        </tr>
+
 </table>
 
     <br>

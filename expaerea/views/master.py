@@ -202,6 +202,8 @@ def edit_master(request, id_master):
                 master.posicion = form.cleaned_data.get('posicion_e', "")  # Asignar "" si está vacío
                 master.operacion = form.cleaned_data.get('operacion_e', "")  # Asignar "" si está vacío
                 master.awb = form.cleaned_data.get('awd_e', "")  # Asignar "" si está vacío
+                master.volumen = form.cleaned_data.get('volumen',0)
+                master.aplicable = form.cleaned_data.get('aplicable',0)
                 numero=form.cleaned_data.get('numero_guia',0)
                 prefijo = form.cleaned_data.get('prefijo_guia', 0)
                 numero_old=form.cleaned_data.get('numero_old',0)
