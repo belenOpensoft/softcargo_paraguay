@@ -15,8 +15,9 @@ from django.shortcuts import render
 from cargosystem.settings import RUTA_PROYECTO
 from impterrestre.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
     rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse, NotasForm
-from impterrestre.models import Master, ImpterraReservas, ImpterraEmbarqueaereo, VEmbarqueaereo, ImpterraAttachhijo, ImpterraCargaaerea, ImpterraEnvases, \
-    ImpterraServiceaereo, ImpterraConexaerea
+from impterrestre.models import Master, ImpterraReservas, ImpterraEmbarqueaereo, VEmbarqueaereo, ImpterraAttachhijo, \
+    ImpterraCargaaerea, ImpterraEnvases, \
+    ImpterraServiceaereo, ImpterraConexaerea, ImpterraFaxes
 from seguimientos.forms import archivosForm, pdfForm
 
 
@@ -342,11 +343,13 @@ def get_data_embarque_aereo(registros_filtrados):
             envases = ImpterraEnvases.objects.filter(numero=registro.numero).count()
             gastos = ImpterraServiceaereo.objects.filter(numero=registro.numero).count()
             rutas = ImpterraConexaerea.objects.filter(numero=registro.numero).count() #18
+            notas = ImpterraFaxes.objects.filter(numero=registro.numero).count() #18
             registro_json.append(archivos)
             registro_json.append(embarques)
             registro_json.append(0)
             registro_json.append(gastos)
             registro_json.append(rutas)
+            registro_json.append(notas)
 
             data.append(registro_json)
         return data

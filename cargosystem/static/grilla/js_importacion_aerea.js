@@ -2425,6 +2425,14 @@ table_add_im = $('#table_add_im').DataTable({
                     '<path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>\n' +
                     '</svg>';
             }
+            if (data[19] > 0) {
+            //notas
+            texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">\n' +
+            '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
+            '</svg>';
+
+                }
+
             $('td:eq(3)', row).html(texto + " " + data[3]);
 
         },
@@ -2741,6 +2749,13 @@ table_edit_im = $('#table_edit_im').DataTable({
                     '<path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>\n' +
                     '</svg>';
             }
+            if (data[19] > 0) {
+            //notas
+            texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">\n' +
+            '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
+            '</svg>';
+
+                }
             $('td:eq(3)', row).html(texto + " " + data[3]);
 
         },
@@ -4509,6 +4524,16 @@ function agregar_nota(event) {
                 $('#notas_table').DataTable().ajax.reload();
                 $("#notas_form")[0].reset();  // Limpia el formulario después de guardar
                 $("#id_nota").val('');  // Restablece el campo oculto para futuras creaciones
+                        if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        }
+
+                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        }
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        }
             } else {
                 alert("Error al guardar las notas: " + response.errores);
             }
@@ -4531,6 +4556,16 @@ function eliminarNota(id) {
                 if (response.resultado === 'exito') {
                     alert("Nota eliminada exitosamente");
                     $('#notas_table').DataTable().ajax.reload();
+                        if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        }
+
+                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        }
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        }
                 } else {
                     alert("Error al eliminar la nota");
                 }

@@ -17,8 +17,8 @@ from django.views.decorators.csrf import csrf_exempt
 from cargosystem.settings import RUTA_PROYECTO
 from expaerea.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
     rutasFormHouse, emailsForm, embarquesFormHouse, NotasForm
-from expaerea.models import Master, ExportEmbarqueaereo, VEmbarqueaereo, ExportAttachhijo, ExportCargaaerea,  \
-    ExportServiceaereo, ExportConexaerea
+from expaerea.models import Master, ExportEmbarqueaereo, VEmbarqueaereo, ExportAttachhijo, ExportCargaaerea, \
+    ExportServiceaereo, ExportConexaerea, ExportFaxes
 from seguimientos.forms import archivosForm, pdfForm
 
 
@@ -353,12 +353,14 @@ def get_data_embarque_aereo(registros_filtrados):
             #envases = ImportEnvases.objects.filter(numero=registro.numero).count()
             gastos = ExportServiceaereo.objects.filter(numero=registro.numero).count()
             rutas = ExportConexaerea.objects.filter(numero=registro.numero).count()
+            notas = ExportFaxes.objects.filter(numero=registro.numero).count()
+
             registro_json.append(archivos)
             registro_json.append(embarques)
             registro_json.append(0)
             registro_json.append(gastos)
             registro_json.append(rutas)
-
+            registro_json.append(notas)
             data.append(registro_json)
         return data
     except Exception as e:

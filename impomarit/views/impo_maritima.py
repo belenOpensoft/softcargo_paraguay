@@ -18,7 +18,7 @@ from cargosystem.settings import RUTA_PROYECTO
 from impomarit.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
     rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse, NotasForm
 from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo, Attachhijo, Cargaaerea, Envases, \
-    Serviceaereo, Conexaerea
+    Serviceaereo, Conexaerea, Faxes
 from seguimientos.forms import archivosForm, pdfForm
 
 
@@ -348,11 +348,13 @@ def get_data_embarque_aereo(registros_filtrados):
             envases = Envases.objects.filter(numero=registro.numero).count()
             gastos = Serviceaereo.objects.filter(numero=registro.numero).count()
             rutas = Conexaerea.objects.filter(numero=registro.numero).count()
+            notas = Faxes.objects.filter(numero=registro.numero).count()
             registro_json.append(archivos)
             registro_json.append(embarques)
             registro_json.append(envases)
             registro_json.append(gastos)
             registro_json.append(rutas)
+            registro_json.append(notas)
 
             data.append(registro_json)
         return data
