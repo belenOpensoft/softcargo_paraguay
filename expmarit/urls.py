@@ -16,6 +16,7 @@ from expmarit.views.master import master_detail, add_importacion_maritima, edit_
     consultar_seguimientos
 
 from expmarit.views.mails import get_data_email_op
+from expmarit.views.notas import source, guardar_notas, eliminar_nota
 from expmarit.views.pdf import get_datos_caratula
 from expmarit.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado
 
@@ -23,6 +24,9 @@ from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
+    path('source/', source, name='source'),
+    path('guardar_notas/', guardar_notas, name='guardar_notas'),
+    path('eliminar_nota/', eliminar_nota, name='eliminar_nota'),
     path(r'source_embarque_aereo_full/<str:master>/', source_embarque_aereo_full, name="source_embarque_aereo_full"),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
     path(r'masters/', master_expo_maritima, name="master_importacion_maritima"),

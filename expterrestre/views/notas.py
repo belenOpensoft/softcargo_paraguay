@@ -5,7 +5,7 @@ from django.db import IntegrityError
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.views import View
-from impomarit.models import Faxes
+from expterrestre.models import ExpterraFaxes as Faxes
 from impomarit.forms import NotasForm
 
 def source(request):
@@ -15,7 +15,7 @@ def source(request):
     if is_ajax:
         numero = request.GET.get('numero')
         if numero:
-            notas_list = Faxes.objects.filter(numero=numero).values('id', 'fecha', 'asunto', 'tipo','notas')
+            notas_list = Faxes.objects.filter(numero=numero).values('id', 'fecha', 'notas', 'asunto', 'tipo','notas')
         else:
             notas_list = Faxes.objects.all().values('id', 'fecha', 'asunto', 'tipo','notas')
 

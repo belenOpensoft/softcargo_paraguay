@@ -347,14 +347,28 @@ class ExportEntregadoc(models.Model):
         db_table = 'export_entregadoc'
 
 
+
 class ExportFaxes(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    # Define las opciones de choices
+    TIPO_CHOICES = [
+        ('CL', 'CLIENTE'),
+        ('IN', 'INTERNO'),
+        ('FF', 'AGENTE CARGA'),
+        ('TR', 'TRANSPORTISTA'),
+        ('AV', 'AGENTE VENTAS'),
+        ('AC', 'AGENTE COMPRAS'),
+        ('TK', 'TRACKING'),
+        ('EM', 'EMBARCADOR'),
+        ('AD', 'ADUANA'),
+        ('DE', 'DESPACHANTE'),
+
+    ]
+
     numero = models.IntegerField(blank=True, null=True)
     fecha = models.DateTimeField(blank=True, null=True)
     notas = models.TextField(blank=True, null=True)
     asunto = models.TextField(blank=True, null=True)
-    tipo = models.CharField(max_length=2, blank=True, null=True)
-    status = models.CharField(db_column='Status', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    tipo = models.CharField(max_length=2, choices=TIPO_CHOICES, blank=True, null=True)  # Agrega choices al campo
 
     class Meta:
         managed = False

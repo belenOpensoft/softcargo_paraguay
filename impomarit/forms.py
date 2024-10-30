@@ -51,7 +51,16 @@ choice_op = (
 class NotasForm(BSModalModelForm):
     class Meta:
         model = Faxes
-        fields = ['fecha', 'notas', 'asunto', 'tipo']  # Lista los campos del modelo que deseas incluir
+        fields = ['fecha', 'notas', 'asunto', 'tipo']
+
+    # Define el ChoiceField para el campo 'tipo'
+    tipo = forms.ChoiceField(
+        choices=Faxes.TIPO_CHOICES,
+        widget=forms.Select(attrs={
+            "id": 'id_tipo_notas',
+            "class": "form-control"
+        })
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,7 +71,7 @@ class NotasForm(BSModalModelForm):
 
         # Configuración de widgets personalizados en el __init__
         self.fields['fecha'].widget = forms.DateInput(
-            attrs={"type": "date", "class": "form-control",'id':'id_fecha_notas'}
+            attrs={"type": "date", "class": "form-control", 'id': 'id_fecha_notas'}
         )
         self.fields['notas'].widget = forms.Textarea(
             attrs={
@@ -78,15 +87,6 @@ class NotasForm(BSModalModelForm):
                 "autocomplete": "off",
                 "class": "form-control",
                 "max_length": 100
-            }
-        )
-        # Configura el campo 'tipo' con id y otras opciones
-        self.fields['tipo'].widget = forms.TextInput(
-            attrs={
-                "id": 'id_tipo_notas',
-                "autocomplete": "off",
-                "class": "form-control",
-                "max_length": 50
             }
         )
 

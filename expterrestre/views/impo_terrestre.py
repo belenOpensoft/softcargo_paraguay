@@ -14,7 +14,7 @@ from django.shortcuts import render
 
 from cargosystem.settings import RUTA_PROYECTO
 from expterrestre.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
-    rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse
+    rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse, NotasForm
 from expterrestre.models import Master, ExpterraEmbarqueaereo, VEmbarqueaereo, ExpterraAttachhijo, ExpterraCargaaerea, ExpterraEnvases, \
     ExpterraServiceaereo, ExpterraConexaerea
 from seguimientos.forms import archivosForm, pdfForm
@@ -51,6 +51,8 @@ def master_importacion_maritima(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
+                'form_notas': NotasForm(),
+
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
@@ -84,6 +86,8 @@ def house_importacion_maritima(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
+                'form_notas': NotasForm(),
+
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')

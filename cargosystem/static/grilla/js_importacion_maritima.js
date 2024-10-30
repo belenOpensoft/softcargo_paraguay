@@ -4625,8 +4625,8 @@ function notas_house() {
                 },
                 modal: true,
                 title: "Notas para el House N°: " + selectedRowN,
-                height: wHeight * 0.70,
-                width: wWidth * 0.60,
+                height: wHeight * 0.90,
+                width: wWidth * 0.70,
                 class: 'modal fade',
                        buttons: [
                     {
@@ -4641,6 +4641,7 @@ function notas_house() {
                 beforeClose: function (event, ui) {
                  localStorage.removeItem('num_house_gasto');
                  $('#notas_table').DataTable().destroy();
+                 $("#notas_form").trigger("reset");
                  $('#table_add_im tbody tr').removeClass('table-secondary');
                 $('#table_edit_im tbody tr').removeClass('table-secondary');
                 $('#tabla_house_directo tbody tr').removeClass('table-secondary');
@@ -4657,7 +4658,6 @@ function cargar_notas(numero) {
         columns: [
             { data: 'id' },
             { data: 'fecha' },
-            { data: 'notas' },
             { data: 'asunto' },
             { data: 'tipo' },
             {

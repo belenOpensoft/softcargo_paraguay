@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from cargosystem.settings import RUTA_PROYECTO
 from expaerea.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
-    rutasFormHouse, emailsForm,  embarquesFormHouse
+    rutasFormHouse, emailsForm, embarquesFormHouse, NotasForm
 from expaerea.models import Master, ExportEmbarqueaereo, VEmbarqueaereo, ExportAttachhijo, ExportCargaaerea,  \
     ExportServiceaereo, ExportConexaerea
 from seguimientos.forms import archivosForm, pdfForm
@@ -52,6 +52,8 @@ def master_expo_aerea(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
+                'form_notas': NotasForm(),
+
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
@@ -84,6 +86,8 @@ def house_importacion_maritima(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
+                'form_notas': NotasForm(),
+
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')

@@ -4605,3 +4605,144 @@ function acumulados(master, callback) {
         }
     });
 }
+
+//notas
+function notas_house() {
+    let selectedRowN = localStorage.getItem('num_house_gasto');
+    const wHeight = $(window).height();
+    const wWidth = $(window).width();
+            $("#notas_modal").dialog({
+                autoOpen: true,
+                open: function (event, ui) {
+                cargar_notas(selectedRowN);
+                },
+                modal: true,
+                title: "Notas para el House N°: " + selectedRowN,
+                height: wHeight * 0.90,
+                width: wWidth * 0.70,
+                class: 'modal fade',
+                       buttons: [
+                    {
+                        text: "Cancelar",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                ],
+                beforeClose: function (event, ui) {
+                 localStorage.removeItem('num_house_gasto');
+                 $('#notas_table').DataTable().destroy();
+                 $("#notas_form").trigger("reset");
+                 $('#table_add_im tbody tr').removeClass('table-secondary');
+                $('#table_edit_im tbody tr').removeClass('table-secondary');
+                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                }
+            })
+}
+function cargar_notas(numero) {
+    $('#notas_table').DataTable({
+        destroy: true,  // Asegura que se destruya cualquier instancia anterior
+        ajax: {
+            url: `/exportacion_maritima/source/?numero=${numero}`,  // URL de la vista source
+            dataSrc: 'data'
+        },
+        columns: [
+            { data: 'id' },
+            { data: 'fecha' },
+            { data: 'asunto' },
+            { data: 'tipo' },
+            {
+                data: null,
+                render: function(data, type, row) {
+                    return `
+                        <button class="btn btn-danger" onclick="eliminarNota(${row.id})">Eliminar</button>
+                    `;
+                }
+            }
+        ],
+        rowCallback: function(row, data) {
+            // Configura el evento de doble clic para cada fila
+            $(row).off('dblclick').on('dblclick', function() {
+
+                $("#notas_add_input").val(data.notas);          // ID del registro
+                $("#id_fecha_notas").val(formatDateToYYYYMMDD(data.fecha));
+                $("#id_nota").val(data.id);      // Notas
+                $("#id_asunto").val(data.asunto);    // Asunto
+                $("#id_tipo_notas").val(data.tipo);        // Tipo
+                $("#guardar_nota").html('Modificar');  // Cambia el botón de guardar a "Modificar"
+            });
+                $(row).off('click').on('click', function () {
+                $('#notas_table tbody tr').removeClass('table-secondary');
+                $(this).addClass('table-secondary');
+            });
+
+        }
+    });
+}
+function agregar_nota(event) {
+    event.preventDefault();
+
+    // Convierte los datos del formulario en un JSON estructurado
+    let formDataArray = $("#notas_form").serializeArray();
+    let formData = {};
+    formDataArray.forEach(item => {
+        formData[item.name] = item.value;
+    });
+
+    let numero = localStorage.getItem('num_house_gasto');
+    formData.numero = numero;
+
+    // Verifica si estamos editando una nota existente
+    const idNota = $("#id_nota").val();
+    const url = "/exportacion_maritima/guardar_notas/";
+
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function(response) {
+            if (response.resultado === 'exito') {
+            $("#guardar_nota").html('Agregar');
+                alert("Notas guardadas exitosamente");
+                //$("#notas_modal").dialog("close");
+                $('#notas_table').DataTable().ajax.reload();
+                $("#notas_form")[0].reset();  // Limpia el formulario después de guardar
+                $("#id_nota").val('');  // Restablece el campo oculto para futuras creaciones
+            } else {
+                alert("Error al guardar las notas: " + response.errores);
+            }
+        },
+        error: function() {
+            alert("Error en la solicitud");
+        }
+    });
+}
+function eliminarNota(id) {
+    if (confirm("¿Desea eliminar esta nota?")) {
+        $.ajax({
+            type: "POST",
+            url: `/exportacion_maritima/eliminar_nota/`,
+            data: {
+                id: id,  // Corrige la clave `íd` a `id`
+                csrfmiddlewaretoken: csrf_token  // Asegúrate de incluir el token CSRF
+            },
+            success: function(response) {
+                if (response.resultado === 'exito') {
+                    alert("Nota eliminada exitosamente");
+                    $('#notas_table').DataTable().ajax.reload();
+                } else {
+                    alert("Error al eliminar la nota");
+                }
+            },
+            error: function() {
+                alert("Error en la solicitud");
+            }
+        });
+    }
+}

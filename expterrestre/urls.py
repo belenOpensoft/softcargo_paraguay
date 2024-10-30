@@ -16,10 +16,14 @@ from expterrestre.views.mails import get_data_email_op
 from expterrestre.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
 from expterrestre.views.pdf import get_datos_caratula
 from expterrestre.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado
+from expterrestre.views.notas import source, guardar_notas,eliminar_nota
 from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
+    path('source/', source, name='source'),
+    path('guardar_notas/', guardar_notas, name='guardar_notas'),
+    path('eliminar_nota/', eliminar_nota, name='eliminar_nota'),
     path(r'source_embarque_aereo_full/<str:master>/', source_embarque_aereo_full, name="source_embarque_aereo_full"),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
     path(r'masters/', master_importacion_maritima, name="master_importacion_maritima"),

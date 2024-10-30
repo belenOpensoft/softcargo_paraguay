@@ -5,7 +5,7 @@ from django.db import IntegrityError
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.views import View
-from impomarit.models import Faxes
+from impaerea.models import ImportFaxes as Faxes
 from impomarit.forms import NotasForm
 
 def source(request):
