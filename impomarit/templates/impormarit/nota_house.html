@@ -1,0 +1,50 @@
+{% load static %}
+
+<div id="notas_modal" style="display: none;">
+    <div style="display:flex; justify-content:center;">
+    <form id="notas_form" method="post" style="width:90%">
+        {% csrf_token %}
+
+        <!-- Fila para fecha, asunto y tipo -->
+        <div class="form-row" style="display:flex; justify-content:space-between; align-items: flex-end;">
+            <div class="form-group col-md-4" style="width: 250px;">
+                <label for="{{ form_notas.fecha.id_for_label }}">{{ form_notas.fecha.label }}</label>
+                <input type="hidden" id="id_nota" name="id_nota">
+                {{ form_notas.fecha }}
+            </div>
+            <div class="form-group col-md-4" style="width: 250px;">
+                <label for="{{ form_notas.asunto.id_for_label }}">{{ form_notas.asunto.label }}</label>
+                {{ form_notas.asunto }}
+            </div>
+            <div class="form-group col-md-4" style="width: 250px;">
+                <label for="{{ form_notas.tipo.id_for_label }}">{{ form_notas.tipo.label }}</label>
+                {{ form_notas.tipo }}
+            </div>
+        </div>
+
+        <!-- Fila para el campo de notas (ocupa toda la fila) -->
+        <div class="form-group" style="margin-top:10px;">
+            <label for="{{ form_notas.notas.id_for_label }}">{{ form_notas.notas.label }}</label>
+            {{ form_notas.notas }}
+        </div>
+            <button class="btn btn-primary" id="guardar_nota" onclick="agregar_nota(event)">Agregar Nota</button>
+    </form>
+    </div>
+
+    <div class="container mt-4">
+    <table id="notas_table" class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Notas</th>
+                <th>Asunto</th>
+                <th>Tipo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+</div>
+

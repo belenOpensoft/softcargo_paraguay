@@ -405,21 +405,20 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
             tabla_html += f"<tr><th align='left'>Modo</th><td>{str(g.modo)}</td></tr>"
             tabla_html += f"<tr><th align='left'>Precio</th><td>{str(g.precio)}</td></tr>"
             tabla_html += f"<tr><th align='left'>Costo</th><td>{str(g.costo)}</td></tr>"
-            tabla_html += f"<tr><th align='left'>Detalle</th><td>{str(g.detalle)}</td></tr>"
             tabla_html += f"<tr><th align='left'>Tipo de Gasto</th><td>{str(g.tipogasto)}</td></tr>"
             tabla_html +="<tr><th></th><td></td></tr><br>"
 
         tabla_html += "</table><br>"
         texto += tabla_html
 
-        texto += 'Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar. <br>' \
-                 'Agradeciendo vuestra preferencia, le saludamos muy atentamente.<br><br>'
-        texto += '<b>OCEANLINK,</b><br>'
-        texto += 'MISIONES 1574 OF 201 <br>'
-        texto += 'OPERACIONES <br>'
-        texto += 'EMAIL: <br>'
-        texto += 'TEL: 598 2917 0501 <br>'
-        texto += 'FAX: 598 2916 8215 <br><br><br><br>'
+        texto += 'Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta: <br><br>'
+        texto += 'BBVA URUGUAY S.A.<br>'
+        texto += '25 de Mayo 401 <br>'
+        texto += 'Cuenta Número: 5207347 <br>'
+        texto += 'OCEANLINK Ltda. <br><br>'
+        texto += 'Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR. <br>'
+        texto+='Agradeciendo vuestra preferencia, le saludamos muy atentamente. <br><br>'
+
         texto += '</table>'
 
         return texto, resultado

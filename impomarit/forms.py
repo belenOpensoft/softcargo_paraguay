@@ -2,7 +2,7 @@
 from bootstrap_modal_forms.forms import BSModalModelForm
 from django import forms
 
-from impomarit.models import Reservas, Embarqueaereo, Servireserva, Conexaerea, Envases, Cargaaerea, Attachhijo
+from impomarit.models import Reservas, Embarqueaereo, Servireserva, Conexaerea, Envases, Cargaaerea, Attachhijo,Faxes
 from mantenimientos.models import Clientes, Vapores, Ciudades, Monedas, Servicios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -46,6 +46,49 @@ choice_op = (
                  ("TRASLADO","TRASLADO"),
                  ("MUESTRA","MUESTRA"),
                  )
+
+
+class NotasForm(BSModalModelForm):
+    class Meta:
+        model = Faxes
+        fields = ['fecha', 'notas', 'asunto', 'tipo']  # Lista los campos del modelo que deseas incluir
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'update-form'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Actualizar'))
+
+        # Configuración de widgets personalizados en el __init__
+        self.fields['fecha'].widget = forms.DateInput(
+            attrs={"type": "date", "class": "form-control",'id':'id_fecha_notas'}
+        )
+        self.fields['notas'].widget = forms.Textarea(
+            attrs={
+                "id": 'notas_add_input',
+                "autocomplete": "off",
+                "rows": "5",
+                "cols": "100",
+                "class": "form-control"
+            }
+        )
+        self.fields['asunto'].widget = forms.TextInput(
+            attrs={
+                "autocomplete": "off",
+                "class": "form-control",
+                "max_length": 100
+            }
+        )
+        # Configura el campo 'tipo' con id y otras opciones
+        self.fields['tipo'].widget = forms.TextInput(
+            attrs={
+                "id": 'id_tipo_notas',
+                "autocomplete": "off",
+                "class": "form-control",
+                "max_length": 50
+            }
+        )
 
 class add_im_form(forms.Form):
     awb_number = forms.CharField(

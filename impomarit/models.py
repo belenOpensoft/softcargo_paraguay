@@ -482,6 +482,9 @@ class Faxes(models.Model):
     notas = models.TextField( blank=True, null=True)
     asunto = models.TextField( blank=True, null=True)
     tipo = models.CharField(max_length=2, blank=True, null=True)
+    class Meta:
+        managed = False
+        db_table = 'impmarit_faxes'
 
 class Fisico(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  

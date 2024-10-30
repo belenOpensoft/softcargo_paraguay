@@ -4,7 +4,7 @@ import json
 from django.http import HttpResponse
 import base64
 from django.views.decorators.csrf import csrf_exempt
-from expterrestre.models import VEmbarqueaereo, ExpterraCargaaerea, ExpterraEnvases, ExpterraServiceaereo
+from expterrestre.models import VEmbarqueaereo, ExpterraCargaaerea, ExpterraEnvases, ExpterraServiceaereo, VGastosHouse
 from mantenimientos.views.bancos import is_ajax
 from mantenimientos.models import Productos
 from seguimientos.models import VGrillaSeguimientos
@@ -38,7 +38,7 @@ def get_data_email_op(request):
             row = VEmbarqueaereo.objects.get(numero=row_number)
             row2 = ExpterraCargaaerea.objects.filter(numero=row_number)
             row3 = ExpterraEnvases.objects.filter(numero=row_number)
-            gastos = ExpterraServiceaereo.objects.filter(numero=row_number)
+            gastos = VGastosHouse.objects.filter(numero=row_number)
 
             try:
                 seguimiento = VGrillaSeguimientos.objects.get(numero=row.seguimiento)
@@ -396,21 +396,20 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             tabla_html += f"<tr><th align='left'>Modo</th><td>{str(g.modo)}</td></tr>"
             tabla_html += f"<tr><th align='left'>Precio</th><td>{str(g.precio)}</td></tr>"
             tabla_html += f"<tr><th align='left'>Costo</th><td>{str(g.costo)}</td></tr>"
-            tabla_html += f"<tr><th align='left'>Detalle</th><td>{str(g.detalle)}</td></tr>"
             tabla_html += f"<tr><th align='left'>Tipo de Gasto</th><td>{str(g.tipogasto)}</td></tr>"
             tabla_html +="<tr><th></th><td></td></tr><br>"
 
         tabla_html += "</table><br>"
         texto += tabla_html
 
-        texto += 'Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar. <br>' \
-                 'Agradeciendo vuestra preferencia, le saludamos muy atentamente.<br><br>'
-        texto += '<b>OCEANLINK,</b><br>'
-        texto += 'MISIONES 1574 OF 201 <br>'
-        texto += 'OPERACIONES <br>'
-        texto += 'EMAIL: <br>'
-        texto += 'TEL: 598 2917 0501 <br>'
-        texto += 'FAX: 598 2916 8215 <br><br><br><br>'
+        texto += 'Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta: <br><br>'
+        texto += 'BBVA URUGUAY S.A.<br>'
+        texto += '25 de Mayo 401 <br>'
+        texto += 'Cuenta Número: 5207347 <br>'
+        texto += 'OCEANLINK Ltda. <br><br>'
+        texto += 'Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR. <br>'
+        texto+='Agradeciendo vuestra preferencia, le saludamos muy atentamente. <br><br>'
+
         texto += '</table>'
 
         return texto, resultado
