@@ -1163,6 +1163,7 @@ var expandedRow;
                     beforeClose: function (event, ui) {
                         localStorage.removeItem('fecha_editada_master');
                         localStorage.removeItem('id_master_editar');
+                        localStorage.removeItem('num_house_gasto');
                     }
                 });
 
@@ -1179,6 +1180,20 @@ var expandedRow;
         alert('Por favor, selecciona una fila para editar.');
     }
 });
+    $('#tabla_expoterrestre tbody').on('dblclick', 'tr', function() {
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
+        var rowData = row.data();
+
+        if (rowData) {
+            var selectedRowId = rowData[0];
+            var selectedRowNumber = rowData[1];
+            localStorage.setItem('id_master_editar', selectedRowId);
+            localStorage.setItem('numero_master_seleccionado', selectedRowNumber);
+        }
+
+        $('#editar_btn').trigger('click');
+    });
     $('#edit_master_form').submit(function(e){
        e.preventDefault();
     if(document.getElementById('id_tarifa_e').value<0||document.getElementById('id_arbitraje_e').value<0||document.getElementById('id_trafico_e').value<0||document.getElementById('id_cotizacion_e').value<0){
@@ -3782,10 +3797,10 @@ function gastos_btn_h_click(){
                         },
                     }],
                 beforeClose: function (event, ui) {
-                localStorage.removeItem('num_house_gasto');
-                $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                //localStorage.removeItem('num_house_gasto');
+//                $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                     // table.ajax.reload();
                 $("#tabla_gastos").dataTable().fnDestroy();
                 }
@@ -3890,11 +3905,11 @@ function rutas_btn_h_click(){
                         },
                     }],
                 beforeClose: function (event, ui) {
-                localStorage.removeItem('num_house_gasto');
+               // localStorage.removeItem('num_house_gasto');
                  $("#table_rutas_house").dataTable().fnDestroy();
-                 $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                 $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -3998,11 +4013,11 @@ $("#id_envase_id").val('');
                         },
                     }],
                 beforeClose: function (event, ui) {
-                localStorage.removeItem('num_house_gasto');
+                //localStorage.removeItem('num_house_gasto');
                    $("#tabla_envases_house").dataTable().fnDestroy();
-                 $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                 $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -4106,11 +4121,11 @@ $("#id_embarque_id").val('');
                         },
                     }],
                 beforeClose: function (event, ui) {
-                localStorage.removeItem('num_house_gasto');
+                //localStorage.removeItem('num_house_gasto');
                  $("#tabla_embarques_house").dataTable().fnDestroy();
-                 $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                 $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -4185,10 +4200,10 @@ $('.email').click(function () {
                         },
                     },],
                 beforeClose: function (event, ui) {
-                localStorage.removeItem('num_house_gasto');
-                $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+               // localStorage.removeItem('num_house_gasto');
+//                $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
         } else {
@@ -4428,9 +4443,9 @@ function archivos_btn_h_click(){
             beforeClose: function (event, ui) {
                 // table.ajax.reload();
                 $("#tabla_archivos").dataTable().fnDestroy();
-                $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
             }
         })
 }
@@ -4650,12 +4665,12 @@ function notas_house() {
                     }
                 ],
                 beforeClose: function (event, ui) {
-                 localStorage.removeItem('num_house_gasto');
+                 //localStorage.removeItem('num_house_gasto');
                  $('#notas_table').DataTable().destroy();
                  $("#notas_form").trigger("reset");
-                 $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                 $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
 }

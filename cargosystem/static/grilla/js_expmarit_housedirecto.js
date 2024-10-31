@@ -346,7 +346,7 @@ if (!$('#id_awbhijo').val()) {
                                 },
                             },],
                         beforeClose: function (event, ui) {
-                        localStorage.removeItem('num_house_gasto');
+                        //localStorage.removeItem('num_house_gasto');
                         $('#table_add_im tbody tr').removeClass('table-secondary');
                         $('#table_edit_im tbody tr').removeClass('table-secondary');
                         $('#tabla_house_directo tbody tr').removeClass('table-secondary');
