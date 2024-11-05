@@ -42,7 +42,7 @@
 {% block formulario %}
 
     <form method="POST">
-        <table class="table table-condensed table-sm form-control" style="margin-top: 10px; margin-bottom: 10px;" border="1">
+        <table class="table table-borderless table-condensed table-sm form-control" style="margin-top: 10px; margin-bottom: 10px;" border="1">
             {% csrf_token %}
             <tr>
                 <th>{{ form.transportista.label }}</th>

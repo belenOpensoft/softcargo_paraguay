@@ -19,7 +19,8 @@ from django.urls import path
 
 from cargosystem import settings
 from mantenimientos.models import Clientes
-from mantenimientos.views.guias import grilla_guias, source_guias, agregar_guias, anular_guia, asignar_guia_aerea
+from mantenimientos.views.guias import grilla_guias, source_guias, agregar_guias, anular_guia, asignar_guia_aerea, \
+    obtener_guias_transportista
 from seguimientos.views.desconsolidacion_aerea import desconsolidacion_aerea, desconsolidar_aereo
 from seguimientos.views.archivos import source_archivos, guardar_archivo, eliminar_archivo, descargar_archivo
 from seguimientos.views.autocompletes import autocomplete_clientes, autocomplete_ciudades, autocomplete_vendedores, \
@@ -81,6 +82,7 @@ urlpatterns = [
     path('get_data_seguimiento/<int:id>/', get_data_seguimiento, name='get_data_seguimiento'),
     path('get_data_email/', get_data_email, name='get_data_email'),
     path('guias/', grilla_guias, name='vista_guias'),
+    path('obtener-guias/<int:transportista_id>/', obtener_guias_transportista, name='obtener_guias_transportista'),
     path('source_guias/', source_guias, name='source_guias'),
     path('agregar_guias', agregar_guias, name='agregar_guias'),
     path('anular_guia', anular_guia, name='anular_guia'),

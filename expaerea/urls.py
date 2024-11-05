@@ -10,11 +10,12 @@ from expaerea.views.house import add_house_impmarit, edit_house_function, house_
     generar_posicion, source_embarque_importado, source_archivos_importado
 from expaerea.views.exp_aerea import master_expo_aerea, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
-    descargar_archivo, modificar_fecha_retiro, add_archivo_importado
+    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full
 from expaerea.views.master import master_detail, add_importacion_maritima, edit_master, get_name_by_id, \
     consultar_seguimientos
 
 from expaerea.views.mails import get_data_email_op
+from expaerea.views.notas import source, guardar_notas, eliminar_nota
 from expaerea.views.pdf import get_datos_caratula
 from expaerea.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado
 
@@ -22,6 +23,9 @@ from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
+    path('source/', source, name='source'),
+    path('guardar_notas/', guardar_notas, name='guardar_notas'),
+    path('eliminar_nota/', eliminar_nota, name='eliminar_nota'),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
     path(r'masters/', master_expo_aerea, name="master_importacion_maritima"),
     path('descargar_archivo/<int:id>', descargar_archivo, name="descargar_archivo"),
@@ -55,6 +59,7 @@ urlpatterns = [
     path(r'eliminar_ruta_house/', eliminar_ruta, name="eliminar_ruta_house"),
     path(r'eliminar_house/', eliminar_house, name="eliminar_house"),
     path(r'source_embarque_aereo/<str:master>/', source_embarque_aereo, name="source_embarque_aereo"), #hauses
+    path(r'source_embarque_aereo_full/<str:master>/', source_embarque_aereo_full, name="source_embarque_aereo_full"),  # hauses
     path(r'add_master/', add_importacion_maritima, name="add_master"),
     path('edit_master/<int:id_master>/', edit_master, name='edit_master'),
     path('edit_house/<int:numero>/', edit_house_function, name='edit_house'),

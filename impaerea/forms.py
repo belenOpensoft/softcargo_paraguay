@@ -3,7 +3,7 @@ from bootstrap_modal_forms.forms import BSModalModelForm
 from django import forms
 
 from impaerea.models import ImportReservas, ImportEmbarqueaereo, ImportServireserva, ImportConexaerea, ImportCargaaerea, \
-    ImportAttachhijo, ImportServiceaereo
+    ImportAttachhijo, ImportServiceaereo, ImportFaxes
 from mantenimientos.models import Clientes, Vapores, Ciudades, Monedas, Servicios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -47,6 +47,47 @@ choice_op = (
                  ("TRASLADO","TRASLADO"),
                  ("MUESTRA","MUESTRA"),
                  )
+class NotasForm(BSModalModelForm):
+    class Meta:
+        model = ImportFaxes
+        fields = ['fecha', 'notas', 'asunto', 'tipo']
+
+    # Define el ChoiceField para el campo 'tipo'
+    tipo = forms.ChoiceField(
+        choices=ImportFaxes.TIPO_CHOICES,
+        widget=forms.Select(attrs={
+            "id": 'id_tipo_notas',
+            "class": "form-control"
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'update-form'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Actualizar'))
+
+        # Configuración de widgets personalizados en el __init__
+        self.fields['fecha'].widget = forms.DateInput(
+            attrs={"type": "date", "class": "form-control", 'id': 'id_fecha_notas'}
+        )
+        self.fields['notas'].widget = forms.Textarea(
+            attrs={
+                "id": 'notas_add_input',
+                "autocomplete": "off",
+                "rows": "5",
+                "cols": "100",
+                "class": "form-control"
+            }
+        )
+        self.fields['asunto'].widget = forms.TextInput(
+            attrs={
+                "autocomplete": "off",
+                "class": "form-control",
+                "max_length": 100
+            }
+        )
 
 class add_im_form(forms.Form):
     awb_number = forms.CharField(
@@ -64,9 +105,11 @@ class add_form(BSModalModelForm):
         fields = (
             'aduana',
             'operacion',
-            'kilosmadre',
+             'kilos',
+            'volumen',
+            'aplicable',
             'tarifa',
-            'bultosmadre',
+            # 'bultosmadre',
             'origen',
             'destino',
             'cotizacion',
@@ -86,8 +129,14 @@ class add_form(BSModalModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False }),
         required=False)
     awb = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'required': True}),
-        required=True)
+        widget=forms.TextInput(attrs={'required': True}),
+        required=True
+    )
+
+    radio = forms.CharField(
+        widget=forms.HiddenInput(attrs={'required': True, 'id': 'radio'}),
+        required=True
+    )
     consignatario = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'consignatario_add', 'name':'otro' }),
@@ -95,7 +144,6 @@ class add_form(BSModalModelForm):
     transportista= forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required':False, 'id': 'transportista_add', 'name':'otro'}),
         required=False)
-
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': False,"class":'form-control'}),
                      required=True, label="Moneda", choices=((1,'USD'),(2,'EURO'),(3,'PESOS')), initial='')
     fecha = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': False,"onkeypress":"return tabular(event,this)","class":"form-control mb-3",}),label="Llegada",required=True)
@@ -143,7 +191,6 @@ class add_form(BSModalModelForm):
 
 
 
-
     def __init__(self, *args, **kwargs):
        # lista_clientes = Clientes.objects.none()
         super().__init__(*args, **kwargs)
@@ -158,8 +205,13 @@ class edit_form(BSModalModelForm):
     class Meta:
         model = ImportReservas
         fields = (
-
+            'volumen',
+            'aplicable',
         )
+        widgets = {
+            'volumen': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_volumen_e'}),
+            'aplicable': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_aplicable_e'}),
+        }
     posicion_e = forms.CharField(
             widget=forms.TextInput(
                 attrs={
@@ -190,19 +242,12 @@ class edit_form(BSModalModelForm):
         required=False,  # No obligatorio
         label="Arbitraje", initial=0
     )
-    kilosmadre_e = forms.CharField(
+    kilos_e = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
         max_length=20,
         required=False,  # Obligatorio
         label="Kilos", initial=0
-    )
-    bultosmadre_e = forms.CharField(
-        widget=forms.TextInput(
-            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
-        max_length=20,
-        required=False,  # Obligatorio
-        label="Bultos", initial=0
     )
     trafico_e = forms.CharField(
         widget=forms.TextInput(
@@ -225,17 +270,21 @@ class edit_form(BSModalModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False }),
         required=False,label="Aduana")
     awd_e = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'required': True}),
-        required=False,label="Máster")
+        widget=forms.TextInput(attrs={'required': True}),
+        required=True
+    )
+
+    radio = forms.CharField(
+        widget=forms.HiddenInput(attrs={'required': True, 'id': 'radio_e'}),
+        required=True
+    )
     consignatario_e = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'consignatario_edit', 'name':'otro' }),
         required=False,label="Consignatario")
-
     transportista_e= forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required':False, 'id': 'transportista_edit', 'name':'otro'}),
         required=False,label="Transportista")
-
     moneda_e = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': False,"class":'form-control'}),
                      required=True, label="Moneda", choices=((1,'USD'),(2,'EURO'),(3,'PESOS')), initial='')
     fecha_e = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': False,"onkeypress":"return tabular(event,this)","class":"form-control mb-3",}),label="Llegada",required=True)
@@ -246,7 +295,6 @@ class edit_form(BSModalModelForm):
     destino_e = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'destino_edit'}),
         required=False,label="Destino")
-
     status_e = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Estado",choices=choice_status)
     operacion_e = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Operacion",choices=choice_op)
     pagoflete_e = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("C","Collect"),("P","Prepaid")))
@@ -280,16 +328,7 @@ class edit_form(BSModalModelForm):
         }),
         required=False
     )
-    armador_ie = forms.CharField(
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'style': 'width:50px; margin-right:2px;',
-            'readonly': 'readonly',
-            'id': 'armador_ie',
-            'name': 'armador_ie',
-        }),
-        required=False
-    )
+
 
     def __init__(self, *args, **kwargs):
        # lista_clientes = Clientes.objects.none()

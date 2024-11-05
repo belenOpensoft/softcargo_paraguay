@@ -11,11 +11,12 @@ from expmarit.views.house import add_house_impmarit, edit_house_function, house_
     generar_posicion, source_embarque_importado, source_archivos_importado
 from expmarit.views.expo_maritima import master_expo_maritima, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
-    descargar_archivo, modificar_fecha_retiro, add_archivo_importado
+    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full
 from expmarit.views.master import master_detail, add_importacion_maritima, edit_master, get_name_by_id, \
     consultar_seguimientos
 
 from expmarit.views.mails import get_data_email_op
+from expmarit.views.notas import source, guardar_notas, eliminar_nota
 from expmarit.views.pdf import get_datos_caratula
 from expmarit.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado
 
@@ -23,6 +24,10 @@ from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
+    path('source/', source, name='source'),
+    path('guardar_notas/', guardar_notas, name='guardar_notas'),
+    path('eliminar_nota/', eliminar_nota, name='eliminar_nota'),
+    path(r'source_embarque_aereo_full/<str:master>/', source_embarque_aereo_full, name="source_embarque_aereo_full"),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
     path(r'masters/', master_expo_maritima, name="master_importacion_maritima"),
     path('descargar_archivo/<int:id>', descargar_archivo, name="descargar_archivo"),

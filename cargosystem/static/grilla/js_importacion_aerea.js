@@ -986,7 +986,7 @@ $(document).ready(function () {
     e.preventDefault();
     e.stopPropagation();
 
-    if(document.getElementById('id_tarifa').value<0||document.getElementById('id_arbitraje').value<0||document.getElementById('id_trafico').value<0||document.getElementById('id_bultosmadre').value<0||document.getElementById('id_kilosmadre').value<0||document.getElementById('id_cotizacion').value<0){
+    if(document.getElementById('id_tarifa').value<0||document.getElementById('id_arbitraje').value<0||document.getElementById('id_trafico').value<0||document.getElementById('id_kilos').value<0||document.getElementById('id_cotizacion').value<0){
     alert('No se admiten valores negativos.');
     }else{
     let formData = $(this).serialize();
@@ -1039,6 +1039,97 @@ $(document).ready(function () {
     });
     }
 });
+
+    //calculo aplicable
+    $('#id_volumen, #id_kilos').on('input', function() {
+    let volumen =  $('#id_volumen').val();
+    let peso =  $('#id_kilos').val();
+    let coef = 166.67;
+    let valor1;
+
+    if(volumen && peso){
+        valor1=volumen*coef;
+
+        if(valor1>peso){
+        //marcar volumen
+        valor1=Math.round(valor1 * 2) / 2;
+        $('#id_aplicable').val(valor1);
+        $('#radio').val('volumen');
+        $('#volumen_radio').prop('checked', true);
+        }else{
+        //marcar peso
+        $('#id_aplicable').val(peso);
+        $('#peso_radio').prop('checked', true);
+        $('#radio').val('peso');
+        }
+    }
+
+});
+    $('input[type="radio"]').on('change', function() {
+    let tarifa = $('#id_tarifa').val();
+    let volumen =  $('#id_volumen').val();
+    let peso =  $('#id_kilos').val();
+
+    let tarifa_e = $('#id_tarifa_e').val();
+    let volumen_e =  $('#id_volumen_e').val();
+    let peso_e =  $('#id_kilos_e').val();
+
+    let aplicable1;
+
+    // Verificar cuál radio button fue seleccionado
+    let radioSeleccionado = $(this).attr('id');
+
+        if ($(this).is(':checked')) {
+            if(radioSeleccionado=='volumen_radio'){
+                if(volumen){
+                    aplicable1=aplicable_volumen(volumen);
+                    $('#id_aplicable').val(aplicable1);
+                    $('#radio').val('volumen');
+                }
+            }else if(radioSeleccionado=='peso_radio'){
+                if(peso){
+                    $('#id_aplicable').val(peso);
+                    $('#radio').val('peso');
+                }
+            }else if(radioSeleccionado=='manual_radio'){
+                $('#id_aplicable').val(0);
+                $('#radio').val('manual');
+            }else if(radioSeleccionado=='volumen_radio_e'){
+                if(volumen_e){
+                    aplicable1=aplicable_volumen(volumen_e);
+                    $('#id_aplicable_e').val(aplicable1);
+                    $('#radio_e').val('volumen');
+                }
+            }else if(radioSeleccionado=='peso_radio_e'){
+                if(peso_e){
+                    $('#id_aplicable_e').val(peso_e);
+                    $('#radio_e').val('peso');
+                }
+            }else if(radioSeleccionado=='manual_radio_e'){
+                $('#id_aplicable_e').val(0);
+                $('#radio_e').val('manual');
+            }
+            else{
+                console.log(radioSeleccionado);
+            }
+        }
+
+
+  });
+
+
+
+
+function aplicable_volumen(volumen){
+    let valor1;
+    let coef = 166.67;
+    let aplicable1;
+
+    valor1=volumen*coef;
+
+    return Math.round(valor1 * 2) / 2;
+}
+
         //ver mas
 var expandedRow;
     $('#tabla_importaerea tbody').on('click', 'td.details-control', function () {
@@ -1124,6 +1215,7 @@ var expandedRow;
                     beforeClose: function (event, ui) {
                         localStorage.removeItem('fecha_editada_master');
                         localStorage.removeItem('id_master_editar');
+                        localStorage.removeItem('num_house_gasto');
                     }
                 });
 
@@ -1140,9 +1232,23 @@ var expandedRow;
         alert('Por favor, selecciona una fila para editar.');
     }
 });
+    $('#tabla_importaerea tbody').on('dblclick', 'tr', function() {
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
+        var rowData = row.data();
+
+        if (rowData) {
+            var selectedRowId = rowData[0];
+            var selectedRowNumber = rowData[1];
+            localStorage.setItem('id_master_editar', selectedRowId);
+            localStorage.setItem('numero_master_seleccionado', selectedRowNumber);
+        }
+
+        $('#editar_btn').trigger('click');
+    });
     $('#edit_master_form').submit(function(e){
        e.preventDefault();
-    if(document.getElementById('id_tarifa_e').value<0||document.getElementById('id_arbitraje_e').value<0||document.getElementById('id_trafico_e').value<0||document.getElementById('id_bultosmadre_e').value<0||document.getElementById('id_kilosmadre_e').value<0||document.getElementById('id_cotizacion_e').value<0){
+    if(document.getElementById('id_tarifa_e').value<0||document.getElementById('id_arbitraje_e').value<0||document.getElementById('id_trafico_e').value<0||document.getElementById('id_kilos_e').value<0||document.getElementById('id_cotizacion_e').value<0){
     alert('No se admiten valores negativos.');
     }else{
 
@@ -2334,6 +2440,14 @@ table_add_im = $('#table_add_im').DataTable({
                     '<path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>\n' +
                     '</svg>';
             }
+            if (data[19] > 0) {
+            //notas
+            texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">\n' +
+            '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
+            '</svg>';
+
+                }
+
             $('td:eq(3)', row).html(texto + " " + data[3]);
 
         },
@@ -2502,8 +2616,7 @@ function fillFormWithData(data) {
     $('#edit_master_form [name="tarifa_e"]').val(data.tarifa_e);
     $('#edit_master_form [name="moneda_e"]').val(data.moneda_e);
     $('#edit_master_form [name="arbitraje_e"]').val(data.arbitraje_e);
-    $('#edit_master_form [name="kilosmadre_e"]').val(data.kilosmadre_e);
-    $('#edit_master_form [name="bultosmadre_e"]').val(data.bultosmadre_e);
+    $('#edit_master_form [name="kilos_e"]').val(data.kilosmadre_e);
     $('#edit_master_form [name="pagoflete_e"]').val(data.pagoflete_e);
     $('#edit_master_form [name="trafico_e"]').val(data.trafico_e);
     $('#edit_master_form [name="fecha_e"]').val(formatDateToYYYYMMDD(data.fecha_e));
@@ -2517,6 +2630,25 @@ function fillFormWithData(data) {
     $('#edit_master_form [name="posicion_e"]').val(data.posicion_e);
     $('#edit_master_form [name="operacion_e"]').val(data.operacion_e);
     $('#edit_master_form [name="awd_e"]').val(data.awd_e);
+    $('#edit_master_form [name="volumen"]').val(data.volumen_e);
+    $('#edit_master_form [name="aplicable"]').val(data.aplicable_e);
+    if(data.radio=='volumen'){
+    $('#volumen_radio_e').prop('checked', true);
+    }else if(data.radio=='peso'){
+    $('#peso_radio_e').prop('checked', true);
+    }else{
+    $('#manual_radio_e').prop('checked', true);
+    }
+            acumulados(data.awd_e, function(result) {
+            // Asegúrate de que estos elementos están disponibles en el DOM
+            if ($("#cantidad_acumulados").length && $("#peso_acumulados").length && $("#volumen_acumulados").length) {
+                $('#cantidad_acumulados').val(result.cantidad);
+                $('#peso_acumulados').val(result.peso);
+                $('#volumen_acumulados').val(result.volumen);
+            } else {
+                console.log("Elementos de entrada no encontrados en el DOM.");
+            }
+        });
 }
 function formatDateToYYYYMMDD(isoDate) {
     // Asegúrate de que la fecha esté en formato ISO
@@ -2632,6 +2764,13 @@ table_edit_im = $('#table_edit_im').DataTable({
                     '<path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>\n' +
                     '</svg>';
             }
+            if (data[19] > 0) {
+            //notas
+            texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">\n' +
+            '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
+            '</svg>';
+
+                }
             $('td:eq(3)', row).html(texto + " " + data[3]);
 
         },
@@ -3561,10 +3700,10 @@ function gastos_btn_h_click(){
                         },
                     }],
                 beforeClose: function (event, ui) {
-                localStorage.removeItem('num_house_gasto');
-                $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+               // localStorage.removeItem('num_house_gasto');
+//                $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                     // table.ajax.reload();
                 $("#tabla_gastos").dataTable().fnDestroy();
                 }
@@ -3669,11 +3808,11 @@ function rutas_btn_h_click(){
                         },
                     }],
                 beforeClose: function (event, ui) {
-                localStorage.removeItem('num_house_gasto');
+               // localStorage.removeItem('num_house_gasto');
                  $("#table_rutas_house").dataTable().fnDestroy();
-                 $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                 $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -3778,11 +3917,11 @@ $("#id_embarque_id").val('');
                         },
                     }],
                 beforeClose: function (event, ui) {
-                localStorage.removeItem('num_house_gasto');
+               // localStorage.removeItem('num_house_gasto');
                  $("#tabla_embarques_house").dataTable().fnDestroy();
-                 $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                 $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -3857,10 +3996,10 @@ $('.email').click(function () {
                         },
                     },],
                 beforeClose: function (event, ui) {
-                localStorage.removeItem('num_house_gasto');
-                $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+               // localStorage.removeItem('num_house_gasto');
+//                $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
         } else {
@@ -4100,9 +4239,9 @@ function archivos_btn_h_click(){
             beforeClose: function (event, ui) {
                 // table.ajax.reload();
                 $("#tabla_archivos").dataTable().fnDestroy();
-                $('#table_add_im tbody tr').removeClass('table-secondary');
-                $('#table_edit_im tbody tr').removeClass('table-secondary');
-                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
             }
         })
 }
@@ -4255,3 +4394,200 @@ function get_datos_pdf() {
 //}else if(lugar==='edit_directo'){
 //$('#tabla_house_directo').DataTable().ajax.reload(null, false);
 //}
+//acumulados
+function acumulados(master, callback) {
+    let peso = 0, volumen = 0;
+    let volumen_aux;
+
+    $.ajax({
+        url: '/importacion_aerea/source_embarque_aereo_full/' + master + '/',
+        method: 'GET',
+        success: function(response) {
+                let cant = response.recordsFiltered;
+            if (response.data && response.data.length > 0) {
+
+                response.data.forEach(function(item) {
+                    peso += item.bruto ? parseFloat(item.bruto) : 0;
+                    if (item.medidas && item.medidas.includes('*')) {
+                        let medidasArray = item.medidas.split('*');
+                        volumen_aux = medidasArray.reduce((total, num) => total * parseFloat(num), 1);
+                    }else{
+                    volumen_aux=0;
+                    }
+                    volumen += volumen_aux ? parseFloat(volumen_aux) : 0;
+                });
+
+                // Llamada al callback con los resultados
+                callback({ 'volumen': volumen, 'peso': peso, 'cantidad': cant });
+            } else {
+                console.log("No se encontraron datos.");
+                // Callback con valores por defecto
+                callback({ 'volumen': 0, 'peso': 0, 'cantidad': cant });
+            }
+        },
+        error: function(error) {
+            console.error('Error al obtener las guías:', error);
+        }
+    });
+}
+
+//notas para el house
+function notas_house() {
+    let selectedRowN = localStorage.getItem('num_house_gasto');
+    const wHeight = $(window).height();
+    const wWidth = $(window).width();
+            $("#notas_modal").dialog({
+                autoOpen: true,
+                open: function (event, ui) {
+                cargar_notas(selectedRowN);
+                },
+                modal: true,
+                title: "Notas para el House N°: " + selectedRowN,
+                height: wHeight * 0.90,
+                width: wWidth * 0.70,
+                class: 'modal fade',
+                       buttons: [
+                    {
+                        text: "Cancelar",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                ],
+                beforeClose: function (event, ui) {
+                 //localStorage.removeItem('num_house_gasto');
+                 $('#notas_table').DataTable().destroy();
+                 $("#notas_form").trigger("reset");
+//                 $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                }
+            })
+}
+function cargar_notas(numero) {
+    $('#notas_table').DataTable({
+        destroy: true,  // Asegura que se destruya cualquier instancia anterior
+        ajax: {
+            url: `/importacion_aerea/source/?numero=${numero}`,  // URL de la vista source
+            dataSrc: 'data'
+        },
+        columns: [
+            { data: 'id' },
+            { data: 'fecha' },
+            { data: 'asunto' },
+            { data: 'tipo' },
+            {
+                data: null,
+                render: function(data, type, row) {
+                    return `
+                        <button class="btn btn-danger" onclick="eliminarNota(${row.id})">Eliminar</button>
+                    `;
+                }
+            }
+        ],
+        rowCallback: function(row, data) {
+            // Configura el evento de doble clic para cada fila
+            $(row).off('dblclick').on('dblclick', function() {
+
+                $("#notas_add_input").val(data.notas);          // ID del registro
+                $("#id_fecha_notas").val(formatDateToYYYYMMDD(data.fecha));
+                $("#id_nota").val(data.id);      // Notas
+                $("#id_asunto").val(data.asunto);    // Asunto
+                $("#id_tipo_notas").val(data.tipo);        // Tipo
+                $("#guardar_nota").html('Modificar');  // Cambia el botón de guardar a "Modificar"
+            });
+                $(row).off('click').on('click', function () {
+                $('#notas_table tbody tr').removeClass('table-secondary');
+                $(this).addClass('table-secondary');
+            });
+
+        }
+    });
+}
+function agregar_nota(event) {
+    event.preventDefault();
+
+    // Convierte los datos del formulario en un JSON estructurado
+    let formDataArray = $("#notas_form").serializeArray();
+    let formData = {};
+    formDataArray.forEach(item => {
+        formData[item.name] = item.value;
+    });
+
+    let numero = localStorage.getItem('num_house_gasto');
+    formData.numero = numero;
+
+    // Verifica si estamos editando una nota existente
+    const idNota = $("#id_nota").val();
+    const url = "/importacion_aerea/guardar_notas/";
+
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function(response) {
+            if (response.resultado === 'exito') {
+            $("#guardar_nota").html('Agregar');
+                alert("Notas guardadas exitosamente");
+                //$("#notas_modal").dialog("close");
+                $('#notas_table').DataTable().ajax.reload();
+                $("#notas_form")[0].reset();  // Limpia el formulario después de guardar
+                $("#id_nota").val('');  // Restablece el campo oculto para futuras creaciones
+                        if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        }
+
+                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        }
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        }
+            } else {
+                alert("Error al guardar las notas: " + response.errores);
+            }
+        },
+        error: function() {
+            alert("Error en la solicitud");
+        }
+    });
+}
+function eliminarNota(id) {
+    if (confirm("¿Desea eliminar esta nota?")) {
+        $.ajax({
+            type: "POST",
+            url: `/importacion_aerea/eliminar_nota/`,
+            data: {
+                id: id,  // Corrige la clave `íd` a `id`
+                csrfmiddlewaretoken: csrf_token  // Asegúrate de incluir el token CSRF
+            },
+            success: function(response) {
+                if (response.resultado === 'exito') {
+                    alert("Nota eliminada exitosamente");
+                    $('#notas_table').DataTable().ajax.reload();
+                        if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        }
+
+                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        }
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        }
+                } else {
+                    alert("Error al eliminar la nota");
+                }
+            },
+            error: function() {
+                alert("Error en la solicitud");
+            }
+        });
+    }
+}

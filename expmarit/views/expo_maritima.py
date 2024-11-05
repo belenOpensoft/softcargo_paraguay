@@ -16,9 +16,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 from cargosystem.settings import RUTA_PROYECTO
 from expmarit.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
-    rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse
+    rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse, NotasForm
 
-from expmarit.models import Master, VEmbarqueaereo, ExpmaritEmbarqueaereo
+from expmarit.models import Master, VEmbarqueaereo, ExpmaritEmbarqueaereo, ExpmaritFaxes
 
 from expmarit.models import ExpmaritConexaerea, ExpmaritEnvases, ExpmaritCargaaerea, ExpmaritAttachhijo, ExpmaritServiceaereo
 from seguimientos.forms import archivosForm, pdfForm
@@ -55,6 +55,8 @@ def master_expo_maritima(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
+                'form_notas': NotasForm(),
+
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
@@ -63,7 +65,34 @@ def master_expo_maritima(request):
         return HttpResponseRedirect('/')
 
 
+def source_embarque_aereo_full(request, master):
+    if is_ajax(request):
+        # Buscar todos los embarques en ExportEmbarqueaereo con el awb igual a master
+        try:
+            embarques = ExpmaritEmbarqueaereo.objects.filter(awb=master)
+            numeros = [embarque.numero for embarque in embarques]  # Obtener una lista de números
 
+            # Usar los números para buscar registros en ExportCargaaerea
+            registros_cargaaerea = ExpmaritCargaaerea.objects.filter(numero__in=numeros)
+            vector_registros = list(registros_cargaaerea.values()) if registros_cargaaerea.exists() else []
+
+            # Preparar el resultado
+            resultado = {
+                'recordsFiltered': embarques.count(),  # Total de registros en ExportEmbarqueaereo
+                'data': vector_registros
+            }
+
+            return JsonResponse(resultado)
+
+        except ExpmaritEmbarqueaereo.DoesNotExist:
+            # Si no se encuentra el embarque, devolver mensaje de error
+            return JsonResponse({
+                'success': False,
+                'message': 'No se encontró un embarque con ese master.'
+            })
+
+    else:
+        return HttpResponse("fail", content_type="application/json")
 
 
 def house_importacion_maritima(request):
@@ -93,6 +122,8 @@ def house_importacion_maritima(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
+                'form_notas': NotasForm(),
+
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
@@ -308,11 +339,13 @@ def get_data_embarque_aereo(registros_filtrados):
             envases = ExpmaritEnvases.objects.filter(numero=registro.numero).count()
             gastos = ExpmaritServiceaereo.objects.filter(numero=registro.numero).count()
             rutas = ExpmaritConexaerea.objects.filter(numero=registro.numero).count() #17
+            notas=ExpmaritFaxes.objects.filter(numero=registro.numero).count()
             registro_json.append(archivos)
             registro_json.append(embarques)
             registro_json.append(envases)
             registro_json.append(gastos)
             registro_json.append(rutas)
+            registro_json.append(notas)
 
             data.append(registro_json)
         return data

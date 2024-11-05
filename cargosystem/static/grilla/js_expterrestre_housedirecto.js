@@ -89,6 +89,13 @@ $(document).ready(function () {
                     '<path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>\n' +
                     '</svg>';
             }
+            if (data[19] > 0) {
+    //notas
+            texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">\n' +
+            '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
+            '</svg>';
+
+                }
             $('td:eq(3)', row).html(texto + " " + data[3]);
 
         },
@@ -215,9 +222,10 @@ $(document).ready(function () {
                     localStorage.removeItem('lugar_editar');
                     }
                 });
-                $("td:contains('Master')").css('visibility', 'hidden');
-                $('#id_awbhijo').css('display','none');
-                $('#id_awbhijo').val(0);
+if (!$('#id_awbhijo').val()) {
+    $('#id_awbhijo').val(0);
+}
+
                 generar_posicion();
                 $('#cliente_addh').addClass('input-sobrepasar');
                 $('#embarcador_addh').addClass('input-sobrepasar');
@@ -331,7 +339,7 @@ $(document).ready(function () {
                                 },
                             },],
                         beforeClose: function (event, ui) {
-                        localStorage.removeItem('num_house_gasto');
+                      //  localStorage.removeItem('num_house_gasto');
                         $('#table_add_im tbody tr').removeClass('table-secondary');
                         $('#table_edit_im tbody tr').removeClass('table-secondary');
                         $('#tabla_house_directo tbody tr').removeClass('table-secondary');

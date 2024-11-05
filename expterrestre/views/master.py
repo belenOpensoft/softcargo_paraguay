@@ -45,8 +45,8 @@ def add_importacion_maritima(request):
                 reserva.tarifa = form.cleaned_data.get('tarifa', 0)  # Si vacío, asignar 0
                 reserva.moneda = form.cleaned_data.get('moneda', "")  # Si vacío, asignar ""
                 reserva.arbitraje = form.cleaned_data.get('arbitraje', "")  # Si vacío, asignar ""
-                reserva.kilosmadre = form.cleaned_data.get('kilosmadre', 0)  # Si vacío, asignar 0
-                reserva.bultosmadre = form.cleaned_data.get('bultosmadre', 0)  # Si vacío, asignar 0
+                reserva.kilos = form.cleaned_data.get('kilos', 0)  # Si vacío, asignar 0
+                reserva.volumen = form.cleaned_data.get('volumen', 0)  # Si vacío, asignar 0
                 reserva.pagoflete = form.cleaned_data.get('pagoflete', "")  # Si vacío, asignar ""
                 reserva.trafico = form.cleaned_data.get('trafico', "")  # Si vacío, asignar ""
                 reserva.origen = form.cleaned_data.get('origen', "")  # Si vacío, asignar ""
@@ -134,6 +134,9 @@ def master_detail(request):
                     'posicion_e': master.posicion,
                     'operacion_e': master.operacion,
                     'awd_e': master.awb,
+                    'volumen_e': master.volumen,
+                    'kilos_e': master.kilos,
+
                 }
                 return JsonResponse(data)
             except ExpterraReservas.DoesNotExist:
@@ -147,7 +150,7 @@ def get_name_by_id(request):
         client_id = request.GET.get('id')
 
         if client_id:
-            cliente = Clientes.objects.get(id=client_id)
+            cliente = Clientes.objects.get(codigo=client_id)
             name = cliente.empresa
 
             return JsonResponse({'name': name})
@@ -177,8 +180,8 @@ def edit_master(request, id_master):
                 master.moneda = form.cleaned_data.get('moneda_e', "")
                 master.tarifa = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
                 master.arbitraje = form.cleaned_data.get('arbitraje_e', 0) if form.cleaned_data.get('arbitraje_e') not in [None, ''] else 0
-                master.bultosmadre = form.cleaned_data.get('bultosmadre_e', 0) if form.cleaned_data.get('bultosmadre_e') not in [None, ''] else 0
-                master.kilosmadre = form.cleaned_data.get('kilosmadre_e', 0) if form.cleaned_data.get('kilosmadre_e') not in [None, ''] else 0
+                master.kilos = form.cleaned_data.get('kilos', 0)  # Si vacío, asignar 0
+                master.volumen = form.cleaned_data.get('volumen', 0)  # Si vacío, asignar 0
                 master.trafico = form.cleaned_data.get('trafico_e', 0) if form.cleaned_data.get('trafico_e') not in [None, ''] else 0
                 master.cotizacion = form.cleaned_data.get('cotizacion_e', 0) if form.cleaned_data.get('cotizacion_e') not in [None, ''] else 0
 

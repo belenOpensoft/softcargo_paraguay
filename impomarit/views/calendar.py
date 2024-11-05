@@ -61,6 +61,9 @@ def eventos_calendario(request):
         elif evento.source == 'import':
             color = '#90EE90'  # Verde claro para aéreo
             source_formatted = "IMPO AÉREO"
+        elif evento.source == 'impterra':
+            color = '#FF7F7F'
+            source_formatted = "IMPO TERRESTRE"
 
         if evento.fecharetiro is not None:
             fecha_evento = evento.fecharetiro.strftime('%Y-%m-%d')
@@ -125,7 +128,12 @@ def generar_reporte_excel(request):
             'transportista': evento.transportista,
             'consignatario': evento.consignatario,
             'fecharetiro': evento.fecharetiro.strftime('%Y-%m-%d') if evento.fecharetiro else '',
-            'source_formatted': 'IMPO AÉREO' if evento.source == 'import' else 'IMPO MARÍTIMO'
+            'source_formatted': (
+                'IMPO AÉREO' if evento.source == 'import'
+                else 'IMPO MARÍTIMO' if evento.source == 'impmarit'
+                else 'IMPO TERRESTRE'
+            )
+
         })
 
     # Llamar a la función que genera el reporte Excel y devolverlo

@@ -14,9 +14,10 @@ from django.shortcuts import render
 
 from cargosystem.settings import RUTA_PROYECTO
 from impterrestre.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
-    rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse
-from impterrestre.models import Master, ImpterraReservas, ImpterraEmbarqueaereo, VEmbarqueaereo, ImpterraAttachhijo, ImpterraCargaaerea, ImpterraEnvases, \
-    ImpterraServiceaereo, ImpterraConexaerea
+    rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse, NotasForm
+from impterrestre.models import Master, ImpterraReservas, ImpterraEmbarqueaereo, VEmbarqueaereo, ImpterraAttachhijo, \
+    ImpterraCargaaerea, ImpterraEnvases, \
+    ImpterraServiceaereo, ImpterraConexaerea, ImpterraFaxes
 from seguimientos.forms import archivosForm, pdfForm
 
 
@@ -51,6 +52,7 @@ def master_importacion_maritima(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
+                'form_notas': NotasForm(),
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
@@ -84,6 +86,7 @@ def house_importacion_maritima(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
+                'form_notas': NotasForm(),
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
@@ -264,6 +267,34 @@ def is_ajax(request):
     except Exception as e:
         messages.error(request,e)
 
+def source_embarque_aereo_full(request, master):
+    if is_ajax(request):
+        # Buscar todos los embarques en ExportEmbarqueaereo con el awb igual a master
+        try:
+            embarques = ImpterraEmbarqueaereo.objects.filter(awb=master)
+            numeros = [embarque.numero for embarque in embarques]  # Obtener una lista de números
+
+            # Usar los números para buscar registros en ExportCargaaerea
+            registros_cargaaerea = ImpterraCargaaerea.objects.filter(numero__in=numeros)
+            vector_registros = list(registros_cargaaerea.values()) if registros_cargaaerea.exists() else []
+
+            # Preparar el resultado
+            resultado = {
+                'recordsFiltered': embarques.count(),  # Total de registros en ExportEmbarqueaereo
+                'data': vector_registros
+            }
+
+            return JsonResponse(resultado)
+
+        except ImpterraEmbarqueaereo.DoesNotExist:
+            # Si no se encuentra el embarque, devolver mensaje de error
+            return JsonResponse({
+                'success': False,
+                'message': 'No se encontró un embarque con ese master.'
+            })
+
+    else:
+        return HttpResponse("fail", content_type="application/json")
 
 
 #traer datos houses tabla
@@ -311,12 +342,14 @@ def get_data_embarque_aereo(registros_filtrados):
             embarques = ImpterraCargaaerea.objects.filter(numero=registro.numero).count()
             envases = ImpterraEnvases.objects.filter(numero=registro.numero).count()
             gastos = ImpterraServiceaereo.objects.filter(numero=registro.numero).count()
-            rutas = ImpterraConexaerea.objects.filter(numero=registro.numero).count()
+            rutas = ImpterraConexaerea.objects.filter(numero=registro.numero).count() #18
+            notas = ImpterraFaxes.objects.filter(numero=registro.numero).count() #18
             registro_json.append(archivos)
             registro_json.append(embarques)
-            registro_json.append(envases)
+            registro_json.append(0)
             registro_json.append(gastos)
             registro_json.append(rutas)
+            registro_json.append(notas)
 
             data.append(registro_json)
         return data

@@ -2,7 +2,7 @@
 <div id="ajduntar_modal"  style="display: none;">
     <form action="" id="archivos_form" method="post" enctype="multipart/form-data">
      {% csrf_token %}
-     <table class="table">
+     <table class="table table-borderless">
          <tr>
              <th style="text-align: right">{{ form_archivos.archivo.label }}</th>
              <td>{{ form_archivos.archivo }}</td>

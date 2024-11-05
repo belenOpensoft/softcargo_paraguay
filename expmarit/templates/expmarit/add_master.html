@@ -24,87 +24,83 @@
 <div id="add_master_modal" style="display: none;" tabindex="-1">
 <form id="add_master_form" method="POST" style="width:fit-content;" action="{% url 'add_master' %}">
     {% csrf_token %}
-    <table class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
+        <table class="table table-borderless table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
         <tr>
             <th>{{ form.transportista.label }}</th>
             <td style="display:flex;" colspan="2">
                 {{ form.transportista_i }}
                 {{ form.transportista }}  <!-- Campo autocompletado o similar -->
             </td>
-
-            <th>{{ form.agente.label }}</th>
-            <td style="display:flex;" colspan="2">
-                {{ form.agente_i }}
-                {{ form.agente }}  <!-- Campo autocompletado o similar -->
-            </td>
-
+            <th>{{ form.awb.label }}</th>
+            <td>{{ form.awb }}</td>
+            <th>{{ form.operacion.label }}</th>
+            <td>{{ form.operacion }}</td>
             <th>{{ form.consignatario.label }}</th>
             <td style="display:flex;" colspan="2">
                 {{ form.consignatario_i }}
                 {{ form.consignatario }}  <!-- Campo autocompletado o similar -->
             </td>
+            </tr>
+        <tr>
+            <th>{{ form.agente.label }}</th>
+            <td style="display:flex;" colspan="2">
+                {{ form.agente_i }}
+                {{ form.agente }}  <!-- Campo autocompletado o similar -->
+            </td>
+            <th>{{ form.moneda.label }}</th>
+            <td>{{ form.moneda }}</td>
+
+            <th>{{ form.cotizacion.label }}</th>
+            <td>{{ form.cotizacion }}</td>
+            <th>{{ form.arbitraje.label }}</th>
+            <td>{{ form.arbitraje }}</td>
+
+        </tr>
+
+        <tr>
+            <th>{{ form.trafico.label }}</th>
+            <td>{{ form.trafico }}</td>
+            <th>{{ form.fecha.label }}</th>
+            <td>{{ form.fecha }}</td>
+            <th>{{ form.destino.label }}</th>
+            <td>{{ form.destino }}</td>
+            <th>{{ form.origen.label }}</th>
+            <td>{{ form.origen }}</td>
+        </tr>
 
             <th>{{ form.armador.label }}</th>
             <td style="display:flex;" colspan="2">
                 {{ form.armador_i }}
                 {{ form.armador }}  <!-- Campo autocompletado o similar -->
             </td>
-        </tr>
+            <th>{{ form.aduana.label }}</th>
+            <td>{{ form.aduana }}</td>
+            <th>{{ form.status.label }}</th>
+            <td>{{ form.status }}</td>
+            <th>{{ form.discharge.label }}</th>
+            <td>{{ form.discharge }}</td>
+
         <tr>
+           <th>{{ form.loading.label }}</th>
+            <td>{{ form.loading }}</td>
             <th>{{ form.vapor.label }}</th>
             <td>{{ form.vapor }}</td>
             <th>{{ form.viaje.label }}</th>
             <td>{{ form.viaje }}</td>
-
-            <th>{{ form.aduana.label }}</th>
-            <td>{{ form.aduana }}</td>
-            <th>{{ form.tarifa.label }}</th>
-            <td>{{ form.tarifa }}</td>
-        </tr>
-        <tr>
-            <th>{{ form.moneda.label }}</th>
-            <td>{{ form.moneda }}</td>
-            <th>{{ form.arbitraje.label }}</th>
-            <td>{{ form.arbitraje }}</td>
-
-<!--            <th>{{ form.kilosmadre.label }}</th>-->
-<!--            <td>{{ form.kilosmadre }}</td>-->
-<!--            <th>{{ form.bultosmadre.label }}</th>-->
-<!--            <td>{{ form.bultosmadre }}</td>-->
-
-            <th>{{ form.operacion.label }}</th>
-            <td>{{ form.operacion }}</td>
-            <th>{{ form.awb.label }}</th>
-            <td>{{ form.awb }}</td>
-
-        </tr>
-        <tr>
             <th>{{ form.pagoflete.label }}</th>
             <td>{{ form.pagoflete }}</td>
-            <th>{{ form.trafico.label }}</th>
-            <td>{{ form.trafico }}</td>
 
-            <th>{{ form.fecha.label }}</th>
-            <td>{{ form.fecha }}</td>
-            <th>{{ form.cotizacion.label }}</th>
-            <td>{{ form.cotizacion }}</td>
-        </tr>
-        <tr>
-            <th>{{ form.destino.label }}</th>
-            <td>{{ form.destino }}</td>
-            <th>{{ form.discharge.label }}</th>
-            <td>{{ form.discharge }}</td>
-
-            <th>{{ form.origen.label }}</th>
-            <td>{{ form.origen }}</td>
-            <th>{{ form.loading.label }}</th>
-            <td>{{ form.loading }}</td>
 
         </tr>
         <tr>
-            <th>{{ form.status.label }}</th>
-            <td>{{ form.status }}</td>
+            <th>{{ form.tarifa.label }}</th>
+            <td>{{ form.tarifa }}</td>
+            <th>{{ form.kilosmadre.label }}</th>
+            <td>{{ form.kilosmadre }}</td>
+            <th>{{ form.bultosmadre.label }}</th>
+            <td>{{ form.bultosmadre }}</td>
         </tr>
+
 
     </table>
 

@@ -2,7 +2,7 @@ import datetime
 import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from mantenimientos.forms import add_buque_form, edit_buque_form, add_guia_form
 from mantenimientos.models import VGrillaGuias, Guias
@@ -249,3 +249,12 @@ def asignar_guia_aerea(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
+def obtener_guias_transportista(request, transportista_id):
+    # Obtener las guías filtradas por transportista con estado = 1, ordenadas por fecha (o número)
+    guias = Guias.objects.filter(transportista=transportista_id, estado=0).order_by('-fecha')  # O por número si es más adecuado
+
+    # Preparar la respuesta JSON
+    guias_data = [{'id': guia.id, 'prefijo': guia.prefijo, 'numero': guia.numero} for guia in guias]
+
+    return JsonResponse(guias_data, safe=False)

@@ -372,13 +372,28 @@ class ImpterraEnvases(models.Model):
         db_table = 'impterra_envases'
 
 
+
 class ImpterraFaxes(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    # Define las opciones de choices
+    TIPO_CHOICES = [
+        ('CL', 'CLIENTE'),
+        ('IN', 'INTERNO'),
+        ('FF', 'AGENTE CARGA'),
+        ('TR', 'TRANSPORTISTA'),
+        ('AV', 'AGENTE VENTAS'),
+        ('AC', 'AGENTE COMPRAS'),
+        ('TK', 'TRACKING'),
+        ('EM', 'EMBARCADOR'),
+        ('AD', 'ADUANA'),
+        ('DE', 'DESPACHANTE'),
+
+    ]
+
     numero = models.IntegerField(blank=True, null=True)
     fecha = models.DateTimeField(blank=True, null=True)
     notas = models.TextField(blank=True, null=True)
     asunto = models.TextField(blank=True, null=True)
-    tipo = models.CharField(max_length=2, blank=True, null=True)
+    tipo = models.CharField(max_length=2, choices=TIPO_CHOICES, blank=True, null=True)  # Agrega choices al campo
 
     class Meta:
         managed = False

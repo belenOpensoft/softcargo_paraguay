@@ -24,20 +24,17 @@
 <div id="add_master_modal" style="display: none;" tabindex="-1">
 <form id="add_master_form" method="POST" style="width:fit-content;" action="{% url 'add_master' %}">
     {% csrf_token %}
-    <table class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
+    <table class="table table-borderless table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
         <tr>
             <th>{{ form.transportista.label }}</th>
             <td style="display:flex;" colspan="2">
                 {{ form.transportista_i }}
                 {{ form.transportista }}  <!-- Campo autocompletado o similar -->
             </td>
-
-            <th>{{ form.agente.label }}</th>
-            <td style="display:flex;" colspan="2">
-                {{ form.agente_i }}
-                {{ form.agente }}  <!-- Campo autocompletado o similar -->
-            </td>
-
+            <th>{{ form.awb.label }}</th>
+            <td>{{ form.awb }}</td>
+            <th>{{ form.operacion.label }}</th>
+            <td>{{ form.operacion }}</td>
             <th>{{ form.consignatario.label }}</th>
             <td style="display:flex;" colspan="2">
                 {{ form.consignatario_i }}
@@ -46,47 +43,49 @@
 
         </tr>
         <tr>
-
-            <th>{{ form.aduana.label }}</th>
-            <td>{{ form.aduana }}</td>
-            <th>{{ form.tarifa.label }}</th>
-            <td>{{ form.tarifa }}</td>
+            <th>{{ form.agente.label }}</th>
+            <td style="display:flex;" colspan="2">
+                {{ form.agente_i }}
+                {{ form.agente }}  <!-- Campo autocompletado o similar -->
+            </td>
             <th>{{ form.moneda.label }}</th>
             <td>{{ form.moneda }}</td>
-        </tr>
-        <tr>
-            <th>{{ form.pagoflete.label }}</th>
-            <td>{{ form.pagoflete }}</td>
-            <th>{{ form.trafico.label }}</th>
-            <td>{{ form.trafico }}</td>
-
-            <th>{{ form.fecha.label }}</th>
-            <td>{{ form.fecha }}</td>
-
-        </tr>
-
-        <tr>
-            <th>{{ form.destino.label }}</th>
-            <td>{{ form.destino }}</td>
-
-            <th>{{ form.origen.label }}</th>
-            <td>{{ form.origen }}</td>
-            <th>{{ form.operacion.label }}</th>
-            <td>{{ form.operacion }}</td>
-
-        </tr>
-
-        <tr>
-           <th>{{ form.awb.label }}</th>
-            <td>{{ form.awb }}</td>
-            <th>{{ form.status.label }}</th>
-            <td>{{ form.status }}</td>
             <th>{{ form.cotizacion.label }}</th>
             <td>{{ form.cotizacion }}</td>
+            <th>{{ form.arbitraje.label }}</th>
+            <td>{{ form.arbitraje }}</td>
         </tr>
         <tr>
-            <td>{{ form.arbitraje.label }}</td>
-            <td>{{ form.arbitraje }}</td>
+            <th>{{ form.trafico.label }}</th>
+            <td>{{ form.trafico }}</td>
+            <th>{{ form.fecha.label }}</th>
+            <td>{{ form.fecha }}</td>
+            <th>{{ form.destino.label }}</th>
+            <td>{{ form.destino }}</td>
+                <th>{{ form.origen.label }}</th>
+            <td>{{ form.origen }}</td>
+        </tr>
+
+        <tr>
+            <th>{{ form.aduana.label }}</th>
+            <td>{{ form.aduana }}</td>
+            <th>{{ form.status.label }}</th>
+            <td>{{ form.status }}</td>
+            <th>{{ form.pagoflete.label }}</th>
+            <td>{{ form.pagoflete }}</td>
+        </tr>
+
+        <tr>
+            <th>{{ form.tarifa.label }}</th>
+            <td>{{ form.tarifa }}</td>
+            <th>{{ form.kilos.label }}</th>
+            <td>{{ form.kilos }}</td>
+            <th>{{ form.volumen.label }}</th>
+            <td>{{ form.volumen }}</td>
+
+        </tr>
+        <tr>
+
 
         </tr>
 
@@ -103,7 +102,7 @@
 
 <div class="col-12 flex-wrap" id="segment_response" style="display:none">
     {% include 'master_imp_aerea/menu_houses.html' %}
-    <table class="table table-striped table-bordered dataTable flex-wrap"  id="table_add_im">
+    <table class="table table-borderless table-striped table-bordered dataTable flex-wrap"  id="table_add_im">
         <thead class="">
             <tr>
                 <th class="text-right">Ver más</th>

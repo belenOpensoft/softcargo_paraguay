@@ -2,7 +2,8 @@
 from bootstrap_modal_forms.forms import BSModalModelForm
 from django import forms
 
-from impterrestre.models import ImpterraReservas, ImpterraEmbarqueaereo, ImpterraServireserva, ImpterraConexaerea, ImpterraEnvases, ImpterraCargaaerea, ImpterraAttachhijo
+from impterrestre.models import ImpterraReservas, ImpterraEmbarqueaereo, ImpterraServireserva, ImpterraConexaerea, \
+    ImpterraEnvases, ImpterraCargaaerea, ImpterraAttachhijo, ImpterraFaxes
 from mantenimientos.models import Clientes, Vapores, Ciudades, Monedas, Servicios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -47,6 +48,48 @@ choice_op = (
                  ("MUESTRA","MUESTRA"),
                  )
 
+class NotasForm(BSModalModelForm):
+    class Meta:
+        model = ImpterraFaxes
+        fields = ['fecha', 'notas', 'asunto', 'tipo']
+
+    # Define el ChoiceField para el campo 'tipo'
+    tipo = forms.ChoiceField(
+        choices=ImpterraFaxes.TIPO_CHOICES,
+        widget=forms.Select(attrs={
+            "id": 'id_tipo_notas',
+            "class": "form-control"
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'update-form'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Actualizar'))
+
+        # Configuración de widgets personalizados en el __init__
+        self.fields['fecha'].widget = forms.DateInput(
+            attrs={"type": "date", "class": "form-control", 'id': 'id_fecha_notas'}
+        )
+        self.fields['notas'].widget = forms.Textarea(
+            attrs={
+                "id": 'notas_add_input',
+                "autocomplete": "off",
+                "rows": "5",
+                "cols": "100",
+                "class": "form-control"
+            }
+        )
+        self.fields['asunto'].widget = forms.TextInput(
+            attrs={
+                "autocomplete": "off",
+                "class": "form-control",
+                "max_length": 100
+            }
+        )
+
 class add_im_form(forms.Form):
     awb_number = forms.CharField(
         label='Número de Master',
@@ -63,9 +106,7 @@ class add_form(BSModalModelForm):
         fields = (
             'aduana',
             'operacion',
-            'kilosmadre',
             'tarifa',
-            'bultosmadre',
             'origen',
             'destino',
             'cotizacion',
@@ -77,6 +118,8 @@ class add_form(BSModalModelForm):
             'awb',
             'operacion',
             'arbitraje',
+            'kilos',
+            'volumen'
         )
     agente = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required':False, 'id': 'agente_add', 'name':'otro'}),
@@ -183,25 +226,11 @@ class edit_form(BSModalModelForm):
         label="Tarifa"
     )
     arbitraje_e = forms.CharField(
-        widget=forms.TextInput(
+        widget=forms.NumberInput(
             attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
         max_length=20,
         required=False,  # No obligatorio
         label="Arbitraje", initial=0
-    )
-    kilosmadre_e = forms.CharField(
-        widget=forms.TextInput(
-            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
-        max_length=20,
-        required=False,  # Obligatorio
-        label="Kilos", initial=0
-    )
-    bultosmadre_e = forms.CharField(
-        widget=forms.TextInput(
-            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
-        max_length=20,
-        required=False,  # Obligatorio
-        label="Bultos", initial=0
     )
     trafico_e = forms.CharField(
         widget=forms.TextInput(
@@ -209,6 +238,20 @@ class edit_form(BSModalModelForm):
         max_length=20,
         required=False,  # No obligatorio
         label="Tráfico",initial=0
+    )
+    volumen_e = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
+        max_length=20,
+        required=False,  # No obligatorio
+        label="Volúmen",initial=0
+    )
+    kilos_e = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
+        max_length=20,
+        required=False,  # No obligatorio
+        label="Kilos",initial=0
     )
     cotizacion_e = forms.CharField(
         widget=forms.TextInput(
