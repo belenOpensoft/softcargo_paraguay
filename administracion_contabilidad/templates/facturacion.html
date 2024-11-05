@@ -1,12 +1,16 @@
 {% extends 'base_table_old.html' %}
 {% load static %}
-{% block script %}
-{% endblock script %}
+
 
 {% block contenido %}
 {% block table_datatable %}
 {% include 'menu/menu_facturacion.html' %}
+<style>
+.ui-autocomplete {
+    z-index: 2050;
+}
 
+</style>
 <table id="tabla_facturas" class="table table-striped table-bordered" cellspacing="0" width="100%">
         <thead>
         <tr>
@@ -48,8 +52,8 @@
         </tfoot>
     </table>
 
-<div id="facturaM" title="Formulario de Factura" style="display: none;">
-    <div class="border rounded p-4 bg-light">
+<div id="facturaM" style="display: none;padding:20px;">
+    <div class="border rounded p-4 bg-light" >
         <form method="post" action="" id="facturaForm">
             {% csrf_token %}
             <h3 id="tipoSeleccionado" style="font-weight: bold; color: white; font-family: Arial, sans-serif; background-color: black; display: inline-block; padding: 3px; border-radius: 3px">
@@ -100,19 +104,19 @@
             <div class="row mt-3">
                 <div class="col-md-3">
                     <label for="cliente">Buscar Cliente</label>
-                    <input type="text" id="cliente" class="form-control" name="cliente" placeholder="Buscar cliente">
+                    <input type="text" id="cliente" class="form-control" name="cliente" placeholder="Buscar cliente" required>
                 </div>
             </div>
             <table id="clienteTable" class="table table-striped mt-4" style="display:none;">
                 <thead>
-                    <tr>
+
                         <th style="display:none;">Id</th>
                         <th>Empresa</th>
                         <th>RUT</th>
                         <th>Dirección</th>
                         <th>Localidad</th>
                         <th>Teléfono</th>
-                    </tr>
+
                 </thead>
                 <tbody></tbody>
             </table>
@@ -178,11 +182,11 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="{% static 'adm_cont/facturacion.js' %}"></script>
 {% endblock script_datatable %}
-
-{% endblock contenido %}
 <script>
     var csrf_token = "{{ csrf_token }}";
 </script>
+{% endblock contenido %}
+
 
 
 

@@ -57,7 +57,7 @@ var que_buscar = '';
     });
 
     // Autocomplete para el input "item"
-        $('#item').autocomplete({
+    $('#item').autocomplete({
         source: function(request, response) {
             $.ajax({
                 url: "/buscar_item_v",
@@ -153,30 +153,38 @@ var que_buscar = '';
     }
 
     function actualizarTotal() {
+    let precio = 0;
+    let neto_fun = 0;
+    total = 0;  // Asegúrate de inicializar total aquí
+    iva = 0;
 
-        let precio=0;
+    // Recorre cada fila y calcula el neto
+    $('#itemTable tbody tr').each(function() {
+        precio = parseFloat($(this).data('precio')) || 0;
+        neto_fun += precio;
+    });
 
-        $('#itemTable tbody tr').each(function() {
-            const precio = parseFloat($(this).data('precio')) || 0;
-            neto += precio;
-        });
+    neto = neto_fun;
 
-        $('#id_neto input').val(neto.toFixed(2)).prop('readonly', true);
+    // Actualiza el valor del neto en el campo correspondiente
+    $('#id_neto input').val(neto.toFixed(2)).prop('readonly', true);
 
+    // Recorre cada fila y calcula el total con IVA
+    $('#itemTable tbody tr').each(function() {
+        precio = parseFloat($(this).data('precio')) || 0;
+        iva = $(this).data('iva');
 
-        $('#itemTable tbody tr').each(function() {
-            precio = parseFloat($(this).data('precio')) || 0;
-            iva = $(this).data('iva');
+        const precioFinal = iva === 'Basico' ? precio * 1.22 : precio;
+        total += precioFinal;
+    });
 
-            const precioFinal = iva === 'Básico' ? precio * 1.22 : precio;
-            total += precioFinal;
-        });
+    // Actualiza el valor del total en el campo correspondiente
+    $('#id_total input').val(total.toFixed(2)).prop('readonly', true);
 
-        $('#id_total input').val(total.toFixed(2)).prop('readonly', true);
-
-        iva = total - neto;
-        $('#id_iva input').val(iva.toFixed(2)).prop('readonly', true);
-    }
+    // Calcula y actualiza el IVA
+    iva = total - neto;
+    $('#id_iva input').val(iva.toFixed(2)).prop('readonly', true);
+}
 
     //Enviar facturar
     $('#facturar').on('click', function() {
@@ -237,7 +245,12 @@ var que_buscar = '';
                 success: function(data) {
                     console.log('Factura procesada:', data);
                     alert('Factura procesada con éxito');
-                    window.location.reload();
+                    $('#facturaM').dialog('close');
+                    $('#facturaForm').trigger('reset');
+                    total=0;
+                    iva=0;
+                    neto=0;
+                    //window.location.reload();
                 },
                 error: function(xhr) {
                     console.error('Error al facturar:', xhr);
@@ -321,16 +334,19 @@ var wHeight = $(window).height();
 var dHeight = wHeight * 0.30;
 
 function abrir_modalfactura(){
-alert();
 $("#facturaM").dialog({
         autoOpen: true,
         modal: true,
         width: wWidth*0.60,
-        height: wHeight*0.70,
-        buttons: {
-            "Cerrar": function() {
+        height: wHeight*0.80,
+        position: { my: "top", at: "top+20", of: window },
+        buttons: [{
+            text: "Salir",
+            class: "btn btn-dark",
+            style: "width:100px",
+            click: function () {
                 $(this).dialog("close");
-            }
-        }
-    });
+            },
+        }],
+    }).prev('.ui-dialog-titlebar').remove();
 }

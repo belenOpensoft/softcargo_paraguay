@@ -4,22 +4,30 @@ from django.forms import RadioSelect
 from mantenimientos.models import Monedas
 from administracion_contabilidad.models import Dolar
 
-data = datetime.datetime.now().date()
 
-try:
-    dolar = Dolar.objects.get(ufecha=data)
-    arbitraje_valor = dolar.uvalor
-except Dolar.DoesNotExist:
-    arbitraje_valor = 0.0000
+def get_arbitraje():
+    try:
+        data = datetime.datetime.now().date()
+        dolar = Dolar.objects.get(ufecha=data)
+        arbitraje_valor = dolar.uvalor
+    except Dolar.DoesNotExist:
+        arbitraje_valor = 0.0000
+    return arbitraje_valor
 
-try:
-    dolar = Dolar.objects.get(ufecha=data)
-    paridad_valor = dolar.paridad
-except Dolar.DoesNotExist:
-    paridad_valor = 0.0000
+def get_paridad():
+    try:
+        data = datetime.datetime.now().date()
+        dolar = Dolar.objects.get(ufecha=data)
+        paridad_valor = dolar.paridad
+    except Dolar.DoesNotExist:
+        paridad_valor = 0.0000
+    return paridad_valor
 
 
 class Factura(forms.Form):
+
+
+
     CHOICE_TIPO = (
         ('11', 'Factura'),
         ('20', 'Nota de débito'),
@@ -45,6 +53,7 @@ class Factura(forms.Form):
             'placeholder': 'Número de serie'
             }
         ),
+
         error_messages={
             'required': 'Este campo es obligatorio',
             'max_length': 'El número de serie no puede tener más de 1 caracter'
@@ -103,7 +112,6 @@ class Factura(forms.Form):
     arbitraje = forms.FloatField(
         required=False,
         label="Arbitraje",
-        initial=arbitraje_valor,
         widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
@@ -114,7 +122,6 @@ class Factura(forms.Form):
     paridad = forms.FloatField(
         required=False,
         label="Paridad",
-        initial=paridad_valor,
         widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
@@ -195,6 +202,17 @@ class Factura(forms.Form):
             'invalid': 'Por favor, ingresa un número decimal válido'
         }
     )
+
+    def __init__(self, *args, **kwargs):
+        super(Factura, self).__init__(*args, **kwargs)
+
+        # Obtener valores de arbitraje y paridad
+        self.arbitraje_valor = get_arbitraje()
+        self.paridad_valor = get_paridad()
+
+        # Asignar valores iniciales a los campos de arbitraje y paridad
+        self.fields['arbitraje'].initial = self.arbitraje_valor
+        self.fields['paridad'].initial = self.paridad_valor
 
 
 class ProveedoresGastos(forms.Form):
@@ -336,7 +354,6 @@ class ProveedoresGastos(forms.Form):
     arbitraje = forms.FloatField(
         required=False,
         label="Arbitraje",
-        initial=arbitraje_valor,
         widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
@@ -347,7 +364,6 @@ class ProveedoresGastos(forms.Form):
     paridad = forms.FloatField(
         required=False,
         label="Paridad",
-        initial=paridad_valor,
         widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
@@ -454,6 +470,16 @@ class ProveedoresGastos(forms.Form):
         }
     )
 
+    def __init__(self, *args, **kwargs):
+        super(ProveedoresGastos, self).__init__(*args, **kwargs)
+
+        # Obtener valores de arbitraje y paridad
+        self.arbitraje_valor = get_arbitraje()
+        self.paridad_valor = get_paridad()
+
+        # Asignar valores iniciales a los campos de arbitraje y paridad
+        self.fields['arbitraje'].initial = self.arbitraje_valor
+        self.fields['paridad'].initial = self.paridad_valor
 
 class Cobranza(forms.Form):
     serie = forms.CharField(
@@ -514,7 +540,6 @@ class Cobranza(forms.Form):
     arbitraje = forms.FloatField(
         required=False,
         label="Arbitraje",
-        initial=arbitraje_valor,
         widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
@@ -525,7 +550,6 @@ class Cobranza(forms.Form):
     paridad = forms.FloatField(
         required=False,
         label="Paridad",
-        initial=paridad_valor,
         widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
@@ -597,6 +621,17 @@ class Cobranza(forms.Form):
             }
         )
 
+    def __init__(self, *args, **kwargs):
+        super(Cobranza, self).__init__(*args, **kwargs)
+
+        # Obtener valores de arbitraje y paridad
+        self.arbitraje_valor = get_arbitraje()
+        self.paridad_valor = get_paridad()
+
+        # Asignar valores iniciales a los campos de arbitraje y paridad
+        self.fields['arbitraje'].initial = self.arbitraje_valor
+        self.fields['paridad'].initial = self.paridad_valor
+
 
 class OrdenPago(forms.Form):
 
@@ -649,7 +684,6 @@ class OrdenPago(forms.Form):
     arbitraje = forms.FloatField(
         required=False,
         label="Arbitraje",
-        initial=arbitraje_valor,
         widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
@@ -660,7 +694,6 @@ class OrdenPago(forms.Form):
     paridad = forms.FloatField(
         required=False,
         label="Paridad",
-        initial=paridad_valor,
         widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
@@ -721,3 +754,14 @@ class OrdenPago(forms.Form):
             'invalid': 'Por favor, ingresa un número decimal válido'
         }
     )
+
+    def __init__(self, *args, **kwargs):
+        super(OrdenPago, self).__init__(*args, **kwargs)
+
+        # Obtener valores de arbitraje y paridad
+        self.arbitraje_valor = get_arbitraje()
+        self.paridad_valor = get_paridad()
+
+        # Asignar valores iniciales a los campos de arbitraje y paridad
+        self.fields['arbitraje'].initial = self.arbitraje_valor
+        self.fields['paridad'].initial = self.paridad_valor

@@ -186,7 +186,7 @@ def buscar_items_v(request):
         servicio = Servicios.objects.filter(id=servicio_id, tipogasto='V').first()
 
         if servicio:
-            iva_texto = "Exento" if servicio.tasa == "X" else "Básico" if servicio.tasa == "B" else "Desconocido"
+            iva_texto = "Exento" if servicio.tasa == "X" else "Basico" if servicio.tasa == "B" else "Desconocido"
 
             data = {
                 'item': servicio.codigo,
@@ -239,26 +239,31 @@ def procesar_factura(request):
             tipo_asiento = 'V'
             detalle1 = 'S/I'
             detalle_mov = "detallemov"  #si viene de la preventa, sino vacio
-            nombre_mov = "nombremov"  #traer del combobox del que se seleccione
+            nombre_mov = "nombremov"
             posicion = 0  #traer de la preventa
             asiento = generar_numero()
             movimiento_num = modificar_numero(asiento)
 
-            if tipo == 23:
+            if int(tipo) == 23:
                 detalle1 = 'e-VTA/CRED'
-            elif tipo == 24:
+                nombre_mov='CONTADO'
+            elif int(tipo) == 24:
                 detalle1 = 'e-NOT/CRED'
                 tipo_asiento = 'P'
-            elif tipo == 11:
+                nombre_mov = 'CONTADO'
+            elif int(tipo) == 11:
                 detalle1 = 'VTA/CRED'
-            elif tipo == 21:
+                nombre_mov='FACTURA'
+            elif int(tipo) == 21:
                 detalle1 = 'NOT/CRED'
                 tipo_asiento = 'P'
-            elif tipo == 20:
+                nombre_mov='FACTURA'
+            elif int(tipo) == 20:
                 detalle1 = 'NOT/DEB'
                 tipo_asiento = 'P'
+                nombre_mov='FACTURA'
 
-            detalle_asiento = detalle1 + serie + prefijo + numero + cliente.empresa
+            detalle_asiento = detalle1 + serie + str(prefijo) + str(numero) + cliente.empresa
 
             movimiento = {
                 'tipo': tipo_mov,
@@ -313,7 +318,17 @@ def procesar_factura(request):
             crear_asiento(asiento_general)
 
             for item_data in items_data:
-                aux = movimiento_num + 1
+                aux = int(movimiento_num) + 1
+                precio=float(item_data.get('precio'))
+                coniva=0
+                totaliva=0
+                if item_data.get('iva')=='Basico':
+                    coniva=precio*1.22
+                    totaliva=precio*0.22
+                else:
+                    coniva=precio
+                    totaliva=0
+
 
                 boleta = Boleta()
                 numero = numero
@@ -345,6 +360,9 @@ def procesar_factura(request):
                 boleta.precio = item_data.get('precio')
                 boleta.iva = item_data.get('iva')
                 boleta.cuenta = item_data.get('cuenta')
+                boleta.monto=item_data.get('precio')
+                boleta.totiva=totaliva
+                boleta.total=coniva
                 boleta.save()
 
                 asiento_vector = {
@@ -352,6 +370,7 @@ def procesar_factura(request):
                     'monto': item_data.get('precio'),
                     'moneda': moneda,
                     'cambio': arbitraje,
+                    'asiento': asiento,
                     'conciliado': 'N',
                     'clearing': fecha_obj,
                     'fecha': fecha_obj,
@@ -390,7 +409,7 @@ def procesar_factura(request):
 
 def generar_numero():
     # Obtener la fecha y hora actual
-    ahora = datetime.datetime.now()
+    ahora = datetime.now()
 
     # Tomar los dos últimos dígitos del año
     año = str(ahora.year)[-2:]
@@ -420,6 +439,7 @@ def modificar_numero(numero):
 def crear_asiento(asiento):
     try:
         lista = Asientos()
+        id=lista.get_id()
         lista.id = lista.get_id()
         lista.fecha = asiento['fecha']
         lista.asiento = asiento['asiento']
