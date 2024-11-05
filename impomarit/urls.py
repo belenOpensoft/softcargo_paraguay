@@ -16,6 +16,7 @@ from impomarit.views.mails import get_data_email_op
 from impomarit.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
 from impomarit.views.notas import source, guardar_notas, eliminar_nota
 from impomarit.views.pdf import get_datos_caratula
+from administracion_contabilidad.views.preventa import guardar_infofactura
 from impomarit.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado
 from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.seguimientos import source_seguimientos_modo
@@ -26,7 +27,7 @@ urlpatterns = [
     path('source/', source, name='source'),
     path('guardar_notas/', guardar_notas, name='guardar_notas'),
     path('eliminar_nota/', eliminar_nota, name='eliminar_nota'),
-
+    path('preventa/', guardar_infofactura, name='preventa'),
     path('generar_reporte_excel/', generar_reporte_excel, name='generar_reporte_excel'),
     path('calendario/', calendario, name='calendario'),
     path('eventos-calendario/', eventos_calendario, name='eventos_calendario'),

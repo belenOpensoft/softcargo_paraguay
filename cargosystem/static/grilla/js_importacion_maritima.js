@@ -933,6 +933,27 @@ $(document).ready(function () {
         }
     });
 
+    //autocomplete factura
+    $("#destinatario").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#destinatario_input').val(ui.item['id']);
+                 $('#destinatario_input').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#destinatario_input').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+
     //autocomplete cliente importar house
     $("#filtro_cliente").autocomplete({
         source: '/autocomplete_clientes/',
@@ -4709,7 +4730,7 @@ function cargar_notas(numero) {
                 $("#id_tipo_notas").val(data.tipo);        // Tipo
                 $("#guardar_nota").html('Modificar');  // Cambia el botón de guardar a "Modificar"
             });
-                $(row).off('click').on('click', function () {
+            $(row).off('click').on('click', function () {
                 $('#notas_table tbody tr').removeClass('table-secondary');
                 $(this).addClass('table-secondary');
             });
@@ -4802,4 +4823,266 @@ function eliminarNota(id) {
         });
     }
 }
+
+//facturar
+function facturar(){
+    let selectedRowN = localStorage.getItem('num_house_gasto');
+    const wHeight = $(window).height();
+    const wWidth = $(window).width();
+                $('#destinatario').val('');
+                $('#destinatario_input').val('');
+                $('#destinatario').css({"border-color": "", 'box-shadow': ''});
+                $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
+            $("#facturar_modal").dialog({
+                autoOpen: true,
+                open: function (event, ui) {
+                cargar_gastos_factura();
+                },
+                modal: true,
+                title: "Facturar el House N°: " + selectedRowN,
+                height: wHeight * 0.90,
+                width: wWidth * 0.70,
+                class: 'modal fade',
+                       buttons: [
+                    {
+                        text: "Cancelar",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                ],
+                beforeClose: function (event, ui) {
+                // localStorage.removeItem('num_house_gasto');
+                 $('#facturar_table').DataTable().destroy();
+                 $("#facturar_form").trigger("reset");
+//                 $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                }
+            })
+
+}
+function cargar_gastos_factura(){
+    let numero = localStorage.getItem('num_house_gasto');
+
+    $("#facturar_table").dataTable().fnDestroy();
+    let tabla_factura = $('#facturar_table').DataTable({
+        "order": [[1, "desc"], [1, "desc"]],
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 10,
+        "language": {
+            url: "/static/datatables/es_ES.json"
+        },
+        "ajax": {
+            "url": "/importacion_maritima/source_gastos_house/",
+            'type': 'GET',
+            "data": function (d) {
+                return $.extend({}, d, {
+                    "numero": numero,
+                });
+            }
+        },
+        "columns": [
+            {
+                "data": 1,    // Concepto - `data[1]`
+                "title": "Concepto"
+            },
+            {
+                "data": 6,    // Tipo - `data[6]`
+                "title": "Tipo"
+            },
+            {
+                "data": 3,    // Cantidad - `data[3]`
+                "title": "Cantidad"
+            },
+            {
+                "data": null, // Facturar a.. - Valor de relleno "S/I"
+                "title": "Facturar a..",
+                "render": function() {
+                    return "S/I";
+                }
+            },
+            {
+                "data": 2,    // Moneda - `data[2]`
+                "title": "Moneda"
+            },
+            {
+                "data": 8,    // Arbitraje - `data[8]`
+                "title": "Arbitraje"
+            }
+        ],
+        rowCallback: function(row, data) {
+            $(row).off('click').on('click', function () {
+                $('#facturar_table tbody tr').removeClass('table-secondary');
+                $(this).addClass('table-secondary');
+            });
+
+            }
+    });
+     sumar_ingresos();
+}
+function asignar_costo(event) {
+event.preventDefault();
+    const filaSeleccionada = $('#facturar_table tbody tr.table-secondary');
+
+    if (filaSeleccionada.length > 0) {
+        const data = $('#facturar_table').DataTable().row(filaSeleccionada).data();
+        let cliente = $('#destinatario').val();
+        let cliente_id = $('#destinatario_input').val();
+
+        if(cliente){
+            console.log(data[0]);
+            console.log(cliente);
+            $('#facturar_table').DataTable().cell(filaSeleccionada, 3).data(cliente);
+            $(filaSeleccionada).find('td').eq(3).text(cliente);
+            $('#destinatario').val('');
+            $('#destinatario_input').val('');
+            $('#destinatario').css({"border-color": "", 'box-shadow': ''});
+            $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
+
+        } else {
+            alert('Debe seleccionar un destinatario.');
+        }
+
+    } else {
+        alert("No hay ninguna fila seleccionada.");
+    }
+}
+function asignar_costo_todos(event) {
+event.preventDefault();
+    let cliente = $('#destinatario').val();
+    let cliente_id = $('#destinatario_input').val();
+
+    if (!cliente) {
+        alert('Debe seleccionar un destinatario.');
+        return;
+    }
+
+    let tabla = $('#facturar_table').DataTable();
+    tabla.rows().every(function() {
+        this.cell(this, 3).data(cliente);
+        $(this.node()).find('td').eq(3).text(cliente);
+    });
+
+    //tabla.draw();
+
+//    $.ajax({
+//        type: "POST",
+//        url: "/ruta/guardar_factura_todas/",
+//        data: JSON.stringify({
+//            cliente: cliente
+//        }),
+//        contentType: "application/json",
+//        headers: {
+//            'X-CSRFToken': csrf_token
+//        },
+//        success: function(response) {
+//            if (response.resultado === 'exito') {
+//                alert("Los cambios se han guardado correctamente.");
+//            } else {
+//                alert("Error al guardar los cambios.");
+//            }
+//        },
+//        error: function() {
+//            alert("Error en la solicitud.");
+//        }
+//    });
+}
+function asignar_no(event) {
+    event.preventDefault();
+    const filaSeleccionada = $('#facturar_table tbody tr.table-secondary');
+
+    if (filaSeleccionada.length > 0) {
+        const data = $('#facturar_table').DataTable().row(filaSeleccionada).data();
+        const mensaje = 'NO SE FACTURA EL CONCEPTO'; // Texto a asignar
+
+        console.log(data[0]);
+        console.log(mensaje);
+
+        // Asigna el valor a la columna y al DOM
+        $('#facturar_table').DataTable().cell(filaSeleccionada, 3).data(mensaje);
+        $(filaSeleccionada).find('td').eq(3).text(mensaje);
+
+    } else {
+        alert("No hay ninguna fila seleccionada.");
+    }
+}
+function asignar_no_todos(event) {
+event.preventDefault();
+    const mensaje = 'NO SE FACTURA EL CONCEPTO'; // Texto a asignar
+
+    let tabla = $('#facturar_table').DataTable();
+    tabla.rows().every(function() {
+        // Asigna el valor a la columna y al DOM
+        this.cell(this, 3).data(mensaje);
+        $(this.node()).find('td').eq(3).text(mensaje);
+    });
+
+    // tabla.draw(); // Descomentar si necesitas que la tabla se redibuje
+}
+function sumar_ingresos() {
+    let totalIngresos = 0;
+    const tabla = $('#facturar_table').DataTable();
+
+    // Verifica si DataTable está inicializado
+    if (!$.fn.DataTable.isDataTable('#facturar_table')) {
+        console.log("DataTable no está inicializado.");
+        return;
+    }
+
+    // Itera sobre cada fila de la tabla y suma el valor en la columna 3
+    tabla.rows().every(function() {
+        const data = this.data();
+        console.log("Datos de la fila:", data); // Verifica el contenido de cada fila
+        const valor = parseFloat(data[3]) || 0;
+        totalIngresos += valor;
+        console.log("Total acumulado:", totalIngresos);
+    });
+
+    // Asigna el resultado total al input con ID #total_ingresos
+    $('#total_ingresos').val(totalIngresos.toFixed(2)); // Redondea a 2 decimales si es necesario
+}
+function enviarDatosTabla() {
+    const tabla = $('#facturar_table').DataTable();
+    let datosTabla = [];
+
+    tabla.rows().every(function() {
+        const data = this.data();
+        datosTabla.push({
+            id: data[0],
+            concepto: data[1], //commodity
+            tipo: data[6],
+            cantidad: data[3],
+            facturar_a: data[3], //cliente
+            moneda: data[2],
+            arbitraje: data[8]
+        });
+    });
+
+
+    $.ajax({
+        type: "POST",
+        url: "/importacion_maritima/preventa/",
+        data: JSON.stringify(datosTabla),
+        contentType: "application/json",
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function(response) {
+            if (response.resultado === 'exito') {
+                alert("Los datos se han enviado correctamente.");
+            } else {
+                alert("Error al enviar los datos.");
+            }
+        },
+        error: function() {
+            alert("Error en la solicitud.");
+        }
+    });
+}
+
+
 

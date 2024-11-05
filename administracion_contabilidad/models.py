@@ -1257,6 +1257,10 @@ class Infofactura(models.Model):
         managed = False
         db_table = 'dataset_infofactura'
 
+    def get_id(self):
+        lista=Infofactura.objects.last()
+        return int(lista.id+1)
+
 
 class Iva(models.Model):
     xporcentaje = models.CharField(max_length=8, blank=True, null=True)
