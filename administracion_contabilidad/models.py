@@ -206,6 +206,10 @@ class Asientos(models.Model):
         managed = False
         db_table = 'dataset_asientos'
 
+    def get_id(self):
+        asiento=Asientos.objects.last()
+        return int(asiento.id+1)
+
 
 class Asociadosresg(models.Model):
     rautogen = models.CharField(max_length=40, blank=True, null=True)
@@ -245,7 +249,7 @@ class Boleta(models.Model):
     tipofactura = models.CharField(max_length=1, blank=True, null=True)
     serie = models.CharField(max_length=1, blank=True, null=True)
     prefijo = models.IntegerField(blank=True, null=True)
-    numero = models.FloatField(blank=True, null=True)
+    numero = models.IntegerField(blank=True, null=True)
     linea = models.SmallIntegerField(blank=True, null=True)
     nrocliente = models.IntegerField(blank=True, null=True)
     cliente = models.CharField(max_length=50, blank=True, null=True)
@@ -320,7 +324,6 @@ class Boleta(models.Model):
     class Meta:
         managed = False
         db_table = 'dataset_boleta'
-
 
 class Boletaretenciones(models.Model):
     autogenerado = models.CharField(max_length=40, blank=True, null=True)
@@ -1377,6 +1380,9 @@ class Movims(models.Model):
         managed = False
         db_table = 'dataset_movims'
 
+    def get_id(self):
+        mov=Movims.objects.last()
+        return int(mov.id+1)
 
 class Niveles(models.Model):
     numero = models.BigIntegerField()
@@ -1735,8 +1741,10 @@ class ExpmaritAttachhijo(models.Model):
     detalle = models.CharField(max_length=50, blank=True, null=True)
     web = models.CharField(max_length=1, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True,
+                                         null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -1747,7 +1755,8 @@ class ExpmaritAttachmadre(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     archivo = models.CharField(max_length=250, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -1808,7 +1817,8 @@ class ExpmaritBooking(models.Model):
     terminal = models.CharField(max_length=30, blank=True, null=True)
     direccterminal = models.CharField(max_length=30, blank=True, null=True)
     telterminal = models.CharField(max_length=30, blank=True, null=True)
-    contactoterminal = models.CharField(db_column='ContactoTerminal', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    contactoterminal = models.CharField(db_column='ContactoTerminal', max_length=30, blank=True,
+                                        null=True)  # Field name made lowercase.
     bandera = models.CharField(max_length=30, blank=True, null=True)
 
     class Meta:
@@ -1827,8 +1837,10 @@ class ExpmaritCargaaerea(models.Model):
     cbm = models.FloatField(blank=True, null=True)
     mercaderia = models.TextField(blank=True, null=True)
     marcas = models.CharField(db_column='Marcas', max_length=150, blank=True, null=True)  # Field name made lowercase.
-    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=15, blank=True, null=True)  # Field name made lowercase.
-    sobredimensionada = models.CharField(db_column='Sobredimensionada', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=15, blank=True,
+                                     null=True)  # Field name made lowercase.
+    sobredimensionada = models.CharField(db_column='Sobredimensionada', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -1863,8 +1875,10 @@ class ExpmaritConexaerea(models.Model):
     cia = models.CharField(max_length=30, blank=True, null=True)
     viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  # Field name made lowercase.
     modo = models.CharField(max_length=15, blank=True, null=True)
-    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
+                                  null=True)  # Field name made lowercase.
+    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -1881,8 +1895,10 @@ class ExpmaritConexreserva(models.Model):
     cia = models.CharField(max_length=30, blank=True, null=True)
     viaje = models.CharField(max_length=10, blank=True, null=True)
     modo = models.CharField(max_length=15, blank=True, null=True)
-    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
+                                  null=True)  # Field name made lowercase.
+    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -1927,7 +1943,8 @@ class ExpmaritEmbarqueaereo(models.Model):
     embarcador = models.IntegerField(db_column='Embarcador', blank=True, null=True)  # Field name made lowercase.
     notificar = models.IntegerField(db_column='Notificar', blank=True, null=True)  # Field name made lowercase.
     vaporcli = models.CharField(db_column='Vaporcli', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    vaporcli2 = models.CharField(db_column='Vaporcli2', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    vaporcli2 = models.CharField(db_column='Vaporcli2', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     vapor = models.CharField(db_column='Vapor', max_length=30, blank=True, null=True)  # Field name made lowercase.
     tipovend = models.CharField(db_column='Tipovend', max_length=1, blank=True, null=True)  # Field name made lowercase.
     vendedor = models.SmallIntegerField(db_column='Vendedor', blank=True, null=True)  # Field name made lowercase.
@@ -1942,76 +1959,122 @@ class ExpmaritEmbarqueaereo(models.Model):
     trafico = models.SmallIntegerField(blank=True, null=True)
     iniciales = models.CharField(max_length=3, blank=True, null=True)
     multimodal = models.CharField(max_length=1, blank=True, null=True)
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     booking = models.CharField(max_length=30, blank=True, null=True)
-    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True,
+                                       null=True)  # Field name made lowercase.
+    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True,
+                                          null=True)  # Field name made lowercase.
+    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
     proyecto = models.SmallIntegerField(db_column='Proyecto', blank=True, null=True)  # Field name made lowercase.
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True,
+                                           null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    depcontenedoringreso = models.SmallIntegerField(db_column='DepContenedorIngreso', blank=True, null=True)  # Field name made lowercase.
-    depcontenedorvacios = models.SmallIntegerField(db_column='DepContenedorVacios', blank=True, null=True)  # Field name made lowercase.
-    agenteportuario = models.IntegerField(db_column='AgentePortuario', blank=True, null=True)  # Field name made lowercase.
+    depcontenedoringreso = models.SmallIntegerField(db_column='DepContenedorIngreso', blank=True,
+                                                    null=True)  # Field name made lowercase.
+    depcontenedorvacios = models.SmallIntegerField(db_column='DepContenedorVacios', blank=True,
+                                                   null=True)  # Field name made lowercase.
+    agenteportuario = models.IntegerField(db_column='AgentePortuario', blank=True,
+                                          null=True)  # Field name made lowercase.
     loading = models.CharField(db_column='Loading', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
     deadborrador = models.DateTimeField(db_column='DeadBorrador', blank=True, null=True)  # Field name made lowercase.
-    deaddocumentos = models.DateTimeField(db_column='DeadDocumentos', blank=True, null=True)  # Field name made lowercase.
+    deaddocumentos = models.DateTimeField(db_column='DeadDocumentos', blank=True,
+                                          null=True)  # Field name made lowercase.
     deadentrega = models.DateTimeField(db_column='DeadEntrega', blank=True, null=True)  # Field name made lowercase.
-    deadliberacion = models.DateTimeField(db_column='DeadLiberacion', blank=True, null=True)  # Field name made lowercase.
+    deadliberacion = models.DateTimeField(db_column='DeadLiberacion', blank=True,
+                                          null=True)  # Field name made lowercase.
     retiravacio = models.DateTimeField(db_column='RetiraVacio', blank=True, null=True)  # Field name made lowercase.
     retiralleno = models.DateTimeField(db_column='RetiraLleno', blank=True, null=True)  # Field name made lowercase.
-    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    imprimiobl = models.CharField(db_column='ImprimioBL', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True,
+                                    null=True)  # Field name made lowercase.
+    imprimiobl = models.CharField(db_column='ImprimioBL', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     hblcorp = models.IntegerField(db_column='HBLCorp', blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    datosnotificante = models.CharField(db_column='DatosNotificante', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    contactoemergencia = models.CharField(db_column='ContactoEmergencia', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    numerocomunicacion = models.CharField(db_column='NumeroComunicacion', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    datosnotificante = models.CharField(db_column='DatosNotificante', max_length=250, blank=True,
+                                        null=True)  # Field name made lowercase.
+    contactoemergencia = models.CharField(db_column='ContactoEmergencia', max_length=100, blank=True,
+                                          null=True)  # Field name made lowercase.
+    numerocomunicacion = models.CharField(db_column='NumeroComunicacion', max_length=50, blank=True,
+                                          null=True)  # Field name made lowercase.
     agecompras = models.IntegerField(db_column='AgeCompras', blank=True, null=True)  # Field name made lowercase.
     ageventas = models.IntegerField(db_column='AgeVentas', blank=True, null=True)  # Field name made lowercase.
     fechaentrega = models.DateTimeField(db_column='FechaEntrega', blank=True, null=True)  # Field name made lowercase.
-    aquienentrega = models.CharField(db_column='aQuienEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    aquienentrega = models.CharField(db_column='aQuienEntrega', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
     actividad = models.SmallIntegerField(db_column='Actividad', blank=True, null=True)  # Field name made lowercase.
     salidasim = models.DateTimeField(db_column='SalidaSIM', blank=True, null=True)  # Field name made lowercase.
     presentasim = models.DateTimeField(db_column='PresentaSIM', blank=True, null=True)  # Field name made lowercase.
     cierresim = models.DateTimeField(db_column='CierreSIM', blank=True, null=True)  # Field name made lowercase.
-    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    imprimioorig = models.CharField(db_column='ImprimioOrig', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    enviointtrabk = models.CharField(db_column='EnvioInttraBK', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    enviointtrasi = models.CharField(db_column='EnvioInttraSI', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True,
+                                       null=True)  # Field name made lowercase.
+    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True,
+                                         null=True)  # Field name made lowercase.
+    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True,
+                                      null=True)  # Field name made lowercase.
+    imprimioorig = models.CharField(db_column='ImprimioOrig', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    enviointtrabk = models.CharField(db_column='EnvioInttraBK', max_length=10, blank=True,
+                                     null=True)  # Field name made lowercase.
+    enviointtrasi = models.CharField(db_column='EnvioInttraSI', max_length=10, blank=True,
+                                     null=True)  # Field name made lowercase.
     maerskbk = models.CharField(db_column='MaerskBK', max_length=1, blank=True, null=True)  # Field name made lowercase.
     maersksi = models.CharField(db_column='MaerskSI', max_length=1, blank=True, null=True)  # Field name made lowercase.
     tipobl = models.CharField(db_column='TipoBL', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     fechacutoff = models.DateTimeField(db_column='FechaCutOff', blank=True, null=True)  # Field name made lowercase.
-    horacutoff = models.CharField(db_column='HoraCutOff', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    fecharetiromercaderia = models.DateTimeField(db_column='FechaRetiroMercaderia', blank=True, null=True)  # Field name made lowercase.
-    fechainiciostacking = models.DateTimeField(db_column='FechaInicioStacking', blank=True, null=True)  # Field name made lowercase.
-    horainiciostacking = models.CharField(db_column='HoraInicioStacking', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    fechafinstacking = models.DateTimeField(db_column='FechaFinStacking', blank=True, null=True)  # Field name made lowercase.
-    horafinstacking = models.CharField(db_column='HoraFinStacking', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    horacutoff = models.CharField(db_column='HoraCutOff', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    fecharetiromercaderia = models.DateTimeField(db_column='FechaRetiroMercaderia', blank=True,
+                                                 null=True)  # Field name made lowercase.
+    fechainiciostacking = models.DateTimeField(db_column='FechaInicioStacking', blank=True,
+                                               null=True)  # Field name made lowercase.
+    horainiciostacking = models.CharField(db_column='HoraInicioStacking', max_length=30, blank=True,
+                                          null=True)  # Field name made lowercase.
+    fechafinstacking = models.DateTimeField(db_column='FechaFinStacking', blank=True,
+                                            null=True)  # Field name made lowercase.
+    horafinstacking = models.CharField(db_column='HoraFinStacking', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
     emisionbl = models.DateTimeField(db_column='EmisionBL', blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    envioeasipassbk = models.CharField(db_column='EnvioEASIPASSBK', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    envioeasipasssi = models.CharField(db_column='EnvioEASIPASSSI', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    envioeasipassbk = models.CharField(db_column='EnvioEASIPASSBK', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    envioeasipasssi = models.CharField(db_column='EnvioEASIPASSSI', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
     demora = models.SmallIntegerField(db_column='Demora', blank=True, null=True)  # Field name made lowercase.
-    valordemoravta = models.DecimalField(db_column='ValorDemoraVTA', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    valordemoracpa = models.DecimalField(db_column='ValorDemoraCPA', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    truckerarrivaltime = models.CharField(db_column='TruckerArrivalTime', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    valordemoravta = models.DecimalField(db_column='ValorDemoraVTA', max_digits=19, decimal_places=4, blank=True,
+                                         null=True)  # Field name made lowercase.
+    valordemoracpa = models.DecimalField(db_column='ValorDemoraCPA', max_digits=19, decimal_places=4, blank=True,
+                                         null=True)  # Field name made lowercase.
+    truckerarrivaltime = models.CharField(db_column='TruckerArrivalTime', max_length=30, blank=True,
+                                          null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
-    fechacutoffvgm = models.DateTimeField(db_column='FechaCutOffVGM', blank=True, null=True)  # Field name made lowercase.
-    horacutoffvgm = models.CharField(db_column='HoraCutOffVGM', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    emitebloriginal = models.CharField(db_column='EmiteBLOriginal', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    fechacutoffvgm = models.DateTimeField(db_column='FechaCutOffVGM', blank=True,
+                                          null=True)  # Field name made lowercase.
+    horacutoffvgm = models.CharField(db_column='HoraCutOffVGM', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
+    emitebloriginal = models.CharField(db_column='EmiteBLOriginal', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
     trackid = models.CharField(db_column='TrackID', max_length=50, blank=True, null=True)  # Field name made lowercase.
     etd = models.DateTimeField(db_column='ETD', blank=True, null=True)  # Field name made lowercase.
     eta = models.DateTimeField(db_column='ETA', blank=True, null=True)  # Field name made lowercase.
@@ -2023,56 +2086,90 @@ class ExpmaritEmbarqueaereo(models.Model):
 
 class ExpmaritEntregadoc(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True,
+                                        null=True)  # Field name made lowercase.
+    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
+    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
     original = models.CharField(db_column='Original', max_length=1, blank=True, null=True)  # Field name made lowercase.
     lista = models.CharField(db_column='Lista', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     declara = models.CharField(db_column='Declara', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     copiahbl = models.CharField(db_column='CopiaHBL', max_length=1, blank=True, null=True)  # Field name made lowercase.
     otros = models.CharField(db_column='Otros', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
     ordendep = models.CharField(db_column='OrdenDep', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     libre = models.CharField(db_column='Libre', max_length=1, blank=True, null=True)  # Field name made lowercase.
     eur1 = models.CharField(db_column='Eur1', max_length=1, blank=True, null=True)  # Field name made lowercase.
     factura = models.CharField(db_column='Factura', max_length=1, blank=True, null=True)  # Field name made lowercase.
     nuestra = models.CharField(db_column='Nuestra', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     cumplido = models.CharField(db_column='Cumplido', max_length=1, blank=True, null=True)  # Field name made lowercase.
     transfer = models.CharField(db_column='Transfer', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     remarks = models.CharField(db_column='Remarks', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True,
+                                null=True)  # Field name made lowercase.
+    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True,
+                                  null=True)  # Field name made lowercase.
+    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True,
+                                           null=True)  # Field name made lowercase.
     crt = models.CharField(db_column='CRT', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True,
+                                 null=True)  # Field name made lowercase.
+    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
+    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True,
+                                               null=True)  # Field name made lowercase.
     micdta = models.CharField(db_column='MicDta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True,
+                                    null=True)  # Field name made lowercase.
     papeleta = models.CharField(db_column='Papeleta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True,
+                                      null=True)  # Field name made lowercase.
+    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True,
+                                              null=True)  # Field name made lowercase.
+    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True,
+                                          null=True)  # Field name made lowercase.
+    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -2100,12 +2197,17 @@ class ExpmaritEnvases(models.Model):
     pinformar = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     temperatura = models.FloatField(db_column='Temperatura', blank=True, null=True)  # Field name made lowercase.
     activo = models.CharField(db_column='Activo', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadtemp = models.CharField(db_column='UnidadTemp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    ventilacion = models.CharField(db_column='Ventilacion', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    unidadtemp = models.CharField(db_column='UnidadTemp', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    ventilacion = models.CharField(db_column='Ventilacion', max_length=20, blank=True,
+                                   null=True)  # Field name made lowercase.
     genset = models.CharField(db_column='GenSet', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    atmosferacontrolada = models.CharField(db_column='AtmosferaControlada', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    consolidacion = models.SmallIntegerField(db_column='Consolidacion', blank=True, null=True)  # Field name made lowercase.
-    tipoventilacion = models.CharField(db_column='TipoVentilacion', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    atmosferacontrolada = models.CharField(db_column='AtmosferaControlada', max_length=1, blank=True,
+                                           null=True)  # Field name made lowercase.
+    consolidacion = models.SmallIntegerField(db_column='Consolidacion', blank=True,
+                                             null=True)  # Field name made lowercase.
+    tipoventilacion = models.CharField(db_column='TipoVentilacion', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
     pesovgm = models.FloatField(db_column='PesoVGM', blank=True, null=True)  # Field name made lowercase.
     humedad = models.SmallIntegerField(db_column='Humedad', blank=True, null=True)  # Field name made lowercase.
 
@@ -2130,10 +2232,13 @@ class ExpmaritFisico(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     detalle = models.CharField(db_column='Detalle', max_length=100, blank=True, null=True)  # Field name made lowercase.
     marcas = models.CharField(db_column='Marcas', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    precinto = models.CharField(db_column='Precinto', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    precinto = models.CharField(db_column='Precinto', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
     tara = models.IntegerField(db_column='Tara', blank=True, null=True)  # Field name made lowercase.
-    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
     peso = models.FloatField(db_column='Peso', blank=True, null=True)  # Field name made lowercase.
     detalle2 = models.CharField(max_length=50, blank=True, null=True)
     cliente = models.IntegerField(db_column='Cliente', blank=True, null=True)  # Field name made lowercase.
@@ -2153,10 +2258,12 @@ class ExpmaritGastoshijos(models.Model):
     moneda = models.SmallIntegerField(db_column='Moneda', blank=True, null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=50, blank=True, null=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
     statushijos = models.SmallIntegerField(db_column='StatusHijos', blank=True, null=True)  # Field name made lowercase.
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    movimiento = models.CharField(db_column='Movimiento', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    movimiento = models.CharField(db_column='Movimiento', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -2220,23 +2327,31 @@ class ExpmaritGuiasgrabadas(models.Model):
     booking = models.CharField(max_length=30, blank=True, null=True)
     position2 = models.CharField(max_length=50, blank=True, null=True)
     origin = models.CharField(db_column='Origin', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    paisdestino = models.CharField(db_column='PaisDestino', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=3, blank=True, null=True)  # Field name made lowercase.
+    paisdestino = models.CharField(db_column='PaisDestino', max_length=35, blank=True,
+                                   null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=3, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=3, blank=True,
+                                     null=True)  # Field name made lowercase.
     awb = models.CharField(db_column='AWB', max_length=40, blank=True, null=True)  # Field name made lowercase.
     hawb = models.CharField(db_column='HAWB', max_length=50, blank=True, null=True)  # Field name made lowercase.
     totalkilos = models.FloatField(db_column='TotalKilos', blank=True, null=True)  # Field name made lowercase.
     totalpaquetes = models.IntegerField(db_column='TotalPaquetes', blank=True, null=True)  # Field name made lowercase.
-    tipodocumento = models.CharField(db_column='TipoDocumento', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    tipodocumento = models.CharField(db_column='TipoDocumento', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     consolidado = models.IntegerField(db_column='Consolidado', blank=True, null=True)  # Field name made lowercase.
     mensaje1 = models.IntegerField(db_column='Mensaje1', blank=True, null=True)  # Field name made lowercase.
     mensaje2 = models.IntegerField(db_column='Mensaje2', blank=True, null=True)  # Field name made lowercase.
     label6 = models.CharField(db_column='Label6', max_length=50, blank=True, null=True)  # Field name made lowercase.
     texto = models.TextField(db_column='Texto', blank=True, null=True)  # Field name made lowercase.
-    consigna6 = models.CharField(db_column='Consigna6', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    consigna7 = models.CharField(db_column='Consigna7', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    consigna8 = models.CharField(db_column='Consigna8', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    precarriage = models.CharField(db_column='PreCarriage', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    consigna6 = models.CharField(db_column='Consigna6', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    consigna7 = models.CharField(db_column='Consigna7', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    consigna8 = models.CharField(db_column='Consigna8', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    precarriage = models.CharField(db_column='PreCarriage', max_length=35, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -2259,7 +2374,8 @@ class ExpmaritGuiasgrabadas2(models.Model):
 
 class ExpmaritGuiasgrabadas3(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    servicio = models.CharField(db_column='Servicio', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    servicio = models.CharField(db_column='Servicio', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
     prepaid = models.CharField(db_column='Prepaid', max_length=10, blank=True, null=True)  # Field name made lowercase.
     collect = models.CharField(db_column='Collect', max_length=10, blank=True, null=True)  # Field name made lowercase.
     moneda = models.CharField(db_column='Moneda', max_length=3, blank=True, null=True)  # Field name made lowercase.
@@ -2348,10 +2464,12 @@ class ExpmaritReservas(models.Model):
     awb = models.CharField(max_length=40, blank=True, null=True)
     agente = models.IntegerField(blank=True, null=True)
     consignatario = models.IntegerField(blank=True, null=True)
-    pagoflete = models.CharField(db_column='Pagoflete', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    pagoflete = models.CharField(db_column='Pagoflete', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
     moneda = models.SmallIntegerField(blank=True, null=True)
     arbitraje = models.FloatField(blank=True, null=True)
-    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
     notas = models.TextField(db_column='Notas', blank=True, null=True)  # Field name made lowercase.
     volumen = models.FloatField(db_column='Volumen', blank=True, null=True)  # Field name made lowercase.
     cotizacion = models.IntegerField(blank=True, null=True)
@@ -2361,7 +2479,8 @@ class ExpmaritReservas(models.Model):
     tarifapl = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     vapor = models.CharField(db_column='Vapor', max_length=30, blank=True, null=True)  # Field name made lowercase.
     viaje = models.CharField(db_column='Viaje', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    posicion = models.CharField(db_column='Posicion', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    posicion = models.CharField(db_column='Posicion', max_length=30, blank=True,
+                                null=True)  # Field name made lowercase.
     envioedi = models.CharField(max_length=1, blank=True, null=True)
     nroreferedi = models.IntegerField(blank=True, null=True)
     ciep = models.CharField(max_length=15, blank=True, null=True)
@@ -2370,23 +2489,32 @@ class ExpmaritReservas(models.Model):
     plfacturado = models.CharField(max_length=1, blank=True, null=True)
     trafico = models.SmallIntegerField(blank=True, null=True)
     iniciales = models.CharField(max_length=3, blank=True, null=True)
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
     loading = models.CharField(db_column='Loading', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    enviointtrabk = models.CharField(db_column='EnvioInttraBK', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    enviointtrasi = models.CharField(db_column='EnvioInttraSI', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    enviointtrabk = models.CharField(db_column='EnvioInttraBK', max_length=10, blank=True,
+                                     null=True)  # Field name made lowercase.
+    enviointtrasi = models.CharField(db_column='EnvioInttraSI', max_length=10, blank=True,
+                                     null=True)  # Field name made lowercase.
     maerskbk = models.CharField(db_column='MaerskBK', max_length=1, blank=True, null=True)  # Field name made lowercase.
     maersksi = models.CharField(db_column='MaerskSI', max_length=1, blank=True, null=True)  # Field name made lowercase.
     embarcador = models.IntegerField(db_column='Embarcador', blank=True, null=True)  # Field name made lowercase.
     esagente = models.CharField(db_column='esAgente', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
     tipobl = models.CharField(db_column='TipoBL', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    manifiesto = models.CharField(db_column='Manifiesto', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    manifiesto = models.CharField(db_column='Manifiesto', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
     deposito = models.SmallIntegerField(db_column='Deposito', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -2410,7 +2538,8 @@ class ExpmaritServiceaereo(models.Model):
     pinformar = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -2434,7 +2563,8 @@ class ExpmaritServireserva(models.Model):
     precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -2444,10 +2574,12 @@ class ExpmaritServireserva(models.Model):
 
 class ExpmaritTraceop(models.Model):
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
     modulo = models.CharField(db_column='Modulo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     detalle = models.CharField(db_column='Detalle', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
     clave = models.CharField(db_column='Clave', max_length=4, blank=True, null=True)  # Field name made lowercase.
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
 
@@ -2472,8 +2604,10 @@ class ExportAttachhijo(models.Model):
     detalle = models.CharField(max_length=50, blank=True, null=True)
     web = models.CharField(max_length=1, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True,
+                                         null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -2484,7 +2618,8 @@ class ExportAttachmadre(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     archivo = models.CharField(max_length=250, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -2502,7 +2637,8 @@ class ExportCargaaerea(models.Model):
     tarifa = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     aplicable = models.FloatField(blank=True, null=True)
     unidad = models.CharField(db_column='Unidad', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
     tara = models.FloatField(db_column='Tara', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -2545,8 +2681,10 @@ class ExportConexaerea(models.Model):
     ciavuelo = models.CharField(max_length=30, blank=True, null=True)
     viaje = models.CharField(max_length=10, blank=True, null=True)
     modo = models.CharField(max_length=15, blank=True, null=True)
-    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
+                                  null=True)  # Field name made lowercase.
+    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -2561,8 +2699,10 @@ class ExportConexreserva(models.Model):
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
     ciavuelo = models.CharField(max_length=2, blank=True, null=True)
-    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
+                                  null=True)  # Field name made lowercase.
+    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -2629,22 +2769,34 @@ class ExportEmbarqueaereo(models.Model):
     multimodal = models.CharField(max_length=1, blank=True, null=True)
     agente = models.IntegerField(db_column='Agente', blank=True, null=True)  # Field name made lowercase.
     tarifaprofit = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
+    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True,
+                                       null=True)  # Field name made lowercase.
+    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True,
+                                          null=True)  # Field name made lowercase.
+    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
     mercaderia = models.TextField(db_column='Mercaderia', blank=True, null=True)  # Field name made lowercase.
     proyecto = models.SmallIntegerField(db_column='Proyecto', blank=True, null=True)  # Field name made lowercase.
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    datosnotificante = models.CharField(db_column='DatosNotificante', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    datosnotificante = models.CharField(db_column='DatosNotificante', max_length=250, blank=True,
+                                        null=True)  # Field name made lowercase.
+    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True,
+                                           null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    arbitrajecass = models.DecimalField(db_column='ArbitrajeCASS', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    arbitrajecass = models.DecimalField(db_column='ArbitrajeCASS', max_digits=19, decimal_places=4, blank=True,
+                                        null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True,
+                                    null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     servicelevel = models.CharField(max_length=20, blank=True, null=True)
     serviceleveltype = models.CharField(max_length=20, blank=True, null=True)
     stthawb = models.CharField(max_length=30, blank=True, null=True)
@@ -2652,21 +2804,33 @@ class ExportEmbarqueaereo(models.Model):
     agecompras = models.IntegerField(db_column='AgeCompras', blank=True, null=True)  # Field name made lowercase.
     ageventas = models.IntegerField(db_column='AgeVentas', blank=True, null=True)  # Field name made lowercase.
     fechaentrega = models.DateTimeField(db_column='FechaEntrega', blank=True, null=True)  # Field name made lowercase.
-    aquienentrega = models.CharField(db_column='aQuienEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    aquienentrega = models.CharField(db_column='aQuienEntrega', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
     actividad = models.SmallIntegerField(db_column='Actividad', blank=True, null=True)  # Field name made lowercase.
-    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True,
+                                       null=True)  # Field name made lowercase.
+    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True,
+                                         null=True)  # Field name made lowercase.
+    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True,
+                                      null=True)  # Field name made lowercase.
     deposito = models.SmallIntegerField(db_column='Deposito', blank=True, null=True)  # Field name made lowercase.
-    autogenfletecpa = models.CharField(db_column='AutogenFleteCPA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    envioiata = models.CharField(db_column='EnvioIATA', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    autogenfletecpa = models.CharField(db_column='AutogenFleteCPA', max_length=50, blank=True,
+                                       null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    envioiata = models.CharField(db_column='EnvioIATA', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
-    documentos = models.CharField(db_column='Documentos', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    documentos = models.CharField(db_column='Documentos', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
     trackid = models.CharField(db_column='TrackID', max_length=50, blank=True, null=True)  # Field name made lowercase.
     etd = models.DateTimeField(db_column='ETD', blank=True, null=True)  # Field name made lowercase.
     eta = models.DateTimeField(db_column='ETA', blank=True, null=True)  # Field name made lowercase.
@@ -2678,56 +2842,90 @@ class ExportEmbarqueaereo(models.Model):
 
 class ExportEntregadoc(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True,
+                                        null=True)  # Field name made lowercase.
+    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
+    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
     original = models.CharField(db_column='Original', max_length=1, blank=True, null=True)  # Field name made lowercase.
     lista = models.CharField(db_column='Lista', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     declara = models.CharField(db_column='Declara', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     copiahbl = models.CharField(db_column='CopiaHBL', max_length=1, blank=True, null=True)  # Field name made lowercase.
     otros = models.CharField(db_column='Otros', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
     ordendep = models.CharField(db_column='OrdenDep', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     libre = models.CharField(db_column='Libre', max_length=1, blank=True, null=True)  # Field name made lowercase.
     eur1 = models.CharField(db_column='Eur1', max_length=1, blank=True, null=True)  # Field name made lowercase.
     factura = models.CharField(db_column='Factura', max_length=1, blank=True, null=True)  # Field name made lowercase.
     nuestra = models.CharField(db_column='Nuestra', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     cumplido = models.CharField(db_column='Cumplido', max_length=1, blank=True, null=True)  # Field name made lowercase.
     transfer = models.CharField(db_column='Transfer', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     remarks = models.CharField(db_column='Remarks', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True,
+                                null=True)  # Field name made lowercase.
+    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True,
+                                  null=True)  # Field name made lowercase.
+    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True,
+                                           null=True)  # Field name made lowercase.
     crt = models.CharField(db_column='CRT', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True,
+                                 null=True)  # Field name made lowercase.
+    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
+    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True,
+                                               null=True)  # Field name made lowercase.
     micdta = models.CharField(db_column='MicDta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True,
+                                    null=True)  # Field name made lowercase.
     papeleta = models.CharField(db_column='Papeleta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True,
+                                      null=True)  # Field name made lowercase.
+    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True,
+                                              null=True)  # Field name made lowercase.
+    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True,
+                                          null=True)  # Field name made lowercase.
+    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -2757,7 +2955,8 @@ class ExportGastoshijos(models.Model):
     moneda = models.SmallIntegerField(db_column='Moneda', blank=True, null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=50, blank=True, null=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
     statushijos = models.SmallIntegerField(db_column='StatusHijos', blank=True, null=True)  # Field name made lowercase.
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
 
@@ -2812,8 +3011,10 @@ class ExportGuiasgrabadas(models.Model):
     vuelo3 = models.CharField(max_length=15, blank=True, null=True)
     vuelo4 = models.CharField(max_length=15, blank=True, null=True)
     valseguro = models.CharField(max_length=10, blank=True, null=True)
-    cliente5 = models.CharField(db_column='Cliente5', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    consigna6 = models.CharField(db_column='Consigna6', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    cliente5 = models.CharField(db_column='Cliente5', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    consigna6 = models.CharField(db_column='Consigna6', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -2850,17 +3051,27 @@ class ExportGuiasgrabadas2(models.Model):
     nature11 = models.CharField(max_length=25, blank=True, null=True)
     nature12 = models.CharField(max_length=25, blank=True, null=True)
     gastosconiva = models.IntegerField(blank=True, null=True)
-    nature13 = models.CharField(db_column='Nature13', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature14 = models.CharField(db_column='Nature14', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature15 = models.CharField(db_column='Nature15', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature16 = models.CharField(db_column='Nature16', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature17 = models.CharField(db_column='Nature17', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature18 = models.CharField(db_column='Nature18', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature19 = models.CharField(db_column='Nature19', max_length=25, blank=True, null=True)  # Field name made lowercase.
+    nature13 = models.CharField(db_column='Nature13', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature14 = models.CharField(db_column='Nature14', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature15 = models.CharField(db_column='Nature15', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature16 = models.CharField(db_column='Nature16', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature17 = models.CharField(db_column='Nature17', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature18 = models.CharField(db_column='Nature18', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature19 = models.CharField(db_column='Nature19', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
     asagent = models.CharField(db_column='AsAgent', max_length=70, blank=True, null=True)  # Field name made lowercase.
-    ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True, null=True)  # Field name made lowercase.
-    chargesatdestination = models.DecimalField(db_column='ChargesAtDestination', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    totalcollectcharges = models.DecimalField(db_column='TotalCollectCharges', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True,
+                                    null=True)  # Field name made lowercase.
+    chargesatdestination = models.DecimalField(db_column='ChargesAtDestination', max_digits=19, decimal_places=4,
+                                               blank=True, null=True)  # Field name made lowercase.
+    totalcollectcharges = models.DecimalField(db_column='TotalCollectCharges', max_digits=19, decimal_places=4,
+                                              blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -2874,13 +3085,19 @@ class ExportGuiasgrabadas3(models.Model):
     piezas3 = models.CharField(db_column='Piezas3', max_length=4, blank=True, null=True)  # Field name made lowercase.
     piezas4 = models.CharField(db_column='Piezas4', max_length=4, blank=True, null=True)  # Field name made lowercase.
     piezas5 = models.CharField(db_column='Piezas5', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    totpiezas = models.CharField(db_column='TotPiezas', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    totpiezas = models.CharField(db_column='TotPiezas', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
     gross = models.CharField(db_column='Gross', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross = models.CharField(db_column='OtroGross', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross2 = models.CharField(db_column='OtroGross2', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross3 = models.CharField(db_column='OtroGross3', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross4 = models.CharField(db_column='OtroGross4', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totgross = models.CharField(db_column='TotGross', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    otrogross = models.CharField(db_column='OtroGross', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
+    otrogross2 = models.CharField(db_column='OtroGross2', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrogross3 = models.CharField(db_column='OtroGross3', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrogross4 = models.CharField(db_column='OtroGross4', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    totgross = models.CharField(db_column='TotGross', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     k = models.CharField(db_column='K', max_length=1, blank=True, null=True)  # Field name made lowercase.
     k2 = models.CharField(db_column='K2', max_length=1, blank=True, null=True)  # Field name made lowercase.
     k3 = models.CharField(db_column='K3', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -2891,7 +3108,8 @@ class ExportGuiasgrabadas3(models.Model):
     r3 = models.CharField(db_column='R3', max_length=1, blank=True, null=True)  # Field name made lowercase.
     r4 = models.CharField(db_column='R4', max_length=1, blank=True, null=True)  # Field name made lowercase.
     r5 = models.CharField(db_column='R5', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    commodity = models.CharField(db_column='Commodity', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    commodity = models.CharField(db_column='Commodity', max_length=8, blank=True,
+                                 null=True)  # Field name made lowercase.
     comm2 = models.CharField(db_column='Comm2', max_length=8, blank=True, null=True)  # Field name made lowercase.
     comm3 = models.CharField(db_column='Comm3', max_length=8, blank=True, null=True)  # Field name made lowercase.
     comm4 = models.CharField(db_column='Comm4', max_length=8, blank=True, null=True)  # Field name made lowercase.
@@ -2911,7 +3129,8 @@ class ExportGuiasgrabadas3(models.Model):
     total3 = models.CharField(db_column='Total3', max_length=10, blank=True, null=True)  # Field name made lowercase.
     total4 = models.CharField(db_column='Total4', max_length=10, blank=True, null=True)  # Field name made lowercase.
     total5 = models.CharField(db_column='Total5', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalfinal = models.CharField(db_column='TotalFinal', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    totalfinal = models.CharField(db_column='TotalFinal', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
     totalpp = models.CharField(db_column='TotalPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
     totalcc = models.CharField(db_column='TotalCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
     valpp = models.CharField(db_column='ValPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
@@ -2922,18 +3141,25 @@ class ExportGuiasgrabadas3(models.Model):
     dacc = models.CharField(db_column='DaCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
     dcpp = models.CharField(db_column='DcPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
     dccc = models.CharField(db_column='DcCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalprepaid = models.CharField(db_column='TotalPrepaid', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalcollect = models.CharField(db_column='TotalCollect', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalpprate = models.CharField(db_column='TotalPPRate', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalccrate = models.CharField(db_column='TotalCCRate', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    totalprepaid = models.CharField(db_column='TotalPrepaid', max_length=10, blank=True,
+                                    null=True)  # Field name made lowercase.
+    totalcollect = models.CharField(db_column='TotalCollect', max_length=10, blank=True,
+                                    null=True)  # Field name made lowercase.
+    totalpprate = models.CharField(db_column='TotalPPRate', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
+    totalccrate = models.CharField(db_column='TotalCCRate', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
     cass = models.CharField(db_column='Cass', max_length=30, blank=True, null=True)  # Field name made lowercase.
     chgscode = models.CharField(db_column='ChgsCode', max_length=2, blank=True, null=True)  # Field name made lowercase.
     wtval = models.CharField(db_column='WtVal', max_length=2, blank=True, null=True)  # Field name made lowercase.
     other = models.CharField(db_column='Other', max_length=2, blank=True, null=True)  # Field name made lowercase.
-    paisdestino = models.CharField(db_column='PaisDestino', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    paisdestino = models.CharField(db_column='PaisDestino', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
+    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     origen = models.CharField(db_column='Origen', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3009,17 +3235,25 @@ class ExportMadresgrabadas(models.Model):
     houses5 = models.CharField(db_column='Houses5', max_length=28, blank=True, null=True)  # Field name made lowercase.
     houses6 = models.CharField(db_column='Houses6', max_length=28, blank=True, null=True)  # Field name made lowercase.
     asagent = models.CharField(db_column='AsAgent', max_length=70, blank=True, null=True)  # Field name made lowercase.
-    ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True, null=True)  # Field name made lowercase.
-    gastosconiva = models.SmallIntegerField(db_column='GastosConIVA', blank=True, null=True)  # Field name made lowercase.
+    ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True,
+                                    null=True)  # Field name made lowercase.
+    gastosconiva = models.SmallIntegerField(db_column='GastosConIVA', blank=True,
+                                            null=True)  # Field name made lowercase.
     houses7 = models.CharField(db_column='Houses7', max_length=28, blank=True, null=True)  # Field name made lowercase.
     houses8 = models.CharField(db_column='Houses8', max_length=28, blank=True, null=True)  # Field name made lowercase.
     houses9 = models.CharField(db_column='Houses9', max_length=28, blank=True, null=True)  # Field name made lowercase.
-    houses10 = models.CharField(db_column='Houses10', max_length=28, blank=True, null=True)  # Field name made lowercase.
-    houses11 = models.CharField(db_column='Houses11', max_length=28, blank=True, null=True)  # Field name made lowercase.
-    houses12 = models.CharField(db_column='Houses12', max_length=28, blank=True, null=True)  # Field name made lowercase.
-    houses13 = models.CharField(db_column='Houses13', max_length=28, blank=True, null=True)  # Field name made lowercase.
-    houses14 = models.CharField(db_column='Houses14', max_length=28, blank=True, null=True)  # Field name made lowercase.
-    houses15 = models.CharField(db_column='Houses15', max_length=28, blank=True, null=True)  # Field name made lowercase.
+    houses10 = models.CharField(db_column='Houses10', max_length=28, blank=True,
+                                null=True)  # Field name made lowercase.
+    houses11 = models.CharField(db_column='Houses11', max_length=28, blank=True,
+                                null=True)  # Field name made lowercase.
+    houses12 = models.CharField(db_column='Houses12', max_length=28, blank=True,
+                                null=True)  # Field name made lowercase.
+    houses13 = models.CharField(db_column='Houses13', max_length=28, blank=True,
+                                null=True)  # Field name made lowercase.
+    houses14 = models.CharField(db_column='Houses14', max_length=28, blank=True,
+                                null=True)  # Field name made lowercase.
+    houses15 = models.CharField(db_column='Houses15', max_length=28, blank=True,
+                                null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3033,13 +3267,19 @@ class ExportMadresgrabadas3(models.Model):
     piezas3 = models.CharField(db_column='Piezas3', max_length=4, blank=True, null=True)  # Field name made lowercase.
     piezas4 = models.CharField(db_column='Piezas4', max_length=4, blank=True, null=True)  # Field name made lowercase.
     piezas5 = models.CharField(db_column='Piezas5', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    totpiezas = models.CharField(db_column='TotPiezas', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    totpiezas = models.CharField(db_column='TotPiezas', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
     gross = models.CharField(db_column='Gross', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross = models.CharField(db_column='OtroGross', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross2 = models.CharField(db_column='OtroGross2', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross3 = models.CharField(db_column='OtroGross3', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross4 = models.CharField(db_column='OtroGross4', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totgross = models.CharField(db_column='TotGross', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    otrogross = models.CharField(db_column='OtroGross', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
+    otrogross2 = models.CharField(db_column='OtroGross2', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrogross3 = models.CharField(db_column='OtroGross3', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrogross4 = models.CharField(db_column='OtroGross4', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    totgross = models.CharField(db_column='TotGross', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     k = models.CharField(db_column='K', max_length=1, blank=True, null=True)  # Field name made lowercase.
     k2 = models.CharField(db_column='K2', max_length=1, blank=True, null=True)  # Field name made lowercase.
     k3 = models.CharField(db_column='K3', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -3050,7 +3290,8 @@ class ExportMadresgrabadas3(models.Model):
     r3 = models.CharField(db_column='R3', max_length=1, blank=True, null=True)  # Field name made lowercase.
     r4 = models.CharField(db_column='R4', max_length=1, blank=True, null=True)  # Field name made lowercase.
     r5 = models.CharField(db_column='R5', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    commodity = models.CharField(db_column='Commodity', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    commodity = models.CharField(db_column='Commodity', max_length=8, blank=True,
+                                 null=True)  # Field name made lowercase.
     comm2 = models.CharField(db_column='Comm2', max_length=8, blank=True, null=True)  # Field name made lowercase.
     comm3 = models.CharField(db_column='Comm3', max_length=8, blank=True, null=True)  # Field name made lowercase.
     comm4 = models.CharField(db_column='Comm4', max_length=8, blank=True, null=True)  # Field name made lowercase.
@@ -3070,7 +3311,8 @@ class ExportMadresgrabadas3(models.Model):
     total3 = models.CharField(db_column='Total3', max_length=10, blank=True, null=True)  # Field name made lowercase.
     total4 = models.CharField(db_column='Total4', max_length=10, blank=True, null=True)  # Field name made lowercase.
     total5 = models.CharField(db_column='Total5', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalfinal = models.CharField(db_column='TotalFinal', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    totalfinal = models.CharField(db_column='TotalFinal', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
     totalpp = models.CharField(db_column='TotalPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
     totalcc = models.CharField(db_column='TotalCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
     valpp = models.CharField(db_column='ValPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
@@ -3081,18 +3323,25 @@ class ExportMadresgrabadas3(models.Model):
     dacc = models.CharField(db_column='DaCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
     dcpp = models.CharField(db_column='DcPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
     dccc = models.CharField(db_column='DcCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalprepaid = models.CharField(db_column='TotalPrepaid', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalcollect = models.CharField(db_column='TotalCollect', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalpprate = models.CharField(db_column='TotalPPRate', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalccrate = models.CharField(db_column='TotalCCRate', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    totalprepaid = models.CharField(db_column='TotalPrepaid', max_length=10, blank=True,
+                                    null=True)  # Field name made lowercase.
+    totalcollect = models.CharField(db_column='TotalCollect', max_length=10, blank=True,
+                                    null=True)  # Field name made lowercase.
+    totalpprate = models.CharField(db_column='TotalPPRate', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
+    totalccrate = models.CharField(db_column='TotalCCRate', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
     cass = models.CharField(db_column='Cass', max_length=30, blank=True, null=True)  # Field name made lowercase.
     chgscode = models.CharField(db_column='ChgsCode', max_length=2, blank=True, null=True)  # Field name made lowercase.
     wtval = models.CharField(db_column='WtVal', max_length=2, blank=True, null=True)  # Field name made lowercase.
     other = models.CharField(db_column='Other', max_length=2, blank=True, null=True)  # Field name made lowercase.
-    paisdestino = models.CharField(db_column='PaisDestino', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    paisdestino = models.CharField(db_column='PaisDestino', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
+    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     origen = models.CharField(db_column='Origen', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3110,10 +3359,12 @@ class ExportReservas(models.Model):
     awb = models.CharField(max_length=20, blank=True, null=True)
     agente = models.IntegerField(blank=True, null=True)
     consignatario = models.IntegerField(blank=True, null=True)
-    pagoflete = models.CharField(db_column='Pagoflete', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    pagoflete = models.CharField(db_column='Pagoflete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     moneda = models.SmallIntegerField(blank=True, null=True)
     arbitraje = models.FloatField(blank=True, null=True)
-    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
     tarifaawb = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     notas = models.TextField(db_column='Notas', blank=True, null=True)  # Field name made lowercase.
     volumen = models.FloatField(db_column='Volumen', blank=True, null=True)  # Field name made lowercase.
@@ -3139,20 +3390,29 @@ class ExportReservas(models.Model):
     tarifafija = models.CharField(max_length=1, blank=True, null=True)
     fechareport = models.DateTimeField(blank=True, null=True)
     manifiesto = models.CharField(max_length=15, blank=True, null=True)
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    arbitrajecass = models.DecimalField(db_column='ArbitrajeCASS', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    arbitrajecass = models.DecimalField(db_column='ArbitrajeCASS', max_digits=19, decimal_places=4, blank=True,
+                                        null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     sttawb = models.CharField(max_length=30, blank=True, null=True)
-    autogenfletecpa = models.CharField(db_column='AutogenFleteCPA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    envioiata = models.CharField(db_column='EnvioIATA', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    autogenfletecpa = models.CharField(db_column='AutogenFleteCPA', max_length=50, blank=True,
+                                       null=True)  # Field name made lowercase.
+    envioiata = models.CharField(db_column='EnvioIATA', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     embarcador = models.IntegerField(db_column='Embarcador', blank=True, null=True)  # Field name made lowercase.
     esagente = models.CharField(db_column='esAgente', max_length=1, blank=True, null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
-    documentos = models.CharField(db_column='Documentos', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    documentos = models.CharField(db_column='Documentos', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
     deposito = models.SmallIntegerField(db_column='Deposito', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -3176,7 +3436,8 @@ class ExportServiceaereo(models.Model):
     pinformar = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -3200,7 +3461,8 @@ class ExportServireserva(models.Model):
     precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -3210,10 +3472,12 @@ class ExportServireserva(models.Model):
 
 class ExportTraceop(models.Model):
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
     modulo = models.CharField(db_column='Modulo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     detalle = models.CharField(db_column='Detalle', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
     clave = models.CharField(db_column='Clave', max_length=4, blank=True, null=True)  # Field name made lowercase.
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
 
@@ -3238,8 +3502,10 @@ class ExpterraAttachhijo(models.Model):
     detalle = models.CharField(max_length=50, blank=True, null=True)
     web = models.CharField(max_length=1, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True,
+                                         null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3250,7 +3516,8 @@ class ExpterraAttachmadre(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     archivo = models.CharField(max_length=250, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3295,8 +3562,10 @@ class ExpterraConexaerea(models.Model):
     embarcador = models.IntegerField(db_column='Embarcador', blank=True, null=True)  # Field name made lowercase.
     consignatario = models.IntegerField(db_column='Consignatario', blank=True, null=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
-    horasalida = models.CharField(db_column='HoraSalida', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    horallegada = models.CharField(db_column='HoraLlegada', max_length=12, blank=True, null=True)  # Field name made lowercase.
+    horasalida = models.CharField(db_column='HoraSalida', max_length=12, blank=True,
+                                  null=True)  # Field name made lowercase.
+    horallegada = models.CharField(db_column='HoraLlegada', max_length=12, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3320,60 +3589,101 @@ class ExpterraConexreserva(models.Model):
 class ExpterraDeclaracion(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     ncorr = models.CharField(db_column='Ncorr', max_length=13, blank=True, null=True)  # Field name made lowercase.
-    nintdespacho = models.CharField(db_column='NintDespacho', max_length=11, blank=True, null=True)  # Field name made lowercase.
+    nintdespacho = models.CharField(db_column='NintDespacho', max_length=11, blank=True,
+                                    null=True)  # Field name made lowercase.
     codfisc = models.CharField(db_column='CodFisc', max_length=6, blank=True, null=True)  # Field name made lowercase.
-    coddeclaracion = models.CharField(db_column='CodDeclaracion', max_length=2, blank=True, null=True)  # Field name made lowercase.
-    nomdeclaracion = models.CharField(db_column='NomDeclaracion', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    coddeclaracion = models.CharField(db_column='CodDeclaracion', max_length=2, blank=True,
+                                      null=True)  # Field name made lowercase.
+    nomdeclaracion = models.CharField(db_column='NomDeclaracion', max_length=15, blank=True,
+                                      null=True)  # Field name made lowercase.
     aduana = models.CharField(db_column='Aduana', max_length=24, blank=True, null=True)  # Field name made lowercase.
-    codaduana = models.CharField(db_column='CodAduana', max_length=3, blank=True, null=True)  # Field name made lowercase.
+    codaduana = models.CharField(db_column='CodAduana', max_length=3, blank=True,
+                                 null=True)  # Field name made lowercase.
     regimen = models.CharField(db_column='Regimen', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codregimen = models.CharField(db_column='CodRegimen', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    tipotramite = models.CharField(db_column='TipoTramite', max_length=24, blank=True, null=True)  # Field name made lowercase.
-    codtramite = models.CharField(db_column='CodTramite', max_length=3, blank=True, null=True)  # Field name made lowercase.
+    codregimen = models.CharField(db_column='CodRegimen', max_length=3, blank=True,
+                                  null=True)  # Field name made lowercase.
+    tipotramite = models.CharField(db_column='TipoTramite', max_length=24, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codtramite = models.CharField(db_column='CodTramite', max_length=3, blank=True,
+                                  null=True)  # Field name made lowercase.
     aduana2 = models.CharField(db_column='Aduana2', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codaduana2 = models.CharField(db_column='CodAduana2', max_length=3, blank=True, null=True)  # Field name made lowercase.
+    codaduana2 = models.CharField(db_column='CodAduana2', max_length=3, blank=True,
+                                  null=True)  # Field name made lowercase.
     numero2 = models.CharField(db_column='Numero2', max_length=26, blank=True, null=True)  # Field name made lowercase.
-    despachador = models.CharField(db_column='Despachador', max_length=24, blank=True, null=True)  # Field name made lowercase.
-    coddespachador = models.CharField(db_column='CodDespachador', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    numerodeclaracion = models.CharField(db_column='NumeroDeclaracion', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    fechadeclaracion = models.CharField(db_column='FechaDeclaracion', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    despachador = models.CharField(db_column='Despachador', max_length=24, blank=True,
+                                   null=True)  # Field name made lowercase.
+    coddespachador = models.CharField(db_column='CodDespachador', max_length=4, blank=True,
+                                      null=True)  # Field name made lowercase.
+    numerodeclaracion = models.CharField(db_column='NumeroDeclaracion', max_length=12, blank=True,
+                                         null=True)  # Field name made lowercase.
+    fechadeclaracion = models.CharField(db_column='FechaDeclaracion', max_length=10, blank=True,
+                                        null=True)  # Field name made lowercase.
     fecha = models.CharField(db_column='Fecha', max_length=26, blank=True, null=True)  # Field name made lowercase.
-    consignatario = models.CharField(db_column='Consignatario', max_length=37, blank=True, null=True)  # Field name made lowercase.
-    direccion = models.CharField(db_column='Direccion', max_length=37, blank=True, null=True)  # Field name made lowercase.
-    almacenista = models.CharField(db_column='Almacenista', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codalmacenista = models.CharField(db_column='CodAlmacenista', max_length=3, blank=True, null=True)  # Field name made lowercase.
+    consignatario = models.CharField(db_column='Consignatario', max_length=37, blank=True,
+                                     null=True)  # Field name made lowercase.
+    direccion = models.CharField(db_column='Direccion', max_length=37, blank=True,
+                                 null=True)  # Field name made lowercase.
+    almacenista = models.CharField(db_column='Almacenista', max_length=12, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codalmacenista = models.CharField(db_column='CodAlmacenista', max_length=3, blank=True,
+                                      null=True)  # Field name made lowercase.
     tipo = models.CharField(db_column='Tipo', max_length=10, blank=True, null=True)  # Field name made lowercase.
     codtipo = models.CharField(db_column='CodTipo', max_length=3, blank=True, null=True)  # Field name made lowercase.
     ciudad = models.CharField(db_column='Ciudad', max_length=20, blank=True, null=True)  # Field name made lowercase.
     rut = models.CharField(db_column='Rut', max_length=14, blank=True, null=True)  # Field name made lowercase.
-    fecharecepcion = models.CharField(db_column='FechaRecepcion', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    consignante = models.CharField(db_column='Consignante', max_length=37, blank=True, null=True)  # Field name made lowercase.
-    ubicacion = models.CharField(db_column='Ubicacion', max_length=26, blank=True, null=True)  # Field name made lowercase.
-    aduanadestino = models.CharField(db_column='AduanaDestino', max_length=16, blank=True, null=True)  # Field name made lowercase.
-    codaduanadestino = models.CharField(db_column='CodAduanaDestino', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    ubicacion2 = models.CharField(db_column='Ubicacion2', max_length=26, blank=True, null=True)  # Field name made lowercase.
-    paisdestino = models.CharField(db_column='PaisDestino', max_length=16, blank=True, null=True)  # Field name made lowercase.
-    codpaisdestino = models.CharField(db_column='CodPaisDestino', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    paisorigen = models.CharField(db_column='PaisOrigen', max_length=24, blank=True, null=True)  # Field name made lowercase.
-    codpaisorigen = models.CharField(db_column='CodPaisOrigen', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    viatransporte = models.CharField(db_column='ViaTransporte', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    codviatransporte = models.CharField(db_column='CodViaTransporte', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    paisorigen2 = models.CharField(db_column='PaisOrigen2', max_length=24, blank=True, null=True)  # Field name made lowercase.
-    codpaisorigen2 = models.CharField(db_column='CodPaisOrigen2', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    garantia = models.CharField(db_column='Garantia', max_length=26, blank=True, null=True)  # Field name made lowercase.
+    fecharecepcion = models.CharField(db_column='FechaRecepcion', max_length=12, blank=True,
+                                      null=True)  # Field name made lowercase.
+    consignante = models.CharField(db_column='Consignante', max_length=37, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ubicacion = models.CharField(db_column='Ubicacion', max_length=26, blank=True,
+                                 null=True)  # Field name made lowercase.
+    aduanadestino = models.CharField(db_column='AduanaDestino', max_length=16, blank=True,
+                                     null=True)  # Field name made lowercase.
+    codaduanadestino = models.CharField(db_column='CodAduanaDestino', max_length=3, blank=True,
+                                        null=True)  # Field name made lowercase.
+    ubicacion2 = models.CharField(db_column='Ubicacion2', max_length=26, blank=True,
+                                  null=True)  # Field name made lowercase.
+    paisdestino = models.CharField(db_column='PaisDestino', max_length=16, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codpaisdestino = models.CharField(db_column='CodPaisDestino', max_length=3, blank=True,
+                                      null=True)  # Field name made lowercase.
+    paisorigen = models.CharField(db_column='PaisOrigen', max_length=24, blank=True,
+                                  null=True)  # Field name made lowercase.
+    codpaisorigen = models.CharField(db_column='CodPaisOrigen', max_length=3, blank=True,
+                                     null=True)  # Field name made lowercase.
+    viatransporte = models.CharField(db_column='ViaTransporte', max_length=20, blank=True,
+                                     null=True)  # Field name made lowercase.
+    codviatransporte = models.CharField(db_column='CodViaTransporte', max_length=5, blank=True,
+                                        null=True)  # Field name made lowercase.
+    paisorigen2 = models.CharField(db_column='PaisOrigen2', max_length=24, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codpaisorigen2 = models.CharField(db_column='CodPaisOrigen2', max_length=3, blank=True,
+                                      null=True)  # Field name made lowercase.
+    garantia = models.CharField(db_column='Garantia', max_length=26, blank=True,
+                                null=True)  # Field name made lowercase.
     texto1 = models.CharField(db_column='Texto1', max_length=26, blank=True, null=True)  # Field name made lowercase.
-    paisorigen3 = models.CharField(db_column='PaisOrigen3', max_length=24, blank=True, null=True)  # Field name made lowercase.
-    codpaisorigen3 = models.CharField(db_column='CodPaisOrigen3', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    garantia2 = models.CharField(db_column='Garantia2', max_length=26, blank=True, null=True)  # Field name made lowercase.
+    paisorigen3 = models.CharField(db_column='PaisOrigen3', max_length=24, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codpaisorigen3 = models.CharField(db_column='CodPaisOrigen3', max_length=3, blank=True,
+                                      null=True)  # Field name made lowercase.
+    garantia2 = models.CharField(db_column='Garantia2', max_length=26, blank=True,
+                                 null=True)  # Field name made lowercase.
     texto2 = models.CharField(db_column='Texto2', max_length=26, blank=True, null=True)  # Field name made lowercase.
     texto3 = models.CharField(db_column='Texto3', max_length=26, blank=True, null=True)  # Field name made lowercase.
-    puertoembarque = models.CharField(db_column='PuertoEmbarque', max_length=24, blank=True, null=True)  # Field name made lowercase.
-    codpuertoembarque = models.CharField(db_column='CodPuertoEmbarque', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    puertodesembarque = models.CharField(db_column='PuertoDesembarque', max_length=24, blank=True, null=True)  # Field name made lowercase.
-    codpuertodesembarque = models.CharField(db_column='CodPuertoDesembarque', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    valorfob = models.CharField(db_column='ValorFob', max_length=16, blank=True, null=True)  # Field name made lowercase.
-    viatransporte2 = models.CharField(db_column='ViaTransporte2', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    codviatransporte2 = models.CharField(db_column='CodViaTransporte2', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    puertoembarque = models.CharField(db_column='PuertoEmbarque', max_length=24, blank=True,
+                                      null=True)  # Field name made lowercase.
+    codpuertoembarque = models.CharField(db_column='CodPuertoEmbarque', max_length=3, blank=True,
+                                         null=True)  # Field name made lowercase.
+    puertodesembarque = models.CharField(db_column='PuertoDesembarque', max_length=24, blank=True,
+                                         null=True)  # Field name made lowercase.
+    codpuertodesembarque = models.CharField(db_column='CodPuertoDesembarque', max_length=3, blank=True,
+                                            null=True)  # Field name made lowercase.
+    valorfob = models.CharField(db_column='ValorFob', max_length=16, blank=True,
+                                null=True)  # Field name made lowercase.
+    viatransporte2 = models.CharField(db_column='ViaTransporte2', max_length=20, blank=True,
+                                      null=True)  # Field name made lowercase.
+    codviatransporte2 = models.CharField(db_column='CodViaTransporte2', max_length=5, blank=True,
+                                         null=True)  # Field name made lowercase.
     flete = models.CharField(db_column='Flete', max_length=16, blank=True, null=True)  # Field name made lowercase.
     codflete = models.CharField(db_column='CodFlete', max_length=3, blank=True, null=True)  # Field name made lowercase.
 
@@ -3384,78 +3694,130 @@ class ExpterraDeclaracion(models.Model):
 
 class ExpterraDeclaracion2(models.Model):
     numero = models.IntegerField(blank=True, null=True)
-    conocembarque = models.CharField(db_column='ConocEmbarque', max_length=19, blank=True, null=True)  # Field name made lowercase.
-    fechaemision = models.CharField(db_column='FechaEmision', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    conocembarque = models.CharField(db_column='ConocEmbarque', max_length=19, blank=True,
+                                     null=True)  # Field name made lowercase.
+    fechaemision = models.CharField(db_column='FechaEmision', max_length=10, blank=True,
+                                    null=True)  # Field name made lowercase.
     emisor = models.CharField(db_column='Emisor', max_length=7, blank=True, null=True)  # Field name made lowercase.
     seguro = models.CharField(db_column='Seguro', max_length=16, blank=True, null=True)  # Field name made lowercase.
-    codseguro = models.CharField(db_column='CodSeguro', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    manifiesto = models.CharField(db_column='Manifiesto', max_length=37, blank=True, null=True)  # Field name made lowercase.
-    valorcif = models.CharField(db_column='ValorCif', max_length=16, blank=True, null=True)  # Field name made lowercase.
+    codseguro = models.CharField(db_column='CodSeguro', max_length=3, blank=True,
+                                 null=True)  # Field name made lowercase.
+    manifiesto = models.CharField(db_column='Manifiesto', max_length=37, blank=True,
+                                  null=True)  # Field name made lowercase.
+    valorcif = models.CharField(db_column='ValorCif', max_length=16, blank=True,
+                                null=True)  # Field name made lowercase.
     texto4 = models.CharField(db_column='Texto4', max_length=90, blank=True, null=True)  # Field name made lowercase.
     texto5 = models.CharField(db_column='Texto5', max_length=90, blank=True, null=True)  # Field name made lowercase.
     texto6 = models.CharField(db_column='Texto6', max_length=90, blank=True, null=True)  # Field name made lowercase.
     texto7 = models.CharField(db_column='Texto7', max_length=90, blank=True, null=True)  # Field name made lowercase.
     infref = models.CharField(db_column='InfRef', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    idbultos = models.CharField(db_column='IdBultos', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantbultos = models.CharField(db_column='CantBultos', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codbultos = models.CharField(db_column='CodBultos', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    idbultos = models.CharField(db_column='IdBultos', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
+    cantbultos = models.CharField(db_column='CantBultos', max_length=12, blank=True,
+                                  null=True)  # Field name made lowercase.
+    codbultos = models.CharField(db_column='CodBultos', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
     infref2 = models.CharField(db_column='InfRef2', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    idbultos2 = models.CharField(db_column='IdBultos2', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantbultos2 = models.CharField(db_column='CantBultos2', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codbultos2 = models.CharField(db_column='CodBultos2', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    idbultos2 = models.CharField(db_column='IdBultos2', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cantbultos2 = models.CharField(db_column='CantBultos2', max_length=12, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codbultos2 = models.CharField(db_column='CodBultos2', max_length=5, blank=True,
+                                  null=True)  # Field name made lowercase.
     nombre = models.CharField(db_column='Nombre', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    idbultos3 = models.CharField(db_column='IdBultos3', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantbultos3 = models.CharField(db_column='CantBultos3', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codbultos3 = models.CharField(db_column='CodBultos3', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    variedad = models.CharField(db_column='Variedad', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    idbultos4 = models.CharField(db_column='IdBultos4', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantbultos4 = models.CharField(db_column='CantBultos4', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codbultos4 = models.CharField(db_column='CodBultos4', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    idbultos3 = models.CharField(db_column='IdBultos3', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cantbultos3 = models.CharField(db_column='CantBultos3', max_length=12, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codbultos3 = models.CharField(db_column='CodBultos3', max_length=5, blank=True,
+                                  null=True)  # Field name made lowercase.
+    variedad = models.CharField(db_column='Variedad', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    idbultos4 = models.CharField(db_column='IdBultos4', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cantbultos4 = models.CharField(db_column='CantBultos4', max_length=12, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codbultos4 = models.CharField(db_column='CodBultos4', max_length=5, blank=True,
+                                  null=True)  # Field name made lowercase.
     marca = models.CharField(db_column='Marca', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    idbultos5 = models.CharField(db_column='IdBultos5', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantbultos5 = models.CharField(db_column='CantBultos5', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codbultos5 = models.CharField(db_column='CodBultos5', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    otrosant = models.CharField(db_column='OtrosAnt', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    idbultos6 = models.CharField(db_column='IdBultos6', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantbultos6 = models.CharField(db_column='CantBultos6', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codbultos6 = models.CharField(db_column='CodBultos6', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    idbultos5 = models.CharField(db_column='IdBultos5', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cantbultos5 = models.CharField(db_column='CantBultos5', max_length=12, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codbultos5 = models.CharField(db_column='CodBultos5', max_length=5, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrosant = models.CharField(db_column='OtrosAnt', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    idbultos6 = models.CharField(db_column='IdBultos6', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cantbultos6 = models.CharField(db_column='CantBultos6', max_length=12, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codbultos6 = models.CharField(db_column='CodBultos6', max_length=5, blank=True,
+                                  null=True)  # Field name made lowercase.
     obs = models.CharField(db_column='Obs', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    idbultos7 = models.CharField(db_column='IdBultos7', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantbultos7 = models.CharField(db_column='CantBultos7', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codbultos7 = models.CharField(db_column='CodBultos7', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    idbultos7 = models.CharField(db_column='IdBultos7', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cantbultos7 = models.CharField(db_column='CantBultos7', max_length=12, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codbultos7 = models.CharField(db_column='CodBultos7', max_length=5, blank=True,
+                                  null=True)  # Field name made lowercase.
     obs2 = models.CharField(db_column='Obs2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    idbultos8 = models.CharField(db_column='IdBultos8', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantbultos8 = models.CharField(db_column='CantBultos8', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codbultos8 = models.CharField(db_column='CodBultos8', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    idbultos8 = models.CharField(db_column='IdBultos8', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cantbultos8 = models.CharField(db_column='CantBultos8', max_length=12, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codbultos8 = models.CharField(db_column='CodBultos8', max_length=5, blank=True,
+                                  null=True)  # Field name made lowercase.
     obs3 = models.CharField(db_column='Obs3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    idbultos9 = models.CharField(db_column='IdBultos9', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantbultos9 = models.CharField(db_column='CantBultos9', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codbultos9 = models.CharField(db_column='CodBultos9', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    idbultos9 = models.CharField(db_column='IdBultos9', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cantbultos9 = models.CharField(db_column='CantBultos9', max_length=12, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codbultos9 = models.CharField(db_column='CodBultos9', max_length=5, blank=True,
+                                  null=True)  # Field name made lowercase.
     obs4 = models.CharField(db_column='Obs4', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    idbultos10 = models.CharField(db_column='IdBultos10', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantbultos10 = models.CharField(db_column='CantBultos10', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codbultos10 = models.CharField(db_column='CodBultos10', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    idbultos10 = models.CharField(db_column='IdBultos10', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
+    cantbultos10 = models.CharField(db_column='CantBultos10', max_length=12, blank=True,
+                                    null=True)  # Field name made lowercase.
+    codbultos10 = models.CharField(db_column='CodBultos10', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
     codnab = models.CharField(db_column='CodNab', max_length=14, blank=True, null=True)  # Field name made lowercase.
     esp = models.CharField(db_column='Esp', max_length=8, blank=True, null=True)  # Field name made lowercase.
     adval = models.CharField(db_column='AdVal', max_length=12, blank=True, null=True)  # Field name made lowercase.
     stasa = models.CharField(db_column='Stasa', max_length=14, blank=True, null=True)  # Field name made lowercase.
-    idbultos11 = models.CharField(db_column='IdBultos11', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantbultos11 = models.CharField(db_column='CantBultos11', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    codbultos11 = models.CharField(db_column='CodBultos11', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    cantmerc = models.CharField(db_column='CantMerc', max_length=14, blank=True, null=True)  # Field name made lowercase.
+    idbultos11 = models.CharField(db_column='IdBultos11', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
+    cantbultos11 = models.CharField(db_column='CantBultos11', max_length=12, blank=True,
+                                    null=True)  # Field name made lowercase.
+    codbultos11 = models.CharField(db_column='CodBultos11', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    cantmerc = models.CharField(db_column='CantMerc', max_length=14, blank=True,
+                                null=True)  # Field name made lowercase.
     punit = models.CharField(db_column='Punit', max_length=20, blank=True, null=True)  # Field name made lowercase.
     umed = models.CharField(db_column='Umed', max_length=15, blank=True, null=True)  # Field name made lowercase.
-    pesobruto = models.CharField(db_column='PesoBruto', max_length=14, blank=True, null=True)  # Field name made lowercase.
-    valorcif2 = models.CharField(db_column='ValorCif2', max_length=14, blank=True, null=True)  # Field name made lowercase.
-    totalbultos = models.CharField(db_column='TotalBultos', max_length=9, blank=True, null=True)  # Field name made lowercase.
-    totalacumulado = models.CharField(db_column='TotalAcumulado', max_length=14, blank=True, null=True)  # Field name made lowercase.
-    totalacumulado2 = models.CharField(db_column='TotalAcumulado2', max_length=14, blank=True, null=True)  # Field name made lowercase.
-    totalacumulado3 = models.CharField(db_column='TotalAcumulado3', max_length=9, blank=True, null=True)  # Field name made lowercase.
-    totalitem = models.CharField(db_column='TotalItem', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    totalhojas = models.CharField(db_column='TotalHojas', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    totalfinal = models.CharField(db_column='TotalFinal', max_length=14, blank=True, null=True)  # Field name made lowercase.
-    totalfinal2 = models.CharField(db_column='TotalFinal2', max_length=14, blank=True, null=True)  # Field name made lowercase.
-    totalfinal3 = models.CharField(db_column='TotalFinal3', max_length=9, blank=True, null=True)  # Field name made lowercase.
+    pesobruto = models.CharField(db_column='PesoBruto', max_length=14, blank=True,
+                                 null=True)  # Field name made lowercase.
+    valorcif2 = models.CharField(db_column='ValorCif2', max_length=14, blank=True,
+                                 null=True)  # Field name made lowercase.
+    totalbultos = models.CharField(db_column='TotalBultos', max_length=9, blank=True,
+                                   null=True)  # Field name made lowercase.
+    totalacumulado = models.CharField(db_column='TotalAcumulado', max_length=14, blank=True,
+                                      null=True)  # Field name made lowercase.
+    totalacumulado2 = models.CharField(db_column='TotalAcumulado2', max_length=14, blank=True,
+                                       null=True)  # Field name made lowercase.
+    totalacumulado3 = models.CharField(db_column='TotalAcumulado3', max_length=9, blank=True,
+                                       null=True)  # Field name made lowercase.
+    totalitem = models.CharField(db_column='TotalItem', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
+    totalhojas = models.CharField(db_column='TotalHojas', max_length=5, blank=True,
+                                  null=True)  # Field name made lowercase.
+    totalfinal = models.CharField(db_column='TotalFinal', max_length=14, blank=True,
+                                  null=True)  # Field name made lowercase.
+    totalfinal2 = models.CharField(db_column='TotalFinal2', max_length=14, blank=True,
+                                   null=True)  # Field name made lowercase.
+    totalfinal3 = models.CharField(db_column='TotalFinal3', max_length=9, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3510,7 +3872,8 @@ class ExpterraEmbarqueaereo(models.Model):
     embarcador = models.IntegerField(db_column='Embarcador', blank=True, null=True)  # Field name made lowercase.
     notificar = models.IntegerField(db_column='Notificar', blank=True, null=True)  # Field name made lowercase.
     vaporcli = models.CharField(db_column='Vaporcli', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    vaporcli2 = models.CharField(db_column='Vaporcli2', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    vaporcli2 = models.CharField(db_column='Vaporcli2', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     terminal = models.SmallIntegerField(blank=True, null=True)
     terminal2 = models.SmallIntegerField(blank=True, null=True)
     tipovend = models.CharField(db_column='Tipovend', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -3526,7 +3889,8 @@ class ExpterraEmbarqueaereo(models.Model):
     advalvta = models.FloatField(blank=True, null=True)
     advalcto = models.FloatField(blank=True, null=True)
     nroreferedi = models.IntegerField(blank=True, null=True)
-    ordencliente = models.CharField(db_column='OrdenCliente', max_length=850, blank=True, null=True)  # Field name made lowercase.
+    ordencliente = models.CharField(db_column='OrdenCliente', max_length=850, blank=True,
+                                    null=True)  # Field name made lowercase.
     propia = models.IntegerField(blank=True, null=True)
     seguimiento = models.IntegerField(blank=True, null=True)
     multimodal = models.CharField(max_length=1, blank=True, null=True)
@@ -3540,36 +3904,55 @@ class ExpterraEmbarqueaereo(models.Model):
     salidaawb = models.DateTimeField(blank=True, null=True)
     llegadaawb = models.DateTimeField(blank=True, null=True)
     viaje = models.CharField(max_length=20, blank=True, null=True)
-    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True,
+                                       null=True)  # Field name made lowercase.
+    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True,
+                                          null=True)  # Field name made lowercase.
+    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
     proyecto = models.SmallIntegerField(db_column='Proyecto', blank=True, null=True)  # Field name made lowercase.
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True,
+                                           null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
     despafrontera = models.IntegerField(db_column='DespaFrontera', blank=True, null=True)  # Field name made lowercase.
     sociotransfer = models.IntegerField(db_column='SocioTransfer', blank=True, null=True)  # Field name made lowercase.
-    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True,
+                                    null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     agecompras = models.IntegerField(db_column='AgeCompras', blank=True, null=True)  # Field name made lowercase.
     ageventas = models.IntegerField(db_column='AgeVentas', blank=True, null=True)  # Field name made lowercase.
     fechaentrega = models.DateTimeField(db_column='FechaEntrega', blank=True, null=True)  # Field name made lowercase.
-    aquienentrega = models.CharField(db_column='aQuienEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    aquienentrega = models.CharField(db_column='aQuienEntrega', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
     actividad = models.SmallIntegerField(db_column='Actividad', blank=True, null=True)  # Field name made lowercase.
-    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True,
+                                       null=True)  # Field name made lowercase.
+    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True,
+                                         null=True)  # Field name made lowercase.
+    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True,
+                                      null=True)  # Field name made lowercase.
     booking = models.CharField(db_column='Booking', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    diasalmacenaje = models.SmallIntegerField(db_column='DiasAlmacenaje', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    diasalmacenaje = models.SmallIntegerField(db_column='DiasAlmacenaje', blank=True,
+                                              null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
     trackid = models.CharField(db_column='TrackID', max_length=50, blank=True, null=True)  # Field name made lowercase.
     etd = models.DateTimeField(db_column='ETD', blank=True, null=True)  # Field name made lowercase.
     eta = models.DateTimeField(db_column='ETA', blank=True, null=True)  # Field name made lowercase.
@@ -3581,56 +3964,90 @@ class ExpterraEmbarqueaereo(models.Model):
 
 class ExpterraEntregadoc(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True,
+                                        null=True)  # Field name made lowercase.
+    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
+    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
     original = models.CharField(db_column='Original', max_length=1, blank=True, null=True)  # Field name made lowercase.
     lista = models.CharField(db_column='Lista', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     declara = models.CharField(db_column='Declara', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     copiahbl = models.CharField(db_column='CopiaHBL', max_length=1, blank=True, null=True)  # Field name made lowercase.
     otros = models.CharField(db_column='Otros', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
     ordendep = models.CharField(db_column='OrdenDep', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     libre = models.CharField(db_column='Libre', max_length=1, blank=True, null=True)  # Field name made lowercase.
     eur1 = models.CharField(db_column='Eur1', max_length=1, blank=True, null=True)  # Field name made lowercase.
     factura = models.CharField(db_column='Factura', max_length=1, blank=True, null=True)  # Field name made lowercase.
     nuestra = models.CharField(db_column='Nuestra', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     cumplido = models.CharField(db_column='Cumplido', max_length=1, blank=True, null=True)  # Field name made lowercase.
     transfer = models.CharField(db_column='Transfer', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     remarks = models.CharField(db_column='Remarks', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True,
+                                null=True)  # Field name made lowercase.
+    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True,
+                                  null=True)  # Field name made lowercase.
+    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True,
+                                           null=True)  # Field name made lowercase.
     crt = models.CharField(db_column='CRT', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True,
+                                 null=True)  # Field name made lowercase.
+    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
+    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True,
+                                               null=True)  # Field name made lowercase.
     micdta = models.CharField(db_column='MicDta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True,
+                                    null=True)  # Field name made lowercase.
     papeleta = models.CharField(db_column='Papeleta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True,
+                                      null=True)  # Field name made lowercase.
+    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True,
+                                              null=True)  # Field name made lowercase.
+    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True,
+                                          null=True)  # Field name made lowercase.
+    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3655,23 +4072,37 @@ class ExpterraEnvases(models.Model):
     profit = models.FloatField(blank=True, null=True)
     temperatura = models.FloatField(db_column='Temperatura', blank=True, null=True)  # Field name made lowercase.
     activo = models.CharField(db_column='Activo', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadtemp = models.CharField(db_column='UnidadTemp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    condespeciales = models.CharField(db_column='CondEspeciales', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    nomchofer = models.CharField(db_column='NomChofer', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    telchofer = models.CharField(db_column='TelChofer', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    matricula = models.CharField(db_column='Matricula', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    unidadtemp = models.CharField(db_column='UnidadTemp', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    condespeciales = models.CharField(db_column='CondEspeciales', max_length=100, blank=True,
+                                      null=True)  # Field name made lowercase.
+    nomchofer = models.CharField(db_column='NomChofer', max_length=100, blank=True,
+                                 null=True)  # Field name made lowercase.
+    telchofer = models.CharField(db_column='TelChofer', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
+    matricula = models.CharField(db_column='Matricula', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
-    horacitacion = models.CharField(db_column='HoraCitacion', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    horallegada = models.CharField(db_column='HoraLlegada', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    depositoretiro = models.IntegerField(db_column='DepositoRetiro', blank=True, null=True)  # Field name made lowercase.
+    horacitacion = models.CharField(db_column='HoraCitacion', max_length=30, blank=True,
+                                    null=True)  # Field name made lowercase.
+    horallegada = models.CharField(db_column='HoraLlegada', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    depositoretiro = models.IntegerField(db_column='DepositoRetiro', blank=True,
+                                         null=True)  # Field name made lowercase.
     depositodev = models.IntegerField(db_column='DepositoDev', blank=True, null=True)  # Field name made lowercase.
     cotizacion = models.IntegerField(db_column='Cotizacion', blank=True, null=True)  # Field name made lowercase.
-    direccionentrega = models.SmallIntegerField(db_column='DireccionEntrega', blank=True, null=True)  # Field name made lowercase.
-    rucchofer = models.CharField(db_column='RucChofer', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    fechallegadaplanta = models.DateTimeField(db_column='FechaLlegadaPlanta', blank=True, null=True)  # Field name made lowercase.
-    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    precinto = models.CharField(db_column='Precinto', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    autogenenvase = models.CharField(db_column='AutogenEnvase', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    direccionentrega = models.SmallIntegerField(db_column='DireccionEntrega', blank=True,
+                                                null=True)  # Field name made lowercase.
+    rucchofer = models.CharField(db_column='RucChofer', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    fechallegadaplanta = models.DateTimeField(db_column='FechaLlegadaPlanta', blank=True,
+                                              null=True)  # Field name made lowercase.
+    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=100, blank=True,
+                                     null=True)  # Field name made lowercase.
+    precinto = models.CharField(db_column='Precinto', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
+    autogenenvase = models.CharField(db_column='AutogenEnvase', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
     fechacitacion = models.DateTimeField(db_column='FechaCitacion', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -3696,8 +4127,10 @@ class ExpterraFisico(models.Model):
     detalle = models.CharField(db_column='Detalle', max_length=60, blank=True, null=True)  # Field name made lowercase.
     volumen = models.FloatField(blank=True, null=True)
     tara = models.IntegerField(db_column='Tara', blank=True, null=True)  # Field name made lowercase.
-    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3714,7 +4147,8 @@ class ExpterraGastoshijos(models.Model):
     moneda = models.SmallIntegerField(db_column='Moneda', blank=True, null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=50, blank=True, null=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
     statushijos = models.SmallIntegerField(db_column='StatusHijos', blank=True, null=True)  # Field name made lowercase.
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
 
@@ -3803,10 +4237,12 @@ class ExpterraReservas(models.Model):
     awb = models.CharField(max_length=20, blank=True, null=True)
     agente = models.IntegerField(blank=True, null=True)
     consignatario = models.IntegerField(blank=True, null=True)
-    pagoflete = models.CharField(db_column='Pagoflete', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    pagoflete = models.CharField(db_column='Pagoflete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     moneda = models.SmallIntegerField(blank=True, null=True)
     arbitraje = models.FloatField(blank=True, null=True)
-    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
     notas = models.TextField(db_column='Notas', blank=True, null=True)  # Field name made lowercase.
     volumen = models.FloatField(db_column='Volumen', blank=True, null=True)  # Field name made lowercase.
     cotizacion = models.IntegerField(blank=True, null=True)
@@ -3822,7 +4258,8 @@ class ExpterraReservas(models.Model):
     observadoc = models.TextField(blank=True, null=True)
     profitage = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     tarifapl = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    posicion = models.CharField(db_column='Posicion', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    posicion = models.CharField(db_column='Posicion', max_length=30, blank=True,
+                                null=True)  # Field name made lowercase.
     envioedi = models.CharField(max_length=1, blank=True, null=True)
     aduanallegada = models.CharField(max_length=3, blank=True, null=True)
     aduanasalida = models.CharField(max_length=3, blank=True, null=True)
@@ -3837,14 +4274,20 @@ class ExpterraReservas(models.Model):
     iniciales = models.CharField(max_length=3, blank=True, null=True)
     trafico = models.SmallIntegerField(blank=True, null=True)
     exportado = models.CharField(max_length=1, blank=True, null=True)
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    manifiesto = models.CharField(db_column='Manifiesto', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    manifiesto = models.CharField(db_column='Manifiesto', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3867,8 +4310,10 @@ class ExpterraServiceaereo(models.Model):
     pinformar = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    autogenenvase = models.CharField(db_column='AutogenEnvase', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    autogenenvase = models.CharField(db_column='AutogenEnvase', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -3893,7 +4338,8 @@ class ExpterraServireserva(models.Model):
     precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -3903,10 +4349,12 @@ class ExpterraServireserva(models.Model):
 
 class ExpterraTraceop(models.Model):
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
     modulo = models.CharField(db_column='Modulo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     detalle = models.CharField(db_column='Detalle', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
     clave = models.CharField(db_column='Clave', max_length=4, blank=True, null=True)  # Field name made lowercase.
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
 
@@ -3931,8 +4379,10 @@ class ImpmaritAttachhijo(models.Model):
     detalle = models.CharField(max_length=50, blank=True, null=True)
     web = models.CharField(max_length=1, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True,
+                                         null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3943,7 +4393,8 @@ class ImpmaritAttachmadre(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     archivo = models.CharField(max_length=250, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3960,7 +4411,8 @@ class ImpmaritCargaaerea(models.Model):
     fechaembarque = models.DateTimeField(blank=True, null=True)
     cbm = models.FloatField(blank=True, null=True)
     mercaderia = models.TextField(blank=True, null=True)
-    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=400, blank=True, null=True)  # Field name made lowercase.
+    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=400, blank=True,
+                                     null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -3995,8 +4447,10 @@ class ImpmaritConexaerea(models.Model):
     cia = models.CharField(max_length=50, blank=True, null=True)
     viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  # Field name made lowercase.
     modo = models.CharField(max_length=15, blank=True, null=True)
-    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
+                                  null=True)  # Field name made lowercase.
+    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4013,8 +4467,10 @@ class ImpmaritConexreserva(models.Model):
     cia = models.CharField(max_length=50, blank=True, null=True)
     viaje = models.CharField(max_length=10, blank=True, null=True)
     modo = models.CharField(max_length=15, blank=True, null=True)
-    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
+                                  null=True)  # Field name made lowercase.
+    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4070,7 +4526,8 @@ class ImpmaritEmbarqueaereo(models.Model):
     embarcador = models.IntegerField(db_column='Embarcador', blank=True, null=True)  # Field name made lowercase.
     notificar = models.IntegerField(db_column='Notificar', blank=True, null=True)  # Field name made lowercase.
     vaporcli = models.CharField(db_column='Vaporcli', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    vaporcli2 = models.CharField(db_column='Vaporcli2', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    vaporcli2 = models.CharField(db_column='Vaporcli2', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     vapor = models.CharField(db_column='Vapor', max_length=30, blank=True, null=True)  # Field name made lowercase.
     terminal = models.SmallIntegerField(blank=True, null=True)
     tipovend = models.CharField(db_column='Tipovend', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -4091,55 +4548,86 @@ class ImpmaritEmbarqueaereo(models.Model):
     aquienentrega = models.CharField(max_length=30, blank=True, null=True)
     multimodal = models.CharField(max_length=1, blank=True, null=True)
     originales = models.CharField(max_length=1, blank=True, null=True)
-    fechalimitedemora = models.DateTimeField(db_column='FechaLimiteDemora', blank=True, null=True)  # Field name made lowercase.
-    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    fechalimitedemora = models.DateTimeField(db_column='FechaLimiteDemora', blank=True,
+                                             null=True)  # Field name made lowercase.
+    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True,
+                                       null=True)  # Field name made lowercase.
+    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True,
+                                          null=True)  # Field name made lowercase.
+    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
     proyecto = models.SmallIntegerField(db_column='Proyecto', blank=True, null=True)  # Field name made lowercase.
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True,
+                                           null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
     loading = models.CharField(db_column='Loading', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    tieneacta = models.CharField(db_column='TieneActa', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    deaddocumentos = models.DateTimeField(db_column='DeadDocumentos', blank=True, null=True)  # Field name made lowercase.
+    tieneacta = models.CharField(db_column='TieneActa', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True,
+                                    null=True)  # Field name made lowercase.
+    deaddocumentos = models.DateTimeField(db_column='DeadDocumentos', blank=True,
+                                          null=True)  # Field name made lowercase.
     deadentrega = models.DateTimeField(db_column='DeadEntrega', blank=True, null=True)  # Field name made lowercase.
     hblcorp = models.IntegerField(db_column='HBLCorp', blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    desconsolidadeposito = models.CharField(db_column='DesconsolidaDeposito', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    desconsolidadeposito = models.CharField(db_column='DesconsolidaDeposito', max_length=1, blank=True,
+                                            null=True)  # Field name made lowercase.
     demora = models.SmallIntegerField(db_column='Demora', blank=True, null=True)  # Field name made lowercase.
-    valordemoravta = models.DecimalField(db_column='ValorDemoraVTA', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    valordemoracpa = models.DecimalField(db_column='ValorDemoraCPA', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    enviointercomex = models.CharField(db_column='EnvioIntercomex', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    valordemoravta = models.DecimalField(db_column='ValorDemoraVTA', max_digits=19, decimal_places=4, blank=True,
+                                         null=True)  # Field name made lowercase.
+    valordemoracpa = models.DecimalField(db_column='ValorDemoraCPA', max_digits=19, decimal_places=4, blank=True,
+                                         null=True)  # Field name made lowercase.
+    enviointercomex = models.CharField(db_column='EnvioIntercomex', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
     agecompras = models.IntegerField(db_column='AgeCompras', blank=True, null=True)  # Field name made lowercase.
     ageventas = models.IntegerField(db_column='AgeVentas', blank=True, null=True)  # Field name made lowercase.
     actividad = models.SmallIntegerField(db_column='Actividad', blank=True, null=True)  # Field name made lowercase.
     arribosim = models.DateTimeField(db_column='ArriboSIM', blank=True, null=True)  # Field name made lowercase.
     presentasim = models.DateTimeField(db_column='PresentaSIM', blank=True, null=True)  # Field name made lowercase.
     cierresim = models.DateTimeField(db_column='CierreSIM', blank=True, null=True)  # Field name made lowercase.
-    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    manifiesto = models.CharField(db_column='Manifiesto', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True,
+                                       null=True)  # Field name made lowercase.
+    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True,
+                                         null=True)  # Field name made lowercase.
+    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True,
+                                      null=True)  # Field name made lowercase.
+    manifiesto = models.CharField(db_column='Manifiesto', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     emisionbl = models.DateTimeField(db_column='EmisionBL', blank=True, null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
-    fechafinoperativa = models.DateTimeField(db_column='FechaFinOperativa', blank=True, null=True)  # Field name made lowercase.
-    horafinoperativa = models.CharField(db_column='HoraFinOperativa', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    fechafinoperativa = models.DateTimeField(db_column='FechaFinOperativa', blank=True,
+                                             null=True)  # Field name made lowercase.
+    horafinoperativa = models.CharField(db_column='HoraFinOperativa', max_length=8, blank=True,
+                                        null=True)  # Field name made lowercase.
     fechadocsdisp = models.DateTimeField(db_column='FechaDocsDisp', blank=True, null=True)  # Field name made lowercase.
-    horadocsdisp = models.CharField(db_column='HoraDocsDisp', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    horadocsdisp = models.CharField(db_column='HoraDocsDisp', max_length=8, blank=True,
+                                    null=True)  # Field name made lowercase.
     fechadocsret = models.DateTimeField(db_column='FechaDocsRet', blank=True, null=True)  # Field name made lowercase.
-    horadocsret = models.CharField(db_column='HoraDocsRet', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    horadocsret = models.CharField(db_column='HoraDocsRet', max_length=8, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
     tipobl = models.CharField(db_column='TipoBL', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    emitebloriginal = models.CharField(db_column='EmiteBLOriginal', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    emitebloriginal = models.CharField(db_column='EmiteBLOriginal', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
     trackid = models.CharField(db_column='TrackID', max_length=50, blank=True, null=True)  # Field name made lowercase.
     etd = models.DateTimeField(db_column='ETD', blank=True, null=True)  # Field name made lowercase.
     eta = models.DateTimeField(db_column='ETA', blank=True, null=True)  # Field name made lowercase.
@@ -4151,56 +4639,90 @@ class ImpmaritEmbarqueaereo(models.Model):
 
 class ImpmaritEntregadoc(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True,
+                                        null=True)  # Field name made lowercase.
+    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
+    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
     original = models.CharField(db_column='Original', max_length=1, blank=True, null=True)  # Field name made lowercase.
     lista = models.CharField(db_column='Lista', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     declara = models.CharField(db_column='Declara', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     copiahbl = models.CharField(db_column='CopiaHBL', max_length=1, blank=True, null=True)  # Field name made lowercase.
     otros = models.CharField(db_column='Otros', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
     ordendep = models.CharField(db_column='OrdenDep', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     libre = models.CharField(db_column='Libre', max_length=1, blank=True, null=True)  # Field name made lowercase.
     eur1 = models.CharField(db_column='Eur1', max_length=1, blank=True, null=True)  # Field name made lowercase.
     factura = models.CharField(db_column='Factura', max_length=1, blank=True, null=True)  # Field name made lowercase.
     nuestra = models.CharField(db_column='Nuestra', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     cumplido = models.CharField(db_column='Cumplido', max_length=1, blank=True, null=True)  # Field name made lowercase.
     transfer = models.CharField(db_column='Transfer', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     remarks = models.CharField(db_column='Remarks', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True,
+                                null=True)  # Field name made lowercase.
+    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True,
+                                  null=True)  # Field name made lowercase.
+    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True,
+                                           null=True)  # Field name made lowercase.
     crt = models.CharField(db_column='CRT', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True,
+                                 null=True)  # Field name made lowercase.
+    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
+    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True,
+                                               null=True)  # Field name made lowercase.
     micdta = models.CharField(db_column='MicDta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True,
+                                    null=True)  # Field name made lowercase.
     papeleta = models.CharField(db_column='Papeleta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True,
+                                      null=True)  # Field name made lowercase.
+    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True,
+                                              null=True)  # Field name made lowercase.
+    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True,
+                                          null=True)  # Field name made lowercase.
+    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4228,7 +4750,8 @@ class ImpmaritEnvases(models.Model):
     volumen = models.FloatField(blank=True, null=True)
     status = models.SmallIntegerField(db_column='Status', blank=True, null=True)  # Field name made lowercase.
     fechadevol = models.DateTimeField(db_column='FechaDevol', blank=True, null=True)  # Field name made lowercase.
-    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -4252,10 +4775,13 @@ class ImpmaritFisico(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     detalle = models.CharField(db_column='Detalle', max_length=100, blank=True, null=True)  # Field name made lowercase.
     marcas = models.CharField(db_column='Marcas', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    precinto = models.CharField(db_column='Precinto', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    precinto = models.CharField(db_column='Precinto', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
     tara = models.IntegerField(db_column='Tara', blank=True, null=True)  # Field name made lowercase.
-    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
     imo = models.CharField(max_length=1, blank=True, null=True)
     eta = models.DateTimeField(blank=True, null=True)
     ata = models.DateTimeField(blank=True, null=True)
@@ -4296,10 +4822,12 @@ class ImpmaritGastoshijos(models.Model):
     moneda = models.SmallIntegerField(db_column='Moneda', blank=True, null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=50, blank=True, null=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
     statushijos = models.SmallIntegerField(db_column='StatusHijos', blank=True, null=True)  # Field name made lowercase.
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    movimiento = models.CharField(db_column='Movimiento', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    movimiento = models.CharField(db_column='Movimiento', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4316,7 +4844,8 @@ class ImpmaritGastosmadre(models.Model):
     sucursal = models.SmallIntegerField(db_column='Sucursal', blank=True, null=True)  # Field name made lowercase.
     unidad = models.CharField(db_column='Unidad', max_length=5, blank=True, null=True)  # Field name made lowercase.
     tipo = models.CharField(db_column='Tipo', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    operacion = models.CharField(db_column='Operacion', max_length=25, blank=True, null=True)  # Field name made lowercase.
+    operacion = models.CharField(db_column='Operacion', max_length=25, blank=True,
+                                 null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4373,12 +4902,18 @@ class ImpmaritGuiasgrabadas(models.Model):
     restotext = models.CharField(max_length=45, blank=True, null=True)
     portext = models.CharField(max_length=50, blank=True, null=True)
     vadeclared = models.IntegerField(blank=True, null=True)
-    precarriage = models.CharField(db_column='PreCarriage', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    consigna6 = models.CharField(db_column='Consigna6', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    consigna7 = models.CharField(db_column='Consigna7', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    consigna8 = models.CharField(db_column='Consigna8', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente5 = models.CharField(db_column='Cliente5', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otranotif = models.CharField(db_column='Otranotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    precarriage = models.CharField(db_column='PreCarriage', max_length=35, blank=True,
+                                   null=True)  # Field name made lowercase.
+    consigna6 = models.CharField(db_column='Consigna6', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    consigna7 = models.CharField(db_column='Consigna7', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    consigna8 = models.CharField(db_column='Consigna8', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cliente5 = models.CharField(db_column='Cliente5', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    otranotif = models.CharField(db_column='Otranotif', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4413,8 +4948,10 @@ class ImpmaritNietos(models.Model):
     notificar = models.CharField(max_length=50, blank=True, null=True)
     peso = models.FloatField(db_column='Peso', blank=True, null=True)  # Field name made lowercase.
     tipo = models.CharField(db_column='Tipo', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    producto = models.CharField(db_column='Producto', max_length=150, blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    producto = models.CharField(db_column='Producto', max_length=150, blank=True,
+                                null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4431,10 +4968,12 @@ class ImpmaritReservas(models.Model):
     awb = models.CharField(max_length=40, blank=True, null=True)
     agente = models.IntegerField(blank=True, null=True)
     consignatario = models.IntegerField(blank=True, null=True)
-    pagoflete = models.CharField(db_column='Pagoflete', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    pagoflete = models.CharField(db_column='Pagoflete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     moneda = models.SmallIntegerField(blank=True, null=True)
     arbitraje = models.FloatField(blank=True, null=True)
-    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
     notas = models.TextField(db_column='Notas', blank=True, null=True)  # Field name made lowercase.
     volumen = models.FloatField(db_column='Volumen', blank=True, null=True)  # Field name made lowercase.
     cotizacion = models.IntegerField(blank=True, null=True)
@@ -4453,7 +4992,8 @@ class ImpmaritReservas(models.Model):
     tarifapl = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     vapor = models.CharField(db_column='Vapor', max_length=30, blank=True, null=True)  # Field name made lowercase.
     viaje = models.CharField(db_column='Viaje', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    posicion = models.CharField(db_column='Posicion', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    posicion = models.CharField(db_column='Posicion', max_length=30, blank=True,
+                                null=True)  # Field name made lowercase.
     envioedi = models.CharField(max_length=1, blank=True, null=True)
     nroreferedi = models.IntegerField(blank=True, null=True)
     ciep = models.CharField(max_length=30, blank=True, null=True)
@@ -4465,18 +5005,27 @@ class ImpmaritReservas(models.Model):
     trafico = models.SmallIntegerField(blank=True, null=True)
     iniciales = models.CharField(max_length=3, blank=True, null=True)
     orden = models.CharField(max_length=50, blank=True, null=True)
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
     loading = models.CharField(db_column='Loading', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    viajefluvial = models.CharField(db_column='ViajeFluvial', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    awbfluvial = models.CharField(db_column='AwbFluvial', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    prefijofluvial = models.CharField(db_column='PrefijoFluvial', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    viajefluvial = models.CharField(db_column='ViajeFluvial', max_length=30, blank=True,
+                                    null=True)  # Field name made lowercase.
+    awbfluvial = models.CharField(db_column='AwbFluvial', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    prefijofluvial = models.CharField(db_column='PrefijoFluvial', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4499,7 +5048,8 @@ class ImpmaritServiceaereo(models.Model):
     descripcion = models.CharField(max_length=50, blank=True, null=True)
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -4521,10 +5071,12 @@ class ImpmaritServireserva(models.Model):
     pinformar = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     descripcion = models.CharField(max_length=50, blank=True, null=True)
     precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    prorrateo = models.CharField(db_column='Prorrateo', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    prorrateo = models.CharField(db_column='Prorrateo', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -4534,10 +5086,12 @@ class ImpmaritServireserva(models.Model):
 
 class ImpmaritTraceop(models.Model):
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
     modulo = models.CharField(db_column='Modulo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     detalle = models.CharField(db_column='Detalle', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
     clave = models.CharField(db_column='Clave', max_length=4, blank=True, null=True)  # Field name made lowercase.
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
 
@@ -4562,8 +5116,10 @@ class ImportAttachhijo(models.Model):
     detalle = models.CharField(max_length=50, blank=True, null=True)
     web = models.CharField(max_length=1, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True,
+                                         null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4574,7 +5130,8 @@ class ImportAttachmadre(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     archivo = models.CharField(max_length=250, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4601,8 +5158,10 @@ class ImportCargaaereaaduana(models.Model):
     bultos = models.IntegerField(db_column='Bultos', blank=True, null=True)  # Field name made lowercase.
     bruto = models.FloatField(db_column='Bruto', blank=True, null=True)  # Field name made lowercase.
     tipo = models.CharField(db_column='Tipo', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    manifiesto = models.CharField(db_column='Manifiesto', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    fechamanifiesto = models.DateTimeField(db_column='FechaManifiesto', blank=True, null=True)  # Field name made lowercase.
+    manifiesto = models.CharField(db_column='Manifiesto', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    fechamanifiesto = models.DateTimeField(db_column='FechaManifiesto', blank=True,
+                                           null=True)  # Field name made lowercase.
     enviado = models.CharField(db_column='Enviado', max_length=1, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -4629,8 +5188,10 @@ class ImportConexaerea(models.Model):
     ciavuelo = models.CharField(max_length=30, blank=True, null=True)
     viaje = models.CharField(max_length=10, blank=True, null=True)
     modo = models.CharField(max_length=15, blank=True, null=True)
-    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
+                                  null=True)  # Field name made lowercase.
+    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4645,8 +5206,10 @@ class ImportConexreserva(models.Model):
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
     ciavuelo = models.CharField(max_length=2, blank=True, null=True)
-    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
+                                  null=True)  # Field name made lowercase.
+    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4706,7 +5269,8 @@ class ImportEmbarqueaereo(models.Model):
     embarcador = models.SmallIntegerField(db_column='Embarcador', blank=True, null=True)  # Field name made lowercase.
     notificar = models.SmallIntegerField(db_column='Notificar', blank=True, null=True)  # Field name made lowercase.
     vaporcli = models.CharField(db_column='Vaporcli', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    vaporcli2 = models.CharField(db_column='Vaporcli2', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    vaporcli2 = models.CharField(db_column='Vaporcli2', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     tipobonifcli = models.CharField(max_length=1, blank=True, null=True)
     bonifcli = models.FloatField(blank=True, null=True)
     tipovend = models.CharField(max_length=1, blank=True, null=True)
@@ -4726,42 +5290,67 @@ class ImportEmbarqueaereo(models.Model):
     terminal = models.CharField(max_length=25, blank=True, null=True)
     multimodal = models.CharField(max_length=1, blank=True, null=True)
     originales = models.CharField(max_length=1, blank=True, null=True)
-    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True,
+                                       null=True)  # Field name made lowercase.
+    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True,
+                                          null=True)  # Field name made lowercase.
+    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
     mercaderia = models.TextField(db_column='Mercaderia', blank=True, null=True)  # Field name made lowercase.
     proyecto = models.SmallIntegerField(db_column='Proyecto', blank=True, null=True)  # Field name made lowercase.
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True,
+                                           null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    tieneacta = models.CharField(db_column='TieneActa', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    enviointercomex = models.CharField(db_column='EnvioIntercomex', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    tieneacta = models.CharField(db_column='TieneActa', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True,
+                                    null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    enviointercomex = models.CharField(db_column='EnvioIntercomex', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
     agecompras = models.IntegerField(db_column='AgeCompras', blank=True, null=True)  # Field name made lowercase.
     ageventas = models.IntegerField(db_column='AgeVentas', blank=True, null=True)  # Field name made lowercase.
     actividad = models.SmallIntegerField(db_column='Actividad', blank=True, null=True)  # Field name made lowercase.
-    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True,
+                                       null=True)  # Field name made lowercase.
+    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True,
+                                         null=True)  # Field name made lowercase.
+    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True,
+                                      null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     emisionawb = models.DateTimeField(db_column='EmisionAWB', blank=True, null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
     fechalibdoc = models.DateTimeField(db_column='FechaLibDoc', blank=True, null=True)  # Field name made lowercase.
-    horalibdoc = models.CharField(db_column='HoraLibDoc', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    fechapresmanif = models.DateTimeField(db_column='FechaPresManif', blank=True, null=True)  # Field name made lowercase.
-    horapresmanif = models.CharField(db_column='HoraPresManif', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    fechacierremanif = models.DateTimeField(db_column='FechaCierreManif', blank=True, null=True)  # Field name made lowercase.
-    horacierremanif = models.CharField(db_column='HoraCierreManif', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    horalibdoc = models.CharField(db_column='HoraLibDoc', max_length=8, blank=True,
+                                  null=True)  # Field name made lowercase.
+    fechapresmanif = models.DateTimeField(db_column='FechaPresManif', blank=True,
+                                          null=True)  # Field name made lowercase.
+    horapresmanif = models.CharField(db_column='HoraPresManif', max_length=8, blank=True,
+                                     null=True)  # Field name made lowercase.
+    fechacierremanif = models.DateTimeField(db_column='FechaCierreManif', blank=True,
+                                            null=True)  # Field name made lowercase.
+    horacierremanif = models.CharField(db_column='HoraCierreManif', max_length=8, blank=True,
+                                       null=True)  # Field name made lowercase.
     fechadesconso = models.DateTimeField(db_column='FechaDesconso', blank=True, null=True)  # Field name made lowercase.
-    horadesconso = models.CharField(db_column='HoraDesconso', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    horadesconso = models.CharField(db_column='HoraDesconso', max_length=8, blank=True,
+                                    null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
     trackid = models.CharField(db_column='TrackID', max_length=50, blank=True, null=True)  # Field name made lowercase.
     etd = models.DateTimeField(db_column='ETD', blank=True, null=True)  # Field name made lowercase.
     eta = models.DateTimeField(db_column='ETA', blank=True, null=True)  # Field name made lowercase.
@@ -4773,56 +5362,90 @@ class ImportEmbarqueaereo(models.Model):
 
 class ImportEntregadoc(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True,
+                                        null=True)  # Field name made lowercase.
+    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
+    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
     original = models.CharField(db_column='Original', max_length=1, blank=True, null=True)  # Field name made lowercase.
     lista = models.CharField(db_column='Lista', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     declara = models.CharField(db_column='Declara', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     copiahbl = models.CharField(db_column='CopiaHBL', max_length=1, blank=True, null=True)  # Field name made lowercase.
     otros = models.CharField(db_column='Otros', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
     ordendep = models.CharField(db_column='OrdenDep', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     libre = models.CharField(db_column='Libre', max_length=1, blank=True, null=True)  # Field name made lowercase.
     eur1 = models.CharField(db_column='Eur1', max_length=1, blank=True, null=True)  # Field name made lowercase.
     factura = models.CharField(db_column='Factura', max_length=1, blank=True, null=True)  # Field name made lowercase.
     nuestra = models.CharField(db_column='Nuestra', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     cumplido = models.CharField(db_column='Cumplido', max_length=1, blank=True, null=True)  # Field name made lowercase.
     transfer = models.CharField(db_column='Transfer', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     remarks = models.CharField(db_column='Remarks', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True,
+                                null=True)  # Field name made lowercase.
+    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True,
+                                  null=True)  # Field name made lowercase.
+    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True,
+                                           null=True)  # Field name made lowercase.
     crt = models.CharField(db_column='CRT', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True,
+                                 null=True)  # Field name made lowercase.
+    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
+    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True,
+                                               null=True)  # Field name made lowercase.
     micdta = models.CharField(db_column='MicDta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True,
+                                    null=True)  # Field name made lowercase.
     papeleta = models.CharField(db_column='Papeleta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True,
+                                      null=True)  # Field name made lowercase.
+    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True,
+                                              null=True)  # Field name made lowercase.
+    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True,
+                                          null=True)  # Field name made lowercase.
+    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4851,7 +5474,8 @@ class ImportGastoshijos(models.Model):
     moneda = models.SmallIntegerField(db_column='Moneda', blank=True, null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=50, blank=True, null=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
     statushijos = models.SmallIntegerField(db_column='StatusHijos', blank=True, null=True)  # Field name made lowercase.
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
 
@@ -4943,7 +5567,8 @@ class ImportGuiasgrabadas2(models.Model):
     nature12 = models.CharField(max_length=25, blank=True, null=True)
     gastosconiva = models.IntegerField(blank=True, null=True)
     asagent = models.CharField(db_column='AsAgent', max_length=70, blank=True, null=True)  # Field name made lowercase.
-    ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True, null=True)  # Field name made lowercase.
+    ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True,
+                                    null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -4957,13 +5582,19 @@ class ImportGuiasgrabadas3(models.Model):
     piezas3 = models.CharField(db_column='Piezas3', max_length=4, blank=True, null=True)  # Field name made lowercase.
     piezas4 = models.CharField(db_column='Piezas4', max_length=4, blank=True, null=True)  # Field name made lowercase.
     piezas5 = models.CharField(db_column='Piezas5', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    totpiezas = models.CharField(db_column='TotPiezas', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    totpiezas = models.CharField(db_column='TotPiezas', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
     gross = models.CharField(db_column='Gross', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross = models.CharField(db_column='OtroGross', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross2 = models.CharField(db_column='OtroGross2', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross3 = models.CharField(db_column='OtroGross3', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross4 = models.CharField(db_column='OtroGross4', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totgross = models.CharField(db_column='TotGross', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    otrogross = models.CharField(db_column='OtroGross', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
+    otrogross2 = models.CharField(db_column='OtroGross2', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrogross3 = models.CharField(db_column='OtroGross3', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrogross4 = models.CharField(db_column='OtroGross4', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    totgross = models.CharField(db_column='TotGross', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     k = models.CharField(db_column='K', max_length=1, blank=True, null=True)  # Field name made lowercase.
     k2 = models.CharField(db_column='K2', max_length=1, blank=True, null=True)  # Field name made lowercase.
     k3 = models.CharField(db_column='K3', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -4974,7 +5605,8 @@ class ImportGuiasgrabadas3(models.Model):
     r3 = models.CharField(db_column='R3', max_length=1, blank=True, null=True)  # Field name made lowercase.
     r4 = models.CharField(db_column='R4', max_length=1, blank=True, null=True)  # Field name made lowercase.
     r5 = models.CharField(db_column='R5', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    commodity = models.CharField(db_column='Commodity', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    commodity = models.CharField(db_column='Commodity', max_length=8, blank=True,
+                                 null=True)  # Field name made lowercase.
     comm2 = models.CharField(db_column='Comm2', max_length=8, blank=True, null=True)  # Field name made lowercase.
     comm3 = models.CharField(db_column='Comm3', max_length=8, blank=True, null=True)  # Field name made lowercase.
     comm4 = models.CharField(db_column='Comm4', max_length=8, blank=True, null=True)  # Field name made lowercase.
@@ -4994,7 +5626,8 @@ class ImportGuiasgrabadas3(models.Model):
     total3 = models.CharField(db_column='Total3', max_length=10, blank=True, null=True)  # Field name made lowercase.
     total4 = models.CharField(db_column='Total4', max_length=10, blank=True, null=True)  # Field name made lowercase.
     total5 = models.CharField(db_column='Total5', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalfinal = models.CharField(db_column='TotalFinal', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    totalfinal = models.CharField(db_column='TotalFinal', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
     totalpp = models.CharField(db_column='TotalPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
     totalcc = models.CharField(db_column='TotalCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
     valpp = models.CharField(db_column='ValPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
@@ -5005,18 +5638,25 @@ class ImportGuiasgrabadas3(models.Model):
     dacc = models.CharField(db_column='DaCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
     dcpp = models.CharField(db_column='DcPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
     dccc = models.CharField(db_column='DcCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalprepaid = models.CharField(db_column='TotalPrepaid', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalcollect = models.CharField(db_column='TotalCollect', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalpprate = models.CharField(db_column='TotalPPRate', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalccrate = models.CharField(db_column='TotalCCRate', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    totalprepaid = models.CharField(db_column='TotalPrepaid', max_length=10, blank=True,
+                                    null=True)  # Field name made lowercase.
+    totalcollect = models.CharField(db_column='TotalCollect', max_length=10, blank=True,
+                                    null=True)  # Field name made lowercase.
+    totalpprate = models.CharField(db_column='TotalPPRate', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
+    totalccrate = models.CharField(db_column='TotalCCRate', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
     cass = models.CharField(db_column='Cass', max_length=30, blank=True, null=True)  # Field name made lowercase.
     chgscode = models.CharField(db_column='ChgsCode', max_length=2, blank=True, null=True)  # Field name made lowercase.
     wtval = models.CharField(db_column='WtVal', max_length=2, blank=True, null=True)  # Field name made lowercase.
     other = models.CharField(db_column='Other', max_length=2, blank=True, null=True)  # Field name made lowercase.
-    paisdestino = models.CharField(db_column='PaisDestino', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    paisdestino = models.CharField(db_column='PaisDestino', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
+    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     origen = models.CharField(db_column='Origen', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -5025,7 +5665,8 @@ class ImportGuiasgrabadas3(models.Model):
 
 class ImportReservas(models.Model):
     numero = models.IntegerField(db_column='Numero', primary_key=True)  # Field name made lowercase.
-    transportista = models.SmallIntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
+    transportista = models.SmallIntegerField(db_column='Transportista', blank=True,
+                                             null=True)  # Field name made lowercase.
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
     vuelo = models.CharField(db_column='Vuelo', max_length=10, blank=True, null=True)  # Field name made lowercase.
     kilos = models.FloatField(db_column='Kilos', blank=True, null=True)  # Field name made lowercase.
@@ -5034,10 +5675,12 @@ class ImportReservas(models.Model):
     awb = models.CharField(max_length=20, blank=True, null=True)
     agente = models.SmallIntegerField(blank=True, null=True)
     consignatario = models.SmallIntegerField(blank=True, null=True)
-    pagoflete = models.CharField(db_column='Pagoflete', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    pagoflete = models.CharField(db_column='Pagoflete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     moneda = models.SmallIntegerField(blank=True, null=True)
     arbitraje = models.FloatField(blank=True, null=True)
-    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
     notas = models.TextField(db_column='Notas', blank=True, null=True)  # Field name made lowercase.
     volumen = models.FloatField(db_column='Volumen', blank=True, null=True)  # Field name made lowercase.
     cotizacion = models.IntegerField(blank=True, null=True)
@@ -5068,13 +5711,18 @@ class ImportReservas(models.Model):
     manifiesto = models.CharField(max_length=30, blank=True, null=True)
     emision = models.DateTimeField(blank=True, null=True)
     terminal = models.SmallIntegerField(blank=True, null=True)
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -5097,7 +5745,8 @@ class ImportServiceaereo(models.Model):
     descripcion = models.CharField(max_length=50, blank=True, null=True)
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -5119,10 +5768,12 @@ class ImportServireserva(models.Model):
     pinformar = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     descripcion = models.CharField(max_length=50, blank=True, null=True)
     precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    prorrateo = models.CharField(db_column='Prorrateo', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    prorrateo = models.CharField(db_column='Prorrateo', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -5132,10 +5783,12 @@ class ImportServireserva(models.Model):
 
 class ImportTraceop(models.Model):
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
     modulo = models.CharField(db_column='Modulo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     detalle = models.CharField(db_column='Detalle', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
     clave = models.CharField(db_column='Clave', max_length=4, blank=True, null=True)  # Field name made lowercase.
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
 
@@ -5160,8 +5813,10 @@ class ImpterraAttachhijo(models.Model):
     detalle = models.CharField(max_length=50, blank=True, null=True)
     web = models.CharField(max_length=1, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True,
+                                         null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -5172,7 +5827,8 @@ class ImpterraAttachmadre(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     archivo = models.CharField(max_length=250, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -5217,8 +5873,10 @@ class ImpterraConexaerea(models.Model):
     embarcador = models.IntegerField(db_column='Embarcador', blank=True, null=True)  # Field name made lowercase.
     consignatario = models.IntegerField(db_column='Consignatario', blank=True, null=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
-    horasalida = models.CharField(db_column='HoraSalida', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    horallegada = models.CharField(db_column='HoraLlegada', max_length=12, blank=True, null=True)  # Field name made lowercase.
+    horasalida = models.CharField(db_column='HoraSalida', max_length=12, blank=True,
+                                  null=True)  # Field name made lowercase.
+    horallegada = models.CharField(db_column='HoraLlegada', max_length=12, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -5287,7 +5945,8 @@ class ImpterraEmbarqueaereo(models.Model):
     embarcador = models.IntegerField(db_column='Embarcador', blank=True, null=True)  # Field name made lowercase.
     notificar = models.IntegerField(db_column='Notificar', blank=True, null=True)  # Field name made lowercase.
     vaporcli = models.CharField(db_column='Vaporcli', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    vaporcli2 = models.CharField(db_column='Vaporcli2', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    vaporcli2 = models.CharField(db_column='Vaporcli2', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     terminal = models.SmallIntegerField(blank=True, null=True)
     terminal2 = models.SmallIntegerField(blank=True, null=True)
     tipovend = models.CharField(db_column='Tipovend', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -5304,7 +5963,8 @@ class ImpterraEmbarqueaereo(models.Model):
     advalcto = models.FloatField(blank=True, null=True)
     nroreferedi = models.IntegerField(blank=True, null=True)
     notomaprofit = models.IntegerField(blank=True, null=True)
-    ordencliente = models.CharField(db_column='OrdenCliente', max_length=850, blank=True, null=True)  # Field name made lowercase.
+    ordencliente = models.CharField(db_column='OrdenCliente', max_length=850, blank=True,
+                                    null=True)  # Field name made lowercase.
     propia = models.IntegerField(blank=True, null=True)
     seguimiento = models.IntegerField(blank=True, null=True)
     multimodal = models.CharField(max_length=1, blank=True, null=True)
@@ -5313,33 +5973,51 @@ class ImpterraEmbarqueaereo(models.Model):
     exportado = models.CharField(max_length=1, blank=True, null=True)
     aquienentrega = models.CharField(max_length=30, blank=True, null=True)
     fechaentrega = models.DateTimeField(blank=True, null=True)
-    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    datosembarcador = models.CharField(db_column='DatosEmbarcador', max_length=250, blank=True,
+                                       null=True)  # Field name made lowercase.
+    datosconsignatario = models.CharField(db_column='DatosConsignatario', max_length=250, blank=True,
+                                          null=True)  # Field name made lowercase.
+    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
     proyecto = models.SmallIntegerField(db_column='Proyecto', blank=True, null=True)  # Field name made lowercase.
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    autogenflete = models.CharField(db_column='AutogenFlete', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    cambiousdpactado = models.DecimalField(db_column='CambioUSDPactado', max_digits=19, decimal_places=4, blank=True,
+                                           null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
     despafrontera = models.IntegerField(db_column='DespaFrontera', blank=True, null=True)  # Field name made lowercase.
     sociotransfer = models.IntegerField(db_column='SocioTransfer', blank=True, null=True)  # Field name made lowercase.
-    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    enviointercomex = models.CharField(db_column='EnvioIntercomex', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    refproveedor = models.CharField(db_column='RefProveedor', max_length=250, blank=True,
+                                    null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    enviointercomex = models.CharField(db_column='EnvioIntercomex', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
     agecompras = models.IntegerField(db_column='AgeCompras', blank=True, null=True)  # Field name made lowercase.
     ageventas = models.IntegerField(db_column='AgeVentas', blank=True, null=True)  # Field name made lowercase.
     actividad = models.SmallIntegerField(db_column='Actividad', blank=True, null=True)  # Field name made lowercase.
-    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    numentregafemsa = models.CharField(db_column='NumEntregaFEMSA', max_length=50, blank=True,
+                                       null=True)  # Field name made lowercase.
+    numproveedorfemsa = models.CharField(db_column='NumProveedorFEMSA', max_length=50, blank=True,
+                                         null=True)  # Field name made lowercase.
+    remisionfemsa = models.CharField(db_column='RemisionFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    sociedadfemsa = models.CharField(db_column='SociedadFEMSA', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    monedadocfemsa = models.CharField(db_column='MonedaDocFEMSA', max_length=50, blank=True,
+                                      null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
     trackid = models.CharField(db_column='TrackID', max_length=50, blank=True, null=True)  # Field name made lowercase.
     etd = models.DateTimeField(db_column='ETD', blank=True, null=True)  # Field name made lowercase.
     eta = models.DateTimeField(db_column='ETA', blank=True, null=True)  # Field name made lowercase.
@@ -5351,56 +6029,90 @@ class ImpterraEmbarqueaereo(models.Model):
 
 class ImpterraEntregadoc(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True,
+                                        null=True)  # Field name made lowercase.
+    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
+    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
     original = models.CharField(db_column='Original', max_length=1, blank=True, null=True)  # Field name made lowercase.
     lista = models.CharField(db_column='Lista', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     declara = models.CharField(db_column='Declara', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     copiahbl = models.CharField(db_column='CopiaHBL', max_length=1, blank=True, null=True)  # Field name made lowercase.
     otros = models.CharField(db_column='Otros', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
     ordendep = models.CharField(db_column='OrdenDep', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     libre = models.CharField(db_column='Libre', max_length=1, blank=True, null=True)  # Field name made lowercase.
     eur1 = models.CharField(db_column='Eur1', max_length=1, blank=True, null=True)  # Field name made lowercase.
     factura = models.CharField(db_column='Factura', max_length=1, blank=True, null=True)  # Field name made lowercase.
     nuestra = models.CharField(db_column='Nuestra', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     cumplido = models.CharField(db_column='Cumplido', max_length=1, blank=True, null=True)  # Field name made lowercase.
     transfer = models.CharField(db_column='Transfer', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     remarks = models.CharField(db_column='Remarks', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True,
+                                null=True)  # Field name made lowercase.
+    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True,
+                                  null=True)  # Field name made lowercase.
+    cartatemp = models.CharField(db_column='CartaTemp', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    parterecepcion = models.CharField(db_column='ParteRecepcion', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    parterecepcionnumero = models.CharField(db_column='ParteRecepcionNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    facturaseguro = models.CharField(db_column='FacturaSeguro', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    facturaseguronumero = models.CharField(db_column='FacturaSeguroNumero', max_length=40, blank=True,
+                                           null=True)  # Field name made lowercase.
     crt = models.CharField(db_column='CRT', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    crtnumero = models.CharField(db_column='CRTNumero', max_length=40, blank=True,
+                                 null=True)  # Field name made lowercase.
+    facturatransporte = models.CharField(db_column='FacturaTransporte', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
+    facturatransportenumero = models.CharField(db_column='FacturaTransporteNumero', max_length=40, blank=True,
+                                               null=True)  # Field name made lowercase.
     micdta = models.CharField(db_column='MicDta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    micdtanumero = models.CharField(db_column='MicDtaNumero', max_length=40, blank=True,
+                                    null=True)  # Field name made lowercase.
     papeleta = models.CharField(db_column='Papeleta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True, null=True)  # Field name made lowercase.
-    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    papeletanumero = models.CharField(db_column='PapeletaNumero', max_length=40, blank=True,
+                                      null=True)  # Field name made lowercase.
+    descdocumentaria = models.CharField(db_column='DescDocumentaria', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    descdocumentarianumero = models.CharField(db_column='DescDocumentariaNumero', max_length=40, blank=True,
+                                              null=True)  # Field name made lowercase.
+    declaracionembnumero = models.CharField(db_column='DeclaracionEmbNumero', max_length=40, blank=True,
+                                            null=True)  # Field name made lowercase.
+    certorigennumero = models.CharField(db_column='CertOrigenNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    certseguronumero = models.CharField(db_column='CertSeguroNumero', max_length=40, blank=True,
+                                        null=True)  # Field name made lowercase.
+    cumpaduaneronumero = models.CharField(db_column='CumpAduaneroNumero', max_length=40, blank=True,
+                                          null=True)  # Field name made lowercase.
+    detotros3 = models.CharField(db_column='DetOtros3', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    detotros4 = models.CharField(db_column='DetOtros4', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -5423,23 +6135,36 @@ class ImpterraEnvases(models.Model):
     bultos = models.SmallIntegerField(blank=True, null=True)
     peso = models.FloatField(db_column='Peso', blank=True, null=True)  # Field name made lowercase.
     profit = models.FloatField(blank=True, null=True)
-    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    precinto = models.CharField(db_column='Precinto', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=100, blank=True,
+                                     null=True)  # Field name made lowercase.
+    precinto = models.CharField(db_column='Precinto', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
     temperatura = models.FloatField(db_column='Temperatura', blank=True, null=True)  # Field name made lowercase.
     activo = models.CharField(db_column='Activo', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadtemp = models.CharField(db_column='UnidadTemp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    condespeciales = models.CharField(db_column='CondEspeciales', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    nomchofer = models.CharField(db_column='NomChofer', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    telchofer = models.CharField(db_column='TelChofer', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    matricula = models.CharField(db_column='Matricula', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    unidadtemp = models.CharField(db_column='UnidadTemp', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    condespeciales = models.CharField(db_column='CondEspeciales', max_length=100, blank=True,
+                                      null=True)  # Field name made lowercase.
+    nomchofer = models.CharField(db_column='NomChofer', max_length=100, blank=True,
+                                 null=True)  # Field name made lowercase.
+    telchofer = models.CharField(db_column='TelChofer', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
+    matricula = models.CharField(db_column='Matricula', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
-    horacitacion = models.CharField(db_column='HoraCitacion', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    horallegada = models.CharField(db_column='HoraLlegada', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    depositoretiro = models.IntegerField(db_column='DepositoRetiro', blank=True, null=True)  # Field name made lowercase.
+    horacitacion = models.CharField(db_column='HoraCitacion', max_length=30, blank=True,
+                                    null=True)  # Field name made lowercase.
+    horallegada = models.CharField(db_column='HoraLlegada', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    depositoretiro = models.IntegerField(db_column='DepositoRetiro', blank=True,
+                                         null=True)  # Field name made lowercase.
     depositodev = models.IntegerField(db_column='DepositoDev', blank=True, null=True)  # Field name made lowercase.
-    direccionentrega = models.SmallIntegerField(db_column='DireccionEntrega', blank=True, null=True)  # Field name made lowercase.
-    rucchofer = models.CharField(db_column='RucChofer', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    fechallegadaplanta = models.DateTimeField(db_column='FechaLlegadaPlanta', blank=True, null=True)  # Field name made lowercase.
+    direccionentrega = models.SmallIntegerField(db_column='DireccionEntrega', blank=True,
+                                                null=True)  # Field name made lowercase.
+    rucchofer = models.CharField(db_column='RucChofer', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    fechallegadaplanta = models.DateTimeField(db_column='FechaLlegadaPlanta', blank=True,
+                                              null=True)  # Field name made lowercase.
     fechacitacion = models.DateTimeField(db_column='FechaCitacion', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -5464,8 +6189,10 @@ class ImpterraFisico(models.Model):
     detalle = models.CharField(db_column='Detalle', max_length=60, blank=True, null=True)  # Field name made lowercase.
     volumen = models.FloatField(blank=True, null=True)
     tara = models.IntegerField(db_column='Tara', blank=True, null=True)  # Field name made lowercase.
-    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -5482,7 +6209,8 @@ class ImpterraGastoshijos(models.Model):
     moneda = models.SmallIntegerField(db_column='Moneda', blank=True, null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=50, blank=True, null=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
     statushijos = models.SmallIntegerField(db_column='StatusHijos', blank=True, null=True)  # Field name made lowercase.
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
 
@@ -5571,10 +6299,12 @@ class ImpterraReservas(models.Model):
     awb = models.CharField(max_length=20, blank=True, null=True)
     agente = models.IntegerField(blank=True, null=True)
     consignatario = models.IntegerField(blank=True, null=True)
-    pagoflete = models.CharField(db_column='Pagoflete', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    pagoflete = models.CharField(db_column='Pagoflete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     moneda = models.SmallIntegerField(blank=True, null=True)
     arbitraje = models.FloatField(blank=True, null=True)
-    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
     notas = models.TextField(db_column='Notas', blank=True, null=True)  # Field name made lowercase.
     volumen = models.FloatField(db_column='Volumen', blank=True, null=True)  # Field name made lowercase.
     cotizacion = models.IntegerField(blank=True, null=True)
@@ -5590,7 +6320,8 @@ class ImpterraReservas(models.Model):
     observadoc = models.TextField(blank=True, null=True)
     profitage = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     tarifapl = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    posicion = models.CharField(db_column='Posicion', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    posicion = models.CharField(db_column='Posicion', max_length=30, blank=True,
+                                null=True)  # Field name made lowercase.
     envioedi = models.CharField(max_length=1, blank=True, null=True)
     aduanallegada = models.CharField(max_length=3, blank=True, null=True)
     aduanasalida = models.CharField(max_length=3, blank=True, null=True)
@@ -5607,14 +6338,20 @@ class ImpterraReservas(models.Model):
     trafico = models.SmallIntegerField(blank=True, null=True)
     iniciales = models.CharField(max_length=3, blank=True, null=True)
     exportado = models.CharField(max_length=1, blank=True, null=True)
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    envioaduana = models.CharField(db_column='EnvioAduana', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    manifiesto = models.CharField(db_column='Manifiesto', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    manifiesto = models.CharField(db_column='Manifiesto', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -5637,7 +6374,8 @@ class ImpterraServiceaereo(models.Model):
     descripcion = models.CharField(max_length=50, blank=True, null=True)
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -5659,10 +6397,12 @@ class ImpterraServireserva(models.Model):
     pinformar = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     descripcion = models.CharField(max_length=50, blank=True, null=True)
     precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    prorrateo = models.CharField(db_column='Prorrateo', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    prorrateo = models.CharField(db_column='Prorrateo', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     empresa = models.SmallIntegerField(db_column='Empresa', blank=True, null=True)  # Field name made lowercase.
-    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    reembolsable = models.CharField(db_column='Reembolsable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -5672,10 +6412,12 @@ class ImpterraServireserva(models.Model):
 
 class ImpterraTraceop(models.Model):
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
     modulo = models.CharField(db_column='Modulo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     detalle = models.CharField(db_column='Detalle', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
     clave = models.CharField(db_column='Clave', max_length=4, blank=True, null=True)  # Field name made lowercase.
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
 
@@ -5736,10 +6478,12 @@ class MantenimientosAttachsocio(models.Model):
 class MantenimientosBancos(models.Model):
     codigo = models.SmallIntegerField(db_column='Codigo', unique=True)  # Field name made lowercase.
     nombre = models.CharField(db_column='Nombre', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    descripcion = models.CharField(db_column='Descripcion', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    descripcion = models.CharField(db_column='Descripcion', max_length=200, blank=True,
+                                   null=True)  # Field name made lowercase.
     edi = models.CharField(db_column='EDI', max_length=20, blank=True, null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    nombrechino = models.CharField(db_column='NombreChino', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    nombrechino = models.CharField(db_column='NombreChino', max_length=100, blank=True,
+                                   null=True)  # Field name made lowercase.
     rut = models.CharField(db_column='RUT', max_length=30, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -5753,7 +6497,8 @@ class MantenimientosBandejaefreight(models.Model):
     mensaje = models.TextField(db_column='Mensaje', blank=True, null=True)  # Field name made lowercase.
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
     status = models.SmallIntegerField(db_column='Status', blank=True, null=True)  # Field name made lowercase.
-    fechaprocesado = models.DateTimeField(db_column='FechaProcesado', blank=True, null=True)  # Field name made lowercase.
+    fechaprocesado = models.DateTimeField(db_column='FechaProcesado', blank=True,
+                                          null=True)  # Field name made lowercase.
     notas = models.TextField(db_column='Notas', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -5764,10 +6509,14 @@ class MantenimientosBandejaefreight(models.Model):
 class MantenimientosBudget(models.Model):
     codigo = models.IntegerField(db_column='Codigo', blank=True, null=True)  # Field name made lowercase.
     ano = models.SmallIntegerField(db_column='Ano', blank=True, null=True)  # Field name made lowercase.
-    ventat1 = models.DecimalField(db_column='VentaT1', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    ventat2 = models.DecimalField(db_column='VentaT2', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    ventat3 = models.DecimalField(db_column='VentaT3', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    ventat4 = models.DecimalField(db_column='VentaT4', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    ventat1 = models.DecimalField(db_column='VentaT1', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
+    ventat2 = models.DecimalField(db_column='VentaT2', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
+    ventat3 = models.DecimalField(db_column='VentaT3', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
+    ventat4 = models.DecimalField(db_column='VentaT4', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
     pesoeat1 = models.FloatField(db_column='PesoEAT1', blank=True, null=True)  # Field name made lowercase.
     pesoeat2 = models.FloatField(db_column='PesoEAT2', blank=True, null=True)  # Field name made lowercase.
     pesoeat3 = models.FloatField(db_column='PesoEAT3', blank=True, null=True)  # Field name made lowercase.
@@ -5812,10 +6561,13 @@ class MantenimientosCiudades(models.Model):
     nombre = models.CharField(max_length=30, blank=True, null=True)
     pais = models.CharField(max_length=50, blank=True, null=True)
     codedi = models.CharField(max_length=5, blank=True, null=True)
-    codaduana = models.CharField(db_column='Codaduana', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    paises_idinternacional = models.CharField(db_column='Paises_IdInternacional', max_length=2, blank=True, null=True)  # Field name made lowercase.
+    codaduana = models.CharField(db_column='Codaduana', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
+    paises_idinternacional = models.CharField(db_column='Paises_IdInternacional', max_length=2, blank=True,
+                                              null=True)  # Field name made lowercase.
     estado = models.SmallIntegerField(db_column='Estado', blank=True, null=True)  # Field name made lowercase.
-    fechaactualizado = models.DateTimeField(db_column='FechaActualizado', blank=True, null=True)  # Field name made lowercase.
+    fechaactualizado = models.DateTimeField(db_column='FechaActualizado', blank=True,
+                                            null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -5836,7 +6588,8 @@ class MantenimientosClicontactos(models.Model):
     nombre = models.CharField(db_column='Nombre', max_length=100, blank=True, null=True)  # Field name made lowercase.
     cargo = models.CharField(db_column='Cargo', max_length=50, blank=True, null=True)  # Field name made lowercase.
     email = models.CharField(db_column='Email', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    telefono = models.CharField(db_column='Telefono', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    telefono = models.CharField(db_column='Telefono', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
     celular = models.CharField(db_column='Celular', max_length=50, blank=True, null=True)  # Field name made lowercase.
     skype = models.CharField(db_column='Skype', max_length=50, blank=True, null=True)  # Field name made lowercase.
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
@@ -5924,14 +6677,22 @@ class MantenimientosClientes(models.Model):
     plazomu = models.SmallIntegerField(db_column='plazoMU', blank=True, null=True)  # Field name made lowercase.
     riesgo = models.CharField(max_length=1, blank=True, null=True)
     web = models.CharField(max_length=60, blank=True, null=True)
-    contactoim = models.CharField(db_column='ContactoIM', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    contactoia = models.CharField(db_column='ContactoIA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    contactoit = models.CharField(db_column='ContactoIT', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    contactoem = models.CharField(db_column='ContactoEM', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    contactoea = models.CharField(db_column='ContactoEA', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    contactoet = models.CharField(db_column='ContactoET', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    contactoad = models.CharField(db_column='ContactoAD', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    contactogral = models.CharField(db_column='ContactoGRAL', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    contactoim = models.CharField(db_column='ContactoIM', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    contactoia = models.CharField(db_column='ContactoIA', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    contactoit = models.CharField(db_column='ContactoIT', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    contactoem = models.CharField(db_column='ContactoEM', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    contactoea = models.CharField(db_column='ContactoEA', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    contactoet = models.CharField(db_column='ContactoET', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    contactoad = models.CharField(db_column='ContactoAD', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    contactogral = models.CharField(db_column='ContactoGRAL', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
     dicvta = models.CharField(max_length=10, blank=True, null=True)
     diccpa = models.CharField(max_length=10, blank=True, null=True)
     aduana = models.CharField(db_column='Aduana', max_length=20, blank=True, null=True)  # Field name made lowercase.
@@ -5942,33 +6703,51 @@ class MantenimientosClientes(models.Model):
     fletesocioem = models.IntegerField(db_column='FleteSocioEM', blank=True, null=True)  # Field name made lowercase.
     fletesocioea = models.IntegerField(db_column='FleteSocioEA', blank=True, null=True)  # Field name made lowercase.
     fletesocioet = models.IntegerField(db_column='FleteSocioET', blank=True, null=True)  # Field name made lowercase.
-    direccion2 = models.CharField(db_column='Direccion2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    origencliente = models.CharField(db_column='OrigenCliente', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    casillero = models.CharField(db_column='Casillero', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    cedulaid = models.CharField(db_column='CedulaID', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    direccion2 = models.CharField(db_column='Direccion2', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    origencliente = models.CharField(db_column='OrigenCliente', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    casillero = models.CharField(db_column='Casillero', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cedulaid = models.CharField(db_column='CedulaID', max_length=30, blank=True,
+                                null=True)  # Field name made lowercase.
     inscripcion = models.DateTimeField(db_column='Inscripcion', blank=True, null=True)  # Field name made lowercase.
-    vtoinscripcion = models.DateTimeField(db_column='VtoInscripcion', blank=True, null=True)  # Field name made lowercase.
-    facturaelectronica = models.CharField(db_column='FacturaElectronica', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    vtoinscripcion = models.DateTimeField(db_column='VtoInscripcion', blank=True,
+                                          null=True)  # Field name made lowercase.
+    facturaelectronica = models.CharField(db_column='FacturaElectronica', max_length=1, blank=True,
+                                          null=True)  # Field name made lowercase.
     emailfe = models.CharField(db_column='eMailFe', max_length=200, blank=True, null=True)  # Field name made lowercase.
-    telefonocasa = models.CharField(db_column='TelefonoCasa', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    telefonocelular = models.CharField(db_column='TelefonoCelular', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    telefonocasa = models.CharField(db_column='TelefonoCasa', max_length=30, blank=True,
+                                    null=True)  # Field name made lowercase.
+    telefonocelular = models.CharField(db_column='TelefonoCelular', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
     fechacumple = models.DateTimeField(db_column='FechaCumple', blank=True, null=True)  # Field name made lowercase.
     estado = models.CharField(db_column='Estado', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    municipio = models.CharField(db_column='Municipio', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    inscestadual = models.CharField(db_column='InscEstadual', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    inscmunicipal = models.CharField(db_column='InscMunicipal', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    solocontado = models.CharField(db_column='SoloContado', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    municipio = models.CharField(db_column='Municipio', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
+    inscestadual = models.CharField(db_column='InscEstadual', max_length=30, blank=True,
+                                    null=True)  # Field name made lowercase.
+    inscmunicipal = models.CharField(db_column='InscMunicipal', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
+    solocontado = models.CharField(db_column='SoloContado', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     iibbbue = models.CharField(db_column='IIBBBue', max_length=1, blank=True, null=True)  # Field name made lowercase.
     estaxid = models.CharField(db_column='EsTaxID', max_length=1, blank=True, null=True)  # Field name made lowercase.
     enviocc = models.CharField(db_column='EnvioCC', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    modoenviocc = models.CharField(db_column='ModoEnvioCC', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    ciudadnombre = models.CharField(db_column='CiudadNombre', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    idestado = models.CharField(db_column='IDEstado', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    modoenviocc = models.CharField(db_column='ModoEnvioCC', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadnombre = models.CharField(db_column='CiudadNombre', max_length=30, blank=True,
+                                    null=True)  # Field name made lowercase.
+    idestado = models.CharField(db_column='IDEstado', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     idpais = models.CharField(db_column='IDPais', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    tccambioar = models.DecimalField(db_column='TcCambioAR', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    tccambioar = models.DecimalField(db_column='TcCambioAR', max_digits=19, decimal_places=4, blank=True,
+                                     null=True)  # Field name made lowercase.
     paiscia = models.CharField(db_column='PaisCia', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    encargadocuenta = models.CharField(db_column='EncargadoCuenta', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    bancoproveedor = models.CharField(db_column='BancoProveedor', max_length=250, blank=True, null=True)  # Field name made lowercase.
+    encargadocuenta = models.CharField(db_column='EncargadoCuenta', max_length=3, blank=True,
+                                       null=True)  # Field name made lowercase.
+    bancoproveedor = models.CharField(db_column='BancoProveedor', max_length=250, blank=True,
+                                      null=True)  # Field name made lowercase.
     profitea = models.CharField(db_column='ProfitEA', max_length=1, blank=True, null=True)  # Field name made lowercase.
     profitem = models.CharField(db_column='ProfitEM', max_length=1, blank=True, null=True)  # Field name made lowercase.
     profitet = models.CharField(db_column='ProfitET', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -5978,54 +6757,84 @@ class MantenimientosClientes(models.Model):
     nroibb = models.CharField(db_column='NroIBB', max_length=20, blank=True, null=True)  # Field name made lowercase.
     interes = models.FloatField(db_column='Interes', blank=True, null=True)  # Field name made lowercase.
     emailcb = models.CharField(db_column='EmailCB', max_length=500, blank=True, null=True)  # Field name made lowercase.
-    contactocb = models.CharField(db_column='ContactoCB', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    contactocb = models.CharField(db_column='ContactoCB', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
     nroata = models.CharField(db_column='NroATA', max_length=50, blank=True, null=True)  # Field name made lowercase.
     preferido = models.SmallIntegerField(db_column='Preferido', blank=True, null=True)  # Field name made lowercase.
-    razonsocial2 = models.CharField(db_column='RazonSocial2', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    razonsocial2 = models.CharField(db_column='RazonSocial2', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
     emaillg = models.CharField(db_column='EmailLG', max_length=500, blank=True, null=True)  # Field name made lowercase.
-    contactolg = models.CharField(db_column='ContactoLG', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    nrointtra = models.CharField(db_column='NroInttra', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    limiteautorizado = models.CharField(db_column='LimiteAutorizado', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    limitedisponible = models.CharField(db_column='LimiteDisponible', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    contactolg = models.CharField(db_column='ContactoLG', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    nrointtra = models.CharField(db_column='NroInttra', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    limiteautorizado = models.CharField(db_column='LimiteAutorizado', max_length=50, blank=True,
+                                        null=True)  # Field name made lowercase.
+    limitedisponible = models.CharField(db_column='LimiteDisponible', max_length=50, blank=True,
+                                        null=True)  # Field name made lowercase.
     terminos = models.CharField(db_column='Terminos', max_length=3, blank=True, null=True)  # Field name made lowercase.
     tipoindustria = models.IntegerField(db_column='TipoIndustria', blank=True, null=True)  # Field name made lowercase.
-    fechaactualizado = models.DateTimeField(db_column='FechaActualizado', blank=True, null=True)  # Field name made lowercase.
-    coddespachante = models.IntegerField(db_column='CodDespachante', blank=True, null=True)  # Field name made lowercase.
+    fechaactualizado = models.DateTimeField(db_column='FechaActualizado', blank=True,
+                                            null=True)  # Field name made lowercase.
+    coddespachante = models.IntegerField(db_column='CodDespachante', blank=True,
+                                         null=True)  # Field name made lowercase.
     codagente = models.IntegerField(db_column='CodAgente', blank=True, null=True)  # Field name made lowercase.
     coddeposito = models.SmallIntegerField(db_column='CodDeposito', blank=True, null=True)  # Field name made lowercase.
-    envioiata = models.CharField(db_column='EnvioIATA', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    emailefreight = models.CharField(db_column='EmailEFreight', max_length=200, blank=True, null=True)  # Field name made lowercase.
-    usdenegado = models.CharField(db_column='UsDenegado', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    envioiata = models.CharField(db_column='EnvioIATA', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    emailefreight = models.CharField(db_column='EmailEFreight', max_length=200, blank=True,
+                                     null=True)  # Field name made lowercase.
+    usdenegado = models.CharField(db_column='UsDenegado', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     fechadenegado = models.DateTimeField(db_column='FechaDenegado', blank=True, null=True)  # Field name made lowercase.
-    fecharevusdenegado = models.DateTimeField(db_column='FechaRevUsDenegado', blank=True, null=True)  # Field name made lowercase.
+    fecharevusdenegado = models.DateTimeField(db_column='FechaRevUsDenegado', blank=True,
+                                              null=True)  # Field name made lowercase.
     ctarembvta = models.BigIntegerField(db_column='CtaRembVta', blank=True, null=True)  # Field name made lowercase.
     ctarembcpa = models.BigIntegerField(db_column='CtaRembCpa', blank=True, null=True)  # Field name made lowercase.
     pima = models.CharField(db_column='PIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
     envelope = models.CharField(db_column='Envelope', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    idtipodocumento = models.SmallIntegerField(db_column='idTipoDocumento', blank=True, null=True)  # Field name made lowercase.
-    comportamientoplazo = models.CharField(db_column='ComportamientoPlazo', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    comisioncalcula = models.CharField(db_column='ComisionCalcula', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    bonificacionincluyeiva = models.CharField(db_column='BonificacionIncluyeIVA', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    comisionincluyeiva = models.CharField(db_column='ComisionIncluyeIVA', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    tipocuentabanco = models.CharField(db_column='TipoCuentaBanco', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    numerocuentabanco = models.CharField(db_column='NumeroCuentaBanco', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    tipotransferbanco = models.CharField(db_column='TipoTransferBanco', max_length=3, blank=True, null=True)  # Field name made lowercase.
+    idtipodocumento = models.SmallIntegerField(db_column='idTipoDocumento', blank=True,
+                                               null=True)  # Field name made lowercase.
+    comportamientoplazo = models.CharField(db_column='ComportamientoPlazo', max_length=1, blank=True,
+                                           null=True)  # Field name made lowercase.
+    comisioncalcula = models.CharField(db_column='ComisionCalcula', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    bonificacionincluyeiva = models.CharField(db_column='BonificacionIncluyeIVA', max_length=1, blank=True,
+                                              null=True)  # Field name made lowercase.
+    comisionincluyeiva = models.CharField(db_column='ComisionIncluyeIVA', max_length=1, blank=True,
+                                          null=True)  # Field name made lowercase.
+    tipocuentabanco = models.CharField(db_column='TipoCuentaBanco', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    numerocuentabanco = models.CharField(db_column='NumeroCuentaBanco', max_length=30, blank=True,
+                                         null=True)  # Field name made lowercase.
+    tipotransferbanco = models.CharField(db_column='TipoTransferBanco', max_length=3, blank=True,
+                                         null=True)  # Field name made lowercase.
     qbli = models.CharField(db_column='QBLi', max_length=1, blank=True, null=True)  # Field name made lowercase.
     cainro = models.CharField(db_column='CaiNro', max_length=50, blank=True, null=True)  # Field name made lowercase.
     caivto = models.DateTimeField(db_column='CaiVto', blank=True, null=True)  # Field name made lowercase.
-    coordinador = models.CharField(db_column='Coordinador', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    empresachino = models.CharField(db_column='EmpresaChino', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    direccionchino = models.CharField(db_column='DireccionChino', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direccionchino2 = models.CharField(db_column='DireccionChino2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    preferenciales = models.CharField(db_column='Preferenciales', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    coordinador = models.CharField(db_column='Coordinador', max_length=3, blank=True,
+                                   null=True)  # Field name made lowercase.
+    empresachino = models.CharField(db_column='EmpresaChino', max_length=100, blank=True,
+                                    null=True)  # Field name made lowercase.
+    direccionchino = models.CharField(db_column='DireccionChino', max_length=50, blank=True,
+                                      null=True)  # Field name made lowercase.
+    direccionchino2 = models.CharField(db_column='DireccionChino2', max_length=50, blank=True,
+                                       null=True)  # Field name made lowercase.
+    preferenciales = models.CharField(db_column='Preferenciales', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
     plazolg = models.SmallIntegerField(db_column='PlazoLG', blank=True, null=True)  # Field name made lowercase.
-    pagodocumentado = models.CharField(db_column='PagoDocumentado', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    pagodocumentado = models.CharField(db_column='PagoDocumentado', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
     formapago = models.SmallIntegerField(db_column='FormaPago', blank=True, null=True)  # Field name made lowercase.
     iibbcap = models.CharField(db_column='IIBBCap', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    chequeado = models.CharField(db_column='Chequeado', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    formadepagosat = models.CharField(db_column='FormaDePagoSAT', max_length=2, blank=True, null=True)  # Field name made lowercase.
-    metododepagosat = models.CharField(db_column='MetodoDePagoSAT', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    usocfdisat = models.CharField(db_column='UsoCFDISAT', max_length=3, blank=True, null=True)  # Field name made lowercase.
+    chequeado = models.CharField(db_column='Chequeado', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    formadepagosat = models.CharField(db_column='FormaDePagoSAT', max_length=2, blank=True,
+                                      null=True)  # Field name made lowercase.
+    metododepagosat = models.CharField(db_column='MetodoDePagoSAT', max_length=3, blank=True,
+                                       null=True)  # Field name made lowercase.
+    usocfdisat = models.CharField(db_column='UsoCFDISAT', max_length=3, blank=True,
+                                  null=True)  # Field name made lowercase.
     webope = models.CharField(db_column='WebOpe', max_length=1, blank=True, null=True)  # Field name made lowercase.
     webser = models.CharField(db_column='WebSer', max_length=1, blank=True, null=True)  # Field name made lowercase.
     webord = models.CharField(db_column='WebOrd', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -6072,7 +6881,8 @@ class MantenimientosClireldep(models.Model):
 
 class MantenimientosClitipodocumento(models.Model):
     numero = models.CharField(db_column='Numero', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    descripcion = models.CharField(db_column='Descripcion', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    descripcion = models.CharField(db_column='Descripcion', max_length=200, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6081,7 +6891,8 @@ class MantenimientosClitipodocumento(models.Model):
 
 class MantenimientosClitipooperacion(models.Model):
     codigo = models.IntegerField(db_column='Codigo', blank=True, null=True)  # Field name made lowercase.
-    tipooperacion = models.SmallIntegerField(db_column='TipoOperacion', blank=True, null=True)  # Field name made lowercase.
+    tipooperacion = models.SmallIntegerField(db_column='TipoOperacion', blank=True,
+                                             null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6109,7 +6920,8 @@ class MantenimientosConfig(models.Model):
 
 class MantenimientosContratoscli(models.Model):
     codigo = models.IntegerField(db_column='Codigo', blank=True, null=True)  # Field name made lowercase.
-    numcontrato = models.CharField(db_column='NumContrato', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    numcontrato = models.CharField(db_column='NumContrato', max_length=100, blank=True,
+                                   null=True)  # Field name made lowercase.
     origen = models.CharField(db_column='Origen', max_length=5, blank=True, null=True)  # Field name made lowercase.
     destino = models.CharField(db_column='Destino', max_length=5, blank=True, null=True)  # Field name made lowercase.
 
@@ -6133,8 +6945,10 @@ class MantenimientosDepositos(models.Model):
     contactos = models.TextField(blank=True, null=True)
     ruc = models.CharField(max_length=20, blank=True, null=True)
     aduana = models.CharField(db_column='Aduana', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    empresachino = models.CharField(db_column='EmpresaChino', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    direccionchino = models.CharField(db_column='DireccionChino', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    empresachino = models.CharField(db_column='EmpresaChino', max_length=100, blank=True,
+                                    null=True)  # Field name made lowercase.
+    direccionchino = models.CharField(db_column='DireccionChino', max_length=100, blank=True,
+                                      null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6153,8 +6967,10 @@ class MantenimientosDireccionentregas(models.Model):
     telefono2 = models.CharField(max_length=30, blank=True, null=True)
     fax = models.CharField(max_length=30, blank=True, null=True)
     fax2 = models.CharField(max_length=30, blank=True, null=True)
-    contacto = models.CharField(db_column='Contacto', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    centrocosto = models.CharField(db_column='CentroCosto', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    contacto = models.CharField(db_column='Contacto', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    centrocosto = models.CharField(db_column='CentroCosto', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
     modo = models.CharField(db_column='Modo', max_length=1, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -6242,118 +7058,206 @@ class MantenimientosEmpresa(models.Model):
     nroata = models.CharField(max_length=15, blank=True, null=True)
     prefijohouse = models.CharField(max_length=5, blank=True, null=True)
     heredaposhijo = models.IntegerField(blank=True, null=True)
-    usacontrolhawb = models.IntegerField(db_column='usacontrolHAWB', blank=True, null=True)  # Field name made lowercase.
+    usacontrolhawb = models.IntegerField(db_column='usacontrolHAWB', blank=True,
+                                         null=True)  # Field name made lowercase.
     servidores = models.CharField(max_length=1, blank=True, null=True)
     graboimagen = models.IntegerField(blank=True, null=True)
     unidadpeso = models.CharField(max_length=1, blank=True, null=True)
     multiplestarifas = models.CharField(max_length=1, blank=True, null=True)
-    verarbitrajes = models.CharField(db_column='Verarbitrajes', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    verarbitrajes = models.CharField(db_column='Verarbitrajes', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     correo = models.CharField(max_length=1, blank=True, null=True)
     ultragestion = models.CharField(max_length=1, blank=True, null=True)
     formatofecha = models.CharField(max_length=10, blank=True, null=True)
-    sucursalenposicion = models.CharField(db_column='SucursalEnPosicion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    bloqueoarbitraje = models.CharField(db_column='BloqueoArbitraje', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    costosengastos = models.CharField(db_column='CostosEnGastos', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    sucursalenposicion = models.CharField(db_column='SucursalEnPosicion', max_length=1, blank=True,
+                                          null=True)  # Field name made lowercase.
+    bloqueoarbitraje = models.CharField(db_column='BloqueoArbitraje', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    costosengastos = models.CharField(db_column='CostosEnGastos', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     iata = models.CharField(db_column='Iata', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    onlineorders = models.CharField(db_column='OnlineOrders', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    determinounidades = models.CharField(db_column='DeterminoUnidades', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    confirmaritemsembarcar = models.CharField(db_column='ConfirmarItemsEmbarcar', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    aesactivo = models.CharField(db_column='AESActivo', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    brokernumber = models.CharField(db_column='BrokerNumber', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    transmitterid = models.CharField(db_column='TransmitterID', max_length=9, blank=True, null=True)  # Field name made lowercase.
-    transmitteridtype = models.CharField(db_column='TransmitterIDType', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    onlineorders = models.CharField(db_column='OnlineOrders', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    determinounidades = models.CharField(db_column='DeterminoUnidades', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
+    confirmaritemsembarcar = models.CharField(db_column='ConfirmarItemsEmbarcar', max_length=1, blank=True,
+                                              null=True)  # Field name made lowercase.
+    aesactivo = models.CharField(db_column='AESActivo', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    brokernumber = models.CharField(db_column='BrokerNumber', max_length=3, blank=True,
+                                    null=True)  # Field name made lowercase.
+    transmitterid = models.CharField(db_column='TransmitterID', max_length=9, blank=True,
+                                     null=True)  # Field name made lowercase.
+    transmitteridtype = models.CharField(db_column='TransmitterIDType', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
     aes_option = models.IntegerField(db_column='AES_Option', blank=True, null=True)  # Field name made lowercase.
-    datacenterportcode = models.CharField(db_column='DataCenterPortCode', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    sixdigitpassword = models.CharField(db_column='SixDigitPassword', max_length=6, blank=True, null=True)  # Field name made lowercase.
-    eightdigitpassword = models.CharField(db_column='EightDigitPassword', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    remotenumber = models.CharField(db_column='RemoteNumber', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    xidnumber = models.CharField(db_column='XIDNumber', max_length=7, blank=True, null=True)  # Field name made lowercase.
-    transmittertype = models.CharField(db_column='TransmitterType', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    transmissionnumber = models.BigIntegerField(db_column='TransmissionNumber', blank=True, null=True)  # Field name made lowercase.
+    datacenterportcode = models.CharField(db_column='DataCenterPortCode', max_length=4, blank=True,
+                                          null=True)  # Field name made lowercase.
+    sixdigitpassword = models.CharField(db_column='SixDigitPassword', max_length=6, blank=True,
+                                        null=True)  # Field name made lowercase.
+    eightdigitpassword = models.CharField(db_column='EightDigitPassword', max_length=8, blank=True,
+                                          null=True)  # Field name made lowercase.
+    remotenumber = models.CharField(db_column='RemoteNumber', max_length=4, blank=True,
+                                    null=True)  # Field name made lowercase.
+    xidnumber = models.CharField(db_column='XIDNumber', max_length=7, blank=True,
+                                 null=True)  # Field name made lowercase.
+    transmittertype = models.CharField(db_column='TransmitterType', max_length=3, blank=True,
+                                       null=True)  # Field name made lowercase.
+    transmissionnumber = models.BigIntegerField(db_column='TransmissionNumber', blank=True,
+                                                null=True)  # Field name made lowercase.
     bltext = models.CharField(db_column='BLText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     crttext = models.CharField(db_column='CRTText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     nextsednumber = models.IntegerField(db_column='NextSEDNumber', blank=True, null=True)  # Field name made lowercase.
-    abiofficecode = models.CharField(db_column='ABIOfficeCode', max_length=2, blank=True, null=True)  # Field name made lowercase.
+    abiofficecode = models.CharField(db_column='ABIOfficeCode', max_length=2, blank=True,
+                                     null=True)  # Field name made lowercase.
     support_pms = models.IntegerField(db_column='Support_PMS', blank=True, null=True)  # Field name made lowercase.
-    statementtype = models.CharField(db_column='StatementType', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    statementtype = models.CharField(db_column='StatementType', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     processach_ap = models.IntegerField(db_column='ProcessACH_AP', blank=True, null=True)  # Field name made lowercase.
-    payersunitnumber = models.CharField(db_column='PayersUnitNumber', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    payersunitnumber = models.CharField(db_column='PayersUnitNumber', max_length=10, blank=True,
+                                        null=True)  # Field name made lowercase.
     checkseb = models.IntegerField(db_column='CheckSEB', blank=True, null=True)  # Field name made lowercase.
-    bondproducernumber = models.CharField(db_column='BondProducerNumber', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    bondproducernumber = models.CharField(db_column='BondProducerNumber', max_length=10, blank=True,
+                                          null=True)  # Field name made lowercase.
     checkpoa = models.IntegerField(db_column='CheckPOA', blank=True, null=True)  # Field name made lowercase.
-    systemtimezone = models.CharField(db_column='SystemTimeZone', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    highwaypermitfeeschargecode = models.SmallIntegerField(db_column='HighwayPermitFeesChargeCode', blank=True, null=True)  # Field name made lowercase.
-    userfeeschargecode = models.SmallIntegerField(db_column='UserFeesChargeCode', blank=True, null=True)  # Field name made lowercase.
-    freightchargecode = models.SmallIntegerField(db_column='FreightChargeCode', blank=True, null=True)  # Field name made lowercase.
-    driverfeeschargecode = models.SmallIntegerField(db_column='DriverFeesChargeCode', blank=True, null=True)  # Field name made lowercase.
-    otherfeeschargecode = models.SmallIntegerField(db_column='OtherFeesChargeCode', blank=True, null=True)  # Field name made lowercase.
-    highwayfeevendornumber = models.SmallIntegerField(db_column='HighwayFeeVendorNumber', blank=True, null=True)  # Field name made lowercase.
-    userfeesvendornumber = models.SmallIntegerField(db_column='UserFeesVendorNumber', blank=True, null=True)  # Field name made lowercase.
-    driverfeesvendornumber = models.SmallIntegerField(db_column='DriverFeesVendorNumber', blank=True, null=True)  # Field name made lowercase.
-    freightchecksvendornumber = models.SmallIntegerField(db_column='FreightChecksVendorNumber', blank=True, null=True)  # Field name made lowercase.
-    defaultcustomercode = models.SmallIntegerField(db_column='DefaultCustomerCode', blank=True, null=True)  # Field name made lowercase.
-    dwebsite = models.CharField(db_column='dWebSite', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    gastoscondetalle = models.CharField(db_column='GastosConDetalle', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    posicionporsucursal = models.CharField(db_column='PosicionPorSucursal', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    controlcters = models.CharField(db_column='ControlCters', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    solocomprasdefinitivas = models.CharField(db_column='SoloComprasDefinitivas', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    multiempresa = models.CharField(db_column='MultiEmpresa', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    origendestino = models.CharField(db_column='OrigenDestino', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    usamsoffice = models.CharField(db_column='UsaMSOffice', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    codigosat = models.CharField(db_column='CodigoSAT', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    consecutivosat = models.CharField(db_column='ConsecutivoSAT', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    usacodigocorp = models.CharField(db_column='UsaCodigoCorp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    solicitudpagoalgrabar = models.CharField(db_column='SolicitudPagoalGrabar', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    systemtimezone = models.CharField(db_column='SystemTimeZone', max_length=3, blank=True,
+                                      null=True)  # Field name made lowercase.
+    highwaypermitfeeschargecode = models.SmallIntegerField(db_column='HighwayPermitFeesChargeCode', blank=True,
+                                                           null=True)  # Field name made lowercase.
+    userfeeschargecode = models.SmallIntegerField(db_column='UserFeesChargeCode', blank=True,
+                                                  null=True)  # Field name made lowercase.
+    freightchargecode = models.SmallIntegerField(db_column='FreightChargeCode', blank=True,
+                                                 null=True)  # Field name made lowercase.
+    driverfeeschargecode = models.SmallIntegerField(db_column='DriverFeesChargeCode', blank=True,
+                                                    null=True)  # Field name made lowercase.
+    otherfeeschargecode = models.SmallIntegerField(db_column='OtherFeesChargeCode', blank=True,
+                                                   null=True)  # Field name made lowercase.
+    highwayfeevendornumber = models.SmallIntegerField(db_column='HighwayFeeVendorNumber', blank=True,
+                                                      null=True)  # Field name made lowercase.
+    userfeesvendornumber = models.SmallIntegerField(db_column='UserFeesVendorNumber', blank=True,
+                                                    null=True)  # Field name made lowercase.
+    driverfeesvendornumber = models.SmallIntegerField(db_column='DriverFeesVendorNumber', blank=True,
+                                                      null=True)  # Field name made lowercase.
+    freightchecksvendornumber = models.SmallIntegerField(db_column='FreightChecksVendorNumber', blank=True,
+                                                         null=True)  # Field name made lowercase.
+    defaultcustomercode = models.SmallIntegerField(db_column='DefaultCustomerCode', blank=True,
+                                                   null=True)  # Field name made lowercase.
+    dwebsite = models.CharField(db_column='dWebSite', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
+    gastoscondetalle = models.CharField(db_column='GastosConDetalle', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    posicionporsucursal = models.CharField(db_column='PosicionPorSucursal', max_length=1, blank=True,
+                                           null=True)  # Field name made lowercase.
+    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
+    controlcters = models.CharField(db_column='ControlCters', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    solocomprasdefinitivas = models.CharField(db_column='SoloComprasDefinitivas', max_length=1, blank=True,
+                                              null=True)  # Field name made lowercase.
+    multiempresa = models.CharField(db_column='MultiEmpresa', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    origendestino = models.CharField(db_column='OrigenDestino', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    usamsoffice = models.CharField(db_column='UsaMSOffice', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    codigosat = models.CharField(db_column='CodigoSAT', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    consecutivosat = models.CharField(db_column='ConsecutivoSAT', max_length=20, blank=True,
+                                      null=True)  # Field name made lowercase.
+    usacodigocorp = models.CharField(db_column='UsaCodigoCorp', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    solicitudpagoalgrabar = models.CharField(db_column='SolicitudPagoalGrabar', max_length=1, blank=True,
+                                             null=True)  # Field name made lowercase.
     totall = models.SmallIntegerField(db_column='TotalL', blank=True, null=True)  # Field name made lowercase.
     sc = models.CharField(db_column='SC', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    nrointtra = models.CharField(db_column='NroInttra', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantdecimalesea = models.CharField(db_column='CantDecimalesEA', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    intercomex = models.CharField(db_column='Intercomex', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    nrointtra = models.CharField(db_column='NroInttra', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cantdecimalesea = models.CharField(db_column='CantDecimalesEA', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
+    intercomex = models.CharField(db_column='Intercomex', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     numempresa = models.SmallIntegerField(db_column='NumEmpresa', blank=True, null=True)  # Field name made lowercase.
-    statusseguimiento = models.CharField(db_column='StatusSeguimiento', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    campoactividadobligatorio = models.CharField(db_column='CampoActividadObligatorio', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    fuentemail = models.CharField(db_column='FuenteMail', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    fuentetamanomail = models.SmallIntegerField(db_column='FuenteTamanoMail', blank=True, null=True)  # Field name made lowercase.
+    statusseguimiento = models.CharField(db_column='StatusSeguimiento', max_length=20, blank=True,
+                                         null=True)  # Field name made lowercase.
+    campoactividadobligatorio = models.CharField(db_column='CampoActividadObligatorio', max_length=1, blank=True,
+                                                 null=True)  # Field name made lowercase.
+    fuentemail = models.CharField(db_column='FuenteMail', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    fuentetamanomail = models.SmallIntegerField(db_column='FuenteTamanoMail', blank=True,
+                                                null=True)  # Field name made lowercase.
     tsa = models.CharField(db_column='TSA', max_length=30, blank=True, null=True)  # Field name made lowercase.
     smtp = models.CharField(db_column='SMTP', max_length=100, blank=True, null=True)  # Field name made lowercase.
     port = models.IntegerField(db_column='Port', blank=True, null=True)  # Field name made lowercase.
-    datosfemsa = models.CharField(db_column='DatosFEMSA', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    controldefechas = models.CharField(db_column='ControlDeFechas', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    asuntomailresumido = models.CharField(db_column='AsuntoMailResumido', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    controlcterhouse = models.CharField(db_column='ControlCterHouse', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    datosfemsa = models.CharField(db_column='DatosFEMSA', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    controldefechas = models.CharField(db_column='ControlDeFechas', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    asuntomailresumido = models.CharField(db_column='AsuntoMailResumido', max_length=1, blank=True,
+                                          null=True)  # Field name made lowercase.
+    controlcterhouse = models.CharField(db_column='ControlCterHouse', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
     anpworks = models.CharField(db_column='ANPWorks', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    usacodigoedi = models.CharField(db_column='UsaCodigoEDI', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    usacostoinicial = models.CharField(db_column='UsaCostoInicial', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    urltracking = models.CharField(db_column='URLTracking', max_length=200, blank=True, null=True)  # Field name made lowercase.
-    usersmtp = models.CharField(db_column='UserSMTP', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    passsmtp = models.CharField(db_column='PassSMTP', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    emailrespuesta = models.CharField(db_column='EmailRespuesta', max_length=200, blank=True, null=True)  # Field name made lowercase.
-    selclienteconsolidar = models.CharField(db_column='SelClienteConsolidar', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    nromaersk = models.CharField(db_column='NroMaersk', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    utilizacartaaprobacion = models.CharField(db_column='UtilizaCartaAprobacion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    nrosafmarine = models.CharField(db_column='NroSafmarine', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    nomempresaawb = models.CharField(db_column='NomEmpresaAWB', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    impsegcotivencida = models.CharField(db_column='ImpSegCotiVencida', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    lugarnotify = models.CharField(db_column='LugarNotify', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    largominpassword = models.SmallIntegerField(db_column='LargoMinPassword', blank=True, null=True)  # Field name made lowercase.
-    complejidad = models.CharField(db_column='Complejidad', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    intentosfallidos = models.SmallIntegerField(db_column='IntentosFallidos', blank=True, null=True)  # Field name made lowercase.
-    tiempoinactividad = models.SmallIntegerField(db_column='TiempoInactividad', blank=True, null=True)  # Field name made lowercase.
-    bloqueoriesgoso = models.CharField(db_column='BloqueoRiesgoso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    usacontrolseguro = models.CharField(db_column='UsaControlSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    dnombrechino = models.CharField(db_column='dNombreChino', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    stockawbempresa = models.CharField(db_column='StockAWBEmpresa', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    posicionmes = models.CharField(db_column='PosicionMes', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    emitebloriginal = models.CharField(db_column='EmiteBLOriginal', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    cantdecimalespeso = models.CharField(db_column='CantDecimalesPeso', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    dashboardeawb = models.CharField(db_column='DashboardEAWB', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    usacodigoedi = models.CharField(db_column='UsaCodigoEDI', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    usacostoinicial = models.CharField(db_column='UsaCostoInicial', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    urltracking = models.CharField(db_column='URLTracking', max_length=200, blank=True,
+                                   null=True)  # Field name made lowercase.
+    usersmtp = models.CharField(db_column='UserSMTP', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
+    passsmtp = models.CharField(db_column='PassSMTP', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    emailrespuesta = models.CharField(db_column='EmailRespuesta', max_length=200, blank=True,
+                                      null=True)  # Field name made lowercase.
+    selclienteconsolidar = models.CharField(db_column='SelClienteConsolidar', max_length=1, blank=True,
+                                            null=True)  # Field name made lowercase.
+    nromaersk = models.CharField(db_column='NroMaersk', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
+    utilizacartaaprobacion = models.CharField(db_column='UtilizaCartaAprobacion', max_length=1, blank=True,
+                                              null=True)  # Field name made lowercase.
+    nrosafmarine = models.CharField(db_column='NroSafmarine', max_length=20, blank=True,
+                                    null=True)  # Field name made lowercase.
+    nomempresaawb = models.CharField(db_column='NomEmpresaAWB', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
+    impsegcotivencida = models.CharField(db_column='ImpSegCotiVencida', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
+    lugarnotify = models.CharField(db_column='LugarNotify', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    largominpassword = models.SmallIntegerField(db_column='LargoMinPassword', blank=True,
+                                                null=True)  # Field name made lowercase.
+    complejidad = models.CharField(db_column='Complejidad', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
+    intentosfallidos = models.SmallIntegerField(db_column='IntentosFallidos', blank=True,
+                                                null=True)  # Field name made lowercase.
+    tiempoinactividad = models.SmallIntegerField(db_column='TiempoInactividad', blank=True,
+                                                 null=True)  # Field name made lowercase.
+    bloqueoriesgoso = models.CharField(db_column='BloqueoRiesgoso', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    usacontrolseguro = models.CharField(db_column='UsaControlSeguro', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    dnombrechino = models.CharField(db_column='dNombreChino', max_length=100, blank=True,
+                                    null=True)  # Field name made lowercase.
+    stockawbempresa = models.CharField(db_column='StockAWBEmpresa', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    posicionmes = models.CharField(db_column='PosicionMes', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    emitebloriginal = models.CharField(db_column='EmiteBLOriginal', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    cantdecimalespeso = models.CharField(db_column='CantDecimalesPeso', max_length=5, blank=True,
+                                         null=True)  # Field name made lowercase.
+    dashboardeawb = models.CharField(db_column='DashboardEAWB', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     binaryattach = models.IntegerField(db_column='BinaryAttach', blank=True, null=True)  # Field name made lowercase.
-    campotraficoobligatorio = models.CharField(db_column='CampoTraficoObligatorio', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    campotraficoobligatorio = models.CharField(db_column='CampoTraficoObligatorio', max_length=1, blank=True,
+                                               null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6373,7 +7277,8 @@ class MantenimientosEstados(models.Model):
 
 class MantenimientosFormapago(models.Model):
     codigo = models.SmallIntegerField(db_column='Codigo', unique=True)  # Field name made lowercase.
-    descripcion = models.CharField(db_column='Descripcion', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    descripcion = models.CharField(db_column='Descripcion', max_length=200, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6433,11 +7338,13 @@ class MantenimientosHouses(models.Model):
 
 class MantenimientosInterfaces(models.Model):
     numero = models.IntegerField(db_column='Numero', unique=True)  # Field name made lowercase.
-    tipointerface = models.CharField(db_column='TipoInterface', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    tipointerface = models.CharField(db_column='TipoInterface', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     nombre = models.CharField(db_column='Nombre', max_length=50, blank=True, null=True)  # Field name made lowercase.
     formato = models.CharField(db_column='Formato', max_length=1, blank=True, null=True)  # Field name made lowercase.
     cabezal = models.CharField(db_column='Cabezal', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    delimitador = models.CharField(db_column='Delimitador', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    delimitador = models.CharField(db_column='Delimitador', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6446,9 +7353,12 @@ class MantenimientosInterfaces(models.Model):
 
 class MantenimientosInterfacesatributos(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    nombrecampo = models.CharField(db_column='NombreCampo', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    entradato = models.CharField(db_column='EntraDato', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    saledato = models.CharField(db_column='SaleDato', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    nombrecampo = models.CharField(db_column='NombreCampo', max_length=100, blank=True,
+                                   null=True)  # Field name made lowercase.
+    entradato = models.CharField(db_column='EntraDato', max_length=100, blank=True,
+                                 null=True)  # Field name made lowercase.
+    saledato = models.CharField(db_column='SaleDato', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6457,11 +7367,15 @@ class MantenimientosInterfacesatributos(models.Model):
 
 class MantenimientosInterfacesdetalle(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    nombrecampo = models.CharField(db_column='NombreCampo', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    descripcion = models.CharField(db_column='Descripcion', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    tipodato = models.CharField(db_column='TipoDato', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    nombrecampo = models.CharField(db_column='NombreCampo', max_length=100, blank=True,
+                                   null=True)  # Field name made lowercase.
+    descripcion = models.CharField(db_column='Descripcion', max_length=100, blank=True,
+                                   null=True)  # Field name made lowercase.
+    tipodato = models.CharField(db_column='TipoDato', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
     sube = models.CharField(db_column='Sube', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    nombrecomo = models.CharField(db_column='NombreComo', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    nombrecomo = models.CharField(db_column='NombreComo', max_length=100, blank=True,
+                                  null=True)  # Field name made lowercase.
     posicion = models.SmallIntegerField(db_column='Posicion', blank=True, null=True)  # Field name made lowercase.
     formato = models.CharField(db_column='Formato', max_length=100, blank=True, null=True)  # Field name made lowercase.
 
@@ -6473,16 +7387,21 @@ class MantenimientosInterfacesdetalle(models.Model):
 class MantenimientosLlegadas(models.Model):
     vapor = models.CharField(db_column='Vapor', max_length=50, blank=True, null=True)  # Field name made lowercase.
     llegada = models.DateTimeField(db_column='Llegada', blank=True, null=True)  # Field name made lowercase.
-    transportista = models.CharField(db_column='Transportista', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    transportista = models.CharField(db_column='Transportista', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
     notas = models.TextField(db_column='Notas', blank=True, null=True)  # Field name made lowercase.
     viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  # Field name made lowercase.
     semana = models.IntegerField(db_column='Semana', blank=True, null=True)  # Field name made lowercase.
     fechastacking = models.DateTimeField(db_column='FechaStacking', blank=True, null=True)  # Field name made lowercase.
-    horastacking = models.CharField(db_column='HoraStacking', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    horastacking = models.CharField(db_column='HoraStacking', max_length=30, blank=True,
+                                    null=True)  # Field name made lowercase.
     fechacutoff = models.DateTimeField(db_column='FechaCutOff', blank=True, null=True)  # Field name made lowercase.
-    horacutoff = models.CharField(db_column='HoraCutOff', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    fechacutoffvgm = models.DateTimeField(db_column='FechaCutOffVGM', blank=True, null=True)  # Field name made lowercase.
-    horacutoffvgm = models.CharField(db_column='HoraCutOffVGM', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    horacutoff = models.CharField(db_column='HoraCutOff', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    fechacutoffvgm = models.DateTimeField(db_column='FechaCutOffVGM', blank=True,
+                                          null=True)  # Field name made lowercase.
+    horacutoffvgm = models.CharField(db_column='HoraCutOffVGM', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6506,12 +7425,18 @@ class MantenimientosMonedas(models.Model):
     simbolo = models.CharField(max_length=3, blank=True, null=True)
     solicitar = models.CharField(max_length=1, blank=True, null=True)
     alias = models.SmallIntegerField(blank=True, null=True)
-    valorminimo = models.DecimalField(db_column='ValorMinimo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    valormaximo = models.DecimalField(db_column='ValorMaximo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    paridadminima = models.DecimalField(db_column='ParidadMinima', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    paridadmaxima = models.DecimalField(db_column='ParidadMaxima', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    busquedaweb = models.CharField(db_column='BusquedaWeb', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    corporativo = models.CharField(db_column='Corporativo', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    valorminimo = models.DecimalField(db_column='ValorMinimo', max_digits=19, decimal_places=4, blank=True,
+                                      null=True)  # Field name made lowercase.
+    valormaximo = models.DecimalField(db_column='ValorMaximo', max_digits=19, decimal_places=4, blank=True,
+                                      null=True)  # Field name made lowercase.
+    paridadminima = models.DecimalField(db_column='ParidadMinima', max_digits=19, decimal_places=4, blank=True,
+                                        null=True)  # Field name made lowercase.
+    paridadmaxima = models.DecimalField(db_column='ParidadMaxima', max_digits=19, decimal_places=4, blank=True,
+                                        null=True)  # Field name made lowercase.
+    busquedaweb = models.CharField(db_column='BusquedaWeb', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
+    corporativo = models.CharField(db_column='Corporativo', max_length=15, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6523,10 +7448,14 @@ class MantenimientosNotificaciones(models.Model):
     titulo = models.CharField(db_column='Titulo', max_length=100, blank=True, null=True)  # Field name made lowercase.
     modo = models.CharField(db_column='Modo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     desde = models.CharField(db_column='Desde', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    destinatario = models.CharField(db_column='Destinatario', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    razonsocial = models.CharField(db_column='RazonSocial', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    direccion = models.CharField(db_column='Direccion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    localidad = models.CharField(db_column='Localidad', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    destinatario = models.CharField(db_column='Destinatario', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    razonsocial = models.CharField(db_column='RazonSocial', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    direccion = models.CharField(db_column='Direccion', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    localidad = models.CharField(db_column='Localidad', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     ciudad = models.CharField(db_column='Ciudad', max_length=1, blank=True, null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=1, blank=True, null=True)  # Field name made lowercase.
     ruc = models.CharField(db_column='Ruc', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -6536,7 +7465,8 @@ class MantenimientosNotificaciones(models.Model):
     tipo = models.CharField(db_column='Tipo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     idioma = models.SmallIntegerField(db_column='Idioma', blank=True, null=True)  # Field name made lowercase.
     salida = models.CharField(db_column='Salida', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    enviodatoshouse = models.CharField(db_column='EnvioDatosHouse', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    enviodatoshouse = models.CharField(db_column='EnvioDatosHouse', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6573,7 +7503,8 @@ class MantenimientosOrganiza(models.Model):
 class MantenimientosOtrosservicios(models.Model):
     codigo = models.SmallIntegerField(db_column='Codigo', unique=True)  # Field name made lowercase.
     nombre = models.CharField(db_column='Nombre', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    descripcion = models.CharField(db_column='Descripcion', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    descripcion = models.CharField(db_column='Descripcion', max_length=200, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6683,118 +7614,216 @@ class MantenimientosPassword(models.Model):
     accediprev = models.CharField(max_length=1, blank=True, null=True)
     acceliprev = models.CharField(max_length=1, blank=True, null=True)
     accgendocdef = models.CharField(max_length=1, blank=True, null=True)
-    accversucursales = models.CharField(db_column='AccVerSucursales', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accborrodoc = models.CharField(db_column='AccBorroDoc', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accctacodif = models.CharField(db_column='AccCtaCodif', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accvertodo = models.CharField(db_column='AccVerTodo', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accexportar = models.CharField(db_column='AccExportar', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accverbonifcli = models.CharField(db_column='AccVerBonifCli', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acceditacerrado = models.CharField(db_column='AccEditaCerrado', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    accversucursales = models.CharField(db_column='AccVerSucursales', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    accborrodoc = models.CharField(db_column='AccBorroDoc', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accctacodif = models.CharField(db_column='AccCtaCodif', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accvertodo = models.CharField(db_column='AccVerTodo', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    accexportar = models.CharField(db_column='AccExportar', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accverbonifcli = models.CharField(db_column='AccVerBonifCli', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    acceditacerrado = models.CharField(db_column='AccEditaCerrado', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
     idioma = models.SmallIntegerField(db_column='Idioma', blank=True, null=True)  # Field name made lowercase.
-    accfaceleclotes = models.CharField(db_column='AccFacElecLotes', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    masterkey = models.CharField(db_column='MasterKey', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accentregaorden = models.CharField(db_column='accEntregaOrden', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accciudades = models.CharField(db_column='accCiudades', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accproyectos = models.CharField(db_column='accProyectos', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accscheduleb = models.CharField(db_column='accScheduleb', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    accfaceleclotes = models.CharField(db_column='AccFacElecLotes', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    masterkey = models.CharField(db_column='MasterKey', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    accentregaorden = models.CharField(db_column='accEntregaOrden', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    accciudades = models.CharField(db_column='accCiudades', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accproyectos = models.CharField(db_column='accProyectos', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accscheduleb = models.CharField(db_column='accScheduleb', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     accports = models.CharField(db_column='accPorts', max_length=1, blank=True, null=True)  # Field name made lowercase.
     acccodes = models.CharField(db_column='accCodes', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accimppurgescheduleb = models.CharField(db_column='accImpPurgeScheduleb', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    accimppurgescheduleb = models.CharField(db_column='accImpPurgeScheduleb', max_length=1, blank=True,
+                                            null=True)  # Field name made lowercase.
     accaes = models.CharField(db_column='accAES', max_length=1, blank=True, null=True)  # Field name made lowercase.
     diascambio = models.SmallIntegerField(db_column='DiasCambio', blank=True, null=True)  # Field name made lowercase.
-    fechaultimacambio = models.DateTimeField(db_column='FechaUltimaCambio', blank=True, null=True)  # Field name made lowercase.
-    securityiata = models.CharField(db_column='SecurityIata', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    fechaultimacambio = models.DateTimeField(db_column='FechaUltimaCambio', blank=True,
+                                             null=True)  # Field name made lowercase.
+    securityiata = models.CharField(db_column='SecurityIata', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
     cargo = models.CharField(db_column='Cargo', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    acccontrolprov = models.CharField(db_column='AccControlProv', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accselecvendedor = models.CharField(db_column='AccSelecVendedor', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accinfocontable = models.CharField(db_column='AccInfoContable', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accborrarattach = models.CharField(db_column='AccBorrarAttach', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accprefactura = models.CharField(db_column='AccPreFactura', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acceditafollowup = models.CharField(db_column='AccEditaFollowUp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accmodposicion = models.CharField(db_column='AccModPosicion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accmoddocumentos = models.CharField(db_column='AccModDocumentos', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    internodirecto = models.CharField(db_column='InternoDirecto', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    clientemail = models.CharField(db_column='ClienteMail', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accmanten = models.CharField(db_column='AccManten', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acceditaeditados = models.CharField(db_column='AccEditaEditados', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    acccontrolprov = models.CharField(db_column='AccControlProv', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    accselecvendedor = models.CharField(db_column='AccSelecVendedor', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    accinfocontable = models.CharField(db_column='AccInfoContable', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    accborrarattach = models.CharField(db_column='AccBorrarAttach', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    accprefactura = models.CharField(db_column='AccPreFactura', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    acceditafollowup = models.CharField(db_column='AccEditaFollowUp', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    accmodposicion = models.CharField(db_column='AccModPosicion', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    accmoddocumentos = models.CharField(db_column='AccModDocumentos', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    internodirecto = models.CharField(db_column='InternoDirecto', max_length=30, blank=True,
+                                      null=True)  # Field name made lowercase.
+    clientemail = models.CharField(db_column='ClienteMail', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accmanten = models.CharField(db_column='AccManten', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    acceditaeditados = models.CharField(db_column='AccEditaEditados', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
     acctrace = models.CharField(db_column='AccTrace', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accdepuradores = models.CharField(db_column='AccDepuradores', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acceditafinanzas = models.CharField(db_column='AccEditaFinanzas', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acccambiausuario = models.CharField(db_column='AccCambiaUsuario', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accimprimir = models.CharField(db_column='AccImprimir', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acccambiafecha = models.CharField(db_column='AccCambiaFecha', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accinfotracking = models.CharField(db_column='AccInfoTracking', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accvertodoop = models.CharField(db_column='AccVerTodoOP', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accvertodosc = models.CharField(db_column='AccVerTodoSC', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accmodsegvinculado = models.CharField(db_column='AccModSegVinculado', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accmodimpu = models.CharField(db_column='AccModImpu', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accfechavto = models.CharField(db_column='AccFechaVto', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accfechacoti = models.CharField(db_column='AccFechaCoti', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acceditacotizacion = models.CharField(db_column='AccEditaCotizacion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    usersmtp = models.CharField(db_column='UserSMTP', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    passsmtp = models.CharField(db_column='PassSMTP', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    accdepuradores = models.CharField(db_column='AccDepuradores', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    acceditafinanzas = models.CharField(db_column='AccEditaFinanzas', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    acccambiausuario = models.CharField(db_column='AccCambiaUsuario', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    accimprimir = models.CharField(db_column='AccImprimir', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    acccambiafecha = models.CharField(db_column='AccCambiaFecha', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    accinfotracking = models.CharField(db_column='AccInfoTracking', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    accvertodoop = models.CharField(db_column='AccVerTodoOP', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accvertodosc = models.CharField(db_column='AccVerTodoSC', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accmodsegvinculado = models.CharField(db_column='AccModSegVinculado', max_length=1, blank=True,
+                                          null=True)  # Field name made lowercase.
+    accmodimpu = models.CharField(db_column='AccModImpu', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    accfechavto = models.CharField(db_column='AccFechaVto', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accfechacoti = models.CharField(db_column='AccFechaCoti', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    acceditacotizacion = models.CharField(db_column='AccEditaCotizacion', max_length=1, blank=True,
+                                          null=True)  # Field name made lowercase.
+    usersmtp = models.CharField(db_column='UserSMTP', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
+    passsmtp = models.CharField(db_column='PassSMTP', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
     correo = models.CharField(db_column='Correo', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acctodosusrretransmiten95 = models.CharField(db_column='AccTodosUsrRetransmiten95', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acceditatodose = models.CharField(db_column='accEditaTodoSE', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accreenviofacelec = models.CharField(db_column='accReenvioFacElec', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accsocioactivo = models.CharField(db_column='accSocioActivo', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accreimprimeoriginal = models.CharField(db_column='accReimprimeOriginal', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acceditaaceptada = models.CharField(db_column='accEditaAceptada', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    encargadocuenta = models.CharField(db_column='EncargadoCuenta', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accfacdefinitiva = models.CharField(db_column='accFacDefinitiva', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accfacprovision = models.CharField(db_column='accFacProvision', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accpasarprovdef = models.CharField(db_column='accPasarProvDef', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accsolovariables = models.CharField(db_column='accSoloVariables', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accbodega = models.CharField(db_column='accBodega', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    acctodosusrretransmiten95 = models.CharField(db_column='AccTodosUsrRetransmiten95', max_length=1, blank=True,
+                                                 null=True)  # Field name made lowercase.
+    acceditatodose = models.CharField(db_column='accEditaTodoSE', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    accreenviofacelec = models.CharField(db_column='accReenvioFacElec', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
+    accsocioactivo = models.CharField(db_column='accSocioActivo', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    accreimprimeoriginal = models.CharField(db_column='accReimprimeOriginal', max_length=1, blank=True,
+                                            null=True)  # Field name made lowercase.
+    acceditaaceptada = models.CharField(db_column='accEditaAceptada', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    encargadocuenta = models.CharField(db_column='EncargadoCuenta', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    accfacdefinitiva = models.CharField(db_column='accFacDefinitiva', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    accfacprovision = models.CharField(db_column='accFacProvision', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    accpasarprovdef = models.CharField(db_column='accPasarProvDef', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    accsolovariables = models.CharField(db_column='accSoloVariables', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    accbodega = models.CharField(db_column='accBodega', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     accwr = models.CharField(db_column='accWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accegresowr = models.CharField(db_column='accEgresoWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accpickwr = models.CharField(db_column='accPickWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accasistwr = models.CharField(db_column='accAsistWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accdistribuwr = models.CharField(db_column='accDistribuWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accfraccionwr = models.CharField(db_column='accFraccionWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accagruparwr = models.CharField(db_column='accAgruparWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accendosowr = models.CharField(db_column='accEndosoWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accrepackwr = models.CharField(db_column='accRepackWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accajustewr = models.CharField(db_column='accAjusteWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accnacionalwr = models.CharField(db_column='accNacionalWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accubicarwr = models.CharField(db_column='accUbicarWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accremitowr = models.CharField(db_column='accRemitoWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acctarifaswr = models.CharField(db_column='accTarifasWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accestadiswr = models.CharField(db_column='accEstadisWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accinventwr = models.CharField(db_column='accInventWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accfichawr = models.CharField(db_column='accFichaWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acceventoswr = models.CharField(db_column='accEventosWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accfamiliawr = models.CharField(db_column='accFamiliaWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accitemswr = models.CharField(db_column='accItemsWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accbodegaswr = models.CharField(db_column='accBodegasWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accoperawr = models.CharField(db_column='accOperaWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acctareaswr = models.CharField(db_column='accTareasWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accinsumoswr = models.CharField(db_column='accInsumosWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accequiposwr = models.CharField(db_column='accEquiposWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accvehiwr = models.CharField(db_column='accVehiWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accstatuswr = models.CharField(db_column='accStatusWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acccompwr = models.CharField(db_column='accCompWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    cuentabloqueada = models.CharField(db_column='CuentaBloqueada', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    ultimaactividad = models.DateTimeField(db_column='UltimaActividad', blank=True, null=True)  # Field name made lowercase.
+    accegresowr = models.CharField(db_column='accEgresoWR', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accpickwr = models.CharField(db_column='accPickWR', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    accasistwr = models.CharField(db_column='accAsistWR', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    accdistribuwr = models.CharField(db_column='accDistribuWR', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    accfraccionwr = models.CharField(db_column='accFraccionWR', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    accagruparwr = models.CharField(db_column='accAgruparWR', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accendosowr = models.CharField(db_column='accEndosoWR', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accrepackwr = models.CharField(db_column='accRepackWR', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accajustewr = models.CharField(db_column='accAjusteWR', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accnacionalwr = models.CharField(db_column='accNacionalWR', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    accubicarwr = models.CharField(db_column='accUbicarWR', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accremitowr = models.CharField(db_column='accRemitoWR', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    acctarifaswr = models.CharField(db_column='accTarifasWR', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accestadiswr = models.CharField(db_column='accEstadisWR', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accinventwr = models.CharField(db_column='accInventWR', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accfichawr = models.CharField(db_column='accFichaWR', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    acceventoswr = models.CharField(db_column='accEventosWR', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accfamiliawr = models.CharField(db_column='accFamiliaWR', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accitemswr = models.CharField(db_column='accItemsWR', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    accbodegaswr = models.CharField(db_column='accBodegasWR', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accoperawr = models.CharField(db_column='accOperaWR', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    acctareaswr = models.CharField(db_column='accTareasWR', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accinsumoswr = models.CharField(db_column='accInsumosWR', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accequiposwr = models.CharField(db_column='accEquiposWR', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accvehiwr = models.CharField(db_column='accVehiWR', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    accstatuswr = models.CharField(db_column='accStatusWR', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    acccompwr = models.CharField(db_column='accCompWR', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cuentabloqueada = models.CharField(db_column='CuentaBloqueada', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    ultimaactividad = models.DateTimeField(db_column='UltimaActividad', blank=True,
+                                           null=True)  # Field name made lowercase.
     skype = models.CharField(db_column='Skype', max_length=50, blank=True, null=True)  # Field name made lowercase.
     celular = models.CharField(db_column='Celular', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    acccostos = models.CharField(db_column='accCostos', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accoservicios = models.CharField(db_column='AccOServicios', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    acccostos = models.CharField(db_column='accCostos', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    accoservicios = models.CharField(db_column='AccOServicios', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     acctruck = models.CharField(db_column='AccTruck', max_length=1, blank=True, null=True)  # Field name made lowercase.
     estacion = models.CharField(db_column='Estacion', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    aprobarvalormin = models.DecimalField(db_column='AprobarValorMin', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    aprobarvalormax = models.DecimalField(db_column='AprobarValorMax', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    aprobarvalormin = models.DecimalField(db_column='AprobarValorMin', max_digits=19, decimal_places=4, blank=True,
+                                          null=True)  # Field name made lowercase.
+    aprobarvalormax = models.DecimalField(db_column='AprobarValorMax', max_digits=19, decimal_places=4, blank=True,
+                                          null=True)  # Field name made lowercase.
     accniif = models.CharField(db_column='accNIIF', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accactivofijo = models.CharField(db_column='accActivoFijo', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accmodifpicking = models.CharField(db_column='accModifPicking', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accmodifegreso = models.CharField(db_column='accModifEgreso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accfechacorte = models.CharField(db_column='accFechaCorte', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    acclimitecredito = models.CharField(db_column='accLimiteCredito', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accaduanawr = models.CharField(db_column='AccAduanaWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accpedidoswr = models.CharField(db_column='AccPedidosWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accreacpedidoswr = models.CharField(db_column='AccReacPedidosWR', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accveotodoattach = models.CharField(db_column='AccVeoTodoAttach', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    accmodhouse = models.CharField(db_column='AccModHouse', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    accactivofijo = models.CharField(db_column='accActivoFijo', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    accmodifpicking = models.CharField(db_column='accModifPicking', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    accmodifegreso = models.CharField(db_column='accModifEgreso', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    accfechacorte = models.CharField(db_column='accFechaCorte', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    acclimitecredito = models.CharField(db_column='accLimiteCredito', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    accaduanawr = models.CharField(db_column='AccAduanaWR', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    accpedidoswr = models.CharField(db_column='AccPedidosWR', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    accreacpedidoswr = models.CharField(db_column='AccReacPedidosWR', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    accveotodoattach = models.CharField(db_column='AccVeoTodoAttach', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    accmodhouse = models.CharField(db_column='AccModHouse', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6814,8 +7843,10 @@ class MantenimientosPasswordhistorial(models.Model):
 class MantenimientosPermisosterr(models.Model):
     cliente = models.IntegerField(db_column='Cliente', blank=True, null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    peroriginal = models.CharField(db_column='PerOriginal', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    percomplem = models.CharField(db_column='PerComplem', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    peroriginal = models.CharField(db_column='PerOriginal', max_length=20, blank=True,
+                                   null=True)  # Field name made lowercase.
+    percomplem = models.CharField(db_column='PerComplem', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
     contrif = models.CharField(db_column='Contrif', max_length=20, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -6843,23 +7874,34 @@ class MantenimientosProductos(models.Model):
     perecedero = models.SmallIntegerField(blank=True, null=True)
     nrocomm = models.IntegerField(blank=True, null=True)
     corporativo = models.CharField(max_length=10, blank=True, null=True)
-    schedulebnumber = models.CharField(db_column='ScheduleBNumber', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    class_field = models.CharField(db_column='Class', max_length=20, blank=True, null=True)  # Field name made lowercase. Field renamed because it was a Python reserved word.
+    schedulebnumber = models.CharField(db_column='ScheduleBNumber', max_length=12, blank=True,
+                                       null=True)  # Field name made lowercase.
+    class_field = models.CharField(db_column='Class', max_length=20, blank=True,
+                                   null=True)  # Field name made lowercase. Field renamed because it was a Python reserved word.
     un = models.CharField(db_column='UN', max_length=20, blank=True, null=True)  # Field name made lowercase.
     packing = models.CharField(db_column='Packing', max_length=20, blank=True, null=True)  # Field name made lowercase.
     subrisk = models.CharField(db_column='SubRisk', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    aduanaentrada = models.CharField(db_column='AduanaEntrada', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    aduanasalida = models.CharField(db_column='AduanaSalida', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    aduanaentrada = models.CharField(db_column='AduanaEntrada', max_length=20, blank=True,
+                                     null=True)  # Field name made lowercase.
+    aduanasalida = models.CharField(db_column='AduanaSalida', max_length=20, blank=True,
+                                    null=True)  # Field name made lowercase.
     temperatura = models.FloatField(db_column='Temperatura', blank=True, null=True)  # Field name made lowercase.
-    unidadtemp = models.CharField(db_column='UnidadTemp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    hazardpage = models.CharField(db_column='HazardPage', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hazardcodever = models.CharField(db_column='HazardCodeVer', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    unidadtemp = models.CharField(db_column='UnidadTemp', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    hazardpage = models.CharField(db_column='HazardPage', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
+    hazardcodever = models.CharField(db_column='HazardCodeVer', max_length=20, blank=True,
+                                     null=True)  # Field name made lowercase.
     ems = models.CharField(db_column='EMS', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    termcard = models.CharField(db_column='TermCard', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    imocode2 = models.CharField(db_column='ImoCode2', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    imocode3 = models.CharField(db_column='ImoCode3', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    termcard = models.CharField(db_column='TermCard', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
+    imocode2 = models.CharField(db_column='ImoCode2', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
+    imocode3 = models.CharField(db_column='ImoCode3', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     psn = models.CharField(db_column='PSN', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    fechaactualizado = models.DateTimeField(db_column='FechaActualizado', blank=True, null=True)  # Field name made lowercase.
+    fechaactualizado = models.DateTimeField(db_column='FechaActualizado', blank=True,
+                                            null=True)  # Field name made lowercase.
     ncm = models.CharField(db_column='NCM', max_length=20, blank=True, null=True)  # Field name made lowercase.
     shc = models.CharField(db_column='SHC', max_length=100, blank=True, null=True)  # Field name made lowercase.
     dgc = models.CharField(db_column='DGC', max_length=100, blank=True, null=True)  # Field name made lowercase.
@@ -6873,8 +7915,10 @@ class MantenimientosProvincias(models.Model):
     codigo = models.IntegerField(db_column='Codigo', unique=True)  # Field name made lowercase.
     nombre = models.CharField(db_column='Nombre', max_length=50, blank=True, null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    abreviacion = models.CharField(db_column='Abreviacion', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    referencia = models.CharField(db_column='Referencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    abreviacion = models.CharField(db_column='Abreviacion', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
+    referencia = models.CharField(db_column='Referencia', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6882,7 +7926,8 @@ class MantenimientosProvincias(models.Model):
 
 
 class MantenimientosProyectos(models.Model):
-    codigo = models.SmallIntegerField(db_column='Codigo', unique=True, blank=True, null=True)  # Field name made lowercase.
+    codigo = models.SmallIntegerField(db_column='Codigo', unique=True, blank=True,
+                                      null=True)  # Field name made lowercase.
     nombre = models.CharField(db_column='Nombre', max_length=50, blank=True, null=True)  # Field name made lowercase.
     observaciones = models.TextField(db_column='Observaciones', blank=True, null=True)  # Field name made lowercase.
     status = models.SmallIntegerField(db_column='Status', blank=True, null=True)  # Field name made lowercase.
@@ -6903,7 +7948,8 @@ class MantenimientosRetenciones(models.Model):
     baseminima = models.FloatField(db_column='BaseMinima', blank=True, null=True)  # Field name made lowercase.
     contracuenta = models.BigIntegerField(db_column='ContraCuenta', blank=True, null=True)  # Field name made lowercase.
     moneda = models.SmallIntegerField(db_column='Moneda', blank=True, null=True)  # Field name made lowercase.
-    autorretenedor = models.CharField(db_column='Autorretenedor', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    autorretenedor = models.CharField(db_column='Autorretenedor', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
     suma = models.IntegerField(db_column='Suma', blank=True, null=True)  # Field name made lowercase.
     basemaxima = models.FloatField(db_column='BaseMaxima', blank=True, null=True)  # Field name made lowercase.
 
@@ -6938,9 +7984,12 @@ class MantenimientosServicios(models.Model):
     operacion = models.CharField(max_length=1, blank=True, null=True)
     transito = models.CharField(max_length=1, blank=True, null=True)
     maritimo = models.CharField(max_length=1, blank=True, null=True)
-    preciob = models.DecimalField(db_column='precioB', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    precioc = models.DecimalField(db_column='precioC', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    preciod = models.DecimalField(db_column='precioD', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    preciob = models.DecimalField(db_column='precioB', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
+    precioc = models.DecimalField(db_column='precioC', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
+    preciod = models.DecimalField(db_column='precioD', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
     corporativo = models.CharField(max_length=15, blank=True, null=True)
     ctaordeniva = models.IntegerField()
     repartir = models.CharField(max_length=1, blank=True, null=True)
@@ -6952,21 +8001,33 @@ class MantenimientosServicios(models.Model):
     familia = models.SmallIntegerField(blank=True, null=True)
     cofis = models.CharField(max_length=1, blank=True, null=True)
     unistock = models.CharField(max_length=10, blank=True, null=True)
-    minimob = models.DecimalField(db_column='minimoB', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    maximob = models.DecimalField(db_column='maximoB', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    minimoc = models.DecimalField(db_column='minimoC', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    maximoc = models.DecimalField(db_column='maximoC', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    minimod = models.DecimalField(db_column='minimoD', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    maximod = models.DecimalField(db_column='maximoD', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    minimob = models.DecimalField(db_column='minimoB', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
+    maximob = models.DecimalField(db_column='maximoB', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
+    minimoc = models.DecimalField(db_column='minimoC', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
+    maximoc = models.DecimalField(db_column='maximoC', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
+    minimod = models.DecimalField(db_column='minimoD', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
+    maximod = models.DecimalField(db_column='maximoD', max_digits=19, decimal_places=4, blank=True,
+                                  null=True)  # Field name made lowercase.
     nombreingles = models.CharField(max_length=100, blank=True, null=True)
-    tomarcomoiva = models.CharField(db_column='TomarComoIVA', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    tomarcomoiva = models.CharField(db_column='TomarComoIVA', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     activa = models.CharField(db_column='Activa', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    recuperogastos = models.CharField(db_column='RecuperoGastos', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    servicioscliente = models.CharField(db_column='ServiciosCliente', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    extracosto = models.CharField(db_column='ExtraCosto', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    recuperogastos = models.CharField(db_column='RecuperoGastos', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    servicioscliente = models.CharField(db_column='ServiciosCliente', max_length=1, blank=True,
+                                        null=True)  # Field name made lowercase.
+    extracosto = models.CharField(db_column='ExtraCosto', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     catsat = models.CharField(db_column='catSAT', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    claveunidadsat = models.CharField(db_column='ClaveUnidadSAT', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    montonoaplicaretencion = models.DecimalField(db_column='MontoNoAplicaRetencion', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    claveunidadsat = models.CharField(db_column='ClaveUnidadSAT', max_length=4, blank=True,
+                                      null=True)  # Field name made lowercase.
+    montonoaplicaretencion = models.DecimalField(db_column='MontoNoAplicaRetencion', max_digits=19, decimal_places=4,
+                                                 blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -6984,24 +8045,33 @@ class MantenimientosServrelacion(models.Model):
 
 class MantenimientosServvariables(models.Model):
     codigo = models.SmallIntegerField(db_column='Codigo', blank=True, null=True)  # Field name made lowercase.
-    tipovariable = models.CharField(db_column='TipoVariable', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    variablecada = models.SmallIntegerField(db_column='VariableCada', blank=True, null=True)  # Field name made lowercase.
+    tipovariable = models.CharField(db_column='TipoVariable', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
+    variablecada = models.SmallIntegerField(db_column='VariableCada', blank=True,
+                                            null=True)  # Field name made lowercase.
     baseminima = models.IntegerField(db_column='BaseMinima', blank=True, null=True)  # Field name made lowercase.
     redondea = models.CharField(db_column='Redondea', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    sociocomercial = models.IntegerField(db_column='SocioComercial', blank=True, null=True)  # Field name made lowercase.
-    tiposocio = models.CharField(db_column='TipoSocio', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    sociocomercial = models.IntegerField(db_column='SocioComercial', blank=True,
+                                         null=True)  # Field name made lowercase.
+    tiposocio = models.CharField(db_column='TipoSocio', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     origen = models.CharField(db_column='Origen', max_length=5, blank=True, null=True)  # Field name made lowercase.
     destino = models.CharField(db_column='Destino', max_length=5, blank=True, null=True)  # Field name made lowercase.
     modo = models.CharField(db_column='Modo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     tarifa = models.CharField(db_column='Tarifa', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    minimo = models.DecimalField(db_column='Minimo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    maximo = models.DecimalField(db_column='Maximo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
+    minimo = models.DecimalField(db_column='Minimo', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
+    maximo = models.DecimalField(db_column='Maximo', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
     moneda = models.SmallIntegerField(db_column='Moneda', blank=True, null=True)  # Field name made lowercase.
     producto = models.SmallIntegerField(db_column='Producto', blank=True, null=True)  # Field name made lowercase.
     unidad = models.CharField(db_column='Unidad', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    unidadvol = models.CharField(db_column='UnidadVol', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    desdevalor = models.DecimalField(db_column='DesdeValor', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    unidadvol = models.CharField(db_column='UnidadVol', max_length=3, blank=True,
+                                 null=True)  # Field name made lowercase.
+    desdevalor = models.DecimalField(db_column='DesdeValor', max_digits=19, decimal_places=4, blank=True,
+                                     null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7043,26 +8113,39 @@ class MantenimientosSucursales(models.Model):
     contado = models.IntegerField(db_column='Contado', blank=True, null=True)  # Field name made lowercase.
     notadebito = models.IntegerField(db_column='NotaDebito', blank=True, null=True)  # Field name made lowercase.
     devolcontado = models.IntegerField(db_column='DevolContado', blank=True, null=True)  # Field name made lowercase.
-    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
     dfax = models.CharField(db_column='DFax', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     druc = models.CharField(db_column='DRuc', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     bltext = models.CharField(db_column='BLText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     crttext = models.CharField(db_column='CRTText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     nroiata = models.CharField(db_column='NroIATA', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
     serie = models.CharField(db_column='Serie', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    keydosificacion = models.CharField(db_column='KeyDosificacion', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    noautorizacion = models.CharField(db_column='NoAutorizacion', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    fechalimiteemision = models.DateTimeField(db_column='FechaLimiteEmision', blank=True, null=True)  # Field name made lowercase.
+    keydosificacion = models.CharField(db_column='KeyDosificacion', max_length=255, blank=True,
+                                       null=True)  # Field name made lowercase.
+    noautorizacion = models.CharField(db_column='NoAutorizacion', max_length=255, blank=True,
+                                      null=True)  # Field name made lowercase.
+    fechalimiteemision = models.DateTimeField(db_column='FechaLimiteEmision', blank=True,
+                                              null=True)  # Field name made lowercase.
     prefijo = models.IntegerField(db_column='Prefijo', blank=True, null=True)  # Field name made lowercase.
-    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7070,29 +8153,41 @@ class MantenimientosSucursales(models.Model):
 
 
 class MantenimientosSucursalesargentina(models.Model):
-    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True, null=True)  # Field name made lowercase.
+    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True,
+                                           null=True)  # Field name made lowercase.
     factura = models.IntegerField(blank=True, null=True)
     notacredito = models.IntegerField(blank=True, null=True)
     recibo = models.IntegerField(blank=True, null=True)
     contado = models.IntegerField(blank=True, null=True)
-    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
     dfax = models.CharField(db_column='DFax', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     druc = models.CharField(db_column='Druc', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     bltext = models.CharField(db_column='BLText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     crttext = models.CharField(db_column='CRTText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     nroiata = models.CharField(db_column='NroIATA', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
     prefijo = models.IntegerField(db_column='Prefijo', blank=True, null=True)  # Field name made lowercase.
     notadebito = models.IntegerField(db_column='NotaDebito', blank=True, null=True)  # Field name made lowercase.
-    facelectronica = models.CharField(db_column='FacElectronica', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    facelectronica = models.CharField(db_column='FacElectronica', max_length=1, blank=True,
+                                      null=True)  # Field name made lowercase.
+    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7100,26 +8195,37 @@ class MantenimientosSucursalesargentina(models.Model):
 
 
 class MantenimientosSucursalesbrasil(models.Model):
-    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True, null=True)  # Field name made lowercase.
+    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True,
+                                           null=True)  # Field name made lowercase.
     factura = models.IntegerField(blank=True, null=True)
     notacredito = models.IntegerField(blank=True, null=True)
     recibo = models.IntegerField(blank=True, null=True)
     contado = models.IntegerField(blank=True, null=True)
-    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
     dfax = models.CharField(db_column='DFax', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     druc = models.CharField(db_column='Druc', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     bltext = models.CharField(db_column='BLText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     crttext = models.CharField(db_column='CRTText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     nroiata = models.CharField(db_column='NroIATA', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
+    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7134,21 +8240,31 @@ class MantenimientosSucursaleschile(models.Model):
     ncchileb = models.IntegerField(db_column='NcChileB', blank=True, null=True)  # Field name made lowercase.
     ndchilea = models.IntegerField(db_column='NdChileA', blank=True, null=True)  # Field name made lowercase.
     ndchileb = models.IntegerField(db_column='NdChileB', blank=True, null=True)  # Field name made lowercase.
-    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
     dfax = models.CharField(db_column='DFax', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     druc = models.CharField(db_column='Druc', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     bltext = models.CharField(db_column='BLText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     crttext = models.CharField(db_column='CRTText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     nroiata = models.CharField(db_column='NroIATA', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
+    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7156,28 +8272,39 @@ class MantenimientosSucursaleschile(models.Model):
 
 
 class MantenimientosSucursalesdominicana(models.Model):
-    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True, null=True)  # Field name made lowercase.
+    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True,
+                                           null=True)  # Field name made lowercase.
     factura = models.IntegerField(blank=True, null=True)
     notacredito = models.IntegerField(blank=True, null=True)
     recibo = models.IntegerField(blank=True, null=True)
     contado = models.IntegerField(blank=True, null=True)
     notadebito = models.IntegerField(db_column='Notadebito', blank=True, null=True)  # Field name made lowercase.
     devolcontado = models.IntegerField(db_column='Devolcontado', blank=True, null=True)  # Field name made lowercase.
-    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
     dfax = models.CharField(db_column='DFax', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     druc = models.CharField(db_column='Druc', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     bltext = models.CharField(db_column='BLText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     crttext = models.CharField(db_column='CRTText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     nroiata = models.CharField(db_column='NroIATA', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
+    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7185,31 +8312,43 @@ class MantenimientosSucursalesdominicana(models.Model):
 
 
 class MantenimientosSucursalesmexico(models.Model):
-    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True, null=True)  # Field name made lowercase.
+    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True,
+                                           null=True)  # Field name made lowercase.
     facturamx = models.IntegerField(blank=True, null=True)
     notacreditomx = models.IntegerField(blank=True, null=True)
     recibofletemx = models.IntegerField(blank=True, null=True)
-    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True,
+                                      null=True)  # Field name made lowercase.
     facturamxusd = models.IntegerField(blank=True, null=True)
-    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
     dfax = models.CharField(db_column='DFax', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     druc = models.CharField(db_column='Druc', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     bltext = models.CharField(db_column='BLText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     crttext = models.CharField(db_column='CRTText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     facturad = models.IntegerField(db_column='FacturaD', blank=True, null=True)  # Field name made lowercase.
     notacreditod = models.IntegerField(db_column='NotaCreditoD', blank=True, null=True)  # Field name made lowercase.
     nroiata = models.CharField(db_column='NroIATA', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    notacreditousd = models.IntegerField(db_column='NotaCreditoUSD', blank=True, null=True)  # Field name made lowercase.
+    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
+    notacreditousd = models.IntegerField(db_column='NotaCreditoUSD', blank=True,
+                                         null=True)  # Field name made lowercase.
     notadebito = models.IntegerField(db_column='NotaDebito', blank=True, null=True)  # Field name made lowercase.
     notadebitousd = models.IntegerField(db_column='NotaDebitoUSD', blank=True, null=True)  # Field name made lowercase.
-    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7217,26 +8356,37 @@ class MantenimientosSucursalesmexico(models.Model):
 
 
 class MantenimientosSucursalesparaguay(models.Model):
-    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True, null=True)  # Field name made lowercase.
+    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True,
+                                           null=True)  # Field name made lowercase.
     factura = models.IntegerField(blank=True, null=True)
     notacredito = models.IntegerField(blank=True, null=True)
     recibo = models.IntegerField(blank=True, null=True)
     contado = models.IntegerField(blank=True, null=True)
-    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
     dfax = models.CharField(db_column='DFax', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     druc = models.CharField(db_column='Druc', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     bltext = models.CharField(db_column='BLText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     crttext = models.CharField(db_column='CRTText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     nroiata = models.CharField(db_column='NroIATA', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
+    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7244,26 +8394,37 @@ class MantenimientosSucursalesparaguay(models.Model):
 
 
 class MantenimientosSucursalesperu(models.Model):
-    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True, null=True)  # Field name made lowercase.
+    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True,
+                                           null=True)  # Field name made lowercase.
     factura = models.IntegerField(blank=True, null=True)
     notacredito = models.IntegerField(blank=True, null=True)
     recibo = models.IntegerField(blank=True, null=True)
     contado = models.IntegerField(blank=True, null=True)
-    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
     dfax = models.CharField(db_column='DFax', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     druc = models.CharField(db_column='Druc', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     bltext = models.CharField(db_column='BLText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     crttext = models.CharField(db_column='CRTText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     nroiata = models.CharField(db_column='NroIATA', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
+    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7271,26 +8432,37 @@ class MantenimientosSucursalesperu(models.Model):
 
 
 class MantenimientosSucursalesuruguay(models.Model):
-    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True, null=True)  # Field name made lowercase.
+    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True,
+                                           null=True)  # Field name made lowercase.
     factura = models.IntegerField(blank=True, null=True)
     notacredito = models.IntegerField(blank=True, null=True)
     recibo = models.IntegerField(blank=True, null=True)
     contado = models.IntegerField(blank=True, null=True)
-    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
     dfax = models.CharField(db_column='DFax', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     druc = models.CharField(db_column='Druc', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     bltext = models.CharField(db_column='BLText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     crttext = models.CharField(db_column='CRTText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     nroiata = models.CharField(db_column='NroIATA', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
+    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7298,26 +8470,37 @@ class MantenimientosSucursalesuruguay(models.Model):
 
 
 class MantenimientosSucursalesusa(models.Model):
-    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True, null=True)  # Field name made lowercase.
+    nrosucursal = models.SmallIntegerField(db_column='NroSucursal', unique=True, blank=True,
+                                           null=True)  # Field name made lowercase.
     factura = models.IntegerField(blank=True, null=True)
     notacredito = models.IntegerField(blank=True, null=True)
     recibo = models.IntegerField(blank=True, null=True)
     contado = models.IntegerField(blank=True, null=True)
-    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nombresucursal = models.CharField(db_column='NombreSucursal', max_length=30, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ddireccion = models.CharField(db_column='DDireccion', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dlocalidad = models.CharField(db_column='DLocalidad', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    dtelefono = models.CharField(db_column='DTelefono', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
     dfax = models.CharField(db_column='DFax', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    dcpostal = models.CharField(db_column='DCpostal', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     druc = models.CharField(db_column='Druc', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     bltext = models.CharField(db_column='BLText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     crttext = models.CharField(db_column='CRTText', max_length=10, blank=True, null=True)  # Field name made lowercase.
     nroiata = models.CharField(db_column='NroIATA', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    ciudadaereo = models.CharField(db_column='CiudadAereo', max_length=5, blank=True,
+                                   null=True)  # Field name made lowercase.
+    ciudadmaritimo = models.CharField(db_column='CiudadMaritimo', max_length=5, blank=True,
+                                      null=True)  # Field name made lowercase.
+    ciudadterrestre = models.CharField(db_column='CiudadTerrestre', max_length=5, blank=True,
+                                       null=True)  # Field name made lowercase.
+    senderpima = models.CharField(db_column='SenderPIMA', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7328,7 +8511,8 @@ class MantenimientosSysregisedits(models.Model):
     numerolic = models.IntegerField(db_column='NumeroLic', unique=True)  # Field name made lowercase.
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
     equipo = models.CharField(db_column='Equipo', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    registro = models.CharField(db_column='Registro', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    registro = models.CharField(db_column='Registro', max_length=30, blank=True,
+                                null=True)  # Field name made lowercase.
     vigencia = models.DateTimeField(db_column='Vigencia', blank=True, null=True)  # Field name made lowercase.
     estado = models.SmallIntegerField(db_column='Estado', blank=True, null=True)  # Field name made lowercase.
 
@@ -7360,7 +8544,8 @@ class MantenimientosTextos(models.Model):
     general = models.TextField(blank=True, null=True)
     booking = models.TextField(db_column='Booking', blank=True, null=True)  # Field name made lowercase.
     textoaging = models.TextField(db_column='TextoAging', blank=True, null=True)  # Field name made lowercase.
-    textoestadocuenta = models.TextField(db_column='TextoEstadoCuenta', blank=True, null=True)  # Field name made lowercase.
+    textoestadocuenta = models.TextField(db_column='TextoEstadoCuenta', blank=True,
+                                         null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7389,10 +8574,12 @@ class MantenimientosTipooperacion(models.Model):
 
 class MantenimientosTrace(models.Model):
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
     modulo = models.CharField(db_column='Modulo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     detalle = models.CharField(db_column='Detalle', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
     clave = models.CharField(db_column='Clave', max_length=4, blank=True, null=True)  # Field name made lowercase.
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     factura = models.CharField(db_column='Factura', max_length=50, blank=True, null=True)  # Field name made lowercase.
@@ -7418,7 +8605,8 @@ class MantenimientosTraceinterface(models.Model):
 
 class MantenimientosTrackingdetalles(models.Model):
     usuario = models.IntegerField(db_column='Usuario', blank=True, null=True)  # Field name made lowercase.
-    idsociocomercial = models.IntegerField(db_column='IDSocioComercial', blank=True, null=True)  # Field name made lowercase.
+    idsociocomercial = models.IntegerField(db_column='IDSocioComercial', blank=True,
+                                           null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7426,7 +8614,8 @@ class MantenimientosTrackingdetalles(models.Model):
 
 
 class MantenimientosTrackinglogin(models.Model):
-    sociocomercial = models.IntegerField(db_column='SocioComercial', blank=True, null=True)  # Field name made lowercase.
+    sociocomercial = models.IntegerField(db_column='SocioComercial', blank=True,
+                                         null=True)  # Field name made lowercase.
     usuario = models.CharField(db_column='Usuario', max_length=10, blank=True, null=True)  # Field name made lowercase.
     fechain = models.DateTimeField(db_column='FechaIN', blank=True, null=True)  # Field name made lowercase.
     fechaout = models.DateTimeField(db_column='FechaOUT', blank=True, null=True)  # Field name made lowercase.
@@ -7445,8 +8634,10 @@ class MantenimientosTrackingterceros(models.Model):
     embarcador = models.IntegerField(db_column='Embarcador', blank=True, null=True)  # Field name made lowercase.
     consignatario = models.IntegerField(db_column='Consignatario', blank=True, null=True)  # Field name made lowercase.
     ciudad = models.CharField(db_column='Ciudad', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    enviomail = models.CharField(db_column='EnvioMail', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    enviosocial = models.CharField(db_column='EnvioSocial', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    enviomail = models.CharField(db_column='EnvioMail', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    enviosocial = models.CharField(db_column='EnvioSocial', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7454,9 +8645,11 @@ class MantenimientosTrackingterceros(models.Model):
 
 
 class MantenimientosTrackingusuarios(models.Model):
-    codsociocomercial = models.IntegerField(db_column='CodSocioComercial', blank=True, null=True)  # Field name made lowercase.
+    codsociocomercial = models.IntegerField(db_column='CodSocioComercial', blank=True,
+                                            null=True)  # Field name made lowercase.
     usuario = models.CharField(db_column='Usuario', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    password = models.CharField(db_column='Password', max_length=12, blank=True, null=True)  # Field name made lowercase.
+    password = models.CharField(db_column='Password', max_length=12, blank=True,
+                                null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7486,7 +8679,8 @@ class MantenimientosVapores(models.Model):
     deposito = models.SmallIntegerField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
     imo = models.CharField(db_column='IMO', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    fechaactualizado = models.DateTimeField(db_column='FechaActualizado', blank=True, null=True)  # Field name made lowercase.
+    fechaactualizado = models.DateTimeField(db_column='FechaActualizado', blank=True,
+                                            null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7519,7 +8713,8 @@ class MantenimientosVendedores(models.Model):
     tipoterimp = models.CharField(max_length=1, blank=True, null=True)
     comiterexp = models.FloatField(blank=True, null=True)
     comiterimp = models.FloatField(blank=True, null=True)
-    iniciales = models.CharField(db_column='Iniciales', max_length=3, blank=True, null=True)  # Field name made lowercase.
+    iniciales = models.CharField(db_column='Iniciales', max_length=3, blank=True,
+                                 null=True)  # Field name made lowercase.
     activo = models.CharField(db_column='Activo', max_length=1, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -7533,12 +8728,15 @@ class MantenimientosVuelos(models.Model):
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
     origen = models.CharField(db_column='Origen', max_length=5, blank=True, null=True)  # Field name made lowercase.
     destino = models.CharField(db_column='Destino', max_length=5, blank=True, null=True)  # Field name made lowercase.
-    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  # Field name made lowercase.
-    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
+                                  null=True)  # Field name made lowercase.
+    horadestino = models.CharField(db_column='HoraDestino', max_length=8, blank=True,
+                                   null=True)  # Field name made lowercase.
     observaciones = models.TextField(db_column='Observaciones', blank=True, null=True)  # Field name made lowercase.
     lunes = models.CharField(db_column='Lunes', max_length=1, blank=True, null=True)  # Field name made lowercase.
     martes = models.CharField(db_column='Martes', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    miercoles = models.CharField(db_column='Miercoles', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    miercoles = models.CharField(db_column='Miercoles', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     jueves = models.CharField(db_column='Jueves', max_length=1, blank=True, null=True)  # Field name made lowercase.
     viernes = models.CharField(db_column='Viernes', max_length=1, blank=True, null=True)  # Field name made lowercase.
     sabado = models.CharField(db_column='Sabado', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -7555,8 +8753,10 @@ class SeguimientosAttachhijo(models.Model):
     detalle = models.CharField(max_length=50, blank=True, null=True)
     web = models.CharField(max_length=1, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True, null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True,
+                                         null=True)  # Field name made lowercase.
     idusuario = models.IntegerField(blank=True, null=True)
 
     class Meta:
@@ -7579,77 +8779,118 @@ class SeguimientosAttachhijopo(models.Model):
 class SeguimientosBl(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     empresa = models.CharField(db_column='Empresa', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    direccion = models.CharField(db_column='Direccion', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    direccion = models.CharField(db_column='Direccion', max_length=45, blank=True,
+                                 null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=22, blank=True, null=True)  # Field name made lowercase.
-    localidad = models.CharField(db_column='Localidad', max_length=22, blank=True, null=True)  # Field name made lowercase.
-    telefono = models.CharField(db_column='Telefono', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    cliente1 = models.CharField(db_column='Cliente1', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente2 = models.CharField(db_column='Cliente2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente3 = models.CharField(db_column='Cliente3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente4 = models.CharField(db_column='Cliente4', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    consigna = models.CharField(db_column='Consigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direcconsigna = models.CharField(db_column='DirecConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    localconsigna = models.CharField(db_column='LocalConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    teleconsigna = models.CharField(db_column='TeleConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea = models.CharField(db_column='Otralinea', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    localidad = models.CharField(db_column='Localidad', max_length=22, blank=True,
+                                 null=True)  # Field name made lowercase.
+    telefono = models.CharField(db_column='Telefono', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente1 = models.CharField(db_column='Cliente1', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente2 = models.CharField(db_column='Cliente2', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente3 = models.CharField(db_column='Cliente3', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente4 = models.CharField(db_column='Cliente4', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    consigna = models.CharField(db_column='Consigna', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    direcconsigna = models.CharField(db_column='DirecConsigna', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    localconsigna = models.CharField(db_column='LocalConsigna', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    teleconsigna = models.CharField(db_column='TeleConsigna', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    otralinea = models.CharField(db_column='Otralinea', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
     notif = models.CharField(db_column='Notif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dirnotif = models.CharField(db_column='DirNotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea2 = models.CharField(db_column='Otralinea2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    telnotif = models.CharField(db_column='TelNotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    tipoflete = models.CharField(db_column='TipoFlete', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    position = models.CharField(db_column='Position', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    dirnotif = models.CharField(db_column='DirNotif', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    otralinea2 = models.CharField(db_column='Otralinea2', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    telnotif = models.CharField(db_column='TelNotif', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    tipoflete = models.CharField(db_column='TipoFlete', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    position = models.CharField(db_column='Position', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
     salede = models.CharField(db_column='Salede', max_length=35, blank=True, null=True)  # Field name made lowercase.
     vapor = models.CharField(db_column='Vapor', max_length=35, blank=True, null=True)  # Field name made lowercase.
     viaje = models.CharField(db_column='Viaje', max_length=35, blank=True, null=True)  # Field name made lowercase.
     loading = models.CharField(db_column='Loading', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    discharge = models.CharField(db_column='Discharge', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    delivery = models.CharField(db_column='Delivery', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    transterms = models.CharField(db_column='TransTerms', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    discharge = models.CharField(db_column='Discharge', max_length=35, blank=True,
+                                 null=True)  # Field name made lowercase.
+    delivery = models.CharField(db_column='Delivery', max_length=35, blank=True,
+                                null=True)  # Field name made lowercase.
+    transterms = models.CharField(db_column='TransTerms', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
     simbolo = models.CharField(db_column='Simbolo', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    condentrega = models.CharField(db_column='CondEntrega', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    condentrega = models.CharField(db_column='CondEntrega', max_length=20, blank=True,
+                                   null=True)  # Field name made lowercase.
     tipomov = models.CharField(db_column='TipoMov', max_length=15, blank=True, null=True)  # Field name made lowercase.
-    carriage = models.CharField(db_column='Carriage', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    carriage = models.CharField(db_column='Carriage', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     custom = models.CharField(db_column='Custom', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    valseguro = models.CharField(db_column='ValSeguro', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    valseguro = models.CharField(db_column='ValSeguro', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
     goods = models.TextField(db_column='Goods', blank=True, null=True)  # Field name made lowercase.
     free1 = models.CharField(db_column='Free1', max_length=45, blank=True, null=True)  # Field name made lowercase.
     free2 = models.CharField(db_column='Free2', max_length=45, blank=True, null=True)  # Field name made lowercase.
     free3 = models.CharField(db_column='Free3', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    signature = models.CharField(db_column='Signature', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    signature2 = models.CharField(db_column='Signature2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    signature3 = models.CharField(db_column='Signature3', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    signature = models.CharField(db_column='Signature', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    signature2 = models.CharField(db_column='Signature2', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    signature3 = models.CharField(db_column='Signature3', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
     nbls = models.CharField(db_column='Nbls', max_length=2, blank=True, null=True)  # Field name made lowercase.
     payable = models.CharField(db_column='Payable', max_length=15, blank=True, null=True)  # Field name made lowercase.
     board = models.CharField(db_column='Board', max_length=15, blank=True, null=True)  # Field name made lowercase.
     clean = models.CharField(db_column='Clean', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    fechaemi = models.CharField(db_column='FechaEmi', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    restotext = models.CharField(db_column='RestoText', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    fechaemi = models.CharField(db_column='FechaEmi', max_length=12, blank=True,
+                                null=True)  # Field name made lowercase.
+    restotext = models.CharField(db_column='RestoText', max_length=45, blank=True,
+                                 null=True)  # Field name made lowercase.
     portext = models.CharField(db_column='PorText', max_length=50, blank=True, null=True)  # Field name made lowercase.
     vadeclared = models.IntegerField(db_column='VaDeclared', blank=True, null=True)  # Field name made lowercase.
-    cliente5 = models.CharField(db_column='Cliente5', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otranotif = models.CharField(db_column='OtraNotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    signature4 = models.CharField(db_column='Signature4', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    signature5 = models.CharField(db_column='Signature5', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    cliente5 = models.CharField(db_column='Cliente5', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    otranotif = models.CharField(db_column='OtraNotif', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    signature4 = models.CharField(db_column='Signature4', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    signature5 = models.CharField(db_column='Signature5', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
     booking = models.CharField(db_column='Booking', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    position2 = models.CharField(db_column='Position2', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    position2 = models.CharField(db_column='Position2', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
     origin = models.CharField(db_column='Origin', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    paisdestino = models.CharField(db_column='PaisDestino', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=3, blank=True, null=True)  # Field name made lowercase.
+    paisdestino = models.CharField(db_column='PaisDestino', max_length=35, blank=True,
+                                   null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=3, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=3, blank=True,
+                                     null=True)  # Field name made lowercase.
     awb = models.CharField(db_column='AWB', max_length=20, blank=True, null=True)  # Field name made lowercase.
     hawb = models.CharField(db_column='HAWB', max_length=50, blank=True, null=True)  # Field name made lowercase.
     totalkilos = models.FloatField(db_column='TotalKilos', blank=True, null=True)  # Field name made lowercase.
     totalpaquetes = models.IntegerField(db_column='TotalPaquetes', blank=True, null=True)  # Field name made lowercase.
-    tipodocumento = models.CharField(db_column='TipoDocumento', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    tipodocumento = models.CharField(db_column='TipoDocumento', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
     consolidado = models.IntegerField(db_column='Consolidado', blank=True, null=True)  # Field name made lowercase.
     mensaje1 = models.IntegerField(db_column='Mensaje1', blank=True, null=True)  # Field name made lowercase.
     mensaje2 = models.IntegerField(db_column='Mensaje2', blank=True, null=True)  # Field name made lowercase.
     label6 = models.CharField(db_column='Label6', max_length=50, blank=True, null=True)  # Field name made lowercase.
     texto = models.TextField(db_column='Texto', blank=True, null=True)  # Field name made lowercase.
-    consigna6 = models.CharField(db_column='Consigna6', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    consigna7 = models.CharField(db_column='Consigna7', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    consigna8 = models.CharField(db_column='Consigna8', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    precarriage = models.CharField(db_column='PreCarriage', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    consigna6 = models.CharField(db_column='Consigna6', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    consigna7 = models.CharField(db_column='Consigna7', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    consigna8 = models.CharField(db_column='Consigna8', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    precarriage = models.CharField(db_column='PreCarriage', max_length=35, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7659,8 +8900,10 @@ class SeguimientosBl(models.Model):
 class SeguimientosBl2(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     marks = models.CharField(db_column='Marks', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    packages = models.CharField(db_column='Packages', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    description = models.CharField(db_column='Description', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    packages = models.CharField(db_column='Packages', max_length=30, blank=True,
+                                null=True)  # Field name made lowercase.
+    description = models.CharField(db_column='Description', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
     gross = models.CharField(db_column='Gross', max_length=30, blank=True, null=True)  # Field name made lowercase.
     tare = models.CharField(db_column='Tare', max_length=30, blank=True, null=True)  # Field name made lowercase.
 
@@ -7671,7 +8914,8 @@ class SeguimientosBl2(models.Model):
 
 class SeguimientosBl3(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    servicio = models.CharField(db_column='Servicio', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    servicio = models.CharField(db_column='Servicio', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
     prepaid = models.CharField(db_column='Prepaid', max_length=10, blank=True, null=True)  # Field name made lowercase.
     collect = models.CharField(db_column='Collect', max_length=10, blank=True, null=True)  # Field name made lowercase.
     moneda = models.CharField(db_column='Moneda', max_length=3, blank=True, null=True)  # Field name made lowercase.
@@ -7735,7 +8979,8 @@ class SeguimientosBooking(models.Model):
     terminal = models.CharField(max_length=30, blank=True, null=True)
     direccterminal = models.CharField(max_length=30, blank=True, null=True)
     telterminal = models.CharField(max_length=30, blank=True, null=True)
-    contactoterminal = models.CharField(db_column='ContactoTerminal', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    contactoterminal = models.CharField(db_column='ContactoTerminal', max_length=30, blank=True,
+                                        null=True)  # Field name made lowercase.
     bandera = models.CharField(max_length=30, blank=True, null=True)
 
     class Meta:
@@ -7821,8 +9066,10 @@ class SeguimientosCabezalocc(models.Model):
     expedir = models.CharField(db_column='Expedir', max_length=15, blank=True, null=True)  # Field name made lowercase.
     proyecto = models.SmallIntegerField(db_column='Proyecto', blank=True, null=True)  # Field name made lowercase.
     consignatario = models.IntegerField(db_column='Consignatario', blank=True, null=True)  # Field name made lowercase.
-    cartaaprobacion = models.CharField(db_column='CartaAprobacion', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    ultimocomienzoembarque = models.DateTimeField(db_column='UltimoComienzoEmbarque', blank=True, null=True)  # Field name made lowercase.
+    cartaaprobacion = models.CharField(db_column='CartaAprobacion', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    ultimocomienzoembarque = models.DateTimeField(db_column='UltimoComienzoEmbarque', blank=True,
+                                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7839,9 +9086,12 @@ class SeguimientosCargaaerea(models.Model):
     cbm = models.FloatField(blank=True, null=True)
     mercaderia = models.TextField(db_column='Mercaderia', blank=True, null=True)  # Field name made lowercase.
     marcas = models.CharField(db_column='Marcas', max_length=150, blank=True, null=True)  # Field name made lowercase.
-    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=15, blank=True, null=True)  # Field name made lowercase.
-    materialreceipt = models.CharField(db_column='MaterialReceipt', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    sobredimensionada = models.CharField(db_column='Sobredimensionada', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=15, blank=True,
+                                     null=True)  # Field name made lowercase.
+    materialreceipt = models.CharField(db_column='MaterialReceipt', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
+    sobredimensionada = models.CharField(db_column='Sobredimensionada', max_length=1, blank=True,
+                                         null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7854,8 +9104,10 @@ class SeguimientosCargaaereaaduana(models.Model):
     bultos = models.IntegerField(db_column='Bultos', blank=True, null=True)  # Field name made lowercase.
     bruto = models.FloatField(db_column='Bruto', blank=True, null=True)  # Field name made lowercase.
     tipo = models.CharField(db_column='Tipo', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    manifiesto = models.CharField(db_column='Manifiesto', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    fechamanifiesto = models.DateTimeField(db_column='FechaManifiesto', blank=True, null=True)  # Field name made lowercase.
+    manifiesto = models.CharField(db_column='Manifiesto', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    fechamanifiesto = models.DateTimeField(db_column='FechaManifiesto', blank=True,
+                                           null=True)  # Field name made lowercase.
     enviado = models.CharField(db_column='Enviado', max_length=1, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -7924,13 +9176,20 @@ class SeguimientosConexreserva(models.Model):
 class SeguimientosCronologia(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     fecha = models.CharField(db_column='Fecha', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cantrecibida = models.CharField(db_column='CantRecibida', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantembarcado = models.CharField(db_column='CantEmbarcado', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantroto = models.CharField(db_column='CantRoto', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    cantperdido = models.CharField(db_column='CantPerdido', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    inspeccionadopor = models.CharField(db_column='InspeccionadoPor', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    recibidopor = models.CharField(db_column='RecibidoPor', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    trucknbr = models.CharField(db_column='TruckNbr', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    cantrecibida = models.CharField(db_column='CantRecibida', max_length=20, blank=True,
+                                    null=True)  # Field name made lowercase.
+    cantembarcado = models.CharField(db_column='CantEmbarcado', max_length=20, blank=True,
+                                     null=True)  # Field name made lowercase.
+    cantroto = models.CharField(db_column='CantRoto', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
+    cantperdido = models.CharField(db_column='CantPerdido', max_length=20, blank=True,
+                                   null=True)  # Field name made lowercase.
+    inspeccionadopor = models.CharField(db_column='InspeccionadoPor', max_length=50, blank=True,
+                                        null=True)  # Field name made lowercase.
+    recibidopor = models.CharField(db_column='RecibidoPor', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
+    trucknbr = models.CharField(db_column='TruckNbr', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -7940,58 +9199,94 @@ class SeguimientosCronologia(models.Model):
 class SeguimientosCrt(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     empresa = models.CharField(db_column='Empresa', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    direccion = models.CharField(db_column='Direccion', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    direccion = models.CharField(db_column='Direccion', max_length=45, blank=True,
+                                 null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=22, blank=True, null=True)  # Field name made lowercase.
-    localidad = models.CharField(db_column='Localidad', max_length=22, blank=True, null=True)  # Field name made lowercase.
-    telefono = models.CharField(db_column='Telefono', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    cliente1 = models.CharField(db_column='Cliente1', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente2 = models.CharField(db_column='Cliente2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente3 = models.CharField(db_column='Cliente3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente4 = models.CharField(db_column='Cliente4', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    localidad = models.CharField(db_column='Localidad', max_length=22, blank=True,
+                                 null=True)  # Field name made lowercase.
+    telefono = models.CharField(db_column='Telefono', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente1 = models.CharField(db_column='Cliente1', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente2 = models.CharField(db_column='Cliente2', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente3 = models.CharField(db_column='Cliente3', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente4 = models.CharField(db_column='Cliente4', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
     destina = models.CharField(db_column='Destina', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direcdestina = models.CharField(db_column='DirecDestina', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    localdestina = models.CharField(db_column='LocalDestina', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    teledestina = models.CharField(db_column='TeleDestina', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    consigna = models.CharField(db_column='Consigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direcconsigna = models.CharField(db_column='DirecConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    localconsigna = models.CharField(db_column='LocalConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    teleconsigna = models.CharField(db_column='TeleConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    direcdestina = models.CharField(db_column='DirecDestina', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    localdestina = models.CharField(db_column='LocalDestina', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    teledestina = models.CharField(db_column='TeleDestina', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
+    consigna = models.CharField(db_column='Consigna', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    direcconsigna = models.CharField(db_column='DirecConsigna', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    localconsigna = models.CharField(db_column='LocalConsigna', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    teleconsigna = models.CharField(db_column='TeleConsigna', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
     notif = models.CharField(db_column='Notif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dirnotif = models.CharField(db_column='DirNotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea2 = models.CharField(db_column='Otralinea2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    telnotif = models.CharField(db_column='TelNotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    dirnotif = models.CharField(db_column='DirNotif', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    otralinea2 = models.CharField(db_column='Otralinea2', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    telnotif = models.CharField(db_column='TelNotif', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
     salede = models.CharField(db_column='Salede', max_length=80, blank=True, null=True)  # Field name made lowercase.
     loading = models.CharField(db_column='Loading', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    discharge = models.CharField(db_column='Discharge', max_length=80, blank=True, null=True)  # Field name made lowercase.
+    discharge = models.CharField(db_column='Discharge', max_length=80, blank=True,
+                                 null=True)  # Field name made lowercase.
     porte1 = models.CharField(db_column='Porte1', max_length=45, blank=True, null=True)  # Field name made lowercase.
     porte2 = models.CharField(db_column='Porte2', max_length=45, blank=True, null=True)  # Field name made lowercase.
     porte3 = models.CharField(db_column='Porte3', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    declaravalor = models.CharField(db_column='DeclaraValor', max_length=15, blank=True, null=True)  # Field name made lowercase.
-    documanexo1 = models.CharField(db_column='DocumAnexo1', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    documanexo2 = models.CharField(db_column='DocumAnexo2', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    documanexo3 = models.CharField(db_column='DocumAnexo3', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    documanexo4 = models.CharField(db_column='DocumAnexo4', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    declaravalor = models.CharField(db_column='DeclaraValor', max_length=15, blank=True,
+                                    null=True)  # Field name made lowercase.
+    documanexo1 = models.CharField(db_column='DocumAnexo1', max_length=45, blank=True,
+                                   null=True)  # Field name made lowercase.
+    documanexo2 = models.CharField(db_column='DocumAnexo2', max_length=45, blank=True,
+                                   null=True)  # Field name made lowercase.
+    documanexo3 = models.CharField(db_column='DocumAnexo3', max_length=45, blank=True,
+                                   null=True)  # Field name made lowercase.
+    documanexo4 = models.CharField(db_column='DocumAnexo4', max_length=45, blank=True,
+                                   null=True)  # Field name made lowercase.
     aduana1 = models.CharField(db_column='Aduana1', max_length=45, blank=True, null=True)  # Field name made lowercase.
     aduana2 = models.CharField(db_column='Aduana2', max_length=45, blank=True, null=True)  # Field name made lowercase.
     aduana3 = models.CharField(db_column='Aduana3', max_length=45, blank=True, null=True)  # Field name made lowercase.
     aduana4 = models.CharField(db_column='Aduana4', max_length=45, blank=True, null=True)  # Field name made lowercase.
     aduana5 = models.CharField(db_column='Aduana5', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    declara1 = models.CharField(db_column='Declara1', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    declara2 = models.CharField(db_column='Declara2', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    declara3 = models.CharField(db_column='Declara3', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    declara4 = models.CharField(db_column='Declara4', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    declara5 = models.CharField(db_column='Declara5', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    destina1 = models.CharField(db_column='Destina1', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    destina2 = models.CharField(db_column='Destina2', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    destina3 = models.CharField(db_column='Destina3', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    fleteexterno = models.CharField(db_column='FleteExterno', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    reembolso = models.CharField(db_column='Reembolso', max_length=12, blank=True, null=True)  # Field name made lowercase.
+    declara1 = models.CharField(db_column='Declara1', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    declara2 = models.CharField(db_column='Declara2', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    declara3 = models.CharField(db_column='Declara3', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    declara4 = models.CharField(db_column='Declara4', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    declara5 = models.CharField(db_column='Declara5', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    destina1 = models.CharField(db_column='Destina1', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    destina2 = models.CharField(db_column='Destina2', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    destina3 = models.CharField(db_column='Destina3', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
+    fleteexterno = models.CharField(db_column='FleteExterno', max_length=12, blank=True,
+                                    null=True)  # Field name made lowercase.
+    reembolso = models.CharField(db_column='Reembolso', max_length=12, blank=True,
+                                 null=True)  # Field name made lowercase.
     remite1 = models.CharField(db_column='Remite1', max_length=45, blank=True, null=True)  # Field name made lowercase.
     remite2 = models.CharField(db_column='Remite2', max_length=45, blank=True, null=True)  # Field name made lowercase.
     remite3 = models.CharField(db_column='Remite3', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    signature = models.CharField(db_column='Signature', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    signature2 = models.CharField(db_column='Signature2', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    fechaemi = models.CharField(db_column='FechaEmi', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    signature = models.CharField(db_column='Signature', max_length=45, blank=True,
+                                 null=True)  # Field name made lowercase.
+    signature2 = models.CharField(db_column='Signature2', max_length=45, blank=True,
+                                  null=True)  # Field name made lowercase.
+    fechaemi = models.CharField(db_column='FechaEmi', max_length=15, blank=True,
+                                null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -8000,7 +9295,8 @@ class SeguimientosCrt(models.Model):
 
 class SeguimientosCrt2(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    description = models.CharField(db_column='Description', max_length=55, blank=True, null=True)  # Field name made lowercase.
+    description = models.CharField(db_column='Description', max_length=55, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -8021,7 +9317,8 @@ class SeguimientosDetalleocc(models.Model):
     talla = models.CharField(max_length=5, blank=True, null=True)
     color = models.CharField(max_length=20, blank=True, null=True)
     sku = models.CharField(max_length=30, blank=True, null=True)
-    descripcion2 = models.CharField(db_column='Descripcion2', max_length=400, blank=True, null=True)  # Field name made lowercase.
+    descripcion2 = models.CharField(db_column='Descripcion2', max_length=400, blank=True,
+                                    null=True)  # Field name made lowercase.
     cantidadbkd = models.FloatField(db_column='CantidadBKD', blank=True, null=True)  # Field name made lowercase.
     volumen = models.FloatField(db_column='Volumen', blank=True, null=True)  # Field name made lowercase.
     bultos = models.IntegerField(db_column='Bultos', blank=True, null=True)  # Field name made lowercase.
@@ -8034,35 +9331,51 @@ class SeguimientosDetalleocc(models.Model):
 
 class SeguimientosEntregadoc(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
-    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    entreguese = models.CharField(db_column='Entreguese', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    nombreentrega = models.CharField(db_column='NombreEntrega', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    direccionentrega = models.CharField(db_column='DireccionEntrega', max_length=50, blank=True,
+                                        null=True)  # Field name made lowercase.
+    ciudadentrega = models.CharField(db_column='CiudadEntrega', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
+    telefonoentrega = models.CharField(db_column='TelefonoEntrega', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
     original = models.CharField(db_column='Original', max_length=1, blank=True, null=True)  # Field name made lowercase.
     lista = models.CharField(db_column='Lista', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certorigen = models.CharField(db_column='CertOrigen', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     declara = models.CharField(db_column='Declara', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certflete = models.CharField(db_column='CertFlete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cerseguro = models.CharField(db_column='CerSeguro', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     copiahbl = models.CharField(db_column='CopiaHBL', max_length=1, blank=True, null=True)  # Field name made lowercase.
     otros = models.CharField(db_column='Otros', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    detotros = models.CharField(db_column='DetOtros', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    detotros2 = models.CharField(db_column='DetOtros2', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
     ordendep = models.CharField(db_column='OrdenDep', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certgastos = models.CharField(db_column='CertGastos', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     libre = models.CharField(db_column='Libre', max_length=1, blank=True, null=True)  # Field name made lowercase.
     eur1 = models.CharField(db_column='Eur1', max_length=1, blank=True, null=True)  # Field name made lowercase.
     factura = models.CharField(db_column='Factura', max_length=1, blank=True, null=True)  # Field name made lowercase.
     nuestra = models.CharField(db_column='Nuestra', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certcalidad = models.CharField(db_column='CertCalidad', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
     cumplido = models.CharField(db_column='Cumplido', max_length=1, blank=True, null=True)  # Field name made lowercase.
     transfer = models.CharField(db_column='Transfer', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    certpeligroso = models.CharField(db_column='CertPeligroso', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    imprimecom = models.CharField(db_column='ImprimeCom', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     remarks = models.CharField(db_column='Remarks', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True, null=True)  # Field name made lowercase.
+    remarks2 = models.CharField(db_column='Remarks2', max_length=80, blank=True,
+                                null=True)  # Field name made lowercase.
+    facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True,
+                                  null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -8079,8 +9392,10 @@ class SeguimientosEntregaorden(models.Model):
     entregareal = models.DateTimeField(blank=True, null=True)
     unidad = models.CharField(max_length=10, blank=True, null=True)
     arribo = models.DateTimeField(blank=True, null=True)
-    materialreceipt = models.CharField(db_column='MaterialReceipt', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    materialreceipt = models.CharField(db_column='MaterialReceipt', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
+    nrocontenedor = models.CharField(db_column='NroContenedor', max_length=15, blank=True,
+                                     null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -8094,11 +9409,13 @@ class SeguimientosEntregasocc(models.Model):
     entrega = models.DateTimeField(blank=True, null=True)
     arribo = models.DateTimeField(blank=True, null=True)
     embarcar = models.CharField(db_column='Embarcar', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    materialreceipt = models.CharField(db_column='MaterialReceipt', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    materialreceipt = models.CharField(db_column='MaterialReceipt', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
     modo = models.CharField(db_column='Modo', max_length=1, blank=True, null=True)  # Field name made lowercase.
     etd = models.DateTimeField(db_column='ETD', blank=True, null=True)  # Field name made lowercase.
     boxempacado = models.DateTimeField(db_column='BoxEmpacado', blank=True, null=True)  # Field name made lowercase.
-    boxmedidas = models.CharField(db_column='BoxMedidas', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    boxmedidas = models.CharField(db_column='BoxMedidas', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
     boxpeso = models.FloatField(db_column='BoxPeso', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -8127,26 +9444,41 @@ class SeguimientosEnvases(models.Model):
     volumen = models.FloatField(db_column='Volumen', blank=True, null=True)  # Field name made lowercase.
     temperatura = models.FloatField(db_column='Temperatura', blank=True, null=True)  # Field name made lowercase.
     activo = models.CharField(db_column='Activo', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadtemp = models.CharField(db_column='UnidadTemp', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    condespeciales = models.CharField(db_column='CondEspeciales', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    nomchofer = models.CharField(db_column='NomChofer', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    telchofer = models.CharField(db_column='TelChofer', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    matricula = models.CharField(db_column='Matricula', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    unidadtemp = models.CharField(db_column='UnidadTemp', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    condespeciales = models.CharField(db_column='CondEspeciales', max_length=100, blank=True,
+                                      null=True)  # Field name made lowercase.
+    nomchofer = models.CharField(db_column='NomChofer', max_length=100, blank=True,
+                                 null=True)  # Field name made lowercase.
+    telchofer = models.CharField(db_column='TelChofer', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
+    matricula = models.CharField(db_column='Matricula', max_length=20, blank=True,
+                                 null=True)  # Field name made lowercase.
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
-    horacitacion = models.CharField(db_column='HoraCitacion', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    horallegada = models.CharField(db_column='HoraLlegada', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    depositoretiro = models.IntegerField(db_column='DepositoRetiro', blank=True, null=True)  # Field name made lowercase.
+    horacitacion = models.CharField(db_column='HoraCitacion', max_length=30, blank=True,
+                                    null=True)  # Field name made lowercase.
+    horallegada = models.CharField(db_column='HoraLlegada', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    depositoretiro = models.IntegerField(db_column='DepositoRetiro', blank=True,
+                                         null=True)  # Field name made lowercase.
     depositodev = models.IntegerField(db_column='DepositoDev', blank=True, null=True)  # Field name made lowercase.
     cotizacion = models.IntegerField(db_column='Cotizacion', blank=True, null=True)  # Field name made lowercase.
-    rucchofer = models.CharField(db_column='RucChofer', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    fechallegadaplanta = models.DateTimeField(db_column='FechaLlegadaPlanta', blank=True, null=True)  # Field name made lowercase.
-    direccionentrega = models.SmallIntegerField(db_column='DireccionEntrega', blank=True, null=True)  # Field name made lowercase.
+    rucchofer = models.CharField(db_column='RucChofer', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    fechallegadaplanta = models.DateTimeField(db_column='FechaLlegadaPlanta', blank=True,
+                                              null=True)  # Field name made lowercase.
+    direccionentrega = models.SmallIntegerField(db_column='DireccionEntrega', blank=True,
+                                                null=True)  # Field name made lowercase.
     fechacitacion = models.DateTimeField(db_column='FechaCitacion', blank=True, null=True)  # Field name made lowercase.
-    ventilacion = models.CharField(db_column='Ventilacion', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    ventilacion = models.CharField(db_column='Ventilacion', max_length=20, blank=True,
+                                   null=True)  # Field name made lowercase.
     genset = models.CharField(db_column='GenSet', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    atmosferacontrolada = models.CharField(db_column='AtmosferaControlada', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    consolidacion = models.SmallIntegerField(db_column='Consolidacion', blank=True, null=True)  # Field name made lowercase.
-    tipoventilacion = models.CharField(db_column='TipoVentilacion', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    atmosferacontrolada = models.CharField(db_column='AtmosferaControlada', max_length=1, blank=True,
+                                           null=True)  # Field name made lowercase.
+    consolidacion = models.SmallIntegerField(db_column='Consolidacion', blank=True,
+                                             null=True)  # Field name made lowercase.
+    tipoventilacion = models.CharField(db_column='TipoVentilacion', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
     pesovgm = models.FloatField(db_column='PesoVGM', blank=True, null=True)  # Field name made lowercase.
     humedad = models.SmallIntegerField(db_column='Humedad', blank=True, null=True)  # Field name made lowercase.
 
@@ -8183,10 +9515,13 @@ class SeguimientosFisico(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     detalle = models.CharField(db_column='Detalle', max_length=100, blank=True, null=True)  # Field name made lowercase.
     marcas = models.CharField(db_column='Marcas', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    precinto = models.CharField(db_column='Precinto', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    precinto = models.CharField(db_column='Precinto', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
     tara = models.IntegerField(db_column='Tara', blank=True, null=True)  # Field name made lowercase.
-    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
     peso = models.FloatField(db_column='Peso', blank=True, null=True)  # Field name made lowercase.
     deposito = models.SmallIntegerField(db_column='Deposito', blank=True, null=True)  # Field name made lowercase.
 
@@ -8198,9 +9533,12 @@ class SeguimientosFisico(models.Model):
 class SeguimientosGastoshijos(models.Model):
     cliente = models.IntegerField(db_column='Cliente', blank=True, null=True)  # Field name made lowercase.
     codigo = models.SmallIntegerField(db_column='Codigo', blank=True, null=True)  # Field name made lowercase.
-    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    tipogasto = models.CharField(db_column='TipoGasto', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    precio = models.DecimalField(db_column='Precio', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
+    costo = models.DecimalField(db_column='Costo', max_digits=19, decimal_places=4, blank=True,
+                                null=True)  # Field name made lowercase.
+    tipogasto = models.CharField(db_column='TipoGasto', max_length=30, blank=True,
+                                 null=True)  # Field name made lowercase.
     modo = models.CharField(db_column='Modo', max_length=1, blank=True, null=True)  # Field name made lowercase.
     destino = models.CharField(db_column='Destino', max_length=5, blank=True, null=True)  # Field name made lowercase.
     moneda = models.SmallIntegerField(db_column='Moneda', blank=True, null=True)  # Field name made lowercase.
@@ -8217,50 +9555,79 @@ class SeguimientosGastoshijos(models.Model):
 class SeguimientosGuiasgrabadas(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     empresa = models.CharField(db_column='Empresa', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    direccion = models.CharField(db_column='Direccion', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    direccion = models.CharField(db_column='Direccion', max_length=45, blank=True,
+                                 null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=22, blank=True, null=True)  # Field name made lowercase.
-    localidad = models.CharField(db_column='Localidad', max_length=22, blank=True, null=True)  # Field name made lowercase.
-    telefono = models.CharField(db_column='Telefono', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    cliente1 = models.CharField(db_column='Cliente1', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente2 = models.CharField(db_column='Cliente2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente3 = models.CharField(db_column='Cliente3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente4 = models.CharField(db_column='Cliente4', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    consigna = models.CharField(db_column='Consigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direcconsigna = models.CharField(db_column='DirecConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    localconsigna = models.CharField(db_column='LocalConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    teleconsigna = models.CharField(db_column='TeleConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea = models.CharField(db_column='Otralinea', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    empresa2 = models.CharField(db_column='Empresa2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otracarrier = models.CharField(db_column='OtraCarrier', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    localidad2 = models.CharField(db_column='Localidad2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otrosdeagente = models.CharField(db_column='OtrosdeAgente', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    localidad = models.CharField(db_column='Localidad', max_length=22, blank=True,
+                                 null=True)  # Field name made lowercase.
+    telefono = models.CharField(db_column='Telefono', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente1 = models.CharField(db_column='Cliente1', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente2 = models.CharField(db_column='Cliente2', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente3 = models.CharField(db_column='Cliente3', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente4 = models.CharField(db_column='Cliente4', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    consigna = models.CharField(db_column='Consigna', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    direcconsigna = models.CharField(db_column='DirecConsigna', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    localconsigna = models.CharField(db_column='LocalConsigna', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    teleconsigna = models.CharField(db_column='TeleConsigna', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    otralinea = models.CharField(db_column='Otralinea', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    empresa2 = models.CharField(db_column='Empresa2', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    otracarrier = models.CharField(db_column='OtraCarrier', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
+    localidad2 = models.CharField(db_column='Localidad2', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrosdeagente = models.CharField(db_column='OtrosdeAgente', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
     iata = models.CharField(db_column='Iata', max_length=15, blank=True, null=True)  # Field name made lowercase.
     salede = models.CharField(db_column='Salede', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    cadenaaerea = models.CharField(db_column='CadenaAerea', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    tipoflete = models.CharField(db_column='TipoFlete', max_length=18, blank=True, null=True)  # Field name made lowercase.
-    numerolc = models.CharField(db_column='Numerolc', max_length=26, blank=True, null=True)  # Field name made lowercase.
+    cadenaaerea = models.CharField(db_column='CadenaAerea', max_length=20, blank=True,
+                                   null=True)  # Field name made lowercase.
+    tipoflete = models.CharField(db_column='TipoFlete', max_length=18, blank=True,
+                                 null=True)  # Field name made lowercase.
+    numerolc = models.CharField(db_column='Numerolc', max_length=26, blank=True,
+                                null=True)  # Field name made lowercase.
     notif = models.CharField(db_column='Notif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dirnotif = models.CharField(db_column='DirNotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea2 = models.CharField(db_column='Otralinea2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    telnotif = models.CharField(db_column='TelNotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea3 = models.CharField(db_column='Otralinea3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea4 = models.CharField(db_column='Otralinea4', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    dirnotif = models.CharField(db_column='DirNotif', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    otralinea2 = models.CharField(db_column='Otralinea2', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    telnotif = models.CharField(db_column='TelNotif', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    otralinea3 = models.CharField(db_column='Otralinea3', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otralinea4 = models.CharField(db_column='Otralinea4', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
     destino = models.CharField(db_column='Destino', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    idtransport = models.CharField(db_column='Idtransport', max_length=2, blank=True, null=True)  # Field name made lowercase.
+    idtransport = models.CharField(db_column='Idtransport', max_length=2, blank=True,
+                                   null=True)  # Field name made lowercase.
     to1 = models.CharField(db_column='To1', max_length=3, blank=True, null=True)  # Field name made lowercase.
     by1 = models.CharField(db_column='By1', max_length=2, blank=True, null=True)  # Field name made lowercase.
     to2 = models.CharField(db_column='To2', max_length=3, blank=True, null=True)  # Field name made lowercase.
     by2 = models.CharField(db_column='By2', max_length=2, blank=True, null=True)  # Field name made lowercase.
     simbolo = models.CharField(db_column='Simbolo', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    carriage = models.CharField(db_column='Carriage', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    carriage = models.CharField(db_column='Carriage', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     custom = models.CharField(db_column='Custom', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    nombredestino = models.CharField(db_column='NombreDestino', max_length=22, blank=True, null=True)  # Field name made lowercase.
+    nombredestino = models.CharField(db_column='NombreDestino', max_length=22, blank=True,
+                                     null=True)  # Field name made lowercase.
     vuelo1 = models.CharField(db_column='Vuelo1', max_length=15, blank=True, null=True)  # Field name made lowercase.
     vuelo2 = models.CharField(db_column='Vuelo2', max_length=15, blank=True, null=True)  # Field name made lowercase.
     vuelo3 = models.CharField(db_column='Vuelo3', max_length=15, blank=True, null=True)  # Field name made lowercase.
     vuelo4 = models.CharField(db_column='Vuelo4', max_length=15, blank=True, null=True)  # Field name made lowercase.
-    valseguro = models.CharField(db_column='ValSeguro', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    cliente5 = models.CharField(db_column='Cliente5', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    valseguro = models.CharField(db_column='ValSeguro', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
+    cliente5 = models.CharField(db_column='Cliente5', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -8270,8 +9637,10 @@ class SeguimientosGuiasgrabadas(models.Model):
 class SeguimientosGuiasgrabadas2(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     marcas = models.CharField(db_column='Marcas', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    otraline = models.CharField(db_column='Otraline', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    attached = models.CharField(db_column='Attached', max_length=80, blank=True, null=True)  # Field name made lowercase.
+    otraline = models.CharField(db_column='Otraline', max_length=80, blank=True,
+                                null=True)  # Field name made lowercase.
+    attached = models.CharField(db_column='Attached', max_length=80, blank=True,
+                                null=True)  # Field name made lowercase.
     nature1 = models.CharField(db_column='Nature1', max_length=25, blank=True, null=True)  # Field name made lowercase.
     nature2 = models.CharField(db_column='Nature2', max_length=25, blank=True, null=True)  # Field name made lowercase.
     nature3 = models.CharField(db_column='Nature3', max_length=25, blank=True, null=True)  # Field name made lowercase.
@@ -8281,9 +9650,12 @@ class SeguimientosGuiasgrabadas2(models.Model):
     nature7 = models.CharField(db_column='Nature7', max_length=25, blank=True, null=True)  # Field name made lowercase.
     nature8 = models.CharField(db_column='Nature8', max_length=25, blank=True, null=True)  # Field name made lowercase.
     nature9 = models.CharField(db_column='Nature9', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature10 = models.CharField(db_column='Nature10', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature11 = models.CharField(db_column='Nature11', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature12 = models.CharField(db_column='Nature12', max_length=25, blank=True, null=True)  # Field name made lowercase.
+    nature10 = models.CharField(db_column='Nature10', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature11 = models.CharField(db_column='Nature11', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature12 = models.CharField(db_column='Nature12', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
     free1 = models.CharField(db_column='Free1', max_length=60, blank=True, null=True)  # Field name made lowercase.
     free2 = models.CharField(db_column='Free2', max_length=60, blank=True, null=True)  # Field name made lowercase.
     free3 = models.CharField(db_column='Free3', max_length=60, blank=True, null=True)  # Field name made lowercase.
@@ -8292,20 +9664,31 @@ class SeguimientosGuiasgrabadas2(models.Model):
     other1 = models.CharField(db_column='Other1', max_length=50, blank=True, null=True)  # Field name made lowercase.
     other2 = models.CharField(db_column='Other2', max_length=50, blank=True, null=True)  # Field name made lowercase.
     other3 = models.CharField(db_column='Other3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    signature = models.CharField(db_column='Signature', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    fechaemi = models.CharField(db_column='Fechaemi', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    restotext = models.CharField(db_column='Restotext', max_length=25, blank=True, null=True)  # Field name made lowercase.
+    signature = models.CharField(db_column='Signature', max_length=45, blank=True,
+                                 null=True)  # Field name made lowercase.
+    fechaemi = models.CharField(db_column='Fechaemi', max_length=12, blank=True,
+                                null=True)  # Field name made lowercase.
+    restotext = models.CharField(db_column='Restotext', max_length=25, blank=True,
+                                 null=True)  # Field name made lowercase.
     portext = models.CharField(db_column='Portext', max_length=40, blank=True, null=True)  # Field name made lowercase.
     gastosconiva = models.IntegerField(db_column='GastosconIva', blank=True, null=True)  # Field name made lowercase.
-    nature13 = models.CharField(db_column='Nature13', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature14 = models.CharField(db_column='Nature14', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature15 = models.CharField(db_column='Nature15', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature16 = models.CharField(db_column='Nature16', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature17 = models.CharField(db_column='Nature17', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature18 = models.CharField(db_column='Nature18', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    nature19 = models.CharField(db_column='Nature19', max_length=25, blank=True, null=True)  # Field name made lowercase.
+    nature13 = models.CharField(db_column='Nature13', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature14 = models.CharField(db_column='Nature14', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature15 = models.CharField(db_column='Nature15', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature16 = models.CharField(db_column='Nature16', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature17 = models.CharField(db_column='Nature17', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature18 = models.CharField(db_column='Nature18', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
+    nature19 = models.CharField(db_column='Nature19', max_length=25, blank=True,
+                                null=True)  # Field name made lowercase.
     asagent = models.CharField(db_column='AsAgent', max_length=70, blank=True, null=True)  # Field name made lowercase.
-    ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True, null=True)  # Field name made lowercase.
+    ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True,
+                                    null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -8319,13 +9702,19 @@ class SeguimientosGuiasgrabadas3(models.Model):
     piezas3 = models.CharField(db_column='Piezas3', max_length=4, blank=True, null=True)  # Field name made lowercase.
     piezas4 = models.CharField(db_column='Piezas4', max_length=4, blank=True, null=True)  # Field name made lowercase.
     piezas5 = models.CharField(db_column='Piezas5', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    totpiezas = models.CharField(db_column='TotPiezas', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    totpiezas = models.CharField(db_column='TotPiezas', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
     gross = models.CharField(db_column='Gross', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross = models.CharField(db_column='OtroGross', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross2 = models.CharField(db_column='OtroGross2', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross3 = models.CharField(db_column='OtroGross3', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross4 = models.CharField(db_column='OtroGross4', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totgross = models.CharField(db_column='TotGross', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    otrogross = models.CharField(db_column='OtroGross', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
+    otrogross2 = models.CharField(db_column='OtroGross2', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrogross3 = models.CharField(db_column='OtroGross3', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrogross4 = models.CharField(db_column='OtroGross4', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    totgross = models.CharField(db_column='TotGross', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     k = models.CharField(db_column='K', max_length=1, blank=True, null=True)  # Field name made lowercase.
     k2 = models.CharField(db_column='K2', max_length=1, blank=True, null=True)  # Field name made lowercase.
     k3 = models.CharField(db_column='K3', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -8336,7 +9725,8 @@ class SeguimientosGuiasgrabadas3(models.Model):
     r3 = models.CharField(db_column='R3', max_length=1, blank=True, null=True)  # Field name made lowercase.
     r4 = models.CharField(db_column='R4', max_length=1, blank=True, null=True)  # Field name made lowercase.
     r5 = models.CharField(db_column='R5', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    commodity = models.CharField(db_column='Commodity', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    commodity = models.CharField(db_column='Commodity', max_length=8, blank=True,
+                                 null=True)  # Field name made lowercase.
     comm2 = models.CharField(db_column='Comm2', max_length=8, blank=True, null=True)  # Field name made lowercase.
     comm3 = models.CharField(db_column='Comm3', max_length=8, blank=True, null=True)  # Field name made lowercase.
     comm4 = models.CharField(db_column='Comm4', max_length=8, blank=True, null=True)  # Field name made lowercase.
@@ -8356,7 +9746,8 @@ class SeguimientosGuiasgrabadas3(models.Model):
     total3 = models.CharField(db_column='Total3', max_length=10, blank=True, null=True)  # Field name made lowercase.
     total4 = models.CharField(db_column='Total4', max_length=10, blank=True, null=True)  # Field name made lowercase.
     total5 = models.CharField(db_column='Total5', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalfinal = models.CharField(db_column='TotalFinal', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    totalfinal = models.CharField(db_column='TotalFinal', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
     totalpp = models.CharField(db_column='TotalPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
     totalcc = models.CharField(db_column='TotalCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
     valpp = models.CharField(db_column='ValPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
@@ -8367,18 +9758,25 @@ class SeguimientosGuiasgrabadas3(models.Model):
     dacc = models.CharField(db_column='DaCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
     dcpp = models.CharField(db_column='DcPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
     dccc = models.CharField(db_column='DcCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalprepaid = models.CharField(db_column='TotalPrepaid', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalcollect = models.CharField(db_column='TotalCollect', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalpprate = models.CharField(db_column='TotalPPRate', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalccrate = models.CharField(db_column='TotalCCRate', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    totalprepaid = models.CharField(db_column='TotalPrepaid', max_length=10, blank=True,
+                                    null=True)  # Field name made lowercase.
+    totalcollect = models.CharField(db_column='TotalCollect', max_length=10, blank=True,
+                                    null=True)  # Field name made lowercase.
+    totalpprate = models.CharField(db_column='TotalPPRate', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
+    totalccrate = models.CharField(db_column='TotalCCRate', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
     cass = models.CharField(db_column='Cass', max_length=30, blank=True, null=True)  # Field name made lowercase.
     chgscode = models.CharField(db_column='ChgsCode', max_length=2, blank=True, null=True)  # Field name made lowercase.
     wtval = models.CharField(db_column='WtVal', max_length=2, blank=True, null=True)  # Field name made lowercase.
     other = models.CharField(db_column='Other', max_length=2, blank=True, null=True)  # Field name made lowercase.
-    paisdestino = models.CharField(db_column='PaisDestino', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    paisdestino = models.CharField(db_column='PaisDestino', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
+    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     origen = models.CharField(db_column='Origen', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -8388,51 +9786,80 @@ class SeguimientosGuiasgrabadas3(models.Model):
 class SeguimientosMadresgrabadas(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     empresa = models.CharField(db_column='Empresa', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    direccion = models.CharField(db_column='Direccion', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    direccion = models.CharField(db_column='Direccion', max_length=45, blank=True,
+                                 null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=22, blank=True, null=True)  # Field name made lowercase.
-    localidad = models.CharField(db_column='Localidad', max_length=22, blank=True, null=True)  # Field name made lowercase.
-    telefono = models.CharField(db_column='Telefono', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    cliente1 = models.CharField(db_column='Cliente1', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente2 = models.CharField(db_column='Cliente2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente3 = models.CharField(db_column='Cliente3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente4 = models.CharField(db_column='Cliente4', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    consigna = models.CharField(db_column='Consigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direcconsigna = models.CharField(db_column='DirecConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    localconsigna = models.CharField(db_column='LocalConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    teleconsigna = models.CharField(db_column='TeleConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea = models.CharField(db_column='Otralinea', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    empresa2 = models.CharField(db_column='Empresa2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otracarrier = models.CharField(db_column='OtraCarrier', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    localidad2 = models.CharField(db_column='Localidad2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otrosdeagente = models.CharField(db_column='OtrosdeAgente', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    localidad = models.CharField(db_column='Localidad', max_length=22, blank=True,
+                                 null=True)  # Field name made lowercase.
+    telefono = models.CharField(db_column='Telefono', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente1 = models.CharField(db_column='Cliente1', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente2 = models.CharField(db_column='Cliente2', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente3 = models.CharField(db_column='Cliente3', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente4 = models.CharField(db_column='Cliente4', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    consigna = models.CharField(db_column='Consigna', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    direcconsigna = models.CharField(db_column='DirecConsigna', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    localconsigna = models.CharField(db_column='LocalConsigna', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    teleconsigna = models.CharField(db_column='TeleConsigna', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    otralinea = models.CharField(db_column='Otralinea', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    empresa2 = models.CharField(db_column='Empresa2', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    otracarrier = models.CharField(db_column='OtraCarrier', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
+    localidad2 = models.CharField(db_column='Localidad2', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrosdeagente = models.CharField(db_column='OtrosdeAgente', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
     iata = models.CharField(db_column='Iata', max_length=15, blank=True, null=True)  # Field name made lowercase.
     salede = models.CharField(db_column='Salede', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    cadenaaerea = models.CharField(db_column='CadenaAerea', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    tipoflete = models.CharField(db_column='TipoFlete', max_length=18, blank=True, null=True)  # Field name made lowercase.
+    cadenaaerea = models.CharField(db_column='CadenaAerea', max_length=20, blank=True,
+                                   null=True)  # Field name made lowercase.
+    tipoflete = models.CharField(db_column='TipoFlete', max_length=18, blank=True,
+                                 null=True)  # Field name made lowercase.
     notif = models.CharField(db_column='Notif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dirnotif = models.CharField(db_column='DirNotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea2 = models.CharField(db_column='Otralinea2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    telnotif = models.CharField(db_column='TelNotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea3 = models.CharField(db_column='Otralinea3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea4 = models.CharField(db_column='Otralinea4', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    dirnotif = models.CharField(db_column='DirNotif', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    otralinea2 = models.CharField(db_column='Otralinea2', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    telnotif = models.CharField(db_column='TelNotif', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    otralinea3 = models.CharField(db_column='Otralinea3', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otralinea4 = models.CharField(db_column='Otralinea4', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
     destino = models.CharField(db_column='Destino', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    idtransport = models.CharField(db_column='Idtransport', max_length=2, blank=True, null=True)  # Field name made lowercase.
+    idtransport = models.CharField(db_column='Idtransport', max_length=2, blank=True,
+                                   null=True)  # Field name made lowercase.
     to1 = models.CharField(db_column='To1', max_length=3, blank=True, null=True)  # Field name made lowercase.
     by1 = models.CharField(db_column='By1', max_length=2, blank=True, null=True)  # Field name made lowercase.
     to2 = models.CharField(db_column='To2', max_length=3, blank=True, null=True)  # Field name made lowercase.
     by2 = models.CharField(db_column='By2', max_length=2, blank=True, null=True)  # Field name made lowercase.
     simbolo = models.CharField(db_column='Simbolo', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    carriage = models.CharField(db_column='Carriage', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    carriage = models.CharField(db_column='Carriage', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     custom = models.CharField(db_column='Custom', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    nombredestino = models.CharField(db_column='NombreDestino', max_length=22, blank=True, null=True)  # Field name made lowercase.
+    nombredestino = models.CharField(db_column='NombreDestino', max_length=22, blank=True,
+                                     null=True)  # Field name made lowercase.
     vuelo1 = models.CharField(db_column='Vuelo1', max_length=15, blank=True, null=True)  # Field name made lowercase.
     vuelo2 = models.CharField(db_column='Vuelo2', max_length=15, blank=True, null=True)  # Field name made lowercase.
     vuelo3 = models.CharField(db_column='Vuelo3', max_length=15, blank=True, null=True)  # Field name made lowercase.
     vuelo4 = models.CharField(db_column='Vuelo4', max_length=15, blank=True, null=True)  # Field name made lowercase.
-    valseguro = models.CharField(db_column='ValSeguro', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    valseguro = models.CharField(db_column='ValSeguro', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
     marcas = models.CharField(db_column='Marcas', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    otraline = models.CharField(db_column='Otraline', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    attached = models.CharField(db_column='Attached', max_length=80, blank=True, null=True)  # Field name made lowercase.
+    otraline = models.CharField(db_column='Otraline', max_length=80, blank=True,
+                                null=True)  # Field name made lowercase.
+    attached = models.CharField(db_column='Attached', max_length=80, blank=True,
+                                null=True)  # Field name made lowercase.
     nature2 = models.CharField(db_column='Nature2', max_length=25, blank=True, null=True)  # Field name made lowercase.
     nature3 = models.CharField(db_column='Nature3', max_length=25, blank=True, null=True)  # Field name made lowercase.
     houses = models.CharField(db_column='Houses', max_length=28, blank=True, null=True)  # Field name made lowercase.
@@ -8446,15 +9873,19 @@ class SeguimientosMadresgrabadas(models.Model):
     other1 = models.CharField(db_column='Other1', max_length=50, blank=True, null=True)  # Field name made lowercase.
     other2 = models.CharField(db_column='Other2', max_length=50, blank=True, null=True)  # Field name made lowercase.
     other3 = models.CharField(db_column='Other3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    signature = models.CharField(db_column='Signature', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    fechaemi = models.CharField(db_column='Fechaemi', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    restotext = models.CharField(db_column='RestoText', max_length=25, blank=True, null=True)  # Field name made lowercase.
+    signature = models.CharField(db_column='Signature', max_length=45, blank=True,
+                                 null=True)  # Field name made lowercase.
+    fechaemi = models.CharField(db_column='Fechaemi', max_length=12, blank=True,
+                                null=True)  # Field name made lowercase.
+    restotext = models.CharField(db_column='RestoText', max_length=25, blank=True,
+                                 null=True)  # Field name made lowercase.
     portext = models.CharField(db_column='PorText', max_length=40, blank=True, null=True)  # Field name made lowercase.
     houses4 = models.CharField(db_column='Houses4', max_length=28, blank=True, null=True)  # Field name made lowercase.
     houses5 = models.CharField(db_column='Houses5', max_length=28, blank=True, null=True)  # Field name made lowercase.
     houses6 = models.CharField(db_column='Houses6', max_length=28, blank=True, null=True)  # Field name made lowercase.
     asagent = models.CharField(db_column='AsAgent', max_length=70, blank=True, null=True)  # Field name made lowercase.
-    ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True, null=True)  # Field name made lowercase.
+    ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True,
+                                    null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -8468,13 +9899,19 @@ class SeguimientosMadresgrabadas3(models.Model):
     piezas3 = models.CharField(db_column='Piezas3', max_length=4, blank=True, null=True)  # Field name made lowercase.
     piezas4 = models.CharField(db_column='Piezas4', max_length=4, blank=True, null=True)  # Field name made lowercase.
     piezas5 = models.CharField(db_column='Piezas5', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    totpiezas = models.CharField(db_column='TotPiezas', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    totpiezas = models.CharField(db_column='TotPiezas', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
     gross = models.CharField(db_column='Gross', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross = models.CharField(db_column='OtroGross', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross2 = models.CharField(db_column='OtroGross2', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross3 = models.CharField(db_column='OtroGross3', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    otrogross4 = models.CharField(db_column='OtroGross4', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totgross = models.CharField(db_column='TotGross', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    otrogross = models.CharField(db_column='OtroGross', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
+    otrogross2 = models.CharField(db_column='OtroGross2', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrogross3 = models.CharField(db_column='OtroGross3', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    otrogross4 = models.CharField(db_column='OtroGross4', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
+    totgross = models.CharField(db_column='TotGross', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     k = models.CharField(db_column='K', max_length=1, blank=True, null=True)  # Field name made lowercase.
     k2 = models.CharField(db_column='K2', max_length=1, blank=True, null=True)  # Field name made lowercase.
     k3 = models.CharField(db_column='K3', max_length=1, blank=True, null=True)  # Field name made lowercase.
@@ -8485,7 +9922,8 @@ class SeguimientosMadresgrabadas3(models.Model):
     r3 = models.CharField(db_column='R3', max_length=1, blank=True, null=True)  # Field name made lowercase.
     r4 = models.CharField(db_column='R4', max_length=1, blank=True, null=True)  # Field name made lowercase.
     r5 = models.CharField(db_column='R5', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    commodity = models.CharField(db_column='Commodity', max_length=8, blank=True, null=True)  # Field name made lowercase.
+    commodity = models.CharField(db_column='Commodity', max_length=8, blank=True,
+                                 null=True)  # Field name made lowercase.
     comm2 = models.CharField(db_column='Comm2', max_length=8, blank=True, null=True)  # Field name made lowercase.
     comm3 = models.CharField(db_column='Comm3', max_length=8, blank=True, null=True)  # Field name made lowercase.
     comm4 = models.CharField(db_column='Comm4', max_length=8, blank=True, null=True)  # Field name made lowercase.
@@ -8505,7 +9943,8 @@ class SeguimientosMadresgrabadas3(models.Model):
     total3 = models.CharField(db_column='Total3', max_length=10, blank=True, null=True)  # Field name made lowercase.
     total4 = models.CharField(db_column='Total4', max_length=10, blank=True, null=True)  # Field name made lowercase.
     total5 = models.CharField(db_column='Total5', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalfinal = models.CharField(db_column='TotalFinal', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    totalfinal = models.CharField(db_column='TotalFinal', max_length=10, blank=True,
+                                  null=True)  # Field name made lowercase.
     totalpp = models.CharField(db_column='TotalPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
     totalcc = models.CharField(db_column='TotalCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
     valpp = models.CharField(db_column='ValPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
@@ -8516,18 +9955,25 @@ class SeguimientosMadresgrabadas3(models.Model):
     dacc = models.CharField(db_column='DaCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
     dcpp = models.CharField(db_column='DcPP', max_length=10, blank=True, null=True)  # Field name made lowercase.
     dccc = models.CharField(db_column='DcCC', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalprepaid = models.CharField(db_column='TotalPrepaid', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalcollect = models.CharField(db_column='TotalCollect', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalpprate = models.CharField(db_column='TotalPPRate', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    totalccrate = models.CharField(db_column='TotalCCRate', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    totalprepaid = models.CharField(db_column='TotalPrepaid', max_length=10, blank=True,
+                                    null=True)  # Field name made lowercase.
+    totalcollect = models.CharField(db_column='TotalCollect', max_length=10, blank=True,
+                                    null=True)  # Field name made lowercase.
+    totalpprate = models.CharField(db_column='TotalPPRate', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
+    totalccrate = models.CharField(db_column='TotalCCRate', max_length=10, blank=True,
+                                   null=True)  # Field name made lowercase.
     cass = models.CharField(db_column='Cass', max_length=30, blank=True, null=True)  # Field name made lowercase.
     chgscode = models.CharField(db_column='ChgsCode', max_length=2, blank=True, null=True)  # Field name made lowercase.
     wtval = models.CharField(db_column='WtVal', max_length=2, blank=True, null=True)  # Field name made lowercase.
     other = models.CharField(db_column='Other', max_length=2, blank=True, null=True)  # Field name made lowercase.
-    paisdestino = models.CharField(db_column='PaisDestino', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    paisdestino = models.CharField(db_column='PaisDestino', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
+    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
     origen = models.CharField(db_column='Origen', max_length=3, blank=True, null=True)  # Field name made lowercase.
-    carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -8537,51 +9983,79 @@ class SeguimientosMadresgrabadas3(models.Model):
 class SeguimientosMbl(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     empresa = models.CharField(db_column='Empresa', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    direccion = models.CharField(db_column='Direccion', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    direccion = models.CharField(db_column='Direccion', max_length=45, blank=True,
+                                 null=True)  # Field name made lowercase.
     pais = models.CharField(db_column='Pais', max_length=22, blank=True, null=True)  # Field name made lowercase.
-    localidad = models.CharField(db_column='Localidad', max_length=22, blank=True, null=True)  # Field name made lowercase.
-    telefono = models.CharField(db_column='Telefono', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    cliente1 = models.CharField(db_column='Cliente1', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente2 = models.CharField(db_column='Cliente2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente3 = models.CharField(db_column='Cliente3', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    cliente4 = models.CharField(db_column='Cliente4', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    consigna = models.CharField(db_column='Consigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    direcconsigna = models.CharField(db_column='DirecConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    localconsigna = models.CharField(db_column='LocalConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    teleconsigna = models.CharField(db_column='TeleConsigna', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea = models.CharField(db_column='Otralinea', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    localidad = models.CharField(db_column='Localidad', max_length=22, blank=True,
+                                 null=True)  # Field name made lowercase.
+    telefono = models.CharField(db_column='Telefono', max_length=45, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente1 = models.CharField(db_column='Cliente1', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente2 = models.CharField(db_column='Cliente2', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente3 = models.CharField(db_column='Cliente3', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    cliente4 = models.CharField(db_column='Cliente4', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    consigna = models.CharField(db_column='Consigna', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    direcconsigna = models.CharField(db_column='DirecConsigna', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    localconsigna = models.CharField(db_column='LocalConsigna', max_length=50, blank=True,
+                                     null=True)  # Field name made lowercase.
+    teleconsigna = models.CharField(db_column='TeleConsigna', max_length=50, blank=True,
+                                    null=True)  # Field name made lowercase.
+    otralinea = models.CharField(db_column='Otralinea', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
     notif = models.CharField(db_column='Notif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dirnotif = models.CharField(db_column='DirNotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    otralinea2 = models.CharField(db_column='Otralinea2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    telnotif = models.CharField(db_column='TelNotif', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    tipoflete = models.CharField(db_column='TipoFlete', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    position = models.CharField(db_column='Position', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    dirnotif = models.CharField(db_column='DirNotif', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    otralinea2 = models.CharField(db_column='Otralinea2', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    telnotif = models.CharField(db_column='TelNotif', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
+    tipoflete = models.CharField(db_column='TipoFlete', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    position = models.CharField(db_column='Position', max_length=50, blank=True,
+                                null=True)  # Field name made lowercase.
     salede = models.CharField(db_column='Salede', max_length=35, blank=True, null=True)  # Field name made lowercase.
     vapor = models.CharField(db_column='Vapor', max_length=35, blank=True, null=True)  # Field name made lowercase.
     viaje = models.CharField(db_column='Viaje', max_length=35, blank=True, null=True)  # Field name made lowercase.
     loading = models.CharField(db_column='Loading', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    discharge = models.CharField(db_column='Discharge', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    delivery = models.CharField(db_column='Delivery', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    transterms = models.CharField(db_column='TransTerms', max_length=35, blank=True, null=True)  # Field name made lowercase.
+    discharge = models.CharField(db_column='Discharge', max_length=35, blank=True,
+                                 null=True)  # Field name made lowercase.
+    delivery = models.CharField(db_column='Delivery', max_length=35, blank=True,
+                                null=True)  # Field name made lowercase.
+    transterms = models.CharField(db_column='TransTerms', max_length=35, blank=True,
+                                  null=True)  # Field name made lowercase.
     simbolo = models.CharField(db_column='Simbolo', max_length=4, blank=True, null=True)  # Field name made lowercase.
-    condentrega = models.CharField(db_column='CondEntrega', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    condentrega = models.CharField(db_column='CondEntrega', max_length=20, blank=True,
+                                   null=True)  # Field name made lowercase.
     tipomov = models.CharField(db_column='TipoMov', max_length=15, blank=True, null=True)  # Field name made lowercase.
-    carriage = models.CharField(db_column='Carriage', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    carriage = models.CharField(db_column='Carriage', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     custom = models.CharField(db_column='Custom', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    valseguro = models.CharField(db_column='ValSeguro', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    valseguro = models.CharField(db_column='ValSeguro', max_length=10, blank=True,
+                                 null=True)  # Field name made lowercase.
     goods = models.TextField(db_column='Goods', blank=True, null=True)  # Field name made lowercase.
     free1 = models.CharField(db_column='Free1', max_length=45, blank=True, null=True)  # Field name made lowercase.
     free2 = models.CharField(db_column='Free2', max_length=45, blank=True, null=True)  # Field name made lowercase.
     free3 = models.CharField(db_column='Free3', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    signature = models.CharField(db_column='Signature', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    signature2 = models.CharField(db_column='Signature2', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    signature3 = models.CharField(db_column='Signature3', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    signature = models.CharField(db_column='Signature', max_length=50, blank=True,
+                                 null=True)  # Field name made lowercase.
+    signature2 = models.CharField(db_column='Signature2', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
+    signature3 = models.CharField(db_column='Signature3', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
     nbls = models.CharField(db_column='Nbls', max_length=2, blank=True, null=True)  # Field name made lowercase.
     payable = models.CharField(db_column='Payable', max_length=15, blank=True, null=True)  # Field name made lowercase.
     board = models.CharField(db_column='Board', max_length=15, blank=True, null=True)  # Field name made lowercase.
     clean = models.CharField(db_column='Clean', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    fechaemi = models.CharField(db_column='FechaEmi', max_length=12, blank=True, null=True)  # Field name made lowercase.
-    restotext = models.CharField(db_column='RestoText', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    fechaemi = models.CharField(db_column='FechaEmi', max_length=12, blank=True,
+                                null=True)  # Field name made lowercase.
+    restotext = models.CharField(db_column='RestoText', max_length=45, blank=True,
+                                 null=True)  # Field name made lowercase.
     vadeclared = models.IntegerField(db_column='VaDeclared', blank=True, null=True)  # Field name made lowercase.
     portext = models.CharField(db_column='PorText', max_length=15, blank=True, null=True)  # Field name made lowercase.
 
@@ -8593,8 +10067,10 @@ class SeguimientosMbl(models.Model):
 class SeguimientosMbl2(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     marks = models.CharField(db_column='Marks', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    packages = models.CharField(db_column='Packages', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    description = models.CharField(db_column='Description', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    packages = models.CharField(db_column='Packages', max_length=30, blank=True,
+                                null=True)  # Field name made lowercase.
+    description = models.CharField(db_column='Description', max_length=50, blank=True,
+                                   null=True)  # Field name made lowercase.
     gross = models.CharField(db_column='Gross', max_length=30, blank=True, null=True)  # Field name made lowercase.
     tare = models.CharField(db_column='Tare', max_length=30, blank=True, null=True)  # Field name made lowercase.
 
@@ -8621,20 +10097,29 @@ class SeguimientosReservas(models.Model):
     modo = models.CharField(max_length=20, blank=True, null=True)
     embarque = models.IntegerField(blank=True, null=True)
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    pagoflete = models.CharField(db_column='PagoFlete', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    posicion = models.CharField(db_column='Posicion', max_length=20, blank=True,
+                                null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    pagoflete = models.CharField(db_column='PagoFlete', max_length=1, blank=True,
+                                 null=True)  # Field name made lowercase.
     moneda = models.SmallIntegerField(db_column='Moneda', blank=True, null=True)  # Field name made lowercase.
     arbitraje = models.FloatField(db_column='Arbitraje', blank=True, null=True)  # Field name made lowercase.
     tomopeso = models.SmallIntegerField(db_column='TomoPeso', blank=True, null=True)  # Field name made lowercase.
-    tarifaawb = models.DecimalField(db_column='TarifaAWB', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
+    tarifaawb = models.DecimalField(db_column='TarifaAWB', max_digits=19, decimal_places=4, blank=True,
+                                    null=True)  # Field name made lowercase.
     kilos = models.FloatField(db_column='Kilos', blank=True, null=True)  # Field name made lowercase.
     volumen = models.FloatField(db_column='Volumen', blank=True, null=True)  # Field name made lowercase.
-    tarifafija = models.CharField(db_column='TarifaFija', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    tarifafija = models.CharField(db_column='TarifaFija', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    tarifa = models.DecimalField(db_column='Tarifa', max_digits=19, decimal_places=4, blank=True,
+                                 null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -8643,15 +10128,23 @@ class SeguimientosReservas(models.Model):
 
 class SeguimientosSeguimiento(models.Model):
     numero = models.IntegerField()
-    cliente = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='cliente', to_field='codigo', blank=True, null=True)
-    consignatario = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='consignatario', to_field='codigo', related_name='seguimientosseguimiento_consignatario_set', blank=True, null=True)
-    origen = models.ForeignKey(MantenimientosCiudades, models.DO_NOTHING, db_column='origen', to_field='codigo', blank=True, null=True)
-    destino = models.ForeignKey(MantenimientosCiudades, models.DO_NOTHING, db_column='destino', to_field='codigo', related_name='seguimientosseguimiento_destino_set', blank=True, null=True)
+    cliente = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='cliente', to_field='codigo',
+                                blank=True, null=True)
+    consignatario = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='consignatario',
+                                      to_field='codigo', related_name='seguimientosseguimiento_consignatario_set',
+                                      blank=True, null=True)
+    origen = models.ForeignKey(MantenimientosCiudades, models.DO_NOTHING, db_column='origen', to_field='codigo',
+                               blank=True, null=True)
+    destino = models.ForeignKey(MantenimientosCiudades, models.DO_NOTHING, db_column='destino', to_field='codigo',
+                                related_name='seguimientosseguimiento_destino_set', blank=True, null=True)
     terminos = models.CharField(max_length=3, blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, blank=True, null=True)
-    agente = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='agente', to_field='codigo', related_name='seguimientosseguimiento_agente_set', blank=True, null=True)
-    embarcador = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='Embarcador', to_field='codigo', related_name='seguimientosseguimiento_embarcador_set', blank=True, null=True)  # Field name made lowercase.
+    agente = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='agente', to_field='codigo',
+                               related_name='seguimientosseguimiento_agente_set', blank=True, null=True)
+    embarcador = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='Embarcador', to_field='codigo',
+                                   related_name='seguimientosseguimiento_embarcador_set', blank=True,
+                                   null=True)  # Field name made lowercase.
     vaporcli = models.IntegerField(db_column='Vaporcli', blank=True, null=True)  # Field name made lowercase.
     modo = models.CharField(max_length=20, blank=True, null=True)
     fecha = models.DateTimeField(blank=True, null=True)
@@ -8665,18 +10158,24 @@ class SeguimientosSeguimiento(models.Model):
     tarifacompra = models.FloatField(blank=True, null=True)
     pago = models.CharField(max_length=10, blank=True, null=True)
     refcliente = models.CharField(max_length=1024, blank=True, null=True)
-    transportista = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='transportista', to_field='codigo', related_name='seguimientosseguimiento_transportista_set', blank=True, null=True)
+    transportista = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='transportista',
+                                      to_field='codigo', related_name='seguimientosseguimiento_transportista_set',
+                                      blank=True, null=True)
     posicion = models.CharField(max_length=30, blank=True, null=True)
     cotizacion = models.IntegerField(blank=True, null=True)
     cotizacion1 = models.IntegerField(blank=True, null=True)
     vaporcli2 = models.CharField(max_length=1, blank=True, null=True)
     moneda = models.SmallIntegerField(blank=True, null=True)
     arbitraje = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    vendedor = models.ForeignKey(MantenimientosVendedores, models.DO_NOTHING, db_column='vendedor', to_field='codigo', blank=True, null=True)
+    vendedor = models.ForeignKey(MantenimientosVendedores, models.DO_NOTHING, db_column='vendedor', to_field='codigo',
+                                 blank=True, null=True)
     despachante = models.IntegerField(blank=True, null=True)
-    agecompras = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='agecompras', to_field='codigo', related_name='seguimientosseguimiento_agecompras_set', blank=True, null=True)
-    ageventas = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='ageventas', to_field='codigo', related_name='seguimientosseguimiento_ageventas_set', blank=True, null=True)
-    deposito = models.ForeignKey(MantenimientosDepositos, models.DO_NOTHING, db_column='deposito', to_field='codigo', blank=True, null=True)
+    agecompras = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='agecompras', to_field='codigo',
+                                   related_name='seguimientosseguimiento_agecompras_set', blank=True, null=True)
+    ageventas = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='ageventas', to_field='codigo',
+                                  related_name='seguimientosseguimiento_ageventas_set', blank=True, null=True)
+    deposito = models.ForeignKey(MantenimientosDepositos, models.DO_NOTHING, db_column='deposito', to_field='codigo',
+                                 blank=True, null=True)
     recepcion = models.DateTimeField(blank=True, null=True)
     iniciales = models.CharField(max_length=3, blank=True, null=True)
     nrodespacho = models.CharField(max_length=20, blank=True, null=True)
@@ -8718,74 +10217,117 @@ class SeguimientosSeguimiento(models.Model):
     modolocal = models.CharField(max_length=10, blank=True, null=True)
     fecguiadesp = models.DateTimeField(blank=True, null=True)
     tarifaprofit = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    armador = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='armador', to_field='codigo', related_name='seguimientosseguimiento_armador_set', blank=True, null=True)
-    notificar = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='Notificar', to_field='codigo', related_name='seguimientosseguimiento_notificar_set', blank=True, null=True)  # Field name made lowercase.
+    armador = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='armador', to_field='codigo',
+                                related_name='seguimientosseguimiento_armador_set', blank=True, null=True)
+    notificar = models.ForeignKey(MantenimientosClientes, models.DO_NOTHING, db_column='Notificar', to_field='codigo',
+                                  related_name='seguimientosseguimiento_notificar_set', blank=True,
+                                  null=True)  # Field name made lowercase.
     fechaonhand = models.DateTimeField(db_column='FechaOnHand', blank=True, null=True)  # Field name made lowercase.
     booking = models.CharField(max_length=30, blank=True, null=True)
     propia = models.CharField(db_column='Propia', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    trafico = models.ForeignKey(MantenimientosTraficos, models.DO_NOTHING, db_column='Trafico', to_field='codigo', blank=True, null=True)  # Field name made lowercase.
-    proyecto = models.ForeignKey(MantenimientosProyectos, models.DO_NOTHING, db_column='Proyecto', to_field='codigo', blank=True, null=True)  # Field name made lowercase.
-    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    modificado = models.CharField(db_column='Modificado', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    depcontenedoringreso = models.SmallIntegerField(db_column='DepContenedorIngreso', blank=True, null=True)  # Field name made lowercase.
-    depcontenedorvacios = models.SmallIntegerField(db_column='DepContenedorVacios', blank=True, null=True)  # Field name made lowercase.
+    trafico = models.ForeignKey(MantenimientosTraficos, models.DO_NOTHING, db_column='Trafico', to_field='codigo',
+                                blank=True, null=True)  # Field name made lowercase.
+    proyecto = models.ForeignKey(MantenimientosProyectos, models.DO_NOTHING, db_column='Proyecto', to_field='codigo',
+                                 blank=True, null=True)  # Field name made lowercase.
+    unidadpeso = models.CharField(db_column='UnidadPeso', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    unidadvolumen = models.CharField(db_column='UnidadVolumen', max_length=1, blank=True,
+                                     null=True)  # Field name made lowercase.
+    modificado = models.CharField(db_column='Modificado', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
+    depcontenedoringreso = models.SmallIntegerField(db_column='DepContenedorIngreso', blank=True,
+                                                    null=True)  # Field name made lowercase.
+    depcontenedorvacios = models.SmallIntegerField(db_column='DepContenedorVacios', blank=True,
+                                                   null=True)  # Field name made lowercase.
     loading = models.CharField(db_column='Loading', max_length=35, blank=True, null=True)  # Field name made lowercase.
-    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    discharge = models.CharField(db_column='Discharge', max_length=5, blank=True,
+                                 null=True)  # Field name made lowercase.
     deadborrador = models.DateTimeField(db_column='DeadBorrador', blank=True, null=True)  # Field name made lowercase.
-    deaddocumentos = models.DateTimeField(db_column='DeadDocumentos', blank=True, null=True)  # Field name made lowercase.
+    deaddocumentos = models.DateTimeField(db_column='DeadDocumentos', blank=True,
+                                          null=True)  # Field name made lowercase.
     deadentrega = models.DateTimeField(db_column='DeadEntrega', blank=True, null=True)  # Field name made lowercase.
-    deadliberacion = models.DateTimeField(db_column='DeadLiberacion', blank=True, null=True)  # Field name made lowercase.
+    deadliberacion = models.DateTimeField(db_column='DeadLiberacion', blank=True,
+                                          null=True)  # Field name made lowercase.
     retiravacio = models.DateTimeField(db_column='RetiraVacio', blank=True, null=True)  # Field name made lowercase.
     retiralleno = models.DateTimeField(db_column='RetiraLleno', blank=True, null=True)  # Field name made lowercase.
     arriboreal = models.DateTimeField(db_column='ArriboReal', blank=True, null=True)  # Field name made lowercase.
     pagoenfirme = models.DateTimeField(db_column='PagoenFirme', blank=True, null=True)  # Field name made lowercase.
-    recepcionprealert = models.DateTimeField(db_column='RecepcionPrealert', blank=True, null=True)  # Field name made lowercase.
+    recepcionprealert = models.DateTimeField(db_column='RecepcionPrealert', blank=True,
+                                             null=True)  # Field name made lowercase.
     bltipo = models.CharField(db_column='BLTipo', max_length=50, blank=True, null=True)  # Field name made lowercase.
     credito = models.CharField(db_column='Credito', max_length=50, blank=True, null=True)  # Field name made lowercase.
     revalidacion = models.DateTimeField(db_column='Revalidacion', blank=True, null=True)  # Field name made lowercase.
-    almacenajelibrehasta = models.DateTimeField(db_column='AlmacenajeLibreHasta', blank=True, null=True)  # Field name made lowercase.
-    demoraslibrehasta = models.DateTimeField(db_column='DemorasLibreHasta', blank=True, null=True)  # Field name made lowercase.
+    almacenajelibrehasta = models.DateTimeField(db_column='AlmacenajeLibreHasta', blank=True,
+                                                null=True)  # Field name made lowercase.
+    demoraslibrehasta = models.DateTimeField(db_column='DemorasLibreHasta', blank=True,
+                                             null=True)  # Field name made lowercase.
     entregavacio = models.DateTimeField(db_column='EntregaVacio', blank=True, null=True)  # Field name made lowercase.
-    tipobonifcli = models.CharField(db_column='TipoBonifCli', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    tipobonifcli = models.CharField(db_column='TipoBonifCli', max_length=1, blank=True,
+                                    null=True)  # Field name made lowercase.
     bonifcli = models.FloatField(db_column='BonifCli', blank=True, null=True)  # Field name made lowercase.
-    originales = models.CharField(db_column='Originales', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    originales = models.CharField(db_column='Originales', max_length=1, blank=True,
+                                  null=True)  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True,
+                                null=True)  # Field name made lowercase.
     consolidado = models.SmallIntegerField(db_column='Consolidado', blank=True, null=True)  # Field name made lowercase.
     viaje = models.CharField(db_column='Viaje', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    hawbtext = models.CharField(db_column='HawbText', max_length=10, blank=True,
+                                null=True)  # Field name made lowercase.
     demora = models.SmallIntegerField(db_column='Demora', blank=True, null=True)  # Field name made lowercase.
-    valordemoravta = models.DecimalField(db_column='ValorDemoraVTA', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    valordemoracpa = models.DecimalField(db_column='ValorDemoraCPA', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    rotulosincorrectos = models.CharField(db_column='RotulosIncorrectos', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    actividad = models.ForeignKey(MantenimientosActividades, models.DO_NOTHING, db_column='Actividad', to_field='numero', blank=True, null=True)  # Field name made lowercase.
-    entregadoa = models.CharField(db_column='EntregadoA', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    valordemoravta = models.DecimalField(db_column='ValorDemoraVTA', max_digits=19, decimal_places=4, blank=True,
+                                         null=True)  # Field name made lowercase.
+    valordemoracpa = models.DecimalField(db_column='ValorDemoraCPA', max_digits=19, decimal_places=4, blank=True,
+                                         null=True)  # Field name made lowercase.
+    rotulosincorrectos = models.CharField(db_column='RotulosIncorrectos', max_length=1, blank=True,
+                                          null=True)  # Field name made lowercase.
+    actividad = models.ForeignKey(MantenimientosActividades, models.DO_NOTHING, db_column='Actividad',
+                                  to_field='numero', blank=True, null=True)  # Field name made lowercase.
+    entregadoa = models.CharField(db_column='EntregadoA', max_length=50, blank=True,
+                                  null=True)  # Field name made lowercase.
     loadingdate = models.DateTimeField(db_column='LoadingDate', blank=True, null=True)  # Field name made lowercase.
-    diasalmacenaje = models.SmallIntegerField(db_column='DiasAlmacenaje', blank=True, null=True)  # Field name made lowercase.
-    muestroflete = models.DecimalField(db_column='MuestroFlete', max_digits=19, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
-    operacion = models.CharField(db_column='Operacion', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    enviointtrabk = models.CharField(db_column='EnvioInttraBK', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    enviointtrasi = models.CharField(db_column='EnvioInttraSI', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    diasalmacenaje = models.SmallIntegerField(db_column='DiasAlmacenaje', blank=True,
+                                              null=True)  # Field name made lowercase.
+    muestroflete = models.DecimalField(db_column='MuestroFlete', max_digits=19, decimal_places=4, blank=True,
+                                       null=True)  # Field name made lowercase.
+    operacion = models.CharField(db_column='Operacion', max_length=25, blank=True,
+                                 null=True)  # Field name made lowercase.
+    enviointtrabk = models.CharField(db_column='EnvioInttraBK', max_length=10, blank=True,
+                                     null=True)  # Field name made lowercase.
+    enviointtrasi = models.CharField(db_column='EnvioInttraSI', max_length=10, blank=True,
+                                     null=True)  # Field name made lowercase.
     maerskbk = models.CharField(db_column='MaerskBK', max_length=1, blank=True, null=True)  # Field name made lowercase.
     maersksi = models.CharField(db_column='MaerskSI', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    wwanumerobooking = models.IntegerField(db_column='WWANumeroBooking', blank=True, null=True)  # Field name made lowercase.
-    envioeasipassbk = models.CharField(db_column='EnvioEASIPASSBK', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    envioeasipasssi = models.CharField(db_column='EnvioEASIPASSSI', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    wwanumerobooking = models.IntegerField(db_column='WWANumeroBooking', blank=True,
+                                           null=True)  # Field name made lowercase.
+    envioeasipassbk = models.CharField(db_column='EnvioEASIPASSBK', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
+    envioeasipasssi = models.CharField(db_column='EnvioEASIPASSSI', max_length=1, blank=True,
+                                       null=True)  # Field name made lowercase.
     fechastacking = models.DateTimeField(db_column='FechaStacking', blank=True, null=True)  # Field name made lowercase.
-    horastacking = models.CharField(db_column='HoraStacking', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    fechafinstacking = models.DateTimeField(db_column='FechaFinStacking', blank=True, null=True)  # Field name made lowercase.
-    horafinstacking = models.CharField(db_column='HoraFinStacking', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    horastacking = models.CharField(db_column='HoraStacking', max_length=30, blank=True,
+                                    null=True)  # Field name made lowercase.
+    fechafinstacking = models.DateTimeField(db_column='FechaFinStacking', blank=True,
+                                            null=True)  # Field name made lowercase.
+    horafinstacking = models.CharField(db_column='HoraFinStacking', max_length=30, blank=True,
+                                       null=True)  # Field name made lowercase.
     fechacutoff = models.DateTimeField(db_column='FechaCutOff', blank=True, null=True)  # Field name made lowercase.
-    horacutoff = models.CharField(db_column='HoraCutOff', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    tieneseguro = models.CharField(db_column='TieneSeguro', max_length=1, blank=True, null=True)  # Field name made lowercase.
-    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True, null=True)  # Field name made lowercase.
-    fechacutoffvgm = models.DateTimeField(db_column='FechaCutOffVGM', blank=True, null=True)  # Field name made lowercase.
-    horacutoffvgm = models.CharField(db_column='HoraCutOffVGM', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    horacutoff = models.CharField(db_column='HoraCutOff', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
+    tieneseguro = models.CharField(db_column='TieneSeguro', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratocli = models.CharField(db_column='ContratoCli', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    contratotra = models.CharField(db_column='ContratoTra', max_length=30, blank=True,
+                                   null=True)  # Field name made lowercase.
+    fechacutoffvgm = models.DateTimeField(db_column='FechaCutOffVGM', blank=True,
+                                          null=True)  # Field name made lowercase.
+    horacutoffvgm = models.CharField(db_column='HoraCutOffVGM', max_length=30, blank=True,
+                                     null=True)  # Field name made lowercase.
     nroreferedi = models.IntegerField(db_column='NroReferEDI', blank=True, null=True)  # Field name made lowercase.
     trackid = models.CharField(db_column='TrackID', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    deaddocumentoshora = models.CharField(db_column='DeadDocumentosHora', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    deaddocumentoshora = models.CharField(db_column='DeadDocumentosHora', max_length=10, blank=True,
+                                          null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -8834,13 +10376,28 @@ class SeguimientosServireserva(models.Model):
 
 class SeguimientosTraceop(models.Model):
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    nomusuario = models.CharField(db_column='NomUsuario', max_length=30, blank=True,
+                                  null=True)  # Field name made lowercase.
     modulo = models.CharField(db_column='Modulo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     detalle = models.CharField(db_column='Detalle', max_length=250, blank=True, null=True)  # Field name made lowercase.
-    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    formulario = models.CharField(db_column='Formulario', max_length=20, blank=True,
+                                  null=True)  # Field name made lowercase.
     clave = models.CharField(db_column='Clave', max_length=4, blank=True, null=True)  # Field name made lowercase.
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'seguimientos_traceop'
+
+
+class PendienteFacturar(models.Model):
+    autogenerado = models.CharField(max_length=40, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        from administracion_contabilidad.views.facturacion import facturar_pendiente
+        es_nuevo = self.pk is None  # Verifica si es una nueva instancia (sin ID asignada)
+
+        super().save(*args, **kwargs)  # Guarda el objeto en la base de datos
+
+        if es_nuevo:
+            facturar_pendiente(self.autogenerado)

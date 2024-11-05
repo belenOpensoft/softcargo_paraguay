@@ -1,331 +1,189 @@
-{% extends 'base_form.html' %}
+{% extends 'base_table_old.html' %}
 {% load static %}
+{% block script %}
+{% endblock script %}
 
-{% block formulario %}
-<div class="border rounded p-4 bg-light">
-    <form method="post" action="" id="facturaForm">
-        {% csrf_token %}
+{% block contenido %}
+{% block table_datatable %}
+{% include 'menu/menu_facturacion.html' %}
 
-        <h3 style="font-weight: bold; color: white; font-family: Arial, sans-serif; background-color: black; display: inline-block; padding: 3px; border-radius: 3px">
-            Facturación
-        </h3>
-        <br>
+<table id="tabla_facturas" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Autogenerado</th>
+            <th class="text-left">Serie</th>
+            <th class="text-left">Prefijo</th>
+            <th class="text-left">Numero</th>
+            <th class="text-left">Cliente</th>
+            <th class="text-left">MASTER</th>
+            <th class="text-left">HOUSE</th>
+            <th class="text-left">Concepto</th>
+            <th class="text-left">Monto</th>
+            <th class="text-left">IVA</th>
+            <th class="text-left">IVA total</th>
+            <th class="text-left">Monto total</th>
+        </tr>
 
-         <div class="row" id="id_tipo">
-            <div class="col-md-1">
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+          <th width="4%"></th>
+            <th class="text-right">Autogenerado</th>
+            <th class="text-right">Serie</th>
+            <th class="text-right">Prefijo</th>
+            <th class="text-right">Numero</th>
+            <th class="text-right">Cliente</th>
+            <th class="text-right">MASTER</th>
+            <th class="text-right">HOUSE</th>
+            <th class="text-right">Concepto</th>
+            <th class="text-right">Monto</th>
+            <th class="text-right">IVA</th>
+            <th class="text-right">IVA total</th>
+            <th class="text-right">Monto total</th>
+        </tr>
+        </tfoot>
+    </table>
+
+<div id="facturaM" title="Formulario de Factura" style="display: none;">
+    <div class="border rounded p-4 bg-light">
+        <form method="post" action="" id="facturaForm">
+            {% csrf_token %}
+            <h3 id="tipoSeleccionado" style="font-weight: bold; color: white; font-family: Arial, sans-serif; background-color: black; display: inline-block; padding: 3px; border-radius: 3px">
+            </h3>
+            <br>
+            <div class="col-md-2">
                 {{ form.tipo.label_tag }}
                 {{ form.tipo }}
             </div>
-         </div>
-
-        <div class="row">
-            <div class="col-md-1">
-                {{ form.serie.label_tag }}
-                {{ form.serie }}
+            <br>
+            <div class="row">
+                <div class="col-md-1">
+                    {{ form.serie.label_tag }}
+                    {{ form.serie }}
+                </div>
+                <div class="col-md-1">
+                    {{ form.prefijo.label_tag }}
+                    {{ form.prefijo }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.numero.label_tag }}
+                    {{ form.numero }}
+                </div>
+                <div class="col-md-2 offset-md-6">
+                    {{ form.fecha.label_tag }}
+                    {{ form.fecha }}
+                </div>
             </div>
-            <div class="col-md-1">
-                {{ form.prefijo.label_tag }}
-                {{ form.prefijo }}
+            <br>
+            <div class="row mt-3">
+                <div class="col-md-2" id="id_moneda">
+                    {{ form.moneda.label_tag }}
+                    {{ form.moneda }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.arbitraje.label_tag }}
+                    {{ form.arbitraje }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.paridad.label_tag }}
+                    {{ form.paridad }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.imputar.label_tag }}
+                    {{ form.imputar }}
+                </div>
             </div>
-            <div class="col-md-2">
-                {{ form.numero.label_tag }}
-                {{ form.numero }}
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <label for="cliente">Buscar Cliente</label>
+                    <input type="text" id="cliente" class="form-control" name="cliente" placeholder="Buscar cliente">
+                </div>
             </div>
-            <div class="col-md-2 offset-md-6">
-                {{ form.fecha.label_tag }}
-                {{ form.fecha }}
+            <table id="clienteTable" class="table table-striped mt-4" style="display:none;">
+                <thead>
+                    <tr>
+                        <th style="display:none;">Id</th>
+                        <th>Empresa</th>
+                        <th>RUT</th>
+                        <th>Dirección</th>
+                        <th>Localidad</th>
+                        <th>Teléfono</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <label for="item">Buscar Item</label>
+                    <input type="text" id="item" class="form-control" name="item" placeholder="Buscar item">
+                </div>
+                <div class="col-md-4" id="id_descripcion_item">
+                    {{ form.descripcion_item.label_tag }}
+                    {{ form.descripcion_item }}
+                </div>
+                <div class="col-md-2" id="id_precio">
+                    {{ form.precio.label_tag }}
+                    {{ form.precio }}
+                </div>
+                <div class="col-md-2">
+                    <br>
+                    <button type="button" id="agregarItem" class="btn btn-success">Agregar Item</button>
+                </div>
             </div>
-        </div>
-        <br>
-
-        <div class="row mt-3">
-            <div class="col-md-2">
-                {{ form.moneda.label_tag }}
-                {{ form.moneda }}
+            <div class="d-flex justify-content-end mt-3">
+                <button type="button" id="eliminarSeleccionados" class="btn btn-danger" style="display:none;">Eliminar</button>
             </div>
-            <div class="col-md-2">
-                {{ form.arbitraje.label_tag }}
-                {{ form.arbitraje }}
+            <table id="itemTable" class="table table-striped mt-4" style="display:none;">
+                <thead>
+                    <tr>
+                        <th style="display:none;">Id</th>
+                        <th>Item</th>
+                        <th>Descripcion</th>
+                        <th>Precio</th>
+                        <th>IVA</th>
+                        <th>Cuenta</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div id="totales" style="display: none;">
+                <div class="col-md-2 offset-md-10" id="id_neto">
+                    {{ form.neto.label_tag }}
+                    <input type="text" class="form-control text-end" readonly>
+                </div>
+                <div class="col-md-2 offset-md-10" id="id_iva">
+                    {{ form.iva.label_tag }}
+                    <input type="text" class="form-control text-end" readonly>
+                </div>
+                <div class="col-md-2 offset-md-10" id="id_total">
+                    {{ form.total.label_tag }}
+                    <input type="text" class="form-control text-end" readonly>
+                </div>
+                <div class="mt-4">
+                    <button type="button" id="facturar" name="facturar" class="btn btn-primary">Finalizar</button>
+                </div>
             </div>
-            <div class="col-md-2">
-                {{ form.paridad.label_tag }}
-                {{ form.paridad }}
-            </div>
-            <div class="col-md-2">
-                {{ form.imputar.label_tag }}
-                {{ form.imputar }}
-            </div>
-        </div>
-
-        <div class="row mt-3">
-            <div class="col-md-3">
-                <label for="cliente">Buscar Cliente</label>
-                <input type="text" id="cliente" class="form-control" name="cliente" placeholder="Buscar cliente">
-            </div>
-        </div>
-
-
-        <table id="clienteTable" class="table table-striped mt-4" style="display:none;">
-            <thead>
-                <tr>
-                    <th>Empresa</th>
-                    <th>RUT</th>
-                    <th>Dirección</th>
-                    <th>Localidad</th>
-                    <th>Teléfono</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <div class="row mt-3">
-            <div class="col-md-3">
-                <label for="item">Buscar Item</label>
-                <input type="text" id="item" class="form-control" name="item" placeholder="Buscar item">
-            </div>
-
-            <div class="col-md-4" id="id_descripcion_item">
-                {{ form.descripcion_item.label_tag }}
-                {{ form.descripcion_item }}
-            </div>
-
-            <div class="col-md-2" id="id_precio">
-                {{ form.precio.label_tag }}
-                {{ form.precio }}
-            </div>
-
-            <div class="col-md-2">
-                <br>
-                <button type="button" id="agregarItem" class="btn btn-success">Agregar Item</button>
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-end mt-3">
-            <button type="button" id="eliminarSeleccionados" class="btn btn-danger" style="display:none;">Eliminar</button>
-        </div>
-
-        <table id="itemTable" class="table table-striped mt-4" style="display:none;">
-            <thead>
-                <tr>
-                    <th style="display:none;">Id</th>
-                    <th>Item</th>
-                    <th>Descripcion</th>
-                    <th>Precio</th>
-                    <th>IVA</th>
-                    <th>Cuenta</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <div id="totales" style="display: none;">
-            <div class="col-md-2 offset-md-10" id="id_neto">
-                {{ form.neto.label_tag }}
-                <input type="text" class="form-control text-end" readonly>
-            </div>
-
-            <div class="col-md-2 offset-md-10" id="id_iva">
-                {{ form.iva.label_tag }}
-                <input type="text" class="form-control text-end" readonly>
-            </div>
-
-            <div class="col-md-2 offset-md-10" id="id_total">
-                {{ form.total.label_tag }}
-                <input type="text" class="form-control text-end" readonly>
-            </div>
-
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Finalizar</button>
-            </div>
-        </div>
-
-    </form>
+        </form>
+    </div>
 </div>
+{% endblock table_datatable %}
 
+{% block script_datatable %}
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="{% static 'adm_cont/facturacion.js' %}"></script>
+{% endblock script_datatable %}
+
+{% endblock contenido %}
 <script>
-$(document).ready(function() {
-    $('#cliente').autocomplete({
-        source: function(request, response) {
-            $.ajax({
-                url: "{% url 'buscar_cliente' %}",
-                dataType: 'json',
-                data: { term: request.term },
-                success: function(data) {
-                    response(data.map(cliente => ({
-                        label: cliente.text,
-                        value: cliente.text,
-                        id: cliente.id
-                    })));
-                },
-                error: xhr => console.error('Error al buscar clientes:', xhr)
-            });
-        },
-        minLength: 2, // Mínimo de caracteres para activar la búsqueda
-        select: function(event, ui) {
-            const { id } = ui.item;
-
-            $.ajax({
-                url: "{% url 'buscar_clientes' %}",
-                data: { id },
-                dataType: 'json',
-                success: cliente => {
-                    const row = `
-                        <tr id="cliente-${id}">
-                            <td>${cliente.empresa}</td>
-                            <td>${cliente.ruc}</td>
-                            <td>${cliente.direccion}</td>
-                            <td>${cliente.localidad}</td>
-                            <td>${cliente.telefono}</td>
-                        </tr>`;
-                    $('#clienteTable tbody').html(row);
-                    $('#clienteTable').show();
-                },
-                error: xhr => console.error('Error al obtener los detalles del cliente:', xhr)
-            });
-        }
-    });
-
-    // Autocomplete para el input "item"
-    $('#item').autocomplete({
-        source: function(request, response) {
-            // Capturar el valor seleccionado del tipo de gasto
-            const tipo = $('#id_tipo select').val();
-            $.ajax({
-                url: "{% url 'buscar_item' %}",
-                dataType: 'json',
-                data: {
-                    term: request.term,
-                    tipo_gasto: tipo
-                },
-                success: data => response(data.map(item => ({
-                    label: item.text,
-                    value: item.text,
-                    id: item.id
-                }))),
-                error: xhr => console.error('Error al buscar items:', xhr)
-            });
-        },
-        minLength: 2,
-        select: function(event, ui) {
-            $.ajax({
-                url: "{% url 'buscar_items' %}",
-                data: { id: ui.item.id },
-                dataType: 'json',
-                success: servicio => {
-                    $('#id_precio input').data({
-                        iva: servicio.iva,
-                        cuenta: servicio.cuenta,
-                        codigo: servicio.item
-                    });
-                    $('#id_descripcion_item input').val(servicio.nombre);
-                },
-                error: xhr => console.error('Error al obtener los detalles del item:', xhr)
-            });
-        }
-    });
-
-
-    let itemCounter = 0;
-
-    // Agregar Item a la tabla
-    $('#agregarItem').on('click', function() {
-        const item = $('#item').val();
-        const descripcion = $('#id_descripcion_item input').val();
-        const precio = parseFloat($('#id_precio input').val());
-
-        if (item && descripcion && !isNaN(precio)) {
-            const iva = $('#id_precio input').data('iva');
-            const cuenta = $('#id_precio input').data('cuenta');
-            const codigo = $('#id_precio input').data('codigo');
-
-            itemCounter++;
-            const rowId = `item-${itemCounter}`;
-
-            const row = `
-                <tr id="${rowId}" data-precio="${precio}" data-iva="${iva}" data-cuenta="${cuenta}">
-                    <td>${codigo}</td>
-                    <td>${descripcion}</td>
-                    <td>${precio.toFixed(2)}</td>
-                    <td>${iva}</td>
-                    <td>${cuenta}</td>
-                </tr>`;
-
-            $('#itemTable tbody').append(row);
-            $('#itemTable').show();
-            $('#eliminarSeleccionados').show();
-            limpiarCampos();
-            actualizarTotal();
-
-            $('#totales').show();
-        } else {
-            alert('Por favor, completa todos los campos antes de agregar el item.');
-        }
-    });
-
-   // Seleccionar/Deseleccionar fila
-    $('#itemTable tbody').on('click', 'tr', function() {
-        $(this).toggleClass('table-active table-primary');
-    });
-
-    // Eliminar filas seleccionadas
-    $('#eliminarSeleccionados').on('click', function() {
-        if (confirm('¿Está seguro de que desea eliminar la selección?')) {
-            $('#itemTable tbody tr.table-active').remove();
-            actualizarTotal();
-
-            // Ocultar el div de totales si no hay items
-            if ($('#itemTable tbody tr').length === 0) {
-                $('#itemTable').hide();
-                $('#eliminarSeleccionados').hide();
-                $('#totales').hide();
-            }
-        }
-    });
-
-    // Limpiar campos del formulario
-    function limpiarCampos() {
-        $('#item').val('');
-        $('#id_descripcion_item input').val('');
-        $('#id_precio input').val('');
-    }
-
-    // Actualizar total
-    function actualizarTotal() {
-        let neto = 0;
-
-        $('#itemTable tbody tr').each(function() {
-            const precio = parseFloat($(this).data('precio')) || 0;
-            // Sumar solo los precios sin IVA
-            neto += precio;
-        });
-
-        // Actualizar el campo neto
-        $('#id_neto input').val(neto.toFixed(2)).prop('readonly', true);
-
-        let total = 0;
-        $('#itemTable tbody tr').each(function() {
-            const precio = parseFloat($(this).data('precio')) || 0;
-            const iva = $(this).data('iva');
-
-            const precioFinal = iva === 'Básico' ? precio * 1.22 : precio;
-            total += precioFinal;
-        });
-
-        // Actualizar el campo total
-        $('#id_total input').val(total.toFixed(2)).prop('readonly', true);
-
-        // Calcular y actualizar el campo IVA
-        const iva = total - neto;
-        $('#id_iva input').val(iva.toFixed(2)).prop('readonly', true);
-    }
-});
+    var csrf_token = "{{ csrf_token }}";
 </script>
 
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 
-{% endblock formulario %}
+

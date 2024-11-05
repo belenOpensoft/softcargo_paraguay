@@ -1,8 +1,24 @@
 $(document).ready(function() {
+
+let total=0;
+let neto = 0;
+let iva=0;
+
+var buscar = '';
+var que_buscar = '';
+
+    const valorInicial = $('#id_tipo').find('option:selected').text();
+    $('#tipoSeleccionado').text(valorInicial);
+
+    $('#id_tipo').change(function() {
+        const valorSeleccionado = $(this).find('option:selected').text();
+        $('#tipoSeleccionado').text(valorSeleccionado);
+    });
+
     $('#cliente').autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "{% url 'buscar_cliente' %}",
+                url: "/buscar_cliente",
                 dataType: 'json',
                 data: { term: request.term },
                 success: function(data) {
@@ -15,17 +31,17 @@ $(document).ready(function() {
                 error: xhr => console.error('Error al buscar clientes:', xhr)
             });
         },
-        minLength: 2, // Mínimo de caracteres para activar la búsqueda
+        minLength: 2,
         select: function(event, ui) {
             const { id } = ui.item;
-
             $.ajax({
-                url: "{% url 'buscar_clientes' %}",
+                url: "/buscar_clientes",
                 data: { id },
                 dataType: 'json',
                 success: cliente => {
                     const row = `
                         <tr id="cliente-${id}">
+                            <td class="d-none">${cliente.codigo}</td>
                             <td>${cliente.empresa}</td>
                             <td>${cliente.ruc}</td>
                             <td>${cliente.direccion}</td>
@@ -41,15 +57,13 @@ $(document).ready(function() {
     });
 
     // Autocomplete para el input "item"
-    $('#item').autocomplete({
+        $('#item').autocomplete({
         source: function(request, response) {
-            const tipo = $('#id_tipo select').val();
             $.ajax({
-                url: "{% url 'buscar_item' %}",
+                url: "/buscar_item_v",
                 dataType: 'json',
                 data: {
-                    term: request.term,
-                    tipo_gasto: tipo
+                    term: request.term
                 },
                 success: data => response(data.map(item => ({
                     label: item.text,
@@ -62,7 +76,7 @@ $(document).ready(function() {
         minLength: 2,
         select: function(event, ui) {
             $.ajax({
-                url: "{% url 'buscar_items' %}",
+                url: "/buscar_items_v",
                 data: { id: ui.item.id },
                 dataType: 'json',
                 success: servicio => {
@@ -108,7 +122,6 @@ $(document).ready(function() {
             $('#eliminarSeleccionados').show();
             limpiarCampos();
             actualizarTotal();
-
             $('#totales').show();
         } else {
             alert('Por favor, completa todos los campos antes de agregar el item.');
@@ -120,13 +133,11 @@ $(document).ready(function() {
         $(this).toggleClass('table-active table-primary');
     });
 
-    // Eliminar filas seleccionadas
     $('#eliminarSeleccionados').on('click', function() {
         if (confirm('¿Está seguro de que desea eliminar la selección?')) {
             $('#itemTable tbody tr.table-active').remove();
             actualizarTotal();
 
-            // Ocultar el div de totales si no hay items
             if ($('#itemTable tbody tr').length === 0) {
                 $('#itemTable').hide();
                 $('#eliminarSeleccionados').hide();
@@ -135,16 +146,15 @@ $(document).ready(function() {
         }
     });
 
-    // Limpiar campos del formulario
     function limpiarCampos() {
         $('#item').val('');
         $('#id_descripcion_item input').val('');
         $('#id_precio input').val('');
     }
 
-    // Actualizar total
     function actualizarTotal() {
-        let neto = 0;
+
+        let precio=0;
 
         $('#itemTable tbody tr').each(function() {
             const precio = parseFloat($(this).data('precio')) || 0;
@@ -153,10 +163,10 @@ $(document).ready(function() {
 
         $('#id_neto input').val(neto.toFixed(2)).prop('readonly', true);
 
-        let total = 0;
+
         $('#itemTable tbody tr').each(function() {
-            const precio = parseFloat($(this).data('precio')) || 0;
-            const iva = $(this).data('iva');
+            precio = parseFloat($(this).data('precio')) || 0;
+            iva = $(this).data('iva');
 
             const precioFinal = iva === 'Básico' ? precio * 1.22 : precio;
             total += precioFinal;
@@ -164,52 +174,163 @@ $(document).ready(function() {
 
         $('#id_total input').val(total.toFixed(2)).prop('readonly', true);
 
-        const iva = total - neto;
+        iva = total - neto;
         $('#id_iva input').val(iva.toFixed(2)).prop('readonly', true);
     }
 
-        const facturaData = {
-            tipo: $('#id_tipo select').val(),
-            serie: $('#id_serie select').val(),
-            prefijo: $('#id_prefijo select').val(),
-            numero: $('#id_numero input').val(),
-            fecha: $('#id_fecha input').val(),
-            moneda: $('#id_moneda select').val(),
-            arbitraje: $('#id_arbitraje input').val(),
-            paridad: $('#id_paridad input').val(),
-            imputar: $('#id_imputar select').val(),
-            cliente: $('#cliente').val()
-        };
-
-        let items = [];
-        $('#itemTable tbody tr').each(function() {
-            const item = {
-                codigo: $(this).find('td').eq(0).text(),
-                descripcion: $(this).find('td').eq(1).text(),
-                precio: $(this).find('td').eq(2).text(),
-                iva: $(this).find('td').eq(3).text(),
-                cuenta: $(this).find('td').eq(4).text()
+    //Enviar facturar
+    $('#facturar').on('click', function() {
+        if (confirm('¿Está seguro de que desea facturar?')) {
+            let tipoFac = $('#id_tipo').val();
+            let serie = $('#id_serie').val();
+            let prefijo = $('#id_prefijo').val();
+            let numero = $('#id_numero').val();
+            let cliente = $('#cliente').val();
+            let fecha = $('#id_fecha').val();
+            let paridad = $('#id_paridad').val();
+            let arbitraje = $('#id_arbitraje').val();
+            let imputar = $('#id_imputar').val();
+            let moneda = $('#id_moneda select').val();
+            let clienteData = {
+                codigo: $('#clienteTable tbody tr td').eq(0).text(),
+                empresa: $('#clienteTable tbody tr td').eq(1).text(),
+                rut: $('#clienteTable tbody tr td').eq(2).text(),
+                direccion: $('#clienteTable tbody tr td').eq(3).text(),
+                localidad: $('#clienteTable tbody tr td').eq(4).text(),
+                telefono: $('#clienteTable tbody tr td').eq(5).text()
             };
-            items.push(item);
-        });
 
-        const data = {
-            factura: facturaData,
-            items: items,
-            csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
-        };
+            let items = [];
+            $('#itemTable tbody tr').each(function() {
+                const itemData = {
+                    id: $(this).find('td').eq(0).text(),
+                    descripcion: $(this).find('td').eq(1).text(),
+                    precio: $(this).find('td').eq(2).text(),
+                    iva: $(this).find('td').eq(3).text(),
+                    cuenta: $(this).find('td').eq(4).text(),
+                };
+                items.push(itemData);
+            });
 
-        $.ajax({
-            url: "{% url 'procesar_factura' %}",
-            method: 'POST',
-            data: data,
-            dataType: 'json',
-            success: function(response) {
-                alert('Factura enviada correctamente');
-            },
-            error: function(xhr) {
-                console.error('Error al enviar la factura:', xhr);
-            }
-        });
+            $.ajax({
+                url: "/procesar_factura/",
+                dataType: 'json',
+                type: 'POST',
+                data: {
+                    csrfmiddlewaretoken: csrf_token,
+                    fecha: fecha,
+                    tipoFac: tipoFac,
+                    serie: serie,
+                    prefijo: prefijo,
+                    numero: numero,
+                    cliente: cliente,
+                    arbitraje: arbitraje,
+                    paridad: paridad,
+                    imputar: imputar,
+                    moneda: moneda,
+                    clienteData: JSON.stringify(clienteData),
+                    items: JSON.stringify(items),
+                    total:total,
+                    iva:iva,
+                    neto:neto
+                },
+                success: function(data) {
+                    console.log('Factura procesada:', data);
+                    alert('Factura procesada con éxito');
+                    window.location.reload();
+                },
+                error: function(xhr) {
+                    console.error('Error al facturar:', xhr);
+                    alert('Error al procesar la factura');
+                }
+            });
+        }
     });
+
+    //buscadores tabla facturas
+    let contador = 0;
+
+    $('#tabla_facturas tfoot th').each(function () {
+        let title = $(this).text();
+        if (title !== '') {
+            $(this).html('<input type="text" class="form-control"  autocomplete="off" id="buscoid_' + contador + '" type="text" placeholder="Buscar ' + title + '"  autocomplete="off" />');
+            contador++;
+        } else {
+            $(this).html('<button class="btn" title="Borrar filtros" id="clear" ><span class="glyphicon glyphicon-erase"></span></button> ');
+        }
+    });
+    //tabla general master
+    table = $('#tabla_facturas').DataTable({
+    "stateSave": true,
+    "dom": 'Btlipr',
+    "scrollX": true,
+    "bAutoWidth": false,
+    "scrollY": wHeight * 0.60,
+    "columnDefs": [
+        {
+            "targets": [0],
+            "className": '',
+            "orderable": false,
+            "data": null,
+            "defaultContent": '',
+            render: function (data, type, row) { }
+        },
+        {
+            "targets": [1],
+            "className": 'derecha archivos',
+        },
+        // Más definiciones de columnas...
+    ],
+    "order": [[1, "desc"]],
+    "processing": true,
+    "serverSide": true,
+    "pageLength": 100,
+    "ajax": {
+        "url": "/source_facturacion/",
+        'type': 'GET',
+        "data": function (d) {
+            return $.extend({}, d, {
+                "buscar": buscar,
+                "que_buscar": que_buscar,
+            });
+        }
+    },
+    "language": {
+        url: "/static/datatables/es_ES.json"
+    },
+    initComplete: function () {
+        var api = this.api();
+        api.columns().every(function () {
+            var that = this;
+            $('input', this.footer()).on('keyup change', function () {
+                if (that.search() !== this.value) {
+                    that.search(this.value).draw();
+                }
+            });
+        });
+    },
+    "rowCallback": function (row, data) {}
 });
+
+});
+
+/* INITIAL CONTROL PAGE */
+var wWidth = $(window).width();
+var dWidth = wWidth * 0.40;
+var wHeight = $(window).height();
+var dHeight = wHeight * 0.30;
+
+function abrir_modalfactura(){
+alert();
+$("#facturaM").dialog({
+        autoOpen: true,
+        modal: true,
+        width: wWidth*0.60,
+        height: wHeight*0.70,
+        buttons: {
+            "Cerrar": function() {
+                $(this).dialog("close");
+            }
+        }
+    });
+}

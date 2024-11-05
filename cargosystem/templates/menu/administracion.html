@@ -1,0 +1,72 @@
+<aside id="sidebar" style="background-color:#0D6EFD;">
+            <div class="h-100">
+                <div class="sidebar-logo">
+                    <a href="/">{{ request.session.empresa }}</a>
+                </div>
+                <!-- Sidebar Navigation -->
+                <ul class="sidebar-nav">
+                    <li class="sidebar-header">
+                        Opciones
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="/facturacion/" class="sidebar-link">
+                            <i class="fa-solid fa-receipt"></i>
+                            &nbsp;Facturacion
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="/cobranza/" class="sidebar-link">
+                            <i class="fa-solid fa-landmark"></i>&nbsp;Cobranza
+                        </a>
+                    </li>
+                     <li class="sidebar-item">
+                        <a href="/proveedores_gastos/" class="sidebar-link">
+                            <i class="fas fa-user-tie"></i>&nbsp;Proveedores y gastos
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="/orden_pago/" class="sidebar-link">
+                           <i class="fa-solid fa-coins"></i>&nbsp;Orden de pago
+                        </a>
+                    </li>
+
+                    <li class="sidebar-header">
+                        Modulo
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#auth1"
+                            aria-expanded="false" aria-controls="auth">
+                            <i class="fa fa-puzzle-piece pe-2"></i>
+                            {{ request.session.rol }}
+                        </a>
+                        <ul id="auth1" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                           {% for modulo in request.session.roles %}
+                                {% if modulo != request.session.rol %}
+                                    <li class="sidebar-item">
+                                        <a href="{% url 'vista_cambiar_modulo' modulo %}" class="sidebar-link">{{ modulo|capfirst }}</a>
+                                    </li>
+                                {% endif %}
+                           {% endfor %}
+                        </ul>
+                    </li>
+                     <li class="sidebar-header">
+                        Sesion usuario
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#auth"
+                            aria-expanded="false" aria-controls="auth">
+                            <i class="fa-regular fa-user pe-2"></i>
+                            {{ request.user.first_name }} {{ request.user.last_name }}
+                        </a>
+                        <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link">Cambio clave</a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="{% url 'vista_logout' %}" class="sidebar-link">Salir</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </aside>

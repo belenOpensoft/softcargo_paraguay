@@ -1,0 +1,152 @@
+{% extends 'base_form.html' %}
+{% load static %}
+
+{% block formulario %}
+<div class="border rounded p-4 bg-light">
+    <form method="post" action="" id="cobranzaForm">
+        {% csrf_token %}
+
+        <div class="row d-flex align-items-center">
+            <div class="col-md-1">
+                {{ form.serie }}
+            </div>
+
+           <h3 class="col-md-1 text-center"
+                style="font-weight: bold; color: white; font-family: Arial, sans-serif; background-color: black;
+               padding: 2px 2px; border-radius: 3px; height: 40px; display: flex; align-items: center; justify-content: center;
+               margin-top: 8px;">
+                Cobro
+            </h3>
+
+            <div class="col-md-1">
+                {{ form.prefijo }}
+            </div>
+
+            <div class="col-md-2">
+                {{ form.numero }}
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+
+            <div class="col-md-2">
+                {{ form.fecha.label_tag }}
+                {{ form.fecha }}
+            </div>
+        </div>
+        <br>
+
+        <div class="row mt-3">
+            <div class="col-md-2">
+                {{ form.moneda.label_tag }}
+                {{ form.moneda }}
+            </div>
+            <div class="col-md-2">
+                {{ form.arbitraje.label_tag }}
+                {{ form.arbitraje }}
+            </div>
+            <div class="col-md-2">
+                {{ form.paridad.label_tag }}
+                {{ form.paridad }}
+            </div>
+            <div class="col-md-2">
+                {{ form.imputar.label_tag }}
+                {{ form.imputar }}
+            </div>
+        </div>
+
+        <br>
+
+        <div class="col-md-2">
+            {{form.importe.label_tag}}
+            {{form.importe}}
+        </div>
+
+        <div class="row mt-3">
+            <div class="d-flex align-items-center col-md-12">
+                <div class="col-md-3">
+                    <label for="cliente">Buscar Cliente</label>
+                    <input type="text" id="cliente" class="form-control" name="cliente" placeholder="Buscar cliente">
+            </div>
+            <div class="col-md-6 offset-md-1">
+                <table id="clienteTable" class="table table-striped" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th class="d-none">Codigo</th>
+                            <th>Empresa</th>
+                            <th>RUT</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <table id="imputacionTable" class="table table-striped mt-4" style="display:none;">
+            <thead>
+                <tr>
+                    <th style="display:none;">Id</th>
+                    <th>Vencimiento</th>
+                    <th>Emisión</th>
+                    <th>Documento</th>
+                    <th>Total</th>
+                    <th>Saldo</th>
+                    <th>Imputado</th>
+                    <th>T.Cambio</th>
+                    <th>Embarque</th>
+                    <th>Detalle</th>
+                    <th>Posición</th>
+                    <th>Moneda</th>
+                    <th>Paridad</th>
+                    <th>%RG</th>
+                    <th>RG</th>
+                    <th>%RIVA</th>
+                    <th>RIVA</th>
+                    <th>%RIB</th>
+                    <th>RIB</th>
+                    <th>%SUSS</th>
+                    <th>SUSS</th>
+                    <th>%Otros</th>
+                    <th>Otros</th>
+                    <th>Tipo Doc</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div id="totales" style="display: none;">
+            <div class="col-md-2 offset-md-10" id="id_neto">
+                {{ form.neto.label_tag }}
+                <input type="text" class="form-control text-end" readonly>
+            </div>
+
+            <div class="col-md-2 offset-md-10" id="id_iva">
+                {{ form.iva.label_tag }}
+                <input type="text" class="form-control text-end" readonly>
+            </div>
+
+            <div class="col-md-2 offset-md-10" id="id_total">
+                {{ form.total.label_tag }}
+                <input type="text" class="form-control text-end" readonly>
+            </div>
+
+            <div class="mt-4">
+                <button type="button" id="facturar" name="facturar" class="btn btn-primary">Finalizar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    var csrf_token = "{{ csrf_token }}";
+</script>
+
+<script src="{% static 'adm_cont/cobranza.js' %}"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+
+{% endblock formulario %}

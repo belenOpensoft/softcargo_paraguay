@@ -1,0 +1,227 @@
+{% extends 'base_form.html' %}
+{% load static %}
+
+{% block formulario %}
+<div class="border rounded p-4 bg-light" style="overflow-x:auto;">
+    <form method="post" action="" id="facturaForm">
+        {% csrf_token %}
+
+        <h3 id="tipoSeleccionado" style="font-weight: bold; color: white; font-family: Arial, sans-serif; background-color: black; display: inline-block; padding: 3px; border-radius: 3px">
+        </h3>
+
+        <br>
+
+        <div class="col-md-2">
+            {{ form.tipo.label_tag }}
+            {{ form.tipo }}
+        </div>
+
+        <br>
+
+        <div class="row" >
+            <div class="col-md-1">
+                {{ form.serie.label_tag }}
+                {{ form.serie }}
+            </div>
+            <div class="col-md-1">
+                {{ form.prefijo.label_tag }}
+                {{ form.prefijo }}
+            </div>
+            <div class="col-md-2">
+                {{ form.numero.label_tag }}
+                {{ form.numero }}
+            </div>
+            <div class="col-md-2">
+                {{ form.fecha.label_tag }}
+                {{ form.fecha }}
+            </div>
+        </div>
+
+        <div>
+            <div class="col-md-2">
+                {{ form.tipo_factura.label_tag }}
+                {{ form.tipo_factura }}
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-2">
+                {{ form.fecha_registro.label_tag }}
+                {{ form.fecha_registro }}
+            </div>
+            <div class="col-md-2">
+                {{ form.fecha_documento.label_tag }}
+                {{ form.fecha_documento }}
+            </div>
+            <div class="col-md-2">
+                {{ form.vencimiento.label_tag }}
+                {{ form.vencimiento }}
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row mt-3">
+            <div class="col-md-4">
+                {{ form.moneda.label_tag }}
+                {{ form.moneda }}
+            </div>
+            <div class="col-md-2">
+                {{ form.arbitraje.label_tag }}
+                {{ form.arbitraje }}
+            </div>
+            <div class="col-md-2">
+                {{ form.paridad.label_tag }}
+                {{ form.paridad }}
+            </div>
+            <div class="col-md-2">
+                {{ form.imputar.label_tag }}
+                {{ form.imputar }}
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row mt-3">
+            <div class="d-flex align-items-center col-md-12">
+                <div class="col-md-3">
+                    <label for="proveedor">Buscar Proveedor</label>
+                    <input type="text" id="proveedor" class="form-control" name="proveedor" placeholder="Buscar proveedor">
+                </div>
+                <div class="col-md-6 offset-md-1">
+                    <table id="proveedorTable" class="table table-striped" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th class="d-none">Codigo</th>
+                                <th>Empresa</th>
+                                <th>RUT</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <div>
+            {{ form.tercerizado.label_tag }}
+            {{ form.tercerizado }}
+        </div>
+
+        <div class="row mt-3">
+            <div class="d-flex align-items-center col-md-12">
+                <div class="col-md-3">
+                    <label for="proveedor2"></label>
+                    <input type="text" id="proveedor2" class="form-control" name="proveedor" placeholder="Buscar proveedor">
+                </div>
+                <div class="col-md-6 offset-md-1">
+                    <table id="proveedor2Table" class="table table-striped" style="display:none; text-align:center;">
+                        <thead>
+                            <tr>
+                                <th class="d-none">Codigo</th>
+                                <th>Empresa</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <label for="item">Buscar Item</label>
+                <input type="text" id="item" class="form-control" name="item" placeholder="Buscar item">
+            </div>
+
+            <div class="col-md-3" id="id_descripcion_item">
+                {{ form.descripcion.label_tag }}
+                {{ form.descripcion }}
+            </div>
+
+            <div class="col-md-2" id="id_tipo_cobro">
+                {{ form.tipo_cobro.label_tag }}
+                {{ form.tipo_cobro }}
+            </div>
+
+            <div class="col-md-1" id="id_precio">
+                {{ form.precio.label_tag }}
+                {{ form.precio }}
+            </div>
+
+            <div class="col-md-1" id="id_cobro">
+                <br>
+                {{ form.cobro }}
+            </div>
+
+            <div class="col-md-2">
+                <br>
+                <button type="button" id="agregarItem" class="btn btn-success">Agregar</button>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+            <button type="button" id="eliminarSeleccionados" class="btn btn-danger" style="display:none;">Eliminar</button>
+        </div>
+
+        <table id="itemTable" class="table table-striped mt-4 flex-wrap" style="display: block !important; visibility:hidden; overflow-x:auto;">
+            <thead>
+                <tr>
+                    <th style="display:none;">Id</th>
+                    <th>Item</th>
+                    <th>Descripcion</th>
+                    <th>Precio</th>
+                    <th>IVA</th>
+                    <th>Cuenta</th>
+                    <th>Embarque</th>
+                    <th>Posición</th>
+                    <th>E/F</th>
+                    <th>Comp</th>
+                    <th>Área</th>
+                    <th>T.C.</th>
+                    <th>Gasto</th>
+                    <th>Tipo</th>
+                    <th>Pago</th>
+                    <th>Venta Asociada</th>
+                    <th>Estación</th>
+                    <th>Socio Comercial</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div id="totales" style="display: none;">
+            <div class="col-md-2 offset-md-10" id="id_neto">
+                {{ form.neto.label_tag }}
+                <input type="text" class="form-control text-end" readonly>
+            </div>
+
+            <div class="col-md-2 offset-md-10" id="id_iva">
+                {{ form.iva.label_tag }}
+                <input type="text" class="form-control text-end" readonly>
+            </div>
+
+            <div class="col-md-2 offset-md-10" id="id_total">
+                {{ form.total.label_tag }}
+                <input type="text" class="form-control text-end" readonly>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Finalizar</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    var csrf_token = "{{ csrf_token }}";
+</script>
+
+<script src="{% static 'adm_cont/proveedores_gastos.js' %}"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+{% endblock formulario %}

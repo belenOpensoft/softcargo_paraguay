@@ -1,15 +1,141 @@
+import json
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
+from administracion_contabilidad.views.facturacion_electronica import Uruware
 from mantenimientos.models import Clientes, Servicios
 from administracion_contabilidad.forms import Factura
-from administracion_contabilidad.models import Boleta
-from django.http import JsonResponse
+from administracion_contabilidad.models import Boleta, PendienteFacturar, Asientos, Movims
+from django.http import JsonResponse, HttpResponse
 from datetime import datetime
-from django.db.models import Max
+from django.db import transaction
+import random
 
+param_busqueda = {
+    1: 'autogenerado__icontains',
+    2: 'serie__icontains',
+    3: 'prefijo__icontains',
+    4: 'numero__icontains',
+    5: 'cliente__icontains',
+    6: 'master__icontains',
+    7: 'house__icontains',
+    8: 'concepto__icontains',
+    9: 'monto__icontains',
+    10: 'iva__icontains',
+    11: 'totiva__icontains',
+    12: 'total__icontains',
+}
+
+columns_table = {
+    0: 'autogenerado',
+    1: 'serie',
+    2: 'prefijo',
+    3: 'numero',
+    4: 'cliente',
+    5: 'master',
+    6: 'house',
+    7: 'concepto',
+    8: 'monto',
+    9: 'iva',
+    10: 'totiva',
+    11: 'total',
+}
+def source_facturacion(request):
+        args = {
+            '1': request.GET['columns[1][search][value]'],
+            '2': request.GET['columns[2][search][value]'],
+            '3': request.GET['columns[3][search][value]'],
+            '4': request.GET['columns[4][search][value]'],
+            '5': request.GET['columns[5][search][value]'],
+            '6': request.GET['columns[6][search][value]'],
+            '7': request.GET['columns[7][search][value]'],
+            '8': request.GET['columns[8][search][value]'],
+            '9': request.GET['columns[9][search][value]'],
+            '10': request.GET['columns[10][search][value]'],
+            '11': request.GET['columns[11][search][value]'],
+            '12': request.GET['columns[12][search][value]'],
+        }
+        filtro = get_argumentos_busqueda(**args)
+        start = int(request.GET['start'])
+        length = int(request.GET['length'])
+        buscar = str(request.GET['buscar'])
+        que_buscar = str(request.GET['que_buscar'])
+        if len(buscar) > 0:
+            filtro[que_buscar] = buscar
+        end = start + length
+        order = get_order(request, columns_table)
+        if filtro:
+            registros = Boleta.objects.filter(**filtro).order_by(*order)
+        else:
+            registros = Boleta.objects.all().order_by(*order)
+        resultado = {}
+        data = get_data(registros[start:end])
+        resultado['data'] = data
+        resultado['length'] = length
+        resultado['draw'] = request.GET['draw']
+        resultado['recordsTotal'] = Boleta.objects.all().count()
+        resultado['recordsFiltered'] = str(registros.count())
+        data_json = json.dumps(resultado)
+        mimetype = "application/json"
+        return HttpResponse(data_json, mimetype)
+def get_data(registros_filtrados):
+    try:
+        data = []
+        for registro in registros_filtrados:
+            registro_json = []
+            registro_json.append(str(registro.id))
+            registro_json.append('' if registro.autogenerado is None else str(registro.autogenerado))
+            registro_json.append('' if registro.prefijo is None else str(registro.prefijo))
+            registro_json.append('' if registro.serie is None else str(registro.serie))
+            registro_json.append('' if registro.numero is None else str(registro.numero))
+            registro_json.append('' if registro.cliente is None else str(registro.cliente))
+            registro_json.append('' if registro.master is None else str(registro.master))
+            registro_json.append('' if registro.house is None else str(registro.house))
+            registro_json.append('' if registro.concepto is None else str(registro.concepto))
+            registro_json.append('' if registro.monto is None else str(registro.monto))
+            registro_json.append('' if registro.iva is None else str(registro.iva))
+            registro_json.append('' if registro.totiva is None else str(registro.totiva))
+            registro_json.append('' if registro.total is None else str(registro.total))
+            data.append(registro_json)
+        return data
+    except Exception as e:
+        raise TypeError(e)
+def get_argumentos_busqueda(**kwargs):
+    try:
+        result = {}
+        for row in kwargs:
+            if len(kwargs[row]) > 0:
+                result[param_busqueda[int(row)]] = kwargs[row]
+        return result
+    except Exception as e:
+        raise TypeError(e)
+def get_order(request, columns):
+    try:
+        result = []
+        order_column = request.GET['order[0][column]']
+        order_dir = request.GET['order[0][dir]']
+        order = columns[int(order_column)]
+        if order_dir == 'desc':
+            order = '-' + columns[int(order_column)]
+        result.append(order)
+        i = 1
+        while i > 0:
+            try:
+                order_column = request.GET['order[' + str(i) + '][column]']
+                order_dir = request.GET['order[' + str(i) + '][dir]']
+                order = columns[int(order_column)]
+                if order_dir == 'desc':
+                    order = '-' + columns[int(order_column)]
+                result.append(order)
+                i += 1
+            except Exception as e:
+                i = 0
+        result.append('id')
+        return result
+    except Exception as e:
+        raise TypeError(e)
 
 def facturacion_view(request):
     form = Factura(request.POST or None)
-
     return render(request, 'facturacion.html', {'form': form})
 
 
@@ -42,15 +168,11 @@ def buscar_clientes(request):
     return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
 
 
-def buscar_item(request):
+def buscar_item_v(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
         query = request.GET.get('term', '').strip()
-        tipo_gasto = request.GET.get('tipo_gasto', '')
 
-        servicios = Servicios.objects.filter(
-            nombre__icontains=query,
-            tipogasto=tipo_gasto
-        )[:10]
+        servicios = Servicios.objects.filter(nombre__icontains=query, tipogasto='V')[:10]
 
         results = [{'id': servicio.id, 'text': servicio.nombre} for servicio in servicios]
         return JsonResponse(results, safe=False)
@@ -58,10 +180,10 @@ def buscar_item(request):
     return JsonResponse({'error': 'Solicitud inválida'}, status=400)
 
 
-def buscar_items(request):
+def buscar_items_v(request):
     if request.method == "GET":
         servicio_id = request.GET.get("id")
-        servicio = Servicios.objects.filter(id=servicio_id).first()
+        servicio = Servicios.objects.filter(id=servicio_id, tipogasto='V').first()
 
         if servicio:
             iva_texto = "Exento" if servicio.tasa == "X" else "Básico" if servicio.tasa == "B" else "Desconocido"
@@ -77,41 +199,311 @@ def buscar_items(request):
     return JsonResponse({'error': 'Servicio no encontrado'}, status=404)
 
 
-def generar_autogenerado():
-    ahora = datetime.now()
-    fecha_hora = ahora.strftime('%Y%m%d%H%M%S%f')[:-3]
-    ultimo = Boleta.objects.aggregate(Max('autogenerado'))['autogenerado__max']
-    secuencia_actual = int(ultimo[-10:])
-    nuevo_numero = secuencia_actual + 1
-    autogenerado = f"{fecha_hora}{nuevo_numero}"
+def generar_autogenerado(tipo, hora, fecha, numero):
+    fecha = fecha.replace('-', '')
+    fecha_hora = fecha + hora
+    tipo = tipo
+    autogenerado = f"{fecha_hora}{tipo}{numero}"
 
     return autogenerado
 
 
+@transaction.atomic
 def procesar_factura(request):
-    if request.method == 'POST':
-        serie = request.POST.get('serie')
-        prefijo = request.POST.get('prefijo')
-        numero = request.POST.get('numero')
-        fecha = request.POST.get('fecha')
-        moneda = request.POST.get('moneda')
-        arbitraje = request.POST.get('arbitraje')
-        paridad = request.POST.get('paridad')
-        imputar = request.POST.get('imputar')
-        cliente_id = request.POST.get('cliente')
+    try:
+        if request.method == 'POST':
+            lista = Boleta.objects.last()
+            numero = int(lista.numero) + 1
 
-        items_data = json.loads(request.POST.get('items'))  # Convertir JSON a diccionario Python
+            hora = datetime.now().strftime('%H%M%S%f')
+            fecha = request.POST.get('fecha')
+            tipo = request.POST.get('tipoFac', 0)
+            serie = request.POST.get('serie', "")
+            prefijo = request.POST.get('prefijo', 0)
+            moneda = request.POST.get('moneda', "")
+            arbitraje = request.POST.get('arbitraje', 0)
+            paridad = request.POST.get('paridad', 0)
+            cliente_data = json.loads(request.POST.get('clienteData'))
+            codigo_cliente = cliente_data['codigo']
+            cliente = Clientes.objects.get(codigo=codigo_cliente)
+            autogenerado = generar_autogenerado(tipo, hora, fecha, numero)
+            fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
 
-        for item_data in items_data:
-            ItemFactura.objects.create(
-                factura=factura,
-                item=item_data['codigo'],
-                descripcion=item_data['descripcion'],
-                precio=item_data['precio'],
-                iva=item_data['iva'],
-                cuenta=item_data['cuenta']
-            )
+            precio_total = request.POST.get('total', 0)
+            neto = request.POST.get('neto', 0)
+            iva = request.POST.get('iva', 0)
 
-        return JsonResponse({'status': 'success', 'message': 'Factura procesada correctamente'})
+            items_data = json.loads(request.POST.get('items'))
 
-    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+            tipo_mov = tipo
+            tipo_asiento = 'V'
+            detalle1 = 'S/I'
+            detalle_mov = "detallemov"  #si viene de la preventa, sino vacio
+            nombre_mov = "nombremov"  #traer del combobox del que se seleccione
+            posicion = 0  #traer de la preventa
+            asiento = generar_numero()
+            movimiento_num = modificar_numero(asiento)
+
+            if tipo == 23:
+                detalle1 = 'e-VTA/CRED'
+            elif tipo == 24:
+                detalle1 = 'e-NOT/CRED'
+                tipo_asiento = 'P'
+            elif tipo == 11:
+                detalle1 = 'VTA/CRED'
+            elif tipo == 21:
+                detalle1 = 'NOT/CRED'
+                tipo_asiento = 'P'
+            elif tipo == 20:
+                detalle1 = 'NOT/DEB'
+                tipo_asiento = 'P'
+
+            detalle_asiento = detalle1 + serie + prefijo + numero + cliente.empresa
+
+            movimiento = {
+                'tipo': tipo_mov,
+                'fecha': fecha_obj,
+                'boleta': numero,
+                'monto': neto,
+                'iva': iva,
+                'total': precio_total,
+                'saldo': 0,
+                'moneda': moneda,
+                'detalle': detalle_mov,
+                'cliente': cliente.codigo,
+                'nombre': cliente.empresa,
+                'nombremov': nombre_mov,
+                'cambio': arbitraje,
+                'autogenerado': autogenerado,
+                'serie': serie,
+                'prefijo': prefijo,
+                'posicion': posicion,
+                'anio': fecha_obj.year,
+                'mes': fecha_obj.month,
+                'monedaoriginal': moneda,
+                'montooriginal': precio_total,
+                'arbitraje': arbitraje
+            }
+            asiento_general = {
+                'detalle': detalle_asiento,
+                'asiento': asiento,
+                'monto': precio_total,
+                'moneda': moneda,
+                'cambio': arbitraje,
+                'conciliado': 'N',
+                'clearing': fecha_obj,
+                'fecha': fecha_obj,
+                'imputacion': None,
+                'tipo': tipo_asiento,
+                'cuenta': 0,
+                'documento': str(numero),
+                'vencimiento': fecha_obj,
+                'pasado': 0,
+                'autogenerado': autogenerado,
+                'cliente': cliente.codigo,
+                'banco': 'S/I',
+                'centro': 'S/I',
+                'mov': movimiento_num,
+                'anio': fecha_obj.year,
+                'mes': fecha_obj.month,
+                'fechacheque': fecha_obj,
+                'paridad': paridad
+            }
+            crear_movimiento(movimiento)
+            crear_asiento(asiento_general)
+
+            for item_data in items_data:
+                aux = movimiento_num + 1
+
+                boleta = Boleta()
+                numero = numero
+                boleta.autogenerado = autogenerado
+                boleta.tipo = tipo
+                boleta.fecha = fecha
+                boleta.vto = fecha
+                boleta.tipofactura = serie
+                boleta.serie = serie
+                boleta.prefijo = prefijo
+                boleta.numero = numero
+                boleta.nrocliente = cliente.codigo
+                boleta.cliente = cliente.empresa
+                boleta.direccion = cliente.direccion
+                boleta.direccion2 = cliente.direccion2
+                boleta.localidad = cliente.localidad
+                boleta.ciudad = cliente.ciudad
+                boleta.pais = cliente.pais
+                boleta.telefax = cliente.telefono
+                boleta.ruc = cliente.ruc
+                boleta.condiciones = 'S/I'
+                boleta.corporativo = 'S/I'
+                boleta.moneda = moneda
+                boleta.cambio = arbitraje
+                boleta.paridad = paridad
+                boleta.tipocliente = 'RESPONSABLE INSCRIPTO'
+                boleta.item = item_data.get('id')
+                boleta.descripcion = item_data.get('descripcion')
+                boleta.precio = item_data.get('precio')
+                boleta.iva = item_data.get('iva')
+                boleta.cuenta = item_data.get('cuenta')
+                boleta.save()
+
+                asiento_vector = {
+                    'detalle': detalle_asiento,
+                    'monto': item_data.get('precio'),
+                    'moneda': moneda,
+                    'cambio': arbitraje,
+                    'conciliado': 'N',
+                    'clearing': fecha_obj,
+                    'fecha': fecha_obj,
+                    'imputacion': None,
+                    'tipo': tipo_asiento,
+                    'cuenta': item_data.get('cuenta'),
+                    'documento': str(numero),
+                    'vencimiento': fecha_obj,
+                    'pasado': 0,
+                    'autogenerado': autogenerado,
+                    'cliente': cliente.codigo,
+                    'banco': 'S/I',
+                    'centro': 'S/I',
+                    'mov': aux,
+                    'anio': fecha_obj.year,
+                    'mes': fecha_obj.month,
+                    'fechacheque': fecha_obj,
+                    'paridad': paridad
+                }
+                crear_asiento(asiento_vector)
+                movimiento_num = aux
+
+            return JsonResponse({'status': 'Factura procesada correctamente N° ' + str(numero)})
+    except Exception as e:
+        return JsonResponse({'status': 'Error: ' + str(e)})
+
+
+# """ PASO 2 MOVIMIENTOS DE CUENTA """
+#         actualizo_mov_cuenta()
+#         """ PROCESO FACTURACION ELECTRONICA """
+#         if len(items_data) > 0 and isinstance(boleta, Boleta):
+#             thread = threading.Thread(target=proceso_factura_electronica, args=(boleta.autogenerado,))
+#             thread.start()
+#         actualizo_mov_cuenta()
+#         return JsonResponse({'status': 'success', 'message': 'Facturas procesadas correctamente'})
+
+def generar_numero():
+    # Obtener la fecha y hora actual
+    ahora = datetime.datetime.now()
+
+    # Tomar los dos últimos dígitos del año
+    año = str(ahora.year)[-2:]
+
+    # Mes, día, hora, minutos, segundos y milisegundos (truncado a 3 dígitos)
+    mes = f"{ahora.month:02}"
+    dia = f"{ahora.day:02}"
+    hora = f"{ahora.hour:02}"
+    segundos = f"{ahora.second:02}"
+    milisegundos = f"{int(ahora.microsecond / 1000):03}"
+
+    # Generar tres dígitos aleatorios
+    digitos_aleatorios = f"{random.randint(0, 999):03}"
+
+    # Concatenar todo para formar el número de 15 dígitos
+    numero = f"{año}{mes}{dia}{hora}{segundos}{milisegundos}{digitos_aleatorios}"
+
+    return numero
+
+
+def modificar_numero(numero):
+    # Quitar el primer dígito y los últimos dos dígitos
+    numero_modificado = numero[1:-2]
+    return numero_modificado
+
+
+def crear_asiento(asiento):
+    try:
+        lista = Asientos()
+        lista.id = lista.get_id()
+        lista.fecha = asiento['fecha']
+        lista.asiento = asiento['asiento']
+        lista.cuenta = asiento['cuenta']
+        lista.imputacion = asiento['imputacion']
+        lista.tipo = asiento['tipo']
+        lista.documento = asiento['documento']
+        lista.vto = asiento['vencimiento']
+        lista.pasado = asiento['pasado']
+        lista.autogenerado = asiento['autogenerado']
+        lista.cliente = asiento['cliente']
+        lista.banco = asiento['banco']
+        lista.centro = asiento['centro']
+        lista.mov = asiento['mov']
+        lista.anoimpu = asiento['anio']
+        lista.mesimpu = asiento['mes']
+        lista.fechacheque = asiento['fechacheque']
+        lista.paridad = asiento['paridad']
+        lista.monto = asiento['monto']
+        lista.detalle = asiento['detalle']
+        lista.cambio = asiento['cambio']
+        lista.moneda = asiento['moneda']
+        lista.save()
+
+    except Exception as e:
+        return JsonResponse({'status': 'Error: ' + str(e)})
+
+
+def crear_movimiento(movimiento):
+    try:
+        lista = Movims()
+        lista.id = lista.get_id()
+        lista.mtipo = movimiento['tipo']
+        lista.mfechamov = movimiento['fecha']
+        lista.mboleta = movimiento['boleta']
+        lista.mmonto = movimiento['monto']
+        lista.miva = movimiento['iva']
+        lista.mtotal = movimiento['total']
+        lista.msobretasa = 0
+        lista.msaldo = movimiento['saldo']
+        lista.mvtomov = movimiento['fecha']
+        lista.mmoneda = movimiento['moneda']
+        lista.mdetalle = movimiento['detalle']
+        lista.mcliente = movimiento['cliente']
+        lista.mnombre = movimiento['nombre']
+        lista.mnombremov = movimiento['nombremov']
+        lista.mcambio = movimiento['cambio']
+        lista.mautogen = movimiento['autogenerado']
+        lista.mserie = movimiento['serie']
+        lista.mprefijo = movimiento['prefijo']
+        lista.mposicion = movimiento['posicion']
+        lista.mmesimpu = movimiento['mes']
+        lista.manoimpu = movimiento['anio']
+        lista.mmonedaoriginal = movimiento['monedaoriginal']
+        lista.marbitraje = movimiento['arbitraje']
+        lista.mmontooriginal = movimiento['montooriginal']
+        lista.save()
+
+    except Exception as e:
+        return JsonResponse({'status': 'Error:' + str(e)})
+
+
+def proceso_factura_electronica(autogenerado):
+    try:
+        pendiente = PendienteFacturar()
+        pendiente.autogenerado = autogenerado
+        pendiente.save()
+    except Exception as e:
+        raise TypeError(e)
+
+
+def facturar_pendiente(autogenerado):
+    try:
+        mis_boletas = Boleta.objects.filter(autogenerado=autogenerado)
+        """ Creo mi clase de servicio """
+        service = Uruware()
+        """ Cargo datos necesarios para mi factura """
+        service.cliente = mis_boletas[0].cliente
+        service.renglones = mis_boletas
+        """ Envio factura """
+        if service.facturar():
+            """ Actualizo factura pendiente a FINALIZADO si dio exito """
+            pass
+    except ObjectDoesNotExist:
+        raise TypeError('No se encontro la boleta')
+    except Exception as e:
+        raise TypeError(e)

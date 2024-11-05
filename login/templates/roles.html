@@ -61,6 +61,14 @@
                     <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" class="hidden-mobile"> <h4>Operaciones</h4> </a>
                     {% endfor %}
                 </div>
+                <div class="column">
+                    {% for rol in roles.3 %}
+                    <a href="/login/selecccionarol/{{ rol }}">
+                        <i class="iconos bi bi-card-checklist"></i>
+                    </a>
+                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" class="hidden-mobile"> <h4>Administración</h4> </a>
+                    {% endfor %}
+                </div>
             </div>
             {% csrf_token %}
         </form>
