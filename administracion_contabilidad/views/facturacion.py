@@ -39,44 +39,48 @@ columns_table = {
     10: 'totiva',
     11: 'total',
 }
+
+
 def source_facturacion(request):
-        args = {
-            '1': request.GET['columns[1][search][value]'],
-            '2': request.GET['columns[2][search][value]'],
-            '3': request.GET['columns[3][search][value]'],
-            '4': request.GET['columns[4][search][value]'],
-            '5': request.GET['columns[5][search][value]'],
-            '6': request.GET['columns[6][search][value]'],
-            '7': request.GET['columns[7][search][value]'],
-            '8': request.GET['columns[8][search][value]'],
-            '9': request.GET['columns[9][search][value]'],
-            '10': request.GET['columns[10][search][value]'],
-            '11': request.GET['columns[11][search][value]'],
-            '12': request.GET['columns[12][search][value]'],
-        }
-        filtro = get_argumentos_busqueda(**args)
-        start = int(request.GET['start'])
-        length = int(request.GET['length'])
-        buscar = str(request.GET['buscar'])
-        que_buscar = str(request.GET['que_buscar'])
-        if len(buscar) > 0:
-            filtro[que_buscar] = buscar
-        end = start + length
-        order = get_order(request, columns_table)
-        if filtro:
-            registros = Boleta.objects.filter(**filtro).order_by(*order)
-        else:
-            registros = Boleta.objects.all().order_by(*order)
-        resultado = {}
-        data = get_data(registros[start:end])
-        resultado['data'] = data
-        resultado['length'] = length
-        resultado['draw'] = request.GET['draw']
-        resultado['recordsTotal'] = Boleta.objects.all().count()
-        resultado['recordsFiltered'] = str(registros.count())
-        data_json = json.dumps(resultado)
-        mimetype = "application/json"
-        return HttpResponse(data_json, mimetype)
+    args = {
+        '1': request.GET['columns[1][search][value]'],
+        '2': request.GET['columns[2][search][value]'],
+        '3': request.GET['columns[3][search][value]'],
+        '4': request.GET['columns[4][search][value]'],
+        '5': request.GET['columns[5][search][value]'],
+        '6': request.GET['columns[6][search][value]'],
+        '7': request.GET['columns[7][search][value]'],
+        '8': request.GET['columns[8][search][value]'],
+        '9': request.GET['columns[9][search][value]'],
+        '10': request.GET['columns[10][search][value]'],
+        '11': request.GET['columns[11][search][value]'],
+        '12': request.GET['columns[12][search][value]'],
+    }
+    filtro = get_argumentos_busqueda(**args)
+    start = int(request.GET['start'])
+    length = int(request.GET['length'])
+    buscar = str(request.GET['buscar'])
+    que_buscar = str(request.GET['que_buscar'])
+    if len(buscar) > 0:
+        filtro[que_buscar] = buscar
+    end = start + length
+    order = get_order(request, columns_table)
+    if filtro:
+        registros = Boleta.objects.filter(**filtro).order_by(*order)
+    else:
+        registros = Boleta.objects.all().order_by(*order)
+    resultado = {}
+    data = get_data(registros[start:end])
+    resultado['data'] = data
+    resultado['length'] = length
+    resultado['draw'] = request.GET['draw']
+    resultado['recordsTotal'] = Boleta.objects.all().count()
+    resultado['recordsFiltered'] = str(registros.count())
+    data_json = json.dumps(resultado)
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+
+
 def get_data(registros_filtrados):
     try:
         data = []
@@ -99,6 +103,8 @@ def get_data(registros_filtrados):
         return data
     except Exception as e:
         raise TypeError(e)
+
+
 def get_argumentos_busqueda(**kwargs):
     try:
         result = {}
@@ -108,6 +114,8 @@ def get_argumentos_busqueda(**kwargs):
         return result
     except Exception as e:
         raise TypeError(e)
+
+
 def get_order(request, columns):
     try:
         result = []
@@ -133,6 +141,7 @@ def get_order(request, columns):
         return result
     except Exception as e:
         raise TypeError(e)
+
 
 def facturacion_view(request):
     form = Factura(request.POST or None)
@@ -246,22 +255,22 @@ def procesar_factura(request):
 
             if int(tipo) == 23:
                 detalle1 = 'e-VTA/CRED'
-                nombre_mov='CONTADO'
+                nombre_mov = 'CONTADO'
             elif int(tipo) == 24:
                 detalle1 = 'e-NOT/CRED'
                 tipo_asiento = 'P'
                 nombre_mov = 'CONTADO'
             elif int(tipo) == 11:
                 detalle1 = 'VTA/CRED'
-                nombre_mov='FACTURA'
+                nombre_mov = 'FACTURA'
             elif int(tipo) == 21:
                 detalle1 = 'NOT/CRED'
                 tipo_asiento = 'P'
-                nombre_mov='FACTURA'
+                nombre_mov = 'FACTURA'
             elif int(tipo) == 20:
                 detalle1 = 'NOT/DEB'
                 tipo_asiento = 'P'
-                nombre_mov='FACTURA'
+                nombre_mov = 'FACTURA'
 
             detalle_asiento = detalle1 + serie + str(prefijo) + str(numero) + cliente.empresa
 
@@ -319,16 +328,15 @@ def procesar_factura(request):
 
             for item_data in items_data:
                 aux = int(movimiento_num) + 1
-                precio=float(item_data.get('precio'))
-                coniva=0
-                totaliva=0
-                if item_data.get('iva')=='Basico':
-                    coniva=precio*1.22
-                    totaliva=precio*0.22
+                precio = float(item_data.get('precio'))
+                coniva = 0
+                totaliva = 0
+                if item_data.get('iva') == 'Basico':
+                    coniva = precio * 1.22
+                    totaliva = precio * 0.22
                 else:
-                    coniva=precio
-                    totaliva=0
-
+                    coniva = precio
+                    totaliva = 0
 
                 boleta = Boleta()
                 numero = numero
@@ -360,9 +368,9 @@ def procesar_factura(request):
                 boleta.precio = item_data.get('precio')
                 boleta.iva = item_data.get('iva')
                 boleta.cuenta = item_data.get('cuenta')
-                boleta.monto=item_data.get('precio')
-                boleta.totiva=totaliva
-                boleta.total=coniva
+                boleta.monto = item_data.get('precio')
+                boleta.totiva = totaliva
+                boleta.total = coniva
                 boleta.save()
 
                 asiento_vector = {
@@ -439,7 +447,7 @@ def modificar_numero(numero):
 def crear_asiento(asiento):
     try:
         lista = Asientos()
-        id=lista.get_id()
+        id = lista.get_id()
         lista.id = lista.get_id()
         lista.fecha = asiento['fecha']
         lista.asiento = asiento['asiento']

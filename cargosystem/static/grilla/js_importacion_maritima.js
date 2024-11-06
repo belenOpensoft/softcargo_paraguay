@@ -4912,15 +4912,34 @@ function cargar_gastos_factura(){
             {
                 "data": 8,    // Arbitraje - `data[8]`
                 "title": "Arbitraje"
-            }
+            },
+             {
+                "data": 5,
+                "title": "Detalle"
+            },
+
+            {
+                "data": null, // Columna 7 - Valor por defecto "false"
+                "render": function() {
+                    return 'S/I';
+                }
+            },
+
         ],
         rowCallback: function(row, data) {
+            // Agregar el evento de clic para resaltar la fila seleccionada
             $(row).off('click').on('click', function () {
                 $('#facturar_table tbody tr').removeClass('table-secondary');
                 $(this).addClass('table-secondary');
-            });
+            const valorColumna7 = $(row).find('td').eq(7).text().trim();
 
+            if (valorColumna7 === 'S/I') {
+                $('#concepto_detalle').prop('checked', false); // Desmarcar el checkbox
+            } else {
+                $('#concepto_detalle').prop('checked', true); // Marcar el checkbox
             }
+            });
+        }
     });
      sumar_ingresos();
 }
@@ -4934,8 +4953,6 @@ event.preventDefault();
         let cliente_id = $('#destinatario_input').val();
 
         if(cliente){
-            console.log(data[0]);
-            console.log(cliente);
             $('#facturar_table').DataTable().cell(filaSeleccionada, 3).data(cliente);
             $(filaSeleccionada).find('td').eq(3).text(cliente);
             $('#destinatario').val('');
@@ -5046,32 +5063,203 @@ function sumar_ingresos() {
     $('#total_ingresos').val(totalIngresos.toFixed(2)); // Redondea a 2 decimales si es necesario
 }
 function enviarDatosTabla() {
-    const tabla = $('#facturar_table').DataTable();
-    let datosTabla = [];
+let preventa;
+    let num=localStorage.getItem('num_house_gasto');
+    $.ajax({
+                url: '/importacion_maritima/house_detail_factura',
+                data: { numero: num},
+                method: 'GET',
+                success: function (house) {
+                    console.log(house.awb_e);
+                    if(house.awb_e==0){
+                        $.ajax({
+                        url: '/importacion_maritima/source_embarque_factura/',
+                        data: { numero: num},
+                        method: 'GET',
+                        success: function (embarque) {
+                                preventa=({
+                                    seguimiento:house.seguimiento,
+                                    referencia:num,
+                                    transportista:getNameByIdClientes(house.transportista_e),
+                                    vuelo:house.viaje_e,
+                                    master:house.awb_e,
+                                    house:house.hawb_e,
+                                    fecha:house.fecharetiro_e,
+                                    kilos:0,
+                                    bultos:0,
+                                    volumen:0,
+                                    origen:house.origen_e,
+                                    destino:house.destino_e,
+                                    consigna:getNameByIdClientes(house.consignatario_e),
+                                    embarca:getNameByIdClientes(house.embarcador_e),
+                                    agente:getNameByIdClientes(house.agente_e),
+                                    posicion:house.posicion_e,
+                                    terminos:null,
+                                    pagoflete:house.pagoflete_e,
+                                    commodity:embarque[0].producto_id,
+                                });
 
-    tabla.rows().every(function() {
-        const data = this.data();
-        datosTabla.push({
-            id: data[0],
-            concepto: data[1], //commodity
-            tipo: data[6],
-            cantidad: data[3],
-            facturar_a: data[3], //cliente
-            moneda: data[2],
-            arbitraje: data[8]
-        });
+                                //guardar la preventa
+                                    guardar_preventa(preventa);
+                                    const tabla = $('#facturar_table').DataTable();
+                                    let datosTabla = [];
+
+                                    tabla.rows().every(function() {
+                                        const data = this.data();
+
+                                        datosTabla.push({
+                                            id_gasto: data[0],
+                                            notas: $(this.node()).find('td').eq(7).text(),
+                                            descripcion: $(this.node()).find('td').eq(3).text()
+                                        });
+                                    });
+                                   update_gastos(datosTabla);
+                                   $('#facturar_modal').dialog('close');
+                                    if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                        $('#table_add_im').DataTable().ajax.reload(null, false);
+                                    }
+
+                                    if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                        $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                    }
+                                    if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                        $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                    }
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error fetching data:", error);
+                        }
+                    });
+                    }else{
+                    $.ajax({
+                        url: '/importacion_maritima/source_master_factura/',
+                        data: { master: house.awb_e},
+                        method: 'GET',
+                        success: function (master) {
+                        console.log(master);
+                            $.ajax({
+                        url: '/importacion_maritima/source_embarque_factura/',
+                        data: { numero: num},
+                        method: 'GET',
+                        success: function (embarque) {
+                                preventa=({
+                                    seguimiento:house.seguimiento,
+                                    referencia:num,
+                                    transportista_id:house.transportista_e,
+                                    vuelo:house.viaje_e,
+                                    master:house.awb_e,
+                                    house:house.hawb_e,
+                                    fecha:house.fecharetiro_e,
+                                    kilos:master.kilos,
+                                    bultos:master.bultos,
+                                    volumen:master.volumen,
+                                    origen:house.origen_e,
+                                    destino:house.destino_e,
+                                    consigna_id:house.consignatario_e,
+                                    embarca_id:house.embarcador_e,
+                                    agente_id:house.agente_e,
+                                    posicion:house.posicion_e,
+                                    terminos:null,
+                                    pagoflete:house.pagoflete_e,
+                                    commodity:getNameByIdProductos(embarque[0].producto_id),
+                                });
+                                    //guardar la preventa
+                                    guardar_preventa(preventa);
+                                    const tabla = $('#facturar_table').DataTable();
+                                    let datosTabla = [];
+                                    tabla.rows().every(function() {
+                                        const data = this.data();
+
+                                        datosTabla.push({
+                                            id_gasto: data[0],
+                                            notas: $(this.node()).find('td').eq(7).text(),
+                                            descripcion: $(this.node()).find('td').eq(3).text()
+                                        });
+                                    });
+                                   update_gastos(datosTabla);
+                                   $('#facturar_modal').dialog('close');
+                                    if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                        $('#table_add_im').DataTable().ajax.reload(null, false);
+                                    }
+
+                                    if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                        $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                    }
+                                    if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                        $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                    }
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error fetching data:", error);
+                        }
+                    });
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error fetching data:", error);
+                        }
+                    });
+                    }
+
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching data:", error);
+                }
+            });
+
+
+}
+$('#concepto_detalle').change(function() {
+    const filaSeleccionada = $('#facturar_table tbody tr.table-secondary');
+
+    if (filaSeleccionada.length > 0) {
+        const dataTable = $('#facturar_table').DataTable();
+
+        if ($(this).is(':checked')) {
+            // Obtener los valores de las columnas 0 y 6 de la fila seleccionada
+            const valorColumna0 = dataTable.cell(filaSeleccionada, 0).data();
+            const valorColumna6 = dataTable.cell(filaSeleccionada, 6).data();
+
+            // Concatenar los valores y actualizar la columna 7
+            const valorConcatenado = `${valorColumna0} ${valorColumna6}`;
+            dataTable.cell(filaSeleccionada, 7).data(valorConcatenado);
+            $(filaSeleccionada).find('td').eq(7).text(valorConcatenado);
+        } else {
+            // Establecer el valor 'S/I' cuando el checkbox se desmarca
+            dataTable.cell(filaSeleccionada, 7).data('S/I');
+            $(filaSeleccionada).find('td').eq(7).text('S/I');
+        }
+    }
+});
+function update_gastos(x){
+
+    $.ajax({
+        url: '/importacion_maritima/update_gasto_house/',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(x),
+        headers: {
+            "X-CSRFToken": csrf_token
+        },
+        success: function (respuesta) {
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', error);
+        }
     });
-
-
+}
+function guardar_preventa(preventa){
     $.ajax({
         type: "POST",
         url: "/importacion_maritima/preventa/",
-        data: JSON.stringify(datosTabla),
+        data: JSON.stringify(preventa),
         contentType: "application/json",
         headers: {
             'X-CSRFToken': csrf_token
         },
         success: function(response) {
+        console.log(response);
             if (response.resultado === 'exito') {
                 alert("Los datos se han enviado correctamente.");
             } else {
@@ -5083,6 +5271,46 @@ function enviarDatosTabla() {
         }
     });
 }
-
-
-
+function getNameByIdClientes(id) {
+var name = "";
+$.ajax({
+    url: '/importacion_maritima/get_name_by_id',
+    data: { id: id},
+    async: false,
+    success: function (response) {
+        name = response.name;
+    }
+});
+return name;
+}
+function getNameByIdProductos(id){
+var name = "";
+$.ajax({
+    url: '/importacion_maritima/get_name_by_id_productos',
+    data: { id: id},
+    async: false,
+    success: function (response) {
+        name = response.name;
+    }
+});
+return name;
+}
+function checkIfReferenceExists() {
+    let numero = localStorage.getItem('num_house_gasto');
+    $.ajax({
+        url: '/importacion_maritima/check_if_reference_exists/',
+        type: 'GET',
+        data: { numero: numero },
+        success: function(response) {
+            if (response.exists) {
+                alert('Ya ingresó una preventa para este registro.');
+            } else {
+                facturar();
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error en la solicitud:', error);
+            return false;
+        }
+    });
+}

@@ -206,6 +206,7 @@ class Asientos(models.Model):
         managed = False
         db_table = 'dataset_asientos'
 
+
     def get_id(self):
         asiento=Asientos.objects.last()
         return int(asiento.id+1)
