@@ -56,8 +56,11 @@
     <div class="border rounded p-4 bg-light" >
         <form method="post" action="" id="facturaForm">
             {% csrf_token %}
-            <h3 id="tipoSeleccionado" style="font-weight: bold; color: white; font-family: Arial, sans-serif; background-color: black; display: inline-block; padding: 3px; border-radius: 3px">
+            <div style="display:grid;align-content:baseline;justify-content:start;">
+                 <h3 id="tipoSeleccionado" style="font-weight: bold; color: white; font-family: Arial, sans-serif; background-color: black; display: inline-block; padding: 3px; border-radius: 3px">
             </h3>
+            <button type="button" id="preventa" class="btn btn-warning">Preventa</button>
+            </div>
             <br>
             <div class="col-md-2">
                 {{ form.tipo.label_tag }}
@@ -109,7 +112,6 @@
             </div>
             <table id="clienteTable" class="table table-striped mt-4" style="display:none;">
                 <thead>
-
                         <th style="display:none;">Id</th>
                         <th>Empresa</th>
                         <th>RUT</th>
@@ -168,12 +170,15 @@
                     <input type="text" class="form-control text-end" readonly>
                 </div>
                 <div class="mt-4">
-                    <button type="button" id="facturar" name="facturar" class="btn btn-primary">Finalizar</button>
+                    <button type="submit" id="facturar" name="facturar" class="btn btn-primary">Finalizar</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
+{% include 'preventa_modal.html' %}
+
 {% endblock table_datatable %}
 
 {% block script_datatable %}
