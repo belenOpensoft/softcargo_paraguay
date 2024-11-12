@@ -24,7 +24,7 @@ def login_view(request):
                     clave = form.cleaned_data['clave']
                     usuario = authenticate(username=usuario, password=clave)
                     if usuario is not None and usuario.is_active:
-                        login(request,usuario,None)
+                        login(request, usuario, None)
                         l_roles = list(usuario.groups.all().values_list('name', flat=True))
                         request.session['roles'] = l_roles
                         if len(l_roles) > 1:
@@ -38,15 +38,16 @@ def login_view(request):
                             messages.error(request, "El usuario no tiene roles asociados")
                     else:
                         contexto['form'] = form
-                        messages.error(request,'Nombre y/o clave incorrectos.')
+                        messages.error(request, 'Nombre y/o clave incorrectos.')
                 except Exception as e:
                     messages.error(request, str(e))
             else:
                 messages.error(request, 'Formulario invalido, intente nuevamente')
     return render(request, 'login.html', contexto)
 
+
 @login_required(login_url='/login/')
-def select_rol(request,rol=None):
+def select_rol(request, rol=None):
     if rol is not None:
         try:
             if rol in request.session['roles']:
@@ -54,20 +55,22 @@ def select_rol(request,rol=None):
                 request.session['empresa'] = settings.EMPRESA
                 return HttpResponseRedirect('/')
             else:
-                messages.error(request,'No tiene permisos para ingresar a este modulo')
+                messages.error(request, 'No tiene permisos para ingresar a este modulo')
         except Exception as e:
-            messages.error(request,str(e))
+            messages.error(request, str(e))
             return HttpResponseRedirect('/')
     if 'roles' not in request.session:
         return HttpResponseRedirect('/')
     roles = np.array_split(request.session['roles'], 4)
-    ctx = { 'roles': roles,}
-    return render(request,'roles.html',ctx)
+    ctx = {'roles': roles, }
+    return render(request, 'roles.html', ctx)
+
 
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect('/')
 
-def cambiar_modulo(request,modulo):
+
+def cambiar_modulo(request, modulo):
     request.session["rol"] = modulo
     return HttpResponseRedirect('/')
