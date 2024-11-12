@@ -3,21 +3,18 @@ import json
 import os
 import traceback
 import unicodedata
-
 from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.db import IntegrityError
 from cargosystem import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, Http404, FileResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-
 from cargosystem.settings import RUTA_PROYECTO
 from impomarit.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
     rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse, NotasForm
-from impomarit.models import Master, Reservas, Embarqueaereo, VEmbarqueaereo, Attachhijo, Cargaaerea, Envases, \
+from impomarit.models import Master, Embarqueaereo, VEmbarqueaereo, Attachhijo, Cargaaerea, Envases, \
     Serviceaereo, Conexaerea, Faxes
 from seguimientos.forms import archivosForm, pdfForm
 
@@ -25,7 +22,7 @@ from seguimientos.forms import archivosForm, pdfForm
 @login_required(login_url='/')
 def master_importacion_maritima(request):
     try:
-        if request.user.has_perms(["mantenimientos.view_seguimientos",]):
+        if request.user.has_perms(["mantenimientos.view_seguimientos", ]):
             opciones_busqueda = {
                 'cliente__icontains': 'CLIENTE',
                 'embarcador__icontains': 'EMBARCADOR',
@@ -38,11 +35,11 @@ def master_importacion_maritima(request):
                 'posicion__icontains': 'Posicion',
                 # 'contenedores__icontains': 'Contenedor',
             }
-            return render(request, 'impormarit/grilla_datos.html',{
+            return render(request, 'impormarit/grilla_datos.html', {
                 'form': add_form(),
                 'form_house': add_house(),
                 'form_search_master': add_im_form(),
-                'form_edit_master':edit_form(),
+                'form_edit_master': edit_form(),
                 'form_edit_house': edit_house(),
                 'opciones_busqueda': opciones_busqueda,
                 'form_gastos': gastosForm(),
@@ -60,9 +57,11 @@ def master_importacion_maritima(request):
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
+
+
 def house_importacion_maritima(request):
     try:
-        if request.user.has_perms(["mantenimientos.view_seguimientos",]):
+        if request.user.has_perms(["mantenimientos.view_seguimientos", ]):
             opciones_busqueda = {
                 'cliente__icontains': 'CLIENTE',
                 'embarcador__icontains': 'EMBARCADOR',
@@ -75,7 +74,7 @@ def house_importacion_maritima(request):
                 'posicion__icontains': 'Posicion',
                 # 'contenedores__icontains': 'Contenedor',
             }
-            return render(request, 'impormarit/grilla_datos_hd.html',{
+            return render(request, 'impormarit/grilla_datos_hd.html', {
                 'form_house': add_house(),
                 'form_edit_house': edit_house(),
                 'opciones_busqueda': opciones_busqueda,
@@ -94,6 +93,7 @@ def house_importacion_maritima(request):
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
+
 
 param_busqueda = {
     1: 'numero__icontains',
@@ -123,6 +123,8 @@ columns_table = {
     10: 'destino',
     11: 'status',
 }
+
+
 def source_embarque_aereo_full(request, master):
     if is_ajax(request):
         # Buscar todos los embarques en ExportEmbarqueaereo con el awb igual a master
@@ -151,6 +153,8 @@ def source_embarque_aereo_full(request, master):
 
     else:
         return HttpResponse("fail", content_type="application/json")
+
+
 def source_importacion_master(request):
     if is_ajax(request):
         """ BUSCO ORDEN """
@@ -196,6 +200,7 @@ def source_importacion_master(request):
         data_json = 'fail'
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
 
 def get_data(registros_filtrados):
     try:
@@ -255,6 +260,7 @@ def get_data(registros_filtrados):
     except Exception as e:
         raise TypeError(e)
 
+
 def get_order(request, columns):
     try:
         result = []
@@ -281,6 +287,7 @@ def get_order(request, columns):
     except Exception as e:
         raise TypeError(e)
 
+
 def get_argumentos_busqueda(**kwargs):
     try:
         result = {}
@@ -291,14 +298,14 @@ def get_argumentos_busqueda(**kwargs):
     except Exception as e:
         raise TypeError(e)
 
+
 def is_ajax(request):
     try:
         req = request.META.get('HTTP_X_REQUESTED_WITH')
         # return req == 'XMLHttpRequest'
         return True
     except Exception as e:
-        messages.error(request,e)
-
+        messages.error(request, e)
 
 
 #traer datos houses tabla
@@ -322,6 +329,7 @@ def source_embarque_aereo(request, master):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+
 def get_data_embarque_aereo(registros_filtrados):
     try:
         data = []
@@ -340,8 +348,10 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append('' if registro.awb is None else str(registro.awb))  # Estado
             registro_json.append('' if registro.hawb is None else str(registro.hawb))  # Estado
             registro_json.append('' if registro.vapor is None else str(registro.vapor))  # Estado
-            registro_json.append('' if registro.notificar_agente is None else str(registro.notificar_agente)[:10])  # Estado
-            registro_json.append('' if registro.notificar_cliente is None else str(registro.notificar_cliente)[:10])  # Estado
+            registro_json.append(
+                '' if registro.notificar_agente is None else str(registro.notificar_agente)[:10])  # Estado
+            registro_json.append(
+                '' if registro.notificar_cliente is None else str(registro.notificar_cliente)[:10])  # Estado
 
             archivos = Attachhijo.objects.filter(numero=registro.numero).count()
             embarques = Cargaaerea.objects.filter(numero=registro.numero).count()
@@ -360,6 +370,7 @@ def get_data_embarque_aereo(registros_filtrados):
         return data
     except Exception as e:
         raise TypeError(e)
+
 
 def source_embarque_consolidado(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -414,6 +425,7 @@ def source_embarque_consolidado(request):
     else:
         return JsonResponse({"error": "Invalid request"}, status=400)
 
+
 #mails archivo
 def guardar_archivo_im(request):
     resultado = {}
@@ -446,12 +458,13 @@ def guardar_archivo_im(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+
 def add_archivo_importado(request):
     resultado = {}
     try:
         # Recibir el número desde el POST o desde los datos JSON
         data = json.loads(request.body)
-        archivos_data = data.get('data', [])#
+        archivos_data = data.get('data', [])  #
 
         if isinstance(archivos_data, list):
             for envase_data in archivos_data:
@@ -485,15 +498,17 @@ def add_archivo_importado(request):
     # Devolver el resultado en formato JSON
     return JsonResponse(resultado)
 
+
 def formatear_texto(cadena: str):
     try:
         cadena = str(unicodedata.normalize('NFKD', str(cadena)).encode('ASCII', 'ignore').upper())
         # for letra in cadena:
         #     re.match('\W', letra)
         cadena = str(cadena)[2:-1]
-        return cadena.replace("  "," ")
+        return cadena.replace("  ", " ")
     except Exception as e:
         raise TypeError(e)
+
 
 def source_archivos(request):
     if is_ajax(request):
@@ -521,6 +536,7 @@ def source_archivos(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+
 def get_data_a(registros_filtrados):
     try:
         data = []
@@ -534,6 +550,7 @@ def get_data_a(registros_filtrados):
         return data
     except Exception as e:
         raise TypeError(e)
+
 
 def get_order_a(request, columns):
     try:
@@ -561,6 +578,7 @@ def get_order_a(request, columns):
     except Exception as e:
         raise TypeError(e)
 
+
 def eliminar_archivo(request):
     resultado = {}
     try:
@@ -579,7 +597,8 @@ def eliminar_archivo(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
-def descargar_archivo(request,id):
+
+def descargar_archivo(request, id):
     resultado = {}
     try:
         # id = request.POST['id']
@@ -592,6 +611,7 @@ def descargar_archivo(request,id):
     except Exception as e:
         resultado['resultado'] = str(e)
 
+
 def modificar_fecha_retiro(request):
     if request.method == "POST":
         try:
@@ -603,13 +623,16 @@ def modificar_fecha_retiro(request):
             registros = Embarqueaereo.objects.filter(awb=master)
 
             if not registros.exists():
-                return JsonResponse({'status': 'error', 'message': 'No se encontraron registros con el master especificado.'}, status=404)
+                return JsonResponse(
+                    {'status': 'error', 'message': 'No se encontraron registros con el master especificado.'},
+                    status=404)
 
             for registro in registros:
                 registro.fecharetiro = fecha
                 registro.save()
 
-            return JsonResponse({'status': 'success', 'message': f'Se actualizaron {registros.count()} registros correctamente.'})
+            return JsonResponse(
+                {'status': 'success', 'message': f'Se actualizaron {registros.count()} registros correctamente.'})
 
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

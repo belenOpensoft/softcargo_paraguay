@@ -1,20 +1,37 @@
 from datetime import datetime
-
-from django.db import IntegrityError
 from django.http import JsonResponse, HttpResponse, Http404
-from django.views.decorators.csrf import csrf_exempt
 import json
 from administracion_contabilidad.models import Infofactura
 from impomarit.models import Cargaaerea, Embarqueaereo, Reservas
 from mantenimientos.models import Productos
 from impomarit.models import Serviceaereo
 
+
+def generar_autogenerado(fecha):
+    fecha = fecha.replace('-', '').replace(':', '').replace('T', '')
+    qsy = 999
+    aux = Infofactura.objects.last()
+
+    try:
+        numero = str(int(str(aux.autogenerado).zfill(9)[-9:]) + 1).zfill(9)
+        # numero = int(aux.autogenerado[-9:]) + 1
+    except AttributeError:
+        numero = 1
+    except TypeError:
+        numero = 1
+
+    autogenerado = f"{fecha}{qsy}{numero}"
+    print(autogenerado)
+
+    return autogenerado
+
+
 def guardar_infofactura(request):
     if request.method == "POST":
         try:
-            # Decodifica el JSON enviado
             datos = json.loads(request.body.decode('utf-8'))
             fecha_str = datos.get("fecha")
+            autogenerado = generar_autogenerado(fecha_str)
 
             if fecha_str:
                 try:
@@ -30,7 +47,8 @@ def guardar_infofactura(request):
 
             # Crea una nueva instancia de Infofactura
             infofactura = Infofactura()
-            infofactura.id = infofactura.get_id()  # Corrección: quitar la coma extra
+            infofactura.id = infofactura.get_id()
+            infofactura.autogenerado = autogenerado
             infofactura.referencia = datos.get("referencia")
             infofactura.seguimiento = datos.get("seguimiento")
             infofactura.transportista = datos.get("transportista")
@@ -50,6 +68,7 @@ def guardar_infofactura(request):
             infofactura.posicion = datos.get("posicion")
             infofactura.terminos = datos.get("terminos")
             infofactura.pagoflete = datos.get("pagoflete")
+            infofactura.wr = datos.get("wr")
 
             # Guarda la instancia en la base de datos
             infofactura.save()
@@ -60,6 +79,7 @@ def guardar_infofactura(request):
     else:
         return JsonResponse({"resultado": "error", "mensaje": "Método no permitido"}, status=405)
 
+
 def source_embarques_factura(request):
     numero = request.GET.get('numero')
     registros = Cargaaerea.objects.filter(numero=numero).values('producto_id')
@@ -69,6 +89,7 @@ def source_embarques_factura(request):
 
     mimetype = "application/json"
     return HttpResponse(data_json, content_type=mimetype)
+
 
 def house_detail_factura(request):
     if request.method == 'GET':
@@ -92,7 +113,7 @@ def house_detail_factura(request):
                     'hawb_e': house.hawb,
                     'vapor_e': house.vapor,
                     'viaje_e': house.viaje,
-                    'pagoflete_e': house.pago,
+                    'pago': house.pagoflete,
                     'moneda_e': house.moneda,
                     'arbitraje_e': house.arbitraje,
                     'demora_e': house.demora,
@@ -107,7 +128,9 @@ def house_detail_factura(request):
                     'status_e': house.status,
                     'wreceipt_e': house.wreceipt,
                     'trackid_e': house.trackid,
-                    'seguimiento':house.seguimiento,
+                    'seguimiento': house.seguimiento,
+                    'terminos':house.terminos,
+                    'wr':house.wreceipt,
                 }
 
                 data['awb_e'] = house.awb if house.awb is not None else 0
@@ -120,10 +143,11 @@ def house_detail_factura(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
 def source_master_factura(request):
     if request.method == 'GET':
         master_id = request.GET.get('master', 0)
-        if master_id!=0:
+        if master_id != 0:
             try:
                 master = Reservas.objects.get(awb=master_id)
                 # Convierte el objeto en un diccionario
@@ -140,6 +164,7 @@ def source_master_factura(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
 def get_name_by_id_productos(request):
     if request.method == 'GET':
         id = request.GET.get('id')
@@ -151,6 +176,7 @@ def get_name_by_id_productos(request):
             return JsonResponse({'name': name})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
 
 def update_gasto_house(request):
     resultado = {'exitosos': [], 'errores': []}  # Resultado de éxitos y errores
@@ -190,6 +216,7 @@ def update_gasto_house(request):
 
     # Retornar el resultado en formato JSON
     return JsonResponse(resultado)
+
 
 def check_if_reference_exists(request):
     if request.method == 'GET':

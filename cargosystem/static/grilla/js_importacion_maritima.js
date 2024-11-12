@@ -5094,8 +5094,8 @@ let preventa;
                                     embarca:getNameByIdClientes(house.embarcador_e),
                                     agente:getNameByIdClientes(house.agente_e),
                                     posicion:house.posicion_e,
-                                    terminos:null,
-                                    pagoflete:house.pagoflete_e,
+                                    terminos:house.terminos,
+                                    pagoflete:house.pago,
                                     commodity:embarque[0].producto_id,
                                 });
 
@@ -5156,14 +5156,16 @@ let preventa;
                                     volumen:master.volumen,
                                     origen:house.origen_e,
                                     destino:house.destino_e,
-                                    consigna_id:house.consignatario_e,
-                                    embarca_id:house.embarcador_e,
-                                    agente_id:house.agente_e,
+                                    consigna:getNameByIdClientes(house.consignatario_e),
+                                    embarca:getNameByIdClientes(house.embarcador_e),
+                                    agente:getNameByIdClientes(house.agente_e),
                                     posicion:house.posicion_e,
-                                    terminos:null,
-                                    pagoflete:house.pagoflete_e,
+                                    terminos:house.terminos,
+                                    pagoflete:house.pago,
+                                    wr:house.wr,
                                     commodity:getNameByIdProductos(embarque[0].producto_id),
                                 });
+                                console.log(preventa);
                                     //guardar la preventa
                                     guardar_preventa(preventa);
                                     const tabla = $('#facturar_table').DataTable();

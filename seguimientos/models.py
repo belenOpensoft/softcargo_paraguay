@@ -1,25 +1,30 @@
 from django.contrib.auth.models import User
 from django.db import models
-
 from mantenimientos.models import Clientes, Monedas, Vendedores, Depositos, Vapores, Productos
 from auditlog.registry import auditlog
 from auditlog.models import AuditlogHistoryField
+
 
 class MyModel(models.Model):
     history = AuditlogHistoryField()
     # Model definition goes here
 
+
 auditlog.register(MyModel)
+
 
 class Attachhijo(models.Model):
     numero = models.IntegerField(blank=True, null=True)
-    archivo = models.FileField(upload_to='documents/',blank=True, null=True)
+    archivo = models.FileField(upload_to='documents/', blank=True, null=True)
     detalle = models.CharField(max_length=50, blank=True, null=True)
     web = models.CharField(max_length=1, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
-    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,null=True)  # Field name made lowercase.
-    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True,null=True)  # Field name made lowercase.
+    restringido = models.CharField(db_column='Restringido', max_length=1, blank=True,
+                                   null=True)  # Field name made lowercase.
+    idbinaryattach = models.IntegerField(db_column='IdBinaryAttach', blank=True,
+                                         null=True)  # Field name made lowercase.
     idusuario = models.IntegerField(blank=True, null=True)
+
 
 class Attachhijopo(models.Model):
     numero = models.IntegerField(blank=True, null=True)
@@ -27,6 +32,7 @@ class Attachhijopo(models.Model):
     detalle = models.CharField(max_length=50, blank=True, null=True)
     web = models.CharField(max_length=1, blank=True, null=True)
     fecha = models.DateTimeField(db_column='Fecha', blank=True, null=True)  # Field name made lowercase.
+
 
 class Bl(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
@@ -64,7 +70,7 @@ class Bl(models.Model):
     telnotif = models.CharField(db_column='TelNotif', max_length=50, blank=True,
                                 null=True)  # Field name made lowercase.
     tipoflete = models.CharField(db_column='TipoFlete', max_length=50, blank=True,
-                                 null=True,)  # Field name made lowercase.
+                                 null=True, )  # Field name made lowercase.
     position = models.CharField(db_column='Position', max_length=50, blank=True,
                                 null=True)  # Field name made lowercase.
     salede = models.CharField(db_column='Salede', max_length=35, blank=True, null=True)  # Field name made lowercase.
@@ -146,6 +152,7 @@ class Bl(models.Model):
     precarriage = models.CharField(db_column='PreCarriage', max_length=35, blank=True,
                                    null=True)  # Field name made lowercase.
 
+
 class Bl2(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     marks = models.CharField(db_column='Marks', max_length=30, blank=True, null=True)  # Field name made lowercase.
@@ -156,6 +163,7 @@ class Bl2(models.Model):
     gross = models.CharField(db_column='Gross', max_length=30, blank=True, null=True)  # Field name made lowercase.
     tare = models.CharField(db_column='Tare', max_length=30, blank=True, null=True)  # Field name made lowercase.
 
+
 class Bl3(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     servicio = models.CharField(db_column='Servicio', max_length=50, blank=True,
@@ -164,6 +172,7 @@ class Bl3(models.Model):
     collect = models.CharField(db_column='Collect', max_length=10, blank=True, null=True)  # Field name made lowercase.
     moneda = models.CharField(db_column='Moneda', max_length=3, blank=True, null=True)  # Field name made lowercase.
 
+
 class Bookenv(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     marks = models.CharField(max_length=30, blank=True, null=True)
@@ -171,6 +180,7 @@ class Bookenv(models.Model):
     description = models.CharField(max_length=45, blank=True, null=True)
     gross = models.CharField(max_length=30, blank=True, null=True)
     tare = models.CharField(max_length=30, blank=True, null=True)
+
 
 class Booking(models.Model):
     numero = models.IntegerField(blank=True, null=True)
@@ -216,6 +226,7 @@ class Booking(models.Model):
     contactoterminal = models.CharField(db_column='ContactoTerminal', max_length=30, blank=True,
                                         null=True)  # Field name made lowercase.
     bandera = models.CharField(max_length=30, blank=True, null=True)
+
 
 class Booking2(models.Model):
     numero = models.IntegerField(blank=True, null=True)
@@ -438,11 +449,12 @@ class Cargaaerea(models.Model):
     )
 
     numero = models.IntegerField(blank=True, null=True)
-    producto = models.ForeignKey(Productos,to_field='codigo',on_delete=models.PROTECT,db_column='producto',related_name='prod_carga')
+    producto = models.ForeignKey(Productos, to_field='codigo', on_delete=models.PROTECT, db_column='producto',
+                                 related_name='prod_carga')
     bultos = models.IntegerField(blank=True, null=True)
     bruto = models.FloatField(blank=True, null=True)
     medidas = models.CharField(max_length=30, blank=True, null=True)
-    tipo = models.CharField(max_length=25, blank=True, null=True,choices=choice_tipo)
+    tipo = models.CharField(max_length=25, blank=True, null=True, choices=choice_tipo)
     cbm = models.FloatField(blank=True, null=True)
     mercaderia = models.TextField(db_column='Mercaderia', blank=True,
                                   null=True)  # Field name made lowercase. This field type is a guess.
@@ -501,7 +513,7 @@ class VCargaaerea(models.Model):
     bultos = models.IntegerField(blank=True, null=True)
     bruto = models.FloatField(blank=True, null=True)
     medidas = models.CharField(max_length=30, blank=True, null=True)
-    tipo = models.CharField(max_length=25, blank=True, null=True,choices=choice_tipo)
+    tipo = models.CharField(max_length=25, blank=True, null=True, choices=choice_tipo)
     cbm = models.FloatField(blank=True, null=True)
     mercaderia = models.TextField(db_column='Mercaderia', blank=True,
                                   null=True)  # Field name made lowercase. This field type is a guess.
@@ -513,13 +525,13 @@ class VCargaaerea(models.Model):
     sobredimensionada = models.CharField(db_column='Sobredimensionada', max_length=1, blank=True,
                                          null=True)  # Field name made lowercase.
 
-
-    def __str__(self,):
+    def __str__(self, ):
         return str(self.numero)
 
     class Meta:
         managed = False
         db_table = 'seguimientos_cargaaerea'
+
 
 class Cargaaereaaduana(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
@@ -558,6 +570,7 @@ class Conexreserva(models.Model):
     viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  # Field name made lowercase.
     modo = models.CharField(db_column='Modo', max_length=15, blank=True, null=True)  # Field name made lowercase.
 
+
 class Cronologia(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     fecha = models.CharField(db_column='Fecha', max_length=50, blank=True, null=True)  # Field name made lowercase.
@@ -575,6 +588,7 @@ class Cronologia(models.Model):
                                    null=True)  # Field name made lowercase.
     trucknbr = models.CharField(db_column='TruckNbr', max_length=50, blank=True,
                                 null=True)  # Field name made lowercase.
+
 
 class Detalleocc(models.Model):
     numero = models.IntegerField(blank=True, null=True)
@@ -596,6 +610,7 @@ class Detalleocc(models.Model):
     volumen = models.FloatField(db_column='Volumen', blank=True, null=True)  # Field name made lowercase.
     bultos = models.IntegerField(db_column='Bultos', blank=True, null=True)  # Field name made lowercase.
     cantidadpre = models.FloatField(db_column='CantidadPRE', blank=True, null=True)  # Field name made lowercase.
+
 
 class Entregadoc(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
@@ -645,6 +660,7 @@ class Entregadoc(models.Model):
     facturacom = models.CharField(db_column='FacturaCom', max_length=40, blank=True,
                                   null=True)  # Field name made lowercase.
 
+
 class Entregaorden(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     orden = models.IntegerField(blank=True, null=True)
@@ -659,6 +675,7 @@ class Entregaorden(models.Model):
                                        null=True)  # Field name made lowercase.
     nrocontenedor = models.CharField(db_column='NroContenedor', max_length=15, blank=True,
                                      null=True)  # Field name made lowercase.
+
 
 class Entregasocc(models.Model):
     numero = models.IntegerField(blank=True, null=True)
@@ -679,93 +696,93 @@ class Entregasocc(models.Model):
 
 class Envases(models.Model):
     choice_unidad = (
-        ("20","20"),
-        ("40","40"),
-        ("45","45"),
-        ("CBM","CBM"),
-        ("CF","CF"),
-        ("TON","TON"),
-        ("M/T","M/T"),
-        ("MIN","MIN"),
-        ("FLAT","FLAT"),
-        ("UNIT","UNIT"),
-        ("LBS","LBS"),
+        ("20", "20"),
+        ("40", "40"),
+        ("45", "45"),
+        ("CBM", "CBM"),
+        ("CF", "CF"),
+        ("TON", "TON"),
+        ("M/T", "M/T"),
+        ("MIN", "MIN"),
+        ("FLAT", "FLAT"),
+        ("UNIT", "UNIT"),
+        ("LBS", "LBS"),
     )
     choice_tipo = (
-        ("Reefer","Reefer"),
-        ("Hi Cube Reefer","Hi Cube Reefer"),
-        ("Box","Box"),
-        ("N.O.R.","N.O.R."),
-        ("Hi Cube","Hi Cube"),
-        ("Dry","Dry"),
-        ("Standard","Standard"),
-        ("Part Container","Part Container"),
-        ("CBM","CBM"),
-        ("Open Top","Open Top"),
+        ("Reefer", "Reefer"),
+        ("Hi Cube Reefer", "Hi Cube Reefer"),
+        ("Box", "Box"),
+        ("N.O.R.", "N.O.R."),
+        ("Hi Cube", "Hi Cube"),
+        ("Dry", "Dry"),
+        ("Standard", "Standard"),
+        ("Part Container", "Part Container"),
+        ("CBM", "CBM"),
+        ("Open Top", "Open Top"),
     )
     choice_movimiento = (
-        ("FCL/FCL","FCL/FCL"),
-        ("FCL/LCL","FCL/LCL"),
-        ("LCL/FCL","LCL/FCL"),
-        ("LCL/LCL","LCL/LCL"),
-        ("CY/CY","CY/CY"),
-        ("CY/SD","CY/SD"),
-        ("SD/SD","SD/SD"),
-        ("SD/CY","SD/CY"),
-        ("SD/CY","SD/CY"),
-        ("Break Bulk","Break Bulk"),
-        ("Ro/Ro","Ro/Ro"),
+        ("FCL/FCL", "FCL/FCL"),
+        ("FCL/LCL", "FCL/LCL"),
+        ("LCL/FCL", "LCL/FCL"),
+        ("LCL/LCL", "LCL/LCL"),
+        ("CY/CY", "CY/CY"),
+        ("CY/SD", "CY/SD"),
+        ("SD/SD", "SD/SD"),
+        ("SD/CY", "SD/CY"),
+        ("SD/CY", "SD/CY"),
+        ("Break Bulk", "Break Bulk"),
+        ("Ro/Ro", "Ro/Ro"),
     )
     choice_terminos = (
-        ("FILO","FILO"),
-        ("FIOS","FIOS"),
-        ("FLT","FLT"),
-        ("LIFO","LIFO"),
-        ("LT","LT"),
+        ("FILO", "FILO"),
+        ("FIOS", "FIOS"),
+        ("FLT", "FLT"),
+        ("LIFO", "LIFO"),
+        ("LT", "LT"),
     )
     choice_envase = (
-        ("Bags","Bags"),
-        ("Bales","Bales"),
-        ("Big bags","Big bags"),
-        ("Bing","Bing"),
-        ("Boxes","Boxes"),
-        ("Bulk","Bulk"),
-        ("Bundles","Bundles"),
-        ("Cartons","Cartons"),
-        ("Cases","Cases"),
-        ("Container","Container"),
-        ("Crates","Crates"),
-        ("Cylinder","Cylinder"),
-        ("Declared","Declared"),
-        ("Drums","Drums"),
-        ("Envelope","Envelope"),
-        ("Fireboard","Fireboard"),
-        ("Flexitank","Flexitank"),
-        ("Gallons","Gallons"),
-        ("Jumbo","Jumbo"),
-        ("Lot","Lot"),
-        ("Packages","Packages"),
-        ("Pallets","Pallets"),
-        ("Pieces","Pieces"),
-        ("Pipe","Pipe"),
-        ("Platforms","Platforms"),
-        ("Plywood case","Plywood case"),
-        ("Reels","Reels"),
-        ("Rolls","Rolls"),
-        ("Sacks","Sacks"),
-        ("Set","Set"),
-        ("Skids","Skids"),
-        ("Steel Pallets","Steel Pallets"),
-        ("Tank","Tank"),
-        ("Units","Units"),
-        ("Wooden case","Wooden case"),
-        ("Wooden rack","Wooden rack"),
+        ("Bags", "Bags"),
+        ("Bales", "Bales"),
+        ("Big bags", "Big bags"),
+        ("Bing", "Bing"),
+        ("Boxes", "Boxes"),
+        ("Bulk", "Bulk"),
+        ("Bundles", "Bundles"),
+        ("Cartons", "Cartons"),
+        ("Cases", "Cases"),
+        ("Container", "Container"),
+        ("Crates", "Crates"),
+        ("Cylinder", "Cylinder"),
+        ("Declared", "Declared"),
+        ("Drums", "Drums"),
+        ("Envelope", "Envelope"),
+        ("Fireboard", "Fireboard"),
+        ("Flexitank", "Flexitank"),
+        ("Gallons", "Gallons"),
+        ("Jumbo", "Jumbo"),
+        ("Lot", "Lot"),
+        ("Packages", "Packages"),
+        ("Pallets", "Pallets"),
+        ("Pieces", "Pieces"),
+        ("Pipe", "Pipe"),
+        ("Platforms", "Platforms"),
+        ("Plywood case", "Plywood case"),
+        ("Reels", "Reels"),
+        ("Rolls", "Rolls"),
+        ("Sacks", "Sacks"),
+        ("Set", "Set"),
+        ("Skids", "Skids"),
+        ("Steel Pallets", "Steel Pallets"),
+        ("Tank", "Tank"),
+        ("Units", "Units"),
+        ("Wooden case", "Wooden case"),
+        ("Wooden rack", "Wooden rack"),
     )
     numero = models.IntegerField(blank=True, null=True)
-    unidad = models.CharField(max_length=25,choices=choice_unidad)
-    tipo = models.CharField(max_length=20,choices=choice_tipo)
-    movimiento = models.CharField(max_length=30,choices=choice_movimiento)
-    terminos = models.CharField(max_length=5,choices=choice_terminos)
+    unidad = models.CharField(max_length=25, choices=choice_unidad)
+    tipo = models.CharField(max_length=20, choices=choice_tipo)
+    movimiento = models.CharField(max_length=30, choices=choice_movimiento)
+    terminos = models.CharField(max_length=5, choices=choice_terminos)
 
     cantidad = models.FloatField()
     precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
@@ -774,7 +791,7 @@ class Envases(models.Model):
     precinto = models.CharField(max_length=100, blank=True, null=True)
     tara = models.FloatField(blank=True, null=True)
     bonifcli = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    envase = models.CharField(db_column='Envase', max_length=15,choices=choice_envase)  # Field name made lowercase.
+    envase = models.CharField(db_column='Envase', max_length=15, choices=choice_envase)  # Field name made lowercase.
     bultos = models.IntegerField()
     peso = models.FloatField(db_column='Peso', blank=True, null=True)  # Field name made lowercase.
 
@@ -821,6 +838,7 @@ class Envases(models.Model):
     pesovgm = models.FloatField(db_column='PesoVGM', blank=True, null=True)  # Field name made lowercase.
     humedad = models.SmallIntegerField(db_column='Humedad', blank=True, null=True)  # Field name made lowercase.
 
+
 class Faxes(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     fecha = models.DateTimeField(blank=True, null=True)
@@ -828,12 +846,14 @@ class Faxes(models.Model):
     asunto = models.TextField(blank=True, null=True)  # This field type is a guess.
     tipo = models.CharField(max_length=2, blank=True, null=True)
 
+
 class Faxesoc(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     fecha = models.DateTimeField(blank=True, null=True)
     notas = models.TextField(blank=True, null=True)  # This field type is a guess.
     asunto = models.TextField(blank=True, null=True)  # This field type is a guess.
     tipo = models.CharField(max_length=2, blank=True, null=True)
+
 
 class Fisico(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
@@ -848,6 +868,7 @@ class Fisico(models.Model):
                                 null=True)  # Field name made lowercase.
     peso = models.FloatField(db_column='Peso', blank=True, null=True)  # Field name made lowercase.
     deposito = models.SmallIntegerField(db_column='Deposito', blank=True, null=True)  # Field name made lowercase.
+
 
 class Gastoshijos(models.Model):
     cliente = models.IntegerField(db_column='Cliente', blank=True, null=True)  # Field name made lowercase.
@@ -865,6 +886,7 @@ class Gastoshijos(models.Model):
     transportista = models.IntegerField(db_column='Transportista', blank=True, null=True)  # Field name made lowercase.
     modulo = models.CharField(db_column='Modulo', max_length=2, blank=True, null=True)  # Field name made lowercase.
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
+
 
 class Guiasgrabadas(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
@@ -943,6 +965,7 @@ class Guiasgrabadas(models.Model):
     cliente5 = models.CharField(db_column='Cliente5', max_length=50, blank=True,
                                 null=True)  # Field name made lowercase.
 
+
 class Guiasgrabadas2(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     marcas = models.CharField(db_column='Marcas', max_length=80, blank=True, null=True)  # Field name made lowercase.
@@ -998,6 +1021,7 @@ class Guiasgrabadas2(models.Model):
     asagent = models.CharField(db_column='AsAgent', max_length=70, blank=True, null=True)  # Field name made lowercase.
     ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True,
                                     null=True)  # Field name made lowercase.
+
 
 class Guiasgrabadas3(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
@@ -1082,6 +1106,7 @@ class Guiasgrabadas3(models.Model):
     carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True,
                                     null=True)  # Field name made lowercase.
 
+
 class Mbl(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     empresa = models.CharField(db_column='Empresa', max_length=35, blank=True, null=True)  # Field name made lowercase.
@@ -1162,6 +1187,7 @@ class Mbl(models.Model):
     vadeclared = models.BooleanField(db_column='VaDeclared', blank=True, null=True)  # Field name made lowercase.
     portext = models.CharField(db_column='PorText', max_length=15, blank=True, null=True)  # Field name made lowercase.
 
+
 class Mbl2(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     marks = models.CharField(db_column='Marks', max_length=30, blank=True, null=True)  # Field name made lowercase.
@@ -1171,6 +1197,7 @@ class Mbl2(models.Model):
                                    null=True)  # Field name made lowercase.
     gross = models.CharField(db_column='Gross', max_length=30, blank=True, null=True)  # Field name made lowercase.
     tare = models.CharField(db_column='Tare', max_length=30, blank=True, null=True)  # Field name made lowercase.
+
 
 class Madresgrabadas(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
@@ -1276,6 +1303,7 @@ class Madresgrabadas(models.Model):
     ofthecarrier = models.CharField(db_column='OfTheCarrier', max_length=70, blank=True,
                                     null=True)  # Field name made lowercase.
 
+
 class Madresgrabadas3(models.Model):
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)  # Field name made lowercase.
     piezas = models.CharField(db_column='Piezas', max_length=4, blank=True, null=True)  # Field name made lowercase.
@@ -1358,6 +1386,7 @@ class Madresgrabadas3(models.Model):
     origen = models.CharField(db_column='Origen', max_length=3, blank=True, null=True)  # Field name made lowercase.
     carrierfinal = models.CharField(db_column='CarrierFinal', max_length=50, blank=True,
                                     null=True)  # Field name made lowercase.
+
 
 class Reservas(models.Model):
     numero = models.IntegerField()
@@ -1443,14 +1472,14 @@ class VGrillaSeguimientos(models.Model):
     vaporcli2 = models.CharField(max_length=1, blank=True, null=True)
     moneda = models.SmallIntegerField(blank=True, null=True)
     arbitraje = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    vendedor = models.CharField(max_length=500,blank=True, null=True)
+    vendedor = models.CharField(max_length=500, blank=True, null=True)
     vendedor_codigo = models.SmallIntegerField(blank=True, null=True)
     despachante = models.IntegerField(blank=True, null=True)
-    agecompras = models.CharField(max_length=500,blank=True, null=True)
+    agecompras = models.CharField(max_length=500, blank=True, null=True)
     agecompras_codigo = models.IntegerField(blank=True, null=True)
-    ageventas = models.CharField(max_length=500,blank=True, null=True)
+    ageventas = models.CharField(max_length=500, blank=True, null=True)
     ageventas_codigo = models.IntegerField(blank=True, null=True)
-    deposito = models.CharField(max_length=500,blank=True, null=True)
+    deposito = models.CharField(max_length=500, blank=True, null=True)
     deposito_codigo = models.IntegerField(blank=True, null=True)
     recepcion = models.DateTimeField(blank=True, null=True)
     iniciales = models.CharField(max_length=3, blank=True, null=True)
@@ -1565,26 +1594,27 @@ class VGrillaSeguimientos(models.Model):
                                               null=True)  # Field name made lowercase.
     muestroflete = models.DecimalField(db_column='MuestroFlete', max_digits=19, decimal_places=4, blank=True,
                                        null=True)  # Field name made lowercase.
-    choice_op = (("IMPORTACION","IMPORTACION"),
-                 ("EXPORTACION","EXPORTACION"),
-                 ("EXPORTACION FCL","EXPORTACION FCL"),
-                 ("IMPORTACION LCL","IMPORTACION LCL"),
-                 ("IMPORTACION FCL","IMPORTACION FCL"),
-                 ("EXPORTACION CONSOLIDADA","EXPORTACION CONSOLIDADA"),
-                 ("IMPORTACION PART CONT.","IMPORTACION PART CONT."),
-                 ("TRANSITO FCL","TRANSITO FCL"),
-                 ("IMPORTACION CONSOLIDADA","IMPORTACION CONSOLIDADA"),
-                 ("REEMBARCO","REEMBARCO"),
-                 ("COURIER","COURIER"),
-                 ("TRANSITO","TRANSITO"),
-                 ("EXPORTACION LCL","EXPORTACION LCL"),
-                 ("EXPORTACION PART CONT.","EXPORTACION PART CONT."),
-                 ("DUA","DUA"),
-                 ("TRASLADO","TRASLADO"),
-                 ("MUESTRA","MUESTRA"),
-                 ("",""),
+    choice_op = (("IMPORTACION", "IMPORTACION"),
+                 ("EXPORTACION", "EXPORTACION"),
+                 ("EXPORTACION FCL", "EXPORTACION FCL"),
+                 ("IMPORTACION LCL", "IMPORTACION LCL"),
+                 ("IMPORTACION FCL", "IMPORTACION FCL"),
+                 ("EXPORTACION CONSOLIDADA", "EXPORTACION CONSOLIDADA"),
+                 ("IMPORTACION PART CONT.", "IMPORTACION PART CONT."),
+                 ("TRANSITO FCL", "TRANSITO FCL"),
+                 ("IMPORTACION CONSOLIDADA", "IMPORTACION CONSOLIDADA"),
+                 ("REEMBARCO", "REEMBARCO"),
+                 ("COURIER", "COURIER"),
+                 ("TRANSITO", "TRANSITO"),
+                 ("EXPORTACION LCL", "EXPORTACION LCL"),
+                 ("EXPORTACION PART CONT.", "EXPORTACION PART CONT."),
+                 ("DUA", "DUA"),
+                 ("TRASLADO", "TRASLADO"),
+                 ("MUESTRA", "MUESTRA"),
+                 ("", ""),
                  )
-    operacion = models.CharField(db_column='Operacion', max_length=25, blank=True,null=True,choices=choice_op)  # Field name made lowercase.
+    operacion = models.CharField(db_column='Operacion', max_length=25, blank=True, null=True,
+                                 choices=choice_op)  # Field name made lowercase.
     enviointtrabk = models.CharField(db_column='EnvioInttraBK', max_length=10, blank=True,
                                      null=True)  # Field name made lowercase.
     enviointtrasi = models.CharField(db_column='EnvioInttraSI', max_length=10, blank=True,
@@ -1628,14 +1658,13 @@ class VGrillaSeguimientos(models.Model):
     emailia = models.CharField(db_column='emailIA', max_length=500, blank=True, null=True)  # Field name made lowercase.
     emailit = models.CharField(db_column='emailIT', max_length=500, blank=True, null=True)  # Field name made lowercase.
 
-
-
-    def __str__(self,):
+    def __str__(self, ):
         return self.modo + ' - ' + str(self.numero)
 
     class Meta:
         managed = False
         db_table = 'VGrillaSeguimientos'
+
 
 #
 # class Seguimiento(models.Model):
@@ -1986,7 +2015,9 @@ class Seguimiento(models.Model):
     destino = models.CharField(max_length=5, blank=True, null=True)
     terminos = models.CharField(max_length=3, blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)  # This field type is a guess.
-    status = models.CharField(max_length=20, choices=(("ARRIBADO","ARRIBADO"),("CONFIRMADO","CONFIRMADO"),("CANCELADO","CANCELADO"),("RESERVADO","RESERVADO"),("UNIFICADO","UNIFICADO"),("CERRADO","CERRADO"),),blank=True, null=True)
+    status = models.CharField(max_length=20, choices=(
+    ("ARRIBADO", "ARRIBADO"), ("CONFIRMADO", "CONFIRMADO"), ("CANCELADO", "CANCELADO"), ("RESERVADO", "RESERVADO"),
+    ("UNIFICADO", "UNIFICADO"), ("CERRADO", "CERRADO"),), blank=True, null=True)
     agente = models.IntegerField(blank=True, null=True)
     embarcador = models.IntegerField(blank=True, null=True)
     vaporcli = models.IntegerField(blank=True, null=True)
@@ -2001,7 +2032,8 @@ class Seguimiento(models.Model):
     volumen = models.FloatField(blank=True, null=True)
     tarifaventa = models.FloatField(blank=True, null=True)
     tarifacompra = models.FloatField(blank=True, null=True)
-    pago = models.CharField(max_length=10, blank=True, null=True,choices=(("Collect","Collect"),("Prepaid","Prepaid")))
+    pago = models.CharField(max_length=10, blank=True, null=True,
+                            choices=(("Collect", "Collect"), ("Prepaid", "Prepaid")))
     refcliente = models.CharField(max_length=1024, blank=True, null=True)
     transportista = models.IntegerField(blank=True, null=True)
     posicion = models.CharField(max_length=30, blank=True, null=True)
@@ -2104,7 +2136,8 @@ class Seguimiento(models.Model):
     tipobonifcli = models.CharField(db_column='TipoBonifCli', max_length=1, blank=True,
                                     null=True)  # Field name made lowercase.
     bonifcli = models.FloatField(db_column='BonifCli', blank=True, null=True)  # Field name made lowercase.
-    originales = models.CharField(db_column='Originales', max_length=1, blank=True,null=True,choices=(("S","S"),("N","N"),),default='N')  # Field name made lowercase.
+    originales = models.CharField(db_column='Originales', max_length=1, blank=True, null=True,
+                                  choices=(("S", "S"), ("N", "N"),), default='N')  # Field name made lowercase.
     editado = models.CharField(db_column='Editado', max_length=30, blank=True, null=True)  # Field name made lowercase.
     wreceipt = models.CharField(db_column='Wreceipt', max_length=100, blank=True,
                                 null=True)  # Field name made lowercase.
@@ -2141,7 +2174,7 @@ class Seguimiento(models.Model):
                  ("MUESTRA", "MUESTRA"),
 
                  )
-    operacion = models.CharField(db_column='Operacion',max_length=30, choices=choice_op,blank=True, null=True)
+    operacion = models.CharField(db_column='Operacion', max_length=30, choices=choice_op, blank=True, null=True)
     enviointtrabk = models.CharField(db_column='EnvioInttraBK', max_length=10, blank=True,
                                      null=True)  # Field name made lowercase.
     enviointtrasi = models.CharField(db_column='EnvioInttraSI', max_length=10, blank=True,
@@ -2179,8 +2212,9 @@ class Seguimiento(models.Model):
     deaddocumentoshora = models.CharField(db_column='DeadDocumentosHora', max_length=10, blank=True,
                                           null=True)  # Field name made lowercase.
 
-    def __str__(self,):
+    def __str__(self, ):
         return self.modo + ' - ' + str(self.numero)
+
 
 class Servireserva(models.Model):
     numero = models.SmallIntegerField(blank=True, null=True)
@@ -2211,16 +2245,16 @@ class Traceop(models.Model):
 
 class Conexaerea(models.Model):
     choice_accion = (
-        ("DELIVERY","DELIVERY"),
-        ("DISCHARGE","DISCHARGE"),
-        ("RECEIPT","RECEIPT"),
-        ("TRANSIT","TRANSIT"),
+        ("DELIVERY", "DELIVERY"),
+        ("DISCHARGE", "DISCHARGE"),
+        ("RECEIPT", "RECEIPT"),
+        ("TRANSIT", "TRANSIT"),
     )
     choice_modo = (
-        ("MARITIMO","MARITIMO"),
-        ("FLUVIAL","FLUVIAL"),
-        ("TERRESTRE","TERRESTRE"),
-        ("AEREO","AEREO"),
+        ("MARITIMO", "MARITIMO"),
+        ("FLUVIAL", "FLUVIAL"),
+        ("TERRESTRE", "TERRESTRE"),
+        ("AEREO", "AEREO"),
     )
     numero = models.IntegerField(blank=True, null=True)
     origen = models.CharField(max_length=5, blank=True, null=True)
@@ -2230,20 +2264,22 @@ class Conexaerea(models.Model):
     llegada = models.DateField(blank=True, null=True)
     cia = models.CharField(max_length=250, blank=True, null=True)
     viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    modo = models.CharField(max_length=15,choices=choice_modo)
-    accion = models.CharField(db_column='Accion', max_length=15,choices=choice_accion,blank=True,null=True)  # Field name made lowercase.
+    modo = models.CharField(max_length=15, choices=choice_modo)
+    accion = models.CharField(db_column='Accion', max_length=15, choices=choice_accion, blank=True,
+                              null=True)  # Field name made lowercase.
 
-    def _get_seguimiento(self,):
+    def _get_seguimiento(self, ):
         try:
-                return Seguimiento.objects.get(numero=self.numero)
+            return Seguimiento.objects.get(numero=self.numero)
         except:
             return None
 
     seguimiento = property(_get_seguimiento)
 
+
 class Serviceaereo(models.Model):
     numero = models.IntegerField(blank=True, null=True)
-    modo = models.CharField(max_length=1, blank=True, null=True,choices=(("P","Prepaid"),("C","Collect")))
+    modo = models.CharField(max_length=1, blank=True, null=True, choices=(("P", "Prepaid"), ("C", "Collect")))
     servicio = models.SmallIntegerField()
     moneda = models.SmallIntegerField()
     tipogasto = models.CharField(max_length=30, blank=True, null=True)
@@ -2251,18 +2287,17 @@ class Serviceaereo(models.Model):
     precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     costo = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     detalle = models.CharField(max_length=100, blank=True, null=True)
-    secomparte = models.CharField(max_length=1, blank=True, null=True,choices=(("S","SI"),("N","NO"),))
+    secomparte = models.CharField(max_length=1, blank=True, null=True, choices=(("S", "SI"), ("N", "NO"),))
     notomaprofit = models.BooleanField()
     pinformar = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
     socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
 
 
-
 class VGrillaServiceaereo(models.Model):
     numero = models.IntegerField(blank=True, null=True)
-    modo = models.CharField(max_length=1, blank=True, null=True,choices=(("P","Prepaid"),("C","Collect")))
-    servicio = models.CharField(max_length=500,blank=True, null=True)
+    modo = models.CharField(max_length=1, blank=True, null=True, choices=(("P", "Prepaid"), ("C", "Collect")))
+    servicio = models.CharField(max_length=500, blank=True, null=True)
     moneda = models.SmallIntegerField(blank=True, null=True)
     tipogasto = models.CharField(max_length=30, blank=True, null=True)
     arbitraje = models.FloatField(blank=True, null=True)
@@ -2278,7 +2313,7 @@ class VGrillaServiceaereo(models.Model):
     id_moneda = models.SmallIntegerField()
     id_socio = models.SmallIntegerField()
 
-    def __str__(self,):
+    def __str__(self, ):
         return self.modo + ' - ' + str(self.numero)
 
     class Meta:
@@ -2286,12 +2321,9 @@ class VGrillaServiceaereo(models.Model):
         db_table = 'VGrillaServiceaereo'
 
 
-
 from inspect import getmembers
 from auditlog.registry import auditlog
 from seguimientos import models
-
-
 
 tablas = getmembers(models)
 for t in tablas:
@@ -2299,4 +2331,3 @@ for t in tablas:
         auditlog.register(t[1], serialize_data=True)
     except Exception as e:
         pass
-

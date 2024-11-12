@@ -163,7 +163,7 @@ class Factura(forms.Form):
         required=False,
         label="Precio",
         initial=0.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control','id':'id_precio_fac'}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número decimal válido'

@@ -326,6 +326,7 @@ class Boleta(models.Model):
         managed = False
         db_table = 'dataset_boleta'
 
+
 class Boletaretenciones(models.Model):
     autogenerado = models.CharField(max_length=40, blank=True, null=True)
     nombre = models.CharField(max_length=40, blank=True, null=True)
@@ -1259,7 +1260,7 @@ class Infofactura(models.Model):
         db_table = 'dataset_infofactura'
 
     def get_id(self):
-        lista=Infofactura.objects.last()
+        lista = Infofactura.objects.last()
         return int(lista.id+1)
 
 
@@ -10406,3 +10407,30 @@ class PendienteFacturar(models.Model):
 
         if es_nuevo:
             facturar_pendiente(self.autogenerado)
+
+
+
+class VistaGastosPreventa(models.Model):
+    numero = models.CharField(max_length=255, blank=True, null=True)
+    servicio = models.CharField(max_length=255, blank=True, null=True)
+    moneda = models.CharField(max_length=255, blank=True, null=True)
+    modo = models.CharField(max_length=10, blank=True, null=True)
+    precio = models.FloatField(blank=True, null=True)
+    costo = models.FloatField(blank=True, null=True)
+    detalle = models.CharField(max_length=255, blank=True, null=True)
+    tipogasto = models.CharField(max_length=255, blank=True, null=True)
+    arbitraje = models.FloatField(blank=True, null=True)
+    notomaprofit = models.CharField(max_length=2, blank=True, null=True)
+    secomparte = models.CharField(max_length=2, blank=True, null=True)
+    Notas = models.CharField(max_length=255, blank=True, null=True)
+    pinformar = models.CharField(max_length=255, blank=True, null=True)
+    socio = models.CharField(max_length=255, blank=True, null=True)
+    id_servicio = models.CharField(max_length=255, blank=True, null=True)
+    id_moneda = models.CharField(max_length=255, blank=True, null=True)
+    id_socio = models.IntegerField(blank=True, null=True)
+    source = models.CharField(max_length=2, blank=True, null=True)
+    iva = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'vista_gastos_preventa'
