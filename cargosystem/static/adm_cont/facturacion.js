@@ -146,48 +146,6 @@ var que_buscar = '';
         }
     });
 
-    function limpiarCampos() {
-        $('#item').val('');
-        $('#id_descripcion_item input').val('');
-        $('#id_precio input').val('');
-    }
-
-    function actualizarTotal() {
-    let precio = 0;
-    let neto_fun = 0;
-    total = 0;  // Asegúrate de inicializar total aquí
-    iva = 0;
-
-    // Recorre cada fila y calcula el neto
-    $('#itemTable tbody tr').each(function() {
-        precio = parseFloat($(this).data('precio')) || 0;
-        neto_fun += precio;
-    });
-
-    neto = neto_fun;
-
-    // Actualiza el valor del neto en el campo correspondiente
-    $('#id_neto input').val(neto.toFixed(2)).prop('readonly', true);
-
-    // Recorre cada fila y calcula el total con IVA
-    $('#itemTable tbody tr').each(function() {
-        precio = parseFloat($(this).data('precio')) || 0;
-        iva = $(this).data('iva');
-
-        const precioFinal = iva === 'Basico' ? precio * 1.22 : precio;
-        total += precioFinal;
-    });
-
-    // Actualiza el valor del total en el campo correspondiente
-    $('#id_total input').val(total.toFixed(2)).prop('readonly', true);
-
-    // Calcula y actualiza el IVA
-    iva = total - neto;
-    $('#id_iva input').val(iva.toFixed(2)).prop('readonly', true);
-}
-
-
-
     $('#facturaForm').submit(function(event) {
         event.preventDefault();
         if (confirm('¿Está seguro de que desea facturar?')) {
@@ -222,11 +180,11 @@ var que_buscar = '';
                 items.push(itemData);
             });
 
-            $.ajax({
-                url: "/procesar_factura/",
-                dataType: 'json',
-                type: 'POST',
-                data: {
+            let preventa = JSON.parse(localStorage.getItem('preventa')) || [];
+            let data=[];
+            if (preventa!=null){
+                //es preventa
+                data={
                     csrfmiddlewaretoken: csrf_token,
                     fecha: fecha,
                     tipoFac: tipoFac,
@@ -242,8 +200,37 @@ var que_buscar = '';
                     items: JSON.stringify(items),
                     total:total,
                     iva:iva,
-                    neto:neto
-                },
+                    neto:neto,
+                    preventa:JSON.stringify(preventa),
+                }
+            }else{
+                data={
+                    csrfmiddlewaretoken: csrf_token,
+                    fecha: fecha,
+                    tipoFac: tipoFac,
+                    serie: serie,
+                    prefijo: prefijo,
+                    numero: numero,
+                    cliente: cliente,
+                    arbitraje: arbitraje,
+                    paridad: paridad,
+                    imputar: imputar,
+                    moneda: moneda,
+                    clienteData: JSON.stringify(clienteData),
+                    items: JSON.stringify(items),
+                    total:total,
+                    iva:iva,
+                    neto:neto,
+                    preventa:0,
+                }
+            }
+
+            $.ajax({
+                url: "/procesar_factura/",
+                dataType: 'json',
+                type: 'POST',
+                data: data,
+                headers: { 'X-CSRFToken': csrf_token },
                 success: function(data) {
                     console.log('Factura procesada:', data);
                     alert('Factura procesada con éxito');
@@ -337,6 +324,12 @@ var dHeight = wHeight * 0.30;
 
 function abrir_modalfactura(){
 $('#facturaForm').trigger('reset');
+$('#itemTable tbody').empty();
+$('#itemTable').hide();
+$('#clienteTable tbody').empty();
+$('#clienteTable').hide();
+$('#totales').hide();
+
 $("#facturaM").dialog({
         autoOpen: true,
         modal: true,
@@ -349,6 +342,9 @@ $("#facturaM").dialog({
             style: "width:100px",
             click: function () {
                 $(this).dialog("close");
+                localStorage.removeItem('preventa');
+                localStorage.removeItem('gastos');
+
             },
         }],
     }).prev('.ui-dialog-titlebar').remove();
@@ -358,7 +354,7 @@ $('#preventa').on('click', function() {
     $("#preventa_modal").dialog({
         autoOpen: true,
         modal: true,
-        width: wWidth*0.60,
+        width: wWidth*0.90,
         height: wHeight*0.90,
         buttons: {
             "Cerrar": function() {
@@ -521,42 +517,112 @@ function facturar_preventa() {
     $("#preventa_modal").dialog('close');
     let gastos = JSON.parse(localStorage.getItem('gastos_preventa')) || [];
     let preventa = JSON.parse(localStorage.getItem('preventa')) || [];
-    console.log(gastos);
 
+    // Cargar cliente
     $("#cliente").val(preventa.cliente_i);
     $("#cliente").autocomplete("search", preventa.cliente_i);
 
-    setTimeout(function () {
-        const li = $('#cliente').autocomplete('widget').find("li:contains('" + preventa.cliente_i + "')");
-
-        if (li.length > 0) {
-            li.trigger('click');  // Disparar el click si se encuentra el cliente
-        } else {
-            console.error('No se encontró el cliente en los resultados');
-        }
-    }, 300);  // Ajustar el tiempo de espera según sea necesario
-
-    // Iterar sobre los gastos para agregar cada uno
-    gastos.forEach(gasto => {
-        const desc = gasto.descripcion.split(' - ')[1];
-        $('#id_precio_fac').val(gasto.total);
-        $('#item').val(desc);
-        $('#item').autocomplete("search", desc);
-        console.log(desc);
-        setTimeout(function () {
-            const ce = $('#item').autocomplete('widget').find("li:contains('" + desc + "')");
-
-            if (ce.length > 0) {
-                ce.trigger('click');  // Seleccionar el item
-
-            setTimeout(function () {
-                $("#agregarItem").trigger('click');
-             }, 300);
-
+    $.Deferred(function(deferred) {
+        setTimeout(function() {
+            const li = $('#cliente').autocomplete('widget').find("li:contains('" + preventa.cliente_i + "')");
+            if (li.length > 0) {
+                li.trigger('click');
+                deferred.resolve();
             } else {
-                console.error('No se encontró el item en los resultados');
+                console.error('No se encontró el cliente en los resultados');
+                deferred.reject();
             }
-        }, 300);  // Asegurarse de que se carguen los resultados antes de seleccionar el item
+        }, 300);
+    }).done(function() {
+        // Cargar cada item después de seleccionar el cliente
+        gastos.forEach(gasto => {
+            const desc = gasto.descripcion.split(' - ')[1];
+            const codigo= gasto.descripcion.split('-')[0];
+            agregarItem(desc,codigo,gasto.total)
+
+        });
+    }).fail(function() {
+        console.error('Falló la carga del cliente');
     });
 }
+
+function agregarItem(desc,codigo,precio) {
+    const item = desc;
+    const descripcion = desc;
+
+    if (item && descripcion && !isNaN(precio)) {
+        $.ajax({
+            url: "/buscar_items_v",
+            data: { id: codigo },
+            dataType: 'json',
+            success: servicio => {
+                const iva = servicio.iva;
+                const cuenta = servicio.cuenta;
+                const codigo = servicio.item;
+
+                const row = `
+                    <tr data-precio="${precio}" data-iva="${iva}" data-cuenta="${cuenta}">
+                        <td>${codigo}</td>
+                        <td>${descripcion}</td>
+                        <td>${precio.toFixed(2)}</td>
+                        <td>${iva}</td>
+                        <td>${cuenta}</td>
+                    </tr>`;
+
+                $('#itemTable tbody').append(row);
+                $('#itemTable').show();
+                $('#eliminarSeleccionados').show();
+                //limpiarCampos();
+                actualizarTotal();
+                $('#totales').show();
+            },
+            error: xhr => console.error('Error al obtener los detalles del item:', xhr)
+        });
+
+    } else {
+        alert('Por favor, completa todos los campos antes de agregar el item.');
+    }
+}
+
+function limpiarCampos() {
+    $('#item').val('');
+    $('#id_descripcion_item input').val('');
+    $('#id_precio input').val('');
+}
+
+function actualizarTotal() {
+let precio = 0;
+let neto_fun = 0;
+total = 0;  // Asegúrate de inicializar total aquí
+iva = 0;
+
+// Recorre cada fila y calcula el neto
+$('#itemTable tbody tr').each(function() {
+    precio = parseFloat($(this).data('precio')) || 0;
+    neto_fun += precio;
+});
+
+neto = neto_fun;
+
+// Actualiza el valor del neto en el campo correspondiente
+$('#id_neto input').val(neto.toFixed(2)).prop('readonly', true);
+
+// Recorre cada fila y calcula el total con IVA
+$('#itemTable tbody tr').each(function() {
+    precio = parseFloat($(this).data('precio')) || 0;
+    iva = $(this).data('iva');
+
+    const precioFinal = iva === 'Basico' ? precio * 1.22 : precio;
+    total += precioFinal;
+});
+
+// Actualiza el valor del total en el campo correspondiente
+$('#id_total input').val(total.toFixed(2)).prop('readonly', true);
+
+// Calcula y actualiza el IVA
+iva = total - neto;
+$('#id_iva input').val(iva.toFixed(2)).prop('readonly', true);
+}
+
+
 
