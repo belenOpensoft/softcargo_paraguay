@@ -233,3 +233,24 @@ def check_if_reference_exists(request):
                 return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def eliminar_preventa(request):
+    if request.method == "POST":
+        try:
+            datos = json.loads(request.body.decode('utf-8'))
+            preventa_id = datos.get("id")
+
+            if not preventa_id:
+                return JsonResponse({"resultado": "error", "mensaje": "ID no proporcionado"}, status=400)
+
+            try:
+                infofactura = Infofactura.objects.get(id=preventa_id)
+                infofactura.delete()
+                return JsonResponse({"resultado": "éxito", "mensaje": "Preventa eliminada correctamente"})
+            except Infofactura.DoesNotExist:
+                return JsonResponse({"resultado": "error", "mensaje": "La preventa no existe"}, status=404)
+
+        except Exception as e:
+            return JsonResponse({"resultado": "error", "mensaje": str(e)}, status=500)
+    else:
+        return JsonResponse({"resultado": "error", "mensaje": "Método no permitido"}, status=405)

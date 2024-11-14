@@ -392,6 +392,7 @@ $('#preventa').on('click', function() {
 
 $('#preventa_table tbody').on('dblclick', 'tr', function() {
     $('#pararesetear').trigger('reset');
+    $('#pararesetear2').trigger('reset');
     let referencia = $(this).find('td').eq(8).text();
     let clase = $(this).find('td').eq(7).text();
     let preventa = $(this).find('td').eq(0).text();
@@ -512,6 +513,17 @@ $('#preventa_table tbody').on('dblclick', 'tr', function() {
         }
     });
 });
+$('#preventa_table tbody').on('click', 'tr', function() {
+    let preventa = $(this).find('td').eq(0).text();
+    if ($(this).hasClass('table-secondary')) {
+        $(this).removeClass('table-secondary');
+        localStorage.removeItem('preventa_id',preventa);
+    } else {
+        $('#preventa_table tbody tr.table-secondary').removeClass('table-secondary');
+        $(this).addClass('table-secondary');
+        localStorage.setItem('preventa_id',preventa);
+    }
+});
 
 function facturar_preventa() {
     $("#preventa_modal").dialog('close');
@@ -624,5 +636,42 @@ iva = total - neto;
 $('#id_iva input').val(iva.toFixed(2)).prop('readonly', true);
 }
 
+function cancelar_preventa(){
+//agregar a formularios los demas bloques para poder resetearlos
+$('#pararesetear').trigger('reset');
+$('#pararesetear2').trigger('reset');
+if ($.fn.DataTable.isDataTable("#tabla_gastos_preventa_factura")) {
+    $('#tabla_gastos_preventa_factura').DataTable().clear().destroy();
+}
+}
 
+function borrar_preventa(){
+id=localStorage.getItem('preventa_id');
 
+    $.ajax({
+        url: '/eliminar_preventa/',
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrf_token },
+        data: JSON.stringify({ id: id }),
+        contentType: 'application/json',
+        success: function(response) {
+            if (response.resultado === "éxito") {
+                alert("Preventa eliminada correctamente");
+                $('#preventa_table').DataTable().ajax.reload(null, false);
+            } else {
+                alert(response.mensaje);
+            }
+        },
+        error: function(xhr) {
+            alert("Error al eliminar la preventa: " + xhr.responseText);
+        }
+    });
+}
+
+function imprimir_preventa(){
+
+}
+
+function arbitraje_formulario(){
+
+}
