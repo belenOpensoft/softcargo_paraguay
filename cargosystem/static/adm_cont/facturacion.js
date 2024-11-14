@@ -668,10 +668,149 @@ id=localStorage.getItem('preventa_id');
     });
 }
 
-function imprimir_preventa(){
+function arbitraje_formulario(){
 
 }
 
-function arbitraje_formulario(){
+//imprimir caratula house
+function imprimir_preventa(){
+id=localStorage.getItem('preventa_id');
+        $("#pdf_add_input").html('');
+        $('#pdf_add_input').summernote('destroy');
+        get_datos_pdf();
+        if (id!=null) {
+            $("#pdf_modal").dialog({
+                autoOpen: true,
+                open: function (event, ui) {
+                    $('#pdf_add_input').summernote('destroy');
 
+                    $('#pdf_add_input').summernote({
+                        placeholder: '',
+                        title: 'PDF con el detalle del seguimiento',
+                        tabsize: 10,
+                        fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Merriweather'],
+                        height: wHeight * 0.65,
+                        width: wWidth * 0.55,
+                        toolbar: [
+                            ['style', ['style']],
+                            ['font', ['bold', 'underline', 'clear']],
+                            ['color', ['color']],
+                            ['para', ['ul', 'ol', 'paragraph']],
+                            ['table', ['table']],
+                            ['insert', ['link', 'picture', 'video']],
+                            ['view', ['fullscreen', 'codeview']]
+                        ]
+                    });
+                },
+                modal: true,
+                title: "Preventa N°: " + id,
+                height: wHeight * 0.70,
+                width: wWidth * 0.60,
+                class: 'modal fade',
+                buttons: [
+                    {
+                        // text:"Imprimir",
+                        html: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">\n' +
+                            '  <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>\n' +
+                            '  <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>\n' +
+                            '</svg> Imprimir',
+                        class: "btn btn-warning ",
+                        style: "width:100px",
+                        icons: {primary: "bi bi-star"},
+                        click: function () {
+                            imprimirPDF();
+                        },
+                    }, {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        },
+                    },
+                ],
+                beforeClose: function (event, ui) {
+                    // table.ajax.reload();
+                }
+            })
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+}
+function imprimirPDF() {
+    var contenido = $('#pdf_add_input').summernote('code');
+    var ventanaImpresion = window.open('', '_blank');
+
+    ventanaImpresion.document.write('<html><head><title>Impresión</title>');
+    ventanaImpresion.document.write('<style>');
+    ventanaImpresion.document.write(`
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            font-size:12px;
+        }
+        @media print {
+            @page {
+                size: portrait; /* Establece la orientación en vertical (portrait) */
+                margin: 20mm;   /* Márgenes alrededor del contenido */
+            }
+            body {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                display: block;
+                width: 100%;
+                text-align: left;
+            }
+        }
+        .container {
+            margin: 20px; /* Margen interior para el contenido */
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        p {
+            text-align: left;
+        }
+        hr {
+            border: 1px solid #000;
+        }
+    `);
+    ventanaImpresion.document.write('</style></head><body>');
+    ventanaImpresion.document.write('<div class="container">');
+    ventanaImpresion.document.write(contenido);
+    ventanaImpresion.document.write('</div></body></html>');
+    ventanaImpresion.document.close();
+
+    ventanaImpresion.onload = function () {
+        ventanaImpresion.focus(); // Asegurarse de que la ventana esté en foco
+        ventanaImpresion.print(); // Iniciar la impresión
+        ventanaImpresion.close(); // Cerrar la ventana después de la impresión
+    };
+}
+function get_datos_pdf() {
+id=localStorage.getItem('preventa_id');
+    miurl = "/get_datos_pdf_preventa/";
+    var toData = {
+        'modo':'MARITIMO',
+        'id': id,
+        'csrfmiddlewaretoken': csrf_token,
+    };
+    $.ajax({
+        type: "POST",
+        url: miurl,
+        data: toData,
+        async: false,
+        success: function (resultado) {
+            if (resultado['resultado'] === 'exito') {
+                $("#pdf_add_input").html(resultado['texto']);
+            } else {
+                alert(resultado['resultado']);
+            }
+        }
+    });
 }

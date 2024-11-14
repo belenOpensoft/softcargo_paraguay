@@ -16,6 +16,7 @@ from django.db import transaction
 import random
 from impomarit.models import VGastosHouse, Envases, Cargaaerea, Embarqueaereo
 from decimal import Decimal
+from administracion_contabilidad.forms import pdfForm
 
 param_busqueda = {
     1: 'autogenerado__icontains',
@@ -152,7 +153,7 @@ def get_order(request, columns):
 
 def facturacion_view(request):
     form = Factura(request.POST or None)
-    return render(request, 'facturacion.html', {'form': form})
+    return render(request, 'facturacion.html', {'form': form,'form_pdf': pdfForm(),})
 
 
 def buscar_cliente(request):

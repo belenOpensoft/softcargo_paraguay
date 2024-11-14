@@ -1,8 +1,11 @@
+from bootstrap_modal_forms.forms import BSModalModelForm
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
 from django import forms
 import datetime
 from django.forms import RadioSelect
 from mantenimientos.models import Monedas
-from administracion_contabilidad.models import Dolar
+from administracion_contabilidad.models import Dolar, Infofactura
 
 
 def get_arbitraje():
@@ -765,3 +768,16 @@ class OrdenPago(forms.Form):
         # Asignar valores iniciales a los campos de arbitraje y paridad
         self.fields['arbitraje'].initial = self.arbitraje_valor
         self.fields['paridad'].initial = self.paridad_valor
+
+class pdfForm(BSModalModelForm):
+    class Meta:
+        model = Infofactura
+        fields = ['observaciones',]  # Agrega los campos que deseas actualizar
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Actualizar'))
+
+    observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'pdf_add_input', "autocomplete": "off", 'required': False, 'max_length': 500, "rows": "25"," cols": "100", "class": "form-control"}, ), required=False, label="Notas", max_length=500)
