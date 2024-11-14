@@ -515,13 +515,17 @@ $('#preventa_table tbody').on('dblclick', 'tr', function() {
 });
 $('#preventa_table tbody').on('click', 'tr', function() {
     let preventa = $(this).find('td').eq(0).text();
+    let clase = $(this).find('td').eq(7).text();
+
     if ($(this).hasClass('table-secondary')) {
         $(this).removeClass('table-secondary');
         localStorage.removeItem('preventa_id',preventa);
+        localStorage.removeItem('preventa_clase',clase);
     } else {
         $('#preventa_table tbody tr.table-secondary').removeClass('table-secondary');
         $(this).addClass('table-secondary');
         localStorage.setItem('preventa_id',preventa);
+        localStorage.setItem('preventa_clase',clase);
     }
 });
 
@@ -794,9 +798,22 @@ function imprimirPDF() {
 }
 function get_datos_pdf() {
 id=localStorage.getItem('preventa_id');
+clase=localStorage.getItem('preventa_clase');
+let modo='';
+if(clase=='IM' || clase=='EM' ){
+modo='MARITIMO';
+}else if(clase=='IA' || clase=='EA'){
+modo='AEREO';
+}else if(clase=='IT'||clase=='ET'){
+modo='TERRESTRE';
+}else{
+modo='SINMODO';
+}
+
     miurl = "/get_datos_pdf_preventa/";
     var toData = {
-        'modo':'MARITIMO',
+    'clase':clase,
+        'modo':modo,
         'id': id,
         'csrfmiddlewaretoken': csrf_token,
     };

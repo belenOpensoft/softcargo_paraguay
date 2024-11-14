@@ -617,7 +617,6 @@ def source_infofactura(request):
 
 
 
-
 def cargar_preventa_infofactura(request):
     if request.method == 'POST':
         clase = request.POST.get('clase')
