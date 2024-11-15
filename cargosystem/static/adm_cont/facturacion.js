@@ -7,6 +7,23 @@ let iva=0;
 var buscar = '';
 var que_buscar = '';
 
+//    $.ajax({
+//            url: '/source_infofactura_cliente/', // Ruta a tu vista
+//            type: 'GET',
+//            data: {
+//                cliente: 'TO THE ORDER OF TECNNOMYL'
+//            },
+//            success: function (response) {
+//                console.log('Respuesta del servidor:', response);
+//                alert('Petición exitosa. Revisa la consola para más detalles.');
+//            },
+//            error: function (xhr, status, error) {
+//                console.error('Error en la petición:', error);
+//                alert('Error al comunicarse con el servidor. Revisa la consola.');
+//            }
+//        });
+
+
     const valorInicial = $('#id_tipo').find('option:selected').text();
     $('#tipoSeleccionado').text(valorInicial);
 
@@ -831,3 +848,183 @@ modo='SINMODO';
         }
     });
 }
+
+//multiples preventas
+
+//$('#infofacturaTable').DataTable().ajax.reload();
+function multiples_preventas(){
+$("#prev_multiple_modal").dialog({
+        autoOpen: true,
+        modal: true,
+        width: wWidth*0.60,
+        height: wHeight*0.80,
+        position: { my: "top", at: "top+20", of: window },
+        buttons: [{
+            text: "Salir",
+            class: "btn btn-dark",
+            style: "width:100px",
+            click: function () {
+                $(this).dialog("close");
+
+            },
+        }],
+    }).prev('.ui-dialog-titlebar').remove();
+}
+$('#socio_com_filtro').autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "/buscar_cliente",
+                dataType: 'json',
+                data: { term: request.term },
+                success: function(data) {
+                    response(data.map(cliente => ({
+                        label: cliente.text,
+                        value: cliente.text,
+                        id: cliente.text
+                    })));
+                },
+                error: xhr => console.error('Error al buscar clientes:', xhr)
+            });
+        },
+        minLength: 2,
+        select: function(event, ui) {
+            tabla_pendientes();
+
+        }
+    });
+function tabla_pendientes(nombre) {
+    try {
+        if ($.fn.DataTable.isDataTable('#pendientes_tabla')) {
+            $('#pendientes_tabla').DataTable().destroy();
+        }
+
+        $('#pendientes_tabla').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '/source_infofactura_cliente/',
+                type: 'GET',
+                data: function (d) {
+                d.cliente = $('#socio_com_filtro').val();
+
+                },
+            },
+            columnDefs: [
+                { targets: 0, data: 'numero' },
+                { targets: 1, data: 'sale_llega' },
+                { targets: 2, data: 'referencia' },
+                { targets: 3, data: 'consignatario' },
+                { targets: 4, data: 'master' },
+                { targets: 5, data: 'house' },
+                {
+                    targets: 6,
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        return `<input type="checkbox" class="select-checkbox" value="${row.numero}">`;
+                    }
+                },
+                { targets: 7, data: 'vapor_vuelo' },
+                { targets: 8, data: 'clase' },
+                { targets: 9, data: 'fecha' },
+            ],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json',
+            },
+        });
+
+        console.log('DataTable inicializado correctamente');
+    } catch (error) {
+        console.error('Error al inicializar el DataTable:', error);
+    }
+}
+function tabla_pendientes() {
+    $('#pendientes_tabla').DataTable({
+        "stateSave": true,
+        "dom": 'Btlipr',
+        "scrollX": true,
+        "bAutoWidth": false,
+        "scrollY": $(window).height() * 0.60, // Altura dinámica según el tamaño de la ventana
+        "columnDefs": [
+            {
+                "targets": [0],
+                "className": 'text-left',
+                "data": 'numero',
+                "title": 'Número'
+            },
+            {
+                "targets": [1],
+                "className": 'text-left',
+                "data": 'sale_llega',
+                "title": 'Sale/Llega'
+            },
+            {
+                "targets": [2],
+                "className": 'text-left',
+                "data": 'referencia',
+                "title": 'Ref.'
+            },
+            {
+                "targets": [3],
+                "className": 'text-left',
+                "data": 'consignatario',
+                "title": 'Consignatario'
+            },
+            {
+                "targets": [4],
+                "className": 'text-left',
+                "data": 'master',
+                "title": 'Máster'
+            },
+            {
+                "targets": [5],
+                "className": 'text-left',
+                "data": 'house',
+                "title": 'House'
+            },
+            {
+                "targets": [6],
+                "className": 'text-center',
+                "orderable": false,
+                "data": null,
+                "defaultContent": '',
+                "render": function (data, type, row) {
+                    return `<input type="checkbox" value="${row.numero}">`;
+                },
+                "title": 'Seleccionar'
+            },
+            {
+                "targets": [7],
+                "className": 'text-left',
+                "data": 'vapor_vuelo',
+                "title": 'Vuelo/Vapor'
+            },
+            {
+                "targets": [8],
+                "className": 'text-left',
+                "data": 'clase',
+                "title": 'Clase'
+            }
+        ],
+        "order": [[0, "desc"]], // Ordena inicialmente por la columna 'Número'
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 100,
+        "ajax": {
+            "url": "/source_infofactura_cliente/",
+            'type': 'GET',
+            "data": function (d) {
+                return $.extend({}, d, {
+                    "cliente": $('#socio_com_filtro').val() // Se pasa el valor del cliente
+                });
+            }
+        },
+        "language": {
+            "url": "/static/datatables/es_ES.json" // Ruta de traducción al español
+        }
+    });
+}
+
+
+
+

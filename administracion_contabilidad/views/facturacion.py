@@ -615,7 +615,49 @@ def source_infofactura(request):
     except Exception as e:
         return JsonResponse({'error': str(e)})
 
+def source_infofactura_cliente(request):
+    try:
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        cliente = str(request.GET.get('cliente'))
 
+        anio_limite = 2000
+
+        infofacturas_qs = Infofactura.objects.all()
+
+        infofacturas_qs = infofacturas_qs.filter(
+            Q(autogenerado__gte=str(anio_limite))&
+            Q(consigna__icontains=cliente)
+        ).exclude(
+            autogenerado__in=Boleta.objects.values('autogenerado')
+        )
+
+
+        total_registros = infofacturas_qs.count()
+
+        infofacturas_paginated = infofacturas_qs[start:start + length]
+
+        data = [{
+            'numero': infofactura.id,
+            'sale_llega':infofactura.fecha,
+            'referencia': infofactura.referencia,
+            'consignatario': infofactura.consigna,
+            'master': infofactura.master,
+            'house': infofactura.house,
+            'vapor_vuelo': infofactura.vuelo,
+            'clase': infofactura.posicion[:2],
+            'fecha': infofactura.fecha,
+        } for infofactura in infofacturas_paginated]
+
+        return JsonResponse({
+            'draw': int(request.GET.get('draw', 1)),
+            'recordsTotal': total_registros,
+            'recordsFiltered': total_registros,
+            'data': data,
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
 
 def cargar_preventa_infofactura(request):
     if request.method == 'POST':
