@@ -163,8 +163,8 @@ def house_detail_factura(request):
                     'armador_e': house.armador if clase == 'IM' or clase =='EM' else None,
                     'agventas_e': house.ageventas,
                     'agcompras_e': house.agecompras,
-                    'notifcliente_e': house.notifcliente,
-                    'notifagente_e': house.notifagente,
+                    'notifcliente_e': house.notifcliente if clase == 'IM' or clase == 'IA' or clase == 'IT' else None,
+                    'notifagente_e': house.notifagente if clase == 'IM' or clase == 'IA' or clase == 'IT' else None,
                     'fecharetiro_e': house.fecharetiro,
                     'fechaembarque_e': house.fechaembarque,
                     'status_e': house.status,
@@ -209,10 +209,9 @@ def source_master_factura(request):
 
         if master_id != 0:
             try:
-
                 data = {
-                    'kilos': master.kilosmadre,
-                    'bultos': master.bultosmadre,
+                    'kilos': master.kilosmadre if clase == 'IA' or clase == 'IM' or clase == 'IT' else master.kilos,
+                    'bultos': master.bultosmadre if clase == 'IA' or clase == 'IM' or clase == 'IT' else None,
                     'volumen': master.volumen,
                 }
                 return JsonResponse(data)
