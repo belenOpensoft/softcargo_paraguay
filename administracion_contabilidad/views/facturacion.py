@@ -743,7 +743,7 @@ def cargar_preventa_infofactura(request):
                 'peso': prev.kilos,
                 'direccion': cliente.direccion if cliente else None,
                 'localidad': cliente.localidad if cliente else None,
-                'aplic': 0 if int(ref)<0 else Cargaaerea.objects.filter(numero=ref).values('aplicable').first().get('aplicable','S/I') if clase == "IA" else 'S/I',
+                #'aplic': 0 if int(ref)<0 else Cargaaerea.objects.filter(numero=ref).values('aplicable').first().get('aplicable','S/I') if clase == "IA" else 'S/I',
                 'bultos': prev.bultos,
                 'volumen': prev.volumen,
                 'commodity': prev.commodity,

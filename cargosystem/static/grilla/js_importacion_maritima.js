@@ -4902,3 +4902,25 @@ function cargar_gastos_factura(){
     });
      sumar_ingresos();
 }
+function sumar_ingresos() {
+    let totalIngresos = 0;
+    const tabla = $('#facturar_table').DataTable();
+
+    // Verifica si DataTable está inicializado
+    if (!$.fn.DataTable.isDataTable('#facturar_table')) {
+        console.log("DataTable no está inicializado.");
+        return;
+    }
+
+    // Itera sobre cada fila de la tabla y suma el valor en la columna 3
+    tabla.rows().every(function() {
+        const data = this.data();
+        console.log("Datos de la fila:", data); // Verifica el contenido de cada fila
+        const valor = parseFloat(data[3]) || 0;
+        totalIngresos += valor;
+        console.log("Total acumulado:", totalIngresos);
+    });
+
+    // Asigna el resultado total al input con ID #total_ingresos
+    $('#total_ingresos').val(totalIngresos.toFixed(2)); // Redondea a 2 decimales si es necesario
+}
