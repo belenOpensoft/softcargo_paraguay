@@ -2571,6 +2571,8 @@ table_add_im = $('#table_add_im').DataTable({
         var selectedRowN = rowData[3];
         localStorage.setItem('id_house_gasto', selectedRowId);
         localStorage.setItem('num_house_gasto', selectedRowN);
+                    localStorage.setItem('clase_house', 'IT');
+
     }
 });
     }
@@ -2896,6 +2898,8 @@ table_edit_im = $('#table_edit_im').DataTable({
         var selectedRowN = rowData[3];
         localStorage.setItem('id_house_gasto', selectedRowId);
         localStorage.setItem('num_house_gasto', selectedRowN);
+                    localStorage.setItem('clase_house', 'IT');
+
     }
 });
     }

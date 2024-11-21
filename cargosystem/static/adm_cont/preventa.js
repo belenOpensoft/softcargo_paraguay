@@ -79,29 +79,7 @@ event.preventDefault();
         $(this.node()).find('td').eq(3).text(cliente);
     });
 
-    //tabla.draw();
 
-//    $.ajax({
-//        type: "POST",
-//        url: "/ruta/guardar_factura_todas/",
-//        data: JSON.stringify({
-//            cliente: cliente
-//        }),
-//        contentType: "application/json",
-//        headers: {
-//            'X-CSRFToken': csrf_token
-//        },
-//        success: function(response) {
-//            if (response.resultado === 'exito') {
-//                alert("Los cambios se han guardado correctamente.");
-//            } else {
-//                alert("Error al guardar los cambios.");
-//            }
-//        },
-//        error: function() {
-//            alert("Error en la solicitud.");
-//        }
-//    });
 }
 function asignar_no(event) {
     event.preventDefault();
@@ -160,16 +138,17 @@ function sumar_ingresos() {
 function enviarDatosTabla() {
 let preventa;
     let num=localStorage.getItem('num_house_gasto');
+    let clase=localStorage.getItem('clase_house');
     $.ajax({
-                url: '/house_detail_factura',
-                data: { numero: num},
+                url: '/admin_cont/house_detail_factura',
+                data: { numero: num, clase:clase},
                 method: 'GET',
                 success: function (house) {
                     console.log(house.awb_e);
                     if(house.awb_e==0){
                         $.ajax({
-                        url: '/importacion_maritima/source_embarque_factura/',
-                        data: { numero: num},
+                        url: '/admin_cont/source_embarque_factura/',
+                        data: { numero: num, clase:clase},
                         method: 'GET',
                         success: function (embarque) {
                                 preventa=({
@@ -228,14 +207,14 @@ let preventa;
                     });
                     }else{
                     $.ajax({
-                        url: '/importacion_maritima/source_master_factura/',
-                        data: { master: house.awb_e},
+                        url: '/admin_cont/source_master_factura/',
+                        data: { master: house.awb_e, clase:clase},
                         method: 'GET',
                         success: function (master) {
                         console.log(master);
                             $.ajax({
-                        url: '/importacion_maritima/source_embarque_factura/',
-                        data: { numero: num},
+                        url: '/admin_cont/source_embarque_factura/',
+                        data: { numero: num, clase:clase},
                         method: 'GET',
                         success: function (embarque) {
                                 preventa=({
@@ -332,7 +311,7 @@ $('#concepto_detalle').change(function() {
 function update_gastos(x){
 
     $.ajax({
-        url: '/update_gasto_house/',
+        url: '/admin_cont/update_gasto_house/',
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(x),
@@ -347,9 +326,10 @@ function update_gastos(x){
     });
 }
 function guardar_preventa(preventa){
+console.log(preventa);
     $.ajax({
         type: "POST",
-        url: "/preventa/",
+        url: "/admin_cont/preventa/",
         data: JSON.stringify(preventa),
         contentType: "application/json",
         headers: {
@@ -383,7 +363,7 @@ return name;
 function getNameByIdProductos(id){
 var name = "";
 $.ajax({
-    url: '/get_name_by_id_productos',
+    url: '/admin_cont/get_name_by_id_productos',
     data: { id: id},
     async: false,
     success: function (response) {
@@ -395,7 +375,7 @@ return name;
 function checkIfReferenceExists() {
     let numero = localStorage.getItem('num_house_gasto');
     $.ajax({
-        url: '/check_if_reference_exists/',
+        url: '/admin_cont/check_if_reference_exists/',
         type: 'GET',
         data: { numero: numero },
         success: function(response) {

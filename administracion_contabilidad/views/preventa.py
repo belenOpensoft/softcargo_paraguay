@@ -2,8 +2,13 @@ from datetime import datetime
 from django.http import JsonResponse, HttpResponse, Http404
 import json
 from administracion_contabilidad.models import Infofactura
+from expaerea.models import ExportServiceaereo, ExportEmbarqueaereo, ExportCargaaerea, ExportReservas
+from expmarit.models import ExpmaritServiceaereo, ExpmaritEmbarqueaereo, ExpmaritCargaaerea, ExpmaritReservas
+from expterrestre.models import ExpterraServiceaereo, ExpterraEmbarqueaereo, ExpterraCargaaerea, ExpterraReservas
+from impaerea.models import ImportServiceaereo, ImportEmbarqueaereo, ImportCargaaerea, ImportReservas
 from impomarit.models import Cargaaerea, Embarqueaereo, Reservas
-from mantenimientos.models import Productos
+from impterrestre.models import ImpterraServiceaereo, ImpterraEmbarqueaereo, ImpterraCargaaerea, ImpterraReservas
+from mantenimientos.models import Productos, Monedas
 from impomarit.models import Serviceaereo
 
 
@@ -31,6 +36,8 @@ def guardar_infofactura(request):
         try:
             datos = json.loads(request.body.decode('utf-8'))
             fecha_str = datos.get("fecha")
+            if fecha_str == None:
+                fecha_str=str(datetime.now())
             autogenerado = generar_autogenerado(fecha_str)
 
             if fecha_str:
@@ -39,7 +46,8 @@ def guardar_infofactura(request):
                     fecha_formateada = fecha_obj.strftime("%d/%m/%y")
 
                 except ValueError:
-                    print("Formato de fecha no válido")
+                    fecha_formateada=datetime.now()
+                    fecha_formateada = fecha_formateada.strftime("%d/%m/%y")
 
             # Asegúrate de que 'datos' sea un diccionario
             if not isinstance(datos, dict):
@@ -62,7 +70,7 @@ def guardar_infofactura(request):
             infofactura.bultos = datos.get("bultos")
             infofactura.origen = datos.get("origen")
             infofactura.destino = datos.get("destino")
-            infofactura.consigna = datos.get("consigna")
+            infofactura.consigna = datos.get("consigna") if datos.get("consigna")  else datos.get("consignatario")
             infofactura.embarca = datos.get("embarca")
             infofactura.agente = datos.get("agente")
             infofactura.posicion = datos.get("posicion")
@@ -70,7 +78,6 @@ def guardar_infofactura(request):
             infofactura.pagoflete = datos.get("pagoflete")
             infofactura.wr = datos.get("wr")
 
-            # Guarda la instancia en la base de datos
             infofactura.save()
 
             return JsonResponse({"resultado": "exito"})
@@ -82,7 +89,24 @@ def guardar_infofactura(request):
 
 def source_embarques_factura(request):
     numero = request.GET.get('numero')
-    registros = Cargaaerea.objects.filter(numero=numero).values('producto_id')
+    clase = request.GET.get('clase')
+
+    if numero and clase:
+
+        if clase == "IM":
+            registros = Cargaaerea.objects.filter(numero=numero).values('producto_id')
+        elif clase == "EM":
+            registros = ExpmaritCargaaerea.objects.filter(numero=numero).values('producto_id')
+        elif clase == "IA":
+            registros = ImportCargaaerea.objects.filter(numero=numero).values('producto_id')
+        elif clase == "EA":
+            registros = ExportCargaaerea.objects.filter(numero=numero).values('producto_id')
+        elif clase == "IT":
+            registros = ImpterraCargaaerea.objects.filter(numero=numero).values('producto_id')
+        elif clase == "ET":
+            registros = ExpterraCargaaerea.objects.filter(numero=numero).values('producto_id')
+        else:
+            return JsonResponse({'error': 'Clase no válida'}, status=400)
 
     data = list(registros)
     data_json = json.dumps(data)
@@ -94,9 +118,27 @@ def source_embarques_factura(request):
 def house_detail_factura(request):
     if request.method == 'GET':
         numero = request.GET.get('numero', None)
+        clase = request.GET.get('clase', None)
+
+        if numero and clase:
+
+            if clase == "IM":
+                house = Embarqueaereo.objects.get(numero=numero)
+            elif clase == "EM":
+                house = ExpmaritEmbarqueaereo.objects.get(numero=numero)
+            elif clase == "IA":
+                house = ImportEmbarqueaereo.objects.get(numero=numero)
+            elif clase == "EA":
+                house = ExportEmbarqueaereo.objects.get(numero=numero)
+            elif clase == "IT":
+                house = ImpterraEmbarqueaereo.objects.get(numero=numero)
+            elif clase == "ET":
+                house = ExpterraEmbarqueaereo.objects.get(numero=numero)
+            else:
+                return JsonResponse({'error': 'Clase no válida'}, status=400)
+
         if numero:
             try:
-                house = Embarqueaereo.objects.get(numero=numero)
                 data = {
                     'id': house.id,
                     'cliente_e': house.cliente,
@@ -147,10 +189,27 @@ def house_detail_factura(request):
 def source_master_factura(request):
     if request.method == 'GET':
         master_id = request.GET.get('master', 0)
+        clase = request.GET.get('clase')
+
+        if master_id !=0 and clase:
+            if clase == "IM":
+                master = Reservas.objects.get(awb=master_id)
+            elif clase == "EM":
+                master = ExpmaritReservas.objects.get(awb=master_id)
+            elif clase == "IA":
+                master = ImportReservas.objects.get(awb=master_id)
+            elif clase == "EA":
+                master = ExportReservas.objects.get(awb=master_id)
+            elif clase == "IT":
+                master = ImpterraReservas.objects.get(awb=master_id)
+            elif clase == "ET":
+                master = ExpterraReservas.objects.get(awb=master_id)
+            else:
+                return JsonResponse({'error': 'Clase no válida'}, status=400)
+
         if master_id != 0:
             try:
-                master = Reservas.objects.get(awb=master_id)
-                # Convierte el objeto en un diccionario
+
                 data = {
                     'kilos': master.kilosmadre,
                     'bultos': master.bultosmadre,
@@ -254,3 +313,65 @@ def eliminar_preventa(request):
             return JsonResponse({"resultado": "error", "mensaje": str(e)}, status=500)
     else:
         return JsonResponse({"resultado": "error", "mensaje": "Método no permitido"}, status=405)
+
+
+def guardar_gasto_unificado(request):
+    if request.method == "POST":
+        try:
+            datos = json.loads(request.body.decode('utf-8'))
+
+            gastos = datos.get('gastos', [])
+            clase = datos.get('clase', None)
+
+            if not clase:
+                return JsonResponse({'error': 'Clase no proporcionada'}, status=400)
+
+            # Seleccionar el modelo adecuado según la clase
+            if clase == "IM":
+                registro_model = Serviceaereo
+            elif clase == "EM":
+                registro_model = ExpmaritServiceaereo
+            elif clase == "IA":
+                registro_model = ImportServiceaereo
+            elif clase == "EA":
+                registro_model = ExportServiceaereo
+            elif clase == "IT":
+                registro_model = ImpterraServiceaereo
+            elif clase == "ET":
+                registro_model = ExpterraServiceaereo
+            else:
+                return JsonResponse({'error': 'Clase no válida'}, status=400)
+
+            ref = datos.get('referencia', None)
+
+            # Procesar cada gasto
+            for gasto in gastos:
+                registro = registro_model()
+
+                descripcion = gasto.get('descripcion')
+                numero = descripcion.split('-')[0]
+                registro.numero = ref
+                registro.servicio= numero
+                registro.descripcion = gasto.get('descripcion')
+
+                # Obtener la moneda
+                try:
+                    moneda = Monedas.objects.get(nombre=gasto.get('moneda'))
+                    registro.moneda = moneda.codigo  # Asignar el código de la moneda
+                except Monedas.DoesNotExist:
+                    return JsonResponse({'error': f"Moneda no encontrada: {gasto.get('moneda')}"}, status=400)
+
+                registro.precio = gasto.get('total')
+
+                # Guardar el registro en la base de datos
+                registro.save()
+
+            return JsonResponse({'exito': True}, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error al procesar el JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+

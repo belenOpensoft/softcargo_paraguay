@@ -1,7 +1,57 @@
 {% extends 'base_form.html' %}
 {% load static %}
-
 {% block formulario %}
+
+{% include 'menu/menu_cobranza.html' %}
+<style>
+.ui-autocomplete {
+    z-index: 3050;
+}
+</style>
+
+<table id="tabla_cobranzas" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Autogenerado</th>
+            <th class="text-left">Serie</th>
+            <th class="text-left">Prefijo</th>
+            <th class="text-left">Numero</th>
+            <th class="text-left">Cliente</th>
+            <th class="text-left">MASTER</th>
+            <th class="text-left">HOUSE</th>
+            <th class="text-left">Concepto</th>
+            <th class="text-left">Monto</th>
+            <th class="text-left">IVA</th>
+            <th class="text-left">IVA total</th>
+            <th class="text-left">Monto total</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+          <th width="4%"></th>
+            <th class="text-right">Autogenerado</th>
+            <th class="text-right">Serie</th>
+            <th class="text-right">Prefijo</th>
+            <th class="text-right">Numero</th>
+            <th class="text-right">Cliente</th>
+            <th class="text-right">MASTER</th>
+            <th class="text-right">HOUSE</th>
+            <th class="text-right">Concepto</th>
+            <th class="text-right">Monto</th>
+            <th class="text-right">IVA</th>
+            <th class="text-right">IVA total</th>
+            <th class="text-right">Monto total</th>
+        </tr>
+        </tfoot>
+    </table>
+
+
+<div id="dialog-form" title="Formulario de Cobranza" style="display: none;">
 <div class="border rounded p-4 bg-light">
     <form method="post" action="" id="cobranzaForm">
         {% csrf_token %}
@@ -84,7 +134,7 @@
             </div>
         </div>
 
-        <table id="imputacionTable" class="table table-striped mt-4" style="display:none;">
+        <table id="imputacionTable" class="table table-striped mt-4" style="display:block;">
             <thead>
                 <tr>
                     <th style="display:none;">Id</th>
@@ -100,16 +150,6 @@
                     <th>Posición</th>
                     <th>Moneda</th>
                     <th>Paridad</th>
-                    <th>%RG</th>
-                    <th>RG</th>
-                    <th>%RIVA</th>
-                    <th>RIVA</th>
-                    <th>%RIB</th>
-                    <th>RIB</th>
-                    <th>%SUSS</th>
-                    <th>SUSS</th>
-                    <th>%Otros</th>
-                    <th>Otros</th>
                     <th>Tipo Doc</th>
                 </tr>
             </thead>
@@ -138,15 +178,16 @@
         </div>
     </form>
 </div>
-
+</div>
 
 <script>
     var csrf_token = "{{ csrf_token }}";
 </script>
 
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="{% static 'adm_cont/cobranza.js' %}"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
 
 {% endblock formulario %}

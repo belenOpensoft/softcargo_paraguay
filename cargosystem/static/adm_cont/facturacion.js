@@ -7,23 +7,6 @@ let iva=0;
 var buscar = '';
 var que_buscar = '';
 
-//    $.ajax({
-//            url: '/source_infofactura_cliente/', // Ruta a tu vista
-//            type: 'GET',
-//            data: {
-//                cliente: 'TO THE ORDER OF TECNNOMYL'
-//            },
-//            success: function (response) {
-//                console.log('Respuesta del servidor:', response);
-//                alert('Petición exitosa. Revisa la consola para más detalles.');
-//            },
-//            error: function (xhr, status, error) {
-//                console.error('Error en la petición:', error);
-//                alert('Error al comunicarse con el servidor. Revisa la consola.');
-//            }
-//        });
-
-
     const valorInicial = $('#id_tipo').find('option:selected').text();
     $('#tipoSeleccionado').text(valorInicial);
 
@@ -35,7 +18,7 @@ var que_buscar = '';
     $('#cliente').autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "/buscar_cliente",
+                url: "/admin_cont/buscar_cliente",
                 dataType: 'json',
                 data: { term: request.term },
                 success: function(data) {
@@ -52,7 +35,7 @@ var que_buscar = '';
         select: function(event, ui) {
             const { id } = ui.item;
             $.ajax({
-                url: "/buscar_clientes",
+                url: "/admin_cont/buscar_clientes",
                 data: { id },
                 dataType: 'json',
                 success: cliente => {
@@ -77,7 +60,7 @@ var que_buscar = '';
     $('#item').autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "/buscar_item_v",
+                url: "/admin_cont/buscar_item_v",
                 dataType: 'json',
                 data: {
                     term: request.term
@@ -93,7 +76,7 @@ var que_buscar = '';
         minLength: 2,
         select: function(event, ui) {
             $.ajax({
-                url: "/buscar_items_v",
+                url: "/admin_cont/buscar_items_v",
                 data: { id: ui.item.id },
                 dataType: 'json',
                 success: servicio => {
@@ -243,7 +226,7 @@ var que_buscar = '';
             }
 
             $.ajax({
-                url: "/procesar_factura/",
+                url: "/admin_cont/procesar_factura/",
                 dataType: 'json',
                 type: 'POST',
                 data: data,
@@ -303,9 +286,9 @@ var que_buscar = '';
     "order": [[1, "desc"]],
     "processing": true,
     "serverSide": true,
-    "pageLength": 100,
+    "pageLength": 10,
     "ajax": {
-        "url": "/source_facturacion/",
+        "url": "/admin_cont/source_facturacion/",
         'type': 'GET',
         "data": function (d) {
             return $.extend({}, d, {
@@ -373,18 +356,21 @@ $('#preventa').on('click', function() {
         modal: true,
         width: wWidth*0.90,
         height: wHeight*0.90,
-        buttons: {
-            "Cerrar": function() {
+        buttons: [{
+        class: "btn btn-dark",
+                    style: "width:100px",
+                    text:"Cerrar",
+                    click: function() {
                 $(this).dialog("close");
                 $('#preventa_table').DataTable().destroy();
 
             }
-        }
+        }]
     });
     $('#preventa_table').DataTable({
         serverSide: true,
         ajax: {
-            url: "/source_infofactura",
+            url: "/admin_cont/source_infofactura",
             type: "GET"
         },
         columns: [
@@ -415,7 +401,7 @@ $('#preventa_table tbody').on('dblclick', 'tr', function() {
     let preventa = $(this).find('td').eq(0).text();
 
     $.ajax({
-        url: "/cargar_preventa_infofactura/",
+        url: "/admin_cont/cargar_preventa_infofactura/",
         method: 'POST',
         data: {
             'referencia': referencia,
@@ -424,6 +410,7 @@ $('#preventa_table tbody').on('dblclick', 'tr', function() {
         },
         headers: { 'X-CSRFToken': csrf_token },
         success: function(response) {
+        console.log(response);
             let preventa = response.data_preventa;
             let gastos = response.data;
 
@@ -585,7 +572,7 @@ function agregarItem(desc,codigo,precio) {
 
     if (item && descripcion && !isNaN(precio)) {
         $.ajax({
-            url: "/buscar_items_v",
+            url: "/admin_cont/buscar_items_v",
             data: { id: codigo },
             dataType: 'json',
             success: servicio => {
@@ -670,7 +657,7 @@ function borrar_preventa(){
 id=localStorage.getItem('preventa_id');
 
     $.ajax({
-        url: '/eliminar_preventa/',
+        url: '/admin_cont/eliminar_preventa/',
         method: 'POST',
         headers: { 'X-CSRFToken': csrf_token },
         data: JSON.stringify({ id: id }),
@@ -827,7 +814,7 @@ modo='TERRESTRE';
 modo='SINMODO';
 }
 
-    miurl = "/get_datos_pdf_preventa/";
+    miurl = "/admin_cont/get_datos_pdf_preventa/";
     var toData = {
     'clase':clase,
         'modo':modo,
@@ -865,6 +852,10 @@ $("#prev_multiple_modal").dialog({
             style: "width:100px",
             click: function () {
                 $(this).dialog("close");
+                $('#pendientes_tabla').DataTable().destroy();
+                $('#preventa_unificada_tabla').DataTable().destroy();
+                $('#conceptos_unificar_tabla').DataTable().destroy();
+                $('#socio_com_filtro').val();
 
             },
         }],
@@ -873,7 +864,7 @@ $("#prev_multiple_modal").dialog({
 $('#socio_com_filtro').autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "/buscar_cliente",
+                url: "/admin_cont/buscar_cliente",
                 dataType: 'json',
                 data: { term: request.term },
                 success: function(data) {
@@ -892,59 +883,14 @@ $('#socio_com_filtro').autocomplete({
 
         }
     });
-function tabla_pendientes(nombre) {
-    try {
-        if ($.fn.DataTable.isDataTable('#pendientes_tabla')) {
-            $('#pendientes_tabla').DataTable().destroy();
-        }
-
-        $('#pendientes_tabla').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: '/source_infofactura_cliente/',
-                type: 'GET',
-                data: function (d) {
-                d.cliente = $('#socio_com_filtro').val();
-
-                },
-            },
-            columnDefs: [
-                { targets: 0, data: 'numero' },
-                { targets: 1, data: 'sale_llega' },
-                { targets: 2, data: 'referencia' },
-                { targets: 3, data: 'consignatario' },
-                { targets: 4, data: 'master' },
-                { targets: 5, data: 'house' },
-                {
-                    targets: 6,
-                    orderable: false,
-                    searchable: false,
-                    render: function (data, type, row) {
-                        return `<input type="checkbox" class="select-checkbox" value="${row.numero}">`;
-                    }
-                },
-                { targets: 7, data: 'vapor_vuelo' },
-                { targets: 8, data: 'clase' },
-                { targets: 9, data: 'fecha' },
-            ],
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json',
-            },
-        });
-
-        console.log('DataTable inicializado correctamente');
-    } catch (error) {
-        console.error('Error al inicializar el DataTable:', error);
-    }
-}
 function tabla_pendientes() {
     $('#pendientes_tabla').DataTable({
-        "stateSave": true,
+        "stateSave": false,
         "dom": 'Btlipr',
         "scrollX": true,
         "bAutoWidth": false,
-        "scrollY": $(window).height() * 0.60, // Altura dinámica según el tamaño de la ventana
+        "scrollY": true,
+        "lengthMenu": [5, 10, 25],
         "columnDefs": [
             {
                 "targets": [0],
@@ -1009,9 +955,9 @@ function tabla_pendientes() {
         "order": [[0, "desc"]], // Ordena inicialmente por la columna 'Número'
         "processing": true,
         "serverSide": true,
-        "pageLength": 100,
+        "pageLength": 5,
         "ajax": {
-            "url": "/source_infofactura_cliente/",
+            "url": "/admin_cont/source_infofactura_cliente/",
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
@@ -1023,6 +969,378 @@ function tabla_pendientes() {
             "url": "/static/datatables/es_ES.json" // Ruta de traducción al español
         }
     });
+}
+function unificar(x){
+// 1 es unificados, 0 es originales
+$('#guardar_preventa_unificada').attr('data-id', x);
+
+let seleccionados = [];
+
+    $('#pendientes_tabla input[type="checkbox"]:checked').each(function () {
+        let fila = $(this).closest('tr');
+        let numero = $(this).val();
+        let referencia = fila.find('td').eq(2).text().trim();
+        let clase = fila.find('td').eq(8).text().trim();
+        seleccionados.push({ numero: numero, referencia: referencia, clase: clase });
+    });
+
+    if (seleccionados.length === 0) {
+        alert('Por favor, seleccione al menos una fila.');
+        return;
+    }
+
+    $.ajax({
+        url: "/admin_cont/cargar_preventa_infofactura_multiple/",
+        method: 'POST',
+        data: {
+            'seleccionados': JSON.stringify(seleccionados)
+        },
+        headers: { 'X-CSRFToken': csrf_token },
+        success: function(response) {
+            let todo = response.data;
+
+            let resultado=unificarPreventas(todo);
+            let gastos=resultado.gastosUnificados;
+            let preventa=resultado.preventaUnificada.data_preventa;
+            let gastos_originales=resultado.preventaUnificada.gastos_originales;
+            let gastos_mostrar;
+
+            if ($.fn.DataTable.isDataTable("#conceptos_unificar_tabla")) {
+                $('#conceptos_unificar_tabla').DataTable().clear().destroy();
+            }
+            if ($.fn.DataTable.isDataTable("#gastos_no_unificados")) {
+                $('#gastos_no_unificados').DataTable().clear().destroy();
+            }
+
+            if ($.fn.DataTable.isDataTable("#preventa_unificada_tabla")) {
+                $('#preventa_unificada_tabla').DataTable().clear().destroy();
+            }
+
+            if(x==1){
+                gastos_mostrar=gastos;
+            }else{
+                gastos_mostrar=gastos_originales;
+            }
+
+
+            var tabla = $('#preventa_unificada_tabla tbody');
+                tabla.empty();
+                    var fila = $('<tr>');
+                    fila.append('<td class="editable">' + preventa.llegada_salida + '</td>');
+                    fila.append('<td class="">' + preventa.referencia + '</td>');
+                    fila.append('<td class="">' + preventa.consignatario + '</td>');
+                    fila.append('<td class="">' + preventa.master + '</td>');
+                    fila.append('<td class="editable">' + preventa.house + '</td>');
+                    fila.append('<td class="">' + preventa.posicion + '</td>');
+                    fila.append('<td class="">' + preventa.seguimiento + '</td>');
+                    fila.append('<td class="">' + preventa.cliente_i + '</td>');
+                    fila.append('<td class="editable">' + preventa.vuelo_vapor + '</td>');
+                    fila.append('<td class="">' + resultado.preventaUnificada.clase + '</td>');
+                    tabla.append(fila);
+
+            $('.editable').on('dblclick', function () {
+        var celda = $(this);
+        var valorActual = celda.text();
+        var input = $('<input type="text" class="form-control">').val(valorActual);
+
+        // Reemplazar el contenido de la celda con el input
+        celda.html(input);
+
+        // Enfocar el input y seleccionar el texto
+        input.focus().select();
+
+        // Manejar el evento blur (cuando el usuario sale del campo)
+        input.on('blur', function () {
+            var nuevoValor = $(this).val(); // Obtener el nuevo valor
+            celda.html(nuevoValor); // Reemplazar el input con el nuevo valor
+        });
+
+        // Manejar el evento Enter para confirmar la edición
+        input.on('keypress', function (e) {
+            if (e.which === 13) { // Enter key
+                $(this).blur(); // Simular blur para confirmar el cambio
+            }
+        });
+    });
+
+            $('#conceptos_unificar_tabla').DataTable({
+                data: gastos_mostrar,
+                columns: [
+                    { data: 'descripcion', title: 'Descripcion' },
+                    { data: 'total', title: 'Total' },
+                    { data: 'iva', title: 'IVA' },
+                    { data: 'original', title: 'Original' },
+                    { data: 'moneda', title: 'Moneda' },
+
+                ],
+                paging: true,
+                searching: true,
+                ordering: true,
+                responsive: true,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                },
+                "columnDefs": [
+                        {
+                            targets: 0,
+                            className: "dt-body-left",
+                            render: function (data, type, row) {
+                                return data;
+                            }
+                        },
+                        {
+                            targets: 1,
+                            className: "dt-body-right",
+                            render: function (data, type, row) {
+                                return '$' + parseFloat(data).toFixed(2);
+                            }
+                        },
+                        {
+                            targets: 2,
+                            className: "dt-body-center",
+                            render: function (data, type, row) {
+                                return data;
+                            }
+                        },
+                        {
+                            targets: 3,
+                            className: "dt-body-center",
+                            render: function (data, type, row) {
+                                return '$' + parseFloat(data).toFixed(2);
+                            }
+                        },
+                        {
+                            targets: 4,
+                            className: "dt-body-center",
+                            render: function (data, type, row) {
+                                return data;
+                            }
+                        }
+                    ],
+                "lengthMenu": [5, 10, 25],
+                "pageLength": 5,
+            });
+            $('#gastos_no_unificados').DataTable({
+                data: gastos_originales,
+                columns: [
+                    { data: 'descripcion', title: 'Descripcion' },
+                    { data: 'total', title: 'Total' },
+                    { data: 'iva', title: 'IVA' },
+                    { data: 'original', title: 'Original' },
+                    { data: 'moneda', title: 'Moneda' },
+
+                ],
+                paging: true,
+                searching: true,
+                ordering: true,
+                responsive: true,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                },
+                "columnDefs": [
+                        {
+                            targets: 0,
+                            className: "dt-body-left",
+                            render: function (data, type, row) {
+                                return data;
+                            }
+                        },
+                        {
+                            targets: 1,
+                            className: "dt-body-right",
+                            render: function (data, type, row) {
+                                return '$' + parseFloat(data).toFixed(2);
+                            }
+                        },
+                        {
+                            targets: 2,
+                            className: "dt-body-center",
+                            render: function (data, type, row) {
+                                return data;
+                            }
+                        },
+                        {
+                            targets: 3,
+                            className: "dt-body-center",
+                            render: function (data, type, row) {
+                                return '$' + parseFloat(data).toFixed(2);
+                            }
+                        },
+                        {
+                            targets: 4,
+                            className: "dt-body-center",
+                            render: function (data, type, row) {
+                                return data;
+                            }
+                        }
+                    ],
+                "lengthMenu": [5, 10, 25],
+                "pageLength": 5,
+            });
+
+        },
+        error: function() {
+            alert('Error al realizar la consulta.');
+        }
+    });
+
+}
+function unificarPreventas(preventas) {
+    let ids=[];
+    const gastosOriginales = preventas.flatMap(preventa => preventa.gastos);
+
+    const gastosUnificados = gastosOriginales.reduce((acumulador, actual) => {
+        const existente = acumulador.find(
+            gasto => gasto.descripcion === actual.descripcion && gasto.moneda === actual.moneda
+        );
+
+        if (existente) {
+            existente.total += parseFloat(actual.total) || 0;
+            existente.original += parseFloat(actual.original) || 0;
+        } else {
+            acumulador.push({
+                ...actual,
+                total: parseFloat(actual.total) || 0,
+                original: parseFloat(actual.original) || 0
+            });
+        }
+
+        return acumulador;
+    }, []);
+
+    const preventaUnificada = JSON.parse(JSON.stringify(preventas[0]));
+
+    preventaUnificada.data_preventa.total_con_iva = 0;
+    preventaUnificada.data_preventa.total_sin_iva = 0;
+    preventaUnificada.data_preventa.bultos = 0;
+    preventaUnificada.data_preventa.peso = 0;
+
+    preventas.forEach(preventa => {
+        preventaUnificada.data_preventa.total_con_iva += parseFloat(preventa.data_preventa.total_con_iva) || 0;
+        preventaUnificada.data_preventa.total_sin_iva += parseFloat(preventa.data_preventa.total_sin_iva) || 0;
+        preventaUnificada.data_preventa.bultos += parseInt(preventa.data_preventa.bultos, 10) || 0;
+        preventaUnificada.data_preventa.peso += parseFloat(preventa.data_preventa.peso) || 0;
+        ids.push(preventa.numero);
+    });
+
+    preventaUnificada.data_preventa.total_con_iva = preventaUnificada.data_preventa.total_con_iva.toFixed(4);
+    preventaUnificada.data_preventa.total_sin_iva = preventaUnificada.data_preventa.total_sin_iva.toFixed(4);
+
+    preventaUnificada.gastos = gastosUnificados;
+    preventaUnificada.gastos_originales = gastosOriginales;
+    preventaUnificada.ids=ids;
+    preventaUnificada.data_preventa.referencia = generarNumero();
+    //preventaUnificada.referencia = preventaUnificada.data_preventa.referencia;
+
+    const datosParaGuardar = {
+        preventaUnificada,
+        gastosUnificados
+    };
+    const datosJSON = JSON.stringify(datosParaGuardar);
+    localStorage.setItem('preventaUnificada', datosJSON);
+
+    return {
+        preventaUnificada,
+        gastosUnificados
+    };
+}
+
+function guardar_preventa_unificada(){
+let x = $('#guardar_preventa_unificada').attr('data-id');
+let preventaUnificada = JSON.parse(localStorage.getItem('preventaUnificada')) || [];
+let preventa=preventaUnificada.preventaUnificada.data_preventa;
+preventa.numero=preventaUnificada.preventaUnificada.numero;
+let clase = preventaUnificada.preventaUnificada.clase;
+let referencia = preventaUnificada.preventaUnificada.data_preventa.referencia;
+
+let gastos=preventaUnificada.gastosUnificados;
+let gastos_originales=preventaUnificada.preventaUnificada.gastos_originales;
+let gastos_mostrar;
+let ids=preventaUnificada.preventaUnificada.ids;
+
+if(x==1){
+    gastos_mostrar=gastos;
+}else{
+    gastos_mostrar=gastos_originales;
+}
+
+console.log(preventa);
+    $.ajax({
+        type: "POST",
+        url: "/admin_cont/preventa/",
+        data: JSON.stringify(preventa),
+        contentType: "application/json",
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function(response) {
+        console.log(response);
+            if (response.resultado === 'exito') {
+                guardar_gastos_uni(gastos_mostrar, clase,referencia);
+                borrar_preventas_multiples(ids);
+                alert("Los datos se han enviado correctamente.");
+            } else {
+                alert("Error al enviar los datos.");
+            }
+        },
+        error: function() {
+            alert("Error en la solicitud.");
+        }
+    });
+}
+
+function guardar_gastos_uni(gastos, clase,referencia){
+    $.ajax({
+        method: "POST",
+        url: "/admin_cont/guardar_gasto_unificado/",
+        data: JSON.stringify({
+            gastos: gastos,  // Asegúrate de que los datos sean un objeto JavaScript
+            clase: clase,
+            referencia:referencia
+        }),
+        contentType: "application/json",
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function(response) {
+            console.log(response);
+        },
+        error: function() {
+            alert("Error en la solicitud.");
+        }
+    });
+}
+
+function borrar_preventas_multiples(preventas){
+
+    preventas.forEach(function(p) {
+    console.log(p);
+    $.ajax({
+        url: '/admin_cont/eliminar_preventa/',
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrf_token },
+        data: JSON.stringify({ id: p }),
+        contentType: 'application/json',
+        success: function(response) {
+            console.log(response);
+        },
+        error: function(xhr) {
+            alert("Error al eliminar la preventa: " + xhr.responseText);
+        }
+    });
+    });
+}
+
+function generarNumero() {
+    const now = new Date();
+
+    const segundos = now.getSeconds();
+
+    const milisegundos = now.getMilliseconds();
+
+    const numero = `${segundos % 100}${milisegundos % 100}`.padStart(4, '0');
+
+    return -parseInt(numero);
 }
 
 

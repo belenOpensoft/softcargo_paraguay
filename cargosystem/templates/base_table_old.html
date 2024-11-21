@@ -2,18 +2,19 @@
 {% load static %}
 
 {% block script %}
-<link rel="stylesheet" type="text/css" href="/static/datatables/datatables.min.css">
-<link rel="stylesheet" type="text/css" href="/static/datatables/buttons.dataTables.min.css">
-<link rel="stylesheet" type="text/css" href="/static/jquery-ui/jquery-ui-1.10.0.custom.css">
-<link rel="stylesheet" type="text/css" href="/static/summernote/summernote-lite.css">
-
-<script src="/static/js/jquery.min.js"></script>
-<script src="/static/js/jquery-ui.min.js"></script>
-<script src="/static/datatables/datatables.min.js"></script>
-<script src="/static/datatables/dataTables.buttons.min.js"></script>
-<script src="/static/grilla/js_controlador_sidemenu.js"></script>
-<script src="/static/summernote/summernote-lite.js"></script>
-
+    <!-- DATATABLES -->
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'datatables/datatables.min.css'  %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'datatables/buttons.dataTables.min.css'  %}">
+    <!--    <link rel="stylesheet" type="text/css" href="{% static 'jquery-ui/jquery-ui.min.css'  %}">-->
+    <link rel="stylesheet" type="text/css" href="{% static 'jquery-ui/jquery-ui-1.10.0.custom.css'  %}">
+    <script src="{% static 'datatables/datatables.min.js' %}"></script>
+    <script src="{% static 'datatables/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script>
+<script src="{% static 'grilla/js_controlador_sidemenu.js' %}"></script>
+    <script type="text/javascript" src="{% static 'summernote/summernote-lite.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'summernote/summernote-lite.css'  %}">
 
 {% block script_table %}
 
@@ -72,4 +73,3 @@
 {% endblock script_datatable %}
 
 {% endblock contenido %}
-

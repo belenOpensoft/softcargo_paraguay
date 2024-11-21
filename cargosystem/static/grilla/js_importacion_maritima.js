@@ -138,12 +138,7 @@ $(document).ready(function () {
 
             }
         },
-//
-//         "drawCallback": function (settings) {
-//        // Guardar los datos en localStorage después de que la tabla se haya dibujado
-//        var data = table.rows({search: 'applied'}).data().toArray();
-//        localStorage.setItem('lista_masters', JSON.stringify(data));
-//        },
+
         "language": {
             url: "/static/datatables/es_ES.json"
         },
@@ -2599,6 +2594,7 @@ table_add_im = $('#table_add_im').DataTable({
         var selectedRowN = rowData[3];
         localStorage.setItem('id_house_gasto', selectedRowId);
         localStorage.setItem('num_house_gasto', selectedRowN);
+        localStorage.setItem('clase_house', 'IM');
     }
 });
     }
@@ -2922,6 +2918,8 @@ table_edit_im = $('#table_edit_im').DataTable({
         var selectedRowN = rowData[3];
         localStorage.setItem('id_house_gasto', selectedRowId);
         localStorage.setItem('num_house_gasto', selectedRowN);
+        localStorage.setItem('clase_house', 'IM');
+
     }
 });
     }
