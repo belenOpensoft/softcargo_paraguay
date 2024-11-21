@@ -1,8 +1,8 @@
-{% extends 'base_form.html' %}
+{% extends 'base_table_old.html' %}
 {% load static %}
-{% block formulario %}
-
+{% block contenido %}
 {% include 'menu/menu_cobranza.html' %}
+
 <style>
 .ui-autocomplete {
     z-index: 3050;
@@ -188,6 +188,6 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="{% static 'adm_cont/cobranza.js' %}"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock contenido %}
 
 
-{% endblock formulario %}
