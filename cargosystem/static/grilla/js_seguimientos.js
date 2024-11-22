@@ -1082,7 +1082,7 @@ $(document).ready(function () {
                         class: "btn btn-primary",
                         style: "width:100px",
                         click: function () {
-                        if(!document.getElementById('id_prima').value<0){
+
                         let formData = $("#cronologia_form").serializeArray();
                             let data = JSON.stringify(formData);
                             miurl = "/guardar_cronologia/";
@@ -1106,9 +1106,6 @@ $(document).ready(function () {
                                 }
                             });
                             $(this).dialog("close");
-                        }else{
-                        alert('No se admiten valores negativos.');
-                        }
 
                         },
                     }, {

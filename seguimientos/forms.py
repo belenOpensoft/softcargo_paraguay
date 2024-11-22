@@ -314,6 +314,8 @@ class cronologiaForm(BSModalModelForm):
         self.helper.form_id = 'cronologia-form'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Actualizar'))
+        self.fields['prima'].initial = 0
+        self.fields['nroseguro'].initial = 0
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
 
