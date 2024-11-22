@@ -4,7 +4,6 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-
 from cargosystem import settings
 from login.forms import usuarioForm
 
@@ -61,7 +60,7 @@ def select_rol(request, rol=None):
             return HttpResponseRedirect('/')
     if 'roles' not in request.session:
         return HttpResponseRedirect('/')
-    roles = np.array_split(request.session['roles'], 4)
+    roles = np.array_split(request.session['roles'], 5)
     ctx = {'roles': roles, }
     return render(request, 'roles.html', ctx)
 

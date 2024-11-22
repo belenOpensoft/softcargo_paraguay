@@ -1,10 +1,7 @@
 from django.shortcuts import render
 from mantenimientos.models import Clientes, Servicios
 from administracion_contabilidad.forms import ProveedoresGastos
-from administracion_contabilidad.models import Boleta
 from django.http import JsonResponse
-from datetime import datetime
-from django.db.models import Max
 
 
 def proveedores_gastos_view(request):

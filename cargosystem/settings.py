@@ -58,7 +58,8 @@ CKEDITOR_CONFIGS = {
         'toolbar': 'Custom',
         'toolbar_Custom': [
             ['Bold', 'Italic', 'Underline'],
-            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter',
+             'JustifyRight', 'JustifyBlock'],
             ['Link', 'Unlink'],
             ['RemoveFormat', 'Source']
         ]
@@ -107,7 +108,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
             ],
-            'libraries':{
+            'libraries': {
                 'my_templatetag': 'seguimientos.templatetags.filtros',
 
             }
@@ -115,7 +116,6 @@ TEMPLATES = [
     },
 ]
 WSGI_APPLICATION = 'cargosystem.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -138,7 +138,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -157,7 +156,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -165,7 +163,6 @@ LANGUAGE_CODE = 'es-ar'
 TIME_ZONE = 'America/Montevideo'
 USE_I18N = True
 USE_TZ = False
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
@@ -178,8 +175,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATICFILES_DIRS = (
-    os.path.join(RUTA_PROYECTO,'static'),
-    os.path.join(RUTA_PROYECTO,'media'),
+    os.path.join(RUTA_PROYECTO, 'static'),
+    os.path.join(RUTA_PROYECTO, 'media'),
     os.path.join(BASE_DIR, 'mantenimientos/static'),
     os.path.join(BASE_DIR, 'seguimientos/static'),
     os.path.join(BASE_DIR, 'administracion_contabilidad/static'),
@@ -203,5 +200,4 @@ EMAIL_HOST_PASSWORD = 'zoho@opensoft@1987'
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = 'soporte@opensoft.com.uy'
 
-
-EMPRESA_HAWB = 'OCEANLINK'+ '<br />\n' + 'MISIONES 1574 OF 201' + '<br />\n' + 'MONTEVIDEO, 11000 URUGUAY' + '<br />\n' +  'PH:598 2917 0501 - FAX:598 2916 8215' + '<br />\n'
+EMPRESA_HAWB = 'OCEANLINK' + '<br />\n' + 'MISIONES 1574 OF 201' + '<br />\n' + 'MONTEVIDEO, 11000 URUGUAY' + '<br />\n' + 'PH:598 2917 0501 - FAX:598 2916 8215' + '<br />\n'

@@ -1041,12 +1041,11 @@ class emailsForm(forms.Form):
     subject = forms.CharField(label='Asunto',widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
     email = forms.CharField(widget=forms.Textarea(attrs={"id": 'email_add_input',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"100","class":"form-control"}, ), required=False,label="Email", max_length=500)
 
+
 class archivosForm(forms.ModelForm):
     class Meta:
         model = ExpmaritAttachhijo
-        fields = ('numero', 'archivo','detalle', 'restringido' )
-
-
+        fields = ('numero', 'archivo', 'detalle', 'restringido')
 
     def __init__(self, *args, **kwargs):
 
@@ -1062,18 +1061,40 @@ class archivosForm(forms.ModelForm):
         self.fields['numero'].widget = forms.HiddenInput()
 
     choice_detalle = (
-        ("OTR", "Otro tipo"),
-        ("CRF", "Certificacion de fecha"),
-        ("CAR", "Carta de reclamo"),
-        ("EDD", "Entrega de documentos"),
-        ("SDA", "SDA"),
-        ("CHO", "Canje House"),
-        ("FAG", "Factura agente"),
-        ("DAD", "Documento aduanero"),
-        ("VAE", "Validacion electronica"),
-        ("ODP", "Comprobante electronico"),
+        ("FAC", "Factura Comercial"),
+        ("NDB", "Nota de débito"),
+        ("FFT", "Factura flete terrestre"),
+        ("CSA", "Certificado Sanitario"),
+        ("COR", "Certificado de origen"),
+        ("PIC", "Fotos / Imágenes"),
+        ("PRE", "Pre-alerta"),
+        ("FPR", "Factura Proveedor"),
+        ("WHR", "Warehouse Receipt"),
+        ("NCA", "N/C Agente"),
+        ("BKC", "Booking Confirmation"),
         ("PKL", "Packing list"),
+        ("PPQ", "PPQ"),
+        ("MST", "Master"),
+        ("HUS", "House"),
+        ("GRA", "Docs. Generales"),
+        ("COM", "Docs. Comerciales"),
+        ("IMO", "Documentos IMO"),
+        ("MCA", "Manifiesto de Carga"),
+        ("CDS", "Certificado de Seguro"),
+        ("PUO", "Purchase Order"),
+        ("POD", "P.O.D."),
+        ("ODP", "Comprobante electronico"),
+        ("VAE", "Validacion electronica"),
+        ("DAD", "Documento aduanero"),
+        ("FAG", "Factura agente"),
+        ("CHO", "Canje House"),
+        ("SDA", "SDA"),
+        ("EDD", "Entrega de documentos"),
+        ("CAR", "Carta de reclamo"),
+        ("CRF", "Certificacion de fecha"),
+        ("OTR", "Otro tipo"),
     )
+
     prueba = list(choice_detalle).sort(key = lambda x: x[1], reverse=True)
     detalle = forms.ChoiceField(
         widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "12", 'id': 'id_operacion'}),

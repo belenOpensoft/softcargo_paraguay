@@ -1,9 +1,11 @@
 from django.urls import path
 from administracion_contabilidad.views.cobranza import cobranza_view
 from administracion_contabilidad.views.facturacion import facturacion_view, buscar_clientes, buscar_cliente, \
-    buscar_item_v, buscar_items_v, procesar_factura, source_facturacion, source_infofactura, cargar_preventa_infofactura
+    buscar_item_v, buscar_items_v, procesar_factura, source_facturacion, source_infofactura, \
+    cargar_preventa_infofactura, guardar_arbitraje
 from administracion_contabilidad.views.proveedores_gastos import proveedores_gastos_view, buscar_proveedor, buscar_proveedores, buscar_item_c, buscar_items_c
 from administracion_contabilidad.views.orden_pago import orden_pago_view, obtener_imputables
+from administracion_contabilidad.views.editar_consultar_pagos import editar_consultar_pagos
 
 urlpatterns = [
     path('facturacion/', facturacion_view, name='facturacion'),
@@ -23,5 +25,6 @@ urlpatterns = [
     path('obtener_imputables/', obtener_imputables, name='obtener_imputables'),
     path('source_infofactura/', source_infofactura, name='source_infofactura'),
     path('cargar_preventa_infofactura/', cargar_preventa_infofactura, name='cargar_preventa_infofactura'),
-
+    path('editar_consultar_pagos/', editar_consultar_pagos, name='editar_consultar_pagos'),
+    path('guardar_arbitraje/', guardar_arbitraje, name='guardar_arbitraje'),
 ]

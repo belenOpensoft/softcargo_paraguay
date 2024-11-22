@@ -4,19 +4,18 @@ import simplejson as simplejson
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.db.models import QuerySet, Count
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from seguimientos.forms import notasForm, seguimientoForm, cronologiaForm, envasesForm, embarquesForm, gastosForm, \
     pdfForm, archivosForm, rutasForm, emailsForm, clonarForm
 from seguimientos.models import VGrillaSeguimientos as Seguimiento, Seguimiento as SeguimientoReal, Envases, Cargaaerea, \
-    Attachhijo, VCargaaerea, Serviceaereo, Conexaerea
+    Attachhijo, Serviceaereo, Conexaerea
 
 
 @login_required(login_url='/')
 def grilla_seguimientos(request):
     try:
-        if request.user.has_perms(["mantenimientos.view_seguimientos",]):
+        if request.user.has_perms(["mantenimientos.view_seguimientos", ]):
             opciones_busqueda = {
                 'cliente__icontains': 'CLIENTE',
                 'embarcador__icontains': 'EMBARCADOR',
@@ -29,7 +28,7 @@ def grilla_seguimientos(request):
                 'posicion__icontains': 'Posicion',
                 # 'contenedores__icontains': 'Contenedor',
             }
-            return render(request, 'seguimientos/grilla_datos.html',{
+            return render(request, 'seguimientos/grilla_datos.html', {
                 'form_notas': notasForm(),
                 'form_emails': emailsForm(),
                 'form': seguimientoForm(),
@@ -42,13 +41,14 @@ def grilla_seguimientos(request):
                 'form_rutas': rutasForm(),
                 'form_clonar': clonarForm(),
                 'title_page': 'Seguimientos',
-                'opciones_busqueda' : opciones_busqueda,
+                'opciones_busqueda': opciones_busqueda,
             })
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
+
 
 """ VISTA """
 
@@ -164,6 +164,7 @@ def source_seguimientos_modo_old(request, modo):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+
 def source_seguimientos_modo(request, modo):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         """ BUSCO ORDEN """
@@ -218,6 +219,7 @@ def source_seguimientos_modo(request, modo):
 
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
 
 def get_data(registros_filtrados):
     try:
@@ -318,7 +320,7 @@ def get_data(registros_filtrados):
             campos = vars(registro2)
             for c in campos:
                 if c in cronologia:
-                    aux = getattr(registro2,c)
+                    aux = getattr(registro2, c)
                     if aux is not None:
                         crono = True
             registro_json.append(crono)
@@ -344,6 +346,7 @@ def get_data(registros_filtrados):
         return data
     except Exception as e:
         raise TypeError(e)
+
 
 def get_order(request, columns):
     try:
@@ -371,6 +374,7 @@ def get_order(request, columns):
     except Exception as e:
         raise TypeError(e)
 
+
 def get_argumentos_busqueda(**kwargs):
     try:
         result = {}
@@ -381,13 +385,15 @@ def get_argumentos_busqueda(**kwargs):
     except Exception as e:
         raise TypeError(e)
 
+
 def is_ajax(request):
     try:
         req = request.META.get('HTTP_X_REQUESTED_WITH')
         # return req == 'XMLHttpRequest'
         return True
     except Exception as e:
-        messages.error(request,e)
+        messages.error(request, e)
+
 
 def guardar_notas(request):
     resultado = {}
@@ -405,6 +411,7 @@ def guardar_notas(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
 
 def guardar_envases(request):
     resultado = {}
@@ -439,6 +446,7 @@ def guardar_envases(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+
 def eliminar_envase(request):
     resultado = {}
     try:
@@ -452,7 +460,6 @@ def eliminar_envase(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
-
 
 
 def guardar_cronologia(request):
@@ -479,11 +486,13 @@ def guardar_cronologia(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+
 def guardar_seguimiento(request):
     resultado = {}
     try:
         data = simplejson.loads(request.POST['form'])
         tipo = request.POST['tipo']
+
         if 'id' in data and data['id'][0] != '':
             registro = SeguimientoReal.objects.get(id=data['id'][0])
             tiporeg = 'modifica'
@@ -493,7 +502,7 @@ def guardar_seguimiento(request):
             registro.numero = numero + 1
             tiporeg = 'nuevo'
         campos = vars(registro)
-        for k,v in data.items():
+        for k, v in data.items():
             for name in campos:
                 if name == k:
                     if v[0] is not None and len(v[0]) > 0:
@@ -521,6 +530,7 @@ def guardar_seguimiento(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
 
 def clonar_seguimiento(request):
     resultado = {}
@@ -557,7 +567,3 @@ def clonar_seguimiento(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
-
-
-
-

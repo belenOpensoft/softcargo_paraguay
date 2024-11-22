@@ -1,20 +1,18 @@
 import json
 import re
-
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from administracion_contabilidad.views.facturacion_electronica import Uruware
 from mantenimientos.models import Clientes, Servicios, Monedas
 from administracion_contabilidad.forms import Factura
 from administracion_contabilidad.models import Boleta, PendienteFacturar, Asientos, Movims, Infofactura, \
-    VistaGastosPreventa
+    VistaGastosPreventa, Dolar
 from django.http import JsonResponse, HttpResponse
 from datetime import datetime
 from django.db import transaction
 import random
-from impomarit.models import VGastosHouse, Envases, Cargaaerea, Embarqueaereo
+from impomarit.models import Envases, Cargaaerea, Embarqueaereo
 from decimal import Decimal
 
 param_busqueda = {
@@ -587,6 +585,7 @@ def source_infofactura(request):
     except Exception as e:
         return JsonResponse({'error': str(e)})
 
+
 def cargar_preventa_infofactura_old(request):
     if request.method == 'POST':
         clase = request.POST.get('clase')
@@ -791,4 +790,28 @@ def cargar_preventa_infofactura(request):
             return JsonResponse({'error': 'Cliente no encontrado'}, safe=False)
 
 
-
+def guardar_arbitraje(request):
+    try:
+        if request.method == 'POST':
+            fecha = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+            arbitraje = request.POST.get('arbDolar')
+            paridad = request.POST.get('parDolar')
+            pizarra = request.POST.get('pizDolar')
+            tipo_moneda = request.POST.get('tipoMoneda')
+            nuevo_arb = Dolar()
+            nuevo_arb.ufecha = fecha
+            nuevo_arb.uvalor = arbitraje
+            nuevo_arb.umoneda = tipo_moneda
+            nuevo_arb.upizarra = pizarra
+            nuevo_arb.paridad = paridad
+            nuevo_arb.usuario = None
+            nuevo_arb.utcea = None
+            nuevo_arb.utcem = None
+            nuevo_arb.utcet = None
+            nuevo_arb.utcia = None
+            nuevo_arb.utcim = None
+            nuevo_arb.utcit = None
+            nuevo_arb.save()
+        return JsonResponse({'status': ''})
+    except Exception as e:
+        return JsonResponse({'status': 'Error: ' + str(e)})

@@ -94,6 +94,7 @@ class seguimientoForm(BSModalModelForm):
                   'wreceipt',
                   'valor',
                   'modo',
+                  'terminos'
                   ]  # Agrega los campos que deseas actualizar
         labels = {
             'awb': 'Master',
@@ -171,6 +172,8 @@ class seguimientoForm(BSModalModelForm):
                 self.fields[field].widget.attrs['tabindex'] = '37'
             elif field == 'diasalmacenaje':
                 self.fields[field].widget.attrs['tabindex'] = '38'
+            elif field == 'terminos':
+                self.fields[field].widget.attrs['tabindex'] = '9'
 
     choice_op = (("", ""),
                  ("IMPORTACION", "IMPORTACION"),
@@ -184,9 +187,24 @@ class seguimientoForm(BSModalModelForm):
                  ("TRANSITO", "TRANSITO"),
                  ("TRASLADO", "TRASLADO"),
                  ("MUESTRA", "MUESTRA"),
-
                  )
-    # primer columna
+
+    CHOICE_TERMINOS = (("", ""),
+                       ("FOB", "FOB"),
+                       ("EXW", "EXW"),
+                       ("DDU", "DDU"),
+                       ("FCA", "FCA"),
+                       ("DDP", "DDP"),
+                       ("DAP", "DAP"),
+                       ("CIF", "CIF"),
+                       ("CFR", "CFR"),
+                       ("DAF", "DAF"),
+                       ("DAT", "DAT"),
+                       ("CPT", "CPT"),
+                       ("CIP", "CIP"),
+                       )
+
+    # primera columna
     cliente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'cliente_add',"tabindex":"1"}))
     embarcador = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'embarcador_add',"tabindex":"2"}))
     consignatario = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'consignatario_add',"tabindex":"3"}))
@@ -210,8 +228,9 @@ class seguimientoForm(BSModalModelForm):
     proyecto = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'proyecto_add', 'required': False, "tabindex": "34"}),required=False)
     trafico = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'trafico_add', 'required': False, "tabindex": "35"}),required=False)
     actividad = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'actividad_add', 'required': False, "tabindex": "36"}),required=False)
+    terminos = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'id': 'terminos', 'required': True, "tabindex": "37"}),required=True,choices=CHOICE_TERMINOS)
     # observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'notas_seguimiento',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"10","class":"form-control"}, ), required=False,label="Notas", max_length=500)
-    id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete":"off",'required': False}),required=False,label="ID")
+    id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False}), required=False, label="ID")
 
 
 class cronologiaForm(BSModalModelForm):
@@ -502,7 +521,7 @@ class gastosForm(BSModalModelForm):
 class archivosForm(forms.ModelForm):
     class Meta:
         model = Attachhijo
-        fields = ('numero', 'archivo','detalle', 'restringido' )
+        fields = ('numero', 'archivo', 'detalle', 'restringido')
 
 
 
@@ -520,19 +539,41 @@ class archivosForm(forms.ModelForm):
         self.fields['numero'].widget = forms.HiddenInput()
 
     choice_detalle = (
-        ("OTR", "Otro tipo"),
-        ("CRF", "Certificacion de fecha"),
-        ("CAR", "Carta de reclamo"),
-        ("EDD", "Entrega de documentos"),
-        ("SDA", "SDA"),
-        ("CHO", "Canje House"),
-        ("FAG", "Factura agente"),
-        ("DAD", "Documento aduanero"),
-        ("VAE", "Validacion electronica"),
-        ("ODP", "Comprobante electronico"),
+        ("FAC", "Factura Comercial"),
+        ("NDB", "Nota de débito"),
+        ("FFT", "Factura flete terrestre"),
+        ("CSA", "Certificado Sanitario"),
+        ("COR", "Certificado de origen"),
+        ("PIC", "Fotos / Imágenes"),
+        ("PRE", "Pre-alerta"),
+        ("FPR", "Factura Proveedor"),
+        ("WHR", "Warehouse Receipt"),
+        ("NCA", "N/C Agente"),
+        ("BKC", "Booking Confirmation"),
         ("PKL", "Packing list"),
+        ("PPQ", "PPQ"),
+        ("MST", "Master"),
+        ("HUS", "House"),
+        ("GRA", "Docs. Generales"),
+        ("COM", "Docs. Comerciales"),
+        ("IMO", "Documentos IMO"),
+        ("MCA", "Manifiesto de Carga"),
+        ("CDS", "Certificado de Seguro"),
+        ("PUO", "Purchase Order"),
+        ("POD", "P.O.D."),
+        ("ODP", "Comprobante electronico"),
+        ("VAE", "Validacion electronica"),
+        ("DAD", "Documento aduanero"),
+        ("FAG", "Factura agente"),
+        ("CHO", "Canje House"),
+        ("SDA", "SDA"),
+        ("EDD", "Entrega de documentos"),
+        ("CAR", "Carta de reclamo"),
+        ("CRF", "Certificacion de fecha"),
+        ("OTR", "Otro tipo"),
     )
-    prueba = list(choice_detalle).sort(key = lambda x: x[1], reverse=True)
+
+    prueba = list(choice_detalle).sort(key=lambda x: x[1], reverse=True)
     detalle = forms.ChoiceField(
         widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "12", 'id': 'id_operacion'}),
         required=True, label="Detalle (tipo archivo)", choices=choice_detalle, initial='')
@@ -558,7 +599,7 @@ class rutasForm(forms.ModelForm):
             'viaje': forms.TextInput(attrs={'id': 'id_viaje_ruta'}),
             'modo': forms.Select(attrs={'id': 'id_modo_ruta'}),
         }
-        
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
