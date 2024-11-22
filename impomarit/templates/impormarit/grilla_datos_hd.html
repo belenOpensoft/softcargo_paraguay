@@ -108,7 +108,7 @@
 {% include 'impormarit/embarques_house.html' %}
 {% include 'impormarit/pdf.html' %}
 {% include 'impormarit/nota_house.html' %}
-{% include 'impormarit/facturar.html' %}
+{% include 'facturar.html' %}
 
 {% endblock table_datatable %}
 
@@ -116,6 +116,7 @@
 {% block script_datatable %}
     <script src="{% static 'grilla/js_impmarit_housedirecto.js' %}"></script>
     <script src="{% static 'grilla/js_importacion_maritima.js' %}"></script>
+    <script src="{% static 'adm_cont/preventa.js' %}"></script>
     <script src="{% static 'js/select2.min.js' %}"></script>
     <script src="{% static 'js/select2/es.js'  %}"></script>
     <script>

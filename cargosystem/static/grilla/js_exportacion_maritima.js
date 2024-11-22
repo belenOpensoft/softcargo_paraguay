@@ -1620,7 +1620,7 @@ var expandedRow;
     });
     $('#ingresar_gasto_master').click(function (event) {
     event.preventDefault();
-     if(document.getElementById('id_pinformar').value<0||document.getElementById('id_arbitraje_id').value<0||document.getElementById('id_costo').value<0){
+     if(document.getElementById('id_arbitraje_id').value<0||document.getElementById('id_costo').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
     if (confirm("¿Confirma guardar el gasto?")) {
@@ -1708,8 +1708,7 @@ var expandedRow;
     }else{
     if (confirm("¿Confirma guardar el gasto?")) {
         var form = $('#gastos_form_house');
-        var formData = new FormData(form[0]);
-        if (form[0].checkValidity()) {
+
         let numero=localStorage.getItem('num_house_gasto');
             let formData = $("#gastos_form_house").serializeArray();
             let data = JSON.stringify(formData);
@@ -1749,14 +1748,6 @@ var expandedRow;
                     }
                 }
             });
-        }else{
-            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
-            invalidFields.forEach(field => {
-                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
-            });
-
-            alert('Debe completar todos los campos.');
-        }
     }
     }
 });
@@ -2578,6 +2569,8 @@ table_add_im = $('#table_add_im').DataTable({
         var selectedRowN = rowData[3];
         localStorage.setItem('id_house_gasto', selectedRowId);
         localStorage.setItem('num_house_gasto', selectedRowN);
+        localStorage.setItem('clase_house', 'EM');
+
     }
 });
     }
@@ -2895,6 +2888,8 @@ table_edit_im = $('#table_edit_im').DataTable({
         var selectedRowN = rowData[3];
         localStorage.setItem('id_house_gasto', selectedRowId);
         localStorage.setItem('num_house_gasto', selectedRowN);
+                    localStorage.setItem('clase_house', 'EM');
+
     }
 });
     }
@@ -4795,3 +4790,127 @@ function eliminarNota(id) {
         });
     }
 }
+
+
+//facturacion preventa
+function cargar_gastos_factura(){
+    let numero = localStorage.getItem('num_house_gasto');
+
+    $("#facturar_table").dataTable().fnDestroy();
+    let tabla_factura = $('#facturar_table').DataTable({
+        "order": [[1, "desc"], [1, "desc"]],
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 10,
+        "language": {
+            url: "/static/datatables/es_ES.json"
+        },
+        "ajax": {
+            "url": "/importacion_maritima/source_gastos_house/",
+            'type': 'GET',
+            "data": function (d) {
+                return $.extend({}, d, {
+                    "numero": numero,
+                });
+            }
+        },
+        "columns": [
+            {
+                "data": 1,    // Concepto - `data[1]`
+                "title": "Concepto"
+            },
+            {
+                "data": 6,    // Tipo - `data[6]`
+                "title": "Tipo"
+            },
+            {
+                "data": 3,    // Cantidad - `data[3]`
+                "title": "Cantidad"
+            },
+            {
+                "data": null, // Facturar a.. - Valor de relleno "S/I"
+                "title": "Facturar a..",
+                "render": function() {
+                    return "S/I";
+                }
+            },
+            {
+                "data": 2,    // Moneda - `data[2]`
+                "title": "Moneda"
+            },
+            {
+                "data": 8,    // Arbitraje - `data[8]`
+                "title": "Arbitraje"
+            },
+             {
+                "data": 5,
+                "title": "Detalle"
+            },
+
+            {
+                "data": null, // Columna 7 - Valor por defecto "false"
+                "render": function() {
+                    return 'S/I';
+                }
+            },
+
+        ],
+        rowCallback: function(row, data) {
+            // Agregar el evento de clic para resaltar la fila seleccionada
+            $(row).off('click').on('click', function () {
+                $('#facturar_table tbody tr').removeClass('table-secondary');
+                $(this).addClass('table-secondary');
+            const valorColumna7 = $(row).find('td').eq(7).text().trim();
+
+            if (valorColumna7 === 'S/I') {
+                $('#concepto_detalle').prop('checked', false); // Desmarcar el checkbox
+            } else {
+                $('#concepto_detalle').prop('checked', true); // Marcar el checkbox
+            }
+            });
+        }
+    });
+     sumar_ingresos();
+}
+function sumar_ingresos() {
+    let totalIngresos = 0;
+    const tabla = $('#facturar_table').DataTable();
+
+    // Verifica si DataTable está inicializado
+    if (!$.fn.DataTable.isDataTable('#facturar_table')) {
+        console.log("DataTable no está inicializado.");
+        return;
+    }
+
+    // Itera sobre cada fila de la tabla y suma el valor en la columna 3
+    tabla.rows().every(function() {
+        const data = this.data();
+        console.log("Datos de la fila:", data); // Verifica el contenido de cada fila
+        const valor = parseFloat(data[3]) || 0;
+        totalIngresos += valor;
+        console.log("Total acumulado:", totalIngresos);
+    });
+
+    // Asigna el resultado total al input con ID #total_ingresos
+    $('#total_ingresos').val(totalIngresos.toFixed(2)); // Redondea a 2 decimales si es necesario
+}
+//autocomplete factura
+$("#destinatario").autocomplete({
+    source: '/autocomplete_clientes/',
+    minLength: 2,
+    select: function (event, ui) {
+        $(this).attr('data-id', ui.item['id']);
+    },
+    change: function (event, ui) {
+        if (ui.item) {
+            $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+             $('#destinatario_input').val(ui.item['id']);
+             $('#destinatario_input').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+        } else {
+            $(this).val('');
+            $('#destinatario_input').val('');
+            $(this).css({"border-color": "", 'box-shadow': ''});
+            $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
+        }
+    }
+});

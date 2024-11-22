@@ -16,8 +16,6 @@ from impomarit.views.mails import get_data_email_op
 from impomarit.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
 from impomarit.views.notas import source, guardar_notas, eliminar_nota
 from impomarit.views.pdf import get_datos_caratula
-from administracion_contabilidad.views.preventa import guardar_infofactura, source_embarques_factura, \
-    house_detail_factura, source_master_factura, get_name_by_id_productos, update_gasto_house, check_if_reference_exists
 from impomarit.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado
 from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.seguimientos import source_seguimientos_modo
@@ -25,18 +23,7 @@ from seguimientos.views.seguimientos import source_seguimientos_modo
 urlpatterns = [
     path(r'source_embarque_aereo_full/<str:master>/', source_embarque_aereo_full, name="source_embarque_aereo_full"),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
-
-    # factura
     path('source/', source, name='source'),
-    path('source_embarque_factura/', source_embarques_factura, name='source_embarque_factura'),
-    path('house_detail_factura/', house_detail_factura, name='house_detail_factura'),
-    path('source_master_factura/', source_master_factura, name='source_master_factura'),
-    path('get_name_by_id_productos/', get_name_by_id_productos, name='get_name_by_id_productos'),
-    path('preventa/', guardar_infofactura, name='preventa'),
-    path('update_gasto_house/', update_gasto_house, name='update_gasto_house'),
-    path('check_if_reference_exists/', check_if_reference_exists, name='check_if_reference_exists'),
-    #fcatura
-
     path('guardar_notas/', guardar_notas, name='guardar_notas'),
     path('eliminar_nota/', eliminar_nota, name='eliminar_nota'),
     path('generar_reporte_excel/', generar_reporte_excel, name='generar_reporte_excel'),

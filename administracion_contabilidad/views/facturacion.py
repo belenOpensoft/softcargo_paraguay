@@ -1,19 +1,27 @@
 import json
 import re
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from administracion_contabilidad.views.facturacion_electronica import Uruware
+from expaerea.models import ExportEmbarqueaereo
+from expmarit.models import ExpmaritEmbarqueaereo
+from expterrestre.models import ExpterraEmbarqueaereo
+from impaerea.models import ImportEmbarqueaereo
+from impterrestre.models import ImpterraEmbarqueaereo
 from mantenimientos.models import Clientes, Servicios, Monedas
 from administracion_contabilidad.forms import Factura
 from administracion_contabilidad.models import Boleta, PendienteFacturar, Asientos, Movims, Infofactura, \
-    VistaGastosPreventa, Dolar
+    VistaGastosPreventa
 from django.http import JsonResponse, HttpResponse
 from datetime import datetime
 from django.db import transaction
 import random
-from impomarit.models import Envases, Cargaaerea, Embarqueaereo
+from impomarit.models import VGastosHouse, Envases, Cargaaerea, Embarqueaereo
 from decimal import Decimal
+from administracion_contabilidad.forms import pdfForm
 
 param_busqueda = {
     1: 'autogenerado__icontains',
@@ -150,7 +158,7 @@ def get_order(request, columns):
 
 def facturacion_view(request):
     form = Factura(request.POST or None)
-    return render(request, 'facturacion.html', {'form': form})
+    return render(request, 'facturacion.html', {'form': form,'form_pdf': pdfForm(),})
 
 
 def buscar_cliente(request):
@@ -228,10 +236,37 @@ def procesar_factura(request):
         if request.method == 'POST':
             lista = Boleta.objects.last()
             numero = int(lista.numero) + 1
-
             hora = datetime.now().strftime('%H%M%S%f')
             fecha = request.POST.get('fecha')
             tipo = request.POST.get('tipoFac', 0)
+
+            preventa = json.loads(request.POST.get('preventa'))
+            if preventa!=0:
+                autogenerado=preventa.get('autogenerado')
+                master=preventa.get('master')
+                house=preventa.get('house')
+                posicion=preventa.get('posicion')
+                kilos=preventa.get('kilos')
+                bultos=preventa.get('bultos')
+                terminos=preventa.get('incoterms')
+                pagoflete=preventa.get('pago')
+                origen=preventa.get('origen')
+                destino=preventa.get('destino')
+                seguimiento=preventa.get('seguimiento')
+            else:
+                autogenerado=generar_autogenerado(tipo, hora, fecha, numero)
+                master=None
+                house=None
+                posicion=None
+                kilos=None
+                bultos=None
+                terminos=None
+                pagoflete=None
+                origen=None
+                destino=None
+                seguimiento=None
+
+
             serie = request.POST.get('serie', "")
             prefijo = request.POST.get('prefijo', 0)
             moneda = request.POST.get('moneda', "")
@@ -240,7 +275,6 @@ def procesar_factura(request):
             cliente_data = json.loads(request.POST.get('clienteData'))
             codigo_cliente = cliente_data['codigo']
             cliente = Clientes.objects.get(codigo=codigo_cliente)
-            autogenerado = generar_autogenerado(tipo, hora, fecha, numero)
             fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
 
             precio_total = request.POST.get('total', 0)
@@ -253,8 +287,7 @@ def procesar_factura(request):
             tipo_asiento = 'V'
             detalle1 = 'S/I'
             detalle_mov = "detallemov"  #si viene de la preventa, sino vacio
-            nombre_mov = "nombremov"
-            posicion = 0  #traer de la preventa
+            nombre_mov = ""
             asiento = generar_numero()
             movimiento_num = modificar_numero(asiento)
 
@@ -376,6 +409,16 @@ def procesar_factura(request):
                 boleta.monto = item_data.get('precio')
                 boleta.totiva = totaliva
                 boleta.total = coniva
+                boleta.master=master
+                boleta.house=house
+                boleta.posicion=posicion
+                boleta.kilos=kilos
+                boleta.bultos=bultos
+                boleta.terminos=terminos
+                boleta.pagoflete=pagoflete
+                boleta.origen=origen
+                boleta.destino=destino
+                boleta.seguimiento=seguimiento
                 boleta.save()
 
                 asiento_vector = {
@@ -411,14 +454,6 @@ def procesar_factura(request):
         return JsonResponse({'status': 'Error: ' + str(e)})
 
 
-# """ PASO 2 MOVIMIENTOS DE CUENTA """
-#         actualizo_mov_cuenta()
-#         """ PROCESO FACTURACION ELECTRONICA """
-#         if len(items_data) > 0 and isinstance(boleta, Boleta):
-#             thread = threading.Thread(target=proceso_factura_electronica, args=(boleta.autogenerado,))
-#             thread.start()
-#         actualizo_mov_cuenta()
-#         return JsonResponse({'status': 'success', 'message': 'Facturas procesadas correctamente'})
 
 def generar_numero():
     # Obtener la fecha y hora actual
@@ -585,109 +620,48 @@ def source_infofactura(request):
     except Exception as e:
         return JsonResponse({'error': str(e)})
 
-
-def cargar_preventa_infofactura_old(request):
-    if request.method == 'POST':
-        clase = request.POST.get('clase')
-        referencia = request.POST.get('referencia')
-        preventa = request.POST.get('preventa')
-        gastos_data_list = []
-        total_sin_iva = Decimal('0.00')
-        total_con_iva = Decimal('0.00')
+def source_infofactura_cliente(request):
+    try:
         start = int(request.GET.get('start', 0))
-        length = int(request.GET.get('length', 10))
+        length = int(request.GET.get('length', 5))
+        cliente = str(request.GET.get('cliente'))
 
-        try:
-            prev = Infofactura.objects.get(id=preventa)
-            gastos = VistaGastosPreventa.objects.filter(numero=referencia)
+        anio_limite = 2010
 
-            if gastos.exists():
-                for gasto in gastos:
-                    gasto_data = {
-                        'descripcion': gasto.servicio,
-                        'total': gasto.precio,
-                        'iva': gasto.iva,
-                        'original': gasto.pinformar,
-                        'moneda': gasto.moneda,
-                    }
-                    total_sin_iva += gasto.precio
-                    if gasto.iva == 'Basico':
-                        total_con_iva += gasto.precio * Decimal('1.22')
-                    else:
-                        total_con_iva += gasto.precio
+        infofacturas_qs = Infofactura.objects.all()
 
-                    gasto_data = gasto_data[start:start + length]
+        infofacturas_qs = infofacturas_qs.filter(
+            Q(autogenerado__gte=str(anio_limite))&
+            Q(consigna__icontains=cliente)
+        ).exclude(
+            autogenerado__in=Boleta.objects.values('autogenerado')
+        )
 
-                    gastos_data_list.append({
-                        'draw': int(request.GET.get('draw', 1)),
-                        'recordsTotal':gastos.count() ,
-                        'recordsFiltered': gasto_data.count(),
-                        'data': gastos_data_list,
-                    })
-            else:
-                return JsonResponse({'error': 'No hay gastos'}, safe=False)
+        total_registros = infofacturas_qs.count()
 
-            # Limpiamos la referencia eliminando cualquier letra final
-            ref = re.sub(r'[a-zA-Z]$', '', prev.referencia)
+        infofacturas_paginated = infofacturas_qs[start:start + length]
 
-            if clase == "IM":
-                embarque = Embarqueaereo.objects.get(numero=ref)
-                cliente = Clientes.objects.get(codigo=embarque.cliente)
-                moneda = Monedas.objects.get(codigo=embarque.moneda).nombre
-            elif clase == "IA":
-                embarque = Embarqueaereo.objects.get(numero=ref)
-                cliente = Clientes.objects.get(codigo=embarque.cliente)
-                moneda = embarque.moneda
+        data = [{
+            'numero': infofactura.id,
+            'sale_llega':infofactura.fecha,
+            'referencia': infofactura.referencia,
+            'consignatario': infofactura.consigna,
+            'master': infofactura.master,
+            'house': infofactura.house,
+            'vapor_vuelo': infofactura.vuelo,
+            'clase': infofactura.posicion[:2],
+            'fecha': infofactura.fecha,
+        } for infofactura in infofacturas_paginated]
 
-            data_preventa = {
-                'moneda': moneda,
-                'total_con_iva': str(total_con_iva),
-                'total_sin_iva': str(total_sin_iva),
-                'cliente_i': cliente.empresa,
-                'peso': prev.kilos,
-                'direccion': cliente.direccion,
-                'localidad': cliente.localidad,
-                'aplic': Cargaaerea.objects.filter(numero=ref).values('aplicable').first().get('aplicable',
-                                                                                               'S/I') if clase == "IA" else 'S/I',
-                'bultos': prev.bultos,
-                'volumen': prev.volumen,
-                'commodity': prev.commodity,
-                'inconterms': prev.terminos,
-                'flete': prev.pagoflete,
-                'deposito': "S/I",
-                'wr': prev.wr,
-                'referencia': prev.referencia,
-                'llegada_salida': embarque.fecharetiro,
-                'origen': prev.destino,
-                'destino': prev.origen,
-                'transportista': prev.transportista,
-                'consignatario': prev.consigna,
-                'embarcador': prev.embarca,
-                'agente': prev.agente,
-                'vuelo_vapor': prev.vuelo,
-                'seguimiento': prev.seguimiento,
-                'mawb_mbl_mcrt': prev.master,
-                'hawb_hbl_hcrt': prev.house,
-                'posicion': prev.posicion,
-                'status': 'PARA FACTURAR',
-                'orden': "S/I",
-                'modo': 'MARITIMO',
-            }
+        return JsonResponse({
+            'draw': int(request.GET.get('draw', 1)),
+            'recordsTotal': total_registros,
+            'recordsFiltered': total_registros,
+            'data': data,
+        })
 
-            data = {
-                "data_preventa": data_preventa,
-                "gastos_data": gastos_data_list
-            }
-
-            return JsonResponse(data, safe=False)
-
-        except Infofactura.DoesNotExist:
-            return JsonResponse({'error': 'Infofactura no encontrada'}, safe=False)
-        except Embarqueaereo.DoesNotExist:
-            return JsonResponse({'error': 'Embarque no encontrado'}, safe=False)
-        except Clientes.DoesNotExist:
-            return JsonResponse({'error': 'Cliente no encontrado'}, safe=False)
-
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
 
 def cargar_preventa_infofactura(request):
     if request.method == 'POST':
@@ -725,28 +699,51 @@ def cargar_preventa_infofactura(request):
 
                     gastos_data_list.append(gasto_data)
 
-            # Limpiamos la referencia eliminando cualquier letra final
             ref = re.sub(r'[a-zA-Z]$', '', prev.referencia)
+            try:
+                if clase == "IM":
+                    embarque = Embarqueaereo.objects.get(numero=ref)
+                    cliente = Clientes.objects.get(codigo=embarque.cliente)
+                    moneda = Monedas.objects.get(codigo=embarque.moneda).nombre
+                elif clase == "IA":
+                    embarque = ImportEmbarqueaereo.objects.get(numero=ref)
+                    cliente = Clientes.objects.get(codigo=embarque.cliente)
+                    moneda = embarque.moneda
+                elif clase == "EA":
+                    embarque = ExportEmbarqueaereo.objects.get(numero=ref)
+                    cliente = Clientes.objects.get(codigo=embarque.cliente)
+                    moneda = embarque.moneda
+                elif clase == "EM":
+                    embarque = ExpmaritEmbarqueaereo.objects.get(numero=ref)
+                    cliente = Clientes.objects.get(codigo=embarque.cliente)
+                    moneda = embarque.moneda
+                elif clase == "IT":
+                    embarque = ImpterraEmbarqueaereo.objects.get(numero=ref)
+                    cliente = Clientes.objects.get(codigo=embarque.cliente)
+                    moneda = embarque.moneda
+                elif clase == "ET":
+                    embarque = ExpterraEmbarqueaereo.objects.get(numero=ref)
+                    cliente = Clientes.objects.get(codigo=embarque.cliente)
+                    moneda = embarque.moneda
+            except Embarqueaereo.DoesNotExist:
+                embarque=None
+                moneda = None
+                cliente = None
 
-            if clase == "IM":
-                embarque = Embarqueaereo.objects.get(numero=ref)
-                cliente = Clientes.objects.get(codigo=embarque.cliente)
-                moneda = Monedas.objects.get(codigo=embarque.moneda).nombre
-            elif clase == "IA":
-                embarque = Embarqueaereo.objects.get(numero=ref)
-                cliente = Clientes.objects.get(codigo=embarque.cliente)
-                moneda = embarque.moneda
+            llegada_salida = embarque.fecharetiro if embarque and hasattr(embarque, 'fecharetiro') else None
 
             data_preventa = {
-                'moneda': moneda,
+                'autogenerado':prev.autogenerado,
+                'house':prev.house,
+                'master':prev.master,
+                'moneda': moneda if moneda else None,
                 'total_con_iva': str(total_con_iva),
                 'total_sin_iva': str(total_sin_iva),
-                'cliente_i': cliente.empresa,
+                'cliente_i': cliente.empresa if cliente else None,
                 'peso': prev.kilos,
-                'direccion': cliente.direccion,
-                'localidad': cliente.localidad,
-                'aplic': Cargaaerea.objects.filter(numero=ref).values('aplicable').first().get('aplicable',
-                                                                                               'S/I') if clase == "IA" else 'S/I',
+                'direccion': cliente.direccion if cliente else None,
+                'localidad': cliente.localidad if cliente else None,
+                #'aplic': 0 if int(ref)<0 else Cargaaerea.objects.filter(numero=ref).values('aplicable').first().get('aplicable','S/I') if clase == "IA" else 'S/I',
                 'bultos': prev.bultos,
                 'volumen': prev.volumen,
                 'commodity': prev.commodity,
@@ -755,7 +752,7 @@ def cargar_preventa_infofactura(request):
                 'deposito': "S/I",
                 'wr': prev.wr,
                 'referencia': prev.referencia,
-                'llegada_salida': embarque.fecharetiro,
+                'llegada_salida': llegada_salida,
                 'origen': prev.destino,
                 'destino': prev.origen,
                 'transportista': prev.transportista,
@@ -784,34 +781,136 @@ def cargar_preventa_infofactura(request):
 
         except Infofactura.DoesNotExist:
             return JsonResponse({'error': 'Infofactura no encontrada'}, safe=False)
-        except Embarqueaereo.DoesNotExist:
-            return JsonResponse({'error': 'Embarque no encontrado'}, safe=False)
         except Clientes.DoesNotExist:
             return JsonResponse({'error': 'Cliente no encontrado'}, safe=False)
 
+def cargar_preventa_infofactura_multiple(request):
+    if request.method == 'POST':
+        try:
+            seleccionados = json.loads(request.POST.get('seleccionados', '[]'))
 
-def guardar_arbitraje(request):
-    try:
-        if request.method == 'POST':
-            fecha = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-            arbitraje = request.POST.get('arbDolar')
-            paridad = request.POST.get('parDolar')
-            pizarra = request.POST.get('pizDolar')
-            tipo_moneda = request.POST.get('tipoMoneda')
-            nuevo_arb = Dolar()
-            nuevo_arb.ufecha = fecha
-            nuevo_arb.uvalor = arbitraje
-            nuevo_arb.umoneda = tipo_moneda
-            nuevo_arb.upizarra = pizarra
-            nuevo_arb.paridad = paridad
-            nuevo_arb.usuario = None
-            nuevo_arb.utcea = None
-            nuevo_arb.utcem = None
-            nuevo_arb.utcet = None
-            nuevo_arb.utcia = None
-            nuevo_arb.utcim = None
-            nuevo_arb.utcit = None
-            nuevo_arb.save()
-        return JsonResponse({'status': ''})
-    except Exception as e:
-        return JsonResponse({'status': 'Error: ' + str(e)})
+            resultado = []
+
+            for item in seleccionados:
+                preventa = item.get('numero')
+                referencia = item.get('referencia')
+                clase = item.get('clase')
+
+                gastos_data_list = []
+                total_sin_iva = Decimal('0.00')
+                total_con_iva = Decimal('0.00')
+
+                try:
+                    prev = Infofactura.objects.get(id=preventa)
+                    gastos = VistaGastosPreventa.objects.filter(numero=referencia)
+
+                    total_gastos = gastos.count()
+
+                    for gasto in gastos:
+                        gasto_data = {
+                            'descripcion': gasto.servicio,
+                            'total': float(gasto.precio),
+                            'iva': gasto.iva,
+                            'original': float(gasto.pinformar),
+                            'moneda': gasto.moneda,
+                        }
+                        total_sin_iva += gasto.precio
+                        if gasto.iva == 'Basico':
+                            total_con_iva += gasto.precio * Decimal('1.22')
+                        else:
+                            total_con_iva += gasto.precio
+
+                        gastos_data_list.append(gasto_data)
+
+                    ref = re.sub(r'[a-zA-Z]$', '', prev.referencia)
+
+                    if clase == "IM":
+                        embarque = Embarqueaereo.objects.get(numero=ref)
+                        cliente = Clientes.objects.get(codigo=embarque.cliente)
+                        moneda = Monedas.objects.get(codigo=embarque.moneda).nombre
+                    elif clase == "IA":
+                        embarque = ImportEmbarqueaereo.objects.get(numero=ref)
+                        cliente = Clientes.objects.get(codigo=embarque.cliente)
+                        moneda = embarque.moneda
+                    elif clase == "EA":
+                        embarque = ExportEmbarqueaereo.objects.get(numero=ref)
+                        cliente = Clientes.objects.get(codigo=embarque.cliente)
+                        moneda = embarque.moneda
+                    elif clase == "EM":
+                        embarque = ExpmaritEmbarqueaereo.objects.get(numero=ref)
+                        cliente = Clientes.objects.get(codigo=embarque.cliente)
+                        moneda = embarque.moneda
+                    elif clase == "IT":
+                        embarque = ImpterraEmbarqueaereo.objects.get(numero=ref)
+                        cliente = Clientes.objects.get(codigo=embarque.cliente)
+                        moneda = embarque.moneda
+                    elif clase == "ET":
+                        embarque = ExpterraEmbarqueaereo.objects.get(numero=ref)
+                        cliente = Clientes.objects.get(codigo=embarque.cliente)
+                        moneda = embarque.moneda
+
+
+                    data_preventa = {
+                        'autogenerado': prev.autogenerado,
+                        'house': prev.house,
+                        'master': prev.master,
+                        'moneda': moneda,
+                        'total_con_iva': str(total_con_iva),
+                        'total_sin_iva': str(total_sin_iva),
+                        'cliente_i': cliente.empresa,
+                        'peso': prev.kilos,
+                        'direccion': cliente.direccion,
+                        'localidad': cliente.localidad,
+                        'aplic': Cargaaerea.objects.filter(numero=ref).values('aplicable').first().get('aplicable', 'S/I') if clase == "IA" else 'S/I',
+                        'bultos': prev.bultos,
+                        'volumen': prev.volumen,
+                        'commodity': prev.commodity,
+                        'inconterms': prev.terminos,
+                        'flete': prev.pagoflete,
+                        'deposito': "S/I",
+                        'wr': prev.wr,
+                        'referencia': prev.referencia,
+                        'llegada_salida': embarque.fecharetiro,
+                        'origen': prev.destino,
+                        'destino': prev.origen,
+                        'transportista': prev.transportista,
+                        'consignatario': prev.consigna,
+                        'embarcador': prev.embarca,
+                        'agente': prev.agente,
+                        'vuelo_vapor': prev.vuelo,
+                        'seguimiento': prev.seguimiento,
+                        'mawb_mbl_mcrt': prev.master,
+                        'hawb_hbl_hcrt': prev.house,
+                        'posicion': prev.posicion,
+                        'status': 'PARA FACTURAR',
+                        'orden': "S/I",
+                        'modo': 'MARITIMO',
+                    }
+
+                    resultado.append({
+                        "numero": preventa,
+                        "referencia": referencia,
+                        "clase": clase,
+                        "gastos": gastos_data_list,
+                        "data_preventa": data_preventa
+                    })
+
+                except Infofactura.DoesNotExist:
+                    resultado.append({'error': f'Infofactura con número {preventa} no encontrada'})
+                except Embarqueaereo.DoesNotExist:
+                    resultado.append({'error': f'Embarque con referencia {referencia} no encontrado'})
+                except Clientes.DoesNotExist:
+                    resultado.append({'error': f'Cliente relacionado con referencia {referencia} no encontrado'})
+
+            return JsonResponse({"data": resultado}, safe=False)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error al procesar los datos enviados'}, safe=False)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, safe=False)
+
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+
+

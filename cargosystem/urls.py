@@ -12,7 +12,7 @@ urlpatterns = [
     path('', include('mantenimientos.urls')),
     path('', include('seguimientos.urls')),
     path('', include('notificaciones.urls')),
-    path('', include('administracion_contabilidad.urls')),
+    path('admin_cont/', include('administracion_contabilidad.urls')),
     path('importacion_maritima/', include('impomarit.urls')),
     path('exportacion_maritima/', include('expmarit.urls')),
     path('importacion_aerea/', include('impaerea.urls')),

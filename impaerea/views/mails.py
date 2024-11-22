@@ -5,10 +5,10 @@ from django.http import HttpResponse
 import base64
 from django.views.decorators.csrf import csrf_exempt
 
-from impaerea.models import VGastosHouse
-from impaerea.models import VEmbarqueaereo, ImportCargaaerea, ImportServiceaereo
+from impaerea.models import VGastosHouse, ImportEmbarqueaereo
+from impaerea.models import VEmbarqueaereo, ImportCargaaerea, ImportServiceaereo, ImportEmbarqueaereo as Embarqueaereo
 from mantenimientos.views.bancos import is_ajax
-from mantenimientos.models import Productos
+from mantenimientos.models import Productos, Monedas, Clientes
 from seguimientos.models import VGrillaSeguimientos
 
 DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
@@ -38,21 +38,23 @@ def get_data_email_op(request):
             title = request.POST['title']
             row_number = request.POST['row_number']
             #9155
+            embarque=ImportEmbarqueaereo.objects.get(numero=row_number)
             row = VEmbarqueaereo.objects.get(numero=row_number)
-            seg=VGrillaSeguimientos.objects.get(numero=row.seguimiento)
             row2 = ImportCargaaerea.objects.filter(numero=row_number)
             gastos = VGastosHouse.objects.filter(numero=row_number)
 
             try:
+                seg = VGrillaSeguimientos.objects.get(numero=row.seguimiento)
                 seguimiento = VGrillaSeguimientos.objects.get(numero=row.seguimiento)
+
             except VGrillaSeguimientos.DoesNotExist:
-                seguimiento = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='', deposito='', pago='',
-                                                  vendedor='')
+                seguimiento = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='', deposito='', pago='',vendedor='')
+                seg = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='', deposito='', pago='',vendedor='')
+
             texto = ''
             texto += f'<br>'
-            texto, resultado = get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos)
+            texto, resultado = get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque)
             texto += '<b>OCEANLINK,</b><br>'
-            # texto += str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>'
             texto += 'DEPARTAMENTO DE IMPORTACION MARITIMA, <br>'
             texto += 'MISIONES 1574 OF 201 <br>'
             texto += 'OPERACIONES <br>'
@@ -71,7 +73,7 @@ def get_data_email_op(request):
     return HttpResponse(data_json, mimetype)
 
 
-def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos):
+def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque):
     # merca = Productos.objects.get(codigo=row2.producto.codigo)
     if row2 is not None:
         merca = []
@@ -366,6 +368,98 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += '</table>'
 
         return texto, resultado
+
+    elif title == 'Instruccion de embarque':
+        embarcador = Clientes.objects.get(codigo=embarque.embarcador)
+        consignatario = Clientes.objects.get(codigo=embarque.consignatario)
+        cliente = Clientes.objects.get(codigo=embarque.cliente)
+        mercaderia=ImportCargaaerea.objects.filter(numero=row.numero)
+        moneda=Monedas.objects.get(codigo=embarque.moneda)
+
+        try:
+            if seguimiento.refproveedor.isdigit():
+                proveedor = Clientes.objects.get(codigo=seguimiento.refproveedor)
+                direccion = proveedor.direccion
+                empresa = proveedor.empresa
+                ciudad = proveedor.ciudad
+                pais = proveedor.pais
+            else:
+                direccion = ''
+                empresa = ''
+                ciudad = ''
+                pais = ''
+
+        except Clientes.DoesNotExist:
+            direccion = ''
+            empresa = ''
+            ciudad = ''
+            pais = ''
+
+        resultado['asunto'] = 'INSTRUCCIÓN DE EMBARQUE - Ref.: ' + str(seguimiento.refproveedor) + ' - Shipper: ' + str(
+            embarcador.empresa) + ' - Consignee: ' + str(consignatario.empresa)
+
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+
+        texto += '<br><br>'
+        tabla_html = "<table style='width:40%'>"
+        tabla_html += f"<tr><th align='left'>Fecha: </th><td>{fecha_formateada}</td></tr>"
+        tabla_html += f"<tr><th align='left'>A: </th><td>{str(cliente.empresa)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Departamento: </th><td>MARITIMO</td></tr>"
+        tabla_html += f"<tr><th align='left'>Envíado: </th><td>...</td></tr>"
+        tabla_html += "</table><br>"
+        tabla_html+="<p>Estimados Seres.:</p><br>"
+        tabla_html+="<p>Por favor, contactar a la siguiente compañía para coordinar la operación referenciada:</p><br>"
+        tabla_html += "<table style='width:40%'>"
+        tabla_html += f"<tr><th align='left'>Proveedor: </th><td>{str(empresa)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Dirección: </th><td>{str(direccion)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Ciudad: </th><td>{str(ciudad)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>País: </th><td>{str(pais)}</td></tr><br><br>"
+        tabla_html += f"<tr><th align='left'>Consignatario: </th><td>{str(consignatario.empresa)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Dirección: </th><td>{str(consignatario.direccion)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>País: </th><td>{str(consignatario.pais)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>RUC: </th><td>{str(consignatario.ruc)}</td></tr><br><br>"
+        tabla_html += f"<tr><th align='left'>Referencia interna: </th><td>{seguimiento.refproveedor}/{row.numero}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Posición: </th><td>{str(row.posicion)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Puerto de carga: </th><td>{str(embarque.origen)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Puerto de descarga: </th><td>{str(embarque.destino)}</td></tr>"
+        tabla_html += "</table><br>"
+
+        for m in mercaderia:
+            tabla_html += "<table style='width:40%'>"
+            tabla_html += f"<tr><th align='left'>Mercaderia: </th><td>{m.producto}</td></tr>"
+            tabla_html += f"<tr><th align='left'>Bultos: </th><td>{m.bultos}</td></tr>"
+            tabla_html += f"<tr><th align='left'>Kilos: </th><td>{m.bruto}</td></tr>"
+
+        condicion_pago = "Collect" if row.pago_flete == "C" else "Prepaid" if row.pago_flete == "P" else ""
+        tabla_html += f"<tr><th align='left'>Condiciones de pago: </th><td>{condicion_pago}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Términos de compra: </th><td>{row.terminos}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Modo de embarque: </th><td>MARITIMO</td></tr>"
+        tabla_html += f"<tr><th align='left'>Moneda: </th><td>{moneda.nombre}</td></tr>"
+        tabla_html += "</table><br>"
+
+        return tabla_html, resultado
+
+    elif title == 'Liberacion':
+
+        resultado['asunto'] = 'LIBERACIÓN: ' + str(row.awb) + ' - seguimiento: ' + str(
+            row.seguimiento)
+
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+
+        tabla_html = fecha_formateada + "<br><br>"
+        tabla_html += f"<p>ESTIMADOS, SOLICITAMOS LA LIBERACIÓN DEL SIGUIENTE BL:{row.awb}</p><br>"
+        tabla_html += f"<p>ADJUNTAMOS:</p>"
+        tabla_html += f"<p>*BL {row.awb} ENDOSADO</p>"
+        tabla_html += f"<p>*ARRIVAL NOTICE ENDOSADO</p>"
+        tabla_html += f"<p>*CONTRATO DE RESPONSABILIDAD</p>"
+        tabla_html += f"<p>*COMPROBANTE DE PAGO</p><br>"
+        tabla_html += f"<p>SALUDOS,</p><br>"
+
+        return tabla_html, resultado
 
 
 def image_to_base64(image_path):

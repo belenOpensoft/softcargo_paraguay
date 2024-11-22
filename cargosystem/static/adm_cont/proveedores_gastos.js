@@ -46,7 +46,7 @@ $(document).ready(function() {
     $('#proveedor').autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "/buscar_proveedor",
+                url: "/admin_cont/buscar_proveedor",
                 dataType: 'json',
                 data: { term: request.term },
                 success: function(data) {
@@ -63,7 +63,7 @@ $(document).ready(function() {
         select: function(event, ui) {
             const { id } = ui.item;
             $.ajax({
-                url: "/buscar_proveedores",
+                url: "/admin_cont/buscar_proveedores",
                 data: { id },
                 dataType: 'json',
                 success: proveedor => {
@@ -85,7 +85,7 @@ $(document).ready(function() {
     $('#proveedor2').autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "/buscar_proveedor",
+                url: "/admin_cont/buscar_proveedor",
                 dataType: 'json',
                 data: { term: request.term },
                 success: function(data) {
@@ -103,7 +103,7 @@ $(document).ready(function() {
             const { id } = ui.item;
 
             $.ajax({
-                url: "/buscar_proveedores",
+                url: "/admin_cont/buscar_proveedores",
                 data: { id },
                 dataType: 'json',
                 success: proveedor => {
@@ -126,7 +126,7 @@ $(document).ready(function() {
     $('#item').autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "/buscar_item_c",
+                url: "/admin_cont/buscar_item_c",
                 dataType: 'json',
                 data: {
                     term: request.term
@@ -147,7 +147,7 @@ $(document).ready(function() {
 
 
             $.ajax({
-                url: "/buscar_items_c",
+                url: "/admin_cont/buscar_items_c",
                 data: { id: ui.item.id },
                 dataType: 'json',
                 success: servicio => {

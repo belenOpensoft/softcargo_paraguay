@@ -77,12 +77,14 @@
 {% include 'expaerea/embarques_house.html' %}
 {% include 'expaerea/pdf.html' %}
 {% include 'expaerea/nota_house.html' %}
+{% include 'facturar.html' %}
 
 {% endblock table_datatable %}
 
 
 {% block script_datatable %}
     <script src="{% static 'grilla/js_exportacion_aerea.js' %}"></script>
+    <script src="{% static 'adm_cont/preventa.js' %}"></script>
     <script src="{% static 'js/select2.min.js' %}"></script>
     <script src="{% static 'js/select2/es.js'  %}"></script>
     <script>

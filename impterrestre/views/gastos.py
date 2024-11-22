@@ -159,7 +159,6 @@ def get_order(request, columns):
 def is_ajax(request):
     try:
         req = request.META.get('HTTP_X_REQUESTED_WITH')
-        # return req == 'XMLHttpRequest'
         return True
     except Exception as e:
         messages.error(request,e)
@@ -248,13 +247,10 @@ def eliminar_gasto_master(request):
 def add_gasto_house(request):
     resultado = {}
     try:
-        # Recibir los datos JSON enviados por AJAX
         data = json.loads(request.POST.get('data'))
 
-        # Crear un diccionario para acceder fácilmente a los valores
         form_data = {item['name']: item['value'] for item in data}
 
-        # Acceder a los valores del formulario usando el diccionario
         numero = form_data.get('numero')
         servicio = form_data.get('servicio')
         secomparte = form_data.get('secomparte')
@@ -270,13 +266,10 @@ def add_gasto_house(request):
         empresa = form_data.get('empresa',0)
         reembolsable = form_data.get('reembolsable')
 
-        # Verificar si el registro ya existe
         if 'id_gasto_id_house' in form_data and form_data['id_gasto_id_house']:
-            # Modificar el registro existente
             registro = ImpterraServiceaereo.objects.get(id=form_data['id_gasto_id_house'])
 
         else:
-            # Crear un nuevo registro si no existe
             registro = ImpterraServiceaereo()
 
         registro.numero = numero
@@ -295,7 +288,6 @@ def add_gasto_house(request):
         registro.reembolsable = reembolsable
 
         registro.save()
-        # Devolver el resultado de éxito
         resultado['resultado'] = 'exito'
         resultado['numero'] = registro.numero
 
@@ -306,22 +298,17 @@ def add_gasto_house(request):
     except Exception as e:
         resultado['resultado'] = str(e)
 
-    # Retornar el resultado en formato JSON
     return JsonResponse(resultado)
 
 def add_gasto_importado(request):
     try:
         if request.method == 'POST':
-            # Asumimos que el array de datos llega en formato JSON
             data = json.loads(request.body)
 
             if isinstance(data, list):
-                # Iteramos sobre cada elemento en la lista
                 for gasto_data in data:
-                    # Crear la instancia de ImpterraServiceaereo para cada registro
                     registro = ImpterraServiceaereo()
 
-                    # Asignar los valores desde el JSON al modelo
                     registro.numero = gasto_data.get('numero')
                     registro.servicio = gasto_data.get('servicio')
                     registro.secomparte = gasto_data.get('secomparte')
@@ -335,7 +322,6 @@ def add_gasto_importado(request):
                     registro.socio = gasto_data.get('socio')
                     registro.detalle = gasto_data.get('detalle')
 
-                    # Guardar el registro en la base de datos
                     registro.save()
 
 

@@ -78,6 +78,7 @@
 {% include 'impoterrestre/embarques_house.html' %}
 {% include 'impoterrestre/pdf.html' %}
 {% include 'impoterrestre/nota_house.html' %}
+{% include 'facturar.html' %}
 
 
 {% endblock table_datatable %}
@@ -85,6 +86,7 @@
 
 {% block script_datatable %}
     <script src="{% static 'grilla/js_importacion_terrestre.js' %}"></script>
+    <script src="{% static 'adm_cont/preventa.js' %}"></script>
     <script src="{% static 'js/select2.min.js' %}"></script>
     <script src="{% static 'js/select2/es.js'  %}"></script>
     <script>

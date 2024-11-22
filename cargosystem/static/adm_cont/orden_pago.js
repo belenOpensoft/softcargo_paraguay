@@ -3,7 +3,7 @@ $('#div_tabla').css('display', 'none');
     $('#proveedor').autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "/buscar_proveedor",
+                url: "/admin_cont/buscar_proveedor",
                 dataType: 'json',
                 data: { term: request.term },
                 success: function(data) {
@@ -22,7 +22,7 @@ $('#div_tabla').css('display', 'none');
             console.log(ui.item);
             let codigo;
             $.ajax({
-                url: "/buscar_proveedores",
+                url: "/admin_cont/buscar_proveedores",
                 data: { id },
                 dataType: 'json',
                 success: proveedor => {
@@ -52,7 +52,7 @@ $('#div_tabla').css('display', 'none');
 function cargar_tabla_imputable(codigo){
     const table = $('#imputableTable').DataTable({
                 ajax: {
-                    url: '/obtener_imputables',
+                    url: '/admin_cont/obtener_imputables',
                     data: { codigo: '123' },  // Reemplaza '123' con el código adecuado
                     dataSrc: 'data'  // Indica dónde están los datos en la respuesta JSON
                 },
