@@ -1716,14 +1716,13 @@ var expandedRow;
 
     //gastos house
     $('#ingresar_gasto_house').off('click').click(function (event) {
+
     event.preventDefault();
     if(document.getElementById('id_pinformar_h').value<0||document.getElementById('id_arbitraje_h').value<0||document.getElementById('id_precio_h').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
     if (confirm("¿Confirma guardar el gasto?")) {
         var form = $('#gastos_form_house');
-        var formData = new FormData(form[0]);
-        if (form[0].checkValidity()) {
         let numero=localStorage.getItem('num_house_gasto');
             let formData = $("#gastos_form_house").serializeArray();
             let data = JSON.stringify(formData);
@@ -1763,14 +1762,6 @@ var expandedRow;
                     }
                 }
             });
-        }else{
-            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
-            invalidFields.forEach(field => {
-                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
-            });
-
-            alert('Debe completar todos los campos.');
-        }
     }
     }
 });
