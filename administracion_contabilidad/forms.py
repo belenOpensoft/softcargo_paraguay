@@ -17,6 +17,7 @@ def get_arbitraje():
         arbitraje_valor = 0.0000
     return arbitraje_valor
 
+
 def get_paridad():
     try:
         data = datetime.datetime.now().date()
@@ -28,9 +29,6 @@ def get_paridad():
 
 
 class Factura(forms.Form):
-
-
-
     CHOICE_TIPO = (
         ('11', 'Factura'),
         ('20', 'Nota de débito'),
@@ -54,7 +52,7 @@ class Factura(forms.Form):
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'Número de serie'
-            }
+        }
         ),
 
         error_messages={
@@ -74,7 +72,6 @@ class Factura(forms.Form):
             'invalid': 'Por favor, ingresa un número válido'
         }
     )
-
 
     # numero = forms.CharField(
     #     max_length=10,
@@ -166,7 +163,7 @@ class Factura(forms.Form):
         required=False,
         label="Precio",
         initial=0.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control','id':'id_precio_fac'}),
+        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control', 'id': 'id_precio_fac'}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número decimal válido'
@@ -261,7 +258,7 @@ class ProveedoresGastos(forms.Form):
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'Número de serie'
-            }
+        }
         ),
         error_messages={
             'required': 'Este campo es obligatorio',
@@ -484,6 +481,7 @@ class ProveedoresGastos(forms.Form):
         self.fields['arbitraje'].initial = self.arbitraje_valor
         self.fields['paridad'].initial = self.paridad_valor
 
+
 class Cobranza(forms.Form):
     serie = forms.CharField(
         max_length=1,
@@ -614,15 +612,15 @@ class Cobranza(forms.Form):
     )
 
     total = forms.FloatField(
-            required=False,
-            label="Total",
-            initial=0.00,
-            widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
-            error_messages={
-                'required': 'Este campo es obligatorio',
-                'invalid': 'Por favor, ingresa un número decimal válido'
-            }
-        )
+        required=False,
+        label="Total",
+        initial=0.00,
+        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+        error_messages={
+            'required': 'Este campo es obligatorio',
+            'invalid': 'Por favor, ingresa un número decimal válido'
+        }
+    )
 
     def __init__(self, *args, **kwargs):
         super(Cobranza, self).__init__(*args, **kwargs)
@@ -637,7 +635,6 @@ class Cobranza(forms.Form):
 
 
 class OrdenPago(forms.Form):
-
     CHOICE_TIPO = [
         ('intencion', 'Intencion'),
         ('definitivo', 'Definitivo'),
@@ -781,3 +778,156 @@ class pdfForm(BSModalModelForm):
         self.helper.add_input(Submit('submit', 'Actualizar'))
 
     observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'pdf_add_input', "autocomplete": "off", 'required': False, 'max_length': 500, "rows": "25"," cols": "100", "class": "form-control"}, ), required=False, label="Notas", max_length=500)
+
+
+class EditarConsultarPagos(forms.Form):
+
+    numero = forms.CharField(
+        label="Número",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True,
+        error_messages={
+            'invalid': 'Por favor, ingresa un número válido'
+        }
+    )
+
+    moneda = forms.CharField(
+        required=True,
+        label="Moneda",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+
+    prefijo = forms.CharField(
+        max_length=4,
+        required=True,
+        label="",
+        initial="0001",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
+        error_messages={
+            'required': 'Este campo es obligatorio',
+            'invalid': 'Por favor, ingresa un número válido'
+        }
+    )
+
+    voucher = forms.CharField(
+        label="Voucher",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+
+    alta_de = forms.CharField(
+        label="Alta de",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+
+    detalle = forms.CharField(
+        label="Detalle",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+
+    fecha = forms.DateField(
+        label="Fecha",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'text'}),
+        required=True
+    )
+    documento = forms.CharField(
+        label="Documento",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+    arbitraje = forms.CharField(
+        label="Arbitraje",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+    importe = forms.DecimalField(
+        label="Importe",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True,
+        max_digits=10,
+        decimal_places=2
+    )
+    por_imputar = forms.DecimalField(
+        label="Por imputar",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True,
+        max_digits=10,
+        decimal_places=2
+    )
+    paridad = forms.DecimalField(
+        label="Paridad",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True,
+        max_digits=10,
+        decimal_places=6
+    )
+
+    autogenerado = forms.CharField(
+        label="",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+
+    buscar_ajuste_acr = forms.BooleanField(
+        label="Buscar ajuste de cuenta proveedora",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
+    buscar_ajuste_dif = forms.BooleanField(
+        label="Buscar ajuste de diferecncia de cambio",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
+    mov_efectivo = forms.CharField(
+        label="Movimiento de efectivo recibido",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+
+    moneda_f = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        required=True,
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+
+# class ArbitrajeParidad(forms.Form):
+#     tipo_moneda = forms.ModelChoiceField(
+#         queryset=Monedas.objects.all(),
+#         required=True,
+#         label="Moneda",
+#         initial=2,
+#         widget=forms.Select(attrs={'class': 'form-control'}),
+#         error_messages={'required': 'Este campo es obligatorio'}
+#     )
+#
+#     valor_arbitraje = forms.DecimalField(
+#         label="Arbitraje",
+#         widget=forms.TextInput(attrs={'class': 'form-control'}),
+#         required=True,
+#         max_digits=10,
+#         decimal_places=2
+#     )
+#
+#     valor_paridad = forms.DecimalField(
+#         label="Paridad",
+#         widget=forms.TextInput(attrs={'class': 'form-control'}),
+#         required=True,
+#         max_digits=10,
+#         decimal_places=2
+#     )
+#
+#     valor_pizarra = forms.DecimalField(
+#         label="Pizarra",
+#         widget=forms.TextInput(attrs={'class': 'form-control'}),
+#         required=True,
+#         max_digits=10,
+#         decimal_places=2
+#     )

@@ -1344,5 +1344,61 @@ function generarNumero() {
 }
 
 
+$('#abrir_arbi').on('click', function (event) {
+    $("#arbitraje_modal").dialog({
+        autoOpen: true,
+        modal: true,
+        title: "Cargar un arbitraje para el día de hoy",
+        height: 300,
+        width: 500,
+        position: { my: "top", at: "top+20", of: window },
+        buttons: [
+            {
+                text: "Guardar",
+                class: "btn btn-primary",
+                style: "width:100px",
+                click: function () {
+                    let arbDolar = $('#valor_arbitraje').val();
+                    let parDolar = $('#valor_paridad').val();
+                    let tipoMoneda = $('#moneda_select').val();
+                    let pizDolar = $('#valor_pizarra').val();
+                    alert(tipoMoneda);
+
+                    $.ajax({
+                        url: "/guardar_arbitraje/",
+                        dataType: 'json',
+                        type: 'POST',
+                        headers: { 'X-CSRFToken': csrf_token },
+                        data: {
+                            arbDolar: arbDolar,
+                            parDolar: parDolar,
+                            tipoMoneda: tipoMoneda,
+                            pizDolar: pizDolar,
+                        },
+                        success: function(data) {
+                            if(data['status'].length == 0){
+                                alert("Valores guardados correctamente");
+                                $("#arbitraje_modal").dialog("close");
+                            }else{
+                                alert(data['status']);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            alert("Error al guardar los datos: " + error);
+                        }
+                    });
+                },
+            },
+            {
+                text: "Salir",
+                class: "btn btn-dark",
+                style: "width:100px",
+                click: function () {
+                    $(this).dialog("close");
+                },
+            },
+        ],
+    });
+});
 
 
