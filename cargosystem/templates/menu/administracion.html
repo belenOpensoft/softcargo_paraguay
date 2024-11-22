@@ -1,4 +1,6 @@
 <style>
+
+
   .custom-icon {
     fill: white; /* Cambia el color del SVG a blanco */
         width: 1em; /* Ajusta al tamaño del icono de Font Awesome */
@@ -41,97 +43,99 @@
 .sidebar-item.has-submenu:hover .submenu-link:hover {
     color: #cccccc; /* Un tono de blanco más oscuro para resaltar el hover */
 }
+
+
 </style>
 
 
 <aside id="sidebar" style="background-color:#0D6EFD;">
-    <div class="h-100">
-        <div class="sidebar-logo">
-            <a href="/">{{ request.session.empresa }}</a>
-        </div>
-        <!-- Sidebar Navigation -->
-        <ul class="sidebar-nav">
-            <li class="sidebar-header">
-                Opciones
-            </li>
-
-            <li class="sidebar-item">
-                <a href="/facturacion/" class="sidebar-link">
-                    <i class="fa-solid fa-receipt"></i>
-                    &nbsp;Facturacion
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a href="/cobranza/" class="sidebar-link">
-                    <i class="fa-solid fa-landmark"></i>&nbsp;Cobranza
-                </a>
-            </li>
-             <li class="sidebar-item">
-                <a href="/proveedores_gastos/" class="sidebar-link">
-                    <i class="fas fa-user-tie"></i>&nbsp;Proveedores y gastos
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a href="/orden_pago/" class="sidebar-link">
-                   <i class="fa-solid fa-coins"></i>&nbsp;Orden de pago
-                </a>
-            </li>
-
-            <li class="sidebar-item has-submenu">
-                <a href="javascript:void(0)" class="sidebar-link">
-                <i class="fa-regular fa-pen-to-square"></i>
-                &nbsp; Editar y consultar movimientos
-                </a>
-                <ul class="submenu">
-                    <li class="submenu-item">
-                        <a href="/editar_consultar_pagos/" class="submenu-link">
-                            Editar y consultar pagos
+            <div class="h-100">
+                <div class="sidebar-logo">
+                    <a href="/">{{ request.session.empresa }}</a>
+                </div>
+                <!-- Sidebar Navigation -->
+                <ul class="sidebar-nav">
+                    <li class="sidebar-header">
+                        Opciones
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="/admin_cont/facturacion/" class="sidebar-link">
+                            <i class="fa-solid fa-receipt"></i>
+                            &nbsp;Facturacion
                         </a>
                     </li>
-<!--                    <li class="submenu-item">-->
-<!--                        <a href="" class="submenu-link"></a>-->
-<!--                    </li>-->
-                </ul>
-            </li>
+                    <li class="sidebar-item">
+                        <a href="/admin_cont/cobranza/" class="sidebar-link">
+                            <i class="fa-solid fa-landmark"></i>&nbsp;Cobranza
+                        </a>
+                    </li>
+                     <li class="sidebar-item">
+                        <a href="/admin_cont/proveedores_gastos/" class="sidebar-link">
+                            <i class="fas fa-user-tie"></i>&nbsp;Proveedores y gastos
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="/admin_cont/orden_pago/" class="sidebar-link">
+                           <i class="fa-solid fa-coins"></i>&nbsp;Orden de pago
+                        </a>
+                    </li>
 
-
-            <li class="sidebar-header">
-                Modulo
-            </li>
-            <li class="sidebar-item">
-                <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#auth1"
-                    aria-expanded="false" aria-controls="auth">
-                    <i class="fa fa-puzzle-piece pe-2"></i>
-                    {{ request.session.rol }}
-                </a>
-                <ul id="auth1" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                   {% for modulo in request.session.roles %}
-                        {% if modulo != request.session.rol %}
-                            <li class="sidebar-item">
-                                <a href="{% url 'vista_cambiar_modulo' modulo %}" class="sidebar-link">{{ modulo|capfirst }}</a>
+                    <li class="sidebar-item has-submenu">
+                        <a href="javascript:void(0)" class="sidebar-link">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                            &nbsp; Editar y consultar movimientos
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="" class="submenu-link">
+                                    Editar y consultar pagos y ajustes
+                                </a>
                             </li>
-                        {% endif %}
-                   {% endfor %}
-                </ul>
-            </li>
-             <li class="sidebar-header">
-                Sesion usuario
-            </li>
-            <li class="sidebar-item">
-                <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#auth"
-                    aria-expanded="false" aria-controls="auth">
-                    <i class="fa-regular fa-user pe-2"></i>
-                    {{ request.user.first_name }} {{ request.user.last_name }}
-                </a>
-                <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                    <li class="sidebar-item">
-                        <a href="#" class="sidebar-link">Cambio clave</a>
+<!--                            <li class="submenu-item">-->
+<!--                                <a href="/importacion_maritima/house_directo" class="submenu-link">-->
+<!--                                    House's Directos-->
+<!--                                </a>-->
+<!--                            </li>-->
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-header">
+                        Modulo
                     </li>
                     <li class="sidebar-item">
-                        <a href="{% url 'vista_logout' %}" class="sidebar-link">Salir</a>
+                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#auth1"
+                            aria-expanded="false" aria-controls="auth">
+                            <i class="fa fa-puzzle-piece pe-2"></i>
+                            {{ request.session.rol }}
+                        </a>
+                        <ul id="auth1" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                           {% for modulo in request.session.roles %}
+                                {% if modulo != request.session.rol %}
+                                    <li class="sidebar-item">
+                                        <a href="{% url 'vista_cambiar_modulo' modulo %}" class="sidebar-link">{{ modulo|capfirst }}</a>
+                                    </li>
+                                {% endif %}
+                           {% endfor %}
+                        </ul>
+                    </li>
+                     <li class="sidebar-header">
+                        Sesion usuario
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#auth"
+                            aria-expanded="false" aria-controls="auth">
+                            <i class="fa-regular fa-user pe-2"></i>
+                            {{ request.user.first_name }} {{ request.user.last_name }}
+                        </a>
+                        <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link">Cambio clave</a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="{% url 'vista_logout' %}" class="sidebar-link">Salir</a>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
-            </li>
-        </ul>
-    </div>
-</aside>
+            </div>
+        </aside>
