@@ -53,9 +53,12 @@
 
 <div id="dialog-form" title="Formulario de Cobranza" style="display: none;">
 <div class="border rounded p-4 bg-light">
+
+
     <form method="post" action="" id="cobranzaForm">
         {% csrf_token %}
-
+        <div style="display:inline-flex;width:100%;">
+        <div class="col-md-10">
         <div class="row d-flex align-items-center">
             <div class="col-md-1">
                 {{ form.serie }}
@@ -76,9 +79,24 @@
                 {{ form.numero }}
             </div>
         </div>
-
         <br>
-
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="a_cliente" name="opcion" checked>
+                    <label class="form-check-label" for="a_cliente">
+                        A cliente (cuentas por cobrar)
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="cancelar_prov" name="opcion">
+                    <label class="form-check-label" for="cancelar_prov">
+                        Cancelar N/C y pagos proveedor
+                    </label>
+                </div>
+            </div>
+        </div>
+        <br>
         <div class="row">
 
             <div class="col-md-2">
@@ -87,9 +105,8 @@
             </div>
         </div>
         <br>
-
         <div class="row mt-3">
-            <div class="col-md-2">
+            <div class="col-md-4">
                 {{ form.moneda.label_tag }}
                 {{ form.moneda }}
             </div>
@@ -106,19 +123,17 @@
                 {{ form.imputar }}
             </div>
         </div>
-
         <br>
-
         <div class="col-md-2">
             {{form.importe.label_tag}}
             {{form.importe}}
         </div>
-
         <div class="row mt-3">
             <div class="d-flex align-items-center col-md-12">
                 <div class="col-md-3">
                     <label for="cliente">Buscar Cliente</label>
                     <input type="text" id="cliente" class="form-control" name="cliente" placeholder="Buscar cliente">
+                </div>
             </div>
             <div class="col-md-6 offset-md-1">
                 <table id="clienteTable" class="table table-striped" style="display:none;">
@@ -133,8 +148,42 @@
                 </table>
             </div>
         </div>
+        </div>
+        <div class="col-md-2" >
+        <div>
+            <label for="a_imputar">A imputar</label>
+            <input type="number" id="a_imputar" class="form-control mb-3" name="a_imputar" value="0.0">
+        </div>
+        <div>
+            <button type="button" class="btn btn-danger w-100 mb-3">Deshacer</button>
+            <button type="button" class="btn btn-success w-100 mb-3" id="cobrar">Cobrar</button>
+        </div>
+        <div class="input-group mb-3">
+            <input type="text" id="embarque" class="form-control" name="embarque" placeholder="Nro embarque">
+            <button class="btn btn-primary" type="button">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
 
-        <table id="imputacionTable" class="table table-striped mt-4" style="display:block;">
+
+        <div class="border p-3">
+            <div class="mb-3">
+                <label for="factura">Factura</label>
+                <input type="text" id="factura" class="form-control" value="0.0" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="saldo">Saldo</label>
+                <input type="text" id="saldo" class="form-control" value="0.0" readonly>
+            </div>
+            <div>
+                <label for="se_imputaran">Se imputarán</label>
+                <input type="number" id="se_imputaran" value="0.0" class="form-control">
+            </div>
+        </div>
+    </div>
+        </div>
+
+        <table id="imputacionTable" class="table table-striped mt-4" style="display:block; overflow-x:scroll;">
             <thead>
                 <tr>
                     <th style="display:none;">Id</th>
@@ -176,8 +225,17 @@
                 <button type="button" id="facturar" name="facturar" class="btn btn-primary">Finalizar</button>
             </div>
         </div>
+
     </form>
+
+
+
+
 </div>
+</div>
+
+<div id="forma_pago_modal" title="Forma de pago" style="display:none;">
+
 </div>
 
 <script>

@@ -296,18 +296,18 @@ def procesar_factura(request):
                 nombre_mov = 'CONTADO'
             elif int(tipo) == 24:
                 detalle1 = 'e-NOT/CRED'
-                tipo_asiento = 'P'
+                tipo_asiento = 'V'
                 nombre_mov = 'CONTADO'
             elif int(tipo) == 11:
                 detalle1 = 'VTA/CRED'
                 nombre_mov = 'FACTURA'
             elif int(tipo) == 21:
                 detalle1 = 'NOT/CRED'
-                tipo_asiento = 'P'
+                tipo_asiento = 'V'
                 nombre_mov = 'FACTURA'
             elif int(tipo) == 20:
                 detalle1 = 'NOT/DEB'
-                tipo_asiento = 'P'
+                tipo_asiento = 'V'
                 nombre_mov = 'FACTURA'
 
             detalle_asiento = detalle1 + serie + str(prefijo) + str(numero) + cliente.empresa

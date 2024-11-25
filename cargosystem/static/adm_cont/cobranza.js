@@ -123,18 +123,9 @@ function abrir_cobranza() {
     $("#dialog-form").dialog({
         autoOpen: true,
         modal: true,
-        width: wWidth * 0.90,
+        width: wWidth * 0.60,
         height: wHeight * 0.90,
         buttons: [
-            {
-                class: "btn btn-dark",
-                style: "width:100px",
-                text: "Guardar",
-                click: function() {
-                    // Lógica para guardar
-                    $("#cobranzaForm").submit();
-                }
-            },
             {
                 class: "btn btn-dark",
                 style: "width:100px",
