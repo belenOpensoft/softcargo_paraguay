@@ -1,7 +1,8 @@
 from django.urls import path
 
 from administracion_contabilidad.views.editar_consultar_pagos import editar_consultar_pagos
-from administracion_contabilidad.views.cobranza import cobranza_view, source_cobranza, source_cobranza_imputacion
+from administracion_contabilidad.views.cobranza import cobranza_view, source_cobranza, source_cobranza_imputacion, \
+    source_facturas_pendientes
 from administracion_contabilidad.views.facturacion import facturacion_view, buscar_clientes, buscar_cliente, \
     buscar_item_v, buscar_items_v, procesar_factura, source_facturacion, source_infofactura, \
     cargar_preventa_infofactura, source_infofactura_cliente, cargar_preventa_infofactura_multiple
@@ -50,7 +51,7 @@ urlpatterns = [
     path('cobranza/', cobranza_view, name='cobranza'),
     path('source_cobranza/', source_cobranza, name='source_cobranza'),
     path('source_cobranza_imputacion/', source_cobranza_imputacion, name='source_cobranza_imputacion'),
-
+    path('source_facturas_pendientes/', source_facturas_pendientes, name='source_facturas_pendientes'),
 
     #cobranza
 

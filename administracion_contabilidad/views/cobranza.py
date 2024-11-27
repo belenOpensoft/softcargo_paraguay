@@ -1,11 +1,11 @@
 import json
 
+from django.db.models import Q, OuterRef, Subquery
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from administracion_contabilidad.forms import Cobranza
-from administracion_contabilidad.models import Boleta
-from mantenimientos.models import Clientes
-
+from administracion_contabilidad.models import Boleta, Impuvtas
+from mantenimientos.models import Clientes, Monedas
 
 param_busqueda = {
     1: 'autogenerado__icontains',
@@ -174,3 +174,57 @@ def get_order(request, columns):
         return result
     except Exception as e:
         raise TypeError(e)
+
+def source_facturas_pendientes(request):
+    try:
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        cliente = int(request.GET.get('cliente'))
+
+        anio_limite = 2010
+
+        infofacturas_qs = Boleta.objects.all()
+
+
+        subquery = infofacturas_qs.filter(numero=OuterRef('numero')).order_by('id').values('id')[:1]
+
+        infofacturas_qs = infofacturas_qs.filter(
+            Q(autogenerado__gte=str(anio_limite)) &
+            Q(nrocliente=cliente) &
+            Q(tipo=20)
+        ).exclude(
+            autogenerado__in=Impuvtas.objects.values('autofac')
+        ).filter(
+            id=Subquery(subquery)  # Filtra solo los registros con el ID devuelto por la subconsulta
+        )
+
+        total_registros = infofacturas_qs.count()
+
+        infofacturas_paginated = infofacturas_qs[start:start + length]
+
+        data = [{
+            'id':boleta.id,
+            'vencimiento':boleta.vto,
+            'emision':boleta.fecha,
+            'documento':boleta.numero,
+            'total': boleta.total,
+            'saldo':boleta.total,
+            'imputado':0,
+            'tipo_cambio':boleta.cambio,
+            'embarque':boleta.refer,
+            'detalle':boleta.detalle,
+            'posicion':boleta.posicion,
+            'moneda': Monedas.objects.get(codigo=boleta.moneda).nombre,
+            'paridad':boleta.paridad,
+            'tipo_doc':"FACTURA",
+        } for boleta in infofacturas_paginated]
+
+        return JsonResponse({
+            'draw': int(request.GET.get('draw', 1)),
+            'recordsTotal': total_registros,
+            'recordsFiltered': total_registros,
+            'data': data,
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)})

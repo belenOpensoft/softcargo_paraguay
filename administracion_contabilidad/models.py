@@ -616,6 +616,9 @@ class Cuentas(models.Model):
         managed = False
         db_table = 'dataset_cuentas'
 
+    def __str__(self):
+        return f"{self.xcodigo} - {self.xnombre}"
+
 
 class Cuentasniif(models.Model):
     xcodigo = models.BigIntegerField()

@@ -4,8 +4,9 @@ from crispy_forms.layout import Submit
 from django import forms
 import datetime
 from django.forms import RadioSelect
-from mantenimientos.models import Monedas
-from administracion_contabilidad.models import Dolar, Infofactura
+from mantenimientos.models import Monedas, Bancos
+from administracion_contabilidad.models import Dolar, Infofactura, Cuentas
+from django.db.models import Q
 
 
 def get_arbitraje():
@@ -525,9 +526,92 @@ class Cobranza(forms.Form):
 
     moneda = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
-        required=True,
         label="Moneda",
         initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+    moneda_efectivo = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+    cuenta_efectivo = forms.ModelChoiceField(
+        queryset=Cuentas.objects.filter(xnivel1__contains="111"),
+        label="Cuenta",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+
+    cuenta_cheque = forms.ModelChoiceField(
+        queryset=Cuentas.objects.filter(Q(xcodigo="11113") | Q(xcodigo="11114")),
+        label="Cuenta",
+        initial="11113",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+    cuenta_transferencia = forms.ModelChoiceField(
+        queryset=Cuentas.objects.filter(xcodigo__range=("11120", "11125")),
+        label="Cuenta",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+    cuenta_deposito = forms.ModelChoiceField(
+        queryset=Cuentas.objects.filter(xcodigo__range=("11120", "11125")),
+        label="Cuenta",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+    cuenta_observaciones = forms.ModelChoiceField(
+        queryset=Cuentas.objects.all(),
+        label="Cuenta",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+    cuenta_otro = forms.ModelChoiceField(
+        queryset=Cuentas.objects.all(),
+        label="Cuenta",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+    banco_cheque = forms.ModelChoiceField(
+        queryset=Bancos.objects.all(),
+        label="Banco",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+    banco_transferencia = forms.ModelChoiceField(
+        queryset=Bancos.objects.all(),
+        label="Banco",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+    banco_deposito = forms.ModelChoiceField(
+        queryset=Bancos.objects.all(),
+        label="Banco",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+    banco_otro = forms.ModelChoiceField(
+        queryset=Bancos.objects.all(),
+        label="Banco",
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )

@@ -165,7 +165,7 @@ def buscar_cliente(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
         query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
         clientes = Clientes.objects.filter(empresa__icontains=query)[:10]  # Limitar resultados a 10
-        results = [{'id': cliente.id, 'text': cliente.empresa} for cliente in clientes]
+        results = [{'id': cliente.codigo, 'text': cliente.empresa} for cliente in clientes]
         return JsonResponse(results, safe=False)
 
     return JsonResponse({'error': 'Solicitud inválida'}, status=400)
@@ -626,7 +626,7 @@ def source_infofactura_cliente(request):
         length = int(request.GET.get('length', 5))
         cliente = str(request.GET.get('cliente'))
 
-        anio_limite = 2010
+        anio_limite = 2023
 
         infofacturas_qs = Infofactura.objects.all()
 
