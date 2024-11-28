@@ -6,7 +6,7 @@ $(document).ready(function() {
     const selectedSection = `#${$(this).val()}Section`;
     $(selectedSection).removeClass("d-none");
   });
-  $("#cashSection").removeClass("d-none");
+    $("#cashSection").removeClass("d-none");
 
     var buscar = '';
     var que_buscar = '';
@@ -97,6 +97,14 @@ $(document).ready(function() {
         }
     });
 
+document.querySelector('#exampleTable tbody').addEventListener('click', function (e) {
+    const row = e.target.closest('tr');
+    if (row) {
+        document.querySelectorAll('#exampleTable tbody tr').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+    }
+});
+
 
 $('#id_importe').on('focusout', function () {
     let importe = parseFloat($(this).val()) || 0;
@@ -128,6 +136,15 @@ var dWidth = wWidth * 0.40;
 var wHeight = $(window).height();
 var dHeight = wHeight * 0.30;
 
+function borrar_datos() {
+    const selectedRow = document.querySelector('#exampleTable tbody tr.selected');
+
+    if (selectedRow) {
+        selectedRow.remove(); // Eliminar la fila seleccionada
+    } else {
+        alert('Por favor, selecciona una fila para borrar.');
+    }
+}
 
 function abrir_cobranza() {
     $("#dialog-form").dialog({
@@ -266,17 +283,29 @@ function abrir_forma_pago() {
         class: "btn btn-secondary",
         click: function () {
           $(this).dialog("close");
+//        if ($.fn.DataTable.isDataTable('#imputacionTable')) {
+//            $('#imputacionTable').DataTable().ajax.reload(null, false);
+//        }
         },
       },
       {
         text: "Grabar",
         class: "btn btn-primary",
         click: function () {
-          alert("Datos guardados");
+          let acumulado=$('#accumulated').val();
+          let monto=$('#amount').val();
+//          if(acumulado>monto){
+//          alert('El acumulado supera al importe. Revise.');
+//          }else{
+          crear_impuventa_asiento_movimiento();
+          //alert("Datos guardados");
+//          }
         },
       },
     ],
   });
+
+  cargar_datos_formadepago();
 
   // Manejo de los botones de radio para mostrar las secciones correspondientes
   $("input[name='paymentType']").on("change", function () {
@@ -334,92 +363,333 @@ function tabla_facturas_pendientes(cliente) {
     });
 
 
-    $('#imputarSeleccion').on('click', function () {
+$('#imputarSeleccion').on('click', function () {
     const seleccionadas = table.rows('.selected'); // Obtener las filas seleccionadas
     const data = seleccionadas.data().toArray(); // Convertir a array para depuración
     let importe = parseFloat($('#id_importe').val()) || 0; // Obtener el importe disponible
     let imputado = parseFloat($('#a_imputar').val()) || 0; // Obtener el importe disponible
     let acumulado = 0;
 
-    if(seleccionadas.count()<1){
-    alert('Debe seleccionar al menos una fila.');
-    return;
+    // Vector para almacenar las filas afectadas
+    let filasAfectadas = [];
+
+    if (seleccionadas.count() < 1) {
+        alert('Debe seleccionar al menos una fila.');
+        return;
     }
 
-    if(importe<=0){
-    alert('Digite un importe.');
-    return;
+    if (importe <= 0) {
+        alert('Digite un importe.');
+        return;
     }
 
-    let imputar=$('#a_imputar').val();
-    if(imputar==0){
-    alert('No hay más dinero disponible. Aumente el importe.');
-    return;
+    let imputar = $('#a_imputar').val();
+    if (imputar == 0) {
+        alert('No hay más dinero disponible. Aumente el importe.');
+        return;
     }
 
-
+    // Calcular acumulado
     seleccionadas.nodes().each(function (node) {
         let saldo = parseFloat(table.cell(node, 5).data()) || 0;
         acumulado += saldo;
     });
 
+    // Validar si el importe alcanza
     if (seleccionadas.count() > 1 && importe < acumulado) {
         alert('No alcanza el importe para cubrir la selección. Seleccione de a una para hacer pagos parciales.');
         seleccionadas.nodes().to$().removeClass('selected');
         return;
     }
 
-    if (seleccionadas.count() === 1 && imputado< acumulado) {
+    if (seleccionadas.count() === 1 && imputado < acumulado) {
         seleccionadas.nodes().each(function (node) {
             let saldo = parseFloat(table.cell(node, 5).data()) || 0;
             let imputadoActual = parseFloat(table.cell(node, 6).data()) || 0;
 
             let resto = saldo - imputado; // Calcular el saldo restante
-            table.cell(node, 5).data(resto.toFixed(2)); // Actualizar la columna 5 con el saldo restante
-            table.cell(node, 6).data(imputadoActual + imputado); // Actualizar la columna 6 con el importe imputado
+            table.cell(node, 5).data(resto.toFixed(2)); // Actualizar la columna 5
+            table.cell(node, 6).data(imputadoActual + imputado); // Actualizar la columna 6
 
             $(table.cell(node, 5).node()).css('background-color', '#fcec3f'); // Amarillo para columna 5
             $(table.cell(node, 6).node()).css('background-color', '#fcec3f'); // Amarillo para columna 6
 
+            // Agregar datos actualizados al vector
+            filasAfectadas.push({
+                modo: table.cell(node, 0).data(), // Columna Modo
+                numero: table.cell(node, 3).data(), // Columna Número
+                nuevoSaldo: resto.toFixed(2), // Nuevo saldo
+                imputado: (imputadoActual + imputado).toFixed(2) // Nuevo imputado
+            });
         });
-        seleccionadas.nodes().to$().removeClass('selected');
 
+        seleccionadas.nodes().to$().removeClass('selected');
         $('#a_imputar').val(0);
-        let ac=parseFloat($('#acumulado').val());
-        ac=ac+imputado;
-        $('#acumulado').val(ac);
+        let ac = parseFloat($('#acumulado').val());
+        ac = ac + imputado;
+        $('#acumulado').val(ac.toFixed(2));
+
+        console.log(filasAfectadas); // Vector con datos actualizados
         return;
     }
 
+    // Procesar todas las filas seleccionadas
     seleccionadas.nodes().each(function (node) {
         let saldo = parseFloat(table.cell(node, 5).data()) || 0;
         let imputadoActual = parseFloat(table.cell(node, 6).data()) || 0;
 
-        table.cell(node, 6).data(imputadoActual + saldo); // Columna 6
-        table.cell(node, 5).data(0); // Columna 5
+        table.cell(node, 6).data(imputadoActual + saldo); // Actualizar la columna 6
+        table.cell(node, 5).data(0); // Actualizar la columna 5
 
         $(table.cell(node, 5).node()).css('background-color', '#fcec3f'); // Amarillo para columna 5
         $(table.cell(node, 6).node()).css('background-color', '#fcec3f'); // Amarillo para columna 6
-        seleccionadas.nodes().to$().removeClass('selected');
+
+        // Agregar datos actualizados al vector
+        filasAfectadas.push({
+            modo: table.cell(node, 0).data(), // Columna Modo
+            numero: table.cell(node, 3).data(), // Columna Número
+            nuevoSaldo: '0.00', // Nuevo saldo
+            imputado: (imputadoActual + saldo).toFixed(2) // Nuevo imputado
+        });
     });
 
+    // Actualizar importe restante
     const total = importe - acumulado;
-    let ac=parseFloat($('#acumulado').val());
-    ac=ac+acumulado;
-    $('#acumulado').val(ac);
-    $('#a_imputar').val(total);
+    let ac = parseFloat($('#acumulado').val());
+    ac = ac + acumulado;
+    $('#acumulado').val(ac.toFixed(2));
+    $('#a_imputar').val(total.toFixed(2));
 
+    seleccionadas.nodes().to$().removeClass('selected');
+
+    console.log(filasAfectadas);
+    localStorage.setItem('filasAfectadas',JSON.stringify(filasAfectadas));
 });
 
 
+
 }
 
+function cargar_datos_formadepago(){
+let imputar=$('#a_imputar').val();
+let importe=$('#id_importe').val();
+let acumulado=$('#acumulado').val();
 
-function obtenerFilasSeleccionadas() {
-    const table = $('#imputacionTable').DataTable();
-    const seleccionadas = table.rows('.selected').data().toArray();
-    return seleccionadas;
+
+const table = $('#imputacionTable').DataTable();
+
+let documentos = '';
+
+table.rows().nodes().each(function (node) {
+    let imputado = parseFloat(table.cell(node, 6).data()) || 0;
+
+    if (imputado !== 0) {
+        let nroDocumento = table.cell(node, 3).data();
+        documentos += nroDocumento + ';';
+    }
+});
+
+documentos = documentos.slice(0, -1);
+
+$('#observations').val(documentos);
+acumulado = parseFloat(acumulado || 0).toFixed(2); // Convertir a número y aplicar toFixed
+importe = parseFloat(importe || 0).toFixed(2);     // Convertir a número y aplicar toFixed
+
+if(imputar<=0){
+$('#amount').html(acumulado);
+
+}else{
+$('#amount').html(importe);
+}
+$('#cashAmount').val(acumulado);
+$('#checkAmount').val(acumulado);
+$('#checkAmount_trans').val(acumulado);
+$('#checkAmount_deposito').val(acumulado);
+$('#checkAmount_otro').val(acumulado);
 }
 
+function ingresar_datos(){
+let monto=$('#cashAmount').val();
+let importe=$('#amount').html();
+let arbitraje=$('#id_arbitraje').val();
+
+const tbody = $('#exampleTable tbody');
+//tbody.empty();
+
+let modo, emision,banco,numero,moneda,total,tc,vencimiento,cuenta;
+
+if ($('#efectivo').is(':checked')){
+const selectElement = document.getElementById('id_cuenta_efectivo');
+const moneda_select = document.getElementById('id_moneda_efectivo');
+const labelSeleccionado = selectElement.options[selectElement.selectedIndex].text;
+const valueSeleccionado = selectElement.value;
+const monedaV = moneda_select.value;
+modo='EFECTIVO';
+emision=obtenerFechaHoy();
+banco=valueSeleccionado;
+numero=0;
+moneda=monedaV;
+total=monto;
+tc=arbitraje;
+cuenta=valueSeleccionado;
+vencimiento=obtenerFechaHoy();
+
+}else if ($('#cheque').is(':checked')){
+const selectElement = document.getElementById('id_cuenta_cheque');
+const moneda_select = document.getElementById('id_moneda_cheque');
+const monedaV = moneda_select.value;
+const labelSeleccionado = selectElement.options[selectElement.selectedIndex].text;
+const valueSeleccionado = selectElement.value;
+modo='CHEQUE';
+emision=$('#checkEmission').val();
+banco=labelSeleccionado;
+numero=$('#checkNumber').val();
+tc=arbitraje;
+cuenta=valueSeleccionado;
+moneda=monedaV;
+vencimiento=$('#checkDueDate').val();
+total=$('#checkAmount').val();
+
+}else if ($('#trans').is(':checked')){
+const selectElement = document.getElementById('id_cuenta_transferencia');
+const moneda_select = document.getElementById('id_moneda_transferencia');
+const monedaV = moneda_select.value;
+const labelSeleccionado = selectElement.options[selectElement.selectedIndex].text;
+modo='TRANSFER';
+emision=$('#checkEmission_trans').val();
+banco=labelSeleccionado;
+numero=$('#checkNumber_trans').val();
+tc=arbitraje;
+cuenta=$('#cuenta_trans').val();
+moneda=monedaV;
+vencimiento=$('#checkDueDate_trans').val();
+total=$('#checkAmount_trans').val();
+}else if ($('#deposito').is(':checked')){
+const selectElement = document.getElementById('id_cuenta_deposito');
+const moneda_select = document.getElementById('id_moneda_deposito');
+const monedaV = moneda_select.value;
+const labelSeleccionado = selectElement.options[selectElement.selectedIndex].text;
+modo='DEPOSITO';
+emision=$('#checkEmission_deposito').val();
+banco=labelSeleccionado;
+numero=$('#checkNumber_deposito').val();
+tc=arbitraje;
+cuenta=$('#cuenta_deposito').val();
+moneda=monedaV;
+vencimiento=$('#checkDueDate_deposito').val();
+total=$('#checkAmount_deposito').val();
+}else if ($('#otro').is(':checked')){
+const selectElement = document.getElementById('id_cuenta_otro');
+const moneda_select = document.getElementById('id_moneda_otro');
+const monedaV = moneda_select.value;
+const labelSeleccionado = selectElement.options[selectElement.selectedIndex].text;
+modo='OTRO';
+emision=$('#checkEmission_otro').val();
+banco=labelSeleccionado;
+numero=$('#checkNumber_otro').val();
+tc=arbitraje;
+cuenta=$('#cuenta_otro').val();
+moneda=monedaV;
+vencimiento=$('#checkDueDate_otro').val();
+total=$('#checkAmount_otro').val();
+}
+    const nuevaFilaObj = {
+        modo: modo,
+        emision: emision,
+        banco: banco,
+        numero: numero,
+        moneda: moneda,
+        total: total,
+        tc: tc,
+        vencimiento: vencimiento,
+        cuenta: cuenta
+    };
+
+    let medios_pago=[];
+
+    medios_pago.push(nuevaFilaObj);
+
+    localStorage.setItem('medios_pago', JSON.stringify(medios_pago));
+
+const nuevaFila = `
+            <tr>
+                <td>${modo}</td>
+                <td>${emision}</td>
+                <td>${banco}</td>
+                <td>${numero}</td>
+                <td>${moneda}</td>
+                <td>${total}</td>
+                <td>${tc}</td>
+                <td>${vencimiento}</td>
+                <td>${cuenta}</td>
+            </tr>
+        `;
+        tbody.append(nuevaFila);
+
+let accum = parseFloat($('#accumulated').val()) || 0;
+let totalParsed = parseFloat(total || 0);
+accum += totalParsed;
+$('#accumulated').val(accum.toFixed(2));
+let diferencia = parseFloat(importe || 0) - accum;
+$('#difference').val(diferencia.toFixed(2));
 
 
+}
+
+const obtenerFechaHoy = () =>
+    new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+function crear_impuventa_asiento_movimiento(){
+//traer cliente tambien
+let impuventa = JSON.parse(localStorage.getItem('filasAfectadas')) || [];
+let medios_pago = JSON.parse(localStorage.getItem('medios_pago')) || [];
+
+let vector=[];
+let imputaciones=[];
+let asiento=[];
+let movimiento=[];
+let cobranza=[];
+
+impuventa.forEach((item) => {
+        imputaciones.push({
+            nroboleta: item.numero,
+        });
+        movimiento.push({
+            imputado:item.modo,
+            saldo:item.nuevoSaldo,
+            boletas:$('#observations').val()
+        });
+    });
+
+medios_pago.forEach((item) => {
+        asiento.push({
+            modo:item.modo,
+            cuenta:item.cuenta,
+            banco:item.banco,
+            nro_mediopago:item.numero,
+            total_pago:item.total,
+            vencimiento:item.vencimiento
+        });
+    });
+
+    cobranza.push({
+        nrocliente:$('#cliente_cobranza').val(),
+        serie:$('#id_serie').val(),
+        prefijo:$('#id_prefijo').val(),
+        numero:$('#id_numero').val(),
+        total:$('#id_importe').val(),
+        nromoneda:$('#id_moneda').val(),
+        arbitraje:$('#id_arbitraje').val(),
+        paridad:$('#id_paridad').val()
+    });
+
+
+
+vector.cobranza=cobranza;
+vector.imputaciones=imputaciones;
+vector.asiento=asiento;
+vector.movimiento=movimiento;
+
+console.log(vector);
+
+}

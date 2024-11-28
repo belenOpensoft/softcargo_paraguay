@@ -1,10 +1,15 @@
 import json
+from datetime import datetime
+from os import times
 
+from click import DateTime
 from django.db.models import Q, OuterRef, Subquery
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from administracion_contabilidad.forms import Cobranza
-from administracion_contabilidad.models import Boleta, Impuvtas
+from administracion_contabilidad.models import Boleta, Impuvtas, Asientos, Movims, Cheques
+from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero
+from administracion_contabilidad.views.preventa import generar_autogenerado
 from mantenimientos.models import Clientes, Monedas
 
 param_busqueda = {
@@ -228,3 +233,223 @@ def source_facturas_pendientes(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)})
+
+def guardar_impuventa(request):
+    try:
+        if request.method == 'POST':
+            vector = json.loads(request.POST.get('vector'))
+            imputaciones = vector.get('imputaciones')
+            asiento=vector.get('asiento')
+            movimiento=vector.get('movimiento')
+            cobranza=vector.get('cobranza')
+            autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%y/%m/%d"))
+            fecha = datetime.now().strftime("%y/%m/%d")
+
+            if vector and imputaciones:
+                for nroboleta in imputaciones:
+
+                    try:
+                        boleta = Boleta.objects.get(numero=nroboleta).last()
+                    except Exception as _:
+                        boleta = None
+
+                    if boleta:
+                        autofac = boleta.autogenerado
+                        parteiva=boleta.totiva
+                        monto=boleta.total
+                        cliente=boleta.nrocliente
+                        impuventa = Impuvtas()
+                        impuventa.autogen = autogenerado_impuventa
+                        impuventa.tipo = 1
+                        impuventa.cliente = cliente
+                        impuventa.monto = monto
+                        impuventa.autofac = autofac
+                        impuventa.parteiva = parteiva
+                        impuventa.fechaimpu = fecha
+                        impuventa.save()
+
+            #asientos 1 y 2
+            try:
+                cliente_data = Clientes.objects.get(codigo=cobranza.get('nrocliente'))
+            except Exception as _:
+                cliente_data = None
+
+            if cliente_data:
+                fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
+                nroasiento = generar_numero()
+                movimiento_num = modificar_numero(nroasiento)
+
+                detalle_asiento = 'COBRO' + cobranza.get('serie') + str(cobranza.get('prefijo')) + str(cobranza.get('numero')) + cliente_data.empresa
+                #total_pago total indiviual de cada medio de pago (ver si se genera un asiento por cada medio de pago)
+                asiento_vector_1 = {
+                    'detalle': detalle_asiento,
+                    'monto': cobranza.get('total'),
+                    'moneda': cobranza.get('nromoneda'),
+                    'cambio': cobranza.get('arbitraje'),
+                    'asiento': nroasiento,
+                    'conciliado': 'N',
+                    'clearing': fecha_obj,
+                    'fecha': fecha_obj,
+                    'imputacion': 1,
+                    'modo': asiento.get('modo'),
+                    'tipo': 'Z',
+                    'cuenta': asiento.get('cuenta'),
+                    'documento': cobranza.get('numero'),
+                    'vencimiento': fecha_obj,
+                    'pasado': 0,
+                    'autogenerado': autogenerado_impuventa,
+                    'cliente': cliente_data.codigo,
+                    'banco': asiento.get('banco'),
+                    'centro': 'ADM',
+                    'mov': movimiento_num + 1,
+                    'anio': fecha_obj.year,
+                    'mes': fecha_obj.month,
+                    'fechacheque': fecha_obj,
+                    'paridad': cobranza.get('paridad')
+                }  # haber
+                asiento_vector_2 = {  # deber
+                    'detalle': detalle_asiento,
+                    'monto': cobranza.get('total'),
+                    'moneda': cobranza.get('nromoneda'),
+                    'cambio': cobranza.get('arbitraje'),
+                    'asiento': nroasiento,
+                    'conciliado': 'N',
+                    'clearing': fecha_obj,
+                    'fecha': fecha_obj,
+                    'imputacion': 2,
+                    'modo': None,
+                    'tipo': 'Z',
+                    'cuenta': asiento.get('cuenta'),
+                    'documento': cobranza.get('numero'),
+                    'vencimiento': fecha_obj,
+                    'pasado': 0,
+                    'autogenerado': autogenerado_impuventa,
+                    'cliente': cliente_data.codigo,
+                    'banco': 'S/I',
+                    'centro': 'S/I',
+                    'mov': movimiento_num,
+                    'anio': fecha_obj.year,
+                    'mes': fecha_obj.month,
+                    'fechacheque': fecha_obj,
+                    'paridad': cobranza.get('paridad')
+                }  # deber
+                crear_asiento(asiento_vector_1)
+                crear_asiento(asiento_vector_2)
+                if asiento.get('modo') == 'CHEQUE':
+                    numero=asiento.get('nro_mediopago')
+                    banco=asiento.get('banco')
+                    fecha_vencimiento=asiento.get('vencimiento')
+                    monto=cobranza.get('total') #asumiendo que se selecciona un unico medio de pago
+                    autogenerado=autogenerado_impuventa
+                    detalle=detalle_asiento
+                    moneda=cobranza.get('nromoneda')
+                    nrocliente=cobranza.get('nrocliente')
+                    tipo_cheque='CH'
+                    cheque = Cheques()
+                    cheque.cnumero=numero
+                    cheque.cbanco=banco
+                    cheque.cfecha=fecha_obj
+                    cheque.cvto=fecha_vencimiento
+                    cheque.cmonto=monto
+                    cheque.cautogenerado=autogenerado
+                    cheque.cdetalle=detalle
+                    cheque.ccliente=nrocliente
+                    cheque.cmoneda=moneda
+                    cheque.ctipo=tipo_cheque
+                    cheque.save()
+                #crear el movimiento
+                movimiento = {
+                    'tipo': 25,
+                    'fecha': fecha_obj,
+                    'boleta': numero,
+                    'iva': boleta.totiva,
+                    'total': movimiento.get('imputado'),
+                    'saldo': movimiento.get('saldo'),
+                    'moneda': cobranza.get('nromoneda'),
+                    'detalle': movimiento.get('boletas'),
+                    'cliente': cliente_data.codigo,
+                    'nombre': cliente_data.empresa,
+                    'nombremov': 'COBRO',
+                    'cambio': cobranza.get('arbitraje'),
+                    'autogenerado': autogenerado_impuventa,
+                    'serie': cobranza.get('serie'),
+                    'prefijo': cobranza.get('prefijo'),
+                    'posicion': boleta.posicion if boleta else None,
+                    'anio': fecha_obj.year,
+                    'mes': fecha_obj.month,
+                    'monedaoriginal': cobranza.get('nromoneda'),
+                    'montooriginal': cobranza.get('total'),
+                    'arbitraje': cobranza.get('arbitraje')
+                }
+                crear_movimiento(movimiento)
+
+            return JsonResponse({'status': 'exito'})
+    except Exception as e:
+        return JsonResponse({'status': 'Error: ' + str(e)})
+
+#sin hacer
+def crear_movimiento(movimiento):
+    try:
+        lista = Movims()
+        lista.id = lista.get_id()
+        lista.mtipo = movimiento['tipo']
+        lista.mfechamov = movimiento['fecha']
+        lista.mboleta = movimiento['boleta']
+        lista.mmonto = movimiento['monto']
+        lista.miva = movimiento['iva']
+        lista.mtotal = movimiento['total']
+        lista.msobretasa = 0
+        lista.msaldo = movimiento['saldo']
+        lista.mparidad = movimiento['paridad']
+        lista.mvtomov = movimiento['fecha']
+        lista.mmoneda = movimiento['moneda']
+        lista.mdetalle = movimiento['detalle']
+        lista.mcliente = movimiento['cliente']
+        lista.mnombre = movimiento['nombre']
+        lista.mnombremov = movimiento['nombremov']
+        lista.mcambio = movimiento['cambio']
+        lista.mautogen = movimiento['autogenerado']
+        lista.mserie = movimiento['serie']
+        lista.mprefijo = movimiento['prefijo']
+        lista.mposicion = movimiento['posicion']
+        lista.mmesimpu = movimiento['mes']
+        lista.manoimpu = movimiento['anio']
+        lista.mmonedaoriginal = movimiento['monedaoriginal']
+        lista.marbitraje = movimiento['arbitraje']
+        lista.mmontooriginal = movimiento['montooriginal']
+        lista.save()
+
+    except Exception as e:
+        return JsonResponse({'status': 'Error:' + str(e)})
+
+def crear_asiento(asiento):
+    try:
+        lista = Asientos()
+        id = lista.get_id()
+        lista.id = lista.get_id()
+        lista.fecha = asiento['fecha']
+        lista.asiento = asiento['asiento']
+        lista.cuenta = asiento['cuenta']
+        lista.imputacion = asiento['imputacion']
+        lista.tipo = asiento['tipo']
+        lista.documento = asiento['documento']
+        lista.vto = asiento['vencimiento']
+        lista.pasado = asiento['pasado']
+        lista.autogenerado = asiento['autogenerado']
+        lista.cliente = asiento['cliente']
+        lista.banco = asiento['banco']
+        lista.centro = "ADM"
+        lista.mov = asiento['mov']
+        lista.anoimpu = asiento['anio']
+        lista.mesimpu = asiento['mes']
+        lista.fechacheque = asiento['fechacheque']
+        lista.paridad = asiento['paridad']
+        lista.posicion = asiento['posicion']
+        lista.monto = asiento['monto']
+        lista.detalle = asiento['detalle']
+        lista.cambio = asiento['cambio']
+        lista.moneda = asiento['moneda']
+        lista.save()
+
+    except Exception as e:
+        return JsonResponse({'status': 'Error: ' + str(e)})

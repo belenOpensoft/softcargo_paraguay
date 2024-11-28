@@ -540,6 +540,37 @@ class Cobranza(forms.Form):
         error_messages={'required': 'Este campo es obligatorio'}
     )
 
+    moneda_transferencia= forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+    moneda_deposito = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+    moneda_cheque= forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+    moneda_otro = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
     cuenta_efectivo = forms.ModelChoiceField(
         queryset=Cuentas.objects.filter(xnivel1__contains="111"),
         label="Cuenta",

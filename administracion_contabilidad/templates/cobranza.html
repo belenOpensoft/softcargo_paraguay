@@ -260,7 +260,7 @@
 <div id="paymentModal" title="Forma de Cobro" style="display: none;">
   <!-- Header del modal -->
   <div class="modal-header d-flex justify-content-between align-items-center">
-    <h3>A cobrar: <span id="amount" class="text-primary fw-bold">200.00</span></h3>
+    <h3 style="color:black;">A cobrar: <span id="amount" class="text-primary fw-bold"></span></h3>
     <div class="modal-icons">
       <button class="icon-btn"><i class="ui-icon-folder-open"></i></button>
       <button class="icon-btn"><i class="ui-icon-disk"></i></button>
@@ -269,11 +269,11 @@
 
   <!-- Radio buttons -->
   <div class="payment-methods">
-    <label><input type="radio" name="paymentType" value="cash" checked> Efectivo</label>
-    <label><input type="radio" name="paymentType" value="check"> Cheque</label>
-    <label><input type="radio" name="paymentType" value="transfer"> Transferencia</label>
-    <label><input type="radio" name="paymentType" value="deposit"> Depósito</label>
-    <label><input type="radio" name="paymentType" value="other"> Otro</label>
+    <label><input type="radio" name="paymentType" id="efectivo" value="cash" checked> Efectivo</label>
+    <label><input type="radio" name="paymentType" id="cheque" value="check"> Cheque</label>
+    <label><input type="radio" name="paymentType" id="trans" value="transfer"> Transferencia</label>
+    <label><input type="radio" name="paymentType" id="deposito" value="deposit"> Depósito</label>
+    <label><input type="radio" name="paymentType" id="otro" value="other"> Otro</label>
   </div>
 
   <!-- Secciones dinámicas -->
@@ -318,6 +318,8 @@
 
   </div>
 
+
+
   <div class="row mb-3">
 
       <div class="col-md-6">
@@ -329,12 +331,11 @@
         {{ form.banco_cheque }}
     </div>
   </div>
-
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <label for="cuenta" class="form-label">Cuenta:</label>
-            <input type="number" class="form-control" id="cuenta">
-        </div>
+    <div class="col-md-6">
+    <div>
+      <label for="id_moneda_cheque">Moneda:</label>
+        {{ form.moneda_cheque }}
+    </div>
     </div>
 
 </div>
@@ -381,7 +382,12 @@
             <label for="cuenta_trans" class="form-label">Cuenta:</label>
             <input type="number" class="form-control" id="cuenta_trans">
         </div>
+            <div>
+      <label for="id_moneda_transferencia">Moneda:</label>
+        {{ form.moneda_transferencia }}
     </div>
+    </div>
+
 
 </div>
 
@@ -427,6 +433,10 @@
             <label for="cuenta_deposito" class="form-label">Cuenta:</label>
             <input type="number" class="form-control" id="cuenta_deposito">
         </div>
+                    <div>
+      <label for="id_moneda_deposito">Moneda:</label>
+        {{ form.moneda_deposito }}
+    </div>
     </div>
 
 </div>
@@ -473,6 +483,10 @@
             <label for="cuenta_otro" class="form-label">Cuenta:</label>
             <input type="number" class="form-control" id="cuenta_otro">
         </div>
+            <div>
+      <label for="id_moneda_otro">Moneda:</label>
+        {{ form.moneda_otro }}
+    </div>
     </div>
 
 </div>
@@ -480,7 +494,8 @@
   <!-- Observaciones y cierre -->
     <br>
     <div style="text-align:right;">
-        <button type="button" class="btn btn-success">Ingresar datos</button>
+        <button type="button" class="btn btn-success" onclick="ingresar_datos()">Ingresar datos</button>
+        <button type="button" class="btn btn-danger" onclick="borrar_datos()">Borrar datos</button>
     </div>
     <hr>
     <div class="container mt-4">
@@ -500,30 +515,7 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Estas filas se pueden generar dinámicamente -->
-        <tr>
-          <td>Efectivo</td>
-          <td>2024-11-25</td>
-          <td>Banco 1</td>
-          <td>12345</td>
-          <td>USD</td>
-          <td>150.00</td>
-          <td>1.0</td>
-          <td>2024-12-01</td>
-          <td>Cuenta 1</td>
-        </tr>
-        <tr>
-          <td>Cheque</td>
-          <td>2024-11-20</td>
-          <td>Banco 2</td>
-          <td>67890</td>
-          <td>EUR</td>
-          <td>200.00</td>
-          <td>0.95</td>
-          <td>2024-11-30</td>
-          <td>Cuenta 2</td>
-        </tr>
-        <!-- Más filas dinámicas -->
+
       </tbody>
     </table>
   </div>
