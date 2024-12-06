@@ -491,7 +491,6 @@ class Cobranza(forms.Form):
         initial="A",
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Número de serie'
         }
         ),
         error_messages={
@@ -505,7 +504,7 @@ class Cobranza(forms.Form):
         required=True,
         label="",
         initial="0000",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número válido'
@@ -517,7 +516,7 @@ class Cobranza(forms.Form):
         required=True,
         label="",
         initial="0000000000",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número válido'
