@@ -32,7 +32,7 @@ def get_paridad():
 class Factura(forms.Form):
     CHOICE_TIPO = (
         ('20', 'Factura'),
-        ('0', 'Nota de débito'), #no existe
+        ('0', 'Nota de débito'),
         ('21', 'Nota de crédito'),
         ('23', 'eticket'),
         ('24', 'eticket N/C'),
@@ -505,7 +505,7 @@ class Cobranza(forms.Form):
         required=True,
         label="",
         initial="0000",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número válido'
@@ -517,7 +517,7 @@ class Cobranza(forms.Form):
         required=True,
         label="",
         initial="0000000000",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número válido'

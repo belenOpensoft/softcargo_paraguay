@@ -299,14 +299,14 @@ def procesar_factura(request):
                 tipo_asiento = 'V'
                 nombre_mov = 'CONTADO'
             elif int(tipo) == 11:
-                detalle1 = 'VTA/CRED'
-                nombre_mov = 'FACTURA'
+                detalle1 = 'DEV/CTDO'
+                nombre_mov = 'DEVOLUCION'
             elif int(tipo) == 21:
                 detalle1 = 'NOT/CRED'
                 tipo_asiento = 'V'
-                nombre_mov = 'FACTURA'
+                nombre_mov = 'NOTA CRED.'
             elif int(tipo) == 20:
-                detalle1 = 'NOT/DEB'
+                detalle1 = 'VTA/CRED'
                 tipo_asiento = 'V'
                 nombre_mov = 'FACTURA'
 
@@ -319,7 +319,7 @@ def procesar_factura(request):
                 'monto': neto,
                 'iva': iva,
                 'total': precio_total,
-                'saldo': 0,
+                'saldo': precio_total,
                 'moneda': moneda,
                 'detalle': detalle_mov,
                 'cliente': cliente.codigo,
@@ -462,21 +462,17 @@ def generar_numero():
     # Tomar los dos últimos dígitos del año
     año = str(ahora.year)[-2:]
 
-    # Mes, día, hora, minutos, segundos y milisegundos (truncado a 3 dígitos)
+    # Mes, día, hora, minutos y segundos
     mes = f"{ahora.month:02}"
     dia = f"{ahora.day:02}"
     hora = f"{ahora.hour:02}"
+    minutos = f"{ahora.minute:02}"
     segundos = f"{ahora.second:02}"
-    milisegundos = f"{int(ahora.microsecond / 1000):03}"
 
-    # Generar tres dígitos aleatorios
-    digitos_aleatorios = f"{random.randint(0, 999):03}"
-
-    # Concatenar todo para formar el número de 15 dígitos
-    numero = f"{año}{mes}{dia}{hora}{segundos}{milisegundos}{digitos_aleatorios}"
+    # Concatenar para formar el número (ejemplo: 11051019041186)
+    numero = f"{año}{mes}{dia}{hora}{minutos}{segundos}"
 
     return numero
-
 
 def modificar_numero(numero):
     # Quitar el primer dígito y los últimos dos dígitos
