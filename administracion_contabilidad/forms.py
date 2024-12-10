@@ -540,7 +540,7 @@ class Cobranza(forms.Form):
         error_messages={'required': 'Este campo es obligatorio'}
     )
 
-    moneda_transferencia= forms.ModelChoiceField(
+    moneda_transferencia = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
         initial=2,
@@ -555,7 +555,7 @@ class Cobranza(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
-    moneda_cheque= forms.ModelChoiceField(
+    moneda_cheque = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
         initial=2,
@@ -579,7 +579,6 @@ class Cobranza(forms.Form):
         error_messages={'required': 'Este campo es obligatorio'},
         to_field_name='xcodigo'
     )
-
 
     cuenta_cheque = forms.ModelChoiceField(
         queryset=Cuentas.objects.filter(Q(xcodigo="11113") | Q(xcodigo="11114")),
@@ -881,10 +880,11 @@ class OrdenPago(forms.Form):
         self.fields['arbitraje'].initial = self.arbitraje_valor
         self.fields['paridad'].initial = self.paridad_valor
 
+
 class pdfForm(BSModalModelForm):
     class Meta:
         model = Infofactura
-        fields = ['observaciones',]  # Agrega los campos que deseas actualizar
+        fields = ['observaciones', ]  # Agrega los campos que deseas actualizar
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -892,11 +892,12 @@ class pdfForm(BSModalModelForm):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Actualizar'))
 
-    observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'pdf_add_input', "autocomplete": "off", 'required': False, 'max_length': 500, "rows": "25"," cols": "100", "class": "form-control"}, ), required=False, label="Notas", max_length=500)
+    observaciones = forms.CharField(widget=forms.Textarea(
+        attrs={"id": 'pdf_add_input', "autocomplete": "off", 'required': False, 'max_length': 500, "rows": "25",
+               " cols": "100", "class": "form-control"}, ), required=False, label="Notas", max_length=500)
 
 
 class EditarConsultarPagos(forms.Form):
-
     numero = forms.CharField(
         label="Número",
         widget=forms.TextInput(attrs={'class': 'form-control'}),

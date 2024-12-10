@@ -8,6 +8,26 @@
 from django.db import models
 
 
+class VistaCobranza(models.Model):
+    autogenerado = models.CharField(max_length=40, null=True, blank=True)
+    tipo = models.CharField(max_length=8, null=True, blank=True)
+    emision = models.DateTimeField(null=True, blank=True)
+    vencimiento = models.DateTimeField(null=True, blank=True)
+    nrocliente = models.IntegerField(null=True, blank=True)
+    cliente = models.CharField(max_length=50, null=True, blank=True)
+    embarque = models.CharField(max_length=30, null=True, blank=True)
+    total = models.DecimalField(null=True, blank=True)
+    moneda = models.CharField(max_length=10, null=True, blank=True)
+    arbitraje = models.CharField(max_length=21, null=True, blank=True)
+    paridad = models.DecimalField(null=True, blank=True)
+    posicion = models.CharField(max_length=30, null=True, blank=True)
+    documento = models.CharField(max_length=22, null=True, blank=True)
+    tipo_doc = models.CharField(max_length=20, null=True, blank=True)
+    detalle = models.CharField(max_length=200, null=True, blank=True)
+    source = models.CharField(max_length=8, null=True, blank=True)
+    saldo = models.DecimalField(null=True, blank=True)
+
+
 class AuditlogLogentry(models.Model):
     object_pk = models.CharField(max_length=255)
     object_id = models.BigIntegerField(blank=True, null=True)
@@ -32,6 +52,7 @@ class AuthGroup(models.Model):
     class Meta:
         managed = False
         db_table = 'auth_group'
+
 
 
 class AuthGroupPermissions(models.Model):
@@ -206,10 +227,9 @@ class Asientos(models.Model):
         managed = False
         db_table = 'dataset_asientos'
 
-
     def get_id(self):
-        asiento=Asientos.objects.last()
-        return int(asiento.id+1)
+        asiento = Asientos.objects.last()
+        return int(asiento.id + 1)
 
 
 class Asociadosresg(models.Model):
@@ -1264,7 +1284,7 @@ class Infofactura(models.Model):
 
     def get_id(self):
         lista = Infofactura.objects.last()
-        return int(lista.id+1)
+        return int(lista.id + 1)
 
 
 class Iva(models.Model):
@@ -1390,8 +1410,9 @@ class Movims(models.Model):
         db_table = 'dataset_movims'
 
     def get_id(self):
-        mov=Movims.objects.last()
-        return int(mov.id+1)
+        mov = Movims.objects.last()
+        return int(mov.id + 1)
+
 
 class Niveles(models.Model):
     numero = models.BigIntegerField()
@@ -10410,7 +10431,6 @@ class PendienteFacturar(models.Model):
 
         if es_nuevo:
             facturar_pendiente(self.autogenerado)
-
 
 
 class VistaGastosPreventa(models.Model):
