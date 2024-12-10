@@ -474,7 +474,6 @@ class gastosForm(BSModalModelForm):
         widgets = {
             'modo': forms.Select(attrs={'id': 'id_modo_id'}),
             'arbitraje': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
-            'pinformar': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
         }
 
 
@@ -512,12 +511,13 @@ class gastosForm(BSModalModelForm):
     tipogasto = forms.CharField(widget=forms.Select(choices=CHOICES_TG),label='Tipo')
     servicio = forms.ChoiceField(choices=list(), widget=forms.Select(
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, }), label="Servicio", required=True)
-    importe = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"required":True,'min': '0'}, ), max_digits=12,decimal_places=4, required=True, label="Importe")
-    arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"id":"id_arbitraje_id","required":False,'min': '0'}, ), max_digits=12,decimal_places=4, required=False, label="Arbitraje")
+    importe = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"required":True,'min': '0'}, ), max_digits=12,decimal_places=4, required=True, label="Importe",initial=0)
+    pinformar = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"required":True,'min': '0'}, ), max_digits=12,decimal_places=4, required=True, label="A informar",initial=0)
+    arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"id":"id_arbitraje_id","required":False,'min': '0'}, ), max_digits=12,decimal_places=4, required=False, label="Arbitraje",initial=0)
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13","id":"id_moneda_id"}),
-                               required=True, label="Moneda", choices=(), initial='')
-    socio = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13"}),
-                               required=True, label="Socio comercial", choices=(), initial='')
+                               required=True, label="Moneda", choices=(), initial='2')
+    socio = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off",}),
+                             label="Socio comercial", choices=(), initial='')
 
 
 class archivosForm(forms.ModelForm):

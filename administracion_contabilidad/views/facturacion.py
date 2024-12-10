@@ -299,14 +299,14 @@ def procesar_factura(request):
                 tipo_asiento = 'V'
                 nombre_mov = 'CONTADO'
             elif int(tipo) == 11:
-                detalle1 = 'VTA/CRED'
-                nombre_mov = 'FACTURA'
+                detalle1 = 'DEV/CTDO'
+                nombre_mov = 'DEVOLUCION'
             elif int(tipo) == 21:
                 detalle1 = 'NOT/CRED'
                 tipo_asiento = 'V'
-                nombre_mov = 'FACTURA'
+                nombre_mov = 'NOTA CRED.'
             elif int(tipo) == 20:
-                detalle1 = 'NOT/DEB'
+                detalle1 = 'VTA/CRED'
                 tipo_asiento = 'V'
                 nombre_mov = 'FACTURA'
 
@@ -319,7 +319,7 @@ def procesar_factura(request):
                 'monto': neto,
                 'iva': iva,
                 'total': precio_total,
-                'saldo': 0,
+                'saldo': precio_total,
                 'moneda': moneda,
                 'detalle': detalle_mov,
                 'cliente': cliente.codigo,

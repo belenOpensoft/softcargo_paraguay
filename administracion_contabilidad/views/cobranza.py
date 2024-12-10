@@ -201,7 +201,7 @@ def source_facturas_pendientes(request):
         ).exclude(
             autogenerado__in=Impuvtas.objects.values('autofac')
         ).filter(
-            id=Subquery(subquery)  # Filtra solo los registros con el ID devuelto por la subconsulta
+            id=Subquery(subquery)
         )
 
         total_registros = infofacturas_qs.count()
