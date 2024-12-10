@@ -118,7 +118,6 @@ class add_form(BSModalModelForm):
             'status',
             'pagoflete',
             'trafico',
-            'aduana',
             'awb',
             'operacion',
             'arbitraje',
@@ -135,7 +134,7 @@ class add_form(BSModalModelForm):
     consignatario = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'consignatario_add', 'name':'otro' }),
-        required=False)
+        required=False,initial='OCEANLINK LTDA')
     armador = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'armador_add', 'name':'otro'}),
@@ -167,7 +166,7 @@ class add_form(BSModalModelForm):
     operacion = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Operacion",choices=choice_op)
     pagoflete = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("C","Collect"),("P","Prepaid")))
     transportista_i = forms.CharField(
-        widget=forms.TextInput(attrs={
+        widget=forms.HiddenInput(attrs={
             'class': 'form-control',
             'style': 'width:50px; margin-right:2px;',
             'readonly': 'readonly',  # Campo de solo lectura
@@ -177,7 +176,7 @@ class add_form(BSModalModelForm):
         required=False
     )
     agente_i = forms.CharField(
-        widget=forms.TextInput(attrs={
+        widget=forms.HiddenInput(attrs={
             'class': 'form-control',
             'style': 'width:50px; margin-right:2px;',
             'readonly': 'readonly',
@@ -187,17 +186,17 @@ class add_form(BSModalModelForm):
         required=False
     )
     consignatario_i = forms.CharField(
-        widget=forms.TextInput(attrs={
+        widget=forms.HiddenInput(attrs={
             'class': 'form-control',
             'style': 'width:50px; margin-right:2px;',
             'readonly': 'readonly',
             'id': 'consignatario_i',
             'name': 'consignatario_i',
         }),
-        required=False
+        required=False, initial=835
     )
     armador_i = forms.CharField(
-        widget=forms.TextInput(attrs={
+        widget=forms.HiddenInput(attrs={
             'class': 'form-control',
             'style': 'width:50px; margin-right:2px;',
             'readonly': 'readonly',
@@ -207,9 +206,6 @@ class add_form(BSModalModelForm):
         required=False
     )
 
-
-
-
     def __init__(self, *args, **kwargs):
        # lista_clientes = Clientes.objects.none()
         super().__init__(*args, **kwargs)
@@ -218,7 +214,13 @@ class add_form(BSModalModelForm):
         self.fields['fecha'].required = False
         self.fields['awb'].label = 'Master'
         self.fields['fecha'].label = 'Llegada'
-        #self.fields['awb'].widget.attrs['autocomplete'] = 'off'
+        self.fields['arbitraje'].initial = 0
+        self.fields['aduana'].initial = 0
+        self.fields['trafico'].initial = 0
+        self.fields['cotizacion'].initial = 0
+        self.fields['bultosmadre'].initial = 0
+        self.fields['kilosmadre'].initial = 0
+        self.fields['tarifa'].initial = 0
 
 class edit_form(BSModalModelForm):
     class Meta:
