@@ -186,43 +186,30 @@ def source_facturas_pendientes(request):
         length = int(request.GET.get('length', 10))
         cliente = int(request.GET.get('cliente'))
 
-        anio_limite = 2010
 
-        infofacturas_qs = Boleta.objects.all()
+        pendientes = VistaCobranza.objects.filter(nrocliente=cliente)
 
 
-        subquery = infofacturas_qs.filter(numero=OuterRef('numero')).order_by('id').values('id')[:1]
+        total_registros = pendientes.count()
 
-        infofacturas_qs = infofacturas_qs.filter(
-            Q(autogenerado__gte=str(anio_limite)) &
-            Q(nrocliente=cliente) &
-            Q(tipo=20)
-        ).exclude(
-            autogenerado__in=Impuvtas.objects.values('autofac')
-        ).filter(
-            id=Subquery(subquery)  # Filtra solo los registros con el ID devuelto por la subconsulta
-        )
-
-        total_registros = infofacturas_qs.count()
-
-        infofacturas_paginated = infofacturas_qs[start:start + length]
+        pendientes_paginados = pendientes[start:start + length]
 
         data = [{
-            'id':boleta.id,
-            'vencimiento':boleta.vto,
-            'emision':boleta.fecha,
-            'documento':boleta.numero,
-            'total': boleta.total,
-            'saldo':boleta.total,
+            'id':0,
+            'vencimiento':pendiente.vencimiento,
+            'emision':pendiente.emision,
+            'documento':pendiente.numero, #fijarse
+            'total': pendiente.total,
+            'saldo':pendiente.saldo,
             'imputado':0,
-            'tipo_cambio':boleta.cambio,
-            'embarque':boleta.refer,
-            'detalle':boleta.detalle,
-            'posicion':boleta.posicion,
-            'moneda': Monedas.objects.get(codigo=boleta.moneda).nombre,
-            'paridad':boleta.paridad,
-            'tipo_doc':"FACTURA",
-        } for boleta in infofacturas_paginated]
+            'tipo_cambio':pendiente.arbitraje,
+            'embarque':pendiente.embarque,
+            'detalle':pendiente.detalle,
+            'posicion':pendiente.posicion,
+            'moneda': Monedas.objects.get(codigo=pendiente.moneda).nombre, #fijarse
+            'paridad':pendiente.paridad,
+            'tipo_doc':pendiente.tipo_doc,
+        } for pendiente in pendientes_paginados]
 
         return JsonResponse({
             'draw': int(request.GET.get('draw', 1)),

@@ -31,8 +31,8 @@ def get_paridad():
 
 class Factura(forms.Form):
     CHOICE_TIPO = (
-        ('11', 'Factura'),
-        ('20', 'Nota de débito'),
+        ('20', 'Factura'),
+        ('0', 'Nota de débito'), #no existe
         ('21', 'Nota de crédito'),
         ('23', 'eticket'),
         ('24', 'eticket N/C'),
