@@ -184,6 +184,19 @@ function abrir_cobranza() {
             }
         ]
     }).prev('.ui-dialog-titlebar').remove();
+    $.ajax({
+        url: "/admin_cont/cargar_arbitraje/",
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
+            // Cargar los valores en los campos
+            $('#id_arbitraje').val(data.arbitraje);
+            $('#id_paridad').val(data.paridad);
+        },
+        error: function (xhr, status, error) {
+            alert("Error al cargar los datos iniciales: " + error);
+        }
+    });
 }
 
 function tabla_para_imputar(){
@@ -486,7 +499,6 @@ $('#imputarSeleccion').on('click', function () {
 
     seleccionadas.nodes().to$().removeClass('selected');
 
-    console.log(filasAfectadas);
     localStorage.setItem('filasAfectadas',JSON.stringify(filasAfectadas));
 });
 
@@ -856,8 +868,7 @@ rows.forEach(row => {
 });
 
     if(key){
-    alert();
-       // crear_impuventa_asiento_movimiento();
+     crear_impuventa_asiento_movimiento();
     }else{
         if (confirm('No hay una boleta seleccionada, ¿Desea continuar como anticipo?')) {
             crear_anticipo();

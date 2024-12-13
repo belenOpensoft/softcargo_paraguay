@@ -1362,10 +1362,9 @@ $('#abrir_arbi').on('click', function (event) {
                     let parDolar = $('#valor_paridad').val();
                     let tipoMoneda = $('#moneda_select').val();
                     let pizDolar = $('#valor_pizarra').val();
-                    alert(tipoMoneda);
 
                     $.ajax({
-                        url: "/guardar_arbitraje/",
+                        url: "/admin_cont/guardar_arbitraje/",
                         dataType: 'json',
                         type: 'POST',
                         headers: { 'X-CSRFToken': csrf_token },

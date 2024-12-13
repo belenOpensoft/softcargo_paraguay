@@ -3,15 +3,19 @@ from datetime import datetime
 from os import times
 
 from click import DateTime
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, OuterRef, Subquery
 from django.db.transaction import atomic
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from administracion_contabilidad.forms import Cobranza
-from administracion_contabilidad.models import Boleta, Impuvtas, Asientos, Movims, Cheques, Cuentas
+from administracion_contabilidad.models import Boleta, Impuvtas, Asientos, Movims, Cheques, Cuentas, VistaCobranza, \
+    Dolar
 from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero
 from administracion_contabilidad.views.preventa import generar_autogenerado
 from mantenimientos.models import Clientes, Monedas, Bancos
+from collections import defaultdict
+from django.db.models import Sum
 
 param_busqueda = {
     1: 'autogenerado__icontains',
@@ -181,7 +185,7 @@ def get_order(request, columns):
     except Exception as e:
         raise TypeError(e)
 
-def source_facturas_pendientes(request):
+def source_facturas_pendientes_old(request):
     try:
         start = int(request.GET.get('start', 0))
         length = int(request.GET.get('length', 10))
@@ -199,9 +203,9 @@ def source_facturas_pendientes(request):
             'id':0,
             'vencimiento':pendiente.vencimiento,
             'emision':pendiente.emision,
-            'documento':pendiente.numero, #fijarse
+            'documento':pendiente.documento,
             'total': pendiente.total,
-            'saldo':pendiente.saldo,
+            'saldo':pendiente.saldo if pendiente.saldo is not None else pendiente.total,
             'imputado':0,
             'tipo_cambio':pendiente.arbitraje,
             'embarque':pendiente.embarque,
@@ -221,6 +225,94 @@ def source_facturas_pendientes(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)})
+
+from collections import defaultdict
+
+def source_facturas_pendientes(request):
+    try:
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        cliente = int(request.GET.get('cliente'))
+
+        # Obtener registros filtrados por cliente
+        pendientes = VistaCobranza.objects.filter(nrocliente=cliente)
+        #pendientes = VistaCobranza.objects.all()
+
+        # Agrupar por `autogenerado` y recalcular `saldo` y `pago`
+        agrupados = defaultdict(lambda: {
+            'vencimiento': None,
+            'emision': None,
+            'documento': None,
+            'total': 0,
+            'saldo': 0,
+            'pago': 0,
+            'tipo_cambio': 0,
+            'embarque': None,
+            'detalle': None,
+            'posicion': None,
+            'moneda': None,
+            'paridad': 0,
+            'tipo_doc': None,
+        })
+
+        for pendiente in pendientes:
+            auto = pendiente.autogenerado
+            agrupados[auto]['vencimiento'] = pendiente.vencimiento
+            agrupados[auto]['emision'] = pendiente.emision
+            agrupados[auto]['documento'] = pendiente.documento
+            agrupados[auto]['total'] = pendiente.total
+            agrupados[auto]['tipo_cambio'] = pendiente.arbitraje
+            agrupados[auto]['embarque'] = pendiente.embarque
+            agrupados[auto]['detalle'] = pendiente.detalle
+            agrupados[auto]['posicion'] = pendiente.posicion
+            agrupados[auto]['paridad'] = pendiente.paridad
+            agrupados[auto]['tipo_doc'] = pendiente.tipo_doc
+            try:
+                agrupados[auto]['moneda'] = Monedas.objects.get(codigo=pendiente.moneda).nombre
+            except ObjectDoesNotExist:
+                agrupados[auto]['moneda'] = "Desconocida"
+            # Sumar pago y manejar valores None
+            agrupados[auto]['pago'] += pendiente.pago or 0
+            agrupados[auto]['saldo'] = max(0, pendiente.total - agrupados[auto]['pago'])
+
+        # Filtrar agrupados para excluir saldos cero
+        agrupados_filtrados = {
+            key: value for key, value in agrupados.items() if value['saldo'] > 0
+        }
+
+        # Convertir agrupados a una lista y paginar
+        total_registros = len(agrupados)
+        agrupados_paginados = list(agrupados_filtrados.values())[start:start + length]
+
+        # Preparar datos para la respuesta
+        data = [{
+            'id': idx,
+            'vencimiento': item['vencimiento'],
+            'emision': item['emision'],
+            'documento': item['documento'],
+            'total': item['total'],
+            'saldo': item['saldo'],
+            'imputado': 0,
+            'tipo_cambio': item['tipo_cambio'],
+            'embarque': item['embarque'],
+            'detalle': item['detalle'],
+            'posicion': item['posicion'],
+            'moneda': item['moneda'],
+            'paridad': item['paridad'],
+            'tipo_doc': item['tipo_doc'],
+        } for idx, item in enumerate(agrupados_paginados, start=1)]
+
+        return JsonResponse({
+            'draw': int(request.GET.get('draw', 1)),
+            'recordsTotal': total_registros,
+            'recordsFiltered': total_registros,
+            'data': data,
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
+
+
 
 @atomic
 def guardar_impuventa(request):
@@ -248,7 +340,7 @@ def guardar_impuventa(request):
                     if boleta:
                         autofac = boleta.autogenerado
                         parteiva=boleta.totiva
-                        monto=boleta.total
+                        monto = boleta.total if boleta.tipo == 20 else -boleta.total if boleta.tipo == 21 else 0
                         cliente=boleta.nrocliente
                         impuventa = Impuvtas()
                         impuventa.autogen = autogenerado_impuventa
@@ -543,7 +635,6 @@ def guardar_anticipo(request):
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
 
-#sin hacer
 def crear_movimiento(movimiento):
     try:
         lista = Movims()
@@ -609,3 +700,25 @@ def crear_asiento(asiento):
 
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
+
+def cargar_arbitraje(request):
+    try:
+        fecha_hoy = datetime.today().date()
+
+        dolar_hoy = Dolar.objects.filter(ufecha__date=fecha_hoy).first()
+
+        if dolar_hoy:
+            return JsonResponse({
+                'arbitraje': dolar_hoy.uvalor,
+                'paridad': dolar_hoy.paridad,
+                'contenido': True
+            })
+        else:
+            return JsonResponse({
+                'arbitraje': 0.0,
+                'paridad': 0.0,
+                'contenido': False
+            })
+    except Exception as e:
+        # Manejar errores inesperados
+        return JsonResponse({'error': str(e)}, status=500)

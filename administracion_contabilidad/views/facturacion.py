@@ -14,7 +14,7 @@ from impterrestre.models import ImpterraEmbarqueaereo
 from mantenimientos.models import Clientes, Servicios, Monedas
 from administracion_contabilidad.forms import Factura
 from administracion_contabilidad.models import Boleta, PendienteFacturar, Asientos, Movims, Infofactura, \
-    VistaGastosPreventa
+    VistaGastosPreventa, Dolar
 from django.http import JsonResponse, HttpResponse
 from datetime import datetime
 from django.db import transaction
@@ -907,6 +907,37 @@ def cargar_preventa_infofactura_multiple(request):
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+
+def guardar_arbitraje(request):
+    if request.method == "POST":
+        try:
+            # Obtener datos del POST
+            arb_dolar = request.POST.get('arbDolar')
+            par_dolar = request.POST.get('parDolar')
+            tipo_moneda = request.POST.get('tipoMoneda')
+            piz_dolar = request.POST.get('pizDolar')
+
+            dolar = Dolar()
+
+            if arb_dolar == '':
+                arb_dolar=0
+            if par_dolar == '':
+                par_dolar=0
+            if piz_dolar == '':
+                piz_dolar=0
+            fecha_hoy = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
+            dolar.upizarra=float(piz_dolar)
+            dolar.paridad=float(par_dolar)
+            dolar.uvalor=float(arb_dolar)
+            dolar.umoneda=float(tipo_moneda)
+            dolar.ufecha = fecha_hoy
+            dolar.save()
+
+            return JsonResponse({'status': ''})
+        except Exception as e:
+            return JsonResponse({'status': f'Error al guardar los datos: {str(e)}'}, status=500)
+    else:
+        return JsonResponse({'status': 'Método no permitido.'}, status=405)
 
 
 
