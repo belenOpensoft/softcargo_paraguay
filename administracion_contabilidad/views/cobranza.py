@@ -1,50 +1,40 @@
 import json
 from datetime import datetime
-from os import times
-
-from click import DateTime
+from collections import defaultdict
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q, OuterRef, Subquery
 from django.db.transaction import atomic
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from administracion_contabilidad.forms import Cobranza
 from administracion_contabilidad.models import Boleta, Impuvtas, Asientos, Movims, Cheques, Cuentas, VistaCobranza, \
-    Dolar
+    Dolar, ListaCobranzas
 from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero
 from administracion_contabilidad.views.preventa import generar_autogenerado
 from mantenimientos.models import Clientes, Monedas, Bancos
-from collections import defaultdict
-from django.db.models import Sum
+
 
 param_busqueda = {
-    1: 'autogenerado__icontains',
-    2: 'serie__icontains',
-    3: 'prefijo__icontains',
-    4: 'numero__icontains',
-    5: 'cliente__icontains',
-    6: 'master__icontains',
-    7: 'house__icontains',
-    8: 'concepto__icontains',
-    9: 'monto__icontains',
-    10: 'iva__icontains',
-    11: 'totiva__icontains',
-    12: 'total__icontains',
+    0: 'autogenerado__icontains',
+    1: 'numero__icontains',
+    2: 'detalle__icontains',
+    4: 'master__icontains',
+    5: 'house__icontains',
+    6: 'monto__icontains',
+    7: 'iva__icontains',
+    8: 'totiva__icontains',
+    9: 'total__icontains',
 }
 
 columns_table = {
     0: 'autogenerado',
-    1: 'serie',
-    2: 'prefijo',
-    3: 'numero',
-    4: 'cliente',
-    5: 'master',
-    6: 'house',
-    7: 'concepto',
-    8: 'monto',
-    9: 'iva',
-    10: 'totiva',
-    11: 'total',
+    1: 'numero',
+    2: 'detalle',
+    3: 'master',
+    4: 'house',
+    5: 'monto',
+    6: 'iva',
+    7: 'totiva',
+    8: 'total',
 }
 
 def cobranza_view(request):
@@ -85,43 +75,42 @@ def source_cobranza_imputacion(request):
 
 
 def source_cobranza(request):
-    args = {
-        '1': request.GET['columns[1][search][value]'],
-        '2': request.GET['columns[2][search][value]'],
-        '3': request.GET['columns[3][search][value]'],
-        '4': request.GET['columns[4][search][value]'],
-        '5': request.GET['columns[5][search][value]'],
-        '6': request.GET['columns[6][search][value]'],
-        '7': request.GET['columns[7][search][value]'],
-        '8': request.GET['columns[8][search][value]'],
-        '9': request.GET['columns[9][search][value]'],
-        '10': request.GET['columns[10][search][value]'],
-        '11': request.GET['columns[11][search][value]'],
-        '12': request.GET['columns[12][search][value]'],
-    }
-    filtro = get_argumentos_busqueda(**args)
-    start = int(request.GET['start'])
-    length = int(request.GET['length'])
-    buscar = str(request.GET['buscar'])
-    que_buscar = str(request.GET['que_buscar'])
-    if len(buscar) > 0:
-        filtro[que_buscar] = buscar
-    end = start + length
-    order = get_order(request, columns_table)
-    if filtro:
-        registros = Boleta.objects.filter(**filtro).order_by(*order)
-    else:
-        registros = Boleta.objects.all().order_by(*order)
-    resultado = {}
-    data = get_data(registros[start:end])
-    resultado['data'] = data
-    resultado['length'] = length
-    resultado['draw'] = request.GET['draw']
-    resultado['recordsTotal'] = Boleta.objects.all().count()
-    resultado['recordsFiltered'] = str(registros.count())
-    data_json = json.dumps(resultado)
-    mimetype = "application/json"
-    return HttpResponse(data_json, mimetype)
+    try:
+        # Usar un bucle para recoger dinámicamente las columnas que existen
+        args = {}
+        for i in range(10):  # Cambia el rango según el número de columnas reales
+            key = f'columns[{i}][search][value]'
+            args[str(i)] = request.GET.get(key, '')  # Usa un valor predeterminado si la clave no existe
+
+        # Filtros y lógica de búsqueda
+        filtro = get_argumentos_busqueda(**args)
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        buscar = request.GET.get('buscar', '')
+        que_buscar = request.GET.get('que_buscar', '')
+
+        if buscar:
+            filtro[que_buscar] = buscar
+
+        end = start + length
+
+        # Consulta a la base de datos
+        if filtro:
+            registros = ListaCobranzas.objects.filter(**filtro).order_by()
+        else:
+            registros = ListaCobranzas.objects.all().order_by()
+
+        # Preparación de la respuesta
+        resultado = {
+            'data': get_data(registros[start:end]),
+            'length': length,
+            'draw': request.GET.get('draw', '1'),
+            'recordsTotal': ListaCobranzas.objects.count(),
+            'recordsFiltered': registros.count(),
+        }
+        return JsonResponse(resultado)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 def get_data(registros_filtrados):
@@ -129,15 +118,11 @@ def get_data(registros_filtrados):
         data = []
         for registro in registros_filtrados:
             registro_json = []
-            registro_json.append(str(registro.id))
             registro_json.append('' if registro.autogenerado is None else str(registro.autogenerado))
-            registro_json.append('' if registro.prefijo is None else str(registro.prefijo))
-            registro_json.append('' if registro.serie is None else str(registro.serie))
             registro_json.append('' if registro.numero is None else str(registro.numero))
-            registro_json.append('' if registro.cliente is None else str(registro.cliente))
+            registro_json.append('' if registro.detalle is None else str(registro.detalle))
             registro_json.append('' if registro.master is None else str(registro.master))
             registro_json.append('' if registro.house is None else str(registro.house))
-            registro_json.append('' if registro.concepto is None else str(registro.concepto))
             registro_json.append('' if registro.monto is None else str(registro.monto))
             registro_json.append('' if registro.iva is None else str(registro.iva))
             registro_json.append('' if registro.totiva is None else str(registro.totiva))
@@ -158,32 +143,6 @@ def get_argumentos_busqueda(**kwargs):
     except Exception as e:
         raise TypeError(e)
 
-
-def get_order(request, columns):
-    try:
-        result = []
-        order_column = request.GET['order[0][column]']
-        order_dir = request.GET['order[0][dir]']
-        order = columns[int(order_column)]
-        if order_dir == 'desc':
-            order = '-' + columns[int(order_column)]
-        result.append(order)
-        i = 1
-        while i > 0:
-            try:
-                order_column = request.GET['order[' + str(i) + '][column]']
-                order_dir = request.GET['order[' + str(i) + '][dir]']
-                order = columns[int(order_column)]
-                if order_dir == 'desc':
-                    order = '-' + columns[int(order_column)]
-                result.append(order)
-                i += 1
-            except Exception as e:
-                i = 0
-        result.append('id')
-        return result
-    except Exception as e:
-        raise TypeError(e)
 
 def source_facturas_pendientes_old(request):
     try:
@@ -226,7 +185,7 @@ def source_facturas_pendientes_old(request):
     except Exception as e:
         return JsonResponse({'error': str(e)})
 
-from collections import defaultdict
+
 
 def source_facturas_pendientes(request):
     try:
@@ -253,6 +212,7 @@ def source_facturas_pendientes(request):
             'moneda': None,
             'paridad': 0,
             'tipo_doc': None,
+            'source':None
         })
 
         for pendiente in pendientes:
@@ -267,6 +227,7 @@ def source_facturas_pendientes(request):
             agrupados[auto]['posicion'] = pendiente.posicion
             agrupados[auto]['paridad'] = pendiente.paridad
             agrupados[auto]['tipo_doc'] = pendiente.tipo_doc
+            agrupados[auto]['source'] = pendiente.source
             try:
                 agrupados[auto]['moneda'] = Monedas.objects.get(codigo=pendiente.moneda).nombre
             except ObjectDoesNotExist:
@@ -300,6 +261,7 @@ def source_facturas_pendientes(request):
             'moneda': item['moneda'],
             'paridad': item['paridad'],
             'tipo_doc': item['tipo_doc'],
+            'source':item['source']
         } for idx, item in enumerate(agrupados_paginados, start=1)]
 
         return JsonResponse({
@@ -315,7 +277,7 @@ def source_facturas_pendientes(request):
 
 
 @atomic
-def guardar_impuventa(request):
+def guardar_impuventa_old(request):
     try:
         if request.method == 'POST':
             body_unicode = request.body.decode('utf-8')
@@ -365,7 +327,170 @@ def guardar_impuventa(request):
                     movimiento_num = modificar_numero(nroasiento)
 
                     detalle_asiento = 'COBRO' + cobranza[0]['serie'] +'-'+ str(cobranza[0]['prefijo']) +'-'+ str(cobranza[0]['numero']) +'-'+ cliente_data.empresa
-                    #total_pago total indiviual de cada medio de pago (ver si se genera un asiento por cada medio de pago)
+                    asiento_vector_1 = {
+                        'detalle': detalle_asiento,
+                        'monto': asiento['total_pago'],
+                        'moneda': cobranza[0]['nromoneda'],
+                        'cambio': cobranza[0]['arbitraje'],
+                        'asiento': nroasiento,
+                        'conciliado': 'N',
+                        'clearing': fecha_obj,
+                        'fecha': fecha_obj,
+                        'imputacion': 1,
+                        'modo': asiento['modo'],
+                        'tipo': 'Z',
+                        'cuenta': asiento['cuenta'],
+                        'documento': cobranza[0]['numero'],
+                        'vencimiento': fecha_obj,
+                        'pasado': 0,
+                        'autogenerado': autogenerado_impuventa,
+                        'cliente': cliente_data.codigo,
+                        'banco': asiento['banco'] if asiento['modo'] != 'CHEQUE' else " - ".join(map(str, Cuentas.objects.filter(xcodigo=asiento['cuenta']).values_list('xcodigo', 'xnombre').first() or ('', ''))),
+                        'centro': 'ADM',
+                        'mov': int(movimiento_num) + 1,
+                        'anio': fecha_obj.year,
+                        'mes': fecha_obj.month,
+                        'fechacheque': fecha_obj,
+                        'paridad': cobranza[0]['paridad'],
+                        'posicion': boleta.posicion if boleta.posicion else None
+
+                    }  # haber
+                    crear_asiento(asiento_vector_1)
+                    if asiento.get('modo') == 'CHEQUE':
+                        numero=asiento['nro_mediopago']
+                        banco=asiento['banco']
+                        fecha_vencimiento=asiento['vencimiento']
+                        monto=asiento['total_pago']
+                        autogenerado=autogenerado_impuventa
+                        detalle=detalle_asiento
+                        moneda=cobranza[0]['nromoneda']
+                        nrocliente=cobranza[0]['nrocliente']
+                        tipo_cheque='CH'
+                        cheque = Cheques()
+                        cheque.cnumero=numero
+                        cheque.cbanco=banco
+                        cheque.cfecha=fecha_obj
+                        cheque.cvto=fecha_vencimiento
+                        cheque.cmonto=monto
+                        cheque.cautogenerado=autogenerado
+                        cheque.cdetalle=detalle
+                        cheque.ccliente=nrocliente
+                        cheque.cmoneda=moneda
+                        cheque.ctipo=tipo_cheque
+                        cheque.save()
+
+                #asiento general
+                asiento_vector_2 = {  # deber
+                    'detalle': detalle_asiento,
+                    'monto': cobranza[0]['total'],
+                    'moneda': cobranza[0]['nromoneda'],
+                    'cambio': cobranza[0]['arbitraje'],
+                    'asiento': nroasiento,
+                    'conciliado': 'N',
+                    'clearing': fecha_obj,
+                    'fecha': fecha_obj,
+                    'imputacion': 2,
+                    'modo': None,
+                    'tipo': 'Z',
+                    'cuenta': cliente_data.ctavta,
+                    'documento': cobranza[0]['numero'],
+                    'vencimiento': fecha_obj,
+                    'pasado': 0,
+                    'autogenerado': autogenerado_impuventa,
+                    'cliente': cliente_data.codigo,
+                    'banco': 'S/I',
+                    'centro': 'S/I',
+                    'mov': movimiento_num,
+                    'anio': fecha_obj.year,
+                    'mes': fecha_obj.month,
+                    'fechacheque': fecha_obj,
+                    'paridad': cobranza[0]['paridad'],
+                    'posicion': boleta.posicion if boleta.posicion else None
+                }  # deber general
+                crear_asiento(asiento_vector_2)
+                #crear el movimiento
+                movimiento_vec = {
+                    'tipo': 25,
+                    'fecha': fecha_obj,
+                    'boleta': cobranza[0]['numero'],
+                    'monto': 0,
+                    'paridad': cobranza[0]['paridad'],
+                    'iva': boleta.totiva,
+                    'total': cobranza[0]['total'],
+                    'saldo': movimiento[0]['saldo'],
+                    'moneda': cobranza[0]['nromoneda'],
+                    'detalle': movimiento[0]['boletas'],
+                    'cliente': cliente_data.codigo,
+                    'nombre': cliente_data.empresa,
+                    'nombremov': 'COBRO',
+                    'cambio': cobranza[0]['arbitraje'],
+                    'autogenerado': autogenerado_impuventa,
+                    'serie': cobranza[0]['serie'],
+                    'prefijo': cobranza[0]['prefijo'],
+                    'posicion': boleta.posicion if boleta else None,
+                    'anio': fecha_obj.year,
+                    'mes': fecha_obj.month,
+                    'monedaoriginal': cobranza[0]['nromoneda'],
+                    'montooriginal': cobranza[0]['total'],
+                    'arbitraje': cobranza[0]['arbitraje'],
+
+                }
+                crear_movimiento(movimiento_vec)
+
+            return JsonResponse({'status': 'exito'})
+    except Exception as e:
+        return JsonResponse({'status': 'Error: ' + str(e)})
+def guardar_impuventa(request):
+    try:
+        if request.method == 'POST':
+            body_unicode = request.body.decode('utf-8')
+            body_data = json.loads(body_unicode)
+            vector = body_data.get('vector', {})
+            imputaciones = vector.get('imputaciones', [])
+            asientos = vector.get('asiento', [])
+            movimiento = vector.get('movimiento', [])
+            cobranza = vector.get('cobranza', [])
+
+            autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))
+            fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            if vector and imputaciones:
+                for item in imputaciones:
+
+                    try:
+                        boleta = Boleta.objects.filter(numero=item['nroboleta']).order_by('-id').first()
+                    except Exception as _:
+                        boleta = None
+
+                    if boleta:
+                        autofac = boleta.autogenerado
+                        parteiva=boleta.totiva
+                        #diferenciar si son acreedor o proveedor 40 va negativo
+                        monto = float(item['imputado']) if boleta.tipo == 20 else -float(item['imputado']) if boleta.tipo == 21  else 0
+                        cliente=boleta.nrocliente
+                        impuventa = Impuvtas()
+                        impuventa.autogen = autogenerado_impuventa
+                        impuventa.tipo = 1
+                        impuventa.cliente = cliente
+                        impuventa.monto = monto
+                        impuventa.autofac = autofac
+                        impuventa.parteiva = parteiva
+                        impuventa.fechaimpu = fecha
+                        impuventa.save()
+
+            try:
+                cliente_data = Clientes.objects.get(codigo=cobranza[0]['nrocliente'])
+            except Exception as _:
+                cliente_data = None
+
+            if cliente_data:
+                for asiento in asientos:
+                    fechaj = datetime.now().strftime("%Y-%m-%d")
+                    fecha_obj = datetime.strptime(fechaj, '%Y-%m-%d')
+                    nroasiento = generar_numero()
+                    movimiento_num = modificar_numero(nroasiento)
+
+                    detalle_asiento = 'COBRO' + cobranza[0]['serie'] +'-'+ str(cobranza[0]['prefijo']) +'-'+ str(cobranza[0]['numero']) +'-'+ cliente_data.empresa
                     asiento_vector_1 = {
                         'detalle': detalle_asiento,
                         'monto': asiento['total_pago'],
