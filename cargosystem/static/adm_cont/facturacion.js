@@ -1362,6 +1362,7 @@ $('#abrir_arbi').on('click', function (event) {
                     let parDolar = $('#valor_paridad').val();
                     let tipoMoneda = $('#moneda_select').val();
                     let pizDolar = $('#valor_pizarra').val();
+                    let fecha = $('#fecha_arbi').val();
 
                     $.ajax({
                         url: "/admin_cont/guardar_arbitraje/",
@@ -1373,6 +1374,7 @@ $('#abrir_arbi').on('click', function (event) {
                             parDolar: parDolar,
                             tipoMoneda: tipoMoneda,
                             pizDolar: pizDolar,
+                            fecha:fecha
                         },
                         success: function(data) {
                             if(data['status'].length == 0){
@@ -1398,6 +1400,9 @@ $('#abrir_arbi').on('click', function (event) {
             },
         ],
     });
+        const hoy = new Date().toISOString().split('T')[0];
+    // Establecer el valor predeterminado del campo de fecha
+    document.getElementById('fecha_arbi').value = hoy;
 });
 
 

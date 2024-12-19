@@ -1157,36 +1157,64 @@ def cargar_preventa_infofactura_multiple(request):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
+from datetime import datetime
+from django.http import JsonResponse
+
 def guardar_arbitraje(request):
     if request.method == "POST":
         try:
             # Obtener datos del POST
-            arb_dolar = request.POST.get('arbDolar')
-            par_dolar = request.POST.get('parDolar')
-            tipo_moneda = request.POST.get('tipoMoneda')
-            piz_dolar = request.POST.get('pizDolar')
+            arb_dolar = request.POST.get('arbDolar', '0')
+            par_dolar = request.POST.get('parDolar', '0')
+            tipo_moneda = request.POST.get('tipoMoneda', '0')
+            piz_dolar = request.POST.get('pizDolar', '0')
+            fecha_cliente = request.POST.get('fecha', '')
 
-            dolar = Dolar()
+            # Validar y formatear la fecha
+            if fecha_cliente:
+                fecha_cliente = datetime.strptime(fecha_cliente, '%Y-%m-%d')  # Convertir a datetime
+            else:
+                fecha_cliente = datetime.today()
 
-            if arb_dolar == '':
-                arb_dolar=0
-            if par_dolar == '':
-                par_dolar=0
-            if piz_dolar == '':
-                piz_dolar=0
-            fecha_hoy = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
-            dolar.upizarra=float(piz_dolar)
-            dolar.paridad=float(par_dolar)
-            dolar.uvalor=float(arb_dolar)
-            dolar.umoneda=float(tipo_moneda)
-            dolar.ufecha = fecha_hoy
-            dolar.save()
+            # Formatear la fecha con la hora actual
+            fecha_final = fecha_cliente.replace(
+                hour=datetime.now().hour,
+                minute=datetime.now().minute,
+                second=datetime.now().second,
+                microsecond=datetime.now().microsecond
+            )
 
-            return JsonResponse({'status': ''})
+            # Comprobar si ya existe un registro para la fecha
+            registro_existente = Dolar.objects.filter(
+                ufecha__date=fecha_final.date()
+            ).first()
+
+            if registro_existente:
+                # Modificar el registro existente
+                registro_existente.upizarra = float(piz_dolar)
+                registro_existente.paridad = float(par_dolar)
+                registro_existente.uvalor = float(arb_dolar)
+                registro_existente.umoneda = float(tipo_moneda)
+                registro_existente.ufecha = fecha_final
+                registro_existente.save()
+            else:
+                # Crear un nuevo registro
+                dolar = Dolar()
+                dolar.upizarra = float(piz_dolar)
+                dolar.paridad = float(par_dolar)
+                dolar.uvalor = float(arb_dolar)
+                dolar.umoneda = float(tipo_moneda)
+                dolar.ufecha = fecha_final
+                dolar.save()
+
+            return JsonResponse({'status': 'Registro guardado correctamente.'})
+
         except Exception as e:
             return JsonResponse({'status': f'Error al guardar los datos: {str(e)}'}, status=500)
+
     else:
         return JsonResponse({'status': 'Método no permitido.'}, status=405)
+
 
 
 
