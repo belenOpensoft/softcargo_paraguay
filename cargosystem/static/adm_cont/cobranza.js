@@ -81,7 +81,7 @@ $(document).ready(function() {
         select: function(event, ui) {
             const { id } = ui.item;
             $('#cliente_cobranza_hidden').val(id);
-        tabla_facturas_pendientes(id);
+        tabla_facturas_pendientes(id,2);
         }
     });
 
@@ -111,7 +111,7 @@ $('#id_importe').on('focusout', function () {
     resultado=importe;
     }
 
-    $('#a_imputar').val(resultado);
+    $('#a_imputar').val(resultado.toFixed(2));
 });
 
 
@@ -357,7 +357,7 @@ function abrir_forma_pago() {
 //llamar cuando se seleccione un cliente
 
 
-function tabla_facturas_pendientes(cliente) {
+function tabla_facturas_pendientes(cliente,moneda) {
     if ($.fn.DataTable.isDataTable('#imputacionTable')) {
         $('#imputacionTable').DataTable().clear().destroy();
     }
@@ -369,6 +369,7 @@ function tabla_facturas_pendientes(cliente) {
             type: "GET",
             data: function (d) {
                 d.cliente = cliente;
+                d.nromoneda = moneda;
             }
         },
         columns: [
@@ -986,8 +987,16 @@ rows.forEach(row => {
         key = true;
     }
 });
+let importe = $('#id_importe');
+let imputar = $('#a_imputar');
+
 
     if(key){
+        if(imputar!=0){
+        if (confirm('No se ha asignado todo el IMPORTE, ¿Desea continuar como anticipo?')) {
+            crear_anticipo_consaldo();
+        }
+        }
      crear_impuventa_asiento_movimiento();
     }else{
         if (confirm('No hay una boleta seleccionada, ¿Desea continuar como anticipo?')) {
@@ -996,3 +1005,92 @@ rows.forEach(row => {
     }
 
 }
+function crear_anticipo_consaldo(){
+if(!$('#id_cuenta_observaciones').val() && $('#difference').val()!=0){
+alert('Debe asignar la diferencia a una cuenta');
+return;
+}
+//traer cliente tambien
+let impuventa = JSON.parse(localStorage.getItem('filasAfectadas')) || [];
+let medios_pago = JSON.parse(localStorage.getItem('medios_pago')) || [];
+
+let vector={};
+let asiento=[];
+let cobranza=[];
+
+
+medios_pago.forEach((item) => {
+        asiento.push({
+            modo:item.modo,
+            cuenta:item.cuenta,
+            banco:item.banco,
+            nro_mediopago:item.numero,
+            total_pago:item.total,
+            vencimiento:item.vencimiento
+        });
+    });
+
+cobranza.push({
+        nrocliente:$('#cliente_cobranza_hidden').val(),
+        serie:$('#id_serie').val(),
+        prefijo:$('#id_prefijo').val(),
+        numero:$('#id_numero').val(),
+        total:$('#id_importe').val(),
+        nromoneda:$('#id_moneda').val(),
+        arbitraje:$('#id_arbitraje').val(),
+        paridad:$('#id_paridad').val(),
+        saldo:$('#a_imputar').val()
+    });
+
+
+
+vector.cobranza=cobranza;
+vector.asiento=asiento;
+if($('#difference').val()!=0){
+let nuevaFila = {
+    modo: "DIFERENCIA",
+    cuenta: $('#id_cuenta_observaciones').val(),
+    banco:$('#id_cuenta_observaciones option:selected').text() ,
+    nro_mediopago: 0,
+    total_pago: $('#difference').val(),
+    vencimiento: null
+};
+
+vector.asiento.push(nuevaFila);
+}
+
+console.log('cobranza '+cobranza);
+
+
+$.ajax({
+        url: '/admin_cont/guardar_anticipo/', // Cambia esto a la URL correcta
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrf_token }, // Asegúrate de tener el CSRF token
+        data: JSON.stringify({ 'vector':vector }),
+        contentType: 'application/json',
+        success: function(response) {
+            if (response.status === 'exito') {
+                alert("Datos guardados correctamente");
+                // Opcional: recargar una tabla o actualizar la UI
+            } else {
+                alert("ghfghfgh: " + response.status);
+            }
+        },
+        error: function(xhr) {
+            alert("Error al guardar los datos: " + xhr.responseText);
+        },
+    });
+
+}
+
+function convertir(){
+//traer las filas de la tabla y hacer la conversion solo si tengo paridad
+tabla_facturas_pendientes(cliente,moneda);
+}
+
+$('#id_moneda').on('change', function () {
+        const cliente = $('#cliente_cobranza_hidden').val();
+        const moneda = $(this).val();
+
+        tabla_facturas_pendientes(cliente, moneda);
+    });

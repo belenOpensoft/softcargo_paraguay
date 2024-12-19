@@ -2,15 +2,15 @@ import json
 from datetime import datetime
 from collections import defaultdict
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.transaction import atomic
-from django.http import JsonResponse, HttpResponse
+from django.db import transaction
+from django.http import JsonResponse
 from django.shortcuts import render
 from administracion_contabilidad.forms import Cobranza
 from administracion_contabilidad.models import Boleta, Impuvtas, Asientos, Movims, Cheques, Cuentas, VistaCobranza, \
     Dolar, ListaCobranzas
 from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero
 from administracion_contabilidad.views.preventa import generar_autogenerado
-from mantenimientos.models import Clientes, Monedas, Bancos
+from mantenimientos.models import Clientes, Monedas
 
 
 param_busqueda = {
@@ -144,50 +144,8 @@ def get_argumentos_busqueda(**kwargs):
         raise TypeError(e)
 
 
+
 def source_facturas_pendientes_old(request):
-    try:
-        start = int(request.GET.get('start', 0))
-        length = int(request.GET.get('length', 10))
-        cliente = int(request.GET.get('cliente'))
-
-
-        pendientes = VistaCobranza.objects.filter(nrocliente=cliente)
-
-
-        total_registros = pendientes.count()
-
-        pendientes_paginados = pendientes[start:start + length]
-
-        data = [{
-            'id':0,
-            'vencimiento':pendiente.vencimiento,
-            'emision':pendiente.emision,
-            'documento':pendiente.documento,
-            'total': pendiente.total,
-            'saldo':pendiente.saldo if pendiente.saldo is not None else pendiente.total,
-            'imputado':0,
-            'tipo_cambio':pendiente.arbitraje,
-            'embarque':pendiente.embarque,
-            'detalle':pendiente.detalle,
-            'posicion':pendiente.posicion,
-            'moneda': Monedas.objects.get(codigo=pendiente.moneda).nombre, #fijarse
-            'paridad':pendiente.paridad,
-            'tipo_doc':pendiente.tipo_doc,
-        } for pendiente in pendientes_paginados]
-
-        return JsonResponse({
-            'draw': int(request.GET.get('draw', 1)),
-            'recordsTotal': total_registros,
-            'recordsFiltered': total_registros,
-            'data': data,
-        })
-
-    except Exception as e:
-        return JsonResponse({'error': str(e)})
-
-
-
-def source_facturas_pendientes(request):
     try:
         start = int(request.GET.get('start', 0))
         length = int(request.GET.get('length', 10))
@@ -274,10 +232,204 @@ def source_facturas_pendientes(request):
     except Exception as e:
         return JsonResponse({'error': str(e)})
 
+def source_facturas_pendientes_oldlast(request):
+    try:
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        cliente = int(request.GET.get('cliente'))
+
+        # Obtener registros filtrados por cliente
+        pendientes = VistaCobranza.objects.filter(nrocliente=cliente)
+
+        # Agrupar por `autogenerado` y recalcular `saldo` y `pago`
+        agrupados = defaultdict(lambda: {
+            'vencimiento': None,
+            'emision': None,
+            'documento': None,
+            'total': 0,
+            'saldo': 0,
+            'pago': 0,
+            'tipo_cambio': 0,
+            'embarque': None,
+            'detalle': None,
+            'posicion': None,
+            'moneda': None,
+            'paridad': 0,
+            'tipo_doc': None,
+            'source': None
+        })
+
+        for pendiente in pendientes:
+            auto = pendiente.autogenerado
+            agrupados[auto]['vencimiento'] = pendiente.vencimiento
+            agrupados[auto]['emision'] = pendiente.emision
+            agrupados[auto]['documento'] = pendiente.documento
+            agrupados[auto]['total'] = pendiente.total
+            agrupados[auto]['tipo_cambio'] = pendiente.arbitraje
+            agrupados[auto]['embarque'] = pendiente.embarque
+            agrupados[auto]['detalle'] = pendiente.detalle
+            agrupados[auto]['posicion'] = pendiente.posicion
+            agrupados[auto]['paridad'] = pendiente.paridad
+            agrupados[auto]['tipo_doc'] = pendiente.tipo_doc
+            agrupados[auto]['source'] = pendiente.source
+            try:
+                agrupados[auto]['moneda'] = Monedas.objects.get(codigo=pendiente.moneda).nombre
+            except ObjectDoesNotExist:
+                agrupados[auto]['moneda'] = "Desconocida"
+
+            # Sumar pago y manejar valores None
+            pago_actual = pendiente.pago if pendiente.pago is not None else 0
+            agrupados[auto]['pago'] += pago_actual
+
+            # Calcular saldo solo si tipo_doc no es 'ANTICIPO'
+            if pendiente.tipo_doc != 'ANTICIPO':
+                agrupados[auto]['saldo'] = agrupados[auto]['total'] - agrupados[auto]['pago']
+            else:
+                agrupados[auto]['saldo'] = None  # Excluir el saldo para ANTICIPO
+
+        # Filtrar agrupados para excluir saldos exactamente cero y None
+        agrupados_filtrados = {
+            key: value for key, value in agrupados.items() if value['saldo'] != 0 and value['saldo'] is not None
+        }
+
+        # Convertir agrupados a una lista y paginar
+        total_registros = len(agrupados_filtrados)
+        agrupados_paginados = list(agrupados_filtrados.values())[start:start + length]
+
+        # Preparar datos para la respuesta
+        data = [{
+            'id': idx,
+            'vencimiento': item['vencimiento'],
+            'emision': item['emision'],
+            'documento': item['documento'],
+            'total': item['total'],
+            'saldo': item['saldo'],
+            'imputado': 0,
+            'tipo_cambio': item['tipo_cambio'],
+            'embarque': item['embarque'],
+            'detalle': item['detalle'],
+            'posicion': item['posicion'],
+            'moneda': item['moneda'],
+            'paridad': item['paridad'],
+            'tipo_doc': item['tipo_doc'],
+            'source': item['source']
+        } for idx, item in enumerate(agrupados_paginados, start=1)]
+
+        return JsonResponse({
+            'draw': int(request.GET.get('draw', 1)),
+            'recordsTotal': total_registros,
+            'recordsFiltered': total_registros,
+            'data': data,
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
+
+from collections import defaultdict
+from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
+
+def source_facturas_pendientes(request):
+    try:
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        cliente = int(request.GET.get('cliente'))
+        nromoneda = int(request.GET.get('nromoneda'))
+
+        # Filtrar registros por cliente y moneda=2
+        pendientes = VistaCobranza.objects.filter(nrocliente=cliente, moneda=nromoneda)
+
+        # Agrupar por `autogenerado` y recalcular `saldo` y `pago`
+        agrupados = defaultdict(lambda: {
+            'vencimiento': None,
+            'emision': None,
+            'documento': None,
+            'total': 0,
+            'saldo': 0,
+            'pago': 0,
+            'tipo_cambio': 0,
+            'embarque': None,
+            'detalle': None,
+            'posicion': None,
+            'moneda': None,
+            'paridad': 0,
+            'tipo_doc': None,
+            'source': None
+        })
+
+        for pendiente in pendientes:
+            auto = pendiente.autogenerado
+            agrupados[auto]['vencimiento'] = pendiente.vencimiento
+            agrupados[auto]['emision'] = pendiente.emision
+            agrupados[auto]['documento'] = pendiente.documento
+            agrupados[auto]['total'] = pendiente.total
+            agrupados[auto]['tipo_cambio'] = pendiente.arbitraje
+            agrupados[auto]['embarque'] = pendiente.embarque
+            agrupados[auto]['detalle'] = pendiente.detalle
+            agrupados[auto]['posicion'] = pendiente.posicion
+            agrupados[auto]['paridad'] = pendiente.paridad
+            agrupados[auto]['tipo_doc'] = pendiente.tipo_doc
+            agrupados[auto]['source'] = pendiente.source
+
+            try:
+                agrupados[auto]['moneda'] = Monedas.objects.get(codigo=pendiente.moneda).nombre
+            except ObjectDoesNotExist:
+                agrupados[auto]['moneda'] = "Desconocida"
+
+            # Sumar pago y manejar valores None
+            pago_actual = pendiente.pago if pendiente.pago is not None else 0
+            agrupados[auto]['pago'] += pago_actual
+
+            # Calcular saldo solo si tipo_doc no es 'ANTICIPO'
+            if pendiente.tipo_doc != 'ANTICIPO':
+                saldo = agrupados[auto]['total'] - agrupados[auto]['pago']
+                agrupados[auto]['saldo'] = saldo
+            else:
+                agrupados[auto]['saldo'] = None  # Excluir el saldo para ANTICIPO
+
+        # Filtrar agrupados para excluir saldos exactamente cero y None
+        agrupados_filtrados = {
+            key: value for key, value in agrupados.items()
+            if value['saldo'] is not None and float(value['saldo']) != 0
+        }
+
+        # Convertir agrupados a una lista y paginar
+        total_registros = len(agrupados_filtrados)
+        agrupados_paginados = list(agrupados_filtrados.values())[start:start + length]
+
+        # Preparar datos para la respuesta
+        data = [{
+            'id': idx,
+            'vencimiento': item['vencimiento'],
+            'emision': item['emision'],
+            'documento': item['documento'],
+            'total': item['total'],
+            'saldo': item['saldo'],
+            'imputado': 0,
+            'tipo_cambio': item['tipo_cambio'],
+            'embarque': item['embarque'],
+            'detalle': item['detalle'],
+            'posicion': item['posicion'],
+            'moneda': item['moneda'],
+            'paridad': item['paridad'],
+            'tipo_doc': item['tipo_doc'],
+            'source': item['source']
+        } for idx, item in enumerate(agrupados_paginados, start=1)]
+
+        return JsonResponse({
+            'draw': int(request.GET.get('draw', 1)),
+            'recordsTotal': total_registros,
+            'recordsFiltered': total_registros,
+            'data': data,
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
 
 
-@atomic
-def guardar_impuventa_old(request):
+
+@transaction.atomic
+def guardar_impuventa_mal(request):
     try:
         if request.method == 'POST':
             body_unicode = request.body.decode('utf-8')
@@ -288,27 +440,42 @@ def guardar_impuventa_old(request):
             movimiento = vector.get('movimiento', [])
             cobranza = vector.get('cobranza', [])
 
+            arbitraje = float(cobranza[0]['arbitraje'])
+            paridad = float(cobranza[0]['paridad'])
+            nromoneda = int(cobranza[0]['nromoneda'])
+
             autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))
             fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             if vector and imputaciones:
-                for nroboleta in imputaciones:
+
+                for item in imputaciones:
 
                     try:
-                        boleta = Boleta.objects.filter(numero=nroboleta['nroboleta']).order_by('-id').first()
+                        boleta = Boleta.objects.filter(numero=item['nroboleta']).order_by('-id').first()
                     except Exception as _:
                         boleta = None
 
                     if boleta:
                         autofac = boleta.autogenerado
                         parteiva=boleta.totiva
-                        monto = boleta.total if boleta.tipo == 20 else -boleta.total if boleta.tipo == 21 else 0
+                        #diferenciar si son acreedor o proveedor 40 va negativo
+                        monto = float(item['imputado']) if boleta.tipo == 20 else -float(item['imputado']) if boleta.tipo == 21  else 0
+
+                        if nromoneda == 2: #dolar
+                            monto_convertido =monto*arbitraje
+                        elif nromoneda not in [1,2]:
+                            aux=monto*paridad
+                            monto_convertido=aux*arbitraje
+                        else:
+                            monto_convertido=0
+
                         cliente=boleta.nrocliente
                         impuventa = Impuvtas()
                         impuventa.autogen = autogenerado_impuventa
                         impuventa.tipo = 1
                         impuventa.cliente = cliente
-                        impuventa.monto = monto
+                        impuventa.monto = monto_convertido
                         impuventa.autofac = autofac
                         impuventa.parteiva = parteiva
                         impuventa.fechaimpu = fecha
@@ -325,11 +492,20 @@ def guardar_impuventa_old(request):
                     fecha_obj = datetime.strptime(fechaj, '%Y-%m-%d')
                     nroasiento = generar_numero()
                     movimiento_num = modificar_numero(nroasiento)
-
                     detalle_asiento = 'COBRO' + cobranza[0]['serie'] +'-'+ str(cobranza[0]['prefijo']) +'-'+ str(cobranza[0]['numero']) +'-'+ cliente_data.empresa
+                    asiento_monto=asiento['total_pago']
+
+                    if nromoneda == 2:  # dolar
+                        monto_asiento = float(asiento_monto) * arbitraje
+                    elif nromoneda not in [1, 2]:
+                        aux = float(asiento_monto) * paridad
+                        monto_asiento = aux * arbitraje
+                    else:
+                        monto_asiento = 0
+
                     asiento_vector_1 = {
                         'detalle': detalle_asiento,
-                        'monto': asiento['total_pago'],
+                        'monto':monto_asiento ,
                         'moneda': cobranza[0]['nromoneda'],
                         'cambio': cobranza[0]['arbitraje'],
                         'asiento': nroasiento,
@@ -360,7 +536,7 @@ def guardar_impuventa_old(request):
                         numero=asiento['nro_mediopago']
                         banco=asiento['banco']
                         fecha_vencimiento=asiento['vencimiento']
-                        monto=asiento['total_pago']
+                        monto=monto_asiento
                         autogenerado=autogenerado_impuventa
                         detalle=detalle_asiento
                         moneda=cobranza[0]['nromoneda']
@@ -380,9 +556,22 @@ def guardar_impuventa_old(request):
                         cheque.save()
 
                 #asiento general
+                monto_total=cobranza[0]['total']
+                saldo_mov=movimiento[0]['saldo']
+                if nromoneda == 2:  # dolar
+                    monto_deber = float(monto_total) * arbitraje
+                    saldo_convertido = float(saldo_mov) * arbitraje
+                elif nromoneda not in [1, 2]:
+                    aux = float(monto_total) * paridad
+                    aux2 = float(saldo_mov) * paridad
+                    monto_deber = aux * arbitraje
+                    saldo_convertido = aux2 * arbitraje
+                else:
+                    saldo_convertido = 0
+
                 asiento_vector_2 = {  # deber
                     'detalle': detalle_asiento,
-                    'monto': cobranza[0]['total'],
+                    'monto': monto_deber,
                     'moneda': cobranza[0]['nromoneda'],
                     'cambio': cobranza[0]['arbitraje'],
                     'asiento': nroasiento,
@@ -416,8 +605,8 @@ def guardar_impuventa_old(request):
                     'monto': 0,
                     'paridad': cobranza[0]['paridad'],
                     'iva': boleta.totiva,
-                    'total': cobranza[0]['total'],
-                    'saldo': movimiento[0]['saldo'],
+                    'total': monto_total,
+                    'saldo': saldo_convertido,
                     'moneda': cobranza[0]['nromoneda'],
                     'detalle': movimiento[0]['boletas'],
                     'cliente': cliente_data.codigo,
@@ -431,7 +620,7 @@ def guardar_impuventa_old(request):
                     'anio': fecha_obj.year,
                     'mes': fecha_obj.month,
                     'monedaoriginal': cobranza[0]['nromoneda'],
-                    'montooriginal': cobranza[0]['total'],
+                    'montooriginal': monto_total,
                     'arbitraje': cobranza[0]['arbitraje'],
 
                 }
@@ -440,6 +629,8 @@ def guardar_impuventa_old(request):
             return JsonResponse({'status': 'exito'})
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
+
+@transaction.atomic
 def guardar_impuventa(request):
     try:
         if request.method == 'POST':
@@ -605,6 +796,8 @@ def guardar_impuventa(request):
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
 
+
+
 def guardar_anticipo(request):
     try:
         if request.method == 'POST':
@@ -616,11 +809,19 @@ def guardar_anticipo(request):
            # movimiento = vector.get('movimiento', [])
             cobranza = vector.get('cobranza', [])
 
-            autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))
+            autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))+'111'
+
             fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+            arbitraje = float(cobranza[0]['arbitraje'])
+            paridad = float(cobranza[0]['paridad'])
+            nromoneda = int(cobranza[0]['nromoneda'])
+            total = float(cobranza[0]['total'])
+            saldo = float(cobranza[0].get('saldo', 0))
+
+
             if vector:
-                monto=cobranza[0]['total']
+                monto=total
                 cliente=cobranza[0]['nrocliente']
                 impuventa = Impuvtas()
                 impuventa.autogen = autogenerado_impuventa
@@ -644,10 +845,19 @@ def guardar_anticipo(request):
                     movimiento_num = modificar_numero(nroasiento)
 
                     detalle_asiento = 'COBRO' + cobranza[0]['serie'] +'-'+ str(cobranza[0]['prefijo']) +'-'+ str(cobranza[0]['numero']) +'-'+ cliente_data.empresa
+                    asiento_monto = asiento['total_pago']
+
+                    if nromoneda == 2:  # dolar
+                        monto_asiento = float(asiento_monto) * arbitraje
+                    elif nromoneda not in [1, 2]:
+                        aux = float(asiento_monto) * paridad
+                        monto_asiento = aux * arbitraje
+                    else:
+                        monto_asiento = 0
 
                     asiento_vector_1 = {
                         'detalle': detalle_asiento,
-                        'monto': asiento['total_pago'],
+                        'monto': monto_asiento,
                         'moneda': cobranza[0]['nromoneda'],
                         'cambio': cobranza[0]['arbitraje'],
                         'asiento': nroasiento,
@@ -701,7 +911,7 @@ def guardar_anticipo(request):
                 #asiento general
                 asiento_vector_2 = {  # deber
                     'detalle': detalle_asiento,
-                    'monto': cobranza[0]['total'],
+                    'monto': total,
                     'moneda': cobranza[0]['nromoneda'],
                     'cambio': cobranza[0]['arbitraje'],
                     'asiento': nroasiento,
@@ -735,8 +945,8 @@ def guardar_anticipo(request):
                     'monto': 0,
                     'paridad': cobranza[0]['paridad'],
                     'iva': 0,
-                    'total': cobranza[0]['total'],
-                    'saldo': 0,
+                    'total': total,
+                    'saldo': saldo,
                     'moneda': cobranza[0]['nromoneda'],
                     'detalle': 0,
                     'cliente': cliente_data.codigo,
@@ -750,7 +960,7 @@ def guardar_anticipo(request):
                     'anio': fecha_obj.year,
                     'mes': fecha_obj.month,
                     'monedaoriginal': cobranza[0]['nromoneda'],
-                    'montooriginal': cobranza[0]['total'],
+                    'montooriginal': total,
                     'arbitraje': cobranza[0]['arbitraje'],
 
                 }

@@ -272,3 +272,58 @@ $(document).ready(function() {
         $('#id_iva input').val(iva.toFixed(2)).prop('readonly', true);
     }
 });
+var wWidth = $(window).width();
+var dWidth = wWidth * 0.40;
+var wHeight = $(window).height();
+var dHeight = wHeight * 0.30;
+function abrir_modal() {
+    $("#proveedoresModal").dialog({
+        autoOpen: true,
+        modal: true,
+        width: wWidth * 0.90,
+        height: wHeight * 0.95,
+        buttons: [
+            {
+                class: "btn btn-dark",
+                style: "width:100px",
+                text: "Salir",
+                click: function() {
+                    $(this).dialog("close");
+                    existe_cliente=false;
+                    resetModal("#dialog-form");
+                    resetModal("#paymentModal");
+                }
+            }
+        ]
+    }).prev('.ui-dialog-titlebar').remove();
+    $.ajax({
+        url: "/admin_cont/cargar_arbitraje/",
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
+            // Cargar los valores en los campos
+            $('#id_arbitraje').val(data.arbitraje);
+            $('#id_paridad').val(data.paridad);
+        },
+        error: function (xhr, status, error) {
+            alert("Error al cargar los datos iniciales: " + error);
+        }
+    });
+}
+function resetModal(modalId) {
+    const modal = $(modalId);
+
+    // Reinicia el formulario
+    modal.find("form").each(function () {
+        this.reset();
+    });
+
+    // Limpia tablas
+    modal.find("table").each(function () {
+        if ($.fn.DataTable.isDataTable(this)) {
+            $(this).DataTable().clear().draw();
+        } else {
+            $(this).find("tbody").empty();
+        }
+    });
+}
