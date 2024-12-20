@@ -309,6 +309,160 @@ function abrir_modal() {
             alert("Error al cargar los datos iniciales: " + error);
         }
     });
+    $('#proveedor').autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "/admin_cont/buscar_cliente",
+                dataType: 'json',
+                data: { term: request.term },
+                success: function(data) {
+                    response(data.map(cliente => ({
+                        label: cliente.text,
+                        value: cliente.text,
+                        id: cliente.id
+                    })));
+                },
+                error: xhr => console.error('Error al buscar clientes:', xhr)
+            });
+        },
+        minLength: 2,
+        appendTo: "#proveedoresModal",
+        select: function(event, ui) {
+            const { id } = ui.item;
+            $.ajax({
+                url: "/admin_cont/buscar_clientes",
+                data: { id },
+                dataType: 'json',
+                success: cliente => {
+                    const row = `
+                        <tr id="cliente-${id}">
+                            <td class="d-none">${cliente.codigo}</td>
+                            <td>${cliente.empresa}</td>
+                            <td>${cliente.ruc}</td>
+                        </tr>`;
+                    $('#proveedorTable tbody').html(row);
+                    $('#proveedorTable').show();
+                },
+                error: xhr => console.error('Error al obtener los detalles del cliente:', xhr)
+            });
+        }
+    });
+    $('#proveedor2').autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "/admin_cont/buscar_cliente",
+                dataType: 'json',
+                data: { term: request.term },
+                success: function(data) {
+                    response(data.map(cliente => ({
+                        label: cliente.text,
+                        value: cliente.text,
+                        id: cliente.id
+                    })));
+                },
+                error: xhr => console.error('Error al buscar clientes:', xhr)
+            });
+        },
+        minLength: 2,
+        appendTo: "#proveedoresModal",
+        select: function(event, ui) {
+            const { id } = ui.item;
+            $.ajax({
+                url: "/admin_cont/buscar_clientes",
+                data: { id },
+                dataType: 'json',
+                success: cliente => {
+                    const row = `
+                        <tr id="cliente-${id}">
+                            <td class="d-none">${cliente.codigo}</td>
+                            <td>${cliente.empresa}</td>
+                        </tr>`;
+                    $('#proveedor2Table tbody').html(row);
+                    $('#proveedor2Table').show();
+                },
+                error: xhr => console.error('Error al obtener los detalles del cliente:', xhr)
+            });
+        }
+    });
+    $('#item').autocomplete({
+    source: function(request, response) {
+        $.ajax({
+            url: "/admin_cont/buscar_item_v",
+            dataType: 'json',
+            data: {
+                term: request.term
+            },
+            success: data => response(data.map(item => ({
+                label: item.text,
+                value: item.text,
+                id: item.id
+            }))),
+            error: xhr => console.error('Error al buscar items:', xhr)
+        });
+    },
+    minLength: 2,
+    appendTo: "#proveedoresModal", // Asegúrate de usar el contenedor modal adecuado
+    select: function(event, ui) {
+        $.ajax({
+            url: "/admin_cont/buscar_items_v",
+            data: { id: ui.item.id },
+            dataType: 'json',
+            success: servicio => {
+                $('#id_precio input').data({
+                    iva: servicio.iva,
+                    cuenta: servicio.cuenta,
+                    codigo: servicio.item
+                });
+                $('#id_descripcion_item input').val(servicio.nombre);
+            },
+            error: xhr => console.error('Error al obtener los detalles del item:', xhr)
+        });
+    }
+});
+let itemCounter = 0;
+$('#agregarItem').off('click').on('click', function() {
+    // Obtén los valores antes de cualquier operación
+    const item = $('#item').val();
+    const descripcion = $('#id_descripcion_item input').val();
+    const precio = parseFloat($('#id_precio input').val());
+    const iva = $('#id_precio input').data('iva');
+    const cuenta = $('#id_precio input').data('cuenta');
+    const codigo = $('#id_precio input').data('codigo');
+
+    // Valida los campos antes de proceder
+    if (item && descripcion && !isNaN(precio)) {
+        itemCounter++;
+        const rowId = `item-${itemCounter}`;
+
+        // Agrega una nueva fila a la tabla
+        const row = `
+            <tr id="${rowId}" data-precio="${precio}" data-iva="${iva}" data-cuenta="${cuenta}">
+                <td>${codigo}</td>
+                <td>${descripcion}</td>
+                <td>${precio.toFixed(2)}</td>
+                <td>${iva}</td>
+                <td>${cuenta}</td>
+            </tr>`;
+
+        $('#itemTable tbody').append(row);
+        $('#itemTable').css('visibility', 'visible'); // Asegúrate de que la tabla sea visible
+        $('#eliminarSeleccionados').show();
+
+        // Limpia solo los campos relevantes
+        $('#item').val('');
+        $('#id_descripcion_item input').val('');
+        $('#id_precio input').val('');
+        $('#id_precio input').data('iva', '');
+        $('#id_precio input').data('cuenta', '');
+        $('#id_precio input').data('codigo', '');
+
+        actualizarTotal(); // Actualiza los totales después de agregar el ítem
+        $('#totales').show();
+    } else {
+        alert('Por favor, completa todos los campos antes de agregar el item.');
+    }
+});
+
 }
 function resetModal(modalId) {
     const modal = $(modalId);
