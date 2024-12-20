@@ -5,7 +5,7 @@ from django.http import HttpResponse
 import base64
 from django.views.decorators.csrf import csrf_exempt
 
-from impaerea.models import VGastosHouse, ImportEmbarqueaereo
+from impaerea.models import VGastosHouse, ImportEmbarqueaereo, ImportReservas
 from impaerea.models import VEmbarqueaereo, ImportCargaaerea, ImportServiceaereo, ImportEmbarqueaereo as Embarqueaereo
 from mantenimientos.views.bancos import is_ajax
 from mantenimientos.models import Productos, Monedas, Clientes
@@ -42,6 +42,7 @@ def get_data_email_op(request):
             row = VEmbarqueaereo.objects.get(numero=row_number)
             row2 = ImportCargaaerea.objects.filter(numero=row_number)
             gastos = VGastosHouse.objects.filter(numero=row_number)
+            master=ImportReservas.objects.filter(awb=embarque.awb)
 
             try:
                 seg = VGrillaSeguimientos.objects.get(numero=row.seguimiento)
@@ -55,7 +56,7 @@ def get_data_email_op(request):
             texto += f'<br>'
             texto, resultado = get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque)
             texto += '<b>OCEANLINK,</b><br>'
-            texto += 'DEPARTAMENTO DE IMPORTACION MARITIMA, <br>'
+            texto += 'DEPARTAMENTO DE IMPORTACION AÉREA, <br>'
             texto += 'MISIONES 1574 OF 201 <br>'
             texto += 'OPERACIONES <br>'
             texto += 'EMAIL: <br>'
@@ -460,6 +461,74 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         tabla_html += f"<p>SALUDOS,</p><br>"
 
         return tabla_html, resultado
+
+    elif title == 'Aviso de embarque':
+        cliente=Clientes.objects.get(codigo=embarque.cliente)
+        tabla_html = "<table style='width:40%'>"
+        # Definir los campos y sus respectivos valores
+        resultado['asunto'] = 'AVISO DE EMBARQUE / CS: ' + str(row.numero) + ' ' \
+                                                                             '- HB/l: ' + str(
+            row.hawb) + ' - Shipper: ' + str(row.embarcador) + ' - Consig: ' \
+                                                               '' + str(row.consignatario) + '; Vapor: ' + str(
+            seg.vapor)
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime(
+            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
+        texto += fecha_formateada.capitalize() + '<br><br>'
+        texto += 'Sres.: <br>'
+        texto += str(cliente.empresa) + '<br>'
+        texto += '<b>DEPARTAMENTO DE COMERCIO EXTERIOR </b><br><br>'
+        if isinstance(seguimiento.etd, datetime):
+            salida = str(seguimiento.etd.strftime("%d/%m/%Y"))
+        else:
+            salida = ''
+        if isinstance(seguimiento.eta, datetime):
+            llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
+        else:
+            llegada = ''
+        campos = [
+            ("Referencia", ""),
+            ("Embarcador", str(row.embarcador) if row.embarcador is not None else ""),
+            ("Consignatario", str(row.consignatario) if row.consignatario is not None else ""),
+            ("Ref.Proveedor", str(seguimiento.refproveedor) if seguimiento.refproveedor is not None else ""),
+            ("Términos", str(row.terminos) if row.terminos is not None else ""),
+            ("Transportista", str(row.transportista) if row.transportista is not None else ""),
+            ("Vapor", str(seg.vapor) if seg.vapor is not None else ""),
+            ("Origen", str(row.origen) if row.origen is not None else ""),
+            ("Destino", str(row.destino) if row.destino is not None else ""),
+            ("Salida", str(salida) if salida is not None else ""),
+            ("Llegada", str(llegada) if llegada is not None else ""),
+            ("Llegada estimadas", str(llegada) if llegada is not None else ""),
+            ("Posicion", str(row.posicion) if row.posicion is not None else ""),
+            ("Agente", str(row.agente) if row.agente is not None else ""),
+            ("H B/L", str(row.hawb) if row.hawb is not None else ""),
+            ("B/L", str(row.awb) if row.awb is not None else ""),
+            ("Seguimiento", str(seguimiento.numero) if seguimiento.numero is not None else ""),
+        ]
+        for campo, valor in campos:
+            tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
+        try:
+            carga = ImportCargaaerea.objects.get(numero=row.numero)
+            master = ImportReservas.objects.get(awb=row.awb)
+        except VGrillaSeguimientos.DoesNotExist:
+            carga = ImportCargaaerea(bruto=0,bultos=0,volumen=0)
+            master = ImportReservas(producto=None)
+        except Exception as e:
+            print(e)
+
+        tabla_html += f"<tr><th>Peso</th><td>{carga.bruto if carga.bruto else 0} KGS</td></tr>"
+        tabla_html += f"<tr><th>Bultos</th><td>{carga.bultos if carga.bultos else 0}</td></tr>"
+        tabla_html += f"<tr><th>CBM</th><td>{master.volumen if master.volumen else 0} M³</td></tr>"
+        tabla_html += f"<tr><th>Mercaderia</th><td>" + str(carga.producto) if carga.producto else None + "</td></tr>"
+        # Agregar más campos de contenedores aquí
+
+        # Cerrar la etiqueta de la tabla
+        tabla_html += "</table><br><br>"
+        texto += tabla_html
+        texto += 'Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar. <br>' \
+                 'Agradeciendo vuestra preferencia, le saludamos muy atentamente.<br><br>'
+
+        return texto,resultado
 
 
 def image_to_base64(image_path):

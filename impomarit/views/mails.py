@@ -1,6 +1,4 @@
-from datetime import datetime
 import json
-
 from django.db.models import Count
 from django.http import HttpResponse
 import base64
@@ -553,6 +551,92 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
 
         return tabla_html, resultado
+
+    elif title == 'Aviso de embarque':
+        cliente=Clientes.objects.get(codigo=embarque.cliente)
+        tabla_html = "<table style='width:40%'>"
+        # Definir los campos y sus respectivos valores
+        resultado['asunto'] = 'AVISO DE EMBARQUE / CS: ' + str(row.numero) + ' ' \
+                                                                             '- HB/l: ' + str(
+            row.hawb) + ' - Shipper: ' + str(row.embarcador) + ' - Consig: ' \
+                                                               '' + str(row.consignatario) + '; Vapor: ' + str(
+            row.vapor)
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime(
+            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
+        texto += fecha_formateada.capitalize() + '<br><br>'
+        texto += 'Sres.: <br>'
+        texto += str(cliente.empresa) + '<br>'
+        texto += '<b>DEPARTAMENTO DE COMERCIO EXTERIOR </b><br><br>'
+        if isinstance(seguimiento.etd, datetime):
+            salida = str(seguimiento.etd.strftime("%d/%m/%Y"))
+        else:
+            salida = ''
+        if isinstance(seguimiento.eta, datetime):
+            llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
+        else:
+            llegada = ''
+        campos = [
+            ("Referencia", ""),
+            ("Embarcador", str(row.embarcador) if row.embarcador is not None else ""),
+            ("Consignatario", str(row.consignatario) if row.consignatario is not None else ""),
+            ("Ref.Proveedor", str(seguimiento.refproveedor) if seguimiento.refproveedor is not None else ""),
+            ("Términos", str(row.terminos) if row.terminos is not None else ""),
+            ("Transportista", str(row.transportista) if row.transportista is not None else ""),
+            ("Vapor", str(row.vapor) if row.vapor is not None else ""),
+            ("Origen", str(row.origen) if row.origen is not None else ""),
+            ("Destino", str(row.destino) if row.destino is not None else ""),
+            ("Salida", str(salida) if salida is not None else ""),
+            ("Llegada", str(llegada) if llegada is not None else ""),
+            ("Llegada estimadas", str(llegada) if llegada is not None else ""),
+            ("Posicion", str(row.posicion) if row.posicion is not None else ""),
+            ("Agente", str(row.agente) if row.agente is not None else ""),
+            ("H B/L", str(row.hawb) if row.hawb is not None else ""),
+            ("B/L", str(row.awb) if row.awb is not None else ""),
+            ("Seguimiento", str(seguimiento.numero) if seguimiento.numero is not None else ""),
+        ]
+        # Agregar campos a la tabla
+        for campo, valor in campos:
+            tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
+        # Agregar más filas con los otros detalles, como Contenedores
+        cantidad_cntr = ""
+        contenedores = ""
+        mercaderias = ""
+        precintos = ""
+        bultos = 0
+        peso = 0
+        volumen = 0
+        # Obtener datos de los contenedores y calcular los valores
+        cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto',
+                                                                     'bultos', 'peso', 'envase', 'volumen').annotate(
+            total=Count('id'))
+        if cant_cntr.count() > 0:
+            for cn in cant_cntr:
+                cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - '
+                contenedores += f' {cn["nrocontenedor"]} - '
+                if cn['precinto'] is not None and len(cn['precinto']) > 0:
+                    precintos += f'{cn["precinto"]} - '
+                bultos += cn['bultos']
+                if cn['peso'] is not None:
+                    peso += cn['peso']
+                if cn['volumen'] is not None:
+                    volumen += cn['volumen']
+                mercaderias += cn['envase'] + ' - '
+        tabla_html += f"<tr><th>Contenedores</th><td>{cantidad_cntr[:-3]}</td></tr>"
+        tabla_html += f"<tr><th>Nro.Contenedor/es</th><td>{contenedores[:-3]}</td></tr>"
+        tabla_html += f"<tr><th>Precintos/sellos</th><td>{precintos[:-3]}</td></tr>"
+        tabla_html += f"<tr><th>Peso</th><td>{peso} KGS</td></tr>"
+        tabla_html += f"<tr><th>Bultos</th><td>{bultos}</td></tr>"
+        tabla_html += f"<tr><th>CBM</th><td>{volumen} M³</td></tr>"
+        tabla_html += f"<tr><th>Mercaderia</th><td>" + str(mercaderias)[:-3] + "</td></tr>"
+        # Agregar más campos de contenedores aquí
+
+        # Cerrar la etiqueta de la tabla
+        tabla_html += "</table><br><br>"
+        texto += tabla_html
+        texto += 'Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar. <br>' \
+                 'Agradeciendo vuestra preferencia, le saludamos muy atentamente.<br><br>'
+
 
     return texto, resultado
 

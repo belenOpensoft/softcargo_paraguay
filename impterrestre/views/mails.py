@@ -4,9 +4,10 @@ import json
 from django.http import HttpResponse
 import base64
 from django.views.decorators.csrf import csrf_exempt
-from impterrestre.models import VEmbarqueaereo, ImpterraCargaaerea, ImpterraEnvases, ImpterraServiceaereo, VGastosHouse
+from impterrestre.models import VEmbarqueaereo, ImpterraCargaaerea, ImpterraEnvases, ImpterraServiceaereo, VGastosHouse, \
+    ImpterraEmbarqueaereo, ImpterraReservas
 from mantenimientos.views.bancos import is_ajax
-from mantenimientos.models import Productos
+from mantenimientos.models import Productos, Clientes
 from seguimientos.models import VGrillaSeguimientos
 
 DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
@@ -36,6 +37,7 @@ def get_data_email_op(request):
             title = request.POST['title']
             row_number = request.POST['row_number']
             #9155
+            embarque = ImpterraEmbarqueaereo.objects.get(numero=row_number)
             row = VEmbarqueaereo.objects.get(numero=row_number)
             row2 = ImpterraCargaaerea.objects.filter(numero=row_number)
             row3 = ImpterraEnvases.objects.filter(numero=row_number)
@@ -48,10 +50,9 @@ def get_data_email_op(request):
                                                   vendedor='')
             texto = ''
             texto += f'<br>'
-            texto, resultado = get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos)
+            texto, resultado = get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque)
             texto += '<b>OCEANLINK,</b><br>'
-            # texto += str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>'
-            texto += 'DEPARTAMENTO DE IMPORTACION MARITIMA, <br>'
+            texto += 'DEPARTAMENTO DE IMPORTACION TERRESTRE, <br>'
             texto += 'MISIONES 1574 OF 201 <br>'
             texto += 'OPERACIONES <br>'
             texto += 'EMAIL: <br>'
@@ -69,7 +70,7 @@ def get_data_email_op(request):
     return HttpResponse(data_json, mimetype)
 
 
-def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos):
+def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque):
     # merca = Productos.objects.get(codigo=row2.producto.codigo)
     if row2 is not None:
         merca = []
@@ -416,6 +417,73 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         return texto, resultado
 
+    elif title == 'Aviso de embarque':
+        cliente=Clientes.objects.get(codigo=embarque.cliente)
+        tabla_html = "<table style='width:40%'>"
+        # Definir los campos y sus respectivos valores
+        resultado['asunto'] = 'AVISO DE EMBARQUE / CS: ' + str(row.numero) + ' ' \
+                                                                             '- HB/l: ' + str(
+            row.hawb) + ' - Shipper: ' + str(row.embarcador) + ' - Consig: ' \
+                                                               '' + str(row.consignatario) + '; Vapor: ' + str(
+            seguimiento.vapor)
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime(
+            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
+        texto += fecha_formateada.capitalize() + '<br><br>'
+        texto += 'Sres.: <br>'
+        texto += str(cliente.empresa) + '<br>'
+        texto += '<b>DEPARTAMENTO DE COMERCIO EXTERIOR </b><br><br>'
+        if isinstance(seguimiento.etd, datetime):
+            salida = str(seguimiento.etd.strftime("%d/%m/%Y"))
+        else:
+            salida = ''
+        if isinstance(seguimiento.eta, datetime):
+            llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
+        else:
+            llegada = ''
+        campos = [
+            ("Referencia", ""),
+            ("Embarcador", str(row.embarcador) if row.embarcador is not None else ""),
+            ("Consignatario", str(row.consignatario) if row.consignatario is not None else ""),
+            ("Ref.Proveedor", str(seguimiento.refproveedor) if seguimiento.refproveedor is not None else ""),
+            ("Términos", str(row.terminos) if row.terminos is not None else ""),
+            ("Transportista", str(row.transportista) if row.transportista is not None else ""),
+            ("Vapor", str(seguimiento.vapor) if seguimiento.vapor is not None else ""),
+            ("Origen", str(row.origen) if row.origen is not None else ""),
+            ("Destino", str(row.destino) if row.destino is not None else ""),
+            ("Salida", str(salida) if salida is not None else ""),
+            ("Llegada", str(llegada) if llegada is not None else ""),
+            ("Llegada estimadas", str(llegada) if llegada is not None else ""),
+            ("Posicion", str(row.posicion) if row.posicion is not None else ""),
+            ("Agente", str(row.agente) if row.agente is not None else ""),
+            ("H B/L", str(row.hawb) if row.hawb is not None else ""),
+            ("B/L", str(row.awb) if row.awb is not None else ""),
+            ("Seguimiento", str(seguimiento.numero) if seguimiento.numero is not None else ""),
+        ]
+        for campo, valor in campos:
+            tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
+        try:
+            carga = ImpterraCargaaerea.objects.get(numero=row.numero)
+            master = ImpterraReservas.objects.get(awb=row.awb)
+        except VGrillaSeguimientos.DoesNotExist:
+            carga = ImpterraCargaaerea(bruto=0,bultos=0,volumen=0)
+            master = ImpterraReservas(producto=None)
+        except Exception as e:
+            print(e)
+
+        tabla_html += f"<tr><th>Peso</th><td>{carga.bruto if carga.bruto else 0} KGS</td></tr>"
+        tabla_html += f"<tr><th>Bultos</th><td>{carga.bultos if carga.bultos else 0}</td></tr>"
+        tabla_html += f"<tr><th>CBM</th><td>{master.volumen if master.volumen else 0} M³</td></tr>"
+        tabla_html += f"<tr><th>Mercaderia</th><td>" + str(carga.producto) if carga.producto else None + "</td></tr>"
+        # Agregar más campos de contenedores aquí
+
+        # Cerrar la etiqueta de la tabla
+        tabla_html += "</table><br><br>"
+        texto += tabla_html
+        texto += 'Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar. <br>' \
+                 'Agradeciendo vuestra preferencia, le saludamos muy atentamente.<br><br>'
+
+        return texto,resultado
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:
         image_data = image_file.read()
