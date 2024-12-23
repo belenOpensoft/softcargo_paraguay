@@ -351,6 +351,37 @@ if (!$('#id_awbhijo').val()) {
                     alert('Debe seleccionar al menos un registro');
                 }
             });
+
+    //descargar guias
+    $('#descargar_guia').click(function () {
+        row = table.rows('.table-secondary').data();
+        if (row.length === 1) {
+            if(row[0][2] == 'EXPORT AEREO'){
+//            console.log('row da esto: ' +row[0][0]);
+                   window.open('/descargar_hawb/' + row[0][0], '_blank');
+
+            }else{
+                alert('La guias solo pueden ser asignadas a EXPORTACION AEREA');
+            }
+
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+    });
+    $('#descargar_guia_draft').click(function () {
+        row = table.rows('.table-secondary').data();
+        if (row.length === 1) {
+            if(row[0][2] == 'EXPORT AEREO'){
+                   window.open('/descargar_hawb_draft/' + row[0][0] + '/d' ,'_blank');
+
+            }else{
+                alert('La guias solo pueden ser asignadas a EXPORTACION AEREA');
+            }
+
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+    });
 })
 function generar_posicion(){
     return $.ajax({

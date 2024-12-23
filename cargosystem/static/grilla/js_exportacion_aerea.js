@@ -184,6 +184,23 @@ $(document).ready(function () {
         table.draw();
     }
 
+    //descargar guias
+    $('#descargar_guia').click(function () {
+        row = table.rows('.table-secondary').data();
+        if (row.length === 1) {
+           window.open('/exportacion_aerea/descargar_hawb/' + row[0][0], '_blank');
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+    });
+    $('#descargar_guia_draft').click(function () {
+        row = table.rows('.table-secondary').data();
+        if (row.length === 1) {
+           window.open('/exportacion_aerea/descargar_hawb_draft/' + row[0][0] + '/d' ,'_blank');
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+    });
 
     //autocompletes add master form
     $("#transportista_add").autocomplete({
@@ -1416,9 +1433,9 @@ function aplicable_volumen(volumen){
     //evento fila marcada
     $(document).on('click', function (event) {
     // tabla general
-    if (!$(event.target).closest('#tabla_exportaerea').length) {
-        $('#tabla_exportaerea tbody tr').removeClass('table-secondary');
-    }
+//    if (!$(event.target).closest('#tabla_exportaerea').length) {
+//        $('#tabla_exportaerea tbody tr').removeClass('table-secondary');
+//    }
 //    //tabla de houses en edit master
 //    if (!$(event.target).closest('#table_edit_im').length) {
 //        $('#table_edit_im tbody tr').removeClass('table-secondary');

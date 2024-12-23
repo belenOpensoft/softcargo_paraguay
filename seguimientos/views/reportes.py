@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 
 from cargosystem.settings import BASE_DIR
+from expaerea.models import ExportEmbarqueaereo, ExportConexaerea, ExportCargaaerea, ExportServiceaereo
 from mantenimientos.models import Clientes as SociosComerciales, Ciudades
 from cargosystem import settings
 from mantenimientos.forms import add_buque_form, reporte_seguimiento_form
@@ -234,7 +235,7 @@ def descargar_hawb(request,row_id,draft=None):
             rep.compania = trasbordos[0].cia
             rep.destino = str(trasbordos[0].destino)
             for x in trasbordos:
-                arraydestinos.append(str(x.destino) + '    ' + str(x.cia))
+                arraydestinos.append(str(x.destino) + '    ' + str(x.cia)[:2])
                 rep.fechas += str(x.cia) + str(x.vapor) + '/' + x.salida.strftime("%m-%B")[:6].upper() + ' '
                 rep.routing += '/' + str(x.destino)
                 rep.final = str(x.destino)
@@ -310,6 +311,144 @@ def descargar_hawb(request,row_id,draft=None):
 
         """ OUTPUT """
         name = 'HWBL_' + str(seg.numero)
+        output = str(BASE_DIR) + '/archivos/' + name + '.pdf'
+        if draft is not None:
+            rep.generar_hawb(output,fondo='carrier_hawb.jpg')
+            rep.generar_hawb(output,fondo='consignee.jpg')
+            rep.generar_hawb(output,fondo='shipper.jpg')
+            rep.generar_hawb(output,fondo='delivery_receipt.jpg')
+            rep.generar_hawb(output,fondo='normal.jpg')
+        else:
+            rep.generar_hawb(output)
+
+
+        return rep.descargo_archivo(output)
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        raise Http404(f"Error: {str(e)}")
+
+def descargar_hawb_operativas(request,row_id,draft=None):
+    try:
+        rep = GuiasReport()
+        house = ExportEmbarqueaereo.objects.get(numero=row_id)
+        if house.seguimiento is not None:
+            seg = Seguimiento.objects.get(id=house.seguimiento)
+        else:
+            seg=Seguimiento(cia=None,notificar=None)
+
+        """ CONSIGNATARIO """
+        consignatario = SociosComerciales.objects.get(codigo=house.consignatario)
+        con = str(consignatario.razonsocial) + '<br />\n' + \
+              str(consignatario.direccion) + '<br />\n' + \
+              str(consignatario.ciudad) + '<br />\n' + \
+              str(consignatario.pais) + ' RUT: ' + str(consignatario.ruc)
+        rep.consignatario = con
+        """ SHIPPER """
+        shipper = SociosComerciales.objects.get(codigo=house.embarcador)
+        con = str(shipper.razonsocial) + '<br />\n' + \
+              str(shipper.direccion) + '<br />\n' + \
+              str(shipper.ciudad) + '<br />\n' + \
+              str(shipper.pais) + ' RUT: ' + str(shipper.ruc)
+        rep.shipper = con
+        rep.shipper_nom = str(shipper.razonsocial)
+        """ NOTIFY """
+        notify = 'FREIGHT ' + str(house.pago).upper() + '<br />\n'
+        notificador = SociosComerciales.objects.get(codigo=seg.notificar)
+        notify += 'NOTIFY: ' + str(notificador.razonsocial) + '<br />\n' + \
+                  str(notificador.direccion) + '<br />\n' + \
+                  str(notificador.ciudad) + '<br />\n' + \
+                  str(notificador.pais) + ' RUT: ' + str(shipper.ruc)
+        rep.notify = notify
+        if house.awb is not None and len(house.awb) > 0:
+            awb = house.awb.split('-')
+            rep.awb = awb[0] + '   MVD   ' + awb[1]
+        if house.hawb is not None and len(house.hawb) > 0:
+            rep.hawb = house.hawb
+        trasbordos = ExportConexaerea.objects.filter(numero=house.numero).order_by('llegada','id')
+        arraydestinos = []
+        if trasbordos.count() > 0:
+            rep.routing += 'MONTEVIDEO  (' + str(trasbordos[0].origen)
+            rep.compania = trasbordos[0].ciavuelo
+            rep.destino = str(trasbordos[0].destino)
+            for x in trasbordos:
+                arraydestinos.append(str(x.destino) + '    ' + str(x.ciavuelo)[:2])
+                rep.fechas += str(x.ciavuelo) + str(x.vuelo) + '/' + x.salida.strftime("%m-%B")[:6].upper() + ' '
+                rep.routing += '/' + str(x.destino)
+                rep.final = str(x.destino)
+
+        arraydestinos.reverse()
+        flag = 0
+        if len(arraydestinos) > 0:
+            for x in arraydestinos:
+                if flag < 2:
+                    rep.arraydestinos = x + '   ' + rep.arraydestinos
+                    flag += 1
+        if len(rep.routing) > 0:
+            rep.routing += ')'
+        ciudad = Ciudades.objects.filter(codigo=rep.final)
+        if ciudad.count() > 0:
+            rep.airport_final = ciudad[0].nombre
+        rep.modopago = house.pago
+        if house.pago == 'Collect':
+            rep.pago = 'CC          C            C'
+        else:
+            rep.pago = 'PP    P           P'
+        cargas = ExportCargaaerea.objects.filter(numero=house.numero)
+        if cargas.count() > 0:
+            for x in cargas:
+                aux = [x.bultos,x.bruto,'K','']
+                if house.tomopeso == 2:
+                    if x.medidas is not None and len(x.medidas) > 0:
+                        medidas = x.medidas.split('*')
+                        if len(medidas) == 3 and all(m is not None and m.isdigit() for m in medidas):
+                            valor = float(medidas[0]) * float(medidas[1]) * float(medidas[2]) * 166.67
+                            aux.append(str(redondear_a_05_o_0(valor)) + ' AS VOL')
+                        else:
+                            # Manejar el caso de error o valores faltantes
+                            aux.append('Error en medidas')
+                else:
+                    aux.append(x.bruto)
+                aux.append(house.tarifaventa)
+                if house.aplicable is not None:
+                    aux.append(round(house.aplicable * float(house.tarifaventa), 2))
+                else:
+                    aux.append(0)
+                aux.append(x.producto.descripcion)
+                rep.mercaderias.append(aux)
+
+        rep.posicion = house.posicion
+        """ GASTOS """
+        gastos = ExportServiceaereo.objects.filter(numero=house.numero)
+
+        if gastos.count() > 0:
+            for g in gastos:
+                if g.modo == 'Collect':
+                    if g.tipogasto == 'DUE AGENT':
+                        rep.agentcol += g.precio
+                    elif g.tipogasto == 'DUE CARRIER':
+                        rep.carriercol += g.precio
+                    elif g.tipogasto == 'TAX':
+                        rep.taxcol += g.precio
+                    elif g.tipogasto == 'VALUATION CHARGES':
+                        rep.valcol += g.precio
+                    else:
+                        rep.othcol += g.precio
+                else:
+                    if g.tipogasto == 'DUE AGENT':
+                        rep.agentppd += g.precio
+                    elif g.tipogasto == 'DUE CARRIER':
+                        rep.carrierppd += g.precio
+                    elif g.tipogasto == 'TAX':
+                        rep.taxppd += g.precio
+                    elif g.tipogasto == 'VALUATION CHARGES':
+                        rep.valppd += g.precio
+                    else:
+                        rep.othppd += g.precio
+
+        """ OUTPUT """
+        name = 'HWBL_' + str(house.numero)
         output = str(BASE_DIR) + '/archivos/' + name + '.pdf'
         if draft is not None:
             rep.generar_hawb(output,fondo='carrier_hawb.jpg')

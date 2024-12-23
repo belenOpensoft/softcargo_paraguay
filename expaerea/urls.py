@@ -20,6 +20,7 @@ from expaerea.views.pdf import get_datos_caratula
 from expaerea.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado
 
 from notificaciones.views.correos import envio_notificacion_seguimiento
+from seguimientos.views.reportes import descargar_hawb_operativas
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
@@ -77,7 +78,8 @@ urlpatterns = [
     path('get_name_by_id_vendedor/', get_name_by_id_vendedores, name='get_name_by_id_vendedor'),
     path('source_seguimientos_modo/<str:modo>/', source_seguimientos_modo, name="source_seguimientos_modo"),
     path('envio_notificacion_seguimiento/', envio_notificacion_seguimiento, name="envio_notificacion_seguimiento"),
-
+    path('descargar_hawb/<int:row_id>/', descargar_hawb_operativas, name='descargar_hawb'),
+    path('descargar_hawb_draft/<int:row_id>/<str:draft>', descargar_hawb_operativas, name='descargar_hawb'),
 ]
 
 

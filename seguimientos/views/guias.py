@@ -146,7 +146,7 @@ class GuiasReport:
             table = Table(data=data, colWidths=[4.5 * cm, ], rowHeights=[1 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
-                              ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
+                              ('VALIGN', (0, 0), (0, 0), 'TOP'),
                           ]
                           )
             table.wrapOn(c, 0, 0)
