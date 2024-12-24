@@ -218,11 +218,11 @@ class Factura(forms.Form):
 
 class ProveedoresGastos(forms.Form):
     CHOICE_TIPO = (
-        ('contado', 'Contado'),
-        ('factura', 'Factura'),
-        ('devolucion_contado', 'Devolución contado'),
-        ('nota_de_debito', 'Nota de débito'),
-        ('nota_de_credito', 'Nota de crédito'),
+        (10, 'Contado'),
+        (40, 'Factura'),
+        (11, 'Devolución contado'),
+        (0, 'Nota de débito'),
+        (41, 'Nota de crédito'),
     )
 
     CHOICE_FACTURA = (

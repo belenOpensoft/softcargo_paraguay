@@ -1,4 +1,54 @@
 $(document).ready(function() {
+    var buscar = '';
+    var que_buscar = '';
+    let contador = 0;
+    $('#tabla_proveedoresygastos tfoot th').each(function () {
+        let title = $(this).text();
+        if (title !== '') {
+            $(this).html('<input type="text" class="form-control"  autocomplete="off" id="buscoid_' + contador + '" type="text" placeholder="Buscar ' + title + '"  autocomplete="off" />');
+            contador++;
+        } else {
+            $(this).html('<button class="btn" title="Borrar filtros" id="clear" ><span class="glyphicon glyphicon-erase"></span></button> ');
+        }
+    });
+    //tabla general master
+    table = $('#tabla_proveedoresygastos').DataTable({
+    "stateSave": true,
+    "dom": 'Btlipr',
+    "scrollX": true,
+    "bAutoWidth": false,
+    "scrollY": wHeight * 0.60,
+    "order": [[1, "desc"]],
+    "processing": true,
+    "serverSide": true,
+    "pageLength": 100,
+    "ajax": {
+        "url": "/admin_cont/source_proveedoresygastos/",
+        'type': 'GET',
+        "data": function (d) {
+            return $.extend({}, d, {
+                "buscar": buscar,
+                "que_buscar": que_buscar,
+            });
+        }
+    },
+    "language": {
+        url: "/static/datatables/es_ES.json"
+    },
+    initComplete: function () {
+        var api = this.api();
+        api.columns().every(function () {
+            var that = this;
+            $('input', this.footer()).on('keyup change', function () {
+                if (that.search() !== this.value) {
+                    that.search(this.value).draw();
+                }
+            });
+        });
+    },
+    "rowCallback": function (row, data) {}
+});
+
     const valorInicial = $('#id_tipo').find('option:selected').text();
     $('#tipoSeleccionado').text(valorInicial);
 
@@ -241,41 +291,88 @@ $(document).ready(function() {
     });
 
     // Limpiar campos
-    function limpiarCampos() {
-        $('#item').val('');
-        $('#id_descripcion_item input').val('');
-        $('#id_precio input').val('');
-    }
 
-    function actualizarTotal() {
-        let neto = 0;
 
-        $('#itemTable tbody tr').each(function() {
-            const precio = parseFloat($(this).data('precio')) || 0;
-            neto += precio;
-        });
+        $('#facturaForm').submit(function(event) {
+        event.preventDefault();
+        if (confirm('¿Está seguro de que desea facturar?')) {
+            let tipoFac = $('#id_tipo').val();
+            let serie = $('#id_serie').val();
+            let prefijo = $('#id_prefijo').val();
+            let numero = $('#id_numero').val();
+            let cliente = $('#cliente').val();
+            let fecha = $('#id_fecha_registro').val();
+            let paridad = $('#id_paridad').val();
+            let arbitraje = $('#id_arbitraje').val();
+            let imputar = $('#id_imputar').val();
+            let moneda = $('#id_moneda').val();
+            let clienteData = {
+                codigo: $('#proveedorTable tbody tr td').eq(0).text(),
+                empresa: $('#proveedorTable tbody tr td').eq(1).text(),
+                rut: $('#proveedorTable tbody tr td').eq(2).text(),
+            };
 
-        $('#id_neto input').val(neto.toFixed(2)).prop('readonly', true);
-
-        let total = 0;
-        $('#itemTable tbody tr').each(function() {
-            const precio = parseFloat($(this).data('precio')) || 0;
-            const iva = $(this).data('iva');
-
-            const precioFinal = iva === 'Básico' ? precio * 1.22 : precio;
-            total += precioFinal;
-        });
-
-        $('#id_total input').val(total.toFixed(2)).prop('readonly', true);
-
-        const iva = total - neto;
-        $('#id_iva input').val(iva.toFixed(2)).prop('readonly', true);
-    }
+            let items = [];
+            $('#itemTable tbody tr').each(function() {
+                const itemData = {
+                    id: $(this).find('td').eq(0).text(),
+                    descripcion: $(this).find('td').eq(1).text(),
+                    precio: $(this).find('td').eq(2).text(),
+                    iva: $(this).find('td').eq(3).text(),
+                    cuenta: $(this).find('td').eq(4).text(),
+                };
+                items.push(itemData);
+            });
+            let data=[];
+                data={
+                    csrfmiddlewaretoken: csrf_token,
+                    fecha: fecha,
+                    tipoFac: tipoFac,
+                    serie: serie,
+                    prefijo: prefijo,
+                    numero: numero,
+                    cliente: cliente,
+                    arbitraje: arbitraje,
+                    paridad: paridad,
+                    imputar: imputar,
+                    moneda: moneda,
+                    clienteData: JSON.stringify(clienteData),
+                    items: JSON.stringify(items),
+                    total:$('#id_total input').val(),
+                    iva:$('#id_iva input').val(),
+                    neto:$('#id_neto input').val(),
+                }
+            $.ajax({
+                url: "/admin_cont/procesar_factura_proveedor/",
+                dataType: 'json',
+                type: 'POST',
+                data: data,
+                headers: { 'X-CSRFToken': csrf_token },
+                success: function(data) {
+                    console.log('Factura procesada:', data);
+                    alert('Factura procesada con éxito');
+                    $('#facturaM').dialog('close');
+                    $('#facturaForm').trigger('reset');
+                    total=0;
+                    iva=0;
+                    neto=0;
+                    //window.location.reload();
+                },
+                error: function(xhr) {
+                    console.error('Error al facturar:', xhr);
+                    alert('Error al procesar la factura');
+                }
+            });
+        }
+    });
 });
 var wWidth = $(window).width();
 var dWidth = wWidth * 0.40;
 var wHeight = $(window).height();
 var dHeight = wHeight * 0.30;
+let total=0;
+
+
 function abrir_modal() {
     $("#proveedoresModal").dialog({
         autoOpen: true,
@@ -480,4 +577,39 @@ function resetModal(modalId) {
             $(this).find("tbody").empty();
         }
     });
+}
+function limpiarCampos() {
+    $('#item').val('');
+    $('#id_descripcion_item input').val('');
+    $('#id_precio input').val('');
+}
+
+function actualizarTotal() {
+    let neto = 0;
+    let total = 0; // Inicializar total aquí
+
+    $('#itemTable tbody tr').each(function() {
+        const precio = parseFloat($(this).data('precio')) || 0;
+        neto += precio;
+    });
+
+    $('#id_neto input').val(neto.toFixed(2)).prop('readonly', true);
+
+    $('#itemTable tbody tr').each(function() {
+        const precio = parseFloat($(this).data('precio')) || 0;
+        const iva = $(this).data('iva');
+
+        // Calcular el precio final con IVA
+        const precioFinal = iva === 'Basico' ? precio * 1.22 : precio;
+        total += precioFinal;
+
+        console.log(iva);
+        console.log('precio ' + precio);
+    });
+
+    $('#id_total input').val(total.toFixed(2)).prop('readonly', true);
+
+    const iva_t = total - neto;
+    console.log('total ' + total);
+    $('#id_iva input').val(iva_t.toFixed(2)).prop('readonly', true);
 }

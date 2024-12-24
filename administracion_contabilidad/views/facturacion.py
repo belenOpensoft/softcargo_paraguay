@@ -230,228 +230,6 @@ def generar_autogenerado(tipo, hora, fecha, numero):
     return autogenerado
 
 @transaction.atomic
-def procesar_factura_old(request):
-    try:
-        if request.method == 'POST':
-            lista = Boleta.objects.last()
-            numero = int(lista.numero) + 1
-            hora = datetime.now().strftime('%H%M%S%f')
-            fecha = request.POST.get('fecha')
-            tipo = request.POST.get('tipoFac', 0)
-
-            preventa = json.loads(request.POST.get('preventa'))
-            if preventa!=0:
-                autogenerado=preventa.get('autogenerado')
-                master=preventa.get('master')
-                house=preventa.get('house')
-                posicion=preventa.get('posicion')
-                kilos=preventa.get('kilos')
-                bultos=preventa.get('bultos')
-                terminos=preventa.get('incoterms')
-                pagoflete=preventa.get('pago')
-                origen=preventa.get('origen')
-                destino=preventa.get('destino')
-                seguimiento=preventa.get('seguimiento')
-            else:
-                autogenerado=generar_autogenerado(tipo, hora, fecha, numero)
-                master=None
-                house=None
-                posicion=None
-                kilos=None
-                bultos=None
-                terminos=None
-                pagoflete=None
-                origen=None
-                destino=None
-                seguimiento=None
-
-
-            serie = request.POST.get('serie', "")
-            prefijo = request.POST.get('prefijo', 0)
-            moneda = request.POST.get('moneda', "")
-            arbitraje = request.POST.get('arbitraje', 0)
-            paridad = request.POST.get('paridad', 0)
-            cliente_data = json.loads(request.POST.get('clienteData'))
-            codigo_cliente = cliente_data['codigo']
-            cliente = Clientes.objects.get(codigo=codigo_cliente)
-            fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
-
-            precio_total = request.POST.get('total', 0)
-            neto = request.POST.get('neto', 0)
-            iva = request.POST.get('iva', 0)
-
-            items_data = json.loads(request.POST.get('items'))
-
-            tipo_mov = tipo
-            tipo_asiento = 'V'
-            detalle1 = 'S/I'
-            detalle_mov = "detallemov"  #si viene de la preventa, sino vacio
-            nombre_mov = ""
-            asiento = generar_numero()
-            movimiento_num = modificar_numero(asiento)
-
-            if int(tipo) == 23:
-                detalle1 = 'e-VTA/CRED'
-                nombre_mov = 'CONTADO'
-            elif int(tipo) == 24:
-                detalle1 = 'e-NOT/CRED'
-                tipo_asiento = 'V'
-                nombre_mov = 'CONTADO'
-            elif int(tipo) == 11:
-                detalle1 = 'DEV/CTDO'
-                nombre_mov = 'DEVOLUCION'
-            elif int(tipo) == 21:
-                detalle1 = 'NOT/CRED'
-                tipo_asiento = 'V'
-                nombre_mov = 'NOTA CRED.'
-            elif int(tipo) == 20:
-                detalle1 = 'VTA/CRED'
-                tipo_asiento = 'V'
-                nombre_mov = 'FACTURA'
-
-            detalle_asiento = detalle1 + serie + str(prefijo) + str(numero) + cliente.empresa
-
-            movimiento = {
-                'tipo': tipo_mov,
-                'fecha': fecha_obj,
-                'boleta': numero,
-                'monto': neto,
-                'iva': iva,
-                'total': precio_total,
-                'saldo': precio_total,
-                'moneda': moneda,
-                'detalle': detalle_mov,
-                'cliente': cliente.codigo,
-                'nombre': cliente.empresa,
-                'nombremov': nombre_mov,
-                'cambio': arbitraje,
-                'autogenerado': autogenerado,
-                'serie': serie,
-                'prefijo': prefijo,
-                'posicion': posicion,
-                'anio': fecha_obj.year,
-                'mes': fecha_obj.month,
-                'monedaoriginal': moneda,
-                'montooriginal': precio_total,
-                'arbitraje': arbitraje
-            }
-            asiento_general = {
-                'detalle': detalle_asiento,
-                'asiento': asiento,
-                'monto': precio_total,
-                'moneda': moneda,
-                'cambio': arbitraje,
-                'conciliado': 'N',
-                'clearing': fecha_obj,
-                'fecha': fecha_obj,
-                'imputacion': None,
-                'tipo': tipo_asiento,
-                'cuenta': 0,
-                'documento': str(numero),
-                'vencimiento': fecha_obj,
-                'pasado': 0,
-                'autogenerado': autogenerado,
-                'cliente': cliente.codigo,
-                'banco': 'S/I',
-                'centro': 'S/I',
-                'mov': movimiento_num,
-                'anio': fecha_obj.year,
-                'mes': fecha_obj.month,
-                'fechacheque': fecha_obj,
-                'paridad': paridad
-            }
-            crear_movimiento(movimiento)
-            crear_asiento(asiento_general)
-
-            for item_data in items_data:
-                aux = int(movimiento_num) + 1
-                precio = float(item_data.get('precio'))
-                coniva = 0
-                totaliva = 0
-                if item_data.get('iva') == 'Basico':
-                    coniva = precio * 1.22
-                    totaliva = precio * 0.22
-                else:
-                    coniva = precio
-                    totaliva = 0
-
-                boleta = Boleta()
-                numero = numero
-                boleta.autogenerado = autogenerado
-                boleta.tipo = tipo
-                boleta.fecha = fecha
-                boleta.vto = fecha
-                boleta.tipofactura = serie
-                boleta.serie = serie
-                boleta.prefijo = prefijo
-                boleta.numero = numero
-                boleta.nrocliente = cliente.codigo
-                boleta.cliente = cliente.empresa
-                boleta.direccion = cliente.direccion
-                boleta.direccion2 = cliente.direccion2
-                boleta.localidad = cliente.localidad
-                boleta.ciudad = cliente.ciudad
-                boleta.pais = cliente.pais
-                boleta.telefax = cliente.telefono
-                boleta.ruc = cliente.ruc
-                boleta.condiciones = 'S/I'
-                boleta.corporativo = 'S/I'
-                boleta.moneda = moneda
-                boleta.cambio = arbitraje
-                boleta.paridad = paridad
-                boleta.tipocliente = 'RESPONSABLE INSCRIPTO'
-                boleta.item = item_data.get('id')
-                boleta.descripcion = item_data.get('descripcion')
-                boleta.precio = item_data.get('precio')
-                boleta.iva = item_data.get('iva')
-                boleta.cuenta = item_data.get('cuenta')
-                boleta.monto = item_data.get('precio')
-                boleta.totiva = totaliva
-                boleta.total = coniva
-                boleta.master=master
-                boleta.house=house
-                boleta.posicion=posicion
-                boleta.kilos=kilos
-                boleta.bultos=bultos
-                boleta.terminos=terminos
-                boleta.pagoflete=pagoflete
-                boleta.origen=origen
-                boleta.destino=destino
-                boleta.seguimiento=seguimiento
-                boleta.save()
-
-                asiento_vector = {
-                    'detalle': detalle_asiento,
-                    'monto': item_data.get('precio'),
-                    'moneda': moneda,
-                    'cambio': arbitraje,
-                    'asiento': asiento,
-                    'conciliado': 'N',
-                    'clearing': fecha_obj,
-                    'fecha': fecha_obj,
-                    'imputacion': None,
-                    'tipo': tipo_asiento,
-                    'cuenta': item_data.get('cuenta'),
-                    'documento': str(numero),
-                    'vencimiento': fecha_obj,
-                    'pasado': 0,
-                    'autogenerado': autogenerado,
-                    'cliente': cliente.codigo,
-                    'banco': 'S/I',
-                    'centro': 'S/I',
-                    'mov': aux,
-                    'anio': fecha_obj.year,
-                    'mes': fecha_obj.month,
-                    'fechacheque': fecha_obj,
-                    'paridad': paridad
-                }
-                crear_asiento(asiento_vector)
-                movimiento_num = aux
-
-            return JsonResponse({'status': 'Factura procesada correctamente N° ' + str(numero)})
-    except Exception as e:
-        return JsonResponse({'status': 'Error: ' + str(e)})
-@transaction.atomic
 def procesar_factura(request):
     try:
         if request.method == 'POST':
@@ -502,18 +280,6 @@ def procesar_factura(request):
             neto = request.POST.get('neto', 0)
             iva = request.POST.get('iva', 0)
 
-            if moneda == 2:  # dolar
-                total_convertido = precio_total * arbitraje
-                neto_convertido = neto * arbitraje
-            elif moneda not in [1, 2]:
-                aux = precio_total * paridad
-                total_convertido = aux * arbitraje
-                aux1 = neto * paridad
-                neto_convertido = aux1 * arbitraje
-            else:
-                total_convertido = 0
-                neto_convertido = 0
-
             items_data = json.loads(request.POST.get('items'))
 
             tipo_mov = tipo
@@ -543,16 +309,18 @@ def procesar_factura(request):
                 tipo_asiento = 'V'
                 nombre_mov = 'FACTURA'
 
-            detalle_asiento = detalle1 + serie + str(prefijo) + str(numero) + cliente.empresa
+           # detalle_asiento = detalle1 + serie + str(prefijo) + str(numero) + cliente.empresa
+            detalle_asiento = detalle1 + '-' + serie + '-' + str(prefijo) + '-' + str(numero) + '-' + cliente.empresa
+
 
             movimiento = {
                 'tipo': tipo_mov,
                 'fecha': fecha_obj,
                 'boleta': numero,
-                'monto': neto_convertido,
+                'monto': neto,
                 'iva': iva,
-                'total': total_convertido,
-                'saldo': total_convertido,
+                'total': precio_total,
+                'saldo': precio_total,
                 'moneda': moneda,
                 'detalle': detalle_mov,
                 'cliente': cliente.codigo,
@@ -566,21 +334,21 @@ def procesar_factura(request):
                 'anio': fecha_obj.year,
                 'mes': fecha_obj.month,
                 'monedaoriginal': moneda,
-                'montooriginal': total_convertido,
+                'montooriginal': precio_total,
                 'arbitraje': arbitraje
             }
             asiento_general = {
                 'detalle': detalle_asiento,
                 'asiento': asiento,
-                'monto': total_convertido,
+                'monto': precio_total,
                 'moneda': moneda,
                 'cambio': arbitraje,
                 'conciliado': 'N',
                 'clearing': fecha_obj,
                 'fecha': fecha_obj,
-                'imputacion': None,
+                'imputacion': 1,
                 'tipo': tipo_asiento,
-                'cuenta': 0,
+                'cuenta': cliente.ctavta,
                 'documento': str(numero),
                 'vencimiento': fecha_obj,
                 'pasado': 0,
@@ -609,22 +377,6 @@ def procesar_factura(request):
                     coniva = precio
                     totaliva = 0
 
-                if moneda == 2:  # dolar
-                    precio_c=precio*arbitraje
-                    iva_total_c = totaliva * arbitraje
-                    total_coniva_c = coniva * arbitraje
-                elif moneda not in [1, 2]:
-                    aux = totaliva * paridad
-                    iva_total_c = aux * arbitraje
-                    aux1 = coniva * paridad
-                    total_coniva_c = aux1 * arbitraje
-                    aux2 = precio * paridad
-                    precio_c = aux2 * arbitraje
-                else:
-                    iva_total_c = 0
-                    total_coniva_c = 0
-                    precio_c=0
-
                 boleta = Boleta()
                 numero = numero
                 boleta.autogenerado = autogenerado
@@ -650,14 +402,14 @@ def procesar_factura(request):
                 boleta.cambio = arbitraje
                 boleta.paridad = paridad
                 boleta.tipocliente = 'RESPONSABLE INSCRIPTO'
-                boleta.item = item_data.get('id')
+                boleta.nroservicio = item_data.get('id')
                 boleta.descripcion = item_data.get('descripcion')
                 boleta.precio = item_data.get('precio')
                 boleta.iva = item_data.get('iva')
                 boleta.cuenta = item_data.get('cuenta')
                 boleta.monto = item_data.get('precio')
-                boleta.totiva = iva_total_c
-                boleta.total = total_coniva_c
+                boleta.totiva = totaliva
+                boleta.total = coniva
                 boleta.master=master
                 boleta.house=house
                 boleta.posicion=posicion
@@ -672,14 +424,14 @@ def procesar_factura(request):
 
                 asiento_vector = {
                     'detalle': detalle_asiento,
-                    'monto': precio_c,
+                    'monto': item_data.get('precio'),
                     'moneda': moneda,
                     'cambio': arbitraje,
                     'asiento': asiento,
                     'conciliado': 'N',
                     'clearing': fecha_obj,
                     'fecha': fecha_obj,
-                    'imputacion': None,
+                    'imputacion': 2,
                     'tipo': tipo_asiento,
                     'cuenta': item_data.get('cuenta'),
                     'documento': str(numero),
@@ -701,6 +453,256 @@ def procesar_factura(request):
             return JsonResponse({'status': 'Factura procesada correctamente N° ' + str(numero)})
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
+# @transaction.atomic
+# def procesar_factura(request):
+#     try:
+#         if request.method == 'POST':
+#             lista = Boleta.objects.last()
+#             numero = int(lista.numero) + 1
+#             hora = datetime.now().strftime('%H%M%S%f')
+#             fecha = request.POST.get('fecha')
+#             tipo = request.POST.get('tipoFac', 0)
+#
+#             preventa = json.loads(request.POST.get('preventa'))
+#             if preventa!=0:
+#                 autogenerado=preventa.get('autogenerado')
+#                 master=preventa.get('master')
+#                 house=preventa.get('house')
+#                 posicion=preventa.get('posicion')
+#                 kilos=preventa.get('kilos')
+#                 bultos=preventa.get('bultos')
+#                 terminos=preventa.get('incoterms')
+#                 pagoflete=preventa.get('pago')
+#                 origen=preventa.get('origen')
+#                 destino=preventa.get('destino')
+#                 seguimiento=preventa.get('seguimiento')
+#             else:
+#                 autogenerado=generar_autogenerado(tipo, hora, fecha, numero)
+#                 master=None
+#                 house=None
+#                 posicion=None
+#                 kilos=None
+#                 bultos=None
+#                 terminos=None
+#                 pagoflete=None
+#                 origen=None
+#                 destino=None
+#                 seguimiento=None
+#
+#
+#             serie = request.POST.get('serie', "")
+#             prefijo = request.POST.get('prefijo', 0)
+#             moneda = request.POST.get('moneda', "")
+#             arbitraje = request.POST.get('arbitraje', 0)
+#             paridad = request.POST.get('paridad', 0)
+#             cliente_data = json.loads(request.POST.get('clienteData'))
+#             codigo_cliente = cliente_data['codigo']
+#             cliente = Clientes.objects.get(codigo=codigo_cliente)
+#             fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
+#
+#             precio_total = request.POST.get('total', 0)
+#             neto = request.POST.get('neto', 0)
+#             iva = request.POST.get('iva', 0)
+#
+#             if moneda == 2:  # dolar
+#                 total_convertido = precio_total * arbitraje
+#                 neto_convertido = neto * arbitraje
+#             elif moneda not in [1, 2]:
+#                 aux = precio_total * paridad
+#                 total_convertido = aux * arbitraje
+#                 aux1 = neto * paridad
+#                 neto_convertido = aux1 * arbitraje
+#             else:
+#                 total_convertido = 0
+#                 neto_convertido = 0
+#
+#             items_data = json.loads(request.POST.get('items'))
+#
+#             tipo_mov = tipo
+#             tipo_asiento = 'V'
+#             detalle1 = 'S/I'
+#             detalle_mov = "detallemov"  #si viene de la preventa, sino vacio
+#             nombre_mov = ""
+#             asiento = generar_numero()
+#             movimiento_num = modificar_numero(asiento)
+#
+#             if int(tipo) == 23:
+#                 detalle1 = 'e-VTA/CRED'
+#                 nombre_mov = 'CONTADO'
+#             elif int(tipo) == 24:
+#                 detalle1 = 'e-NOT/CRED'
+#                 tipo_asiento = 'V'
+#                 nombre_mov = 'CONTADO'
+#             elif int(tipo) == 11:
+#                 detalle1 = 'DEV/CTDO'
+#                 nombre_mov = 'DEVOLUCION'
+#             elif int(tipo) == 21:
+#                 detalle1 = 'NOT/CRED'
+#                 tipo_asiento = 'V'
+#                 nombre_mov = 'NOTA CRED.'
+#             elif int(tipo) == 20:
+#                 detalle1 = 'VTA/CRED'
+#                 tipo_asiento = 'V'
+#                 nombre_mov = 'FACTURA'
+#
+#             detalle_asiento = detalle1 + serie + str(prefijo) + str(numero) + cliente.empresa
+#
+#             movimiento = {
+#                 'tipo': tipo_mov,
+#                 'fecha': fecha_obj,
+#                 'boleta': numero,
+#                 'monto': neto_convertido,
+#                 'iva': iva,
+#                 'total': total_convertido,
+#                 'saldo': total_convertido,
+#                 'moneda': moneda,
+#                 'detalle': detalle_mov,
+#                 'cliente': cliente.codigo,
+#                 'nombre': cliente.empresa,
+#                 'nombremov': nombre_mov,
+#                 'cambio': arbitraje,
+#                 'autogenerado': autogenerado,
+#                 'serie': serie,
+#                 'prefijo': prefijo,
+#                 'posicion': posicion,
+#                 'anio': fecha_obj.year,
+#                 'mes': fecha_obj.month,
+#                 'monedaoriginal': moneda,
+#                 'montooriginal': total_convertido,
+#                 'arbitraje': arbitraje
+#             }
+#             asiento_general = {
+#                 'detalle': detalle_asiento,
+#                 'asiento': asiento,
+#                 'monto': total_convertido,
+#                 'moneda': moneda,
+#                 'cambio': arbitraje,
+#                 'conciliado': 'N',
+#                 'clearing': fecha_obj,
+#                 'fecha': fecha_obj,
+#                 'imputacion': None,
+#                 'tipo': tipo_asiento,
+#                 'cuenta': 0,
+#                 'documento': str(numero),
+#                 'vencimiento': fecha_obj,
+#                 'pasado': 0,
+#                 'autogenerado': autogenerado,
+#                 'cliente': cliente.codigo,
+#                 'banco': 'S/I',
+#                 'centro': 'S/I',
+#                 'mov': movimiento_num,
+#                 'anio': fecha_obj.year,
+#                 'mes': fecha_obj.month,
+#                 'fechacheque': fecha_obj,
+#                 'paridad': paridad
+#             }
+#             crear_movimiento(movimiento)
+#             crear_asiento(asiento_general)
+#
+#             for item_data in items_data:
+#                 aux = int(movimiento_num) + 1
+#                 precio = float(item_data.get('precio'))
+#                 coniva = 0
+#                 totaliva = 0
+#                 if item_data.get('iva') == 'Basico':
+#                     coniva = precio * 1.22
+#                     totaliva = precio * 0.22
+#                 else:
+#                     coniva = precio
+#                     totaliva = 0
+#
+#                 if moneda == 2:  # dolar
+#                     precio_c=precio*arbitraje
+#                     iva_total_c = totaliva * arbitraje
+#                     total_coniva_c = coniva * arbitraje
+#                 elif moneda not in [1, 2]:
+#                     aux = totaliva * paridad
+#                     iva_total_c = aux * arbitraje
+#                     aux1 = coniva * paridad
+#                     total_coniva_c = aux1 * arbitraje
+#                     aux2 = precio * paridad
+#                     precio_c = aux2 * arbitraje
+#                 else:
+#                     iva_total_c = 0
+#                     total_coniva_c = 0
+#                     precio_c=0
+#
+#                 boleta = Boleta()
+#                 numero = numero
+#                 boleta.autogenerado = autogenerado
+#                 boleta.tipo = tipo
+#                 boleta.fecha = fecha
+#                 boleta.vto = fecha
+#                 boleta.tipofactura = serie
+#                 boleta.serie = serie
+#                 boleta.prefijo = prefijo
+#                 boleta.numero = numero
+#                 boleta.nrocliente = cliente.codigo
+#                 boleta.cliente = cliente.empresa
+#                 boleta.direccion = cliente.direccion
+#                 boleta.direccion2 = cliente.direccion2
+#                 boleta.localidad = cliente.localidad
+#                 boleta.ciudad = cliente.ciudad
+#                 boleta.pais = cliente.pais
+#                 boleta.telefax = cliente.telefono
+#                 boleta.ruc = cliente.ruc
+#                 boleta.condiciones = 'S/I'
+#                 boleta.corporativo = 'S/I'
+#                 boleta.moneda = moneda
+#                 boleta.cambio = arbitraje
+#                 boleta.paridad = paridad
+#                 boleta.tipocliente = 'RESPONSABLE INSCRIPTO'
+#                 boleta.item = item_data.get('id')
+#                 boleta.descripcion = item_data.get('descripcion')
+#                 boleta.precio = item_data.get('precio')
+#                 boleta.iva = item_data.get('iva')
+#                 boleta.cuenta = item_data.get('cuenta')
+#                 boleta.monto = item_data.get('precio')
+#                 boleta.totiva = iva_total_c
+#                 boleta.total = total_coniva_c
+#                 boleta.master=master
+#                 boleta.house=house
+#                 boleta.posicion=posicion
+#                 boleta.kilos=kilos
+#                 boleta.bultos=bultos
+#                 boleta.terminos=terminos
+#                 boleta.pagoflete=pagoflete
+#                 boleta.origen=origen
+#                 boleta.destino=destino
+#                 boleta.seguimiento=seguimiento
+#                 boleta.save()
+#
+#                 asiento_vector = {
+#                     'detalle': detalle_asiento,
+#                     'monto': precio_c,
+#                     'moneda': moneda,
+#                     'cambio': arbitraje,
+#                     'asiento': asiento,
+#                     'conciliado': 'N',
+#                     'clearing': fecha_obj,
+#                     'fecha': fecha_obj,
+#                     'imputacion': None,
+#                     'tipo': tipo_asiento,
+#                     'cuenta': item_data.get('cuenta'),
+#                     'documento': str(numero),
+#                     'vencimiento': fecha_obj,
+#                     'pasado': 0,
+#                     'autogenerado': autogenerado,
+#                     'cliente': cliente.codigo,
+#                     'banco': 'S/I',
+#                     'centro': 'S/I',
+#                     'mov': aux,
+#                     'anio': fecha_obj.year,
+#                     'mes': fecha_obj.month,
+#                     'fechacheque': fecha_obj,
+#                     'paridad': paridad
+#                 }
+#                 crear_asiento(asiento_vector)
+#                 movimiento_num = aux
+#
+#             return JsonResponse({'status': 'Factura procesada correctamente N° ' + str(numero)})
+#     except Exception as e:
+#         return JsonResponse({'status': 'Error: ' + str(e)})
 
 
 
@@ -1156,9 +1158,6 @@ def cargar_preventa_infofactura_multiple(request):
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
-from datetime import datetime
-from django.http import JsonResponse
 
 def guardar_arbitraje(request):
     if request.method == "POST":

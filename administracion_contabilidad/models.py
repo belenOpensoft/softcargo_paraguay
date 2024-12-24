@@ -10476,3 +10476,16 @@ class ListaCobranzas(models.Model):
     class Meta:
         managed = False  # Indicates that this model represents a database view
         db_table = 'lista_cobranzas'
+
+class VistaProveedoresygastos(models.Model):
+    autogenerado = models.CharField(primary_key=True, max_length=50)
+    numero = models.CharField(max_length=50, null=True, blank=True)
+    detalle = models.TextField(null=True, blank=True)
+    tipo = models.CharField(max_length=50, null=True, blank=True)
+    monto = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    iva = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    class Meta:
+        managed = False  # Indicates that this model represents a database view
+        db_table = 'vista_proveedoresypagos'
