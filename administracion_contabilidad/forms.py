@@ -798,7 +798,16 @@ class OrdenPago(forms.Form):
     arbitraje = forms.FloatField(
         required=False,
         label="Arbitraje",
-        widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
+        widget=forms.NumberInput(attrs={'step': '0.1', 'class': 'form-control'}),
+        error_messages={
+            'required': 'Este campo es obligatorio',
+            'invalid': 'Por favor, ingresa un número decimal válido'
+        }
+    )
+    importe = forms.FloatField(
+        required=False,
+        label="Importe",
+        widget=forms.NumberInput(attrs={'step': '0.1', 'class': 'form-control'}), initial=0,
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número decimal válido'
