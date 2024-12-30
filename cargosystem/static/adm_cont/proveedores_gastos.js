@@ -387,8 +387,7 @@ function abrir_modal() {
                 click: function() {
                     $(this).dialog("close");
                     existe_cliente=false;
-                    resetModal("#dialog-form");
-                    resetModal("#paymentModal");
+                    resetModal("#proveedoresModal");
                 }
             }
         ]

@@ -126,13 +126,16 @@ class add_form(BSModalModelForm):
     aduana = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False }),
         required=False)
+    manifiesto = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'required': False }),
+        required=False, initial='0')
     awb = forms.CharField(
         widget=forms.TextInput(attrs={'required': True}),
         required=True
     )
     radio = forms.CharField(
         widget=forms.HiddenInput(attrs={'required': True, 'id': 'radio'}),
-        required=True
+        required=False
     )
     consignatario = forms.CharField(
         widget=forms.TextInput(
@@ -237,6 +240,9 @@ class edit_form(BSModalModelForm):
         required=False,  # No obligatorio
         label="Tarifa"
     )
+    manifiesto_e = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'required': False }),
+        required=False, initial='0')
     arbitraje_e = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
@@ -278,7 +284,7 @@ class edit_form(BSModalModelForm):
 
     radio = forms.CharField(
         widget=forms.HiddenInput(attrs={'required': True, 'id': 'radio_e'}),
-        required=True
+        required=False
     )
     consignatario_e = forms.CharField(
         widget=forms.TextInput(

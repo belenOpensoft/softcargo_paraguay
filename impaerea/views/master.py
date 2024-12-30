@@ -56,6 +56,7 @@ def add_importacion_maritima(request):
                 reserva.cotizacion = form.cleaned_data.get('cotizacion', 0)  # Si vacío, asignar 0
                 reserva.status = form.cleaned_data.get('status', "")  # Si vacío, asignar ""
                 reserva.operacion = form.cleaned_data.get('operacion', "")  # Si vacío, asignar ""
+                reserva.manifiesto = form.cleaned_data.get('manifiesto', "")  # Si vacío, asignar ""
                 reserva.fechaingreso = datetime.now()
                 reserva.posicion = generar_posicion()
                 reserva.notas = form.cleaned_data.get('radio', "")
@@ -140,6 +141,8 @@ def master_detail(request):
                     'aplicable_e': master.aplicable,
                     'volumen_e': master.volumen,
                     'radio': master.notas,
+                    'manifiesto_e': master.manifiesto,
+
                 }
                 return JsonResponse(data)
             except ImportReservas.DoesNotExist:
@@ -186,6 +189,8 @@ def edit_master(request, id_master):
                 master.kilos = form.cleaned_data.get('kilos_e', 0) if form.cleaned_data.get('kilos_e') not in [None, ''] else 0
                 master.trafico = form.cleaned_data.get('trafico_e', 0) if form.cleaned_data.get('trafico_e') not in [None, ''] else 0
                 master.cotizacion = form.cleaned_data.get('cotizacion_e', 0) if form.cleaned_data.get('cotizacion_e') not in [None, ''] else 0
+                mani=form.cleaned_data.get('manifiesto_e', "")
+                master.manifiesto = form.cleaned_data.get('manifiesto_e', "")  # Si vacío, asignar ""
 
                 # Otros campos con texto
                 master.pagoflete = form.cleaned_data.get('pagoflete_e', "")  # Asignar "" si está vacío

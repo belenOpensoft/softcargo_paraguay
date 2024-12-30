@@ -2621,6 +2621,7 @@ function fillFormWithData(data) {
     $('#edit_master_form [name="origen_e"]').val(data.origen_e);
     $('#edit_master_form [name="loading_e"]').val(data.loading_e);
     $('#edit_master_form [name="status_e"]').val(data.status_e);
+    $('#edit_master_form [name="manifiesto_e"]').val(data.manifiesto_e);
     $('#edit_master_form [name="posicion_e"]').val(data.posicion_e);
     $('#edit_master_form [name="operacion_e"]').val(data.operacion_e);
     $('#edit_master_form [name="awd_e"]').val(data.awd_e);

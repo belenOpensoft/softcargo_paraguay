@@ -48,12 +48,16 @@ $('#div_tabla').css('display', 'none');
         }
     });
 });
-
+var wWidth = $(window).width();
+var dWidth = wWidth * 0.40;
+var wHeight = $(window).height();
+var dHeight = wHeight * 0.30;
+let total=0;
 function cargar_tabla_imputable(codigo){
     const table = $('#imputableTable').DataTable({
                 ajax: {
                     url: '/admin_cont/obtener_imputables',
-                    data: { codigo: '123' },  // Reemplaza '123' con el código adecuado
+                    data: { codigo: codigo },  // Reemplaza '123' con el código adecuado
                     dataSrc: 'data'  // Indica dónde están los datos en la respuesta JSON
                 },
                 columns: [
@@ -74,7 +78,7 @@ function cargar_tabla_imputable(codigo){
                 ],
                 searching: false,
                 pageLength: 5,
-                lengthMenu: [5, 10, 25, 50],
+                lengthMenu: false,
                 language: {
                     "sProcessing": "Procesando...",
                     "sLengthMenu": "Mostrar _MENU_ entradas",
@@ -100,4 +104,89 @@ function cargar_tabla_imputable(codigo){
                     }
                 },
             });
+}
+function abrir_modal() {
+    $("#pagosModal").dialog({
+        autoOpen: true,
+        modal: true,
+        width: wWidth * 0.90,
+        height: wHeight * 0.95,
+        buttons: [
+            {
+                class: "btn btn-dark",
+                style: "width:100px",
+                text: "Salir",
+                click: function() {
+                    $(this).dialog("close");
+                    existe_cliente=false;
+                    resetModal("#pagosModal");
+                    //resetModal("#paymentModal");
+                }
+            }
+        ]
+    }).prev('.ui-dialog-titlebar').remove();
+    $.ajax({
+        url: "/admin_cont/cargar_arbitraje/",
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
+            // Cargar los valores en los campos
+            $('#id_arbitraje').val(data.arbitraje);
+            $('#id_paridad').val(data.paridad);
+        },
+        error: function (xhr, status, error) {
+            alert("Error al cargar los datos iniciales: " + error);
+        }
+    });
+}
+function resetModal(modalId) {
+    const modal = $(modalId);
+
+    // Reinicia el formulario
+    modal.find("form").each(function () {
+        this.reset();
+    });
+
+    // Limpia tablas
+    modal.find("table").each(function () {
+        if ($.fn.DataTable.isDataTable(this)) {
+            $(this).DataTable().clear().draw();
+        } else {
+            $(this).find("tbody").empty();
+        }
+    });
+}
+function limpiarCampos() {
+    $('#item').val('');
+    $('#id_descripcion_item input').val('');
+    $('#id_precio input').val('');
+}
+function actualizarTotal() {
+    let neto = 0;
+    let total = 0; // Inicializar total aquí
+
+    $('#itemTable tbody tr').each(function() {
+        const precio = parseFloat($(this).data('precio')) || 0;
+        neto += precio;
+    });
+
+    $('#id_neto input').val(neto.toFixed(2)).prop('readonly', true);
+
+    $('#itemTable tbody tr').each(function() {
+        const precio = parseFloat($(this).data('precio')) || 0;
+        const iva = $(this).data('iva');
+
+        // Calcular el precio final con IVA
+        const precioFinal = iva === 'Basico' ? precio * 1.22 : precio;
+        total += precioFinal;
+
+        console.log(iva);
+        console.log('precio ' + precio);
+    });
+
+    $('#id_total input').val(total.toFixed(2)).prop('readonly', true);
+
+    const iva_t = total - neto;
+    console.log('total ' + total);
+    $('#id_iva input').val(iva_t.toFixed(2)).prop('readonly', true);
 }

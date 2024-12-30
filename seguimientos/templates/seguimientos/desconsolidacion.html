@@ -54,14 +54,14 @@
                             <tr>
                                  <td>{{ reg.id }}</td>
                                  <td>{{ reg.numero }}</td>
-                                 <td>{{ reg.seguimiento.awb }}</td>
-                                 <td>{{ reg.seguimiento.hawb }}</td>
+                                 <td>{{ reg.awb }}</td>
+                                 <td>{{ reg.hawb }}</td>
                                  <td>{{ reg.origen }}</td>
                                  <td>
-                                     <select>
-                                         <option value="A">ALTA</option>
-                                         <option value="B">BAJA</option>
-                                     </select>
+                                     <select name="transmision_{{ reg.id }}">
+                            <option value="A" {% if reg.alta_baja == "A" %}selected{% endif %}>ALTA</option>
+                            <option value="B" {% if reg.alta_baja == "B" %}selected{% endif %}>BAJA</option>
+                                    </select>
                                  </td>
                             </tr>
                         {% endfor %}
