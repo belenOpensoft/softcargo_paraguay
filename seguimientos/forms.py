@@ -469,10 +469,11 @@ class gastosForm(BSModalModelForm):
         self.fields['servicio'].choices = servicios
         monedas = [("", "---------"), ] + list(Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
         self.fields['moneda'].choices = monedas
-        socios = [("", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa'))
+        socios = [("0", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa'))
         self.fields['socio'].choices = socios
 
     CHOICES = [
+        ('N','--------'),
         ('C', 'Compra'),
         ('V', 'Venta '),
     ]
@@ -496,7 +497,7 @@ class gastosForm(BSModalModelForm):
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13","id":"id_moneda_id"}),
                                required=True, label="Moneda", choices=(), initial='2')
     socio = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off",}),
-                             label="Socio comercial", choices=(), initial='')
+                             label="Socio comercial", choices=(), initial='0',required=False)
 
 
 class archivosForm(forms.ModelForm):
