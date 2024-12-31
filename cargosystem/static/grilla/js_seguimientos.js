@@ -2025,51 +2025,51 @@ $(document).ready(function () {
             }
         }
     });
-    $("#proyecto_add").autocomplete({
-        source: '/autocomplete_proyectos/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['id']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-            } else {
-                $(this).val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
-    $("#trafico_add").autocomplete({
-        source: '/autocomplete_traficos/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['id']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-            } else {
-                $(this).val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
-    $("#actividad_add").autocomplete({
-        source: '/autocomplete_actividades/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['id']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-            } else {
-                $(this).val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
+//    $("#proyecto_add").autocomplete({
+//        source: '/autocomplete_proyectos/',
+//        minLength: 2,
+//        select: function (event, ui) {
+//            $(this).attr('data-id', ui.item['id']);
+//        },
+//        change: function (event, ui) {
+//            if (ui.item) {
+//                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+//            } else {
+//                $(this).val('');
+//                $(this).css({"border-color": "", 'box-shadow': ''});
+//            }
+//        }
+//    });
+//    $("#trafico_add").autocomplete({
+//        source: '/autocomplete_traficos/',
+//        minLength: 2,
+//        select: function (event, ui) {
+//            $(this).attr('data-id', ui.item['id']);
+//        },
+//        change: function (event, ui) {
+//            if (ui.item) {
+//                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+//            } else {
+//                $(this).val('');
+//                $(this).css({"border-color": "", 'box-shadow': ''});
+//            }
+//        }
+//    });
+//    $("#actividad_add").autocomplete({
+//        source: '/autocomplete_actividades/',
+//        minLength: 2,
+//        select: function (event, ui) {
+//            $(this).attr('data-id', ui.item['id']);
+//        },
+//        change: function (event, ui) {
+//            if (ui.item) {
+//                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+//            } else {
+//                $(this).val('');
+//                $(this).css({"border-color": "", 'box-shadow': ''});
+//            }
+//        }
+//    });
 
     //autocomplete rutas
     $("#id_origen").autocomplete({

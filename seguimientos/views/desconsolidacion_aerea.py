@@ -13,7 +13,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from urllib.request import urlopen
 from cargosystem import settings
-from impaerea.models import ImportConexaerea, VEmbarqueaereo, ImportEmbarqueaereo, ImportCargaaerea
+from impaerea.models import ImportConexaerea, VEmbarqueaereo, ImportEmbarqueaereo, ImportCargaaerea, ImportReservas
 from mantenimientos.forms import desconsolidacion_form
 from mantenimientos.models import Clientes, Productos
 from seguimientos.models import VGrillaSeguimientos, Conexaerea, Envases
@@ -75,6 +75,7 @@ def desconsolidar_aereo(request):
         if get_status(url, username, password):
             for d in data:
                 seg = ImportEmbarqueaereo.objects.get(numero=d[1])
+                res = ImportReservas.objects.get(awb=seg.awb)
                 con = ImportConexaerea.objects.get(id=d[0])
                 select_html = d[5]
                 match = re.search(r'<option value="([A-B])" selected.*?>', select_html)
@@ -83,7 +84,7 @@ def desconsolidar_aereo(request):
                 else:
                     alta_baja = None
 
-                data = genero_xml_desconsolidacion(seg, con, alta_baja)
+                data = genero_xml_desconsolidacion(seg, con, alta_baja,res)
                 if data['Codigo'] == codigo_exito:
                         embarque=ImportEmbarqueaereo()
                         embarque.envioaduana='S'
@@ -104,17 +105,16 @@ def desconsolidar_aereo(request):
 
 
 @csrf_exempt
-def genero_xml_desconsolidacion(seg, con, alta_baja):
+def genero_xml_desconsolidacion(seg, con, alta_baja,res):
     try:
         tipo_documento = "4"
-        id_documento = "216803670019"
+        id_documento = "216803670019" #verificar si este es el rut de oceanlink
         fecha_hora_documento = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
         nro_transaccion = "CARX0000004521"
-        manifiesto_numero = "VZ0104"
-        recinto = "2089"
+        manifiesto_numero = res.manifiesto
+        recinto = "2089" #ver cual poner
         fecha_arribo = con.llegada.strftime("%Y%m%d")
         master = seg.awb
-        # Agregar más variables según sea necesario
         transportista = Clientes.objects.filter(codigo=seg.transportista)
         consignatario = Clientes.objects.filter(codigo=seg.consignatario)
         rut_transportista = transportista[0].ruc
@@ -129,7 +129,6 @@ def genero_xml_desconsolidacion(seg, con, alta_baja):
         nombre_consignatario = consignatario[0].razonsocial
         origen = con.origen
         destino = con.destino
-        # Obtener datos de los contenedores y calcular los valores
         envases = ImportCargaaerea.objects.filter(numero=seg.numero).values('tipo', 'bultos', 'bruto', 'medidas','producto').annotate(total=Count('id'))
         volumen = 0
         lineas = '<Lineas>'
@@ -173,11 +172,10 @@ def genero_xml_desconsolidacion(seg, con, alta_baja):
                 linea += 1
         lineas += '</Lineas>'
 
-        num_conocimiento = seg.awb
+        num_conocimiento = seg.awb #mirar si el conocimiento de embarque es el master o es un compuesto
         #BL
-        num_sec_conocimiento = seg.numero #traer de reserva
+        num_sec_conocimiento = res.numero #traer de reserva
         vuelo = con.vuelo
-        # Construir el XML como una cadena de texto
         xml_str = f'''<?xml version = "1.0" encoding = "ISO-8859-1"?>
         <DAE xmlns="http://www.aduanas.gub.uy/LUCIA/DAE">
             <TipoDocumento>{tipo_documento}</TipoDocumento>

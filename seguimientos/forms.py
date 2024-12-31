@@ -118,62 +118,39 @@ class seguimientoForm(BSModalModelForm):
             'operacion' : "tabindex=12;",
         }
 
+        # Asignación de tabindex en el orden que especificaste
+
+
+
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'update-form'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Actualizar'))
+        tabindex_order = {
+            'cliente': 1, 'embarcador': 2, 'consignatario': 3, 'notificar': 4, 'agente': 5,
+            'transportista': 6, 'armador': 7, 'agecompras': 8, 'ageventas': 9, 'terminos': 10,
+            'origen': 11, 'destino': 12, 'operacion': 13, 'moneda': 14, 'vendedor': 15,
+            'vapor': 16, 'deposito': 17, 'awb': 18, 'hawb': 19, 'loading': 20, 'discharge': 21,
+            'posicion': 22, 'arbitraje': 23, 'pago': 24, 'viaje': 25, 'ubicacion': 26,
+            'booking': 27, 'trackid': 28, 'wreceipt': 29, 'valor': 30, 'status': 31, 'proyecto': 32,
+            'trafico': 33, 'actividad': 34, 'demora': 35, 'diasalmacenaje': 36
+        }
+        for field, tabindex in tabindex_order.items():
+            if field in self.fields:
+                self.fields[field].widget.attrs['tabindex'] = str(tabindex)
+
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
             self.fields[field].widget.attrs['attr'] = 'data-id'
-            if field == 'operacion':
-                self.fields[field].widget.attrs['tabindex'] = '12'
-            elif field == 'moneda':
+            self.fields[field].required = False
+
+            if field == 'moneda':
                 monedas = [("","---"),] + list(Monedas.objects.all().order_by('nombre').values_list('codigo','nombre'))
                 self.fields[field].choices = monedas
-            elif field == 'deposito':
-                self.fields[field].widget.attrs['tabindex'] = '19'
-            elif field == 'awb':
-                self.fields[field].widget.attrs['tabindex'] = '20'
-            elif field == 'hawb':
-                self.fields[field].widget.attrs['tabindex'] = '21'
-            elif field == 'wreceipt':
-                self.fields[field].widget.attrs['tabindex'] = '22'
-            elif field == 'valor':
-                self.fields[field].widget.attrs['tabindex'] = '23'
-            elif field == 'status':
-                self.fields[field].widget.attrs['tabindex'] = '24'
-            elif field == 'loading':
-                self.fields[field].widget.attrs['tabindex'] = '25'
-            elif field == 'Discharge':
-                self.fields[field].widget.attrs['tabindex'] = '26'
-            elif field == 'posicion':
-                self.fields[field].widget.attrs['tabindex'] = '27'
-            elif field == 'artibtraje':
-                self.fields[field].widget.attrs['tabindex'] = '28'
-            elif field == 'pago':
-                self.fields[field].widget.attrs['tabindex'] = '29'
-            elif field == 'viaje':
-                self.fields[field].widget.attrs['tabindex'] = '30'
-            elif field == 'ubicacion':
-                self.fields[field].widget.attrs['tabindex'] = '31'
-            elif field == 'booking':
-                self.fields[field].widget.attrs['tabindex'] = '32'
-            elif field == 'trackid':
-                self.fields[field].widget.attrs['tabindex'] = '33'
-            elif field == 'proyecto':
-                self.fields[field].widget.attrs['tabindex'] = '34'
-            elif field == 'trafico':
-                self.fields[field].widget.attrs['tabindex'] = '35'
-            elif field == 'actividad':
-                self.fields[field].widget.attrs['tabindex'] = '36'
-            elif field == 'demora':
-                self.fields[field].widget.attrs['tabindex'] = '37'
-            elif field == 'diasalmacenaje':
-                self.fields[field].widget.attrs['tabindex'] = '38'
-            elif field == 'terminos':
-                self.fields[field].widget.attrs['tabindex'] = '9'
+
 
     choice_op = (("", ""),
                  ("IMPORTACION", "IMPORTACION"),
@@ -205,32 +182,34 @@ class seguimientoForm(BSModalModelForm):
                        )
 
     # primera columna
-    cliente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'cliente_add',"tabindex":"1"}))
-    embarcador = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'embarcador_add',"tabindex":"2"}))
-    consignatario = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'consignatario_add',"tabindex":"3"}))
-    notificar = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'notificar_add',"tabindex":"4"}),label='Notificar a:')
-    agente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'agente_add',"tabindex":"5"}))
-    transportista = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'transportista_add',"tabindex":"6"}))
-    armador = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'armador_add',"tabindex":"7",'required': False}),required=False)
-    agecompras = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'agecompras_add',"required":False,"tabindex":"8"}),required=False,label='Ag.Compras')
-    ageventas = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'ageventas_add',"required":False,"tabindex":"9"}),required=False,label='Ag.Ventas')
+    cliente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'cliente_add'}))
+    embarcador = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'embarcador_add'}))
+    consignatario = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'consignatario_add'}))
+    notificar = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'notificar_add'}),label='Notificar a:')
+    agente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'agente_add'}))
+    transportista = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'transportista_add'}))
+    armador = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'armador_add','required': False}),required=False)
+    agecompras = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'agecompras_add',"required":False}),required=False,label='Ag.Compras')
+    ageventas = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'ageventas_add',"required":False}),required=False,label='Ag.Ventas')
     # segunda columna
-    deposito = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'deposito_add',"tabindex":"19"}),required=False)
-    origen = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'origen_add',"tabindex":"10"}))
-    destino = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'destino_add',"tabindex":"11"}))
-    operacion = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True,"tabindex":"12",'id':'id_operacion'}),required=True,label="Operacion",choices=choice_op,initial='')
-    moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True,"tabindex":"13"}),required=True,label="Moneda", choices=(),initial='')
-    vendedor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'vendedor_add',"tabindex":"14"}))
-    vapor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'vapor_add',"tabindex":"15"}),required=False)
+    deposito = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'deposito_add'}),required=False)
+    origen = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'origen_add'}))
+    destino = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'destino_add'}))
+    operacion = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True,'id':'id_operacion'}),required=True,label="Operacion",choices=choice_op,initial='')
+    moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True}),required=True,label="Moneda", choices=(),initial='')
+    vendedor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'vendedor_add'}))
+    vapor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'vapor_add'}),required=False)
     # tercer columna
-    loading = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'loading_add', 'required': False, "tabindex": "25"}),required=False)
-    discharge = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'discharge_add', 'required': False, "tabindex": "26"}),required=False)
-    proyecto = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'proyecto_add', 'required': False, "tabindex": "34"}),required=False)
-    trafico = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'trafico_add', 'required': False, "tabindex": "35"}),required=False)
-    actividad = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'actividad_add', 'required': False, "tabindex": "36"}),required=False)
-    terminos = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'id': 'terminos', 'required': True, "tabindex": "37"}),required=True,choices=CHOICE_TERMINOS)
+    loading = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'loading_add', 'required': False}),required=False)
+    discharge = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'discharge_add', 'required': False}),required=False)
+    proyecto = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'proyecto_add', 'required': False}),required=False)
+    trafico = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'trafico_add', 'required': False}),required=False)
+    actividad = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'actividad_add', 'required': False}),required=False)
+    terminos = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'id': 'terminos', 'required': True}),required=True,choices=CHOICE_TERMINOS)
     # observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'notas_seguimiento',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"10","class":"form-control"}, ), required=False,label="Notas", max_length=500)
     id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False}), required=False, label="ID")
+
+
 
 
 class cronologiaForm(BSModalModelForm):
