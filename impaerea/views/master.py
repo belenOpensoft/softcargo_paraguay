@@ -57,6 +57,7 @@ def add_importacion_maritima(request):
                 reserva.status = form.cleaned_data.get('status', "")  # Si vacío, asignar ""
                 reserva.operacion = form.cleaned_data.get('operacion', "")  # Si vacío, asignar ""
                 reserva.manifiesto = form.cleaned_data.get('manifiesto', "")  # Si vacío, asignar ""
+                reserva.bultosmadre = form.cleaned_data.get('bultos', "")  # Si vacío, asignar ""
                 reserva.fechaingreso = datetime.now()
                 reserva.posicion = generar_posicion()
                 reserva.notas = form.cleaned_data.get('radio', "")
@@ -142,6 +143,7 @@ def master_detail(request):
                     'volumen_e': master.volumen,
                     'radio': master.notas,
                     'manifiesto_e': master.manifiesto,
+                    'bultos_e': master.bultosmadre,
 
                 }
                 return JsonResponse(data)
@@ -200,6 +202,7 @@ def edit_master(request, id_master):
                 master.status = form.cleaned_data.get('status_e', "")  # Asignar "" si está vacío
                 master.posicion = form.cleaned_data.get('posicion_e', "")  # Asignar "" si está vacío
                 master.operacion = form.cleaned_data.get('operacion_e', "")  # Asignar "" si está vacío
+                master.bultosmadre = form.cleaned_data.get('bultos_e', "")  # Asignar "" si está vacío
                 master.awd = form.cleaned_data.get('awd_e', "")  # Asignar "" si está vacío
                 master.notas=form.cleaned_data.get('radio',"")
                 master.volumen = form.cleaned_data.get('volumen',0)

@@ -129,6 +129,9 @@ class add_form(BSModalModelForm):
     manifiesto = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False }),
         required=False, initial='0')
+    bultos = forms.CharField(
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'required': False }),
+        required=False, initial=0)
     awb = forms.CharField(
         widget=forms.TextInput(attrs={'required': True}),
         required=True
@@ -204,6 +207,7 @@ class add_form(BSModalModelForm):
         self.fields['kilos'].initial = 0
         self.fields['aplicable'].initial = 0
         self.fields['tarifa'].initial = 0
+        self.fields['bultos'].initial = 0
 
 
 class edit_form(BSModalModelForm):
@@ -242,7 +246,7 @@ class edit_form(BSModalModelForm):
     )
     manifiesto_e = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False }),
-        required=False, initial='0')
+        required=False, initial='0',label='Manifiesto')
     arbitraje_e = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
@@ -256,6 +260,13 @@ class edit_form(BSModalModelForm):
         max_length=20,
         required=False,  # Obligatorio
         label="Kilos", initial=0
+    )
+    bultos_e = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
+        max_length=20,
+        required=False,  # Obligatorio
+        label="Bultos"
     )
     trafico_e = forms.CharField(
         widget=forms.TextInput(
