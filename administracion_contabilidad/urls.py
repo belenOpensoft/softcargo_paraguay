@@ -13,7 +13,7 @@ from administracion_contabilidad.views.orden_pago import orden_pago_view, obtene
     source_facturas_pendientes_orden
 from administracion_contabilidad.views.preventa import guardar_infofactura, source_embarques_factura, \
     house_detail_factura, source_master_factura, get_name_by_id_productos, update_gasto_house, \
-    check_if_reference_exists, eliminar_preventa, guardar_gasto_unificado
+    check_if_reference_exists, eliminar_preventa, guardar_gasto_unificado, get_datos_ordenfactura
 
 urlpatterns = [
     path('facturacion/', facturacion_view, name='facturacion'),
@@ -40,6 +40,7 @@ urlpatterns = [
     path('source_embarque_factura/', source_embarques_factura, name='source_embarque_factura'),
     path('house_detail_factura/', house_detail_factura, name='house_detail_factura'),
     path('source_master_factura/', source_master_factura, name='source_master_factura'),
+    path('get_datos_ordenfactura/', get_datos_ordenfactura, name='get_datos_caratula'),
     path('get_name_by_id_productos/', get_name_by_id_productos, name='get_name_by_id_productos'),
     path('preventa/', guardar_infofactura, name='preventa'),
     path('cargar_preventa_infofactura_multiple/', cargar_preventa_infofactura_multiple, name='cargar_preventa_infofactura_multiple'),

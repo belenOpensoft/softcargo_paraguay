@@ -2,14 +2,28 @@ from datetime import datetime
 from django.http import JsonResponse, HttpResponse, Http404
 import json
 from administracion_contabilidad.models import Infofactura
-from expaerea.models import ExportServiceaereo, ExportEmbarqueaereo, ExportCargaaerea, ExportReservas
-from expmarit.models import ExpmaritServiceaereo, ExpmaritEmbarqueaereo, ExpmaritCargaaerea, ExpmaritReservas
-from expterrestre.models import ExpterraServiceaereo, ExpterraEmbarqueaereo, ExpterraCargaaerea, ExpterraReservas
-from impaerea.models import ImportServiceaereo, ImportEmbarqueaereo, ImportCargaaerea, ImportReservas
-from impomarit.models import Cargaaerea, Embarqueaereo, Reservas
-from impterrestre.models import ImpterraServiceaereo, ImpterraEmbarqueaereo, ImpterraCargaaerea, ImpterraReservas
-from mantenimientos.models import Productos, Monedas
+from expaerea.models import ExportServiceaereo, ExportEmbarqueaereo, ExportCargaaerea, ExportReservas, ExportConexaerea
+from expmarit.models import ExpmaritServiceaereo, ExpmaritEmbarqueaereo, ExpmaritCargaaerea, ExpmaritReservas, \
+    ExpmaritConexaerea
+from expterrestre.models import ExpterraServiceaereo, ExpterraEmbarqueaereo, ExpterraCargaaerea, ExpterraReservas, \
+    ExpterraConexaerea
+from impaerea.models import ImportServiceaereo, ImportEmbarqueaereo, ImportCargaaerea, ImportReservas, VEmbarqueaereo, \
+    ImportConexaerea
+from impomarit.models import Cargaaerea, Embarqueaereo, Reservas, Conexaerea
+from impterrestre.models import ImpterraServiceaereo, ImpterraEmbarqueaereo, ImpterraCargaaerea, ImpterraReservas, \
+    ImpterraConexaerea
+from mantenimientos.models import Productos, Monedas, Clientes
 from impomarit.models import Serviceaereo
+from seguimientos.models import VGrillaSeguimientos
+from seguimientos.views.seguimientos import is_ajax
+
+from impomarit.models import VEmbarqueaereo as Vmarit
+from impaerea.models import VEmbarqueaereo as Vaereo
+from impterrestre.models import VEmbarqueaereo as Vterrestre
+from expmarit.models import VEmbarqueaereo as Vexpmarit
+from expaerea.models import VEmbarqueaereo as Vexpaerea
+from expterrestre.models import VEmbarqueaereo as Vexpterrestre
+
 
 
 def generar_autogenerado(fecha):
@@ -373,4 +387,205 @@ def guardar_gasto_unificado(request):
             return JsonResponse({"error": str(e)}, status=500)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+def get_datos_ordenfactura(request):
+    resultado = {}
+    if is_ajax(request):
+        try:
+            idembarque = request.POST['numero']
+            clase = request.POST['clase']
+            if clase == 'importacion_aerea':
+                embarque = ImportEmbarqueaereo.objects.get(numero=idembarque)
+                Vembarque=Vaereo.objects.get(numero=idembarque)
+                con=ImportConexaerea.objects.filter(numero=idembarque).last()
+                carga=ImportCargaaerea.objects.filter(numero=idembarque).last()
+                if embarque.consolidado!=1:
+                    master=ImportReservas.objects.get(awb=embarque.awb)
+                else:
+                    master=ImportReservas(numero=None)
+                aux='IMPORTACION AEREA'
+            elif clase == 'importacion_maritima':
+                embarque = Embarqueaereo.objects.get(numero=idembarque)
+                Vembarque=Vmarit.objects.get(numero=idembarque)
+                con=Conexaerea.objects.filter(numero=idembarque).last()
+                carga=Cargaaerea.objects.filter(numero=idembarque).last()
+                if embarque.consolidado != 1:
+                    master=Reservas.objects.get(awb=embarque.awb)
+                else:
+                    master=Reservas(numero=None)
+                aux ='IMPORTACION MARITIMA'
+            elif clase == 'importacion_terrestre':
+                embarque = ImpterraEmbarqueaereo.objects.get(numero=idembarque)
+                Vembarque=Vterrestre.objects.get(numero=idembarque)
+                con=ImpterraConexaerea.objects.filter(numero=idembarque).last()
+                carga=ImpterraCargaaerea.objects.filter(numero=idembarque).last()
+                if embarque.consolidado != 1:
+                    try:
+                        master = ImpterraReservas.objects.get(awb=embarque.awb)
+                    except ImpterraReservas.DoesNotExist:
+                        master=ImpterraReservas(numero=None)
+                else:
+                    master=ImpterraReservas(numero=None)
+                aux='IMPORTACION TERRESTRE'
+            elif clase == 'exportacion_aerea':
+                embarque = ExportEmbarqueaereo.objects.get(numero=idembarque)
+                Vembarque=Vexpaerea.objects.get(numero=idembarque)
+                con=ExportConexaerea.objects.filter(numero=idembarque).last()
+                carga=ExportCargaaerea.objects.filter(numero=idembarque).last()
+                if embarque.consolidado != 1:
+                    master=ExportReservas.objects.get(awb=embarque.awb)
+                else:
+                    master=ExportReservas(numero=None)
+                aux='EXPORTACION AEREA'
+            elif clase == 'exportacion_maritima':
+                embarque = ExpmaritEmbarqueaereo.objects.get(numero=idembarque)
+                Vembarque=Vexpmarit.objects.get(numero=idembarque)
+                con=ExpmaritConexaerea.objects.filter(numero=idembarque).last()
+                carga=ExpmaritCargaaerea.objects.filter(numero=idembarque).last()
+                if embarque.consolidado != 1:
+                    master=ExpmaritReservas.objects.get(awb=embarque.awb)
+                else:
+                    master=ExpmaritReservas(numero=None)
+                aux='EXPORTACION MARITIMA'
+            elif clase == 'exportacion_terrestre':
+                embarque = ExpterraEmbarqueaereo.objects.get(numero=idembarque)
+                Vembarque=Vexpterrestre.objects.get(numero=idembarque)
+                con=ExpterraConexaerea.objects.filter(numero=idembarque).last()
+                carga=ExpterraCargaaerea.objects.filter(numero=idembarque).last()
+                if embarque.consolidado != 1:
+                    try:
+                        master = ImpterraReservas.objects.get(awb=embarque.awb)
+                    except ImpterraReservas.DoesNotExist:
+                        master = ImpterraReservas(numero=None)
+                else:
+                    master=ExpterraReservas(numero=None)
+                aux='EXPORTACION TERRESTRE'
+            else:
+                return JsonResponse({'error':'la clase es incorrecta'})
+
+
+            try:
+                seguimiento = VGrillaSeguimientos.objects.get(numero=embarque.seguimiento)
+            except VGrillaSeguimientos.DoesNotExist:
+                seguimiento = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='',deposito='', pago='', vendedor='')
+
+
+            if embarque.posicion[0] == 'I':
+                if embarque.posicion[1]=='A':
+                    aux = carga.medidas if carga.medidas is not None else 0
+                    if aux!=0:
+                        medidas = aux.split('*')
+                        if len(medidas) == 3 and all(m is not None and m.isdigit() for m in medidas):
+                            valor = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
+                        else:
+                            valor=0
+                    else:
+                        valor=0
+
+                else:
+                    cbm=carga.cbm if carga.cbm is not None else 0
+                    if cbm !=0:
+                        valor=cbm
+                    else:
+                        aux = carga.medidas if carga.medidas is not None else 0
+                        if aux!=0:
+                            medidas = aux.split('*')
+                            if len(medidas) == 3 and all(m is not None and m.isdigit() for m in medidas):
+                                valor = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
+                            else:
+                                valor = 0
+                        else:
+                            valor = 0
+
+                peso = float(carga.bruto)
+                bultos = float(carga.bultos)
+                volumen = float(valor)
+
+            elif embarque.posicion[0]=='E':
+                if embarque.posicion[1] == 'A':
+                    aux = carga.medidas if carga.medidas is not None else 0
+                    if aux != 0:
+                        medidas = aux.split('*')
+                        if len(medidas) == 3 and all(m is not None and m.isdigit() for m in medidas):
+                            valor = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
+                        else:
+                            valor = 0
+                    else:
+                        valor = 0
+
+                else:
+                    cbm = carga.cbm if carga.cbm is not None else 0
+                    if cbm != 0:
+                        valor = cbm
+                    else:
+                        aux = carga.medidas if carga.medidas is not None else 0
+                        if aux != 0:
+                            medidas = aux.split('*')
+                            if len(medidas) == 3 and all(m is not None and m.isdigit() for m in medidas):
+                                valor = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
+                            else:
+                                valor = 0
+                        else:
+                            valor = 0
+
+                peso = float(carga.bruto)
+                bultos = float(carga.bultos)
+                volumen=float(valor)
+
+            peso=round(peso,2)
+            bultos=round(bultos,2)
+            volumen=round(volumen,2)
+
+
+            hoy = datetime.now().strftime("%d/%m/%Y")
+            # Añadir un contenedor con ancho máximo
+            texto = '<div style=" margin: 0 auto;">'
+
+            # Encabezado centrado
+            texto = texto + '<h2 style="text-align: left;">OCEANLINK LTDA.</h2>'
+            texto = texto + '<h2 style="text-align: center;">ORDEN DE FACTURACION-' + aux + '</h2>'
+            texto = texto + '<h3 style="text-align: center;">Posicion: ' + str(Vembarque.posicion if Vembarque.posicion is not None else '') + '</h3>'
+            texto = texto + '<h3 style="text-align: center;">Referencia: ' + str(idembarque) + '</h3>'
+
+            texto = texto + '<h4 style="text-align: left;">' + hoy + '</h4>'
+            # Información de embarque alineada a la derecha
+            texto = texto + '<b><p style="font-size:12px;text-align:left; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
+            texto = texto + 'Embarcador: ' + str(
+                Vembarque.embarcador if Vembarque.embarcador is not None else '') + '<br>'
+            texto = texto + 'Consignatario:  ' + str(
+                Vembarque.consignatario if Vembarque.consignatario is not None else '') + '<br>'
+            texto = texto + 'Transportista: ' + str(
+                Vembarque.consignatario if Vembarque.consignatario is not None else '') + '<br>'
+
+            # Información adicional alineada a la derecha
+            texto = texto + 'LLegada: ' + str(con.llegada if con.llegada is not None else '') + '<br>'
+            texto = texto + 'Origen: ' + str(Vembarque.origen if Vembarque.origen is not None else '') + '<br>'
+            texto = texto + 'Destino: ' + str(Vembarque.destino if Vembarque.destino is not None else '') + '<br>'
+            texto = texto + 'MAWB: ' + str(Vembarque.awb if Vembarque.awb is not None else '') + '<br>'
+            texto = texto + 'HAWB: ' + str(Vembarque.awb if Vembarque.awb is not None else '') + '<br>'
+            texto = texto + 'Referencia: ' + str(idembarque) + '<br>'
+            texto = texto + 'Seguimiento: ' + str(seguimiento.numero if seguimiento.numero is not None else '') + '<br>'
+            texto = texto + 'Referencia master: ' + str(master.numero if master.numero is not None else '') + '<br>'
+            texto = texto + 'Posicion: ' + str(Vembarque.posicion if Vembarque.posicion is not None else '') + '<br>'
+            texto = texto + 'Peso: ' + str(peso) + '<br>'
+            texto = texto + 'Bultos: ' + str(bultos) + '<br>'
+            texto = texto + 'Volumen: ' + str(volumen) + '</p></b><hr>'
+
+            # Detalle del embarque
+            texto = texto + '<hr><b>A FACTURAR</b><br>'
+
+            # Cerrar el contenedor
+            texto = texto + '</div>'
+
+            resultado['resultado'] = 'exito'
+            resultado['texto'] = texto
+        except Exception as e:
+            resultado['resultado'] = str(e)
+    else:
+        resultado['resultado'] = 'Ha ocurrido un error.'
+    data_json = json.dumps(resultado)
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+
+
 

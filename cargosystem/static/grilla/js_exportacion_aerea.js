@@ -4790,7 +4790,7 @@ function cargar_gastos_factura(){
             url: "/static/datatables/es_ES.json"
         },
         "ajax": {
-            "url": "/importacion_maritima/source_gastos_house/",
+            "url": "/exportacion_aerea/source_gastos_house/",
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
