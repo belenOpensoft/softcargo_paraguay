@@ -44,6 +44,17 @@ var nombre_form = 'Nuevo'
 let table_add_im;
 
 $(document).ready(function () {
+     $('input.autocomplete').on('keydown', function(event) {
+        var keyCode = event.keyCode || event.which;
+
+        if (keyCode === 13 || keyCode === 9) { // 'Enter' (13) o 'Tab' (9)
+            var activeItem = $(".ui-menu-item:hover");
+            if (activeItem.length > 0) {
+                var selectedValue = activeItem.find("a").text();
+                $(this).val(selectedValue);  // Establece el valor automáticamente
+            }
+        }
+    });
     setTimeout(function(){
         $('.navbar-collapse').collapse('hide');
     }, 5000);

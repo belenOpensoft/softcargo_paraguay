@@ -199,6 +199,17 @@ $(document).ready(function () {
         },
     });
 
+     $('input.autocomplete').on('keydown', function(event) {
+        var keyCode = event.keyCode || event.which;
+
+        if (keyCode === 13 || keyCode === 9) { // 'Enter' (13) o 'Tab' (9)
+            var activeItem = $(".ui-menu-item:hover");
+            if (activeItem.length > 0) {
+                var selectedValue = activeItem.find("a").text();
+                $(this).val(selectedValue);  // Establece el valor automáticamente
+            }
+        }
+    });
 
     $('#tabla_seguimiento tbody').on('click', 'td.details-control', function () {
         var tr = $(this).closest('tr');
