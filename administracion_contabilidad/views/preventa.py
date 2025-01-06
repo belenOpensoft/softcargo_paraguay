@@ -1,4 +1,7 @@
+import io
 from datetime import datetime
+
+import xlsxwriter
 from django.http import JsonResponse, HttpResponse, Http404
 import json
 from administracion_contabilidad.models import Infofactura
@@ -586,6 +589,219 @@ def get_datos_ordenfactura(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
+def datos_xls(request):
+    if request.method == 'GET':
+        try:
+            idembarque = request.GET['numero']
+            clase = request.GET['clase']
+            total = request.GET['total']
+
+            if clase == 'importacion_aerea':
+                embarque = ImportEmbarqueaereo.objects.get(numero=idembarque)
+                Vembarque = Vaereo.objects.get(numero=idembarque)
+                con = ImportConexaerea.objects.filter(numero=idembarque).last()
+                carga = ImportCargaaerea.objects.filter(numero=idembarque).last()
+
+            elif clase == 'importacion_maritima':
+                embarque = Embarqueaereo.objects.get(numero=idembarque)
+                Vembarque = Vmarit.objects.get(numero=idembarque)
+                con = Conexaerea.objects.filter(numero=idembarque).last()
+                carga = Cargaaerea.objects.filter(numero=idembarque).last()
+
+            elif clase == 'importacion_terrestre':
+                embarque = ImpterraEmbarqueaereo.objects.get(numero=idembarque)
+                Vembarque = Vterrestre.objects.get(numero=idembarque)
+                con = ImpterraConexaerea.objects.filter(numero=idembarque).last()
+                carga = ImpterraCargaaerea.objects.filter(numero=idembarque).last()
+
+            elif clase == 'exportacion_aerea':
+                embarque = ExportEmbarqueaereo.objects.get(numero=idembarque)
+                Vembarque = Vexpaerea.objects.get(numero=idembarque)
+                con = ExportConexaerea.objects.filter(numero=idembarque).last()
+                carga = ExportCargaaerea.objects.filter(numero=idembarque).last()
+
+            elif clase == 'exportacion_maritima':
+                embarque = ExpmaritEmbarqueaereo.objects.get(numero=idembarque)
+                Vembarque = Vexpmarit.objects.get(numero=idembarque)
+                con = ExpmaritConexaerea.objects.filter(numero=idembarque).last()
+                carga = ExpmaritCargaaerea.objects.filter(numero=idembarque).last()
+
+            elif clase == 'exportacion_terrestre':
+                embarque = ExpterraEmbarqueaereo.objects.get(numero=idembarque)
+                Vembarque = Vexpterrestre.objects.get(numero=idembarque)
+                con = ExpterraConexaerea.objects.filter(numero=idembarque).last()
+                carga = ExpterraCargaaerea.objects.filter(numero=idembarque).last()
+
+            else:
+                return JsonResponse({'error': 'la clase es incorrecta'})
+
+            try:
+                cliente = Clientes.objects.get(codigo=embarque.cliente)
+            except Clientes.DoesNotExist:
+                cliente = VGrillaSeguimientos(codigo='', empresa=None, direccion=None, telefono='', contcatos='')
+
+            hoy = datetime.now().strftime("%d/%m/%Y")
+
+
+            if clase=='importacion_maritima' or clase == 'exportacion_maritima':
+                viaje=con.viaje
+                vapor=con.vapor
+            elif clase == 'importacion_aerea' or clase == 'exportacion_aerea':
+                viaje=con.vuelo
+                vapor=con.ciavuelo
+            else:
+                viaje =con.vuelo
+                vapor=con.cia
+
+            if clase == 'importacion_aerea':
+                if embarque.consolidado!=1:
+                    master=ImportReservas.objects.get(awb=embarque.awb)
+                    valor=master.aplicable
+                else:
+                    valor=0
+
+                aplicable=valor
+            else:
+                aplicable=carga.bruto
+
+            file_url = genero_xls_seguimientos(Vembarque, hoy, cliente, con, total, carga, carga.producto.nombre,viaje,vapor,aplicable)
+
+
+            # Retornar la respuesta del archivo directamente, no un JsonResponse
+            return file_url
+
+        except Exception as e:
+            return  JsonResponse({f'error {e}'})
+
+def genero_xls_seguimientos(embarque, fecha, cliente, conexion, total, carga, producto,viaje,vapor,aplicable):
+    try:
+        name = 'Factura_Preventa' + str(embarque.posicion) + '.xlsx'
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet('Preventa')
+
+        # Formatos
+        header_format = workbook.add_format({'bold': True, 'bg_color': '#0D6EFD', 'font_color': 'white', 'align': 'center'})
+        title_format = workbook.add_format({'bold': True, 'font_size': 14, 'align': 'center'})
+        date_format = workbook.add_format({'num_format': 'yyyy-mm-dd'})
+        currency_format = workbook.add_format({'num_format': '$#,##0.00'})
+        border_format = workbook.add_format({'border': 1})
+
+        # Configurar el ancho de las columnas
+        worksheet.set_column('A:A', 20)  # Ajustar el ancho de la columna A
+        worksheet.set_column('B:B', 20)  # Ajustar el ancho de la columna B
+        worksheet.set_column('C:C', 20)  # Ajustar el ancho de la columna C
+        worksheet.set_column('D:D', 30)  # Ajustar el ancho de la columna D
+
+        row = 0
+        col = 0
+
+        # Título principal
+        worksheet.merge_range(row, col, row, col + 3, "Liquidacion Nro.: "+str(embarque.posicion), title_format)
+        row += 1
+        worksheet.merge_range(row, col, row, col + 3, fecha, title_format)
+        row += 2
+
+        # Remit to y Bill to
+        worksheet.write(row, col, "Remit to:", header_format)
+        worksheet.write(row, col + 1, "OCEANLINK", border_format)
+        row += 1
+        worksheet.write(row, col, "Address:", header_format)
+        worksheet.write(row, col + 1, "MISIONES 1574 OF 201\nMONTEVIDEO MONTEVIDEO", border_format)
+        row += 1
+        worksheet.write(row, col, "Phone:", header_format)
+        worksheet.write(row, col + 1, "PH: 598 2917 0501", border_format)
+        row += 1
+        worksheet.write(row, col, "Balance Due:", header_format)
+        worksheet.write(row, col + 1, "USD 0.00", currency_format)
+        row += 2
+
+        # Bill to (Cliente)
+        worksheet.write(row, col, "Bill to:", header_format)
+        worksheet.write(row, col + 1, cliente.empresa, border_format)
+        row += 1
+        worksheet.write(row, col, "Address:", header_format)
+        worksheet.write(row, col + 1, cliente.direccion, border_format)
+        row += 1
+        worksheet.write(row, col, "Phone:", header_format)
+        worksheet.write(row, col + 1, "TEL. "+cliente.telefono, border_format)
+        row += 1
+        worksheet.write(row, col, "Contact:", header_format)
+        worksheet.write(row, col + 1, cliente.contactos, border_format)
+        row += 2
+
+        # Flight Details
+        worksheet.write(row, col, "CHR Load Number:", header_format)
+        worksheet.write(row, col + 1, "S/R", border_format)
+        worksheet.write(row, col + 2, "Our Reference:", header_format)
+        worksheet.write(row, col + 3, str(embarque.posicion), border_format)
+        row += 1
+        worksheet.write(row, col, "Shipper:", header_format)
+        worksheet.write(row, col + 1, embarque.embarcador, border_format)
+        row += 1
+        worksheet.write(row, col, "Airline:", header_format)
+        worksheet.write(row, col + 1, vapor, border_format)
+        row += 1
+        worksheet.write(row, col, "Flight #:", header_format)
+        worksheet.write(row, col + 1, viaje, border_format)
+        row += 1
+        worksheet.write(row, col, "MAWB #:", header_format)
+        worksheet.write(row, col + 1, embarque.awb, border_format)
+        row += 1
+        worksheet.write(row, col, "HAWB #:", header_format)
+        worksheet.write(row, col + 1, embarque.hawb, border_format)
+        row += 1
+        date_format = workbook.add_format({'num_format': 'dd-mm-yyyy'})  # o 'dd/mm/yyyy'
+
+        # Escribir los datos con el formato de fecha
+        worksheet.write(row, col, "Origin Airport:", header_format)
+        worksheet.write(row, col + 1, conexion.origen, border_format)
+        worksheet.write(row, col + 2, "Departure Date:", header_format)
+        worksheet.write(row, col + 3, conexion.salida, date_format)  # Aplicar el formato de fecha
+        row += 1
+        worksheet.write(row, col, "Dest. Airport:", header_format)
+        worksheet.write(row, col + 1, conexion.destino, border_format)
+        worksheet.write(row, col + 2, "Arrival Date:", header_format)
+        worksheet.write(row, col + 3, conexion.llegada, date_format)  # Aplicar el formato de fecha
+        row += 3
+
+        # Column headers for items
+        worksheet.write(row, col, "QTY", header_format)
+        worksheet.write(row, col + 1, "UOM", header_format)
+        worksheet.write(row, col + 2, "Weight", header_format)
+        worksheet.write(row, col + 3, "UOM", header_format)
+        worksheet.write(row, col + 4, "Chrg Wt", header_format)
+        worksheet.write(row, col + 5, "UOM", header_format)
+        worksheet.write(row, col + 6, "Destination", header_format)
+        worksheet.write(row, col + 7, "Commodity", header_format)
+        row += 1
+
+        # Datos de los contenedores
+        worksheet.write(row, col, carga.bultos, border_format)  # QTY
+        worksheet.write(row, col + 1, carga.tipo, border_format)  # UOM
+        worksheet.write(row, col + 2, carga.bruto, border_format)  # Weight
+        worksheet.write(row, col + 3, "KGS", border_format)  # UOM
+        worksheet.write(row, col + 4, aplicable, border_format)  # Chrg Wt
+        worksheet.write(row, col + 5, "KGS", border_format)  # UOM
+        worksheet.write(row, col + 6, conexion.destino, border_format)  # Destination
+        worksheet.write(row, col + 7, producto, border_format)  # Commodity
+        row+=1
+        # Total (Balance Due)
+        worksheet.merge_range(row, col, row, col + 6, "Balance Due: "+total, currency_format)
+
+        # Cerrar y generar archivo en memoria
+        workbook.close()
+        output.seek(0)
+
+        # Crear la respuesta de descarga de archivo
+        response = HttpResponse(output.read(),content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response['Content-Disposition'] = f"attachment; filename={name}"  # Nombre del archivo a descargar
+        return response
+
+    except Exception as e:
+        raise TypeError(e)
+
 
 
 

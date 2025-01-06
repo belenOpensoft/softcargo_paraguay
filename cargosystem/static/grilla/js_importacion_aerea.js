@@ -4604,7 +4604,7 @@ function eliminarNota(id) {
 }
 
 //facturacion preventa
-function cargar_gastos_factura(){
+function cargar_gastos_factura(callback){
     let numero = localStorage.getItem('num_house_gasto');
 
     $("#facturar_table").dataTable().fnDestroy();
@@ -4681,7 +4681,9 @@ function cargar_gastos_factura(){
             });
         }
     });
-     sumar_ingresos();
+    setTimeout(function() {
+        callback();
+    }, 2000);
 }
 function sumar_ingresos() {
     let totalIngresos = 0;
@@ -4697,12 +4699,13 @@ function sumar_ingresos() {
     tabla.rows().every(function() {
         const data = this.data();
         console.log("Datos de la fila:", data); // Verifica el contenido de cada fila
-        const valor = parseFloat(data[3]) || 0;
+        const valor = parseFloat(data[2]) || 0;
         totalIngresos += valor;
         console.log("Total acumulado:", totalIngresos);
     });
 
     // Asigna el resultado total al input con ID #total_ingresos
+    alert(totalIngresos);
     $('#total_ingresos').val(totalIngresos.toFixed(2)); // Redondea a 2 decimales si es necesario
 }
 //autocomplete factura

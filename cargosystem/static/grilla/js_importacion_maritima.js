@@ -4827,7 +4827,7 @@ function eliminarNota(id) {
 }
 
 //facturacion preventa
-function cargar_gastos_factura(){
+function cargar_gastos_factura(callback){
     let numero = localStorage.getItem('num_house_gasto');
 
     $("#facturar_table").dataTable().fnDestroy();
@@ -4904,7 +4904,11 @@ function cargar_gastos_factura(){
             });
         }
     });
-     sumar_ingresos();
+
+    setTimeout(function() {
+        callback();
+    }, 2000);
+
 }
 function sumar_ingresos() {
     let totalIngresos = 0;

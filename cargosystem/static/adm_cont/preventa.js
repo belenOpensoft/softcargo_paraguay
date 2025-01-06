@@ -10,7 +10,9 @@ function facturar(){
             $("#facturar_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
-                cargar_gastos_factura();
+                cargar_gastos_factura(function() {
+                    sumar_ingresos_tabla();
+                });
                 },
                 modal: true,
                 title: "Facturar el House N°: " + selectedRowN,
@@ -36,7 +38,6 @@ function facturar(){
 //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
-
 }
 function asignar_costo(event) {
 event.preventDefault();
@@ -112,28 +113,6 @@ event.preventDefault();
     });
 
     // tabla.draw(); // Descomentar si necesitas que la tabla se redibuje
-}
-function sumar_ingresos() {
-    let totalIngresos = 0;
-    const tabla = $('#facturar_table').DataTable();
-
-    // Verifica si DataTable está inicializado
-    if (!$.fn.DataTable.isDataTable('#facturar_table')) {
-        console.log("DataTable no está inicializado.");
-        return;
-    }
-
-    // Itera sobre cada fila de la tabla y suma el valor en la columna 3
-    tabla.rows().every(function() {
-        const data = this.data();
-        console.log("Datos de la fila:", data); // Verifica el contenido de cada fila
-        const valor = parseFloat(data[3]) || 0;
-        totalIngresos += valor;
-        console.log("Total acumulado:", totalIngresos);
-    });
-
-    // Asigna el resultado total al input con ID #total_ingresos
-    $('#total_ingresos').val(totalIngresos.toFixed(2)); // Redondea a 2 decimales si es necesario
 }
 function enviarDatosTabla() {
 let preventa;
@@ -391,6 +370,32 @@ function checkIfReferenceExists() {
         }
     });
 }
+function sumar_ingresos_tabla() {
+    let totalIngresos = 0;
+    const tabla = $('#facturar_table').DataTable();
+
+    // Verifica si DataTable está inicializado y tiene filas
+    if (!$.fn.DataTable.isDataTable('#facturar_table') || tabla.rows().count() === 0) {
+        console.log("DataTable no está inicializado o no tiene filas.");
+        return;
+    }
+
+    // Obtiene los datos de las filas de la tabla
+    const dataRows = tabla.rows().data();
+
+    // Itera sobre cada fila y suma el valor de la columna 3 (índice 2)
+    dataRows.each(function(data) {
+
+        const valor = parseFloat(data[3]) // Elimina caracteres no numéricos si es necesario
+        totalIngresos += valor;
+
+        console.log("Valor actual:", valor);
+        console.log("Total acumulado:", totalIngresos);
+    });
+
+    // Asigna el resultado total al input con ID #total_ingresos
+    $('#total_ingresos').val(totalIngresos.toFixed(2)); // Redondea a 2 decimales si es necesario
+}
 
 //orden factura
 $('#orden_factura').click(function () {
@@ -543,3 +548,19 @@ function getPathSegment() {
     var pathSegment = urlParts[3];  // Esto te dará 'importacion_aerea'
     return pathSegment;  // Devuelve el segmento deseado
 }
+
+//excel factura
+$('#excel_factura').click(function () {
+    let clase = getPathSegment();
+    let miurl = "/admin_cont/datos_xls/"; // La URL de la vista que genera el archivo
+    var toData = {
+        'numero': localStorage.getItem('num_house_gasto'),
+        'clase': clase,
+        'csrfmiddlewaretoken': csrf_token,
+        'total': $('#total_ingresos').val()
+    };
+
+    // Construir la URL con los parámetros para enviar al backend
+    var params = new URLSearchParams(toData).toString();
+    window.location.href = miurl + '?' + params; // Redirigir al navegador para descargar el archivo
+});
