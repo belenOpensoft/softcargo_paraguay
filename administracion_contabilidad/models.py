@@ -31,28 +31,6 @@ class VistaCobranza(models.Model):
         managed = False
         db_table = 'vista_cobranza'
 
-class VistaOrdenes(models.Model):
-    autogenerado = models.CharField(max_length=40,primary_key=True)
-    tipo = models.CharField(max_length=8, null=True, blank=True)
-    emision = models.DateTimeField(null=True, blank=True)
-    vencimiento = models.DateTimeField(null=True, blank=True)
-    nrocliente = models.IntegerField(null=True, blank=True)
-    cliente = models.CharField(max_length=50, null=True, blank=True)
-    embarque = models.CharField(max_length=30, null=True, blank=True)
-    total = models.DecimalField(null=True, blank=True,decimal_places=4,max_digits=4)
-    moneda = models.CharField(max_length=10, null=True, blank=True)
-    arbitraje = models.CharField(max_length=21, null=True, blank=True)
-    paridad = models.DecimalField(null=True, blank=True, decimal_places=4,max_digits=4)
-    posicion = models.CharField(max_length=30, null=True, blank=True)
-    documento = models.CharField(max_length=22, null=True, blank=True)
-    tipo_doc = models.CharField(max_length=20, null=True, blank=True)
-    detalle = models.CharField(max_length=200, null=True, blank=True)
-    source = models.CharField(max_length=8, null=True, blank=True)
-    saldo = models.DecimalField(null=True, blank=True,decimal_places=4,max_digits=4)
-    pago = models.DecimalField(null=True, blank=True,decimal_places=4,max_digits=4)
-    class Meta:
-        managed = False
-        db_table = 'vista_pagos'
 
 class AuditlogLogentry(models.Model):
     object_pk = models.CharField(max_length=255)
@@ -10512,3 +10490,20 @@ class VistaProveedoresygastos(models.Model):
     class Meta:
         managed = False  # Indicates that this model represents a database view
         db_table = 'vista_proveedoresypagos'
+
+class VistaPagos(models.Model):
+    autogenerado = models.CharField(primary_key=True, max_length=50)
+    nrocliente = models.IntegerField(max_length=50)
+    cliente = models.CharField( max_length=50)
+    moneda = models.CharField( max_length=50)
+    documento = models.CharField(max_length=50, null=True, blank=True)
+    tipo_factura = models.TextField(null=True, blank=True)
+    iva = models.CharField(max_length=50, null=True, blank=True)
+    monto = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    pago = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    fecha = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        managed = False  # Indicates that this model represents a database view
+        db_table = 'vista_pagos'

@@ -6,10 +6,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.template.defaultfilters import length
+
 from administracion_contabilidad.forms import OrdenPago
 from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero, generar_autogenerado
 from mantenimientos.models import Clientes, Monedas
-from administracion_contabilidad.models import Asientos, VistaCobranza, VistaOrdenes, Dolar
+from administracion_contabilidad.models import Asientos, VistaPagos, Dolar
 
 
 def orden_pago_view(request):
@@ -46,38 +48,90 @@ def buscar_proveedores(request):
     return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
 
 
-def obtener_imputables(request):
+def obtener_imputables_old(request):
     proveedor_id = request.GET.get('codigo')
-    asientos = Asientos.objects.filter(cliente=proveedor_id)
+    registros = VistaPagos.objects.filter(nrocliente=proveedor_id)
 
     resultados = []
-    for registro in asientos:
-        resultados.append({
-            'id': registro.id,
-            'vto': registro.vto.strftime('%Y-%m-%d') if registro.vto else '',
-            'fecha_emision': registro.fechaemision.strftime('%Y-%m-%d') if registro.fechaemision else '',
-            'documento': registro.documento,
-            'monto_total': str(registro.monto),
-            'saldo': str(registro.mov),
-            'detalle': registro.detalle,
-            'embarque': registro.centro,
-            'co': registro.cuenta,
-            'posicion': registro.posicion,
-            'tc': str(registro.cambio),
-            'moneda': registro.moneda,
-            'paridad': str(registro.paridad),
-            'monto_original': str(registro.monto)
-        })
+    for registro in registros:
+        saldo=registro.total-registro.pago if registro.pago is not None else registro.total
+        pago=registro.pago if registro.pago is not None else 0
+        if pago!=registro.total:
+            try:
+                moneda_nombre = Monedas.objects.get(codigo=registro.moneda).nombre if registro.moneda in [1, 2, 3, 4, 5,6] else ''
+            except Monedas.DoesNotExist:
+                moneda_nombre = ''
+
+            resultados.append({
+                'autogenerado': registro.autogenerado,
+                'fecha': registro.fecha.strftime('%Y-%m-%d') if registro.fecha else '',
+                'documento': registro.documento,
+                'total': registro.total,
+                'monto': registro.monto,
+                'iva': registro.iva,
+                'tipo': registro.tipo_factura,
+                'moneda': moneda_nombre,
+                'saldo': saldo,
+                'imputado':0
+            })
 
     # Estructura de respuesta para DataTable
     response_data = {
         'draw': request.GET.get('draw', 0),  # Para mantener la coherencia con DataTable
-        'recordsTotal': asientos.count(),  # Total de registros sin filtros
-        'recordsFiltered': asientos.count(),  # Total de registros después del filtrado
+        'recordsTotal': registros.count(),  # Total de registros sin filtros
+        'recordsFiltered': registros.count(),  # Total de registros después del filtrado
         'data': resultados  # Datos que se mostrarán en la tabla
     }
 
     return JsonResponse(response_data, safe=False)
+
+def obtener_imputables(request):
+    proveedor_id = request.GET.get('codigo')
+
+    # Obtener los parámetros de paginación
+    start = int(request.GET.get('start', 0))  # Inicio de la página (offset)
+    length = int(request.GET.get('length', 5))  # Número de registros por página
+    # Filtrar los registros según el proveedor
+    registros_totales = VistaPagos.objects.filter(nrocliente=proveedor_id)
+
+    filtrados=[]
+    for r in registros_totales:
+        saldo = r.total - r.pago if r.pago is not None else r.total
+        pago = r.pago if r.pago is not None else 0
+        if pago != r.total:
+            try:
+                moneda_nombre = Monedas.objects.get(codigo=r.moneda).nombre if r.moneda in [1, 2, 3, 4, 5,6] else ''
+            except Monedas.DoesNotExist:
+                moneda_nombre = ''
+
+            filtrados.append({
+                'autogenerado': r.autogenerado,
+                'fecha': r.fecha.strftime('%Y-%m-%d') if r.fecha else '',
+                'documento': r.documento,
+                'total': r.total,
+                'monto': r.monto,
+                'iva': r.iva,
+                'tipo': r.tipo_factura,
+                'moneda': moneda_nombre,
+                'saldo': saldo,
+                'imputado': 0
+            })
+
+    # Aplicar la paginación: [start:start+length] para obtener solo los registros de la página solicitada
+    registros = filtrados[start:start + length]
+
+
+    # Estructura de respuesta para DataTable
+    response_data = {
+        'draw': request.GET.get('draw', 0),  # Para mantener la coherencia con DataTable
+        'recordsTotal': registros_totales.count(),  # Total de registros sin filtros
+        'recordsFiltered': len(filtrados),
+        # Total de registros después del filtrado (aplica el filtro de 'nrocliente')
+        'data': registros  # Datos que se mostrarán en la tabla
+    }
+
+    return JsonResponse(response_data, safe=False)
+
 
 # @transaction.atomic
 # def guardar_impuorden(request):
@@ -309,102 +363,102 @@ def obtener_imputables(request):
 #     except Exception as e:
 #         return JsonResponse({'status': 'Error:' + str(e)})
 
-def source_facturas_pendientes_orden(request):
-    try:
-        start = int(request.GET.get('start', 0))
-        length = int(request.GET.get('length', 10))
-        cliente = int(request.GET.get('cliente'))
-        nromoneda = int(request.GET.get('nromoneda'))
-
-        # Filtrar registros por cliente y moneda=2
-        pendientes = VistaOrdenes.objects.filter(nrocliente=cliente, moneda=nromoneda)
-
-        # Agrupar por `autogenerado` y recalcular `saldo` y `pago`
-        agrupados = defaultdict(lambda: {
-            'vencimiento': None,
-            'emision': None,
-            'documento': None,
-            'total': 0,
-            'saldo': 0,
-            'pago': 0,
-            'tipo_cambio': 0,
-            'embarque': None,
-            'detalle': None,
-            'posicion': None,
-            'moneda': None,
-            'paridad': 0,
-            'tipo_doc': None,
-            'source': None
-        })
-
-        for pendiente in pendientes:
-            auto = pendiente.autogenerado
-            agrupados[auto]['vencimiento'] = pendiente.vencimiento
-            agrupados[auto]['emision'] = pendiente.emision
-            agrupados[auto]['documento'] = pendiente.documento
-            agrupados[auto]['total'] = pendiente.total
-            agrupados[auto]['tipo_cambio'] = pendiente.arbitraje
-            agrupados[auto]['embarque'] = pendiente.embarque
-            agrupados[auto]['detalle'] = pendiente.detalle
-            agrupados[auto]['posicion'] = pendiente.posicion
-            agrupados[auto]['paridad'] = pendiente.paridad
-            agrupados[auto]['tipo_doc'] = pendiente.tipo_doc
-            agrupados[auto]['source'] = pendiente.source
-
-            try:
-                agrupados[auto]['moneda'] = Monedas.objects.get(codigo=pendiente.moneda).nombre
-            except ObjectDoesNotExist:
-                agrupados[auto]['moneda'] = "Desconocida"
-
-            # Sumar pago y manejar valores None
-            pago_actual = pendiente.pago if pendiente.pago is not None else 0
-            agrupados[auto]['pago'] += pago_actual
-
-            # Calcular saldo solo si tipo_doc no es 'ANTICIPO'
-            if pendiente.tipo_doc != 'ANTICIPO':
-                saldo = agrupados[auto]['total'] - agrupados[auto]['pago']
-                agrupados[auto]['saldo'] = saldo
-            else:
-                agrupados[auto]['saldo'] = None  # Excluir el saldo para ANTICIPO
-
-        # Filtrar agrupados para excluir saldos exactamente cero y None
-        agrupados_filtrados = {
-            key: value for key, value in agrupados.items()
-            if value['saldo'] is not None and float(value['saldo']) != 0
-        }
-
-        # Convertir agrupados a una lista y paginar
-        total_registros = len(agrupados_filtrados)
-        agrupados_paginados = list(agrupados_filtrados.values())[start:start + length]
-
-        # Preparar datos para la respuesta
-        data = [{
-            'id': idx,
-            'vencimiento': item['vencimiento'],
-            'emision': item['emision'],
-            'documento': item['documento'],
-            'total': item['total'],
-            'saldo': item['saldo'],
-            'imputado': 0,
-            'tipo_cambio': item['tipo_cambio'],
-            'embarque': item['embarque'],
-            'detalle': item['detalle'],
-            'posicion': item['posicion'],
-            'moneda': item['moneda'],
-            'paridad': item['paridad'],
-            'tipo_doc': item['tipo_doc'],
-            'source': item['source']
-        } for idx, item in enumerate(agrupados_paginados, start=1)]
-
-        return JsonResponse({
-            'draw': int(request.GET.get('draw', 1)),
-            'recordsTotal': total_registros,
-            'recordsFiltered': total_registros,
-            'data': data,
-        })
-
-    except Exception as e:
-        return JsonResponse({'error': str(e)})
+# def source_facturas_pendientes_orden(request):
+#     try:
+#         start = int(request.GET.get('start', 0))
+#         length = int(request.GET.get('length', 10))
+#         cliente = int(request.GET.get('cliente'))
+#         nromoneda = int(request.GET.get('nromoneda'))
+#
+#         # Filtrar registros por cliente y moneda=2
+#         pendientes = VistaOrdenes.objects.filter(nrocliente=cliente, moneda=nromoneda)
+#
+#         # Agrupar por `autogenerado` y recalcular `saldo` y `pago`
+#         agrupados = defaultdict(lambda: {
+#             'vencimiento': None,
+#             'emision': None,
+#             'documento': None,
+#             'total': 0,
+#             'saldo': 0,
+#             'pago': 0,
+#             'tipo_cambio': 0,
+#             'embarque': None,
+#             'detalle': None,
+#             'posicion': None,
+#             'moneda': None,
+#             'paridad': 0,
+#             'tipo_doc': None,
+#             'source': None
+#         })
+#
+#         for pendiente in pendientes:
+#             auto = pendiente.autogenerado
+#             agrupados[auto]['vencimiento'] = pendiente.vencimiento
+#             agrupados[auto]['emision'] = pendiente.emision
+#             agrupados[auto]['documento'] = pendiente.documento
+#             agrupados[auto]['total'] = pendiente.total
+#             agrupados[auto]['tipo_cambio'] = pendiente.arbitraje
+#             agrupados[auto]['embarque'] = pendiente.embarque
+#             agrupados[auto]['detalle'] = pendiente.detalle
+#             agrupados[auto]['posicion'] = pendiente.posicion
+#             agrupados[auto]['paridad'] = pendiente.paridad
+#             agrupados[auto]['tipo_doc'] = pendiente.tipo_doc
+#             agrupados[auto]['source'] = pendiente.source
+#
+#             try:
+#                 agrupados[auto]['moneda'] = Monedas.objects.get(codigo=pendiente.moneda).nombre
+#             except ObjectDoesNotExist:
+#                 agrupados[auto]['moneda'] = "Desconocida"
+#
+#             # Sumar pago y manejar valores None
+#             pago_actual = pendiente.pago if pendiente.pago is not None else 0
+#             agrupados[auto]['pago'] += pago_actual
+#
+#             # Calcular saldo solo si tipo_doc no es 'ANTICIPO'
+#             if pendiente.tipo_doc != 'ANTICIPO':
+#                 saldo = agrupados[auto]['total'] - agrupados[auto]['pago']
+#                 agrupados[auto]['saldo'] = saldo
+#             else:
+#                 agrupados[auto]['saldo'] = None  # Excluir el saldo para ANTICIPO
+#
+#         # Filtrar agrupados para excluir saldos exactamente cero y None
+#         agrupados_filtrados = {
+#             key: value for key, value in agrupados.items()
+#             if value['saldo'] is not None and float(value['saldo']) != 0
+#         }
+#
+#         # Convertir agrupados a una lista y paginar
+#         total_registros = len(agrupados_filtrados)
+#         agrupados_paginados = list(agrupados_filtrados.values())[start:start + length]
+#
+#         # Preparar datos para la respuesta
+#         data = [{
+#             'id': idx,
+#             'vencimiento': item['vencimiento'],
+#             'emision': item['emision'],
+#             'documento': item['documento'],
+#             'total': item['total'],
+#             'saldo': item['saldo'],
+#             'imputado': 0,
+#             'tipo_cambio': item['tipo_cambio'],
+#             'embarque': item['embarque'],
+#             'detalle': item['detalle'],
+#             'posicion': item['posicion'],
+#             'moneda': item['moneda'],
+#             'paridad': item['paridad'],
+#             'tipo_doc': item['tipo_doc'],
+#             'source': item['source']
+#         } for idx, item in enumerate(agrupados_paginados, start=1)]
+#
+#         return JsonResponse({
+#             'draw': int(request.GET.get('draw', 1)),
+#             'recordsTotal': total_registros,
+#             'recordsFiltered': total_registros,
+#             'data': data,
+#         })
+#
+#     except Exception as e:
+#         return JsonResponse({'error': str(e)})
 
 def cargar_arbitraje(request):
     try:

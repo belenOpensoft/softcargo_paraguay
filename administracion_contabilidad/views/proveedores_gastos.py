@@ -190,6 +190,7 @@ def procesar_factura_proveedor(request):
                 'fechacheque': fecha_obj,
                 'paridad': paridad
             }
+
             crear_asiento(asiento_general)
 
             for item_data in items_data:

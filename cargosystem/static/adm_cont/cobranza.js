@@ -209,6 +209,8 @@ function resetModal(modalId) {
     $("#a_imputar").val("0.0");
     $("#acumulado").val("0.0");
     $("#balance").val("0.0");
+    $('#id_importe').prop('readonly', false);
+
 }
 function tabla_para_imputar(){
     $('#imputacionTable').DataTable({
@@ -423,7 +425,7 @@ function tabla_facturas_pendientes(cliente,moneda) {
     });
     existe_cliente=true;
 
-$('#imputarSeleccion').on('click', function () {
+$('#imputarSeleccion2').on('click', function () {
     if (!existe_cliente) {
         alert('Seleccione un cliente para continuar');
         return;
@@ -584,6 +586,7 @@ $('#imputarSeleccion').on('click', function () {
         let imputadoActual = parseFloat(table.cell(node, 6).data()) || 0;
 
         if (saldo >= 0) {
+
             table.cell(node, 6).data(imputadoActual + saldo); // Actualizar la columna 6
             table.cell(node, 5).data(0); // Actualizar la columna 5
 
@@ -605,9 +608,10 @@ $('#imputarSeleccion').on('click', function () {
     });
 
     // Actualizar importe restante
-    const total = importe - acumulado;
+    const total = imputado - acumulado;
     let ac = parseFloat($('#acumulado').val());
     ac = ac + acumulado;
+
     $('#acumulado').val(ac.toFixed(2));
     $('#a_imputar').val(total.toFixed(2));
 
@@ -618,6 +622,231 @@ $('#imputarSeleccion').on('click', function () {
     updateBalance();
 });
 
+$('#imputarSeleccion').on('click', function () {
+    if (!existe_cliente) {
+        alert('Seleccione un cliente para continuar');
+        return;
+    }
+
+    const seleccionadas = table.rows('.selected'); // Obtener las filas seleccionadas
+    const data = seleccionadas.data().toArray(); // Convertir a array para depuración
+    let importe = parseFloat($('#id_importe').val()) || 0; // Obtener el importe disponible
+    let imputado = parseFloat($('#a_imputar').val()) || 0; // Obtener el importe disponible
+    let acumulado = 0;
+    let saldoAFavor = 0; // Saldos negativos a favor
+    let balance = 0;
+
+
+    // Validación inicial para acreedores
+    const esInvalida = data.some(row => row.source === 'acreedor' && row.tipo_doc !== 'FACTURA');
+    if (esInvalida) {
+        alert('No se puede imputar registros de acreedor que no sean del tipo "FACTURA".');
+        return;
+    }
+
+
+    // Validar si se seleccionaron filas
+    if (seleccionadas.count() < 1) {
+        alert('Debe seleccionar al menos una fila.');
+        return;
+    }
+
+    if (importe <= 0) {
+        alert('Digite un importe.');
+        return;
+    }
+
+    let imputar = $('#a_imputar').val();
+    if (imputar == 0) {
+        alert('No hay más dinero disponible. Aumente el importe.');
+        return;
+    }
+
+    $('#id_importe').prop('readonly', true);
+    // Vectores para almacenar las filas afectadas y su estado original
+    let filasAfectadas = [];
+    let historial = [];
+
+    // Calcular acumulado (saldos positivos) y saldoAFavor (saldos negativos)
+    seleccionadas.nodes().each(function (node) {
+        let saldo = parseFloat(table.cell(node, 5).data()) || 0;
+        let imputadoActual = parseFloat(table.cell(node, 6).data()) || 0;
+
+        // Guardar estado original en el historial
+        historial.push({
+            modo: table.cell(node, 0).data(),
+            numero: table.cell(node, 3).data(),
+            saldoOriginal: saldo.toFixed(2),
+            imputadoOriginal: imputadoActual.toFixed(2)
+        });
+
+        if (saldo < 0) {
+            saldoAFavor += Math.abs(saldo); // Sumar saldos negativos
+        } else {
+            acumulado += saldo; // Sumar saldos positivos
+        }
+    });
+
+    // Compensar saldos positivos y negativos antes de imputar
+    if (saldoAFavor > 0 && acumulado > 0) {
+        const diferencia = acumulado - saldoAFavor;
+
+        seleccionadas.nodes().each(function (node) {
+            let saldo = parseFloat(table.cell(node, 5).data()) || 0;
+
+            // Si el saldo es negativo (a favor)
+            if (saldo < 0 && saldoAFavor > 0) {
+                const compensacion = Math.min(Math.abs(saldo), saldoAFavor); // Compensar hasta donde sea posible
+                saldo += compensacion; // Reducir el saldo negativo
+                saldoAFavor -= compensacion; // Reducir el saldo a favor
+                table.cell(node, 5).data(saldo.toFixed(2)); // Actualizar saldo en la tabla
+                $(table.cell(node, 5).node()).css('background-color', '#fcec3f'); // Colorear celda
+            }
+
+            // Si el saldo es positivo (en contra)
+            if (saldo > 0 && acumulado > 0) {
+                const compensacion = Math.min(saldo, acumulado); // Compensar hasta donde sea posible
+                saldo -= compensacion; // Reducir el saldo positivo
+                acumulado -= compensacion; // Reducir el saldo acumulado
+                table.cell(node, 5).data(saldo.toFixed(2)); // Actualizar saldo en la tabla
+                $(table.cell(node, 5).node()).css('background-color', '#fcec3f'); // Colorear celda
+            }
+        });
+
+        // Actualizar el importe restante con lo que quede sin compensar
+        if (diferencia > 0) {
+            acumulado = diferencia; // Queda saldo positivo
+            saldoAFavor = 0; // Todo el saldo negativo se compensa
+        } else if (diferencia < 0) {
+            saldoAFavor = Math.abs(diferencia); // Queda saldo negativo
+            acumulado = 0; // Todo el saldo positivo se compensa
+        } else {
+            acumulado = 0;
+            saldoAFavor = 0; // Saldos completamente compensados
+        }
+    }
+
+
+    // Incrementar el importe disponible con el saldo a favor compensado
+    importe += saldoAFavor;
+
+    // Validar si el importe alcanza
+    if (seleccionadas.count() > 0 && importe < acumulado) {
+        let restante = importe; // Inicializar importe restante
+
+        seleccionadas.nodes().each(function (node) {
+            if (restante <= 0) return; // Detener si no queda importe por asignar
+
+            let saldo = parseFloat(table.cell(node, 5).data()) || 0;
+            let imputadoActual = parseFloat(table.cell(node, 6).data()) || 0;
+
+            if (saldo >= 0) {
+                let asignacion = Math.min(saldo, restante); // Determinar cuánto se puede imputar
+                saldo -= asignacion; // Reducir el saldo por el importe asignado
+                restante -= asignacion; // Reducir el importe restante
+
+                table.cell(node, 5).data(saldo.toFixed(2)); // Actualizar la columna de saldo
+                table.cell(node, 6).data((imputadoActual + asignacion).toFixed(2)); // Actualizar la columna de imputado
+
+                $(table.cell(node, 5).node()).css('background-color', '#fcec3f'); // Amarillo para columna 5
+                $(table.cell(node, 6).node()).css('background-color', '#fcec3f'); // Amarillo para columna 6
+
+                // Actualizar balance
+                balance += asignacion;
+
+                // Agregar datos actualizados al vector
+                filasAfectadas.push({
+                    modo: table.cell(node, 0).data(),
+                    numero: table.cell(node, 3).data(),
+                    nuevoSaldo: saldo.toFixed(2),
+                    imputado: (imputadoActual + asignacion).toFixed(2),
+                    source: table.cell(node, 9).data()
+                });
+            }
+        });
+
+        $('#a_imputar').val(restante.toFixed(2)); // Actualizar el importe restante
+        let ac = parseFloat($('#acumulado').val());
+        ac += (parseFloat($('#id_importe').val()) || 0) - restante; // Incrementar acumulado correctamente
+        $('#acumulado').val(ac.toFixed(2));
+
+        //$("#balance").val(balance.toFixed(2)); // Actualizar el balance dinámicamente
+
+        localStorage.setItem('filasAfectadas', JSON.stringify(filasAfectadas));
+        localStorage.setItem('historial', JSON.stringify(historial));
+        seleccionadas.nodes().to$().removeClass('selected');
+        updateBalance();
+        return;
+    }
+
+    // Procesar todas las filas seleccionadas normalmente si el importe alcanza
+    seleccionadas.nodes().each(function (node) {
+        let saldo = parseFloat(table.cell(node, 5).data()) || 0;
+        let imputadoActual = parseFloat(table.cell(node, 6).data()) || 0;
+
+        if (saldo >= 0) {
+
+            if(saldo>imputado){
+                let restante = imputado;
+                let asignacion = Math.min(saldo, restante); // Determinar cuánto se puede imputar
+                saldo -= asignacion; // Reducir el saldo por el importe asignado
+                restante -= asignacion; // Reducir el importe restante
+
+                table.cell(node, 5).data(saldo.toFixed(2)); // Actualizar la columna de saldo
+                table.cell(node, 6).data((imputadoActual + asignacion).toFixed(2)); // Actualizar la columna de imputado
+
+                $(table.cell(node, 5).node()).css('background-color', '#fcec3f'); // Amarillo para columna 5
+                $(table.cell(node, 6).node()).css('background-color', '#fcec3f'); // Amarillo para columna 6
+
+                // Actualizar balance
+                balance += asignacion;
+
+                // Agregar datos actualizados al vector
+                filasAfectadas.push({
+                    modo: table.cell(node, 0).data(),
+                    numero: table.cell(node, 3).data(),
+                    nuevoSaldo: saldo.toFixed(2),
+                    imputado: (imputadoActual + asignacion).toFixed(2),
+                    source: table.cell(node, 9).data()
+                });
+            }else{
+                table.cell(node, 6).data(imputadoActual + saldo); // Actualizar la columna 6
+                table.cell(node, 5).data(0); // Actualizar la columna 5
+
+                $(table.cell(node, 5).node()).css('background-color', '#fcec3f'); // Amarillo para columna 5
+                $(table.cell(node, 6).node()).css('background-color', '#fcec3f'); // Amarillo para columna 6
+
+                // Actualizar balance
+                balance += saldo;
+
+                // Agregar datos actualizados al vector
+                filasAfectadas.push({
+                    modo: table.cell(node, 0).data(),
+                    numero: table.cell(node, 3).data(),
+                    nuevoSaldo: '0.00',
+                    imputado: (imputadoActual + saldo).toFixed(2),
+                    source: table.cell(node, 9).data()
+                });
+                }
+        }
+    });
+
+    // Actualizar importe restante
+//    const total = imputado - acumulado;
+    const total = imputado - balance;
+    let ac = parseFloat($('#acumulado').val());
+    ac = ac + acumulado;
+
+    //$('#acumulado').val(ac.toFixed(2));
+    calcular_acumulado();
+    $('#a_imputar').val(total.toFixed(2));
+
+    seleccionadas.nodes().to$().removeClass('selected');
+
+    localStorage.setItem('filasAfectadas', JSON.stringify(filasAfectadas));
+    localStorage.setItem('historial', JSON.stringify(historial));
+    updateBalance();
+});
 
 $('#deshacer').on('click', function () {
     const seleccionadas = table.rows('.selected');
@@ -675,11 +904,10 @@ $('#deshacer').on('click', function () {
 
     // Llamar a updateBalance para recalcular cualquier dato adicional
     updateBalance();
-
+    calcular_acumulado();
     // Notificar al usuario que los cambios han sido revertidos
     alert('Cambios deshechos en las filas seleccionadas.');
 });
-
 
 }
 
@@ -704,6 +932,26 @@ function updateBalance() {
     }
 }
 
+function calcular_acumulado() {
+    let acumulado = 0;
+
+    // Verifica si DataTable está inicializado
+    if ($.fn.DataTable.isDataTable('#imputacionTable')) {
+        const table = $('#imputacionTable').DataTable();
+
+        // Itera sobre todas las filas visibles de la tabla
+        table.rows().every(function () {
+            let data = this.data(); // Obtén los datos de la fila
+            let imputado = parseFloat(data.imputado) || 0; // Asegúrate de convertir el saldo a número
+            acumulado += imputado; // Suma el saldo al balance total
+        });
+
+        // Actualiza el campo del balance con el total calculado
+        $('#acumulado').val(acumulado.toFixed(2));
+    } else {
+        console.warn('La tabla #imputacionTable no está inicializada.');
+    }
+}
 function cargar_datos_formadepago(){
 let imputar=$('#a_imputar').val();
 let importe=$('#id_importe').val();
