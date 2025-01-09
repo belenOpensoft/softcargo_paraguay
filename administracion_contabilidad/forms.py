@@ -562,7 +562,13 @@ class Cobranza(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
-
+    moneda_cheque_terceros = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
     moneda_otro = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
@@ -588,7 +594,14 @@ class Cobranza(forms.Form):
         error_messages={'required': 'Este campo es obligatorio'},
         to_field_name='xcodigo'
     )
-
+    cuenta_cheque_terceros = forms.ModelChoiceField(
+        queryset=Cuentas.objects.filter(Q(xcodigo="11113") | Q(xcodigo="11114")),
+        label="Cuenta",
+        initial="11113",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
     cuenta_transferencia = forms.ModelChoiceField(
         queryset=Cuentas.objects.filter(xcodigo__range=("11120", "11125")),
         label="Cuenta",
@@ -627,6 +640,7 @@ class Cobranza(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
+
     banco_transferencia = forms.ModelChoiceField(
         queryset=Bancos.objects.all(),
         label="Banco",
@@ -747,37 +761,202 @@ class Cobranza(forms.Form):
         self.fields['arbitraje'].initial = self.arbitraje_valor
         self.fields['paridad'].initial = self.paridad_valor
 
-
 class OrdenPago(forms.Form):
-    CHOICE_TIPO = [
-        ('intencion', 'Intencion'),
-        ('definitivo', 'Definitivo'),
-    ]
+    serie = forms.CharField(
+        max_length=1,
+        required=True,
+        label="Serie",
+        initial="A",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Número de serie'
+        }
+        ),
+        error_messages={
+            'required': 'Este campo es obligatorio',
+            'max_length': 'El número de serie no puede tener más de 1 caracter'
+        }
+    )
 
-    numero = forms.CharField(
-        max_length=10,
+    prefijo = forms.CharField(
+        max_length=4,
         required=True,
         label="",
-        initial="00000",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
+        initial="0000",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número válido'
         }
     )
 
-    tipo = forms.TypedChoiceField(
-        choices=CHOICE_TIPO,
-        widget=RadioSelect()
+    numero = forms.CharField(
+        max_length=10,
+        required=True,
+        label="",
+        initial="0000000000",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'required': 'Este campo es obligatorio',
+            'invalid': 'Por favor, ingresa un número válido'
+        }
     )
 
     moneda = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
-        required=True,
         label="Moneda",
         initial=2,
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+    moneda_efectivo = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+    moneda_transferencia = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+    moneda_deposito = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+    moneda_cheque = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+    moneda_cheque_terceros = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control', 'disabled': 'disabled'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+    moneda_otro = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+    cuenta_efectivo = forms.ModelChoiceField(
+        queryset=Cuentas.objects.filter(xnivel1__contains="111"),
+        label="Cuenta",
+        initial=2,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+    cuenta_cheque = forms.ModelChoiceField(
+        queryset=Cuentas.objects.filter(Q(xcodigo="11113") | Q(xcodigo="11114")),
+        label="Cuenta",
+        initial="11113",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+
+    cuenta_transferencia = forms.ModelChoiceField(
+        queryset=Cuentas.objects.filter(xcodigo__range=("11120", "11125")),
+        label="Cuenta",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+    cuenta_deposito = forms.ModelChoiceField(
+        queryset=Cuentas.objects.filter(xcodigo__range=("11120", "11125")),
+        label="Cuenta",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+    cuenta_observaciones = forms.ModelChoiceField(
+        queryset=Cuentas.objects.all(),
+        label="Cuenta",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+    cuenta_otro = forms.ModelChoiceField(
+        queryset=Cuentas.objects.all(),
+        label="Cuenta",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'},
+        to_field_name='xcodigo'
+    )
+
+    banco_cheque = forms.ModelChoiceField(
+        queryset=Bancos.objects.all(),
+        label="Banco",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+    banco_transferencia = forms.ModelChoiceField(
+        queryset=Bancos.objects.all(),
+        label="Banco",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+    banco_deposito = forms.ModelChoiceField(
+        queryset=Bancos.objects.all(),
+        label="Banco",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+    banco_otro = forms.ModelChoiceField(
+        queryset=Bancos.objects.all(),
+        label="Banco",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        error_messages={'required': 'Este campo es obligatorio'}
+    )
+
+    cliente = forms.CharField(
+        required=True,
+        label="Seleccionar Cliente",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+
+    arbitraje = forms.FloatField(
+        required=False,
+        label="Arbitraje",
+        widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
+        error_messages={
+            'required': 'Este campo es obligatorio',
+            'invalid': 'Por favor, ingresa un número decimal válido'
+        }
+    )
+
+    paridad = forms.FloatField(
+        required=False,
+        label="Paridad",
+        widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
+        error_messages={
+            'required': 'Este campo es obligatorio',
+            'invalid': 'Por favor, ingresa un número decimal válido'
+        }
     )
 
     fecha = forms.DateField(
@@ -795,38 +974,9 @@ class OrdenPago(forms.Form):
         }
     )
 
-    arbitraje = forms.FloatField(
-        required=False,
-        label="Arbitraje",
-        widget=forms.NumberInput(attrs={'step': '0.1', 'class': 'form-control'}),
-        error_messages={
-            'required': 'Este campo es obligatorio',
-            'invalid': 'Por favor, ingresa un número decimal válido'
-        }
-    )
     importe = forms.FloatField(
         required=False,
         label="Importe",
-        widget=forms.NumberInput(attrs={'step': '0.1', 'class': 'form-control'}), initial=0,
-        error_messages={
-            'required': 'Este campo es obligatorio',
-            'invalid': 'Por favor, ingresa un número decimal válido'
-        }
-    )
-
-    paridad = forms.FloatField(
-        required=False,
-        label="Paridad",
-        widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
-        error_messages={
-            'required': 'Este campo es obligatorio',
-            'invalid': 'Por favor, ingresa un número decimal válido'
-        }
-    )
-
-    saldo = forms.FloatField(
-        required=False,
-        label="Saldo",
         initial=0.00,
         widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
         error_messages={
@@ -845,15 +995,10 @@ class OrdenPago(forms.Form):
         }
     )
 
-    factura = forms.CharField(
-        max_length=10,
-        required=True,
-        label="Factura",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
-        error_messages={
-            'required': 'Este campo es obligatorio',
-            'invalid': 'Por favor, ingresa un número válido'
-        }
+    Factura = forms.CharField(
+        required=False,
+        label="",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
     )
 
     saldo = forms.FloatField(
@@ -867,15 +1012,23 @@ class OrdenPago(forms.Form):
         }
     )
 
-    se_imputaran = forms.FloatField(
+    total = forms.FloatField(
         required=False,
-        label="Se imputarán",
+        label="Total",
         initial=0.00,
         widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número decimal válido'
         }
+    )
+    CHOICE_TIPO = [
+        ('intencion', 'Intencion'),
+        ('definitivo', 'Definitivo'),
+    ]
+    tipo = forms.TypedChoiceField(
+        choices=CHOICE_TIPO,
+        widget=RadioSelect()
     )
 
     def __init__(self, *args, **kwargs):
@@ -888,6 +1041,147 @@ class OrdenPago(forms.Form):
         # Asignar valores iniciales a los campos de arbitraje y paridad
         self.fields['arbitraje'].initial = self.arbitraje_valor
         self.fields['paridad'].initial = self.paridad_valor
+
+# class OrdenPago(forms.Form):
+#     CHOICE_TIPO = [
+#         ('intencion', 'Intencion'),
+#         ('definitivo', 'Definitivo'),
+#     ]
+#
+#     numero = forms.CharField(
+#         max_length=10,
+#         required=True,
+#         label="",
+#         initial="00000",
+#         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
+#         error_messages={
+#             'required': 'Este campo es obligatorio',
+#             'invalid': 'Por favor, ingresa un número válido'
+#         }
+#     )
+#
+#     tipo = forms.TypedChoiceField(
+#         choices=CHOICE_TIPO,
+#         widget=RadioSelect()
+#     )
+#
+#     moneda = forms.ModelChoiceField(
+#         queryset=Monedas.objects.all(),
+#         required=True,
+#         label="Moneda",
+#         initial=2,
+#         widget=forms.Select(attrs={'class': 'form-control'}),
+#         error_messages={'required': 'Este campo es obligatorio'}
+#     )
+#
+#     fecha = forms.DateField(
+#         required=True,
+#         label="Fecha",
+#         initial=datetime.date.today,
+#         widget=forms.TextInput(attrs={
+#             'class': 'form-control',
+#             'placeholder': 'DD/MM/YY'
+#         }),
+#         input_formats=['%d/%m/%y'],
+#         error_messages={
+#             'required': 'La fecha es obligatoria',
+#             'invalid': 'Ingresa una fecha válida en formato DD/MM/YY'
+#         }
+#     )
+#
+#     arbitraje = forms.FloatField(
+#         required=False,
+#         label="Arbitraje",
+#         widget=forms.NumberInput(attrs={'step': '0.1', 'class': 'form-control'}),
+#         error_messages={
+#             'required': 'Este campo es obligatorio',
+#             'invalid': 'Por favor, ingresa un número decimal válido'
+#         }
+#     )
+#     importe = forms.FloatField(
+#         required=False,
+#         label="Importe",
+#         widget=forms.NumberInput(attrs={'step': '0.1', 'class': 'form-control'}), initial=0,
+#         error_messages={
+#             'required': 'Este campo es obligatorio',
+#             'invalid': 'Por favor, ingresa un número decimal válido'
+#         }
+#     )
+#
+#     paridad = forms.FloatField(
+#         required=False,
+#         label="Paridad",
+#         widget=forms.NumberInput(attrs={'step': '0.0001', 'class': 'form-control'}),
+#         error_messages={
+#             'required': 'Este campo es obligatorio',
+#             'invalid': 'Por favor, ingresa un número decimal válido'
+#         }
+#     )
+#
+#     saldo = forms.FloatField(
+#         required=False,
+#         label="Saldo",
+#         initial=0.00,
+#         widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+#         error_messages={
+#             'required': 'Este campo es obligatorio',
+#             'invalid': 'Por favor, ingresa un número decimal válido'
+#         }
+#     )
+#
+#     a_imputar = forms.FloatField(
+#         required=False,
+#         label="A imputar",
+#         initial=0.00,
+#         widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+#         error_messages={
+#             'invalid': 'Por favor, ingresa un número decimal válido'
+#         }
+#     )
+#
+#     factura = forms.CharField(
+#         max_length=10,
+#         required=True,
+#         label="Factura",
+#         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
+#         error_messages={
+#             'required': 'Este campo es obligatorio',
+#             'invalid': 'Por favor, ingresa un número válido'
+#         }
+#     )
+#
+#     saldo = forms.FloatField(
+#         required=False,
+#         label="Saldo",
+#         initial=0.00,
+#         widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+#         error_messages={
+#             'required': 'Este campo es obligatorio',
+#             'invalid': 'Por favor, ingresa un número decimal válido'
+#         }
+#     )
+#
+#     se_imputaran = forms.FloatField(
+#         required=False,
+#         label="Se imputarán",
+#         initial=0.00,
+#         widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+#         error_messages={
+#             'required': 'Este campo es obligatorio',
+#             'invalid': 'Por favor, ingresa un número decimal válido'
+#         }
+#     )
+#
+#     def __init__(self, *args, **kwargs):
+#         super(OrdenPago, self).__init__(*args, **kwargs)
+#
+#         # Obtener valores de arbitraje y paridad
+#         self.arbitraje_valor = get_arbitraje()
+#         self.paridad_valor = get_paridad()
+#
+#         # Asignar valores iniciales a los campos de arbitraje y paridad
+#         self.fields['arbitraje'].initial = self.arbitraje_valor
+#         self.fields['paridad'].initial = self.paridad_valor
 
 
 class pdfForm(BSModalModelForm):

@@ -1,10 +1,34 @@
 $(document).ready(function() {
 
-
+    $('#retencion_irpf').change(function() {
+            if ($(this).is(':checked')) {
+                // Habilitar los campos relacionados con Retención IRPF
+                $('#monto_irpf').prop('disabled', false);
+                $('#retenciones_irpf_select').prop('disabled', false);
+            } else {
+                // Deshabilitar los campos relacionados con Retención IRPF
+                $('#monto_irpf').prop('disabled', true);
+                $('#retenciones_irpf_select').prop('disabled', true);
+            }
+        });
+    $('#retencion_iva').change(function() {
+            if ($(this).is(':checked')) {
+                // Habilitar los campos relacionados con Retención IVA
+                $('#monto_iva').prop('disabled', false);
+                $('#retenciones_iva_select').prop('disabled', false);
+            } else {
+                // Deshabilitar los campos relacionados con Retención IVA
+                $('#monto_iva').prop('disabled', true);
+                $('#retenciones_iva_select').prop('disabled', true);
+            }
+        });
     $("input[name='paymentType']").on("change", function () {
     $(".payment-section").addClass("d-none");
     const selectedSection = `#${$(this).val()}Section`;
     $(selectedSection).removeClass("d-none");
+    if($(this).val()=='terceros'){
+        abrir_cheques();
+    }
   });
     $("#cashSection").removeClass("d-none");
 
@@ -84,6 +108,8 @@ $(document).ready(function() {
         tabla_facturas_pendientes(id,2);
         }
     });
+
+
 
 document.querySelector('#exampleTable tbody').addEventListener('click', function (e) {
     const row = e.target.closest('tr');
@@ -367,14 +393,14 @@ function abrir_forma_pago() {
 
 
 function tabla_facturas_pendientes(cliente,moneda) {
-    if ($.fn.DataTable.isDataTable('#imputacionTable')) {
-        $('#imputacionTable tbody').off(); // Elimina todos los eventos previos en el tbody
-        $('#imputacionTable').DataTable().destroy(); // Destruye la tabla completamente
-        $('#imputacionTable tbody').empty(); // Limpia el DOM del tbody
+    if ($.fn.DataTable.isDataTable('#imputacionTablePagos')) {
+        $('#imputacionTablePagos tbody').off(); // Elimina todos los eventos previos en el tbody
+        $('#imputacionTablePagos').DataTable().destroy(); // Destruye la tabla completamente
+        $('#imputacionTablePagos tbody').empty(); // Limpia el DOM del tbody
     }
 
 
-    const table = $('#imputacionTable').DataTable({
+    const table = $('#imputacionTablePagos').DataTable({
         serverSide: true,
         ajax: {
             url: "/admin_cont/obtener_imputables",
@@ -408,7 +434,7 @@ function tabla_facturas_pendientes(cliente,moneda) {
         updateBalance();
 
         // Reasignar evento de clic a las filas
-        $('#imputacionTable tbody').off('click', 'tr').on('click', 'tr', function () {
+        $('#imputacionTablePagos tbody').off('click', 'tr').on('click', 'tr', function () {
             $(this).toggleClass('selected');
         });
     }
@@ -710,8 +736,8 @@ function updateBalance() {
     let balanceTotal = 0;
 
     // Verifica si DataTable está inicializado
-    if ($.fn.DataTable.isDataTable('#imputacionTable')) {
-        const table = $('#imputacionTable').DataTable();
+    if ($.fn.DataTable.isDataTable('#imputacionTablePagos')) {
+        const table = $('#imputacionTablePagos').DataTable();
 
         // Itera sobre todas las filas visibles de la tabla
         table.rows().every(function () {
@@ -723,15 +749,15 @@ function updateBalance() {
         // Actualiza el campo del balance con el total calculado
         $('#balance').val(balanceTotal.toFixed(2));
     } else {
-        console.warn('La tabla #imputacionTable no está inicializada.');
+        console.warn('La tabla #imputacionTablePagos no está inicializada.');
     }
 }
 function calcular_acumulado() {
     let acumulado = 0;
 
     // Verifica si DataTable está inicializado
-    if ($.fn.DataTable.isDataTable('#imputacionTable')) {
-        const table = $('#imputacionTable').DataTable();
+    if ($.fn.DataTable.isDataTable('#imputacionTablePagos')) {
+        const table = $('#imputacionTablePagos').DataTable();
 
         // Itera sobre todas las filas visibles de la tabla
         table.rows().every(function () {
@@ -743,7 +769,7 @@ function calcular_acumulado() {
         // Actualiza el campo del balance con el total calculado
         $('#acumulado').val(acumulado.toFixed(2));
     } else {
-        console.warn('La tabla #imputacionTable no está inicializada.');
+        console.warn('La tabla #imputacionTablePagos no está inicializada.');
     }
 }
 function cargar_datos_formadepago(){
@@ -752,7 +778,7 @@ let importe=$('#id_importe').val();
 let acumulado=$('#acumulado').val();
 
 
-const table = $('#imputacionTable').DataTable();
+const table = $('#imputacionTablePagos').DataTable();
 
 let documentos = '';
 
@@ -1100,7 +1126,7 @@ $.ajax({
 
 function verificar(){
 let key=false;
-let rows = document.querySelectorAll('#imputacionTable tbody tr');
+let rows = document.querySelectorAll('#imputacionTablePagos tbody tr');
 rows.forEach(row => {
     let imputado = row.cells[5]?.textContent.trim();
     let imputadoValue = parseFloat(imputado) || 0;
@@ -1213,3 +1239,153 @@ $('#id_moneda').on('change', function () {
 
         tabla_facturas_pendientes(cliente, moneda);
     });
+
+function abrir_cheques(){
+$('#id_buscar_terciarizado').val(0);
+$('#cliente_terciarizado_buscar').val('');
+
+    if ($.fn.DataTable.isDataTable('#tabla_cheques_disponibles')) {
+        $('#tabla_cheques_disponibles').DataTable().destroy(); // Destruye la tabla completamente
+        $('.checkbox-bajar:checked').each(function() {
+            $(this).prop('checked', false);  // Desmarcar la fila
+        });
+    }
+
+    $("#cheques_disponibles").dialog({
+        autoOpen: true,
+        modal: true,
+        width: wWidth * 0.60,
+        height: wHeight * 0.90,
+        buttons: [
+            {
+                class: "btn btn-dark",
+                style: "width:100px",
+                text: "Salir",
+                click: function() {
+                    $(this).dialog("close");
+                    existe_cliente=false;
+                     resetModal("#dialog-form");
+                    resetModal("#paymentModal");
+                }
+            }
+        ]
+    }).prev('.ui-dialog-titlebar').remove();
+    const table = $('#tabla_cheques_disponibles').DataTable({
+        serverSide: true,
+        ajax: {
+            url: "/admin_cont/obtener_cheques_disponibles",  // Cambia esta URL por la que corresponde en tu API
+            type: "GET",
+            data: function(d) {
+                // Aquí puedes agregar más parámetros si es necesario
+               // d.codigo = $('#cliente_cobranza_hidden').val();  // Si necesitas enviar algún valor extra
+                d.cliente = $('#id_buscar_terciarizado').val();
+            }
+        },
+        columns: [
+            { data: 'id', visible: false }, // Ocultar la columna ID
+            { data: 'moneda', visible: false }, // Ocultar la columna ID
+            { data: 'vto' },
+            { data: 'emision' },
+            { data: 'banco' },
+            { data: 'numero' },
+            { data: 'cliente' },
+            { data: 'total' },
+            {
+                data: 'id',  // Usar el ID para el checkbox
+                render: function(data, type, row) {
+                    // Crear un checkbox con el value igual a la ID de la fila
+                    return `<input type="checkbox" class="checkbox-bajar" value="${data}">`;
+                }
+            }
+        ],
+        responsive: true,
+        processing: true,
+        lengthChange: false,
+        language: {
+            url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+        },
+        initComplete: function() {
+            // Aquí puedes hacer otras inicializaciones si es necesario
+        },
+        drawCallback: function() {
+
+        $('.checkbox-bajar').change(function() {
+    localStorage.removeItem('cheques');
+    const selectedRows = [];
+    let monedaCoincide = true; // Variable para verificar si todos los valores de moneda son iguales
+    let monedaValor = null; // Almacenar el valor de "moneda" de la primera fila seleccionada
+    let monto = 0;
+    let ids = [];
+
+    $('.checkbox-bajar:checked').each(function() {
+        const row = table.row($(this).closest('tr'));
+        const rowData = row.data();
+        ids.push(rowData.id);
+
+        // Parsear el monto a float para realizar la suma correctamente
+        const total = parseFloat(rowData.total) || 0;  // Si rowData.total es NaN, usa 0
+        monto += total;
+
+        const moneda = rowData.moneda;
+
+        // Verificar si las monedas coinciden
+        if (monedaValor === null) {
+            monedaValor = moneda;
+        } else if (moneda !== monedaValor) {
+            monedaCoincide = false;
+        }
+    });
+
+    // Si las monedas no coinciden, mostramos un alert y desmarcamos las filas seleccionadas
+    if (!monedaCoincide) {
+        alert('Las monedas de los cheques no coinciden.');
+        $('.checkbox-bajar:checked').each(function() {
+            $(this).prop('checked', false);  // Desmarcar la fila
+        });
+        return;
+    }
+
+    // Si las monedas coinciden, actualizar los campos de monto y moneda
+    $('#checkAmountTerceros').val(monto);
+    $('#id_moneda_cheque_terceros').val(monedaValor);
+
+    // Guardar los ids de las filas seleccionadas en el localStorage
+    localStorage.setItem('cheques', JSON.stringify(ids));
+});
+
+        }
+    });
+    $('#cliente_terciarizado_buscar').autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "/admin_cont/buscar_cliente",
+                dataType: 'json',
+                data: { term: request.term },
+                success: function(data) {
+                    response(data.map(cliente => ({
+                        label: cliente.text,
+                        value: cliente.text,
+                        id: cliente.id
+                    })));
+                },
+                error: xhr => console.error('Error al buscar clientes:', xhr)
+            });
+        },
+        minLength: 2,
+        appendTo: "#cheques_disponibles",
+        select: function(event, ui) {
+            const { id } = ui.item;
+            $('#id_buscar_terciarizado').val(id); // Guardar el ID del cliente seleccionado
+           table.ajax.reload(); // Recargar la tabla con el nuevo filtro de cliente
+        }
+    });
+
+    // Filtro personalizado por cliente (aplicado en el evento de cambio de selección)
+    $('#cliente_terciarizado_buscar').on('change', function() {
+//        const clienteId = $('#id_buscar_terciarizado').val();
+//        table.column(5).search(clienteId).draw(); // Filtrar en la columna de cliente
+        table.ajax.reload();
+        $('#id_buscar_terciarizado').val(0);
+    });
+}
+

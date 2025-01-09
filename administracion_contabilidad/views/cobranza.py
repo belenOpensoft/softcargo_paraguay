@@ -906,6 +906,7 @@ def guardar_anticipo(request):
                         cheque.ccliente=nrocliente
                         cheque.cmoneda=moneda
                         cheque.ctipo=tipo_cheque
+                        cheque.cestado=2
                         cheque.save()
 
                 #asiento general

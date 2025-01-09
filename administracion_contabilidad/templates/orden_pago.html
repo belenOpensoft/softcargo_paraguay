@@ -216,7 +216,7 @@
     </div>
         </div>
 
-        <table id="imputacionTable" class="table table-striped mt-4" style="display:block; overflow-x:auto; float:left;">
+        <table id="imputacionTablePagos" class="table table-striped mt-4" style="display:block; overflow-x:auto; float:left;">
             <thead>
                 <tr>
                     <th style="display:none;">Id</th>
@@ -242,7 +242,7 @@
 </div>
 </div>
 
-<div id="paymentModal" title="Forma de Cobro" style="display: none;">
+<div id="paymentModal" title="Forma de Pago" style="display: none;">
   <!-- Header del modal -->
   <div class="modal-header d-flex justify-content-between align-items-center">
     <h3 style="color:black;">A cobrar: <span id="amount" class="text-primary fw-bold"></span></h3>
@@ -259,6 +259,7 @@
     <label><input type="radio" name="paymentType" id="trans" value="transfer"> Transferencia</label>
     <label><input type="radio" name="paymentType" id="deposito" value="deposit"> Depósito</label>
     <label><input type="radio" name="paymentType" id="otro" value="other"> Otro</label>
+    <label><input type="radio" name="paymentType" id="cheque_terceros" value="terceros"> Cheque de terceros</label>
   </div>
 
   <!-- Secciones dinámicas -->
@@ -476,6 +477,24 @@
 
 </div>
 
+<div id="tercerosSection" class="payment-section" style="display: none;">
+  <div class="row mb-3">
+    <div class="col-md-6">
+    <div>
+      <label for="id_moneda_cheque_terceros" class="form-label">Moneda:</label>
+        {{ form.moneda_cheque_terceros }}
+    </div>
+    </div>
+    <div class="col-md-6">
+      <label for="checkAmount" class="form-label">Monto:</label>
+      <input type="number" class="form-control" id="checkAmountTerceros" value="" readonly>
+    </div>
+  </div>
+
+
+
+
+</div>
   <!-- Observaciones y cierre -->
     <br>
     <div style="text-align:right;">
@@ -506,12 +525,67 @@
   </div>
 </div>
  <hr>
+<div class="extras">
+    <!-- Fila de Retención IRPF -->
+    <div class="row mb-3">
+        <div class="col-2">
+            <label for="retencion_irpf" class="me-3">Retención IRPF</label>
+            <input type="checkbox" name="" id="retencion_irpf">
+        </div>
+        <div class="col-1">
+            <input type="number" name="" id="monto_irpf" class="form-control" value="0" disabled>
+        </div>
+        <div class="col-3">
+            <select class="form-control" id="retenciones_irpf_select" disabled>
+                <!-- Opciones -->
+            </select>
+        </div>
+    </div>
+
+    <!-- Fila de Retención IVA -->
+    <div class="row mb-3">
+        <div class="col-2">
+            <label for="retencion_iva" class="me-3">Retención IVA</label>
+            <input type="checkbox" name="" id="retencion_iva">
+        </div>
+        <div class="col-1">
+            <input type="number" name="" id="monto_iva" class="form-control" value="0" disabled>
+        </div>
+        <div class="col-3">
+            <select class="form-control" id="retenciones_iva_select" disabled>
+                <!-- Opciones -->
+            </select>
+        </div>
+    </div>
+</div>
+
+    <hr>
   <div class="observations">
     <label for="observations">Obs.:</label>
     <input type="text" id="observations">
       <label for="id_cuenta_observaciones">Diferencia a: </label>
         {{ form.cuenta_observaciones }}
   </div>
+    <hr>
+    <div class="iva_container">
+
+    <div class="row mb-3">
+        <div class="col-2">
+            <label for="descuento" class="me-3">Descuento</label>
+            <input type="checkbox" name="" id="descuento">
+        </div>
+        <div class="col-1">
+            <input type="number" name="" id="monto_iva_dos" class="form-control" value="0" >
+        </div>
+        <div class="col-3">
+            <select class="form-control" id="retenciones_iva_select_dos" >
+                <!-- Opciones -->
+            </select>
+        </div>
+    </div>
+
+    </div>
+    <hr>
   <div class="footer-section d-flex justify-content-between mt-4">
     <div>
       <label for="accumulated">Acumulado:</label>
@@ -524,6 +598,33 @@
   </div>
 </div>
 
+<div id="cheques_disponibles" title="Cheques disponibles" style="display: none;">
+<div class="d-flex align-items-center col-md-12">
+    <div class="col-md-3">
+        <label for="cliente">Buscar Cliente</label>
+        <input type="text" id="cliente_terciarizado_buscar" class="form-control" name="cliente" placeholder="Buscar cliente">
+        <input type="hidden" id="id_buscar_terciarizado">
+    </div>
+</div>
+<table id="tabla_cheques_disponibles" class="table table-striped mt-4" style="display:block; overflow-x:auto;">
+            <thead>
+                <tr>
+                    <th style="display:none;">Id</th>
+                    <th style="display:none;">moneda</th>
+                    <th>Vto</th>
+                    <th>Emisión</th>
+                    <th>Banco</th>
+                    <th>Número</th>
+                    <th>Cliente</th>
+                    <th>Total</th>
+                    <th>Bajar</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+</div>
 
 <script>
     var csrf_token = "{{ csrf_token }}";

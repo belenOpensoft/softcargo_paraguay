@@ -11,7 +11,7 @@ from django.template.defaultfilters import length
 from administracion_contabilidad.forms import OrdenPago
 from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero, generar_autogenerado
 from mantenimientos.models import Clientes, Monedas
-from administracion_contabilidad.models import Asientos, VistaPagos, Dolar
+from administracion_contabilidad.models import Asientos, VistaPagos, Dolar, Cheques
 
 
 def orden_pago_view(request):
@@ -47,43 +47,6 @@ def buscar_proveedores(request):
 
     return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
 
-
-def obtener_imputables_old(request):
-    proveedor_id = request.GET.get('codigo')
-    registros = VistaPagos.objects.filter(nrocliente=proveedor_id)
-
-    resultados = []
-    for registro in registros:
-        saldo=registro.total-registro.pago if registro.pago is not None else registro.total
-        pago=registro.pago if registro.pago is not None else 0
-        if pago!=registro.total:
-            try:
-                moneda_nombre = Monedas.objects.get(codigo=registro.moneda).nombre if registro.moneda in [1, 2, 3, 4, 5,6] else ''
-            except Monedas.DoesNotExist:
-                moneda_nombre = ''
-
-            resultados.append({
-                'autogenerado': registro.autogenerado,
-                'fecha': registro.fecha.strftime('%Y-%m-%d') if registro.fecha else '',
-                'documento': registro.documento,
-                'total': registro.total,
-                'monto': registro.monto,
-                'iva': registro.iva,
-                'tipo': registro.tipo_factura,
-                'moneda': moneda_nombre,
-                'saldo': saldo,
-                'imputado':0
-            })
-
-    # Estructura de respuesta para DataTable
-    response_data = {
-        'draw': request.GET.get('draw', 0),  # Para mantener la coherencia con DataTable
-        'recordsTotal': registros.count(),  # Total de registros sin filtros
-        'recordsFiltered': registros.count(),  # Total de registros después del filtrado
-        'data': resultados  # Datos que se mostrarán en la tabla
-    }
-
-    return JsonResponse(response_data, safe=False)
 
 def obtener_imputables(request):
     proveedor_id = request.GET.get('codigo')
@@ -481,3 +444,49 @@ def cargar_arbitraje(request):
     except Exception as e:
         # Manejar errores inesperados
         return JsonResponse({'error': str(e)}, status=500)
+
+def obtener_cheques_disponibles(request):
+
+    # Obtener los parámetros de paginación
+    start = int(request.GET.get('start', 0))  # Inicio de la página (offset)
+    length = int(request.GET.get('length', 10))  # Número de registros por página
+    cliente = int(request.GET.get('cliente', 0))  # Número de registros por página
+    # Filtrar los registros según el proveedor
+    if cliente and cliente!=0:
+        cheques = Cheques.objects.filter(cestado=0,ccliente=cliente)
+    else:
+        cheques = Cheques.objects.filter(cestado=0)
+
+    resultado=[]
+    registros = cheques[start:start + length]
+    for r in registros:
+        try:
+            cliente = Clientes.objects.get(codigo=r.ccliente).empresa if r.ccliente else ''
+        except Clientes.DoesNotExist:
+            cliente = ''
+
+        resultado.append({
+            'id': r.id,
+            'vto': r.cvto.strftime('%Y-%m-%d') if r.cvto else '',
+            'emision': r.cfecha.strftime('%Y-%m-%d') if r.cfecha else '',
+            'banco': r.cbanco,
+            'numero': r.cnumero,
+            'cliente': cliente,
+            'total': r.cmonto,
+            'moneda':r.cmoneda
+        })
+
+    # Aplicar la paginación: [start:start+length] para obtener solo los registros de la página solicitada
+
+
+
+    # Estructura de respuesta para DataTable
+    response_data = {
+        'draw': request.GET.get('draw', 0),  # Para mantener la coherencia con DataTable
+        'recordsTotal': cheques.count(),  # Total de registros sin filtros
+        'recordsFiltered': cheques.count(),
+        # Total de registros después del filtrado (aplica el filtro de 'nrocliente')
+        'data': resultado  # Datos que se mostrarán en la tabla
+    }
+
+    return JsonResponse(response_data, safe=False)
