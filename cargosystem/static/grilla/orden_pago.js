@@ -56,7 +56,7 @@ $(document).ready(function() {
     "serverSide": true,
     "pageLength": 100,
     "ajax": {
-        "url": "/admin_cont/source_cobranza/",
+        "url": "/admin_cont/source_ordenes/",
         'type': 'GET',
         "data": function (d) {
             return $.extend({}, d, {
@@ -65,6 +65,15 @@ $(document).ready(function() {
             });
         }
     },
+     "columns": [
+        { "data": "autogenerado" },
+        { "data": "fecha" },
+        { "data": "documento" },
+        { "data": "total" },
+        { "data": "monto" },
+        { "data": "iva" },
+        { "data": "moneda" }
+    ],
     "language": {
         url: "/static/datatables/es_ES.json"
     },
@@ -167,6 +176,7 @@ function borrar_datos() {
         $('#difference').val(diferencia.toFixed(2));
         $('#cashAmount').val(diferencia.toFixed(2));
         $('#checkAmount').val(diferencia.toFixed(2));
+        $('#checkAmountTerceros').val(diferencia.toFixed(2));
         $('#checkAmount_trans').val(diferencia.toFixed(2));
         $('#checkAmount_deposito').val(diferencia.toFixed(2));
         $('#checkAmount_otro').val(diferencia.toFixed(2));
@@ -435,7 +445,32 @@ function tabla_facturas_pendientes(cliente,moneda) {
 
         // Reasignar evento de clic a las filas
         $('#imputacionTablePagos tbody').off('click', 'tr').on('click', 'tr', function () {
-            $(this).toggleClass('selected');
+             $(this).toggleClass('selected');
+            const selectedRows = table.rows('.selected').count();
+            if (selectedRows > 0) {
+                $('#imputarSeleccion').prop('disabled', false);  // Habilitar el botón
+            } else {
+                $('#imputarSeleccion').prop('disabled', true);   // Deshabilitar el botón
+            }
+
+            let filaImputada = false;
+
+            table.rows().every(function () {
+                const data = this.data(); // Obtener los datos de la fila
+                const imputado = parseFloat(data.imputado); // Obtener el valor de la celda 'imputado'
+
+                if (imputado !== 0) {
+                    filaImputada = true;
+                }
+            });
+
+            if (filaImputada) {
+                $('#abrirpago').prop('disabled', false); // Habilitar el botón
+                $('#deshacer').prop('disabled', false); // Habilitar el botón
+            } else {
+                $('#abrirpago').prop('disabled', true);  // Deshabilitar el botón
+                $('#deshacer').prop('disabled', true);  // Deshabilitar el botón
+            }
         });
     }
 
@@ -443,6 +478,7 @@ function tabla_facturas_pendientes(cliente,moneda) {
     existe_cliente=true;
 
 $('#imputarSeleccion').on('click', function () {
+
     if (!existe_cliente) {
         alert('Seleccione un cliente para continuar');
         return;
@@ -665,6 +701,8 @@ $('#imputarSeleccion').on('click', function () {
     localStorage.setItem('filasAfectadas', JSON.stringify(filasAfectadas));
     localStorage.setItem('historial', JSON.stringify(historial));
     updateBalance();
+    $('#abrirpago').prop('disabled', false);
+    $('#deshacer').prop('disabled', false);
 });
 
 
@@ -726,12 +764,35 @@ $('#deshacer').on('click', function () {
     updateBalance();
     calcular_acumulado();
     // Notificar al usuario que los cambios han sido revertidos
+    verificarImputado(table);  // Deshabilitar el botón
     alert('Cambios deshechos en las filas seleccionadas.');
 });
 
 
 }
+function verificarImputado(table) {
+        let filaImputada = false;
 
+        // Recorre todas las filas de la tabla
+        table.rows().every(function () {
+            const data = this.data(); // Obtener los datos de la fila
+            const imputado = parseFloat(data.imputado); // Obtener el valor de la celda 'imputado'
+
+            // Si el valor de 'imputado' es diferente de cero, habilitar el botón
+            if (imputado !== 0) {
+                filaImputada = true;
+            }
+        });
+
+        // Habilitar o deshabilitar el botón basado en si alguna fila fue imputada
+        if (filaImputada) {
+            $('#abrirpago').prop('disabled', false); // Habilitar el botón
+            $('#deshacer').prop('disabled', false); // Habilitar el botón
+        } else {
+            $('#abrirpago').prop('disabled', true);  // Deshabilitar el botón
+            $('#deshacer').prop('disabled', true);  // Deshabilitar el botón
+        }
+    }
 function updateBalance() {
     let balanceTotal = 0;
 
@@ -896,6 +957,9 @@ cuenta=$('#cuenta_otro').val();
 moneda=monedaV;
 vencimiento=$('#checkDueDate_otro').val();
 total=$('#checkAmount_otro').val();
+}else if ($('#cheque_terceros').is(':checked')){
+cheques_terceros_tabla();
+return;
 }
     const nuevaFilaObj = {
         modo: modo,
@@ -952,6 +1016,78 @@ const obtenerFechaHoy = () => {
     const día = String(fechaHoy.getDate()).padStart(2, '0');
     return `${año}-${mes}-${día}`;
 };
+
+function cheques_terceros_tabla(){
+let importe=$('#checkAmountTerceros').val();
+let importe_o=$('#amount').html();
+let monto=$('#cashAmount').val();
+
+const tbody = $('#exampleTable tbody');
+let modo,emision,banco,numero,tc,cuenta,moneda,vencimiento,total;
+let seleccionadas = JSON.parse(localStorage.getItem('chequesData'));
+const moneda_select = document.getElementById('id_moneda_cheque_terceros');
+const monedaV = moneda_select.value;
+modo='CHEQUE TERCEROS';
+let arbitraje=$('#id_arbitraje').val();
+tc=arbitraje;
+moneda=monedaV;
+let nuevaFilaObj;
+let nuevaFila;
+cuenta=0;
+for (let i = 0; i < seleccionadas.length; i++) {
+    let cheque = seleccionadas[i];
+    emision=cheque.emision;
+    banco=cheque.banco;
+    numero=cheque.numero;
+    vencimiento=cheque.vto;
+    total=cheque.total;
+
+    nuevaFilaObj = {
+        modo: modo,
+        emision: emision,
+        banco: banco,
+        numero: numero,
+        moneda: moneda,
+        total: total,
+        tc: tc,
+        vencimiento: vencimiento,
+        cuenta: cuenta
+    };
+    nuevaFila = `
+            <tr>
+                <td>${modo}</td>
+                <td>${emision}</td>
+                <td>${banco}</td>
+                <td>${numero}</td>
+                <td>${moneda}</td>
+                <td>${total}</td>
+                <td>${tc}</td>
+                <td>${vencimiento}</td>
+                <td>${cuenta}</td>
+            </tr>
+        `;
+
+        tbody.append(nuevaFila);
+}
+
+    let medios_pago=JSON.parse(localStorage.getItem('medios_pago')) || [];
+    medios_pago.push(nuevaFilaObj);
+    localStorage.setItem('medios_pago', JSON.stringify(medios_pago));
+
+    let accum = parseFloat($('#accumulated').val()) || 0;
+    let totalParsed = parseFloat(importe || 0);
+    accum += totalParsed;
+    $('#accumulated').val(accum.toFixed(2));
+    let diferencia = parseFloat(importe_o || 0) - accum;
+    $('#difference').val(diferencia.toFixed(2));
+    $('#cashAmount').val(diferencia.toFixed(2));
+    $('#checkAmount').val(diferencia.toFixed(2));
+    $('#checkAmount_trans').val(diferencia.toFixed(2));
+    $('#checkAmount_deposito').val(diferencia.toFixed(2));
+    $('#checkAmount_otro').val(diferencia.toFixed(2));
+
+
+}
 
 function crear_impuventa_asiento_movimiento(){
 
@@ -1263,9 +1399,6 @@ $('#cliente_terciarizado_buscar').val('');
                 text: "Salir",
                 click: function() {
                     $(this).dialog("close");
-                    existe_cliente=false;
-                     resetModal("#dialog-form");
-                    resetModal("#paymentModal");
                 }
             }
         ]
@@ -1310,48 +1443,61 @@ $('#cliente_terciarizado_buscar').val('');
         drawCallback: function() {
 
         $('.checkbox-bajar').change(function() {
-    localStorage.removeItem('cheques');
-    const selectedRows = [];
-    let monedaCoincide = true; // Variable para verificar si todos los valores de moneda son iguales
-    let monedaValor = null; // Almacenar el valor de "moneda" de la primera fila seleccionada
-    let monto = 0;
-    let ids = [];
+            localStorage.removeItem('cheques');
+            localStorage.removeItem('chequesData');
+            const selectedRows = [];
+            let monedaCoincide = true; // Variable para verificar si todos los valores de moneda son iguales
+            let monedaValor = null; // Almacenar el valor de "moneda" de la primera fila seleccionada
+            let monto = 0;
+            let ids = [];
 
-    $('.checkbox-bajar:checked').each(function() {
-        const row = table.row($(this).closest('tr'));
-        const rowData = row.data();
-        ids.push(rowData.id);
+            $('.checkbox-bajar:checked').each(function() {
+                const row = table.row($(this).closest('tr'));
+                const rowData = row.data();
+                ids.push(rowData.id);
+                selectedRows.push(rowData);
 
-        // Parsear el monto a float para realizar la suma correctamente
-        const total = parseFloat(rowData.total) || 0;  // Si rowData.total es NaN, usa 0
-        monto += total;
+                // Parsear el monto a float para realizar la suma correctamente
+                const total = parseFloat(rowData.total) || 0;  // Si rowData.total es NaN, usa 0
+                monto += total;
 
-        const moneda = rowData.moneda;
+                const moneda = rowData.moneda;
 
-        // Verificar si las monedas coinciden
-        if (monedaValor === null) {
-            monedaValor = moneda;
-        } else if (moneda !== monedaValor) {
-            monedaCoincide = false;
-        }
-    });
+                // Verificar si las monedas coinciden
+                if (monedaValor === null) {
+                    monedaValor = moneda;
+                } else if (moneda !== monedaValor) {
+                    monedaCoincide = false;
+                }
+            });
 
-    // Si las monedas no coinciden, mostramos un alert y desmarcamos las filas seleccionadas
-    if (!monedaCoincide) {
-        alert('Las monedas de los cheques no coinciden.');
-        $('.checkbox-bajar:checked').each(function() {
-            $(this).prop('checked', false);  // Desmarcar la fila
+            // Si las monedas no coinciden, mostramos un alert y desmarcamos las filas seleccionadas
+            if (!monedaCoincide) {
+                alert('Las monedas de los cheques no coinciden.');
+                $('.checkbox-bajar:checked').each(function() {
+                    $(this).prop('checked', false);  // Desmarcar la fila
+                });
+                return;
+            }
+            let restante=$('#checkAmount').val();
+
+            if(monto>restante){
+                alert('El monto del cheque no debe superar el monto a pagar.');
+                $('.checkbox-bajar:checked').each(function() {
+                    $(this).prop('checked', false);  // Desmarcar la fila
+                });
+                return;
+            }
+
+
+            // Si las monedas coinciden, actualizar los campos de monto y moneda
+            $('#checkAmountTerceros').val(monto);
+            $('#id_moneda_cheque_terceros').val(monedaValor);
+
+            // Guardar los ids de las filas seleccionadas en el localStorage
+            localStorage.setItem('cheques', JSON.stringify(ids));
+            localStorage.setItem('chequesData', JSON.stringify(selectedRows));
         });
-        return;
-    }
-
-    // Si las monedas coinciden, actualizar los campos de monto y moneda
-    $('#checkAmountTerceros').val(monto);
-    $('#id_moneda_cheque_terceros').val(monedaValor);
-
-    // Guardar los ids de las filas seleccionadas en el localStorage
-    localStorage.setItem('cheques', JSON.stringify(ids));
-});
 
         }
     });

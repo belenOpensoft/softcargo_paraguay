@@ -65,14 +65,12 @@
         <thead>
         <tr>
             <th class="text-left">Autogenerado</th>
-            <th class="text-left">Numero</th>
-            <th class="text-left">Detalle</th>
-            <th class="text-left">MASTER</th>
-            <th class="text-left">HOUSE</th>
+            <th class="text-left">Fecha</th>
+            <th class="text-left">Documento</th>
+            <th class="text-left">Total</th>
             <th class="text-left">Monto</th>
             <th class="text-left">IVA</th>
-            <th class="text-left">IVA total</th>
-            <th class="text-left">Monto total</th>
+            <th class="text-left">Moneda</th>
         </tr>
 
         </thead>
@@ -82,14 +80,12 @@
         <tfoot>
         <tr>
             <th class="text-right">Autogenerado</th>
-            <th class="text-right">Numero</th>
-            <th class="text-right">Detalle</th>
-            <th class="text-right">MASTER</th>
-            <th class="text-right">HOUSE</th>
+            <th class="text-right">Fecha</th>
+            <th class="text-right">Documento</th>
+            <th class="text-right">Total</th>
             <th class="text-right">Monto</th>
             <th class="text-right">IVA</th>
-            <th class="text-right">IVA total</th>
-            <th class="text-right">Monto total</th>
+            <th class="text-right">Moneda</th>
         </tr>
         </tfoot>
     </table>
@@ -191,9 +187,9 @@
         <div class="col-md-2" >
 
         <div>
-            <button type="button" id="deshacer" class="btn btn-danger w-100 mb-3">Deshacer</button>
-            <button type="button" class="btn btn-warning w-100 mb-3" id="imputarSeleccion">Imputar selección</button>
-            <button type="button" class="btn btn-success w-100 mb-3" onclick="abrir_forma_pago()">Cobrar</button>
+            <button type="button" id="deshacer" class="btn btn-danger w-100 mb-3" disabled>Deshacer</button>
+            <button type="button" class="btn btn-warning w-100 mb-3" id="imputarSeleccion" disabled>Imputar selección</button>
+            <button type="button" class="btn btn-success w-100 mb-3" onclick="abrir_forma_pago()" id="abrirpago" disabled>Cobrar</button>
         </div>
         <div class="input-group mb-3">
             <input type="text" id="embarque" class="form-control" name="embarque" placeholder="Nro embarque">

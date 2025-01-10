@@ -18,6 +18,93 @@ def orden_pago_view(request):
     form = OrdenPago(request.POST or None)
     return render(request, 'orden_pago.html', {'form': form})
 
+param_busqueda = {
+    0: 'autogenerado__icontains',
+    1: 'fecha__icontains',
+    2: 'documento__icontains',
+    4: 'total__icontains',
+    5: 'monto__icontains',
+    6: 'iva__icontains',
+    7: 'moneda__icontains',
+}
+
+columns_table = {
+    0: 'autogenerado',
+    1: 'fecha',
+    2: 'documento',
+    3: 'total',
+    4: 'monto',
+    5: 'iva',
+    6: 'moneda',
+}
+
+def source_ordenes(request):
+    try:
+        args = {}
+        for i in range(10):  # Cambia el rango según el número de columnas reales
+            key = f'columns[{i}][search][value]'
+            args[str(i)] = request.GET.get(key, '')  # Usa un valor predeterminado si la clave no existe
+
+        filtro = get_argumentos_busqueda(**args)
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        buscar = request.GET.get('buscar', '')
+        que_buscar = request.GET.get('que_buscar', '')
+
+        if buscar:
+            filtro[que_buscar] = buscar
+
+        end = start + length
+
+        # Consulta a la base de datos
+        if filtro:
+            registros = VistaPagos.objects.filter(**filtro).order_by()
+        else:
+            registros = VistaPagos.objects.all().order_by()
+
+        finales=[]
+
+        for r in registros:
+            pago = r.pago if r.pago is not None else 0
+            if pago == r.total:
+                try:
+                    moneda_nombre = Monedas.objects.get(codigo=r.moneda).nombre if r.moneda in [1, 2, 3, 4, 5,
+                                                                                                6] else ''
+                except Monedas.DoesNotExist:
+                    moneda_nombre = ''
+
+                finales.append({
+                    'autogenerado': r.autogenerado,
+                    'fecha': r.fecha.strftime('%Y-%m-%d') if r.fecha else '',
+                    'documento': r.documento,
+                    'total': r.total,
+                    'monto': r.monto,
+                    'iva': r.iva,
+                    'moneda': moneda_nombre,
+                })
+
+        # Preparación de la respuesta
+        resultado = {
+            'data': finales[start:end],
+            'length': length,
+            'draw': request.GET.get('draw', '1'),
+            'recordsTotal': VistaPagos.objects.count(),
+            'recordsFiltered': len(finales),
+        }
+        return JsonResponse(resultado)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def get_argumentos_busqueda(**kwargs):
+    try:
+        result = {}
+        for row in kwargs:
+            if len(kwargs[row]) > 0:
+                result[param_busqueda[int(row)]] = kwargs[row]
+        return result
+    except Exception as e:
+        raise TypeError(e)
 
 def buscar_proveedor(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
@@ -94,8 +181,6 @@ def obtener_imputables(request):
     }
 
     return JsonResponse(response_data, safe=False)
-
-
 # @transaction.atomic
 # def guardar_impuorden(request):
 #     try:
