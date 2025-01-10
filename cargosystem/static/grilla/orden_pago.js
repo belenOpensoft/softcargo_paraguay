@@ -1033,7 +1033,6 @@ tc=arbitraje;
 moneda=monedaV;
 let nuevaFilaObj;
 let nuevaFila;
-cuenta=0;
 for (let i = 0; i < seleccionadas.length; i++) {
     let cheque = seleccionadas[i];
     emision=cheque.emision;
@@ -1041,6 +1040,7 @@ for (let i = 0; i < seleccionadas.length; i++) {
     numero=cheque.numero;
     vencimiento=cheque.vto;
     total=cheque.total;
+    cuenta=cheque.id;
 
     nuevaFilaObj = {
         modo: modo,
@@ -1104,12 +1104,18 @@ let imputaciones=[];
 let asiento=[];
 let movimiento=[];
 let cobranza=[];
-
+let definitivo;
+if ($('#definitivo').is(':checked')) {
+        definitivo=true;
+    } else if ($('#intencion').is(':checked')) {
+        definitivo=false;
+    }
 impuventa.forEach((item) => {
         imputaciones.push({
             nroboleta: item.numero,
             imputado:item.imputado,
-            saldo_imputado:item.nuevoSaldo
+            saldo_imputado:item.nuevoSaldo,
+            source:item.source
         });
         movimiento.push({
             imputado:item.modo,
@@ -1131,10 +1137,9 @@ medios_pago.forEach((item) => {
 
 cobranza.push({
         nrocliente:$('#cliente_cobranza_hidden').val(),
-        serie:$('#id_serie').val(),
-        prefijo:$('#id_prefijo').val(),
         numero:$('#id_numero').val(),
         total:$('#id_importe').val(),
+        definitivo:definitivo,
         nromoneda:$('#id_moneda').val(),
         arbitraje:$('#id_arbitraje').val(),
         paridad:$('#id_paridad').val()
@@ -1163,7 +1168,7 @@ console.log(vector);
 
 
 $.ajax({
-        url: '/admin_cont/guardar_impuventa/', // Cambia esto a la URL correcta
+        url: '/admin_cont/guardar_impuorden/', // Cambia esto a la URL correcta
         method: 'POST',
         headers: { 'X-CSRFToken': csrf_token }, // Asegúrate de tener el CSRF token
         data: JSON.stringify({ 'vector':vector }),
@@ -1261,19 +1266,20 @@ $.ajax({
 }
 
 function verificar(){
-let key=false;
-let rows = document.querySelectorAll('#imputacionTablePagos tbody tr');
-rows.forEach(row => {
-    let imputado = row.cells[5]?.textContent.trim();
-    let imputadoValue = parseFloat(imputado) || 0;
-
-    if (imputadoValue !== 0) {
-        console.log('Fila con Imputado diferente de cero:', imputadoValue);
-        key = true;
-    }
-});
-let importe = $('#id_importe');
-let imputar = $('#a_imputar');
+let key=true;
+//let key=false;
+//let rows = document.querySelectorAll('#imputacionTablePagos tbody tr');
+//rows.forEach(row => {
+//    let imputado = row.cells[9]?.textContent.trim();
+//    let imputadoValue = parseFloat(imputado) || 0;
+//
+//    if (imputadoValue !== 0) {
+//        console.log('Fila con Imputado diferente de cero:', imputadoValue);
+//        key = true;
+//    }
+//});
+let importe = $('#id_importe').val();
+let imputar = $('#a_imputar').val();
 
 
     if(key){

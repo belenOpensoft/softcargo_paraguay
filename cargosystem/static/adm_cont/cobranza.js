@@ -1170,8 +1170,8 @@ rows.forEach(row => {
         key = true;
     }
 });
-let importe = $('#id_importe');
-let imputar = $('#a_imputar');
+let importe = $('#id_importe').val();
+let imputar = $('#a_imputar').val();
 
 
     if(key){

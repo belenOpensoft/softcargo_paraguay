@@ -1214,7 +1214,8 @@ class Impuestosbrasil(models.Model):
 
 
 class Impuordenes(models.Model):
-    orden = models.IntegerField(blank=True, null=True)
+    id = models.IntegerField(primary_key=True)
+    orden = models.IntegerField(max_length=20, blank=True, null=True)
     numero = models.CharField(max_length=20, blank=True, null=True)
     cliente = models.IntegerField(blank=True, null=True)
     monto = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
@@ -1490,6 +1491,7 @@ class Observacionescae(models.Model):
 
 
 class Ordenes(models.Model):
+    id = models.IntegerField(primary_key=True)
     mboleta = models.IntegerField()
     mfechamov = models.DateTimeField(blank=True, null=True)
     mmonto = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
@@ -10497,6 +10499,8 @@ class VistaPagos(models.Model):
     cliente = models.CharField( max_length=50)
     moneda = models.CharField( max_length=50)
     documento = models.CharField(max_length=50, null=True, blank=True)
+    serie = models.CharField(max_length=50, null=True, blank=True)
+    prefijo = models.CharField(max_length=50, null=True, blank=True)
     tipo_factura = models.TextField(null=True, blank=True)
     iva = models.CharField(max_length=50, null=True, blank=True)
     monto = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
