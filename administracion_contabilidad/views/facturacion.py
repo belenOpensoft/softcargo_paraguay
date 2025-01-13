@@ -1,6 +1,7 @@
 import json
 import re
 
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -155,7 +156,7 @@ def get_order(request, columns):
     except Exception as e:
         raise TypeError(e)
 
-
+@login_required(login_url='/login')
 def facturacion_view(request):
     form = Factura(request.POST or None)
     return render(request, 'facturacion.html', {'form': form,'form_pdf': pdfForm(),})

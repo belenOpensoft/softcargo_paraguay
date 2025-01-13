@@ -1,4 +1,6 @@
 import json
+
+from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import HttpResponse
 import base64
@@ -29,7 +31,7 @@ def format_fecha(fecha):
 
 
 @csrf_exempt
-# @login_required(login_url='/')
+@login_required(login_url='/')
 def get_data_email_op(request):
     resultado = {}
     if is_ajax(request):

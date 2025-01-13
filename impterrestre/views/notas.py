@@ -1,6 +1,7 @@
 import json
 
 import simplejson
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse
@@ -8,6 +9,7 @@ from django.views import View
 from impterrestre.models import ImpterraFaxes as Faxes
 from impomarit.forms import NotasForm
 
+@login_required(login_url="/")
 def source(request):
     # Verificación de solicitud AJAX en Django 4.2
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'

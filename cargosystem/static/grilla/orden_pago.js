@@ -1245,7 +1245,7 @@ console.log('anticipo '+vector);
 
 
 $.ajax({
-        url: '/admin_cont/guardar_anticipo/', // Cambia esto a la URL correcta
+        url: '/admin_cont/guardar_anticipo_orden/', // Cambia esto a la URL correcta
         method: 'POST',
         headers: { 'X-CSRFToken': csrf_token }, // Asegúrate de tener el CSRF token
         data: JSON.stringify({ 'vector':vector }),

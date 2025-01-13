@@ -17,7 +17,6 @@ def consultar_seguimientos(request):
         data = list(seguimientos)
         return JsonResponse({'data': data})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
-@login_required(login_url="/")
 
 def add_importacion_maritima(request):
     try:

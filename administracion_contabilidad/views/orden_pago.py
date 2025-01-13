@@ -2,6 +2,7 @@ import json
 from collections import defaultdict
 from datetime import datetime
 
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
@@ -15,7 +16,7 @@ from mantenimientos.models import Clientes, Monedas
 from administracion_contabilidad.models import Asientos, VistaPagos, Dolar, Cheques, Impuordenes, Ordenes, Cuentas, \
     Movims
 
-
+@login_required(login_url='/login')
 def orden_pago_view(request):
     form = OrdenPago(request.POST or None)
     return render(request, 'orden_pago.html', {'form': form})
@@ -261,7 +262,7 @@ def guardar_impuorden(request):
                             'fecha': fecha_obj,
                             'imputacion': 2,
                             'modo': asiento['modo'],
-                            'tipo': 'Z',
+                            'tipo': 'G',
                             'cuenta': asiento['cuenta'],
                             'documento': cobranza[0]['numero'],
                             'vencimiento': fecha_obj,
@@ -319,7 +320,7 @@ def guardar_impuorden(request):
                         'fecha': fecha_obj,
                         'imputacion': 1,
                         'modo': None,
-                        'tipo': 'Z',
+                        'tipo': 'G',
                         'cuenta': cliente_data.ctavta,
                         'documento': cobranza[0]['numero'],
                         'vencimiento': fecha_obj,
@@ -496,3 +497,175 @@ def obtener_cheques_disponibles(request):
     }
 
     return JsonResponse(response_data, safe=False)
+
+def guardar_anticipo_orden(request):
+    try:
+        if request.method == 'POST':
+            body_unicode = request.body.decode('utf-8')
+            body_data = json.loads(body_unicode)
+            vector = body_data.get('vector', {})
+            # imputaciones = vector.get('imputaciones', []) #pasar el numero de cliente
+            asientos = vector.get('asiento', [])
+            # movimiento = vector.get('movimiento', [])
+            cobranza = vector.get('cobranza', [])
+
+            autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))+'111'
+
+            fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            arbitraje = float(cobranza[0]['arbitraje'])
+            paridad = float(cobranza[0]['paridad'])
+            nromoneda = int(cobranza[0]['nromoneda'])
+            total = float(cobranza[0]['total'])
+            saldo = float(cobranza[0].get('saldo', 0))
+
+
+            if vector:
+                orden = Ordenes()
+                orden.mmonto = cobranza[0]['total']
+                orden.mboleta = cobranza[0]['numero']
+                orden.mfechamov = fecha
+                orden.mmoneda = cobranza[0]['nromoneda']
+                orden.mdetalle = None
+                orden.mcliente = cobranza[0]['nrocliente']
+                orden.mactiva = 'N' if cobranza[0]['definitivo'] == True else 'S'
+                orden.mcaja = 11112 if cobranza[0]['nromoneda'] != 1 else 11111
+                orden.mautogenmovims = autogenerado_impuventa if cobranza[0]['definitivo'] == True else None
+
+            try:
+                cliente_data = Clientes.objects.get(codigo=cobranza[0]['nrocliente'])
+            except Exception as _:
+                cliente_data = None
+
+            if cliente_data:
+                for asiento in asientos:
+                    fechaj = datetime.now().strftime("%Y-%m-%d")
+                    fecha_obj = datetime.strptime(fechaj, '%Y-%m-%d')
+                    nroasiento = generar_numero()
+                    movimiento_num = modificar_numero(nroasiento)
+                    detalle_asiento = 'O/PAGO' + '-' + str(cobranza[0]['numero']) + '-' + cliente_data.empresa
+                    asiento_monto = asiento['total_pago']
+
+                    if nromoneda == 2:  # dolar
+                        monto_asiento = float(asiento_monto) * arbitraje
+                    elif nromoneda not in [1, 2]:
+                        aux = float(asiento_monto) * paridad
+                        monto_asiento = aux * arbitraje
+                    else:
+                        monto_asiento = 0
+
+                    asiento_vector_1 = {
+                        'detalle': detalle_asiento,
+                        'monto': monto_asiento,
+                        'moneda': cobranza[0]['nromoneda'],
+                        'cambio': cobranza[0]['arbitraje'],
+                        'asiento': nroasiento,
+                        'conciliado': 'N',
+                        'clearing': fecha_obj,
+                        'fecha': fecha_obj,
+                        'imputacion': 1,
+                        'modo': asiento['modo'],
+                        'tipo': 'Z',
+                        'cuenta': asiento['cuenta'],
+                        'documento': cobranza[0]['numero'],
+                        'vencimiento': fecha_obj,
+                        'pasado': 0,
+                        'autogenerado': autogenerado_impuventa,
+                        'cliente': cliente_data.codigo,
+                        'banco': asiento['banco'] if asiento['modo'] != 'CHEQUE' else " - ".join(map(str, Cuentas.objects.filter(xcodigo=asiento['cuenta']).values_list('xcodigo', 'xnombre').first() or ('', ''))),
+                        'centro': 'ADM',
+                        'mov': int(movimiento_num) + 1,
+                        'anio': fecha_obj.year,
+                        'mes': fecha_obj.month,
+                        'fechacheque': fecha_obj,
+                        'paridad': cobranza[0]['paridad'],
+                        'posicion': None
+
+                    }  # haber
+                    crear_asiento(asiento_vector_1)
+
+                    if asiento.get('modo') == 'CHEQUE':
+                        numero=asiento['nro_mediopago']
+                        banco=asiento['banco']
+                        fecha_vencimiento=asiento['vencimiento']
+                        monto=asiento['total_pago']
+                        autogenerado=autogenerado_impuventa
+                        detalle=detalle_asiento
+                        moneda=cobranza[0]['nromoneda']
+                        nrocliente=cobranza[0]['nrocliente']
+                        tipo_cheque='CH'
+                        cheque = Cheques()
+                        cheque.cnumero=numero
+                        cheque.cbanco=banco
+                        cheque.cfecha=fecha_obj
+                        cheque.cvto=fecha_vencimiento
+                        cheque.cmonto=monto
+                        cheque.cautogenerado=autogenerado
+                        cheque.cdetalle=detalle
+                        cheque.ccliente=nrocliente
+                        cheque.cmoneda=moneda
+                        cheque.ctipo=tipo_cheque
+                        cheque.cestado=2
+                        cheque.save()
+
+                #asiento general
+                asiento_vector_2 = {  # deber
+                    'detalle': detalle_asiento,
+                    'monto': total,
+                    'moneda': cobranza[0]['nromoneda'],
+                    'cambio': cobranza[0]['arbitraje'],
+                    'asiento': nroasiento,
+                    'conciliado': 'N',
+                    'clearing': fecha_obj,
+                    'fecha': fecha_obj,
+                    'imputacion': 2,
+                    'modo': None,
+                    'tipo': 'G',
+                    'cuenta': cliente_data.ctavta,
+                    'documento': cobranza[0]['numero'],
+                    'vencimiento': fecha_obj,
+                    'pasado': 0,
+                    'autogenerado': autogenerado_impuventa,
+                    'cliente': cliente_data.codigo,
+                    'banco': 'S/I',
+                    'centro': 'S/I',
+                    'mov': movimiento_num,
+                    'anio': fecha_obj.year,
+                    'mes': fecha_obj.month,
+                    'fechacheque': fecha_obj,
+                    'paridad': cobranza[0]['paridad'],
+                    'posicion': None
+                }  # deber general
+                crear_asiento(asiento_vector_2)
+                #crear el movimiento
+                movimiento_vec = {
+                    'tipo': 25,
+                    'fecha': fecha_obj,
+                    'boleta': cobranza[0]['numero'],
+                    'monto': 0,
+                    'paridad': cobranza[0]['paridad'],
+                    'iva': 0,
+                    'total': total,
+                    'saldo': saldo,
+                    'moneda': cobranza[0]['nromoneda'],
+                    'detalle': 0,
+                    'cliente': cliente_data.codigo,
+                    'nombre': cliente_data.empresa,
+                    'nombremov': 'COBRO',
+                    'cambio': cobranza[0]['arbitraje'],
+                    'autogenerado': autogenerado_impuventa,
+                    'serie': cobranza[0]['serie'],
+                    'prefijo': cobranza[0]['prefijo'],
+                    'posicion': None,
+                    'anio': fecha_obj.year,
+                    'mes': fecha_obj.month,
+                    'monedaoriginal': cobranza[0]['nromoneda'],
+                    'montooriginal': total,
+                    'arbitraje': cobranza[0]['arbitraje'],
+
+                }
+                crear_movimiento(movimiento_vec)
+
+            return JsonResponse({'status': 'exito'})
+    except Exception as e:
+        return JsonResponse({'status': 'Error: ' + str(e)})

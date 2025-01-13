@@ -58,7 +58,7 @@ def master_importacion_maritima(request):
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
 
-
+@login_required(login_url="/")
 def house_importacion_maritima(request):
     try:
         if request.user.has_perms(["mantenimientos.view_seguimientos", ]):

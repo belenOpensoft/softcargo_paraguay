@@ -60,6 +60,8 @@ def master_expo_aerea(request):
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
+
+@login_required(login_url='/login')
 def house_importacion_maritima(request):
     try:
         if request.user.has_perms(["mantenimientos.view_seguimientos",]):

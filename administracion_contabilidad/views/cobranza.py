@@ -1,6 +1,8 @@
 import json
 from datetime import datetime
 from collections import defaultdict
+
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
@@ -37,6 +39,7 @@ columns_table = {
     8: 'total',
 }
 
+@login_required(login_url='/login')
 def cobranza_view(request):
     form = Cobranza(request.POST or None)
     return render(request, 'cobranza.html', {'form': form})

@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import render
 
@@ -29,7 +30,7 @@ columns_table = {
     6: 'total',
 }
 
-
+@login_required(login_url='/login')
 def proveedores_gastos_view(request):
     form = ProveedoresGastos(request.POST or None)
 

@@ -94,7 +94,7 @@ def source_embarque_aereo_full(request, master):
     else:
         return HttpResponse("fail", content_type="application/json")
 
-
+@login_required(login_url='/login')
 def house_importacion_maritima(request):
     try:
         if request.user.has_perms(["mantenimientos.view_seguimientos",]):
