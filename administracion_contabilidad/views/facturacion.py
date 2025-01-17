@@ -2,6 +2,7 @@ import json
 import re
 
 from django.contrib.auth.decorators import login_required
+from django.core.checks import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -16,7 +17,7 @@ from mantenimientos.models import Clientes, Servicios, Monedas
 from administracion_contabilidad.forms import Factura
 from administracion_contabilidad.models import Boleta, PendienteFacturar, Asientos, Movims, Infofactura, \
     VistaGastosPreventa, Dolar
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from datetime import datetime
 from django.db import transaction
 import random
@@ -158,9 +159,12 @@ def get_order(request, columns):
 
 @login_required(login_url='/login')
 def facturacion_view(request):
-    form = Factura(request.POST or None)
-    return render(request, 'facturacion.html', {'form': form,'form_pdf': pdfForm(),})
-
+    if request.user.has_perms(["administracion_contabilidad.view_boleta", ]):
+        form = Factura(request.POST or None)
+        return render(request, 'facturacion.html', {'form': form,'form_pdf': pdfForm(),})
+    else:
+        messages.error(request, 'No tiene permisos para realizar esta accion.')
+        return HttpResponseRedirect('/')
 
 def buscar_cliente(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':

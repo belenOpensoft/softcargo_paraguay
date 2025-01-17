@@ -508,7 +508,6 @@ class reporte_seguimiento_form(forms.Form):
         ('operacion', 'Operación'),
         ('vendedor', 'Vendedor'),
         ('tipo_de_operacion', 'Tipo de Operación'),
-        ('servicios', 'Servicios'),
         ('origen', 'Origen'),
         ('destino', 'Destino'),
         ('status', 'Status'),
@@ -593,7 +592,7 @@ class reporte_seguimiento_form(forms.Form):
     )
     cliente = forms.ModelChoiceField(
         queryset=Clientes.objects.all(),
-        label="cliente",
+        label="Cliente",
         required=False,
         widget=forms.Select(attrs={'class': 'form-control mb-3'}),
     )
@@ -628,7 +627,140 @@ class reporte_seguimiento_form(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control mb-3'}),
     )
 
+class reporte_operativas_form(forms.Form):
 
+    desde = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': True,"onkeypress":"return tabular(event,this)","class":"form-control mb-3",'autofocus':True}),label="Desde",initial=datetime.datetime.now().strftime("%Y-%m-%d"), required = True)
+    hasta = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': True,"onkeypress":"return tabular(event,this)","class":"form-control mb-3"}),label="Hasta",initial=datetime.datetime.now().strftime("%Y-%m-%d"), required = True)
+    filtros = (
+        ('', '---------'),
+        ('fecha_llegada', 'Fecha llegada'),
+        ('modo', 'Modo'),
+        ('tipo_operacion', 'Operación'),
+        ('vendedor', 'Vendedor'),
+        ('operacion', 'Tipo de Operación'),
+        ('origen', 'Origen'),
+        ('destino', 'Destino'),
+        ('status', 'Status'),
+    )
+    MODO_CHOICES = (
+        ('', 'Todos'),
+        ('aereo', 'Aéreo'),
+        ('maritimo', 'Marítimo'),
+        ('terrestre', 'Terrestre'),
+    )
+    modo = forms.ChoiceField(
+        choices=MODO_CHOICES,
+        label="Modo",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+    OPERACION_CHOICES = (
+        ('', 'Todos'),
+        ('importacion', 'Importación'),
+        ('exportacion', 'Exportación'),
+    )
+    operacion = forms.ChoiceField(
+        choices=OPERACION_CHOICES,
+        label="Operación",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+    vendedor = forms.ModelChoiceField(
+        queryset=Vendedores.objects.all(),
+        label="Vendedor",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+    choice_op = (("", "Todos"),
+                 ("IMPORTACION", "IMPORTACION"),
+                 ("EXPORTACION", "EXPORTACION"),
+                 ("IMPORTACION LCL", "IMPORTACION LCL"),
+                 ("IMPORTACION FCL", "IMPORTACION FCL"),
+                 ("IMPORTACION PART CONT.", "IMPORTACION PART CONT."),
+                 ("TRANSITO FCL", "TRANSITO FCL"),
+                 ("IMPORTACION CONSOLIDADA", "IMPORTACION CONSOLIDADA"),
+                 ("REEMBARCO", "REEMBARCO"),
+                 ("TRANSITO", "TRANSITO"),
+                 ("TRASLADO", "TRASLADO"),
+                 ("MUESTRA", "MUESTRA"),
+
+                 )
+
+    tipo_de_operacion = forms.ChoiceField(
+        choices=choice_op,
+        label="Tipo de Operación",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+
+    origen = forms.ModelChoiceField(
+        queryset=Ciudades.objects.all().order_by('nombre'),
+        label="Origen",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+    destino = forms.ModelChoiceField(
+        queryset=Ciudades.objects.all().order_by('nombre'),
+        label="Destino",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3 mb-3'}),
+    )
+
+    STATUS_CHOICES = (("","Todos"),("ARRIBADO","ARRIBADO"),("CONFIRMADO","CONFIRMADO"),("CANCELADO","CANCELADO"),("RESERVADO","RESERVADO"),("UNIFICADO","UNIFICADO"),("CERRADO","CERRADO"),)
+    status = forms.ChoiceField(
+        choices=STATUS_CHOICES,
+        label="Status",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+    # buque = forms.ModelChoiceField(
+    #     queryset=Vapores.objects.all(),
+    #     label="Buque",
+    #     required=False,
+    #     widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    # )
+    cliente = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(),
+        label="Cliente",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+    embarcador = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(),
+        label="Embarcador",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+    consignatario = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(),
+        label="Consignatario",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+    transportista = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(),
+        label="Transportista",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+    filtro1 = forms.ChoiceField(
+        choices=filtros,
+        label="Orden 1",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+    filtro2 = forms.ChoiceField(
+        choices=filtros,
+        label="Orden 2",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
+    filtro3 = forms.ChoiceField(
+        choices=filtros,
+        label="Orden 3",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control mb-3'}),
+    )
 
 class desconsolidacion_form(forms.Form):
     cia = forms.CharField(

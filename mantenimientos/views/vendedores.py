@@ -139,7 +139,7 @@ def is_ajax(request):
 @login_required(login_url="/")
 def agregar_vendedor(request):
     try:
-        if request.user.has_perms(["mantenimientos.add_basicovendedores",]):
+        if request.user.has_perms(["mantenimientos.add_vendedores",]):
            # ctx = {'form': add_vendedor_form(),'title_page':'Agregar vendedor'}
             if request.method == 'POST':
                 form = add_vendedor_form(request.POST)
@@ -179,7 +179,7 @@ def agregar_vendedor(request):
 @login_required(login_url='/')
 def modificar_vendedor(request, id_vendedor):
     try:
-        if request.user.has_perms(["mantenimientos.change_basicovendedores", ]):
+        if request.user.has_perms(["mantenimientos.change_vendedores", ]):
             vendedor = Vendedores.objects.get(id=id_vendedor)
             paises = Paises.objects.all()  # Obtén la lista de países
             ciudades = Ciudades.objects.all()  # Obtén la lista de países
@@ -227,7 +227,7 @@ def modificar_vendedor(request, id_vendedor):
 def eliminar_vendedor(request):
 
     resultado = {}
-    if request.user.has_perms(["mantenimientos.delete_basicovendedores", ]):
+    if request.user.has_perms(["mantenimientos.delete_vendedores", ]):
         if is_ajax(request):
             try:
                 id = request.GET['id']

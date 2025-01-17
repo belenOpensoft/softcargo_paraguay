@@ -145,7 +145,7 @@ def is_ajax(request):
 @login_required(login_url="/")
 def agregar_banco(request):
     try:
-        if request.user.has_perms(["mantenimientos.add_basicobancos",]):
+        if request.user.has_perms(["mantenimientos.add_bancos",]):
             ctx = {'form': add_banco_form(),'title_page':'Agregar bancos',}
             if request.method == 'POST':
                 form = add_banco_form(request.POST)
@@ -176,7 +176,7 @@ def agregar_banco(request):
 @login_required(login_url='/')
 def modificar_banco(request, id_banco):
     try:
-        if request.user.has_perms(["mantenimientos.change_basicobancos", ]):
+        if request.user.has_perms(["mantenimientos.change_bancos", ]):
             banco = Bancos.objects.get(id=id_banco)
             paises = Paises.objects.all()  # Obtén la lista de países
             ctx = {'form': edit_banco_form({
@@ -218,7 +218,7 @@ def modificar_banco(request, id_banco):
 def eliminar_banco(request):
 
     resultado = {}
-    if request.user.has_perms(["mantenimientos.delete_basicobancos", ]):
+    if request.user.has_perms(["mantenimientos.delete_bancos", ]):
         if is_ajax(request):
             try:
                 id = request.GET['id']

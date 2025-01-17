@@ -11,7 +11,10 @@ from cargosystem import settings
 @login_required(login_url='/login/')
 def correos(request):
     try:
-        return render(request,'correos.html',{'title_page':'Correos enviados'})
+        if request.user.has_perms(["seguimientos.view_seguimiento", ]):
+            return render(request,'correos.html',{'title_page':'Correos enviados'})
+        else:
+            raise TypeError('No tiene permisos para realizar esta accion.')
     except Exception as e:
         messages.error(request,str(e))
         return HttpResponseRedirect('/')

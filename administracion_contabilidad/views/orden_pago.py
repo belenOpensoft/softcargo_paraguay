@@ -1,11 +1,12 @@
 import json
 from collections import defaultdict
 from datetime import datetime
+from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.defaultfilters import length
 
@@ -18,8 +19,13 @@ from administracion_contabilidad.models import Asientos, VistaPagos, Dolar, Cheq
 
 @login_required(login_url='/login')
 def orden_pago_view(request):
-    form = OrdenPago(request.POST or None)
-    return render(request, 'orden_pago.html', {'form': form})
+    #if request.user.has_perms(["administracion_contabilidad.view_vistapagos", ]):
+    if request.user.has_perms(["administracion_contabilidad.view_forzarerror", ]):
+        form = OrdenPago(request.POST or None)
+        return render(request, 'orden_pago.html', {'form': form})
+    else:
+        messages.error(request,'Funcionalidad en construcción.')
+        return HttpResponseRedirect('/')
 
 param_busqueda = {
     0: 'autogenerado__icontains',

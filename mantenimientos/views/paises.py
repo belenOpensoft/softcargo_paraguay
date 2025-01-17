@@ -157,7 +157,7 @@ def is_ajax(request):
 @login_required(login_url="/")
 def agregar_pais(request):
     try:
-        if request.user.has_perms(["mantenimientos.add_basicopaises", ]):
+        if request.user.has_perms(["mantenimientos.add_paises", ]):
             ctx = {'form': add_pais_form(),'title_page': 'Agregar pais'}
             if request.method == 'POST':
                 form = add_pais_form(request.POST)
@@ -186,7 +186,7 @@ def agregar_pais(request):
 @login_required(login_url='/')
 def modificar_pais(request, id_pais):
     try:
-        if request.user.has_perms(["mantenimientos.change_basicopaises", ]):
+        if request.user.has_perms(["mantenimientos.change_paises", ]):
             pais = Paises.objects.get(id=id_pais)
             ctx = {'form': edit_pais_form({
                 'nombre': pais.nombre,
@@ -224,7 +224,7 @@ def modificar_pais(request, id_pais):
 @login_required(login_url='/')
 def eliminar_pais(request):
     resultado = {}
-    if request.user.has_perms(["mantenimientos.delete_basicopaises", ]):
+    if request.user.has_perms(["mantenimientos.delete_paises", ]):
         if is_ajax(request):
             try:
                 id = request.GET['id']

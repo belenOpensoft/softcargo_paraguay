@@ -14,7 +14,7 @@ from mantenimientos.models import Clientes as SociosComerciales,VSociosComercial
 @login_required(login_url='/')
 def grilla_clientes(request):
     try:
-        if request.user.has_perms(["mantenimientos.view_socioscomerciales",]):
+        if request.user.has_perms(["mantenimientos.view_clientes",]):
             return render(request, 'clientes/grilla_datos.html',{'title_page':'Mantenimiento de socios comerciales'})
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
@@ -213,7 +213,7 @@ def is_ajax(request):
 @login_required(login_url="/")
 def agregar_socio_comercial_old(request, id_socio=None):
     try:
-        if request.user.has_perms(["mantenimientos.add_basicosocioscomerciales"]):
+        if request.user.has_perms(["mantenimientos.add_clientes"]):
             if id_socio:
                 cliente = get_object_or_404(SociosComerciales, id=id_socio)
                 ctx = {'form': add_cliente_form(instance=cliente),
@@ -248,7 +248,7 @@ def agregar_socio_comercial_old(request, id_socio=None):
 
 def agregar_socio_comercial(request, id_socio=None):
     try:
-        if request.user.has_perms(["mantenimientos.add_basicosocioscomerciales"]):
+        if request.user.has_perms(["mantenimientos.add_clientes"]):
             if id_socio:
                 cliente = get_object_or_404(SociosComerciales, id=id_socio)
                 form = add_cliente_form(initial={
@@ -337,7 +337,7 @@ def agregar_socio_comercial(request, id_socio=None):
 def eliminar_socio_comercial(request):
 
     resultado = {}
-    if request.user.has_perms(["mantenimientos.delete_basicosocioscomerciales", ]):
+    if request.user.has_perms(["mantenimientos.delete_clientes", ]):
         if is_ajax(request):
             try:
                 id = request.GET['id']

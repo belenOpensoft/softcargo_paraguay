@@ -7,7 +7,8 @@
     <meta charset="UTF-8">
     <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" id="bootstrap-css">
     <link href="{% static 'css/roles.css' %}" rel="stylesheet" id="login-css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://fontawesome.com/icons/ship?f=classic&s=solid">
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/jquery-3.6.4.min.js' %}"></script>
 </head>
@@ -19,55 +20,42 @@
            <h2> Seleccione el módulo al que quiere dirigirse: </h2>
         </div>
     <div class="wrapper">
+
         <form method="post">
-            {% for message in messages %}
-                <div class="alert alert-sm {{ message.tags }} alert-dismissible" role="alert">
-                    {{ message }}
-                </div>
-            {% endfor %}
             <div class="">
                 <div class="column">
-                    {% for rol in roles.0 %}
-                    <a href="/login/selecccionarol/{{ rol }}">
-                        <i class="iconos bi bi-database-fill-gear"></i>
-                    </a>
-                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" class="hidden-mobile"> <h4>Mantenimientos</h4> </a>
-                    {% endfor %}
+                    {% if 'mantenimientos' in roles %}
+                        <a href="/login/selecccionarol/mantenimientos">
+                            <i class="iconos bi bi-database-fill-gear"></i>
+                        </a>
+                        <a href="/login/selecccionarol/mantenimientos" title="Mantenimientos" class="hidden-mobile"> <h4>Mantenimientos</h4> </a>
+                    {% endif %}
                 </div>
 
                 <div class="column">
-                    {% for rol in roles.1 %}
-                    <a href="/login/selecccionarol/{{ rol }}">
-                        <i class="iconos bi bi-person-fill-gear"></i>
-                    </a>
-                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" class="hidden-mobile"> <h4>Administrador</h4> </a>
-                    {% endfor %}
-                </div>
-
-                <div class="column">
-                    {% for rol in roles.2 %}
-                    <a href="/login/selecccionarol/{{ rol }}">
+                    {% if 'seguimientos' in roles %}
+                    <a href="/login/selecccionarol/seguimientos">
                         <i class="iconos bi bi-send-check"></i>
                     </a>
-                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" class="hidden-mobile"> <h4>Seguimientos</h4></a>
-                    {% endfor %}
+                    <a href="/login/selecccionarol/seguimientos" title="Seguimientos" class="hidden-mobile"> <h4>Seguimientos</h4></a>
+                    {% endif %}
                 </div>
 
                 <div class="column">
-                    {% for rol in roles.3 %}
-                    <a href="/login/selecccionarol/{{ rol }}">
-                        <i class="iconos bi bi-card-checklist"></i>
+                    {% if 'operaciones' in roles %}
+                    <a href="/login/selecccionarol/Operaciones">
+                        <i class="iconos bi bi-diagram-3"></i>
                     </a>
-                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" class="hidden-mobile"> <h4>Operaciones</h4> </a>
-                    {% endfor %}
+                    <a href="/login/selecccionarol/operaciones" title="Operaciones" class="hidden-mobile"> <h4>Operaciones</h4> </a>
+                    {% endif %}
                 </div>
                 <div class="column">
-                    {% for rol in roles.4 %}
-                    <a href="/login/selecccionarol/{{ rol }}">
+                    {% if 'administracion' in roles %}
+                    <a href="/login/selecccionarol/administracion">
                         <i class="iconos bi bi-card-checklist"></i>
                     </a>
-                    <a href="/login/selecccionarol/{{ rol }}" title="{{ rol|title }}" class="hidden-mobile"> <h4>Administración</h4> </a>
-                    {% endfor %}
+                    <a href="/login/selecccionarol/administracion" title="Administración" class="hidden-mobile"> <h4>Administración</h4> </a>
+                    {% endif %}
                 </div>
             </div>
             {% csrf_token %}

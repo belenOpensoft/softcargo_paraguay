@@ -15,7 +15,7 @@ from seguimientos.models import VGrillaSeguimientos as Seguimiento, Seguimiento 
 @login_required(login_url='/')
 def grilla_seguimientos(request):
     try:
-        if request.user.has_perms(["mantenimientos.view_seguimientos", ]):
+        if request.user.has_perms(["seguimientos.view_seguimiento", ]):
             opciones_busqueda = {
                 'cliente__icontains': 'CLIENTE',
                 'embarcador__icontains': 'EMBARCADOR',

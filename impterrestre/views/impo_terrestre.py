@@ -24,7 +24,7 @@ from seguimientos.forms import archivosForm, pdfForm
 @login_required(login_url='/')
 def master_importacion_maritima(request):
     try:
-        if request.user.has_perms(["mantenimientos.view_seguimientos",]):
+        if request.user.has_perms(["impterrestre.view_master",]):
             opciones_busqueda = {
                 'cliente__icontains': 'CLIENTE',
                 'embarcador__icontains': 'EMBARCADOR',
@@ -63,7 +63,7 @@ def master_importacion_maritima(request):
 @login_required(login_url="/")
 def house_importacion_maritima(request):
     try:
-        if request.user.has_perms(["mantenimientos.view_seguimientos",]):
+        if request.user.has_perms(["impterrestre.view_vembarqueaereo",]):
             opciones_busqueda = {
                 'cliente__icontains': 'CLIENTE',
                 'embarcador__icontains': 'EMBARCADOR',

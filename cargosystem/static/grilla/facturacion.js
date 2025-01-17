@@ -676,9 +676,6 @@ id=localStorage.getItem('preventa_id');
     });
 }
 
-function arbitraje_formulario(){
-
-}
 
 //imprimir caratula house
 function imprimir_preventa(){
@@ -1403,6 +1400,21 @@ $('#abrir_arbi').on('click', function (event) {
         const hoy = new Date().toISOString().split('T')[0];
     // Establecer el valor predeterminado del campo de fecha
     document.getElementById('fecha_arbi').value = hoy;
+        $.ajax({
+        url: "/admin_cont/cargar_arbitraje/",
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
+            // Cargar los valores en los campos
+            $('#valor_arbitraje').val(data.arbitraje);
+            $('#valor_pizarra').val(data.pizarra);
+            $('#valor_paridad').val(data.paridad);
+            $('#moneda_select').val(data.moneda);
+        },
+        error: function (xhr, status, error) {
+            alert("Error al cargar los datos iniciales: " + error);
+        }
+    });
 });
 
 

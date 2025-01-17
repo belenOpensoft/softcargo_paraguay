@@ -917,3 +917,78 @@ class VistaEventosCalendario(models.Model):
     class Meta:
         managed = False  # No intentes modificar la tabla
         db_table = 'vista_eventos_calendario'
+
+class VistaOperativas(models.Model):
+    modo = models.CharField(max_length=255, null=True)
+    tipo_operacion = models.CharField(max_length=255, null=True)
+    numero = models.IntegerField(primary_key=True)
+    nroarmador = models.CharField(max_length=255, null=True)
+    armador = models.CharField(max_length=255, null=True)
+    nrotransportista = models.CharField(max_length=255, null=True)
+    nrovendedor = models.CharField(max_length=255, null=True)
+    nrocliente = models.CharField(max_length=255, null=True)
+    nroconsignatario = models.CharField(max_length=255, null=True)
+    transportista = models.CharField(max_length=255, null=True)
+    embarcador = models.CharField(max_length=255, null=True)
+    consignatario = models.CharField(max_length=255, null=True)
+    cliente = models.CharField(max_length=255, null=True)
+    vapor = models.CharField(max_length=255, null=True)
+    operacion = models.CharField(max_length=255, null=True)
+    origen = models.CharField(max_length=255, null=True)
+    destino = models.CharField(max_length=255, null=True)
+    status = models.CharField(max_length=255, null=True)
+    vendedor = models.CharField(max_length=255, null=True)
+    fecha_embarque = models.DateField(blank=True, null=True)
+    fecha_retiro = models.DateField(blank=True, null=True)
+    nrodespachante = models.CharField(max_length=255, null=True)
+    despachante = models.CharField(max_length=255, null=True)
+    house = models.CharField(max_length=255, null=True)
+    master = models.CharField(max_length=255, null=True)
+    tipo = models.CharField(max_length=255, null=True)
+    pago = models.CharField(max_length=255, null=True)
+    flete = models.CharField(max_length=255, null=True)
+    comision = models.CharField(max_length=255, null=True)
+    viaje = models.CharField(max_length=255, null=True)
+    loading = models.CharField(max_length=255, null=True)
+    discharge = models.CharField(max_length=255, null=True)
+    cotizacion = models.CharField(max_length=255, null=True)
+    volumen = models.CharField(max_length=255, null=True)
+    volumen_total = models.CharField(max_length=255, null=True)
+    bultos = models.CharField(max_length=255, null=True)
+    peso_bruto = models.CharField(max_length=255, null=True)
+    producto = models.CharField(max_length=255, null=True)
+    seguimiento = models.CharField(max_length=255, null=True)
+    agente = models.CharField(max_length=255, null=True)
+    nroagente = models.CharField(max_length=255, null=True)
+    movimiento = models.CharField(max_length=255, null=True)
+    tipo_contenedor = models.CharField(max_length=255, null=True)
+    contenedor = models.CharField(max_length=255, null=True)
+    aplicable = models.CharField(max_length=255, null=True)
+    proft_final = models.CharField(max_length=255, null=True)
+    porcentaje_profit = models.CharField(max_length=255, null=True)
+    otros_ingresos = models.CharField(max_length=255, null=True)
+    propio = models.CharField(max_length=255, null=True)
+    pais = models.CharField(max_length=255, null=True)
+    fecha_facturacion = models.DateField(max_length=255, null=True)
+    customer = models.CharField(max_length=255, null=True)
+    usuario = models.CharField(max_length=255, null=True)
+
+
+    class Meta:
+        managed = False  # No intentes modificar la tabla
+        db_table = 'VOperativas'
+
+class VistaOperativasGastos(models.Model):
+    numero = models.IntegerField(primary_key=True)
+    due_carrier = models.CharField(max_length=255, null=True)
+    local_charges = models.CharField(max_length=255, null=True)
+    due_agent = models.CharField(max_length=255, null=True)
+    others = models.CharField(max_length=255, null=True)
+    operacion = models.CharField(max_length=255, null=True)
+    tipo = models.CharField(max_length=255, null=True)
+    fecha_embarque = models.DateField(blank=True, null=True)
+    fecha_retiro = models.DateField(blank=True, null=True)
+
+    class Meta:
+        managed = False  # No intentes modificar la tabla
+        db_table = 'VOperativasGastos'

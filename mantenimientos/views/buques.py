@@ -12,7 +12,7 @@ from mantenimientos.models import Vapores as Buques, Paises
 @login_required(login_url='/')
 def grilla_buques(request):
     try:
-        if request.user.has_perms(["mantenimientos.view_buques", ]):
+        if request.user.has_perms(["mantenimientos.view_vapores", ]):
             return render(request, 'buques/grilla_datos.html',{'title_page':'Mantenimiento de buques',})
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
@@ -136,7 +136,7 @@ def is_ajax(request):
 @login_required(login_url="/")
 def agregar_buque(request):
     try:
-        if request.user.has_perms(["mantenimientos.add_basicobuques", ]):
+        if request.user.has_perms(["mantenimientos.add_vapores", ]):
             ctx = {'form': add_buque_form(),'title_page':'Agregar buque',}
             if request.method == 'POST':
                 form = add_buque_form(request.POST)
@@ -167,7 +167,7 @@ def agregar_buque(request):
 @login_required(login_url='/')
 def modificar_buque(request, id_buque):
     try:
-        if request.user.has_perms(["mantenimientos.change_basicobuques", ]):
+        if request.user.has_perms(["mantenimientos.change_vapores", ]):
             buque = Buques.objects.get(id=id_buque)
             ctx = {'form': edit_buque_form({
                 'codigo': buque.codigo,
@@ -204,7 +204,7 @@ def modificar_buque(request, id_buque):
 @login_required(login_url='/')
 def eliminar_buque(request):
     resultado = {}
-    if request.user.has_perms(["mantenimientos.delete_basicobuques", ]):
+    if request.user.has_perms(["mantenimientos.delete_vapores", ]):
         if is_ajax(request):
             try:
                 id = request.GET['id']

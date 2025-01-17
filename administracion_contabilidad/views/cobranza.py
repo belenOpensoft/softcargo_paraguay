@@ -3,9 +3,8 @@ from datetime import datetime
 from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.checks import messages
 from django.db import transaction
-from django.http import JsonResponse
 from django.shortcuts import render
 from administracion_contabilidad.forms import Cobranza
 from administracion_contabilidad.models import Boleta, Impuvtas, Asientos, Movims, Cheques, Cuentas, VistaCobranza, \
@@ -13,6 +12,10 @@ from administracion_contabilidad.models import Boleta, Impuvtas, Asientos, Movim
 from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero
 from administracion_contabilidad.views.preventa import generar_autogenerado
 from mantenimientos.models import Clientes, Monedas
+
+from collections import defaultdict
+from django.http import JsonResponse, HttpResponseRedirect
+from django.core.exceptions import ObjectDoesNotExist
 
 
 param_busqueda = {
@@ -41,9 +44,12 @@ columns_table = {
 
 @login_required(login_url='/login')
 def cobranza_view(request):
-    form = Cobranza(request.POST or None)
-    return render(request, 'cobranza.html', {'form': form})
-
+    if request.user.has_perms(["administracion_contabilidad.view_listacobranzas", ]):
+        form = Cobranza(request.POST or None)
+        return render(request, 'cobranza.html', {'form': form})
+    else:
+        messages.error(request, 'No tiene permisos para realizar esta accion.')
+        return HttpResponseRedirect('/')
 
 def buscar_cliente(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
@@ -328,9 +334,7 @@ def source_facturas_pendientes_oldlast(request):
     except Exception as e:
         return JsonResponse({'error': str(e)})
 
-from collections import defaultdict
-from django.http import JsonResponse
-from django.core.exceptions import ObjectDoesNotExist
+
 
 def source_facturas_pendientes(request):
     try:
@@ -597,8 +601,6 @@ def guardar_impuventa(request):
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
 
-
-
 def guardar_anticipo(request):
     try:
         if request.method == 'POST':
@@ -848,12 +850,16 @@ def cargar_arbitraje(request):
             return JsonResponse({
                 'arbitraje': dolar_hoy.uvalor,
                 'paridad': dolar_hoy.paridad,
+                'pizarra':dolar_hoy.upizarra,
+                'moneda':dolar_hoy.umoneda,
                 'contenido': True
             })
         else:
             return JsonResponse({
                 'arbitraje': 0.0,
                 'paridad': 0.0,
+                'pizarra': 0.0,
+                'moneda': 2,
                 'contenido': False
             })
     except Exception as e:

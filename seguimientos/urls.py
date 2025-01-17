@@ -34,7 +34,7 @@ from seguimientos.views.gastos import source_gastos, guardar_gasto, eliminar_gas
 from seguimientos.views.getdata import get_data_cronologia, get_data_seguimiento
 from seguimientos.views.logs import source_logs
 from seguimientos.views.pdf import get_datos_caratula
-from seguimientos.views.reportes import reportes_seguimiento, descargar_pdf, descargar_hawb
+from seguimientos.views.reportes import reportes_seguimiento, descargar_pdf, descargar_hawb, reportes_operativas
 from seguimientos.views.rutas import source_rutas, guardar_ruta, eliminar_ruta
 from seguimientos.views.seguimientos import grilla_seguimientos, source_seguimientos, guardar_notas, guardar_cronologia, \
     guardar_seguimiento, guardar_envases, eliminar_envase, clonar_seguimiento
@@ -88,6 +88,7 @@ urlpatterns = [
     path('anular_guia', anular_guia, name='anular_guia'),
     path('asignar_guia_aerea/', asignar_guia_aerea, name='asignar_guia_aerea'),
     path('reportes_seguimiento/', reportes_seguimiento, name='vista_reportes'),
+    path('reportes_operativas/', reportes_operativas, name='vista_reportes_op'),
     path('comprobar_vapores/', comprobar_vapores, name='comprobar_vapores'),
     path('desconsolidacion_aerea/', desconsolidacion_aerea, name='vista_desconsolidacion_aerea'),
     path('desconsolidar_aereo/', desconsolidar_aereo, name='vista_desconsolidar_aereo'),

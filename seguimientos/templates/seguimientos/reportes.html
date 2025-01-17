@@ -58,9 +58,9 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-4">
-                    {{ form.buque.label_tag }}
-                    {{ form.buque }}
+               <div class="col-md-4">
+                    {{ form.cliente.label_tag }}
+                    {{ form.cliente }}
                 </div>
                 <div class="col-md-4">
                     {{ form.consignatario.label_tag }}
@@ -68,21 +68,24 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-4">
-                    {{ form.cliente.label_tag }}
-                    {{ form.cliente }}
-                </div>
+
                 <div class="col-md-4">
                     {{ form.embarcador.label_tag }}
                     {{ form.embarcador }}
                 </div>
-            </div>
-            <div class="row">
                 <div class="col-md-4">
-                    {{ form.status.label_tag }}
-                    {{ form.status }}
+                    {{ form.buque.label_tag }}
+                    {{ form.buque }}
                 </div>
             </div>
+
+           <div class="row">
+                   <div class="col-md-4">
+                        {{ form.status.label_tag }}
+                        {{ form.status }}
+                    </div>
+           </div>
+
             <div class="row">
                 <div class="col-md-12">
                     <br>
@@ -91,4 +94,6 @@
                 </div>
             </div>
     </form>
+
+
 {% endblock formulario %}

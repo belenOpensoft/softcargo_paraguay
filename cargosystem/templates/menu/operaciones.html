@@ -190,7 +190,7 @@
                         </a>
                     </li>
                     <li class="sidebar-item">
-                        <a href="{% url 'vista_reportes' %}" class="sidebar-link">
+                        <a href="{% url 'vista_reportes_op' %}" class="sidebar-link">
                            <i class="fa-solid fa-file-lines pe-2"></i>&nbsp;Reportes
                         </a>
                     </li>
@@ -209,8 +209,7 @@
                         Modulo
                     </li>
                     <li class="sidebar-item">
-                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#auth1"
-                            aria-expanded="false" aria-controls="auth">
+                        <a href="#" class="sidebar-link" data-bs-toggle="collapse" onclick="toggle_collapse_menu('auth1', this)" >
                             <i class="fa fa-puzzle-piece pe-2"></i>
                             {{ request.session.rol }}
                         </a>

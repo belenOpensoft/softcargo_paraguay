@@ -2,7 +2,8 @@ import io
 from datetime import datetime
 
 import xlsxwriter
-from django.http import JsonResponse, HttpResponse, Http404
+from django.core.checks import messages
+from django.http import JsonResponse, HttpResponse, Http404, HttpResponseRedirect
 import json
 from administracion_contabilidad.models import Infofactura
 from expaerea.models import ExportServiceaereo, ExportEmbarqueaereo, ExportCargaaerea, ExportReservas, ExportConexaerea
@@ -294,20 +295,24 @@ def update_gasto_house(request):
 
 
 def check_if_reference_exists(request):
-    if request.method == 'GET':
-        numero = request.GET.get('numero')  # Obtén el número de la referencia desde la URL
+    if request.user.has_perms(["administracion_contabilidad.view_vistagastospreventa", ]):
+        if request.method == 'GET':
+            numero = request.GET.get('numero')  # Obtén el número de la referencia desde la URL
 
-        if numero:
-            try:
-                # Consulta si existe un registro en Infofactura con la referencia proporcionada
-                existe = Infofactura.objects.filter(referencia=numero).exists()
+            if numero:
+                try:
+                    # Consulta si existe un registro en Infofactura con la referencia proporcionada
+                    existe = Infofactura.objects.filter(referencia=numero).exists()
 
-                # Retorna True si existe, False si no
-                return JsonResponse({'exists': existe})
-            except Exception as e:
-                return JsonResponse({'error': str(e)}, status=500)
+                    # Retorna True si existe, False si no
+                    return JsonResponse({'exists': existe})
+                except Exception as e:
+                    return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+    else:
+        messages.error(request, 'No tiene permisos para realizar esta accion.')
+        return HttpResponseRedirect('/')
 
-    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def eliminar_preventa(request):
     if request.method == "POST":
@@ -329,7 +334,6 @@ def eliminar_preventa(request):
             return JsonResponse({"resultado": "error", "mensaje": str(e)}, status=500)
     else:
         return JsonResponse({"resultado": "error", "mensaje": "Método no permitido"}, status=405)
-
 
 def guardar_gasto_unificado(request):
     if request.method == "POST":

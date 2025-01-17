@@ -29,8 +29,7 @@
                         Modulo
                     </li>
                     <li class="sidebar-item">
-                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#auth1"
-                            aria-expanded="false" aria-controls="auth">
+                        <a href="#" class="sidebar-link" data-bs-toggle="collapse" onclick="toggle_collapse_menu('auth1', this)" >
                             <i class="fa fa-puzzle-piece pe-2"></i>
                             {{ request.session.rol }}
                         </a>

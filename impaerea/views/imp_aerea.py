@@ -26,7 +26,8 @@ from seguimientos.forms import archivosForm, pdfForm
 @login_required(login_url='/')
 def master_importacion_maritima(request):
     try:
-        if request.user.has_perms(["mantenimientos.view_seguimientos",]):
+        print(request.user.get_all_permissions())
+        if request.user.has_perms(["impaerea.view_master",]):
             opciones_busqueda = {
                 'cliente__icontains': 'CLIENTE',
                 'embarcador__icontains': 'EMBARCADOR',
@@ -37,7 +38,6 @@ def master_importacion_maritima(request):
                 'hawb__icontains': 'HBL',
                 'vapor__icontains': 'Vapor',
                 'posicion__icontains': 'Posicion',
-                # 'contenedores__icontains': 'Contenedor',
             }
             return render(request, 'impaerea/grilla_datos.html',{
                 'form': add_form(),
@@ -64,7 +64,7 @@ def master_importacion_maritima(request):
 @login_required(login_url="/")
 def house_importacion_maritima(request):
     try:
-        if request.user.has_perms(["mantenimientos.view_seguimientos",]):
+        if request.user.has_perms(["impaerea.view_vembarqueaereo",]):
             opciones_busqueda = {
                 'cliente__icontains': 'CLIENTE',
                 'embarcador__icontains': 'EMBARCADOR',

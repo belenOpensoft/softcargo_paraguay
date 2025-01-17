@@ -137,7 +137,7 @@ def is_ajax(request):
 @login_required(login_url="/")
 def agregar_producto(request):
     try:
-        if request.user.has_perms(["mantenimientos.add_basicoproductos",]):
+        if request.user.has_perms(["mantenimientos.add_productos",]):
             ctx = {'form': add_producto_form(),'title_page':'Agregar producto'}
             if request.method == 'POST':
                 form = add_producto_form(request.POST)
@@ -162,7 +162,7 @@ def agregar_producto(request):
 @login_required(login_url='/')
 def modificar_producto(request, id_producto):
     try:
-        if request.user.has_perms(["mantenimientos.change_basicoproductos", ]):
+        if request.user.has_perms(["mantenimientos.change_productos", ]):
             producto = Productos.objects.get(id=id_producto)
             ctx = {'form': edit_producto_form({
                 'codigo': producto.codigo,
@@ -193,7 +193,7 @@ def modificar_producto(request, id_producto):
 @login_required(login_url='/')
 def eliminar_producto(request):
     resultado = {}
-    if request.user.has_perms(["mantenimientos.delete_basicoproductos", ]):
+    if request.user.has_perms(["mantenimientos.delete_productos", ]):
         if is_ajax(request):
             try:
                 id = request.GET['id']

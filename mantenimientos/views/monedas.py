@@ -163,7 +163,7 @@ def is_ajax(request):
 @login_required(login_url="/")
 def agregar_moneda(request):
     try:
-        if request.user.has_perms(["mantenimientos.add_basicomonedas",]):
+        if request.user.has_perms(["mantenimientos.add_monedas",]):
             ctx = {'form': add_moneda_form(),'title_page':'Agregar moneda',}
             if request.method == 'POST':
                 form = add_moneda_form(request.POST)
@@ -201,7 +201,7 @@ def agregar_moneda(request):
 @login_required(login_url='/')
 def modificar_moneda(request, id_moneda):
     try:
-        if request.user.has_perms(["mantenimientos.change_basicomonedas", ]):
+        if request.user.has_perms(["mantenimientos.change_monedas", ]):
             moneda = Monedas.objects.get(id=id_moneda)
             pais = Paises.objects.get(nombre=moneda.pais)
 
@@ -252,7 +252,7 @@ def modificar_moneda(request, id_moneda):
 @login_required(login_url='/')
 def eliminar_moneda(request):
     resultado = {}
-    if request.user.has_perms(["mantenimientos.delete_basicomonedas", ]):
+    if request.user.has_perms(["mantenimientos.delete_monedas", ]):
         if is_ajax(request):
             try:
                 id = request.GET['id']

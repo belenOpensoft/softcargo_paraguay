@@ -23,6 +23,7 @@ RUTA_PROYECTO = os.path.dirname(os.path.realpath(__file__))
 SECRET_KEY = 'django-insecure-e-1*c(&*w!hbn1r9ok^5q)p1sut-snx*2r-u9u^9rtbk((-c48'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+#DEBUG = False
 ALLOWED_HOSTS = ["*"]
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 URL_DESCONSOLIDACION='http://www.importsys.com.uy/ws/wsOcean.exe'
@@ -125,6 +126,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         'NAME': 'cargosystem_prod',
+        #'NAME': 'cargosystem',
         # 'NAME': 'cargo',
         # 'USER': 'sistemas',
         'USER': 'root',

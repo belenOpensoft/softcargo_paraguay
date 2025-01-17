@@ -149,7 +149,7 @@ def is_ajax(request):
 @login_required(login_url="/")
 def agregar_ciudad(request):
     try:
-        if request.user.has_perms(["mantenimientos.add_basicociudades",]):
+        if request.user.has_perms(["mantenimientos.add_ciudades",]):
             ctx = {'form': add_ciudad_form(),'title_page': 'Agregar ciudad',}
             if request.method == 'POST':
                 form = add_ciudad_form(request.POST)
@@ -187,7 +187,7 @@ def agregar_ciudad(request):
 @login_required(login_url='/')
 def modificar_ciudad(request, id_ciudad):
     try:
-        if request.user.has_perms(["mantenimientos.change_basicociudades", ]):
+        if request.user.has_perms(["mantenimientos.change_ciudades", ]):
             ciudad = Ciudades.objects.get(id=id_ciudad)
             if request.method == 'POST':
                 form = edit_ciudad_form(request.POST)
@@ -235,7 +235,7 @@ def modificar_ciudad(request, id_ciudad):
 def eliminar_ciudad(request):
 
     resultado = {}
-    if request.user.has_perms(["mantenimientos.delete_basicociudades", ]):
+    if request.user.has_perms(["mantenimientos.delete_ciudades", ]):
         if is_ajax(request):
             try:
                 id = request.GET['id']

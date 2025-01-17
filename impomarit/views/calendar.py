@@ -11,7 +11,7 @@ from impomarit.models import VistaEventosCalendario
 @login_required(login_url='/')
 def calendario(request):
     try:
-        if request.user.has_perms(["mantenimientos.view_seguimientos",]):
+        if request.user.has_perms(["impomarit.view_vistaeventoscalendario",]):
             opciones_busqueda = {
                 'cliente__icontains': 'CLIENTE',
                 'embarcador__icontains': 'EMBARCADOR',
