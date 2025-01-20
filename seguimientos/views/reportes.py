@@ -544,8 +544,6 @@ def reportes_operativas(request):
                     # Realiza la consulta a la tabla Seguimientos con el filtro
                     resultados = VistaOperativas.objects.filter(**filtro).order_by(*orden)
                     gastos = VistaOperativasGastos.objects.filter(**filtro2).order_by('fecha_embarque')
-                    uno=resultados.count()
-                    dos=gastos.count()
                     if resultados.count() > 0 and gastos.count()> 0:
                         return genero_xls_operativas(resultados,desde,hasta,selected_columns,gastos)
                     else:

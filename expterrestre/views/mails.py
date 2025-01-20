@@ -415,7 +415,29 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += '</table>'
 
         return texto, resultado
+    elif title == 'Orden de facturacion':
 
+        resultado['asunto'] = 'ORDEN DE FACTURACION: - seguimiento: ' + str(
+            row.seguimiento)
+
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+        if isinstance(seguimiento.eta, datetime):
+            llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
+        else:
+            llegada = ''
+        tabla_html = fecha_formateada+"<br><br>"
+        tabla_html += f"<p>ORDEN DE FACTURACIÓN SEGUIMIENTO: {row.seguimiento}</p><br>"
+        tabla_html += f"<p>POSICIÓN: {row.posicion}</p><br>"
+        tabla_html += f"<p>MASTER: {row.awb}</p><br>"
+        tabla_html += f"<p>ETA {llegada} </p><br>"
+        tabla_html += f"<p>CLIENTE: {seguimiento.cliente}</p><br>"
+
+
+
+
+        return tabla_html, resultado
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:

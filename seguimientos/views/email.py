@@ -1,13 +1,16 @@
 import datetime
 import json
+import locale
+
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count
 from django.http import HttpResponse
 import base64
 
 from cargosystem import settings
+from mantenimientos.models import Clientes
 from mantenimientos.views.bancos import is_ajax
-from seguimientos.models import VGrillaSeguimientos, Envases
+from seguimientos.models import VGrillaSeguimientos, Envases, Cargaaerea
 
 
 @login_required(login_url='/')
@@ -29,6 +32,7 @@ def get_data_email(request):
             title = request.POST['title']
             row_number = request.POST['row_number']
             row = VGrillaSeguimientos.objects.get(numero=row_number)
+
             texto = ''
             # image_path = str(settings.BASE_DIR) +  "/cargosystem/static/images/oceanlink.png"  # Cambia esto a la ruta de tu imagen
             # base64_string = image_to_base64(image_path)
@@ -339,6 +343,234 @@ def get_data_email(request):
                 texto += 'TEL: 598 2917 0501 <br>'
                 texto += 'FAX: 598 2916 8215 <br><br><br><br>'
                 texto += '</table>'
+            elif title == 'Cargo release':
+                fecha_actual = datetime.datetime.now()
+                resultado['asunto'] = 'CARGO RELEASE - Seg.: ' + str(row.numero) +'- HB/l: ' + str(row.hawb) + ' - Shipper: ' + str(row.embarcador) + ' - CNEE: ' + str(row.consignatario)
+                # # TEXTO DE CUERPO DEL MENSAJE
+                fecha_formateada = fecha_actual.strftime(f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y')
+
+                texto='<p> SEG: '+ str(row.numero) + '<br>'
+                texto+='HBL: '+ str(row.hawb) + '<br>'
+                texto+='Date: '+ fecha_formateada.capitalize().upper() + '<br>'
+                texto+='PLEASE NOTE THAT WE REALEASED DOCS TO CONSIGNEE. <br>'
+                texto+='THANK YOU VERY MUCH FOR YOUR ASSISTANCE.<br>'
+                texto+='BEST REGARDS,<br>'
+                texto+='OCEANLINK<br></p>'
+            elif title == 'Release documentacion':
+                try:
+                    resultado['asunto'] = 'RELEASE DOCUMENTACION - FCR.: ' + str(
+                        row.hawb or '') + ' - SEGUIMIENTO' + str(
+                        row.numero or '')
+
+                    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # Revisa si este ajuste de idioma causa problemas
+
+                    fecha_actual = datetime.datetime.now()
+
+                    fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+
+                    texto = fecha_formateada + '<br><br>'
+
+                    texto += '<p>Estimados, </p><br>'
+
+                    texto += '<p>Informamos a Uds. que se encuentra a vuestra disposición para ser retirada en nuestras oficinas la documentación correspondiente a la libreación </p>'
+
+                    texto += '<p>del siguiente embarque: </p><br>'
+
+                    texto += f'<p>FCR: {row.hawb or ""} </p>'
+
+                    texto += f'<p>BUQUE: {row.vapor or ""} </p>'
+
+                    texto += '<p>Favor presentar para dicha liberación de los FCR correspondientes a este embarque. </p>'
+
+                    texto += '<p>Nuestro horario para transferencias es de lunes a viernes de 08.30 a 12.00 y de 13.00 a 16.30 hrs. </p>'
+
+                    texto += '<p>Saludos, </p><br>'
+                    texto += '<p>OCEANLINK </p><br>'
+
+                except Exception as e:
+                    return None, {"resultado": "error", "mensaje": f"Error en 'Relese documentación': {e}"}
+            elif title == 'Liberacion':
+                resultado['asunto'] = 'LIBERACIÓN: ' + str(row.awb) + ' - seguimiento: ' + str(
+                    row.numero)
+                locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+                fecha_actual = datetime.datetime.now()
+                fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+
+                texto = fecha_formateada + "<br><br>"
+                texto += f"<p>ESTIMADOS, SOLICITAMOS LA LIBERACIÓN DEL SIGUIENTE BL:{row.awb}</p><br>"
+                texto += f"<p>ADJUNTAMOS:</p>"
+                texto += f"<p>*BL {row.awb} ENDOSADO</p>"
+                texto += f"<p>*ARRIVAL NOTICE ENDOSADO</p>"
+                texto += f"<p>*CONTRATO DE RESPONSABILIDAD</p>"
+                texto += f"<p>*COMPROBANTE DE PAGO</p><br>"
+                texto += f"<p>SALUDOS,</p><br>"
+                texto += f"<p>OCEANLINK</p><br>"
+            elif title == 'Notificacion cambio de linea':
+                resultado['asunto'] = 'NOTIFICACIÓN CAMBIO DE LÍNEA / NVOCC / CÍA AEREA '
+                locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+                fecha_actual = datetime.datetime.now()
+                fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+
+                texto = fecha_formateada + "<br><br>"
+                texto += f"<p>SEG: {row.numero}</p><br>"
+                texto += f"<p>CONFIRMO CAMBIO DE LÍNEA / NVOCC / CÍA AEREA DE ESTE SEGUIMIENTO</p><br>"
+                texto += f"<p>ANTERIOR: </p><br>"
+                texto += f"<p>ACTUAL: {row.transportista}</p><br><br>"
+                texto += f"<p>OCEANLINK</p><br>"
+            elif title == 'Shipping instruction':
+                tabla_html = "<table style='width:40%'>"
+                # Definir los campos y sus respectivos valores
+                resultado['asunto'] = 'LCC SHIPPING INSTRUCTION: Ref: ' + str(row.numero) + ' ' \
+                                           ' - Shipper: ' + str(row.embarcador) + ' - Consig: ' \
+                                      '' + str(row.consignatario)
+                fecha_actual = datetime.datetime.now()
+                fecha_formateada = fecha_actual.strftime(
+                    f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y')
+                texto += 'Date: '+fecha_formateada.capitalize()+' <br>'
+                texto += 'To: '+str(row.agente)+' <br><br>'
+
+                cons = Clientes.objects.get(codigo=row.consignatario_codigo)
+                if cons:
+                    direccion = cons.direccion
+                    pais_c = cons.pais
+                    tel = cons.telefono
+                    rut = cons.ruc
+                else:
+                    direccion = None
+                    pais_c = None
+                    tel = None
+                    rut = None
+
+                embarcador = Clientes.objects.get(codigo=row.embarcador_codigo)
+                if embarcador:
+                    pais = embarcador.pais
+                    ciudad = embarcador.ciudad
+                    contacto = embarcador.contactos
+                else:
+                    pais = None
+                    ciudad = None
+                    contacto = None
+
+
+                texto += str(row.embarcador)+',<br>'
+                texto += str(ciudad)+','+str(pais)+'<br>'
+                texto += 'Contactos: '+str(contacto)+'<br><br>'
+
+                texto+='<p> Dear colleagues: </p>'
+                texto+='<p> Please find bellow coordination details for a shipment to '+row.destino_text+'</p><br>'
+                texto+='<p>CARGO DETAILS</p><br><br>'
+
+
+                if isinstance(row.etd,datetime.datetime):
+                    salida = str(row.etd.strftime("%d/%m/%Y"))
+                else:
+                    salida = ''
+                if isinstance(row.eta,datetime.datetime):
+                    llegada = str(row.eta.strftime("%d/%m/%Y"))
+                else:
+                    llegada = ''
+
+                carga = Cargaaerea.objects.get(numero=row.numero)
+                if carga:
+                    producto = carga.producto
+                    bultos = carga.bultos
+                    peso=carga.bruto
+                    volumen=carga.cbm
+                else:
+                    producto = None
+                    bultos = None
+                    peso = None
+                    volumen = None
+
+                campos = [
+                    ("Internal Reference", row.numero),
+                    ("Delivery date", llegada if llegada is not None else ""),
+                    ("Port of Loading", str(row.loading) if row.loading is not None else ""),
+                    ("Port of Discharge", str(row.discharge) if row.discharge is not None else ""),
+                    ("Payment Condition", str(row.pago) if row.pago is not None else ""),
+                    ("Incoterm", str(row.terminos) if row.terminos is not None else ""),
+                    ("Commodity", str(producto.nombre) if producto.nombre is not None else ""),
+                    ("Pieces", str(bultos) if bultos is not None else ""),
+                    ("Weight", peso if peso is not None else ""),
+                    ("Volume", str(volumen) if volumen is not None else ""),
+                ]
+                # Agregar campos a la tabla
+
+                for campo, valor in campos:
+                    tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
+
+                tabla_html += "</table><br><br>"
+                texto += tabla_html
+                texto += '<p>HBL INFO <br><br>'
+                texto += 'Please note HS Code is MANDATORY on HBL body.</p> <br>'
+                texto += str(row.embarcador) + ',<br>'
+                texto += str(ciudad) + ',' + str(pais) + '<br>'
+                texto += 'Contactos: ' + str(contacto) + '<br><br><br>'
+
+                campos2 = [
+                    ("Consignee", row.consignatario),
+                    ("Address", direccion if direccion is not None else ""),
+                    ("Country", pais if pais is not None else ""),
+                    ("Ph", tel if tel is not None else ""),
+                    ("RUT", rut if rut is not None else ""),
+                ]
+                # Agregar campos a la tabla
+                tabla_html = "<table style='width:40%'>"
+                for campo, valor in campos2:
+                    tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
+
+                tabla_html += "</table><br><br>"
+                texto += tabla_html
+
+                texto += '<p>MBL INFO <br><br>'
+                texto += 'Please consign MBL EXACTLY as shown bellow. <br>'
+                texto += 'Please note HS Code is MANDATORY on MBL body.</p> <br>'
+                campos3 = [
+                    ("Shipper", row.embarcador),
+                ]
+                # Agregar campos a la tabla
+                tabla_html = "<table style='width:40%'>"
+                for campo, valor in campos3:
+                    tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
+
+                tabla_html += "</table><br><br>"
+                texto += tabla_html
+
+                texto += '<p>MBL/HBL information must include: <br><br>'
+                texto += ('  - Container number, seal(s) number(s), quantity of pieces, kind od units (packages, pieces, crates, tec), <br>'
+                          ' weight, volume (LCL), port of loading, port of discharge, and description of goods, HS tariff Code/NCM number, <br>'
+                          '(first four digits are mandatory), <br>')
+                texto+=('  -Information on both documents must match. Any discrepancies between MBL/HBL are likely to incur fines and shipment blocked <br>'
+                        'by Uruguayan Customs. <br> ')
+                texto+='  -Telex Release / Express Release / Seawaybill wil generate extra issuing charges at destination depending on Shipping Line. <br>'
+                texto+='  -Consignee on MBL/HBL must include detailed information: <br>'
+                texto+=('  -Full name, address, phone number, contact person or e-mail address, Tax ID (RUT) or passport number if consignee <br>'
+                        'is an individual. <br>')
+                texto += ('  -Pre-alert notice must be sent at least 5 days before vessel arrival. This will allow sufficient time for eventual br>'
+                          'amendments as needed and prevent additional fees from the steamship line. <br><br>')
+
+                texto+='OCEANLINK'
+            elif title == 'Orden de facturacion':
+
+                resultado['asunto'] = 'ORDEN DE FACTURACION: - seguimiento: ' + str(
+                    row.numero)
+
+                locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+                fecha_actual = datetime.datetime.now()
+                fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+                if isinstance(row.eta, datetime.datetime):
+                    llegada = str(row.eta.strftime("%d/%m/%Y"))
+                else:
+                    llegada = ''
+                texto = fecha_formateada + "<br><br>"
+                texto += f"<p>ORDEN DE FACTURACIÓN SEGUIMIENTO: {row.numero}</p><br>"
+                texto += f"<p>POSICIÓN: {row.posicion}</p><br>"
+                texto += f"<p>MASTER: {row.awb}</p><br>"
+                texto += f"<p>ETA {llegada} </p><br>"
+                texto += f"<p>CLIENTE: {row.cliente}</p><br>"
+                texto += 'OCEANLINK'
+
+
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
         except Exception as e:
@@ -348,6 +580,7 @@ def get_data_email(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
 
 
 def image_to_base64(image_path):
