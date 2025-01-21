@@ -7,7 +7,8 @@ from django.db.models import Count
 from django.http import HttpResponse
 import base64
 from django.views.decorators.csrf import csrf_exempt
-from expmarit.models import VEmbarqueaereo, ExpmaritCargaaerea as Cargaaerea, ExpmaritEnvases as Envases, ExpmaritServiceaereo as Serviceaereo, ExpmaritEmbarqueaereo as Embarqueaereo
+from expmarit.models import VEmbarqueaereo, ExpmaritCargaaerea as Cargaaerea, ExpmaritEnvases as Envases, \
+    ExpmaritServiceaereo as Serviceaereo, ExpmaritEmbarqueaereo as Embarqueaereo, ExpmaritCargaaerea
 from mantenimientos.views.bancos import is_ajax
 from mantenimientos.models import Productos, Clientes, Monedas
 from seguimientos .models import VGrillaSeguimientos
@@ -521,6 +522,145 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
 
 
         return tabla_html, resultado
+
+    elif title == 'Shipping instruction':
+        tabla_html = "<table style='width:40%'>"
+        # Definir los campos y sus respectivos valores
+        resultado['asunto'] = 'LCC SHIPPING INSTRUCTION: Ref: ' + str(row.numero) + ' ' \
+                                                                                    ' - Shipper: ' + str(
+            row.embarcador) + ' - Consig: ' \
+                              '' + str(row.consignatario)
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+        texto += 'Date: ' + fecha_formateada.capitalize() + ' <br>'
+        texto += 'To: ' + str(row.agente) + ' <br><br>'
+
+        cons = Clientes.objects.get(codigo=embarque.consignatario)
+        if cons:
+            direccion = cons.direccion
+            pais_c = cons.pais
+            tel = cons.telefono
+            rut = cons.ruc
+        else:
+            direccion = None
+            pais_c = None
+            tel = None
+            rut = None
+
+        embarcador = Clientes.objects.get(codigo=embarque.embarcador)
+        if embarcador:
+            pais = embarcador.pais
+            ciudad = embarcador.ciudad
+            contacto = embarcador.contactos
+        else:
+            pais = None
+            ciudad = None
+            contacto = None
+
+        texto += str(row.embarcador) + ',<br>'
+        texto += str(ciudad) + ',' + str(pais) + '<br>'
+        texto += 'Contactos: ' + str(contacto) + '<br><br>'
+
+        texto += '<p> Dear colleagues: </p>'
+        texto += '<p> Please find bellow coordination details for a shipment to ' + row.destino + '</p><br>'
+        texto += '<p>CARGO DETAILS</p><br><br>'
+
+        if isinstance(seguimiento.etd, datetime):
+            salida = str(seguimiento.etd.strftime("%d/%m/%Y"))
+        else:
+            salida = ''
+        if isinstance(seguimiento.eta, datetime):
+            llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
+        else:
+            llegada = ''
+
+        carga = ExpmaritCargaaerea.objects.get(numero=row.numero)
+        if carga:
+            producto = carga.producto
+            bultos = carga.bultos
+            peso = carga.bruto
+            volumen = carga.medidas
+        else:
+            producto = None
+            bultos = None
+            peso = None
+            volumen = None
+
+        campos = [
+            ("Internal Reference", row.numero),
+            ("Delivery date", llegada if llegada is not None else ""),
+            ("Port of Loading", str(row.origen) if row.origen is not None else ""),
+            ("Port of Discharge", str(row.destino) if row.destino is not None else ""),
+            ("Payment Condition", str(row.pago_flete) if row.pago_flete is not None else ""),
+            ("Incoterm", str(row.terminos) if row.terminos is not None else ""),
+            ("Commodity", str(producto.nombre) if producto.nombre is not None else ""),
+            ("Pieces", str(bultos) if bultos is not None else ""),
+            ("Weight", peso if peso is not None else ""),
+            ("Volume", str(volumen) if volumen is not None else ""),
+        ]
+        # Agregar campos a la tabla
+
+        for campo, valor in campos:
+            tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
+
+        tabla_html += "</table><br><br>"
+        texto += tabla_html
+        texto += '<p>HBL INFO <br><br>'
+        texto += 'Please note HS Code is MANDATORY on HBL body.</p> <br>'
+        texto += str(row.embarcador) + ',<br>'
+        texto += str(ciudad) + ',' + str(pais) + '<br>'
+        texto += 'Contactos: ' + str(contacto) + '<br><br><br>'
+
+        campos2 = [
+            ("Consignee", row.consignatario),
+            ("Address", direccion if direccion is not None else ""),
+            ("Country", pais if pais is not None else ""),
+            ("Ph", tel if tel is not None else ""),
+            ("RUT", rut if rut is not None else ""),
+        ]
+        # Agregar campos a la tabla
+        tabla_html = "<table style='width:40%'>"
+        for campo, valor in campos2:
+            tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
+
+        tabla_html += "</table><br><br>"
+        texto += tabla_html
+
+        texto += '<p>MBL INFO <br><br>'
+        texto += 'Please consign MBL EXACTLY as shown bellow. <br>'
+        texto += 'Please note HS Code is MANDATORY on MBL body.</p> <br>'
+        campos3 = [
+            ("Shipper", row.embarcador),
+        ]
+        # Agregar campos a la tabla
+        tabla_html = "<table style='width:40%'>"
+        for campo, valor in campos3:
+            tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
+
+        tabla_html += "</table><br><br>"
+        texto += tabla_html
+
+        texto += '<p>MBL/HBL information must include: <br><br>'
+        texto += (
+            '  - Container number, seal(s) number(s), quantity of pieces, kind od units (packages, pieces, crates, tec), <br>'
+            ' weight, volume (LCL), port of loading, port of discharge, and description of goods, HS tariff Code/NCM number, <br>'
+            '(first four digits are mandatory), <br>')
+        texto += (
+            '  -Information on both documents must match. Any discrepancies between MBL/HBL are likely to incur fines and shipment blocked <br>'
+            'by Uruguayan Customs. <br> ')
+        texto += '  -Telex Release / Express Release / Seawaybill wil generate extra issuing charges at destination depending on Shipping Line. <br>'
+        texto += '  -Consignee on MBL/HBL must include detailed information: <br>'
+        texto += (
+            '  -Full name, address, phone number, contact person or e-mail address, Tax ID (RUT) or passport number if consignee <br>'
+            'is an individual. <br>')
+        texto += (
+            '  -Pre-alert notice must be sent at least 5 days before vessel arrival. This will allow sufficient time for eventual br>'
+            'amendments as needed and prevent additional fees from the steamship line. <br><br>')
+
+
+        return texto, resultado
+
 
 
 def image_to_base64(image_path):
