@@ -416,9 +416,6 @@ class edit_moneda_form(forms.Form):
                                   label="Corporativo", max_length=3)
 
 class add_producto_form(forms.Form):
-    codigo = forms.IntegerField(widget=forms.NumberInput(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'min': 0, 'max': 999}, ),
-                                required=True, label="Código")
     nombre = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 50, 'required': True, }), label="Nombre",
                              max_length=50)

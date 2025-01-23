@@ -54,8 +54,8 @@ $(document).ready(function()
                                         success:function(resultado){
                                             aux = resultado['resultado'];
                                             if(aux == 'exito'){
+                                                alert('Producto eliminado correctamente');
                                                 table.ajax.reload();
-                                                
                                             }else{
                                                 alert(aux);
                                             }
