@@ -344,7 +344,7 @@ def source_facturas_pendientes(request):
         nromoneda = int(request.GET.get('nromoneda'))
 
         # Filtrar registros por cliente y moneda=2
-        pendientes = VistaCobranza.objects.filter(nrocliente=cliente, moneda=nromoneda)
+        pendientes = VistaCobranza.objects.filter(nrocliente=cliente)
 
         # Agrupar por `autogenerado` y recalcular `saldo` y `pago`
         agrupados = defaultdict(lambda: {

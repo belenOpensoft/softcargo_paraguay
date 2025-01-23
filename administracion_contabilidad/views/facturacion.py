@@ -179,7 +179,7 @@ def buscar_cliente(request):
 def buscar_clientes(request):
     if request.method == "GET":
         cliente_id = request.GET.get("id")
-        cliente = Clientes.objects.filter(id=cliente_id).first()
+        cliente = Clientes.objects.filter(codigo=cliente_id).first()
 
         if cliente:
             data = {
@@ -245,7 +245,7 @@ def procesar_factura(request):
             tipo = request.POST.get('tipoFac', 0)
 
             preventa = json.loads(request.POST.get('preventa'))
-            if preventa!=0:
+            if preventa:
                 autogenerado=preventa.get('autogenerado')
                 master=preventa.get('master')
                 house=preventa.get('house')
@@ -834,14 +834,14 @@ def source_infofactura(request):
         start = int(request.GET.get('start', 0))
         length = int(request.GET.get('length', 10))
 
-        anio_limite = 2023
+        anio_limite = 2010
 
         infofacturas_qs = Infofactura.objects.all()
 
         infofacturas_qs = infofacturas_qs.filter(
             Q(autogenerado__gte=str(anio_limite))
         ).exclude(
-            autogenerado__in=Boleta.objects.values('autogenerado')
+            autogenerado__in=Movims.objects.values('mautogen')
         )
 
 

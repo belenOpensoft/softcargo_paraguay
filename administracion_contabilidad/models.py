@@ -10506,6 +10506,7 @@ class VistaPagos(models.Model):
     monto = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     pago = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    saldo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     fecha = models.DateTimeField(null=True, blank=True)
 
     class Meta:

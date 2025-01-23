@@ -128,7 +128,7 @@ def buscar_proveedor(request):
 def buscar_proveedores(request):
     if request.method == "GET":
         proveedor_id = request.GET.get("codigo")
-        proveedor = Clientes.objects.filter(id=proveedor_id).first()
+        proveedor = Clientes.objects.filter(codigo=proveedor_id).first()
 
         if proveedor:
             data = {
@@ -155,9 +155,15 @@ def obtener_imputables(request):
 
     filtrados=[]
     for r in registros_totales:
-        saldo = r.total - r.pago if r.pago is not None else r.total
+        if r.tipo_factura!='anticipo':
+            saldo = r.total - r.pago if r.pago is not None else r.total
+            if saldo <0:
+                saldo='error'
+        else:
+            saldo = -r.saldo
+
         pago = r.pago if r.pago is not None else 0
-        if pago != r.total:
+        if pago != r.total and saldo !='error':
             try:
                 moneda_nombre = Monedas.objects.get(codigo=r.moneda).nombre if r.moneda in [1, 2, 3, 4, 5,6] else ''
             except Monedas.DoesNotExist:
@@ -190,6 +196,7 @@ def obtener_imputables(request):
     }
 
     return JsonResponse(response_data, safe=False)
+
 
 @transaction.atomic
 def guardar_impuorden(request):
@@ -538,6 +545,7 @@ def guardar_anticipo_orden(request):
                 orden.mcaja = 11112 if cobranza[0]['nromoneda'] != 1 else 11111
                 orden.mautogenmovims = autogenerado_impuventa if cobranza[0]['definitivo'] == True else None
 
+
             try:
                 cliente_data = Clientes.objects.get(codigo=cobranza[0]['nrocliente'])
             except Exception as _:
@@ -575,7 +583,7 @@ def guardar_anticipo_orden(request):
                         'cuenta': asiento['cuenta'],
                         'documento': cobranza[0]['numero'],
                         'vencimiento': fecha_obj,
-                        'pasado': 0,
+                        'pasado': 1,
                         'autogenerado': autogenerado_impuventa,
                         'cliente': cliente_data.codigo,
                         'banco': asiento['banco'] if asiento['modo'] != 'CHEQUE' else " - ".join(map(str, Cuentas.objects.filter(xcodigo=asiento['cuenta']).values_list('xcodigo', 'xnombre').first() or ('', ''))),
@@ -630,7 +638,7 @@ def guardar_anticipo_orden(request):
                     'cuenta': cliente_data.ctavta,
                     'documento': cobranza[0]['numero'],
                     'vencimiento': fecha_obj,
-                    'pasado': 0,
+                    'pasado': 1,
                     'autogenerado': autogenerado_impuventa,
                     'cliente': cliente_data.codigo,
                     'banco': 'S/I',

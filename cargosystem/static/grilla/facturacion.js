@@ -32,6 +32,7 @@ var que_buscar = '';
             });
         },
         minLength: 2,
+        appendTo: "#facturaM",
         select: function(event, ui) {
             const { id } = ui.item;
             $.ajax({
@@ -74,6 +75,7 @@ var que_buscar = '';
             });
         },
         minLength: 2,
+        appendTo: "#facturaM",
         select: function(event, ui) {
             $.ajax({
                 url: "/admin_cont/buscar_items_v",

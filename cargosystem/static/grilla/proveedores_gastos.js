@@ -2,6 +2,9 @@ $(document).ready(function() {
     var buscar = '';
     var que_buscar = '';
     let contador = 0;
+
+    verificarTipoFactura();
+
     $('#tabla_proveedoresygastos tfoot th').each(function () {
         let title = $(this).text();
         if (title !== '') {
@@ -48,26 +51,14 @@ $(document).ready(function() {
     },
     "rowCallback": function (row, data) {}
 });
-
     const valorInicial = $('#id_tipo').find('option:selected').text();
+
     $('#tipoSeleccionado').text(valorInicial);
 
     $('#id_tipo').change(function() {
         const valorSeleccionado = $(this).find('option:selected').text();
         $('#tipoSeleccionado').text(valorSeleccionado);
     });
-
-    // Mostrar u ocultar tipo_factura
-    function verificarTipoFactura() {
-        const valorSeleccionado = $('#id_tipo').find('option:selected').val();
-        if (valorSeleccionado === 'devolucion_contado') {
-            $('#id_tipo_factura').hide();
-        } else {
-            $('#id_tipo_factura').show();
-        }
-    }
-
-    verificarTipoFactura();
 
     $('#id_tipo').change(function() {
         const valorSeleccionado = $(this).find('option:selected').text();
@@ -78,19 +69,10 @@ $(document).ready(function() {
     // Verificar el estado inicial de tercerizado
         toggleProveedor2();
 
-        // Detectar cambios en el campo tercerizado
-        $('#id_tercerizado').change(function() {
-            toggleProveedor2();
-        });
-
-        // Función para mostrar u ocultar el campo proveedor2
-        function toggleProveedor2() {
-            if ($('#id_tercerizado').is(':checked')) {
-                $('#proveedor2').show();
-            } else {
-                $('#proveedor2').hide();
-            }
-        }
+    // Detectar cambios en el campo tercerizado
+    $('#id_tercerizado').change(function() {
+        toggleProveedor2();
+    });
 
     // Autocomplete proveedor
     $('#proveedor').autocomplete({
@@ -103,22 +85,23 @@ $(document).ready(function() {
                     response(data.map(proveedor => ({
                         label: proveedor.text,
                         value: proveedor.text,
-                        id: proveedor.id
+                        codigo: proveedor.codigo
                     })));
                 },
                 error: xhr => console.error('Error al buscar proveedores:', xhr)
             });
         },
         minLength: 2,
+        appendTo: "#proveedoresModal",
         select: function(event, ui) {
-            const { id } = ui.item;
+            let codigo = ui.item['codigo'];
             $.ajax({
                 url: "/admin_cont/buscar_proveedores",
-                data: { id },
+                data: { 'codigo': codigo, },
                 dataType: 'json',
                 success: proveedor => {
                     const row = `
-                        <tr id="proveedor-${id}">
+                        <tr id="proveedor-${codigo}">
                             <td class="d-none">${proveedor.codigo}</td>
                             <td>${proveedor.empresa}</td>
                             <td>${proveedor.ruc}</td>
@@ -290,10 +273,7 @@ $(document).ready(function() {
         }
     });
 
-    // Limpiar campos
-
-
-        $('#facturaForm').submit(function(event) {
+    $('#facturaForm').submit(function(event) {
         event.preventDefault();
         if (confirm('¿Está seguro de que desea facturar?')) {
             let tipoFac = $('#id_tipo').val();
@@ -372,7 +352,15 @@ var wHeight = $(window).height();
 var dHeight = wHeight * 0.30;
 let total=0;
 
-
+// Mostrar u ocultar tipo_factura
+function verificarTipoFactura() {
+    const valorSeleccionado = $('#id_tipo').find('option:selected').val();
+    if (valorSeleccionado === 'devolucion_contado') {
+        $('#id_tipo_factura').hide();
+    } else {
+        $('#id_tipo_factura').show();
+    }
+}
 function abrir_modal() {
     $("#proveedoresModal").dialog({
         autoOpen: true,
@@ -405,81 +393,43 @@ function abrir_modal() {
             alert("Error al cargar los datos iniciales: " + error);
         }
     });
-    $('#proveedor').autocomplete({
-        source: function(request, response) {
-            $.ajax({
-                url: "/admin_cont/buscar_cliente",
-                dataType: 'json',
-                data: { term: request.term },
-                success: function(data) {
-                    response(data.map(cliente => ({
-                        label: cliente.text,
-                        value: cliente.text,
-                        id: cliente.id
-                    })));
-                },
-                error: xhr => console.error('Error al buscar clientes:', xhr)
-            });
-        },
-        minLength: 2,
-        appendTo: "#proveedoresModal",
-        select: function(event, ui) {
-            const { id } = ui.item;
-            $.ajax({
-                url: "/admin_cont/buscar_clientes",
-                data: { id },
-                dataType: 'json',
-                success: cliente => {
-                    const row = `
-                        <tr id="cliente-${id}">
-                            <td class="d-none">${cliente.codigo}</td>
-                            <td>${cliente.empresa}</td>
-                            <td>${cliente.ruc}</td>
-                        </tr>`;
-                    $('#proveedorTable tbody').html(row);
-                    $('#proveedorTable').show();
-                },
-                error: xhr => console.error('Error al obtener los detalles del cliente:', xhr)
-            });
-        }
-    });
-    $('#proveedor2').autocomplete({
-        source: function(request, response) {
-            $.ajax({
-                url: "/admin_cont/buscar_cliente",
-                dataType: 'json',
-                data: { term: request.term },
-                success: function(data) {
-                    response(data.map(cliente => ({
-                        label: cliente.text,
-                        value: cliente.text,
-                        id: cliente.id
-                    })));
-                },
-                error: xhr => console.error('Error al buscar clientes:', xhr)
-            });
-        },
-        minLength: 2,
-        appendTo: "#proveedoresModal",
-        select: function(event, ui) {
-            const { id } = ui.item;
-            $.ajax({
-                url: "/admin_cont/buscar_clientes",
-                data: { id },
-                dataType: 'json',
-                success: cliente => {
-                    const row = `
-                        <tr id="cliente-${id}">
-                            <td class="d-none">${cliente.codigo}</td>
-                            <td>${cliente.empresa}</td>
-                        </tr>`;
-                    $('#proveedor2Table tbody').html(row);
-                    $('#proveedor2Table').show();
-                },
-                error: xhr => console.error('Error al obtener los detalles del cliente:', xhr)
-            });
-        }
-    });
+//    $('#proveedor2').autocomplete({
+//        source: function(request, response) {
+//            $.ajax({
+//                url: "/admin_cont/buscar_cliente",
+//                dataType: 'json',
+//                data: { term: request.term },
+//                success: function(data) {
+//                    response(data.map(cliente => ({
+//                        label: cliente.text,
+//                        value: cliente.text,
+//                        id: cliente.id
+//                    })));
+//                },
+//                error: xhr => console.error('Error al buscar clientes:', xhr)
+//            });
+//        },
+//        minLength: 2,
+//        appendTo: "##proveedoresModal",
+//        select: function(event, ui) {
+//            const { id } = ui.item;
+//            $.ajax({
+//                url: "/admin_cont/buscar_clientes",
+//                data: { id },
+//                dataType: 'json',
+//                success: cliente => {
+//                    const row = `
+//                        <tr id="cliente-${id}">
+//                            <td class="d-none">${cliente.codigo}</td>
+//                            <td>${cliente.empresa}</td>
+//                        </tr>`;
+//                    $('#proveedor2Table tbody').html(row);
+//                    $('#proveedor2Table').show();
+//                },
+//                error: xhr => console.error('Error al obtener los detalles del cliente:', xhr)
+//            });
+//        }
+//    });
     $('#item').autocomplete({
     source: function(request, response) {
         $.ajax({
@@ -516,6 +466,7 @@ function abrir_modal() {
     }
 });
 let itemCounter = 0;
+
 $('#agregarItem').off('click').on('click', function() {
     // Obtén los valores antes de cualquier operación
     const item = $('#item').val();
@@ -582,7 +533,14 @@ function limpiarCampos() {
     $('#id_descripcion_item input').val('');
     $('#id_precio input').val('');
 }
-
+// Función para mostrar u ocultar el campo proveedor2
+function toggleProveedor2() {
+        if ($('#id_tercerizado').is(':checked')) {
+            $('#proveedor2').show();
+        } else {
+            $('#proveedor2').hide();
+        }
+}
 function actualizarTotal() {
     let neto = 0;
     let total = 0; // Inicializar total aquí
