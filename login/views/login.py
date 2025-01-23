@@ -10,7 +10,11 @@ from login.forms import usuarioForm
 
 def login_view(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect('/')
+        if 'rol' in request.session:
+            return HttpResponseRedirect('/')
+        else:
+            logout(request)
+            return HttpResponseRedirect('/login')
     else:
         contexto = {
             'form': usuarioForm(),

@@ -32,7 +32,6 @@ def source_embarques(request):
         registros = Cargaaerea.objects.filter(numero=numero).order_by(*order)
         se = VGrillaSeguimientos.objects.get(numero=numero)
         data_extra = {
-
             'tarifaprofit': float(se.tarifaprofit) if se.tarifaprofit is not None else '',
             'muestroflete': float(se.muestroflete) if se.muestroflete is not None else '',
             'tarifaventa': float(se.tarifaventa) if se.tarifaventa is not None else '',
@@ -75,7 +74,7 @@ def get_data(registros_filtrados):
             registro_json.append('' if registro.cbm is None else str(registro.cbm))
             registro_json.append('' if registro.mercaderia is None else str(registro.mercaderia))
             registro_json.append('' if registro.materialreceipt is None else str(registro.materialreceipt))
-            registro_json.append('' if registro.producto is None else str(registro.producto.id))
+            registro_json.append('' if registro.producto is None else str(registro.producto.codigo))
             data.append(registro_json)
         return data
     except Exception as e:

@@ -1443,39 +1443,39 @@ $(document).ready(function () {
             alert('Debe seleccionar al menos un registro');
         }
     });
-    $('#asignar_guia').click(function () {
-        if(confirm('¿Confirma asignar guia aerea?')){
-            row = table.rows('.table-secondary').data();
-            if (row.length === 1) {
-                if(row[0][2] == 'EXPORT AEREO'){
-                    miurl = "/asignar_guia_aerea/";
-                    var toData = {
-                        'id': row[0][0],
-                        'csrfmiddlewaretoken': csrf_token,
-                    };
-                    $.ajax({
-                        type: "POST",
-                        url: miurl,
-                        data: toData,
-                        success: function (resultado) {
-                            aux = resultado['resultado'];
-                            if (aux == 'exito') {
-                                alert('Guian asignada N°' + resultado['numero']);
-                                mostrarToast('¡Guia asignada correctamente!', 'success');
-                            } else {
-                                alert(aux);
-                            }
-                        }
-                    });
-                }else{
-                    alert('La guias solo pueden ser asignadas a EXPORTACION AEREA');
-                }
-
-            } else {
-                alert('Debe seleccionar al menos un registro');
-            }
-        }
-    });
+//    $('#asignar_guia').click(function () {
+//        if(confirm('¿Confirma asignar guia aerea?')){
+//            row = table.rows('.table-secondary').data();
+//            if (row.length === 1) {
+//                if(row[0][2] == 'EXPORT AEREO'){
+//                    miurl = "/asignar_guia_aerea/";
+//                    var toData = {
+//                        'id': row[0][0],
+//                        'csrfmiddlewaretoken': csrf_token,
+//                    };
+//                    $.ajax({
+//                        type: "POST",
+//                        url: miurl,
+//                        data: toData,
+//                        success: function (resultado) {
+//                            aux = resultado['resultado'];
+//                            if (aux == 'exito') {
+//                                alert('Guian asignada N°' + resultado['numero']);
+//                                mostrarToast('¡Guia asignada correctamente!', 'success');
+//                            } else {
+//                                alert(aux);
+//                            }
+//                        }
+//                    });
+//                }else{
+//                    alert('La guias solo pueden ser asignadas a EXPORTACION AEREA');
+//                }
+//
+//            } else {
+//                alert('Debe seleccionar al menos un registro');
+//            }
+//        }
+//    });
     $('#descargar_guia').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
@@ -1566,6 +1566,7 @@ $(document).ready(function () {
     });
     $('#tabla_embarques tbody').on('dblclick', 'tr', function () {
         var data = table_embarques.row(this).data();
+        console.log(data);
         $("#id_embarque_id").val(data[0]);
         $("#id_producto").val(data[9]);
         $("#id_bultos_embarque").val(data[2]);

@@ -540,6 +540,9 @@ def clonar_seguimiento(request):
         numero = SeguimientoReal.objects.all().values_list('numero').order_by('-numero')[:1][0][0]
         clonado = deepcopy(original)
         clonado.id = None
+        clonado.awb = None
+        clonado.hawb = None
+        clonado.posicion = None
         clonado.numero = numero + 1
         for row in data:
             registros = None

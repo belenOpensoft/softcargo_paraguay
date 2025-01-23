@@ -143,7 +143,6 @@ def agregar_producto(request):
                 form = add_producto_form(request.POST)
                 if form.is_valid():
                     producto = Productos()
-                    producto.codigo = form.cleaned_data['codigo']
                     producto.nombre = form.cleaned_data['nombre']
                     producto.descripcion = form.cleaned_data['descripcion']
                     producto.save()

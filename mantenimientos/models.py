@@ -2234,7 +2234,7 @@ class Paises(models.Model):
 
 class Productos(models.Model):
 
-    codigo = models.SmallIntegerField(unique=True)
+    codigo = models.IntegerField(unique=True)
     nombre = models.CharField(max_length=50, blank=True, null=True)
     descripcion = models.CharField(max_length=150, blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2278,6 +2278,12 @@ class Productos(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.codigo = Productos.objects.all().order_by('-codigo')[0].codigo + 1
+        super().save(*args, **kwargs)  # Guarda el objeto
+
 
 
 class Sysregisedits(models.Model):
