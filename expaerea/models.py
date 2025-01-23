@@ -894,7 +894,9 @@ class VEmbarqueaereo(models.Model):
     awb = models.CharField(max_length=40, blank=True, null=True)
     hawb = models.CharField(max_length=50, blank=True, null=True)
     agente = models.CharField(max_length=255, blank=True, null=True)  # Nombre del agente
-    consignatario = models.CharField(max_length=255, blank=True, null=True)  # Nombre del consignatario
+    consignatario = models.CharField(max_length=255, blank=True, null=True)
+    consignatario_id = models.IntegerField()
+    # Nombre del consignatario
     posicion = models.CharField(max_length=20, blank=True, null=True)
     operacion = models.CharField(max_length=25, blank=True, null=True)
     origen = models.CharField(max_length=5, blank=True, null=True)

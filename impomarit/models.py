@@ -288,6 +288,8 @@ class VEmbarqueaereo(models.Model):
     hawb = models.CharField(max_length=50, blank=True, null=True)
     agente = models.CharField(max_length=255, blank=True, null=True)  # Nombre del agente
     consignatario = models.CharField(max_length=255, blank=True, null=True)  # Nombre del consignatario
+    consignatario_codigo = models.IntegerField()
+    consignatario_id = models.IntegerField()
     armador = models.CharField(max_length=255, blank=True, null=True)  # Nombre del armador
     vapor = models.CharField(max_length=30, blank=True, null=True)
     posicion = models.CharField(max_length=20, blank=True, null=True)

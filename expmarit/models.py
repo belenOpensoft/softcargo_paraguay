@@ -950,6 +950,7 @@ class Master(models.Model):
 
 class VEmbarqueaereo(models.Model):
     numero = models.IntegerField(unique=True, primary_key=True)
+    consignatario_id = models.IntegerField()
     transportista = models.CharField(max_length=255, blank=True, null=True)  # Nombre del transportista
     awb = models.CharField(max_length=40, blank=True, null=True)
     hawb = models.CharField(max_length=50, blank=True, null=True)

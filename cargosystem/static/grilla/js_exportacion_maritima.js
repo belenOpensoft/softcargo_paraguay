@@ -3733,9 +3733,16 @@ function gastos_btn_h_click(){
         $("#id_gasto_id_house").val('');
         let selectedRowId = localStorage.getItem('id_house_gasto');
         let selectedRowN = localStorage.getItem('num_house_gasto');
+        let consignatario_code;
+        if ($.fn.dataTable.isDataTable('#table_edit_im')) {
+            consignatario_code = $('#table_edit_im').DataTable().row('.table-secondary').data()[19];
+        } else {
+            consignatario_code = $('#tabla_house_directo').DataTable().row('.table-secondary').data()[19];
+        }
         if (selectedRowN!=null) {
         get_datos_gastos_house();
             $('#gastos_form_house').trigger("reset");
+            $("#id_socio_h").val(consignatario_code);
             $("#gastos_modal_house").dialog({
                 autoOpen: true,
                 open: function () {
