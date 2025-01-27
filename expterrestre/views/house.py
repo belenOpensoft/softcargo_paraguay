@@ -159,6 +159,15 @@ def add_house_importado(request):
 
                     reserva.save()
 
+                    numero = reserva.get_number()
+                    consolidado = house_data.get('consolidado', 0)
+                    awb = house_data.get('awb')
+                    hawb = house_data.get('house')
+                    seguimiento = house_data.get('seguimiento')
+                    posicion = house_data.get('posicion')
+
+                    actualizar_seguimiento(request, awb, hawb, numero, consolidado, seguimiento, posicion)
+
                     numeros_guardados.append({
                         "numero": reserva.numero,
                         "seguimiento": reserva.seguimiento
@@ -180,6 +189,17 @@ def add_house_importado(request):
             'message': f'Ocurrió un error: {str(e)}',
             'errors': {}
         })
+
+def actualizar_seguimiento(request,awb,hawb,embarque,consolidado,seguimiento,posicion):
+
+    seg = Seguimiento.objects.get(numero=seguimiento)
+    seg.awb=awb
+    seg.hawb=hawb
+    seg.embarque=embarque
+    seg.consolidado=consolidado
+    seg.posicion=posicion
+    seg.save()
+
 
 def source_seguimientos_importado(request):
 

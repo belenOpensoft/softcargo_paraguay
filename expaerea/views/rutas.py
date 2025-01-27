@@ -1,10 +1,12 @@
 import json
+from datetime import datetime
 
 import simplejson
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
-from expaerea.models import ExportConexaerea
+from expaerea.models import ExportConexaerea, ExportEmbarqueaereo
+from seguimientos.models import Seguimiento
 
 """ TABLA PUERTO """
 columns_table = {
@@ -123,6 +125,12 @@ def guardar_ruta(request):
                     continue
         registro.numero = numero
         registro.save()
+
+        eta = next(item['value'] for item in data if item['name'] == 'llegada')
+        etd = next(item['value'] for item in data if item['name'] == 'salida')
+
+        actualizar_fechas(etd, eta, numero)
+
         resultado['resultado'] = 'exito'
         resultado['numero'] = str(registro.numero)
     except IntegrityError as e:
@@ -132,6 +140,21 @@ def guardar_ruta(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
+def actualizar_fechas(etd, eta, numero):
+    try:
+        etd = datetime.strptime(etd, "%Y-%m-%d")
+        eta = datetime.strptime(eta, "%Y-%m-%d")
+        resultado = {}
+        num=ExportEmbarqueaereo.objects.get(numero=numero).seguimiento
+        seg=Seguimiento.objects.get(numero=num)
+        seg.etd=etd
+        seg.eta=eta
+        seg.save()
+    except Exception as e:
+        resultado['resultado'] = f'Ocurrió un error: {str(e)}'
+    return JsonResponse(resultado)
+
 
 def add_ruta_importado(request):
     resultado = {}

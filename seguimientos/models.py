@@ -785,23 +785,23 @@ class Envases(models.Model):
     terminos = models.CharField(max_length=5, choices=choice_terminos)
 
     cantidad = models.FloatField()
-    precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    costo = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    marcas = models.CharField(max_length=50, blank=True, null=True)
-    precinto = models.CharField(max_length=100, blank=True, null=True)
-    tara = models.FloatField(blank=True, null=True)
-    bonifcli = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True,default=0)
+    costo = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True,default=0)
+    marcas = models.CharField(max_length=50, blank=True, null=True,default='S/I')
+    precinto = models.CharField(max_length=100, blank=True, null=True,default='S/I')
+    tara = models.FloatField(blank=True, null=True,default=0)
+    bonifcli = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True,default=0)
     envase = models.CharField(db_column='Envase', max_length=15, choices=choice_envase)  # Field name made lowercase.
     bultos = models.IntegerField()
     peso = models.FloatField(db_column='Peso', blank=True, null=True)  # Field name made lowercase.
 
-    profit = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    nrocontenedor = models.CharField(max_length=100, blank=True, null=True)
-    volumen = models.FloatField(db_column='Volumen', blank=True, null=True)  # Field name made lowercase.
-    temperatura = models.FloatField(db_column='Temperatura', blank=True, null=True)  # Field name made lowercase.
-    activo = models.CharField(db_column='Activo', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    profit = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True,default=0)
+    nrocontenedor = models.CharField(max_length=100, blank=True, null=True,default='S/I')
+    volumen = models.FloatField(db_column='Volumen', blank=True, null=True,default=0)  # Field name made lowercase.
+    temperatura = models.FloatField(db_column='Temperatura', blank=True, null=True,default=0)  # Field name made lowercase.
+    activo = models.CharField(db_column='Activo', max_length=1, blank=True, null=True,default='N')  # Field name made lowercase.
     unidadtemp = models.CharField(db_column='UnidadTemp', max_length=1, blank=True,
-                                  null=True)  # Field name made lowercase.
+                                  null=True,default='C')  # Field name made lowercase.
     condespeciales = models.CharField(db_column='CondEspeciales', max_length=100, blank=True,
                                       null=True)  # Field name made lowercase.
     nomchofer = models.CharField(db_column='NomChofer', max_length=100, blank=True,
@@ -828,15 +828,15 @@ class Envases(models.Model):
     fechacitacion = models.DateTimeField(db_column='FechaCitacion', blank=True, null=True)  # Field name made lowercase.
     ventilacion = models.CharField(db_column='Ventilacion', max_length=20, blank=True,
                                    null=True)  # Field name made lowercase.
-    genset = models.CharField(db_column='GenSet', max_length=1, blank=True, null=True)  # Field name made lowercase.
+    genset = models.CharField(db_column='GenSet', max_length=1, blank=True, null=True,default='N')  # Field name made lowercase.
     atmosferacontrolada = models.CharField(db_column='AtmosferaControlada', max_length=1, blank=True,
-                                           null=True)  # Field name made lowercase.
+                                           null=True,default='N')  # Field name made lowercase.
     consolidacion = models.SmallIntegerField(db_column='Consolidacion', blank=True,
-                                             null=True)  # Field name made lowercase.
+                                             null=True,default=0)  # Field name made lowercase.
     tipoventilacion = models.CharField(db_column='TipoVentilacion', max_length=1, blank=True,
                                        null=True)  # Field name made lowercase.
     pesovgm = models.FloatField(db_column='PesoVGM', blank=True, null=True)  # Field name made lowercase.
-    humedad = models.SmallIntegerField(db_column='Humedad', blank=True, null=True)  # Field name made lowercase.
+    humedad = models.SmallIntegerField(db_column='Humedad', blank=True, null=True,default=0)  # Field name made lowercase.
 
 
 class Faxes(models.Model):
