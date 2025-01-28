@@ -1,3 +1,4 @@
+
 from bootstrap_modal_forms.forms import BSModalModelForm
 from mantenimientos.models import Clientes, Monedas, Depositos, Servicios
 from seguimientos.models import Seguimiento, VGrillaSeguimientos, Envases, Cargaaerea, Serviceaereo, Attachhijo, \
@@ -94,7 +95,23 @@ class seguimientoForm(BSModalModelForm):
                   'wreceipt',
                   'valor',
                   'modo',
-                  'terminos'
+                  'terminos',
+                  'fecha',
+                  'vencimiento',
+                  'loadingdate',
+                  'tomopeso',
+                  'despachante',
+                  'volumen',
+                  'iniciales',
+                  'recepcionado',
+                  'tarifafija',
+                  'multimodal',
+                  'unidadpeso',
+                  'unidadvolumen',
+                  'tipobonifcli',
+                  'editado',
+                  'observaciones'
+
                   ]  # Agrega los campos que deseas actualizar
         labels = {
             'awb': 'Master',
@@ -129,28 +146,20 @@ class seguimientoForm(BSModalModelForm):
         self.helper.form_id = 'update-form'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Actualizar'))
-        tabindex_order = {
-            'cliente': 1, 'embarcador': 2, 'consignatario': 3, 'notificar': 4, 'agente': 5,
-            'transportista': 6, 'armador': 7, 'agecompras': 8, 'ageventas': 9, 'terminos': 10,
-            'origen': 11, 'destino': 12, 'operacion': 13, 'moneda': 14, 'vendedor': 15,
-            'vapor': 16, 'deposito': 17, 'awb': 18, 'hawb': 19, 'loading': 20, 'discharge': 21,
-            'posicion': 22, 'arbitraje': 23, 'pago': 24, 'viaje': 25, 'ubicacion': 26,
-            'booking': 27, 'trackid': 28, 'wreceipt': 29, 'valor': 30, 'status': 31, 'proyecto': 32,
-            'trafico': 33, 'actividad': 34, 'demora': 35, 'diasalmacenaje': 36
-        }
-        for field, tabindex in tabindex_order.items():
-            if field in self.fields:
-                self.fields[field].widget.attrs['tabindex'] = str(tabindex)
 
-        for field in self.fields:
-            self.fields[field].widget.attrs['class'] = 'form-control'
-            self.fields[field].widget.attrs['attr'] = 'data-id'
-            self.fields[field].required = False
+        for field_name, field in self.fields.items():
+            # Verificar el tipo de widget para no sobreescribir
+            if isinstance(field.widget, forms.CheckboxInput):  # Si es un checkbox
+                field.widget.attrs['class'] = 'form-check-input'
+            else:  # Para otros tipos de campos
+                field.widget.attrs['class'] = 'form-control'
+                field.widget.attrs['attr'] = 'data-id'
+                field.required = False
 
-            if field == 'moneda':
-                monedas = [("","---"),] + list(Monedas.objects.all().order_by('nombre').values_list('codigo','nombre'))
-                self.fields[field].choices = monedas
-
+            # Configuración específica para el campo 'moneda'
+            if field_name == 'moneda':
+                monedas = [("", "---")] + list(Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
+                field.choices = monedas
 
     choice_op = (("", ""),
                  ("IMPORTACION", "IMPORTACION"),
@@ -183,6 +192,8 @@ class seguimientoForm(BSModalModelForm):
 
     # primera columna
     cliente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'cliente_add'}))
+    despachante = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'despachante_add'}))
+    observaciones = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'observaciones'}))
     embarcador = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'embarcador_add'}))
     consignatario = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'consignatario_add'}))
     notificar = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'notificar_add'}),label='Notificar a:')
@@ -208,7 +219,36 @@ class seguimientoForm(BSModalModelForm):
     terminos = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'id': 'terminos', 'required': True}),required=True,choices=CHOICE_TERMINOS)
     # observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'notas_seguimiento',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"10","class":"form-control"}, ), required=False,label="Notas", max_length=500)
     id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False}), required=False, label="ID")
-
+    propia = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'propia', 'required': True}),
+        required=True,
+        label="Propia"  # Cambia el texto según necesites
+    )
+    fecha = forms.DateField(
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        required=True,
+        label="Fecha"
+    )
+    vencimiento = forms.DateField(
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        required=True,
+        label="Vencimiento"
+    )
+    loadingdate = forms.DateField(
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        required=True,
+        label="Fecha Loading"
+    )
+    tomopeso = forms.BooleanField(widget=forms.CheckboxInput(attrs={"autocomplete": "off", 'required': False}), required=False, label="Tomo peso",initial=1)
+    iniciales = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'iniciales', 'required': False}),required=False)
+    recepcionado = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'recepcionado', 'required': False}),required=False,initial='N')
+    tarifafija = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'tarifafija', 'required': False}),required=False,initial='N')
+    multimodal = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'multimodal', 'required': False}),required=False,initial='N')
+    unidadpeso = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'unidadpeso', 'required': False}),required=False,initial='K')
+    unidadvolumen = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'unidadvolumen', 'required': False}),required=False,initial='B')
+    tipobonifcli = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'tipobonifcli', 'required': False}),required=False,initial='P')
+    editado = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'editado', 'required': False}),required=False)
+    volumen = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'volumen', 'required': False}),required=False,initial=0)
 
 
 

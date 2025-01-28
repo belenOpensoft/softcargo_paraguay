@@ -714,8 +714,6 @@ def procesar_factura(request):
 #     except Exception as e:
 #         return JsonResponse({'status': 'Error: ' + str(e)})
 
-
-
 def generar_numero():
     # Obtener la fecha y hora actual
     ahora = datetime.now()

@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
+from django.utils.datetime_safe import datetime
+from datetime import datetime
 from seguimientos.forms import notasForm, seguimientoForm, cronologiaForm, envasesForm, embarquesForm, gastosForm, \
     pdfForm, archivosForm, rutasForm, emailsForm, clonarForm
 from seguimientos.models import VGrillaSeguimientos as Seguimiento, Seguimiento as SeguimientoReal, Envases, Cargaaerea, \
@@ -31,7 +33,7 @@ def grilla_seguimientos(request):
             return render(request, 'seguimientos/grilla_datos.html', {
                 'form_notas': notasForm(),
                 'form_emails': emailsForm(),
-                'form': seguimientoForm(),
+                'form': seguimientoForm(initial={'fecha':datetime.now().strftime('%Y-%m-%d'),'vencimiento':datetime.now().strftime('%Y-%m-%d'),'loadingdate':datetime.now().strftime('%Y-%m-%d')}),
                 'form_cronologia': cronologiaForm(),
                 'form_envases': envasesForm(),
                 'form_embarques': embarquesForm(),
@@ -501,7 +503,9 @@ def guardar_seguimiento(request):
             numero = SeguimientoReal.objects.all().values_list('numero').order_by('-numero')[:1][0][0]
             registro.numero = numero + 1
             tiporeg = 'nuevo'
+
         campos = vars(registro)
+
         for k, v in data.items():
             for name in campos:
                 if name == k:
@@ -519,7 +523,16 @@ def guardar_seguimiento(request):
             registro.id = data['id'][0]
             registro.save()
         else:
+            registro.iniciales='S/I'
+            registro.recepcionado='N'
+            registro.tarifafija='N'
+            registro.multimodal='N'
+            registro.unidadpeso='K'
+            registro.unidadvolumen='B'
+            registro.tipobonifcli='P'
+            registro.editado='S/I'
             registro.save()
+
         resultado['resultado'] = 'exito'
         resultado['numero'] = str(registro.numero)
         resultado['tipo'] = tiporeg

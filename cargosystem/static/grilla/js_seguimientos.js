@@ -240,17 +240,13 @@ $(document).ready(function () {
             .draw();
     });
     var state = table.state.loaded();
-//    if (state) {
-//        table.columns().eq(0).each(function (colIdx) {
-//            var colSearch = state.columns[colIdx].search;
-//            if (colSearch.search) {
-//                var aux = colSearch.search;
-//                document.getElementById('buscoid_' + colIdx).value = aux;
-//            }
-//        });
-//        table.draw();
-//    }
-    ;
+    $('#id_medidas, #id_bultos_embarque').on('change', function () {
+            let m = $('#id_medidas').val(); // Valor del primer input
+            let b = $('#id_bultos_embarque').val(); // Valor del segundo input
+
+            let resultado = calcular_volumen(m,b)
+            $('#id_cbm').val(resultado); // Mostrar resultado en el div
+        });
 
     $('#tabla_seguimiento tbody').on('click', 'tr', function () {
         if ($(this).hasClass('table-secondary')) {
@@ -1138,6 +1134,11 @@ $(document).ready(function () {
     $('#envases_btn').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
+        console.log(row[0][2]);
+        if(row[0][2]=='IMPORT AEREO'){
+        alert('No puede agregar envases a las operaciones aereas.');
+        return;
+        }
         get_datos_envases();
 
             $('#envases_form').trigger("reset");
@@ -1443,39 +1444,6 @@ $(document).ready(function () {
             alert('Debe seleccionar al menos un registro');
         }
     });
-//    $('#asignar_guia').click(function () {
-//        if(confirm('¿Confirma asignar guia aerea?')){
-//            row = table.rows('.table-secondary').data();
-//            if (row.length === 1) {
-//                if(row[0][2] == 'EXPORT AEREO'){
-//                    miurl = "/asignar_guia_aerea/";
-//                    var toData = {
-//                        'id': row[0][0],
-//                        'csrfmiddlewaretoken': csrf_token,
-//                    };
-//                    $.ajax({
-//                        type: "POST",
-//                        url: miurl,
-//                        data: toData,
-//                        success: function (resultado) {
-//                            aux = resultado['resultado'];
-//                            if (aux == 'exito') {
-//                                alert('Guian asignada N°' + resultado['numero']);
-//                                mostrarToast('¡Guia asignada correctamente!', 'success');
-//                            } else {
-//                                alert(aux);
-//                            }
-//                        }
-//                    });
-//                }else{
-//                    alert('La guias solo pueden ser asignadas a EXPORTACION AEREA');
-//                }
-//
-//            } else {
-//                alert('Debe seleccionar al menos un registro');
-//            }
-//        }
-//    });
     $('#descargar_guia').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
@@ -1763,7 +1731,7 @@ $(document).ready(function () {
                                         table.ajax.reload();
                                     } else {
                                         //alert(resultado['resultado']);
-                                        consolelog(resultado['resultado']);
+                                        console.log(resultado['resultado']);
                                     }
                                 },
                                 error: function (e) {
@@ -1797,6 +1765,22 @@ $(document).ready(function () {
 
     // AUTOCOMPLETES
     $("#cliente_add").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#despachante_add").autocomplete({
         source: '/autocomplete_clientes/',
         minLength: 2,
         select: function (event, ui) {
@@ -1992,21 +1976,6 @@ $(document).ready(function () {
             }
         }
     });
-//    $("#vapor_add").autocomplete({
-//        source: '/autocomplete_vapores/',
-//        minLength: 2,
-//        select: function (event, ui) {
-//            $(this).attr('data-id', ui.item['codigo']);
-//        },
-//        change: function (event, ui) {
-//            if (ui.item) {
-//                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-//            } else {
-//                $(this).val('');
-//                $(this).css({"border-color": "", 'box-shadow': ''});
-//            }
-//        }
-//    });
     $("#loading_add").autocomplete({
         source: '/autocomplete_ciudades/',
         minLength: 2,
@@ -2037,51 +2006,6 @@ $(document).ready(function () {
             }
         }
     });
-//    $("#proyecto_add").autocomplete({
-//        source: '/autocomplete_proyectos/',
-//        minLength: 2,
-//        select: function (event, ui) {
-//            $(this).attr('data-id', ui.item['id']);
-//        },
-//        change: function (event, ui) {
-//            if (ui.item) {
-//                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-//            } else {
-//                $(this).val('');
-//                $(this).css({"border-color": "", 'box-shadow': ''});
-//            }
-//        }
-//    });
-//    $("#trafico_add").autocomplete({
-//        source: '/autocomplete_traficos/',
-//        minLength: 2,
-//        select: function (event, ui) {
-//            $(this).attr('data-id', ui.item['id']);
-//        },
-//        change: function (event, ui) {
-//            if (ui.item) {
-//                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-//            } else {
-//                $(this).val('');
-//                $(this).css({"border-color": "", 'box-shadow': ''});
-//            }
-//        }
-//    });
-//    $("#actividad_add").autocomplete({
-//        source: '/autocomplete_actividades/',
-//        minLength: 2,
-//        select: function (event, ui) {
-//            $(this).attr('data-id', ui.item['id']);
-//        },
-//        change: function (event, ui) {
-//            if (ui.item) {
-//                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-//            } else {
-//                $(this).val('');
-//                $(this).css({"border-color": "", 'box-shadow': ''});
-//            }
-//        }
-//    });
 
     //autocomplete rutas
     $("#id_origen").autocomplete({
@@ -2982,5 +2906,16 @@ function redondear_a_05_o_0(numero) {
     } else {
         return parseInt(numero_redondeado) + 1;
     }
+}
+
+function calcular_volumen(medidas,bultos){
+    let volumen_aux=0;
+    let total=0;
+    if(medidas!=null && bultos!=null){
+        let medidasArray = medidas.split('*');
+        volumen_aux = medidasArray.reduce((total, num) => total * parseFloat(num), 1);
+        total=volumen_aux*bultos;
+    }
+    return total;
 }
 
