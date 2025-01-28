@@ -7,6 +7,7 @@ function facturar(){
                 $('#destinatario_input').val('');
                 $('#destinatario').css({"border-color": "", 'box-shadow': ''});
                 $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
+
             $("#facturar_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {

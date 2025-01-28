@@ -5,8 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q
 from administracion_contabilidad.views.facturacion_electronica import Uruware
 from expaerea.models import ExportEmbarqueaereo
 from expmarit.models import ExpmaritEmbarqueaereo
@@ -16,11 +14,11 @@ from impterrestre.models import ImpterraEmbarqueaereo
 from mantenimientos.models import Clientes, Servicios, Monedas
 from administracion_contabilidad.forms import Factura
 from administracion_contabilidad.models import Boleta, PendienteFacturar, Asientos, Movims, Infofactura, \
-    VistaGastosPreventa, Dolar
+    VistaGastosPreventa, Dolar, Factudif, VPreventas
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from datetime import datetime
 from django.db import transaction
-import random
+from django.db.models import F
 from impomarit.models import VGastosHouse, Envases, Cargaaerea, Embarqueaereo
 from decimal import Decimal
 from administracion_contabilidad.forms import pdfForm
@@ -257,6 +255,13 @@ def procesar_factura(request):
                 origen=preventa.get('origen')
                 destino=preventa.get('destino')
                 seguimiento=preventa.get('seguimiento')
+
+                reg=Factudif.objects.filter(znumero=autogenerado)
+                for r in reg:
+                    r.zfacturado='S'
+                    r.save()
+
+
             else:
                 autogenerado=generar_autogenerado(tipo, hora, fecha, numero)
                 master=None
@@ -802,66 +807,36 @@ def crear_movimiento(movimiento):
         return JsonResponse({'status': 'Error:' + str(e)})
 
 
-def proceso_factura_electronica(autogenerado):
-    try:
-        pendiente = PendienteFacturar()
-        pendiente.autogenerado = autogenerado
-        pendiente.save()
-    except Exception as e:
-        raise TypeError(e)
-
-
-def facturar_pendiente(autogenerado):
-    try:
-        mis_boletas = Boleta.objects.filter(autogenerado=autogenerado)
-        """ Creo mi clase de servicio """
-        service = Uruware()
-        """ Cargo datos necesarios para mi factura """
-        service.cliente = mis_boletas[0].cliente
-        service.renglones = mis_boletas
-        """ Envio factura """
-        if service.facturar():
-            """ Actualizo factura pendiente a FINALIZADO si dio exito """
-            pass
-    except ObjectDoesNotExist:
-        raise TypeError('No se encontro la boleta')
-    except Exception as e:
-        raise TypeError(e)
-
-
 def source_infofactura(request):
     try:
         start = int(request.GET.get('start', 0))
         length = int(request.GET.get('length', 10))
 
-        anio_limite = 2010
+        registros=VPreventas.objects.all()
 
-        infofacturas_qs = Infofactura.objects.all()
+        total_registros = len(registros)
 
-        infofacturas_qs = infofacturas_qs.filter(
-            Q(autogenerado__gte=str(anio_limite))
-        ).exclude(
-            autogenerado__in=Movims.objects.values('mautogen')
-        )
+        # Paginación
+        registros_paginated = registros[start:start + length]
 
-
-        total_registros = infofacturas_qs.count()
-
-        infofacturas_paginated = infofacturas_qs[start:start + length]
-
+        # Construir los datos para la tabla
         data = [{
-            'numero': infofactura.id,
-            'cliente': infofactura.consigna,
-            'posicion': infofactura.posicion,
-            'master': infofactura.master,
-            'house': infofactura.house,
-            'vapor_vuelo': infofactura.vuelo,
-            'contenedor': (Envases.objects.filter(numero = re.sub(r'[a-zA-Z]$', '', infofactura.referencia)).order_by('id').first()).nrocontenedor if Envases.objects.filter(numero=re.sub(r'[a-zA-Z]$', '', infofactura.referencia)).exists() else 0,
-            'clase': infofactura.posicion[:2],
-            'referencia': infofactura.referencia,
-            'fecha': infofactura.fecha,
-        } for infofactura in infofacturas_paginated]
+            'numero': item.znumero,
+            'cliente': item.zconsignatario,
+            'posicion': item.zposicion,
+            'master': item.zmaster,
+            'house': item.zhouse,
+            'vapor_vuelo': item.zcarrier,
+            'contenedor': (
+                Envases.objects.filter(numero=item.zrefer).order_by('id').first().nrocontenedor
+                if Envases.objects.filter(numero=item.zrefer).exists() else 0
+            ),
+            'clase': item.zclase,
+            'referencia': item.zrefer,
+            'fecha': item.zllegasale.strftime('%Y-%m-%d') if item.zllegasale else None,
+        } for item in registros_paginated]
 
+        # Respuesta JSON
         return JsonResponse({
             'draw': int(request.GET.get('draw', 1)),
             'recordsTotal': total_registros,
@@ -871,6 +846,7 @@ def source_infofactura(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)})
+
 
 def source_infofactura_cliente(request):
     try:
@@ -878,33 +854,30 @@ def source_infofactura_cliente(request):
         length = int(request.GET.get('length', 5))
         cliente = str(request.GET.get('cliente'))
 
-        anio_limite = 2023
+        registros = VPreventas.objects.filter(zcliente=cliente)
 
-        infofacturas_qs = Infofactura.objects.all()
+        total_registros = len(registros)
 
-        infofacturas_qs = infofacturas_qs.filter(
-            Q(autogenerado__gte=str(anio_limite))&
-            Q(consigna__icontains=cliente)
-        ).exclude(
-            autogenerado__in=Boleta.objects.values('autogenerado')
-        )
+        # Paginación
+        registros_paginated = registros[start:start + length]
 
-        total_registros = infofacturas_qs.count()
-
-        infofacturas_paginated = infofacturas_qs[start:start + length]
-
+        # Construir los datos para la tabla
         data = [{
-            'numero': infofactura.id,
-            'sale_llega':infofactura.fecha,
-            'referencia': infofactura.referencia,
-            'consignatario': infofactura.consigna,
-            'master': infofactura.master,
-            'house': infofactura.house,
-            'vapor_vuelo': infofactura.vuelo,
-            'clase': infofactura.posicion[:2],
-            'fecha': infofactura.fecha,
-        } for infofactura in infofacturas_paginated]
-
+            'numero': item.znumero,
+            'cliente': item.zconsignatario,
+            'posicion': item.zposicion,
+            'master': item.zmaster,
+            'house': item.zhouse,
+            'vapor_vuelo': item.zcarrier,
+            'contenedor': (
+                Envases.objects.filter(numero=item.zrefer).order_by('id').first().nrocontenedor
+                if Envases.objects.filter(numero=item.zrefer).exists() else 0
+            ),
+            'clase': item.zclase,
+            'referencia': item.zrefer,
+            'fecha': item.zllegasale.strftime('%Y-%m-%d') if item.zllegasale else None,
+        } for item in registros_paginated]
+        # Respuesta JSON
         return JsonResponse({
             'draw': int(request.GET.get('draw', 1)),
             'recordsTotal': total_registros,
@@ -912,14 +885,15 @@ def source_infofactura_cliente(request):
             'data': data,
         })
 
+
     except Exception as e:
         return JsonResponse({'error': str(e)})
 
 def cargar_preventa_infofactura(request):
     if request.method == 'POST':
         clase = request.POST.get('clase')
-        referencia = request.POST.get('referencia')
-        preventa = request.POST.get('preventa')
+        referencia = int(request.POST.get('referencia'))
+        preventa = int(request.POST.get('preventa'))
         gastos_data_list = []
         total_sin_iva = Decimal('0.00')
         total_con_iva = Decimal('0.00')
@@ -928,7 +902,7 @@ def cargar_preventa_infofactura(request):
         length = int(request.GET.get('length', 10))
 
         try:
-            prev = Infofactura.objects.get(id=preventa)
+            prev = VPreventas.objects.get(znumero=preventa)
             gastos = VistaGastosPreventa.objects.filter(numero=referencia)
 
             total_gastos = gastos.count()
@@ -951,7 +925,7 @@ def cargar_preventa_infofactura(request):
 
                     gastos_data_list.append(gasto_data)
 
-            ref = re.sub(r'[a-zA-Z]$', '', prev.referencia)
+            ref = prev.zrefer
             try:
                 if clase == "IM":
                     embarque = Embarqueaereo.objects.get(numero=ref)
@@ -977,48 +951,50 @@ def cargar_preventa_infofactura(request):
                     embarque = ExpterraEmbarqueaereo.objects.get(numero=ref)
                     cliente = Clientes.objects.get(codigo=embarque.cliente)
                     moneda = embarque.moneda
+
             except Embarqueaereo.DoesNotExist:
                 embarque=None
                 moneda = None
                 cliente = None
 
-            llegada_salida = embarque.fecharetiro if embarque and hasattr(embarque, 'fecharetiro') else None
+            llegada_salida = (
+                prev.zllegasale.strftime('%Y-%m-%d') if prev.zllegasale else None
+            )
 
             data_preventa = {
-                'autogenerado':prev.autogenerado,
-                'house':prev.house,
-                'master':prev.master,
+                'autogenerado':prev.znumero,
+                'house':prev.zhouse,
+                'master':prev.zmaster,
                 'moneda': moneda if moneda else None,
                 'total_con_iva': str(total_con_iva),
                 'total_sin_iva': str(total_sin_iva),
                 'cliente_i': cliente.empresa if cliente else None,
-                'peso': prev.kilos,
+                'peso': prev.zkilos,
                 'direccion': cliente.direccion if cliente else None,
                 'localidad': cliente.localidad if cliente else None,
-                #'aplic': 0 if int(ref)<0 else Cargaaerea.objects.filter(numero=ref).values('aplicable').first().get('aplicable','S/I') if clase == "IA" else 'S/I',
-                'bultos': prev.bultos,
-                'volumen': prev.volumen,
-                'commodity': prev.commodity,
-                'inconterms': prev.terminos,
-                'flete': prev.pagoflete,
+                'bultos': prev.zbultos,
+                'volumen': prev.zvolumen,
+                'commodity': prev.zcommodity,
+                'inconterms': prev.zterminos,
+                'flete': prev.zpagoflete,
                 'deposito': "S/I",
-                'wr': prev.wr,
-                'referencia': prev.referencia,
+                'wr': prev.zwr,
+                'referencia': prev.zrefer,
                 'llegada_salida': llegada_salida,
-                'origen': prev.destino,
-                'destino': prev.origen,
-                'transportista': prev.transportista,
-                'consignatario': prev.consigna,
-                'embarcador': prev.embarca,
-                'agente': prev.agente,
-                'vuelo_vapor': prev.vuelo,
-                'seguimiento': prev.seguimiento,
-                'mawb_mbl_mcrt': prev.master,
-                'hawb_hbl_hcrt': prev.house,
-                'posicion': prev.posicion,
+                'origen': prev.zorigen,
+                'destino': prev.zdestino,
+                'transportista': prev.zcarrier,
+                'consignatario': prev.zconsignatario,
+                'embarcador': prev.zembarcador,
+                'agente': prev.zagente,
+                'vuelo_vapor': prev.zcarrier,
+                'seguimiento': prev.zseguimiento,
+                'mawb_mbl_mcrt': prev.zmaster,
+                'hawb_hbl_hcrt': prev.zhouse,
+                'posicion': prev.zposicion,
                 'status': 'PARA FACTURAR',
                 'orden': "S/I",
-                'modo': 'MARITIMO',
+                'modo': prev.ztransporte,
             }
 
             data = {
@@ -1031,7 +1007,7 @@ def cargar_preventa_infofactura(request):
 
             return JsonResponse(data, safe=False)
 
-        except Infofactura.DoesNotExist:
+        except VPreventas.DoesNotExist:
             return JsonResponse({'error': 'Infofactura no encontrada'}, safe=False)
         except Clientes.DoesNotExist:
             return JsonResponse({'error': 'Cliente no encontrado'}, safe=False)
@@ -1053,8 +1029,12 @@ def cargar_preventa_infofactura_multiple(request):
                 total_con_iva = Decimal('0.00')
 
                 try:
-                    prev = Infofactura.objects.get(id=preventa)
+                    prev = VPreventas.objects.get(znumero=preventa)
                     gastos = VistaGastosPreventa.objects.filter(numero=referencia)
+
+                    llegada_salida = (
+                        prev.zllegasale.strftime('%Y-%m-%d') if prev.zllegasale else None
+                    )
 
                     total_gastos = gastos.count()
 
@@ -1074,7 +1054,7 @@ def cargar_preventa_infofactura_multiple(request):
 
                         gastos_data_list.append(gasto_data)
 
-                    ref = re.sub(r'[a-zA-Z]$', '', prev.referencia)
+                    ref = prev.zrefer
 
                     if clase == "IM":
                         embarque = Embarqueaereo.objects.get(numero=ref)
@@ -1102,7 +1082,7 @@ def cargar_preventa_infofactura_multiple(request):
                         moneda = embarque.moneda
 
 
-                    data_preventa = {
+                    data_preventa_old = {
                         'autogenerado': prev.autogenerado,
                         'house': prev.house,
                         'master': prev.master,
@@ -1137,6 +1117,42 @@ def cargar_preventa_infofactura_multiple(request):
                         'status': 'PARA FACTURAR',
                         'orden': "S/I",
                         'modo': 'MARITIMO',
+                    }
+                    data_preventa = {
+                        'autogenerado': prev.znumero,
+                        'house': prev.zhouse,
+                        'master': prev.zmaster,
+                        'moneda': moneda if moneda else None,
+                        'total_con_iva': str(total_con_iva),
+                        'total_sin_iva': str(total_sin_iva),
+                        'cliente_i': cliente.empresa if cliente else None,
+                        'peso': prev.zkilos,
+                        'direccion': cliente.direccion if cliente else None,
+                        'localidad': cliente.localidad if cliente else None,
+                        # 'aplic': 0 if int(ref)<0 else Cargaaerea.objects.filter(numero=ref).values('aplicable').first().get('aplicable','S/I') if clase == "IA" else 'S/I',
+                        'bultos': prev.zbultos,
+                        'volumen': prev.zvolumen,
+                        'commodity': prev.zcommodity,
+                        'inconterms': prev.zterminos,
+                        'flete': prev.zpagoflete,
+                        'deposito': "S/I",
+                        'wr': prev.zwr,
+                        'referencia': prev.zrefer,
+                        'llegada_salida': llegada_salida,
+                        'origen': prev.zorigen,
+                        'destino': prev.zdestino,
+                        'transportista': prev.zcarrier,
+                        'consignatario': prev.zconsignatario,
+                        'embarcador': prev.zembarcador,
+                        'agente': prev.zagente,
+                        'vuelo_vapor': prev.zcarrier,
+                        'seguimiento': prev.zseguimiento,
+                        'mawb_mbl_mcrt': prev.zmaster,
+                        'hawb_hbl_hcrt': prev.zhouse,
+                        'posicion': prev.zposicion,
+                        'status': 'PARA FACTURAR',
+                        'orden': "S/I",
+                        'modo': prev.ztransporte,
                     }
 
                     resultado.append({
@@ -1219,6 +1235,52 @@ def guardar_arbitraje(request):
     else:
         return JsonResponse({'status': 'Método no permitido.'}, status=405)
 
+"""
+data_preventa = {
+                'autogenerado':prev.autogenerado,
+                'house':prev.house,
+                'master':prev.master,
+                'moneda': moneda if moneda else None,
+                'total_con_iva': str(total_con_iva),
+                'total_sin_iva': str(total_sin_iva),
+                'cliente_i': cliente.empresa if cliente else None,
+                'peso': prev.kilos,
+                'direccion': cliente.direccion if cliente else None,
+                'localidad': cliente.localidad if cliente else None,
+                #'aplic': 0 if int(ref)<0 else Cargaaerea.objects.filter(numero=ref).values('aplicable').first().get('aplicable','S/I') if clase == "IA" else 'S/I',
+                'bultos': prev.bultos,
+                'volumen': prev.volumen,
+                'commodity': prev.commodity,
+                'inconterms': prev.terminos,
+                'flete': prev.pagoflete,
+                'deposito': "S/I",
+                'wr': prev.wr,
+                'referencia': prev.referencia,
+                'llegada_salida': llegada_salida,
+                'origen': prev.destino,
+                'destino': prev.origen,
+                'transportista': prev.transportista,
+                'consignatario': prev.consigna,
+                'embarcador': prev.embarca,
+                'agente': prev.agente,
+                'vuelo_vapor': prev.vuelo,
+                'seguimiento': prev.seguimiento,
+                'mawb_mbl_mcrt': prev.master,
+                'hawb_hbl_hcrt': prev.house,
+                'posicion': prev.posicion,
+                'status': 'PARA FACTURAR',
+                'orden': "S/I",
+                'modo': 'MARITIMO',
+            }
+
+data = {
+                "draw": int(request.GET.get('draw', 1)),
+                "recordsTotal": total_gastos,
+                "recordsFiltered": total_gastos,
+                "data": gastos_data_list,
+                "data_preventa": data_preventa,
+            }
+"""
 
 
 

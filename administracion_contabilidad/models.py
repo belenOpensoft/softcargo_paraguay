@@ -885,9 +885,18 @@ class Factudif(models.Model):
     area = models.SmallIntegerField(blank=True, null=True)
     jurisdiccion = models.SmallIntegerField(blank=True, null=True)
 
+    def get_id(self):
+        lista = Factudif.objects.last()
+        return int(lista.id + 1)
+
+    def get_num(self):
+        lista = Factudif.objects.last()
+        return int(lista.znumero + 1)
+
     class Meta:
         managed = False
         db_table = 'dataset_factudif'
+
 
 
 class Familias(models.Model):
@@ -10512,3 +10521,68 @@ class VistaPagos(models.Model):
     class Meta:
         managed = False  # Indicates that this model represents a database view
         db_table = 'vista_pagos'
+
+
+class VPreventas(models.Model):
+    id = models.AutoField(primary_key=True)
+    znumero = models.CharField(max_length=255, null=True, blank=True)
+    zmoneda = models.CharField(max_length=50, null=True, blank=True)
+    zcliente = models.CharField(max_length=255, null=True, blank=True)
+    ztipo = models.CharField(max_length=50, null=True, blank=True)
+    zitem = models.CharField(max_length=255, null=True, blank=True)
+    zmonto = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    ziva = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    zrefer = models.CharField(max_length=255, null=True, blank=True)
+    zcarrier = models.CharField(max_length=255, null=True, blank=True)
+    zmaster = models.CharField(max_length=255, null=True, blank=True)
+    zdate = models.DateTimeField(null=True, blank=True)
+    zhouse = models.CharField(max_length=255, null=True, blank=True)
+    zposicion = models.CharField(max_length=255, null=True, blank=True)
+    zkilos = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    zbultos = models.IntegerField(null=True, blank=True)
+    zvolumen = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    zorigen = models.CharField(max_length=255, null=True, blank=True)
+    zdestino = models.CharField(max_length=255, null=True, blank=True)
+    zdetalle = models.TextField(null=True, blank=True)
+    ztransporte = models.CharField(max_length=255, null=True, blank=True)
+    zclase = models.CharField(max_length=50, null=True, blank=True)
+    zllegasale = models.DateTimeField(null=True, blank=True)
+    zobs1 = models.TextField(null=True, blank=True)
+    zobs2 = models.TextField(null=True, blank=True)
+    zobs3 = models.TextField(null=True, blank=True)
+    zobs4 = models.TextField(null=True, blank=True)
+    zobs5 = models.TextField(null=True, blank=True)
+    zcommodity = models.CharField(max_length=255, null=True, blank=True)
+    zembarcador = models.CharField(max_length=255, null=True, blank=True)
+    zconsignatario = models.CharField(max_length=255, null=True, blank=True)
+    zmonedaorigen = models.CharField(max_length=50, null=True, blank=True)
+    zarbitraje = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    zorden = models.CharField(max_length=255, null=True, blank=True)
+    zvalororiginal = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    zseguimiento = models.CharField(max_length=255, null=True, blank=True)
+    zagente = models.CharField(max_length=255, null=True, blank=True)
+    zcontrolado = models.BooleanField(default=False)
+    zusuario = models.CharField(max_length=255, null=True, blank=True)
+    zfechagen = models.DateTimeField(null=True, blank=True)
+    zaplicable = models.BooleanField(default=False)
+    zvendedor = models.CharField(max_length=255, null=True, blank=True)
+    zwr = models.CharField(max_length=255, null=True, blank=True)
+    znotas = models.TextField(null=True, blank=True)
+    zcambiousdpactado = models.DecimalField(max_digits=20, decimal_places=6, null=True, blank=True)
+    zpagoflete = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    zterminos = models.CharField(max_length=255, null=True, blank=True)
+    zfacturado = models.BooleanField(default=False, null=True, blank=True)
+    zop = models.CharField(max_length=255, null=True, blank=True)
+    nrofolio = models.CharField(max_length=255, null=True, blank=True)
+    dtefechaorden = models.DateTimeField(null=True, blank=True)
+    srazonreforden = models.TextField(null=True, blank=True)
+    zfechafacturado = models.DateTimeField(null=True, blank=True)
+    zboletafactura = models.CharField(max_length=255, null=True, blank=True)
+    zautogenenvase = models.CharField(max_length=255, null=True, blank=True)
+    zfechaaprobada = models.DateTimeField(null=True, blank=True)
+    area = models.CharField(max_length=255, null=True, blank=True)
+    jurisdiccion = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        managed = False
+        db_table = 'VPreventas'

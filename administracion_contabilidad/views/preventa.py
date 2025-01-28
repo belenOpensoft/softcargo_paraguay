@@ -5,7 +5,7 @@ import xlsxwriter
 from django.core.checks import messages
 from django.http import JsonResponse, HttpResponse, Http404, HttpResponseRedirect
 import json
-from administracion_contabilidad.models import Infofactura
+from administracion_contabilidad.models import Infofactura, Factudif, VistaGastosPreventa
 from expaerea.models import ExportServiceaereo, ExportEmbarqueaereo, ExportCargaaerea, ExportReservas, ExportConexaerea
 from expmarit.models import ExpmaritServiceaereo, ExpmaritEmbarqueaereo, ExpmaritCargaaerea, ExpmaritReservas, \
     ExpmaritConexaerea
@@ -54,49 +54,68 @@ def guardar_infofactura(request):
         try:
             datos = json.loads(request.body.decode('utf-8'))
             fecha_str = datos.get("fecha")
-            if fecha_str == None:
-                fecha_str=str(datetime.now())
-            autogenerado = generar_autogenerado(fecha_str)
+            if fecha_str is None:
+                fecha_str = datetime.now().strftime("%d-%m-%y")
 
-            if fecha_str:
-                try:
-                    fecha_obj = datetime.strptime(fecha_str, "%Y-%m-%dT%H:%M:%S")
-                    fecha_formateada = fecha_obj.strftime("%d/%m/%y")
+            try:
+                # Convertir fecha al formato estándar
+                fecha_obj = datetime.strptime(fecha_str, "%d-%m-%y")
+                fecha_formateada = fecha_obj.strftime("%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                fecha_formateada = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-                except ValueError:
-                    fecha_formateada=datetime.now()
-                    fecha_formateada = fecha_formateada.strftime("%d/%m/%y")
-
-            # Asegúrate de que 'datos' sea un diccionario
+            # Validar que 'datos' sea un diccionario
             if not isinstance(datos, dict):
                 return JsonResponse({"resultado": "error", "mensaje": "Los datos no son un objeto válido."}, status=400)
 
-            # Crea una nueva instancia de Infofactura
-            infofactura = Infofactura()
-            infofactura.id = infofactura.get_id()
-            infofactura.autogenerado = autogenerado
-            infofactura.referencia = datos.get("referencia")
-            infofactura.seguimiento = datos.get("seguimiento")
-            infofactura.transportista = datos.get("transportista")
-            infofactura.vuelo = datos.get("vuelo")
-            infofactura.master = datos.get("master")
-            infofactura.house = datos.get("house")
-            infofactura.fecha = fecha_formateada
-            infofactura.commodity = datos.get("commodity")
-            infofactura.kilos = datos.get("kilos")
-            infofactura.volumen = datos.get("volumen")
-            infofactura.bultos = datos.get("bultos")
-            infofactura.origen = datos.get("origen")
-            infofactura.destino = datos.get("destino")
-            infofactura.consigna = datos.get("consigna") if datos.get("consigna")  else datos.get("consignatario")
-            infofactura.embarca = datos.get("embarca")
-            infofactura.agente = datos.get("agente")
-            infofactura.posicion = datos.get("posicion")
-            infofactura.terminos = datos.get("terminos")
-            infofactura.pagoflete = datos.get("pagoflete")
-            infofactura.wr = datos.get("wr")
+            hoy = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            posicion = datos.get("posicion", "")
 
-            infofactura.save()
+            # Obtener un número único para znumero
+            infofactura = Factudif()
+            numero = infofactura.get_num()  # Generar número único para todos los registros
+
+            embarque = datos.get("referencia")
+            clase = posicion[:2]
+
+            # Filtrar los gastos relacionados
+            gastos = VistaGastosPreventa.objects.filter(numero=embarque, source=clase)
+
+            # Crear un registro de Infofactura para cada gasto
+            for gasto in gastos:
+                nueva_infofactura = Factudif()
+                nueva_infofactura.znumero = numero  # Usar el mismo número para todos los registros
+                nueva_infofactura.zrefer = datos.get("referencia")
+                nueva_infofactura.zseguimiento = datos.get("seguimiento")
+                nueva_infofactura.zcarrier = datos.get("transportista")
+                nueva_infofactura.zmaster = datos.get("master")
+                nueva_infofactura.zhouse = datos.get("house")
+                nueva_infofactura.zfechagen = hoy
+                nueva_infofactura.zllegasale = fecha_formateada
+                nueva_infofactura.zcommodity = datos.get("commodity")
+                nueva_infofactura.zkilos = datos.get("kilos")
+                nueva_infofactura.zvolumen = datos.get("volumen")
+                nueva_infofactura.zbultos = datos.get("bultos")
+                nueva_infofactura.zorigen = datos.get("origen")
+                nueva_infofactura.zdestino = datos.get("destino")
+                nueva_infofactura.zconsignatario = datos.get("consigna") or datos.get("consignatario")
+                nueva_infofactura.zembarcador = datos.get("embarca")
+                nueva_infofactura.zagente = datos.get("agente")
+                nueva_infofactura.zposicion = datos.get("posicion")
+                nueva_infofactura.zterminos = datos.get("terminos")
+                nueva_infofactura.zpagoflete = datos.get("pagoflete")
+                nueva_infofactura.zwr = datos.get("wr")
+                nueva_infofactura.ztransporte = posicion[1] if len(posicion) > 1 else None
+                nueva_infofactura.zclase = posicion[:2] if len(posicion) >= 2 else None
+
+                # Agregar información específica del gasto
+                nueva_infofactura.zitem = gasto.id_servicio  # Descripción del gasto
+                nueva_infofactura.zmonto = gasto.precio
+                nueva_infofactura.ziva = 1 if gasto.iva == 'Basico' else 0
+                nueva_infofactura.zmoneda = gasto.id_moneda
+
+                # Guardar cada registro
+                nueva_infofactura.save()
 
             return JsonResponse({"resultado": "exito"})
         except Exception as e:
@@ -302,7 +321,7 @@ def check_if_reference_exists(request):
             if numero:
                 try:
                     # Consulta si existe un registro en Infofactura con la referencia proporcionada
-                    existe = Infofactura.objects.filter(referencia=numero).exists()
+                    existe = Factudif.objects.filter(zrefer=numero).exists()
 
                     # Retorna True si existe, False si no
                     return JsonResponse({'exists': existe})
