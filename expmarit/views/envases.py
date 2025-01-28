@@ -3,8 +3,7 @@ from django.db import IntegrityError
 import simplejson
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
-from expmarit.models import ExpmaritEnvases
-
+from expmarit.models import ExpmaritEnvases, ExpmaritServiceaereo
 
 """ TABLA PUERTO """
 columns_table = {
@@ -169,6 +168,15 @@ def add_envase_importado(request):
 
                 # Guardar el registro en la base de datos
                 registro.save()
+
+                if envase_data['precio'] is not None and float(envase_data['precio'])  > 0 and envase_data['cantidad'] is not None and int(envase_data['cantidad']) > 0:
+                    costo = float(envase_data['precio'])  * int(envase_data['cantidad'])
+                    gasto = ExpmaritServiceaereo()
+                    gasto.numero = envase_data['numero']
+                    gasto.precio=costo
+                    gasto.servicio=5
+                    gasto.moneda=2
+                    gasto.save()
 
             # Retornar el resultado de éxito
             resultado['resultado'] = 'exito'

@@ -1,12 +1,12 @@
 from django.contrib.auth.decorators import login_required
 import json
-from impomarit.models import Embarqueaereo, Reservas
+from impomarit.models import Embarqueaereo, Serviceaereo
 from mantenimientos.models import Vendedores
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from django.db import IntegrityError
 from impomarit.forms import add_house, edit_house
-from seguimientos.models import Seguimiento, Serviceaereo, Envases, Conexaerea, Cargaaerea, Attachhijo
+from seguimientos.models import Seguimiento, Envases, Conexaerea, Cargaaerea, Attachhijo
 import re
 from datetime import datetime
 
