@@ -16,12 +16,18 @@ $(document).ready(function() {
     });
     //tabla general master
     table = $('#tabla_proveedoresygastos').DataTable({
-    "stateSave": true,
     "dom": 'Btlipr',
     "scrollX": true,
     "bAutoWidth": false,
     "scrollY": wHeight * 0.60,
-    "order": [[1, "desc"]],
+    "columnDefs": [
+        {
+            "targets": [0],  // Ocultamos ambas columnas en una sola configuración
+            "visible": false,
+            "searchable": false  // Opcional: evita que se incluyan en las búsquedas
+        },
+    ],
+    "order": [[2, "desc"]],
     "processing": true,
     "serverSide": true,
     "pageLength": 100,

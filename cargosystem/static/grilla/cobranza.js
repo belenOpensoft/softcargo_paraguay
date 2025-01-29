@@ -22,7 +22,6 @@ $(document).ready(function() {
     });
     //tabla general master
     table = $('#tabla_cobranzas').DataTable({
-    "stateSave": true,
     "dom": 'Btlipr',
     "scrollX": true,
     "bAutoWidth": false,
@@ -41,6 +40,13 @@ $(document).ready(function() {
             });
         }
     },
+     "columnDefs": [
+        {
+            "targets": [0],  // Ocultamos ambas columnas en una sola configuración
+            "visible": false,
+            "searchable": false  // Opcional: evita que se incluyan en las búsquedas
+        },
+        ],
     "language": {
         url: "/static/datatables/es_ES.json"
     },
@@ -438,10 +444,8 @@ function tabla_facturas_pendientes(cliente,moneda) {
             });
 
             if (filaImputada) {
-                $('#abrirpago').prop('disabled', false); // Habilitar el botón
                 $('#deshacer').prop('disabled', false); // Habilitar el botón
             } else {
-                $('#abrirpago').prop('disabled', true);  // Deshabilitar el botón
                 $('#deshacer').prop('disabled', true);  // Deshabilitar el botón
             }
         });
@@ -675,7 +679,6 @@ $('#imputarSeleccion').on('click', function () {
     localStorage.setItem('filasAfectadas', JSON.stringify(filasAfectadas));
     localStorage.setItem('historial', JSON.stringify(historial));
     updateBalance();
-    $('#abrirpago').prop('disabled', false);
     $('#deshacer').prop('disabled', false);
 });
 
@@ -779,10 +782,8 @@ function verificarImputado(table) {
 
         // Habilitar o deshabilitar el botón basado en si alguna fila fue imputada
         if (filaImputada) {
-            $('#abrirpago').prop('disabled', false); // Habilitar el botón
             $('#deshacer').prop('disabled', false); // Habilitar el botón
         } else {
-            $('#abrirpago').prop('disabled', true);  // Deshabilitar el botón
             $('#deshacer').prop('disabled', true);  // Deshabilitar el botón
         }
     }

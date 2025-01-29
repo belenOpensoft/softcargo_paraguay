@@ -264,28 +264,42 @@ var que_buscar = '';
         }
     });
     //tabla general master
+
+
     table = $('#tabla_facturas').DataTable({
-    "stateSave": true,
     "dom": 'Btlipr',
     "scrollX": true,
     "bAutoWidth": false,
     "scrollY": wHeight * 0.60,
     "columnDefs": [
         {
-            "targets": [0],
-            "className": '',
-            "orderable": false,
-            "data": null,
-            "defaultContent": '',
-            render: function (data, type, row) { }
+            "targets": [0, 1],  // Ocultamos ambas columnas en una sola configuración
+            "visible": false,
+            "searchable": false  // Opcional: evita que se incluyan en las búsquedas
         },
         {
-            "targets": [1],
-            "className": 'derecha archivos',
-        },
-        // Más definiciones de columnas...
+            "targets": 2,  // Asignamos la columna de fecha
+            "type": "date-iso", // Indica que esta columna es de tipo fecha
+            "orderable": true // Habilita el ordenamiento
+        }
     ],
-    "order": [[1, "desc"]],
+    "columns": [
+        { "visible": false }, // Columna 0
+        { "visible": false }, // Columna 1
+        { "orderable": true }, // Columna 2 (Ordenable)
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+    ],
+    "order": [[2, "desc"]],
     "processing": true,
     "serverSide": true,
     "pageLength": 10,
@@ -315,7 +329,6 @@ var que_buscar = '';
     },
     "rowCallback": function (row, data) {}
 });
-
 });
 
 /* INITIAL CONTROL PAGE */

@@ -30,7 +30,8 @@ def orden_pago_view(request):
 param_busqueda = {
     0: 'autogenerado__icontains',
     1: 'fecha__icontains',
-    2: 'documento__icontains',
+    2: 'cliente__icontains',
+    3: 'documento__icontains',
     4: 'total__icontains',
     5: 'monto__icontains',
     6: 'iva__icontains',
@@ -40,11 +41,12 @@ param_busqueda = {
 columns_table = {
     0: 'autogenerado',
     1: 'fecha',
-    2: 'documento',
-    3: 'total',
-    4: 'monto',
-    5: 'iva',
-    6: 'moneda',
+    2: 'cliente',
+    3: 'documento',
+    4: 'total',
+    5: 'monto',
+    6: 'iva',
+    7: 'moneda',
 }
 
 def source_ordenes(request):
@@ -67,30 +69,30 @@ def source_ordenes(request):
 
         # Consulta a la base de datos
         if filtro:
-            registros = VistaPagos.objects.filter(**filtro).order_by()
+            registros = VistaPagos.objects.filter(**filtro,tipo_factura='O/PAGO').order_by()
         else:
             registros = VistaPagos.objects.all().order_by()
 
         finales=[]
 
         for r in registros:
-            pago = r.pago if r.pago is not None else 0
-            if pago == r.total:
-                try:
-                    moneda_nombre = Monedas.objects.get(codigo=r.moneda).nombre if r.moneda in [1, 2, 3, 4, 5,
-                                                                                                6] else ''
-                except Monedas.DoesNotExist:
-                    moneda_nombre = ''
 
-                finales.append({
-                    'autogenerado': r.autogenerado,
-                    'fecha': r.fecha.strftime('%Y-%m-%d') if r.fecha else '',
-                    'documento': r.documento,
-                    'total': r.total,
-                    'monto': r.monto,
-                    'iva': r.iva,
-                    'moneda': moneda_nombre,
-                })
+            try:
+                moneda_nombre = Monedas.objects.get(codigo=r.moneda).nombre if r.moneda in [1, 2, 3, 4, 5,
+                                                                                            6] else ''
+            except Monedas.DoesNotExist:
+                moneda_nombre = ''
+
+            finales.append({
+                'autogenerado': r.autogenerado,
+                'fecha': r.fecha.strftime('%Y-%m-%d') if r.fecha else '',
+                'cliente': r.cliente,
+                'documento': r.documento,
+                'total': r.total,
+                'monto': r.monto,
+                'iva': r.iva,
+                'moneda': moneda_nombre,
+            })
 
         # Preparación de la respuesta
         resultado = {
@@ -144,7 +146,7 @@ def buscar_proveedores(request):
     return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
 
 
-def obtener_imputables(request):
+def obtener_imputables_old(request):
     proveedor_id = request.GET.get('codigo')
 
     # Obtener los parámetros de paginación
@@ -197,6 +199,50 @@ def obtener_imputables(request):
 
     return JsonResponse(response_data, safe=False)
 
+def obtener_imputables(request):
+    proveedor_id = request.GET.get('codigo')
+
+    # Obtener los parámetros de paginación
+    start = int(request.GET.get('start', 0))  # Inicio de la página (offset)
+    length = int(request.GET.get('length', 5))  # Número de registros por página
+    # Filtrar los registros según el proveedor
+    registros_totales = VistaPagos.objects.filter(nrocliente=proveedor_id)
+
+    filtrados=[]
+    for r in registros_totales:
+
+        try:
+            moneda_nombre = Monedas.objects.get(codigo=r.moneda).nombre if r.moneda in [1, 2, 3, 4, 5,6] else ''
+        except Monedas.DoesNotExist:
+            moneda_nombre = ''
+
+        filtrados.append({
+            'autogenerado': r.autogenerado,
+            'fecha': r.fecha,
+            'documento': r.documento,
+            'total': r.total,
+            'monto': r.monto,
+            'iva': r.iva,
+            'tipo': r.tipo_factura,
+            'moneda': moneda_nombre,
+            'saldo': r.saldo,
+            'imputado': 0
+        })
+
+    # Aplicar la paginación: [start:start+length] para obtener solo los registros de la página solicitada
+    registros = filtrados[start:start + length]
+
+
+    # Estructura de respuesta para DataTable
+    response_data = {
+        'draw': request.GET.get('draw', 0),  # Para mantener la coherencia con DataTable
+        'recordsTotal': registros_totales.count(),  # Total de registros sin filtros
+        'recordsFiltered': len(filtrados),
+        # Total de registros después del filtrado (aplica el filtro de 'nrocliente')
+        'data': registros  # Datos que se mostrarán en la tabla
+    }
+
+    return JsonResponse(response_data, safe=False)
 
 @transaction.atomic
 def guardar_impuorden(request):

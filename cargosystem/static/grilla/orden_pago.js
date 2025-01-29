@@ -65,15 +65,24 @@ $(document).ready(function() {
             });
         }
     },
+    "columnDefs": [
+        {
+            "targets": [0],  // Ocultamos ambas columnas en una sola configuración
+            "visible": false,
+            "searchable": false  // Opcional: evita que se incluyan en las búsquedas
+        },
+        ],
      "columns": [
         { "data": "autogenerado" },
         { "data": "fecha" },
+        { "data": "cliente" },
         { "data": "documento" },
         { "data": "total" },
         { "data": "monto" },
         { "data": "iva" },
         { "data": "moneda" }
     ],
+
     "language": {
         url: "/static/datatables/es_ES.json"
     },

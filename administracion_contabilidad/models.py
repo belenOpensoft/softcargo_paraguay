@@ -10477,12 +10477,12 @@ class VistaGastosPreventa(models.Model):
 class ListaCobranzas(models.Model):
     autogenerado = models.CharField(primary_key=True, max_length=50)
     numero = models.CharField(max_length=50, null=True, blank=True)
+    nrocliente = models.CharField(max_length=50, null=True, blank=True)
     detalle = models.TextField(null=True, blank=True)
-    master = models.CharField(max_length=50, null=True, blank=True)
-    house = models.CharField(max_length=50, null=True, blank=True)
+    fecha = models.DateTimeField()
+    cliente = models.CharField(max_length=50, null=True, blank=True)
     monto = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     iva = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    totiva = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     class Meta:
@@ -10492,11 +10492,14 @@ class ListaCobranzas(models.Model):
 class VistaProveedoresygastos(models.Model):
     autogenerado = models.CharField(primary_key=True, max_length=50)
     numero = models.CharField(max_length=50, null=True, blank=True)
+    nrocliente = models.CharField(max_length=50, null=True, blank=True)
+    cliente = models.CharField(max_length=50, null=True, blank=True)
     detalle = models.TextField(null=True, blank=True)
     tipo = models.CharField(max_length=50, null=True, blank=True)
     monto = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     iva = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    fecha = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         managed = False  # Indicates that this model represents a database view

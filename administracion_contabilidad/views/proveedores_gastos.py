@@ -12,22 +12,26 @@ from administracion_contabilidad.forms import ProveedoresGastos
 from django.http import JsonResponse
 param_busqueda = {
     0: 'autogenerado__icontains',
-    1: 'numero__icontains',
-    2: 'detalle__icontains',
-    3: 'tipo__icontains',
-    4: 'monto__icontains',
-    5: 'iva__icontains',
-    6: 'total__icontains',
+    1: 'fecha__icontains',
+    2: 'cliente__icontains',
+    3: 'numero__icontains',
+    4: 'detalle__icontains',
+    5: 'tipo__icontains',
+    6: 'monto__icontains',
+    7: 'iva__icontains',
+    8: 'total__icontains',
 }
 
 columns_table = {
     0: 'autogenerado',
-    1: 'numero',
-    2: 'detalle',
-    3: 'tipo',
-    4: 'monto',
-    5: 'iva',
-    6: 'total',
+    1: 'fecha',
+    2: 'proveedor',
+    3: 'numero',
+    4: 'detalle',
+    5: 'tipo',
+    6: 'monto',
+    7: 'iva',
+    8: 'total',
 }
 
 @login_required(login_url='/login')
@@ -432,6 +436,8 @@ def get_data(registros_filtrados):
         for registro in registros_filtrados:
             registro_json = []
             registro_json.append('' if registro.autogenerado is None else str(registro.autogenerado))
+            registro_json.append('' if registro.fecha is None else registro.fecha.strftime('%Y-%m-%d'))
+            registro_json.append('' if registro.cliente is None else str(registro.cliente))
             registro_json.append('' if registro.numero is None else str(registro.numero))
             registro_json.append('' if registro.detalle is None else str(registro.detalle))
             registro_json.append('' if registro.tipo is None else str(registro.tipo))

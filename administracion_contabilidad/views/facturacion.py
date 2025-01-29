@@ -25,32 +25,34 @@ from administracion_contabilidad.forms import pdfForm
 
 param_busqueda = {
     1: 'autogenerado__icontains',
-    2: 'serie__icontains',
-    3: 'prefijo__icontains',
-    4: 'numero__icontains',
-    5: 'cliente__icontains',
-    6: 'master__icontains',
-    7: 'house__icontains',
-    8: 'concepto__icontains',
-    9: 'monto__icontains',
-    10: 'iva__icontains',
-    11: 'totiva__icontains',
-    12: 'total__icontains',
+    2: 'fecha__icontains',
+    3: 'serie__icontains',
+    4: 'prefijo__icontains',
+    5: 'numero__icontains',
+    6: 'cliente__icontains',
+    7: 'master__icontains',
+    8: 'house__icontains',
+    9: 'concepto__icontains',
+    10: 'monto__icontains',
+    11: 'iva__icontains',
+    12: 'totiva__icontains',
+    13: 'total__icontains',
 }
 
 columns_table = {
     0: 'autogenerado',
-    1: 'serie',
-    2: 'prefijo',
-    3: 'numero',
-    4: 'cliente',
-    5: 'master',
-    6: 'house',
-    7: 'concepto',
-    8: 'monto',
-    9: 'iva',
-    10: 'totiva',
-    11: 'total',
+    1: 'fecha',
+    2: 'serie',
+    3: 'prefijo',
+    4: 'numero',
+    5: 'cliente',
+    6: 'master',
+    7: 'house',
+    8: 'concepto',
+    9: 'monto',
+    10: 'iva',
+    11: 'totiva',
+    12: 'total',
 }
 
 
@@ -68,7 +70,9 @@ def source_facturacion(request):
         '10': request.GET['columns[10][search][value]'],
         '11': request.GET['columns[11][search][value]'],
         '12': request.GET['columns[12][search][value]'],
+        '13': request.GET['columns[13][search][value]'],  # Nueva columna agregada
     }
+
     filtro = get_argumentos_busqueda(**args)
     start = int(request.GET['start'])
     length = int(request.GET['length'])
@@ -101,6 +105,7 @@ def get_data(registros_filtrados):
             registro_json = []
             registro_json.append(str(registro.id))
             registro_json.append('' if registro.autogenerado is None else str(registro.autogenerado))
+            registro_json.append('' if registro.fecha is None else registro.fecha.strftime('%Y-%m-%d'))
             registro_json.append('' if registro.prefijo is None else str(registro.prefijo))
             registro_json.append('' if registro.serie is None else str(registro.serie))
             registro_json.append('' if registro.numero is None else str(registro.numero))
@@ -113,6 +118,7 @@ def get_data(registros_filtrados):
             registro_json.append('' if registro.totiva is None else str(registro.totiva))
             registro_json.append('' if registro.total is None else str(registro.total))
             data.append(registro_json)
+            print(json.dumps(data, indent=4))
         return data
     except Exception as e:
         raise TypeError(e)
