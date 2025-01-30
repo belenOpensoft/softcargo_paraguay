@@ -223,6 +223,26 @@ def source_seguimientos_modo(request, modo):
     return HttpResponse(data_json, mimetype)
 
 
+def get_datos_embarque(numero):
+    try:
+        resultado=[]
+        envases = Envases.objects.filter(numero=numero).values_list('unidad','cantidad','nrocontenedor','precinto','peso','volumen','bultos')
+        if envases.count()>0:
+            for registro in envases:
+                txt=('<b>'+ str(registro[0] if registro[0] is not None else '').upper() +'</b>: '+
+                     str('{:.3f}'.format(registro[1]) if registro[1] is not None else ''))
+                txt += ' <b>CNTR:</b> ' + str(registro[2] if registro[2] is not None else '')
+                txt += ' <b>SEAL:</b> ' + str(registro[3] if registro[3] is not None else '')
+                txt += ' <b>WT:</b> ' + str(registro[4] if registro[4] is not None else '')
+                txt += ' <b>VOL:</b> ' + str(registro[5] if registro[5] is not None else '')
+                txt += ' <b>BULTOS:</b> ' + str(registro[6] if registro[6] is not None else '')
+                resultado.append(txt)
+
+        return resultado
+    except Exception as e:
+        raise TypeError(e)
+
+
 def get_data(registros_filtrados):
     try:
         data = []
@@ -343,7 +363,7 @@ def get_data(registros_filtrados):
             else:
                 registro_json.append('')
 
-            #registro_json.append(historial)
+            registro_json.append(get_datos_embarque(registro.numero))
             data.append(registro_json)
         return data
     except Exception as e:
@@ -557,6 +577,8 @@ def clonar_seguimiento(request):
         clonado.hawb = None
         clonado.posicion = None
         clonado.numero = numero + 1
+        clonado.fecha = datetime.now().date()
+        #cambiar cosas del clonado fechas
         for row in data:
             registros = None
             if row['name'] == 'envases' and row['value'] == 'SI':

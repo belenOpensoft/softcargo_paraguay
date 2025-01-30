@@ -1639,7 +1639,7 @@ class Ciudades(models.Model):
 
 class Clientes(models.Model):
     codigo = models.IntegerField(unique=True)
-    empresa = models.CharField(max_length=50)
+    empresa = models.CharField(blank=True,max_length=50)
     razonsocial = models.CharField(max_length=50)
     direccion = models.CharField(max_length=50, blank=True, null=True)
     localidad = models.CharField(max_length=30, blank=True, null=True)

@@ -51,6 +51,7 @@ def get_datos_caratula(request):
                     texto += ' <b>SEAL:</b> '+ str(registro.precinto if registro.precinto is not None else '')
                     texto += ' <b>WT:</b> '+ str('{:.3f}'.format(registro.peso) if registro.peso is not None else '')
                     texto += ' <b>VOL:</b> '+ str('{:.3f}'.format(registro.volumen) if registro.volumen is not None else '')
+                    texto += ' <b>BULTOS:</b> '+ str(registro.bultos) if registro.bultos is not None else ''
             texto = texto + '<hr>'
             texto = texto + '<b>Forma de pago: </b>'+str(row.pago if row.pago is not None else '')+'<br>'
             texto = texto + '<b>Vendedor: </b>'+str(row.vendedor if row.vendedor is not None else '')+'<br>'

@@ -19,7 +19,7 @@ class CorreoEnviado(models.Model):
     )
 
     fecha = models.DateTimeField()
-    enviado_a = models.CharField(max_length=250)
+    enviado_a = models.CharField(max_length=500)
     correo = models.CharField(max_length=100)
     emisor = models.CharField(max_length=150,null=True,blank=True)
     seguimiento = models.CharField(max_length=150,null=True,blank=True)

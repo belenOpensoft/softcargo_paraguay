@@ -1224,7 +1224,7 @@ class Impuestosbrasil(models.Model):
 
 class Impuordenes(models.Model):
     id = models.IntegerField(primary_key=True)
-    orden = models.IntegerField(max_length=20, blank=True, null=True)
+    orden = models.IntegerField(blank=True, null=True)
     numero = models.CharField(max_length=20, blank=True, null=True)
     cliente = models.IntegerField(blank=True, null=True)
     monto = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
@@ -10507,7 +10507,7 @@ class VistaProveedoresygastos(models.Model):
 
 class VistaPagos(models.Model):
     autogenerado = models.CharField(primary_key=True, max_length=50)
-    nrocliente = models.IntegerField(max_length=50)
+    nrocliente = models.IntegerField()
     cliente = models.CharField( max_length=50)
     moneda = models.CharField( max_length=50)
     documento = models.CharField(max_length=50, null=True, blank=True)

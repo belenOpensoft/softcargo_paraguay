@@ -724,8 +724,9 @@ $(document).ready(function () {
         }
     });
     $('.email').click(function () {
-        title = this.getAttribute('data-tt');
-        row = table.rows('.table-secondary').data();
+        let title = this.getAttribute('data-tt');
+        let mail_to = this.getAttribute('data-to');
+        let row = table.rows('.table-secondary').data();
         $("#id_to").val('');
         $("#id_cc").val('');
         $("#id_cco").val('');
@@ -735,7 +736,9 @@ $(document).ready(function () {
         archivos_adjuntos = {};
         if (row.length === 1) {
             get_data_email(row,title,row_number);
-            $("#id_to").val(row[0][50]);
+            if(mail_to==='1'){
+                $("#id_to").val(row[0][50]);
+            }
             $("#emails_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
@@ -2044,7 +2047,7 @@ $(document).ready(function () {
 
 function format(d) {
     // `d` is the original data object for the row
-    return '<table class="table table-sm table-responsive   " cellpadding="5" cellspacing="0" border="0" style="padding-left:30px;">' +
+    let aux= '<table class="table table-sm table-responsive   " cellpadding="5" cellspacing="0" border="0" style="padding-left:30px;">' +
         '<tbody>' +
         '<tr>' +
         '<th class="derecha">Cliente:</th>' +
@@ -2135,9 +2138,13 @@ function format(d) {
         '<td colspan="5">' + d[39] + '</td>' +
         '</tr>' +
         '<tr>' +
-        '<th class="derecha"></th>' +
-        '<td colspan="5"></td>' +
-        '<th class="derecha">Operacion:</th>' +
+        '<th class="derecha">Detalles del embarque:</th>' ;
+        aux+='<td colspan="5">'
+        for(let embarque of d[51]){
+            aux += embarque + '<br>';
+        }
+        aux+='</td>';
+        aux+= '<th class="derecha">Operacion:</th>' +
         '<td colspan="5">' + d[27] + '</td>' +
         '<th class="derecha">Dias demora:</th>' +
         '<td colspan="5">' + d[40] + '</td>' +
@@ -2151,17 +2158,19 @@ function format(d) {
         '<td colspan="5">' + d[41] + '</td>' +
         '</tr>' +
         '<tr>' +
-        '<th class="derecha" colspan="4"></th>' +
+        '<th class="derecha" colspan="12"></th>' +
         '<th class="derecha">WR:</th>' +
-        '<td colspan="5">' + d[42] + '</td>' +
+        '<td colspan="">' + d[42] + '</td>' +
         '</tr>' +
         '<tr>' +
-        '<th class="derecha" colspan="4"></th>' +
+        '<th class="derecha" colspan="12"></th>' +
         '<th class="derecha">Valor:</th>' +
-        '<td colspan="5">' + d[43] + '</td>' +
+        '<td colspan="">' + d[43] + '</td>' +
         '</tr>' +
         '</tbody>' +
         '</table>';
+
+        return aux;
 }
 function setCookie(row_selected) {
     select_row = row_selected;
