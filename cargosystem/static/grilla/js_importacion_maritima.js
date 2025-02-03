@@ -1525,7 +1525,7 @@ var expandedRow;
     $('#edit_house_form').submit(function(e){
     let lugar=localStorage.getItem('lugar');
        e.preventDefault();
-        if(document.getElementById('pago_house_e').value<0||document.getElementById('arbitraje_house_e').value<0||document.getElementById('dias_demora_e').value<0){
+        if(document.getElementById('arbitraje_house_e').value<0||document.getElementById('dias_demora_e').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
         var numero = localStorage.getItem('numero_embarque');
@@ -2654,6 +2654,7 @@ table_add_im = $('#table_add_im').DataTable({
 
 }
 function fillFormWithDataHouse(data) {
+console.log(data);
 
         $('#transportista_addh_e').val(!data.transportista_e || data.transportista_e === 0 ? '' : getNameById(data.transportista_e));
         $('#agente_addh_e').val(!data.agente_e || data.agente_e === 0 ? '' : getNameById(data.agente_e));

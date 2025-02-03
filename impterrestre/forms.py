@@ -297,7 +297,7 @@ class edit_form(BSModalModelForm):
     operacion_e = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Operacion",choices=choice_op)
     pagoflete_e = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("C","Collect"),("P","Prepaid")))
     transportista_ie = forms.CharField(
-        widget=forms.TextInput(attrs={
+        widget=forms.HiddenInput(attrs={
             'class': 'form-control',
             'style': 'width:50px; margin-right:2px;',
             'readonly': 'readonly',
@@ -307,7 +307,7 @@ class edit_form(BSModalModelForm):
         required=False
     )
     agente_ie = forms.CharField(
-        widget=forms.TextInput(attrs={
+        widget=forms.HiddenInput(attrs={
             'class': 'form-control',
             'style': 'width:50px; margin-right:2px;',
             'readonly': 'readonly',
@@ -317,7 +317,7 @@ class edit_form(BSModalModelForm):
         required=False
     )
     consignatario_ie = forms.CharField(
-        widget=forms.TextInput(attrs={
+        widget=forms.HiddenInput(attrs={
             'class': 'form-control',
             'style': 'width:50px; margin-right:2px;',
             'readonly': 'readonly',
@@ -327,7 +327,7 @@ class edit_form(BSModalModelForm):
         required=False
     )
     armador_ie = forms.CharField(
-        widget=forms.TextInput(attrs={
+        widget=forms.HiddenInput(attrs={
             'class': 'form-control',
             'style': 'width:50px; margin-right:2px;',
             'readonly': 'readonly',
@@ -590,7 +590,6 @@ class edit_house(BSModalModelForm):
             'origen',
             'destino',
             'moneda',
-            'pago',
             'terminos',
             'operacion',
             'arbitraje',
@@ -647,6 +646,8 @@ class edit_house(BSModalModelForm):
                              required=False, label="Tipo", choices=choice_localint, initial='')
     # primer columna
     # primer columna
+    pago = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("C","Collect"),("P","Prepaid")))
+
     awb = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'id_awbhijo_e'}), label='Master')
     cliente = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control input-sobrepasar', 'id': 'cliente_addh_e', 'required': False}), required=False)

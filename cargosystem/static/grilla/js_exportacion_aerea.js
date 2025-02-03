@@ -1609,7 +1609,7 @@ function aplicable_volumen(volumen){
     $('#edit_house_form').submit(function(e){
     let lugar=localStorage.getItem('lugar');
        e.preventDefault();
-        if(document.getElementById('pago_house_e').value<0||document.getElementById('arbitraje_house_e').value<0){
+        if(document.getElementById('arbitraje_house_e').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
         var numero = localStorage.getItem('numero_embarque');

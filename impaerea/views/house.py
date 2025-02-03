@@ -155,6 +155,9 @@ def add_house_importado(request):
                     reserva.agecompras = house_data.get('agcompras')
                     reserva.ageventas = house_data.get('agventas')
                     reserva.embarcador = house_data.get('embarcador')
+                    reserva.fechaembarque=house_data.get('fechaembarque')
+                    reserva.pagoflete=house_data.get('pagoflete')
+                    reserva.status=house_data.get('estado')
 
                     reserva.save()
 
@@ -236,7 +239,10 @@ def source_seguimientos_importado(request):
                     "cliente": registro.cliente,
                     "agcompras": registro.agecompras,
                     "embarcador": registro.embarcador,
-                    "agventas": registro.ageventas
+                    "agventas": registro.ageventas,
+                    "pagoflete": 'C' if registro.pago == 'Collect' else 'P',
+                    "estado": registro.status,
+                    "fechaembarque": registro.loadingdate,
                 })
 
             return JsonResponse({"data": resultado}, safe=False)
@@ -495,7 +501,7 @@ def edit_house_function(request, numero):
             house.consolidado = request.POST.get('consolidado', 0)
             house.moneda = form.cleaned_data.get('moneda', 0)
             house.arbitraje = form.cleaned_data.get('arbitraje', 0) if form.cleaned_data.get('arbitraje') not in [None, ''] else 0
-            house.pago = form.cleaned_data.get('pago', 0)
+            house.pagoflete = form.cleaned_data.get('pago', 0)
             house.destino = form.cleaned_data.get('destino', "")
             house.origen = form.cleaned_data.get('origen', "")
             house.status = form.cleaned_data.get('status_h', "")
