@@ -578,6 +578,8 @@ def clonar_seguimiento(request):
         clonado.posicion = None
         clonado.numero = numero + 1
         clonado.fecha = datetime.now().date()
+        clonado.etd=None
+        clonado.eta=None
         #cambiar cosas del clonado fechas
         for row in data:
             registros = None
@@ -589,12 +591,18 @@ def clonar_seguimiento(request):
                 registros = Serviceaereo.objects.filter(numero=original.numero)
             elif row['name'] == 'trasbordo' and row['value'] == 'SI':
                 registros = Conexaerea.objects.filter(numero=original.numero)
-            if registros is not None and registros.count() > 0:
+
+            if registros is not None and registros.exists():
                 for r in registros:
-                    aux = deepcopy(r)
-                    aux.numero = clonado.numero
+                    if row['name'] == 'embarques':
+                        aux = Cargaaerea(numero=clonado.numero, producto=r.producto)
+                    else:
+                        aux = deepcopy(r)
+                        aux.numero = clonado.numero
+
                     aux.id = None
                     aux.save()
+
         clonado.save()
         resultado['resultado'] = 'exito'
         resultado['numero'] = str(clonado.numero)

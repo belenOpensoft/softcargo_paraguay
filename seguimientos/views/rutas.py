@@ -3,8 +3,8 @@ import json
 import simplejson
 from django.contrib import messages
 from django.db import IntegrityError
-from django.http import HttpResponse
-from seguimientos.models import Conexaerea, VGrillaSeguimientos
+from django.http import HttpResponse, JsonResponse
+from seguimientos.models import Conexaerea, VGrillaSeguimientos, Seguimiento
 
 """ TABLA PUERTO """
 columns_table = {
@@ -155,4 +155,29 @@ def eliminar_ruta(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+def datos_seguimiento(request):
+    resultado = {}
+    try:
+        numero = request.POST.get('numero')  # Evita errores si el número no está en la petición
+        seguimiento = Seguimiento.objects.get(numero=numero)
+        transportista = VGrillaSeguimientos.objects.get(numero=numero).transportista
 
+        data = {
+            'salida': seguimiento.loadingdate.strftime('%Y-%m-%d') if seguimiento.loadingdate else None,
+            'origen': seguimiento.origen if seguimiento.origen else None,
+            'destino': seguimiento.destino if seguimiento.destino else None,
+            'cia': transportista if transportista else None,
+            'modo': seguimiento.modo if seguimiento.modo else None,
+            'viaje': seguimiento.viaje if seguimiento.viaje else None,
+            'vapor': seguimiento.vapor if seguimiento.vapor else None
+        }
+
+        resultado['datos'] = data
+        resultado['resultado'] = 'exito'
+
+    except Seguimiento.DoesNotExist:
+        resultado['resultado'] = 'No se encontró el seguimiento con ese número.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+
+    return JsonResponse(resultado)

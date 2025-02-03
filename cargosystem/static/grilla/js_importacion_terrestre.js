@@ -310,6 +310,8 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $('#loading_add').val(ui.item['value']);
+
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -325,6 +327,8 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $('#discharge_add').val(ui.item['value']);
+
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -3847,6 +3851,7 @@ function get_datos_rutas_house() {
             }
         },
     });
+    get_datos_seguimiento_rutas(numero);
 }
 function rutas_btn_h_click(){
   $("#id_house_ruta").val('');
@@ -3929,6 +3934,36 @@ function rutas_btn_h_click(){
         } else {
             alert('Debe seleccionar al menos un registro');
         }
+}
+function get_datos_seguimiento_rutas(numero) {
+    $.ajax({
+        url: "/importacion_terrestre/datos_embarque_ruta/",  // Asegúrate de que esta URL coincida con tu Django URLConf
+        type: "POST",
+        data: {
+            numero: numero,
+            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val() // CSRF Token obligatorio en POST
+        },
+        dataType: "json",
+        success: function (response) {
+            if (response.resultado === "exito") {
+                // Asignar valores a los inputs si existen en el formulario
+                $("#id_salida").val(response.datos.salida || "");
+                $("#id_origen").val(response.datos.origen || "");
+                $("#id_destino").val(response.datos.destino || "");
+                $("#id_cia").val(response.datos.cia || "");
+                $("#id_modo_ruta").val(response.datos.modo || "");
+                $("#id_viaje_ruta").val(response.datos.viaje || "");
+                $("#id_vapor").val(response.datos.vapor || "");
+            } else {
+                console.error("Error en la respuesta:", response.resultado);
+                alert("Error: " + response.resultado);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error en la petición AJAX:", error);
+            alert("No se pudo obtener la información. Verifica el número e intenta de nuevo.");
+        }
+    });
 }
 
 //envases house

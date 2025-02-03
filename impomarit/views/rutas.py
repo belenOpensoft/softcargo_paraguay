@@ -5,7 +5,9 @@ import simplejson
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
-from impomarit.models import Conexaerea, Embarqueaereo
+
+from expmarit.models import VEmbarqueaereo
+from impomarit.models import Conexaerea, Embarqueaereo, VEmbarqueaereo
 from seguimientos.models import Seguimiento
 
 """ TABLA PUERTO """
@@ -193,7 +195,6 @@ def add_ruta_importado(request):
     # Devolver el resultado en formato JSON
     return JsonResponse(resultado)
 
-
 def eliminar_ruta(request):
     resultado = {}
     try:
@@ -208,4 +209,29 @@ def eliminar_ruta(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+def datos_embarque_ruta(request):
+    resultado = {}
+    try:
+        numero = request.POST.get('numero')
+        embarque = Embarqueaereo.objects.get(numero=numero)
+        transportista = VEmbarqueaereo.objects.get(numero=numero).transportista
 
+        data = {
+            'salida': embarque.fechaembarque.strftime('%Y-%m-%d') if embarque.fechaembarque else None,
+            'origen': embarque.origen if embarque.origen else None,
+            'destino': embarque.destino if embarque.destino else None,
+            'cia': transportista if transportista else None,
+            'modo': 'MARITIMO',
+            'viaje': embarque.viaje if embarque.viaje else None,
+            'vapor': embarque.vapor if embarque.vapor else None
+        }
+
+        resultado['datos'] = data
+        resultado['resultado'] = 'exito'
+
+    except Embarqueaereo.DoesNotExist:
+        resultado['resultado'] = 'No se encontró el seguimiento con ese número.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+
+    return JsonResponse(resultado)

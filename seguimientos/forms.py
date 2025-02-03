@@ -239,7 +239,7 @@ class seguimientoForm(BSModalModelForm):
         required=True,
         label="Fecha Loading"
     )
-    tomopeso = forms.BooleanField(widget=forms.CheckboxInput(attrs={"autocomplete": "off", 'required': False}), required=False, label="Tomo peso",initial=1)
+    tomopeso = forms.BooleanField(widget=forms.CheckboxInput(attrs={"autocomplete": "off", 'required': False,"class": "d-none"}), required=False, label="Tomo peso",initial=1)
     iniciales = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'iniciales', 'required': False}),required=False)
     recepcionado = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'recepcionado', 'required': False}),required=False,initial='N')
     tarifafija = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'tarifafija', 'required': False}),required=False,initial='N')
@@ -414,6 +414,7 @@ class embarquesForm(BSModalModelForm):
             'cbm': 'Volumen',
             'bruto': 'Peso bruto',
             'tipo': 'Tipo',
+            'mercaderia':'Detalle'
         }
         widgets = {
             # 'id': forms.HiddenInput(attrs={'id':'id_embarque_id',}),

@@ -25,7 +25,7 @@ from seguimientos.views.desconsolidacion_aerea import desconsolidacion_aerea, de
 from seguimientos.views.archivos import source_archivos, guardar_archivo, eliminar_archivo, descargar_archivo
 from seguimientos.views.autocompletes import autocomplete_clientes, autocomplete_ciudades, autocomplete_vendedores, \
     autocomplete_vapores, autocomplete_proyectos, autocomplete_traficos, autocomplete_actividades, \
-    autocomplete_depositos, autocomplete_ciudades_codigo
+    autocomplete_depositos, autocomplete_ciudades_codigo, agregar_buque
 from seguimientos.views.email import get_data_email
 from seguimientos.views.embarques import source_embarques, guardar_embarques, actualizo_datos_embarque, \
     eliminar_embarque
@@ -35,7 +35,7 @@ from seguimientos.views.getdata import get_data_cronologia, get_data_seguimiento
 from seguimientos.views.logs import source_logs
 from seguimientos.views.pdf import get_datos_caratula
 from seguimientos.views.reportes import reportes_seguimiento, descargar_pdf, descargar_hawb, reportes_operativas
-from seguimientos.views.rutas import source_rutas, guardar_ruta, eliminar_ruta
+from seguimientos.views.rutas import source_rutas, guardar_ruta, eliminar_ruta, datos_seguimiento
 from seguimientos.views.seguimientos import grilla_seguimientos, source_seguimientos, guardar_notas, guardar_cronologia, \
     guardar_seguimiento, guardar_envases, eliminar_envase, clonar_seguimiento
 from seguimientos.views.vapores import comprobar_vapores
@@ -44,6 +44,7 @@ urlpatterns = [
     ### SEGUIMIENTOS ###
     path('seguimientos', grilla_seguimientos, name="vista_seguimientos"),
     path('source_seguimientos', source_seguimientos, name="source_seguimientos"),
+    path('datos_seguimiento', datos_seguimiento, name="datos_seguimiento"),
     path('source_envases', source_envases, name="source_envases"),
     path('source_rutas', source_rutas, name="source_rutas"),
     path('source_logs_seguimiento', source_logs, name="source_logs_seguimiento"),
@@ -73,6 +74,7 @@ urlpatterns = [
     path('autocomplete_depositos/', autocomplete_depositos, name='autocomplete_depositos'),
     path('autocomplete_vendedores/', autocomplete_vendedores, name='autocomplete_vendedores'),
     path('autocomplete_vapores/', autocomplete_vapores, name='autocomplete_vapores'),
+    path('agregar_buque/', agregar_buque, name='guardar_buque'),
     path('autocomplete_proyectos/', autocomplete_proyectos, name='autocomplete_proyectos'),
     path('autocomplete_traficos/', autocomplete_traficos, name='autocomplete_traficos'),
     path('autocomplete_actividades/', autocomplete_actividades, name='autocomplete_actividades'),

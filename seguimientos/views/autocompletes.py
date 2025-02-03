@@ -1,5 +1,7 @@
-from django.http import JsonResponse
+from django.contrib import messages
+from django.http import JsonResponse, HttpResponseRedirect
 
+from mantenimientos.forms import add_buque_form
 from mantenimientos.models import Clientes, Ciudades, Vendedores, Vapores, Proyectos, Traficos, Actividades, Depositos
 
 
@@ -109,5 +111,23 @@ def autocomplete_depositos(request):
                           'value':x.empresa,
                         })
         return JsonResponse(lista,safe=False)
+
+def agregar_buque(request):
+    try:
+            if request.method == 'POST':
+                form = add_buque_form(request.POST)
+                if form.is_valid():
+                    buque = Vapores()
+                    buque.codigo = buque.get_codigo()
+                    buque.nombre = form.cleaned_data['nombre']
+                    buque.save()
+                    return JsonResponse({"success": True, "id": buque.codigo})
+                else:
+                    return JsonResponse({"success": False, "error": 'formulario incorrecto'}, status=500)
+
+
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
 
 

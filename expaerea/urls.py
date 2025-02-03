@@ -17,7 +17,8 @@ from expaerea.views.master import master_detail, add_importacion_maritima, edit_
 from expaerea.views.mails import get_data_email_op
 from expaerea.views.notas import source, guardar_notas, eliminar_nota
 from expaerea.views.pdf import get_datos_caratula
-from expaerea.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado
+from expaerea.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado, \
+    datos_embarque_ruta
 
 from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.reportes import descargar_hawb_operativas
@@ -25,6 +26,7 @@ from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
     path('source/', source, name='source'),
+    path('datos_embarque_ruta/', datos_embarque_ruta, name='datos_embarque_ruta'),
     path('guardar_notas/', guardar_notas, name='guardar_notas'),
     path('eliminar_nota/', eliminar_nota, name='eliminar_nota'),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
