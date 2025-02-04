@@ -2,40 +2,112 @@ from django.http import JsonResponse
 from seguimientos.models import Seguimiento, VGrillaSeguimientos
 
 
-def get_data_cronologia(request,id):
+def get_data_cronologia_old(request,id):
     try:
-        data = Seguimiento.objects.filter(id=id).values(
-                'fecha',
-                'estimadorecepcion',
-                'recepcion',
-                'fecemision',
-                'fecseguro',
-                'fecdocage',
-                'loadingdate',
-                'arriboreal',
-                'fecaduana',
-                'pagoenfirme',
-                'vencimiento',
-                'etd',
-                'eta',
-                'fechaonhand',
-                'fecrecdoc',
-                'recepcionprealert',
-                'lugar',
-                'nroseguro',
-                'bltipo',
-                'manifiesto',
-                'credito',
-                'prima',
-                'originales',)
-        if data:
-                # Convertir los valores en una lista de diccionarios clave-valor
-                return JsonResponse(data[0], safe=False)
-        else:
-                return JsonResponse({'error': 'El objeto no existe'}, status=404)
-        return JsonResponse(list(data), safe=False)
+        data = Seguimiento.objects.filter(id=id)
+
+        # Lista de campos que son fechas
+        campos_fecha = [
+            'fecha', 'estimadorecepcion', 'recepcion', 'fecemision', 'fecseguro',
+            'fecdocage', 'loadingdate', 'arriboreal', 'fecaduana', 'pagoenfirme',
+            'vencimiento', 'etd', 'eta', 'fechaonhand', 'fecrecdoc', 'recepcionprealert'
+        ]
+
+        # Construcción del array con solo los campos de fecha formateados
+        resultado = []
+        for obj in data:
+            item = {}
+            for field_name in campos_fecha:
+                value = getattr(obj, field_name, None)
+
+                # Si el valor no es None, formatearlo
+                if value is not None:
+                    item[field_name] = value.strftime('%Y-%m-%d')
+                else:
+                    item[field_name] = None  # Mantener None si el campo es vacío
+
+            resultado.append(item)
+        return JsonResponse(list(resultado), safe=False)
     except Exception as e:
         return JsonResponse({'error': 'El objeto no existe'}, status=404)
+
+def get_data_cronologia(request, id):
+    try:
+        data = Seguimiento.objects.filter(id=id)
+
+        # Lista de todos los campos requeridos
+        fields = [
+            'fecha', 'estimadorecepcion', 'recepcion', 'fecemision', 'fecseguro',
+            'fecdocage', 'loadingdate', 'arriboreal', 'fecaduana', 'pagoenfirme',
+            'vencimiento', 'etd', 'eta', 'fechaonhand', 'fecrecdoc', 'recepcionprealert',
+            'lugar', 'nroseguro', 'bltipo', 'manifiesto', 'credito', 'prima',
+            'originales', 'observaciones'
+        ]
+
+        # Lista de campos que son fechas para formatearlos
+        campos_fecha = [
+            'fecha', 'estimadorecepcion', 'recepcion', 'fecemision', 'fecseguro',
+            'fecdocage', 'loadingdate', 'arriboreal', 'fecaduana', 'pagoenfirme',
+            'vencimiento', 'etd', 'eta', 'fechaonhand', 'fecrecdoc', 'recepcionprealert'
+        ]
+
+        # Construcción del array con todos los campos formateados correctamente
+        resultado = []
+        for obj in data:
+            item = {}
+            for field_name in fields:
+                value = getattr(obj, field_name, None)
+
+                # Si el campo es de fecha y tiene valor, formatearlo
+                if field_name in campos_fecha and value is not None:
+                    item[field_name] = value.strftime('%Y-%m-%d')
+                else:
+                    item[field_name] = value  # Mantener el valor original para los otros campos
+
+            resultado.append(item)
+
+        return JsonResponse(resultado, safe=False)
+
+    except Exception as e:
+        return JsonResponse({'error': 'El objeto no existe'}, status=404)
+
+
+# def get_data_cronologia(request,id):
+#     try:
+#         data = Seguimiento.objects.filter(id=id).values(
+#                 'fecha',
+#                 'estimadorecepcion',
+#                 'recepcion',
+#                 'fecemision',
+#                 'fecseguro',
+#                 'fecdocage',
+#                 'loadingdate',
+#                 'arriboreal',
+#                 'fecaduana',
+#                 'pagoenfirme',
+#                 'vencimiento',
+#                 'etd',
+#                 'eta',
+#                 'fechaonhand',
+#                 'fecrecdoc',
+#                 'recepcionprealert',
+#                 'lugar',
+#                 'nroseguro',
+#                 'bltipo',
+#                 'manifiesto',
+#                 'credito',
+#                 'prima',
+#                 'originales',)
+#
+#
+#         if data:
+#                 # Convertir los valores en una lista de diccionarios clave-valor
+#                 return JsonResponse(data[0], safe=False)
+#         else:
+#                 return JsonResponse({'error': 'El objeto no existe'}, status=404)
+#         #return JsonResponse(list(data), safe=False)
+#     except Exception as e:
+#         return JsonResponse({'error': 'El objeto no existe'}, status=404)
 
 def get_data_seguimiento(request,id):
     try:

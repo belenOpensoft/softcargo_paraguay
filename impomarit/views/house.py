@@ -213,6 +213,7 @@ def actualizar_seguimiento(request,awb,hawb,embarque,consolidado,seguimiento,pos
     seg.posicion=posicion
     seg.save()
 
+#def actualizar_fechas()
 
 def source_seguimientos_importado(request):
 

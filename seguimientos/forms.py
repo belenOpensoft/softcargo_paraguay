@@ -307,7 +307,7 @@ class cronologiaForm(BSModalModelForm):
             # 'hawb': 'House',
         }
         widgets = {
-            'fecha': forms.DateInput(attrs={'type': 'date'}),
+            'fecha': forms.DateInput(attrs={'type': 'date','id':'id_fecha_crono'}),
             'estimadorecepcion': forms.DateInput(attrs={'type': 'date'}),
             'recepcion': forms.DateInput(attrs={'type': 'date'}),
             'fecemision': forms.DateInput(attrs={'type': 'date'}),
@@ -335,6 +335,7 @@ class cronologiaForm(BSModalModelForm):
         self.helper.add_input(Submit('submit', 'Actualizar'))
         self.fields['prima'].initial = 0
         self.fields['nroseguro'].initial = 0
+
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
 
