@@ -2,6 +2,7 @@ import base64
 import json
 import os
 import socket
+import sys
 from datetime import datetime
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
@@ -22,44 +23,41 @@ from seguimientos.models import Attachhijo, Faxes, Seguimiento
 
 def envio_notificacion_seguimiento(request):
     resultado = {}
-    if request.user.has_perms(["mantenimientos.delete_basicoproductos", ]):
-        if is_ajax(request):
-            try:
-                to = request.POST['to'].split(';')
-                cc = request.POST['cc'].split(';')
-                cco = request.POST['cco'].split(';')
-                tipo = request.POST['tipo']
-                seguimiento = request.POST['seguimiento']
-                aux = Seguimiento.objects.get(numero=seguimiento)
-                num_seg = str(aux.numero) + ' ' + str(aux.modo)
-                adjuntos = simplejson.loads(request.POST['archivos_adjuntos'])
-                subject = request.POST['subject']
-                message = request.POST['message']
-                user = Account.objects.filter(user__id=request.user.id)
-                if user.count() > 0 and len(user[0].email) > 0 and len(user[0].clave) > 0:
-                    usuario = user[0].email
-                    clave = user[0].clave
-                    firma = user[0].firma
-                    name_firma = user[0].firma.name
+    if is_ajax(request):
+        try:
+            to = request.POST['to'].split(';')
+            cc = request.POST['cc'].split(';') if request.POST['cc'] is not None else []
+            cco = request.POST['cco'].split(';') if (request.POST['cco'] is not None and request.POST['cco']) else []
+            tipo = request.POST['tipo']
+            seguimiento = request.POST['seguimiento']
+            aux = Seguimiento.objects.get(numero=seguimiento)
+            num_seg = str(aux.numero) + ' ' + str(aux.modo)
+            adjuntos = simplejson.loads(request.POST['archivos_adjuntos'])
+            subject = request.POST['subject']
+            message = request.POST['message']
+            user = Account.objects.filter(user__id=request.user.id)
+            if user.count() > 0 and user[0].email is not None and len(user[0].email) > 0 and len(user[0].clave) > 0:
+                usuario = user[0].email
+                clave = user[0].clave
+                firma = user[0].firma
+                name_firma = user[0].firma.name
 
-                    if envio_correo_electronico(message,to,subject,adjuntos,cc,cco,tipo=tipo,seguimiento=num_seg,usuario=request.user,emisor=usuario,clave=clave,name_firma=name_firma):
-                        fx = Faxes()
-                        fx.fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
-                        fx.numero = seguimiento
-                        fx.asunto = subject
-                        fx.tipo = ''
-                        fx.save()
-                        resultado['resultado'] = 'exito'
-                    else:
-                        resultado['resultado'] = 'Ocurrio un error al enviar el email'
+                if envio_correo_electronico(message,to,subject,adjuntos,cc,cco,tipo=tipo,seguimiento=num_seg,usuario=request.user,emisor=usuario,clave=clave,name_firma=name_firma):
+                    fx = Faxes()
+                    fx.fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
+                    fx.numero = seguimiento
+                    fx.asunto = subject
+                    fx.tipo = ''
+                    fx.save()
+                    resultado['resultado'] = 'exito'
                 else:
-                    resultado['resultado'] = 'El usuario no tiene definido correctamente su email y contraseña, favor avisar a un supervisor.'
-            except Exception as e:
-                resultado['resultado'] = str(e)
-        else:
-            resultado['resultado'] = 'Ha ocurrido un error.'
+                    resultado['resultado'] = 'Ocurrio un error al enviar el email'
+            else:
+                resultado['resultado'] = 'El usuario no tiene definido correctamente su email y contraseña, favor avisar a un supervisor.'
+        except Exception as e:
+            resultado['resultado'] = str(e)
     else:
-        resultado['resultado'] = 'No tiene permisos para realizar esta accion.'
+        resultado['resultado'] = 'Ha ocurrido un error.'
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
@@ -70,11 +68,12 @@ def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave
     correo = CorreoEnviado()
     try:
         # Crear el mensaje HTML con la imagen incrustada
-        html_message = f'<html><body><img src="http://oceanlink.opensoft.com.uy/static/images/oceanlink.png"><br><br>' + str(mensaje)
+        html_message = f'<html><body><img src="https://opensoft.uy/static/images/oceanlink.png"><br><br>' + str(mensaje)
         # firma
+        cc.append(emisor)
         file = str(BASE_DIR) + '/cargosystem/media/' + name_firma
         if name_firma is not None and os.path.isfile(file):
-            html_message += '<br><img src="http://oceanlink.opensoft.com.uy/media/' + name_firma + '">'
+            html_message += '<br><img src="https://opensoft.uy/media/' + name_firma + '">'
         html_message += '</body></html>'
         # Crear el objeto EmailMessage
         if clave is not None and emisor is not None:
@@ -119,6 +118,7 @@ def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave
         # FIN CORREO
         # email.to = ['tecnicosnm@gmail.com',]
         email.to = remitentes
+
         email.cc = cc
         email.bcc = cco
         email.content_subtype = 'html'

@@ -59,7 +59,7 @@ def get_data_email_op(request):
             texto, resultado = get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque)
             texto += '<b>OCEANLINK,</b><br>'
             texto += 'DEPARTAMENTO DE IMPORTACION AÉREA, <br>'
-            texto += 'MISIONES 1574 OF 201 <br>'
+            texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
             texto += 'OPERACIONES <br>'
             texto += 'EMAIL: <br>'
             texto += 'TEL: 598 2917 0501 <br>'

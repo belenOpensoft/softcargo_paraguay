@@ -41,7 +41,7 @@ def add_importacion_maritima(request):
                 reserva.numero = reserva.get_number()
                 reserva.awb = form.cleaned_data.get('awb', "")  # Si vacío, asignar ""
                 reserva.aduana = form.cleaned_data.get('aduana', "")  # Si vacío, asignar ""
-                reserva.tarifa = form.cleaned_data.get('tarifa', 0)  # Si vacío, asignar 0
+                reserva.tarifaawb = form.cleaned_data.get('tarifa', 0)  # Si vacío, asignar 0
                 reserva.moneda = form.cleaned_data.get('moneda', "")  # Si vacío, asignar ""
                 reserva.arbitraje = form.cleaned_data.get('arbitraje', "")  # Si vacío, asignar ""
                 reserva.kilos= form.cleaned_data.get('kilos', 0)  # Si vacío, asignar 0
@@ -185,7 +185,7 @@ def edit_master(request, id_master):
 
                 master.aduana = form.cleaned_data.get('aduana_e', 'S/I')
                 master.moneda = form.cleaned_data.get('moneda_e', "")
-                master.tarifa = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
+                master.tarifaawb = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
                 master.arbitraje = form.cleaned_data.get('arbitraje_e', 0) if form.cleaned_data.get('arbitraje_e') not in [None, ''] else 0
                 master.kilos = form.cleaned_data.get('kilos_e', 0) if form.cleaned_data.get('kilos_e') not in [None, ''] else 0
                 master.trafico = form.cleaned_data.get('trafico_e', 0) if form.cleaned_data.get('trafico_e') not in [None, ''] else 0

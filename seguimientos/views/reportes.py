@@ -1,6 +1,7 @@
 import io
 import json
 import datetime
+import sys
 
 from django.http import FileResponse, Http404
 import os
@@ -11,7 +12,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 
 from cargosystem.settings import BASE_DIR
-from expaerea.models import ExportEmbarqueaereo, ExportConexaerea, ExportCargaaerea, ExportServiceaereo
+from expaerea.models import ExportEmbarqueaereo, ExportConexaerea, ExportCargaaerea, ExportServiceaereo, ExportReservas, \
+    VEmbarqueaereo
 from impomarit.models import VistaOperativas, VistaOperativasGastos
 from mantenimientos.models import Clientes as SociosComerciales, Ciudades
 from cargosystem import settings
@@ -329,6 +331,9 @@ def descargar_hawb(request,row_id,draft=None):
         return rep.descargo_archivo(output)
 
     except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
         import traceback
         print(traceback.format_exc())
         raise Http404(f"Error: {str(e)}")
@@ -336,21 +341,20 @@ def descargar_hawb(request,row_id,draft=None):
 def descargar_hawb_operativas(request,row_id,draft=None):
     try:
         rep = GuiasReport()
-        house = ExportEmbarqueaereo.objects.get(numero=row_id)
-        if house.seguimiento is not None:
-            seg = Seguimiento.objects.get(id=house.seguimiento)
-        else:
-            seg=Seguimiento(cia=None,notificar=None)
+        master = ExportReservas.objects.get(numero=row_id)
+        houses = ExportEmbarqueaereo.objects.filter(awb=master.awb)
+        housesV = VEmbarqueaereo.objects.filter(awb=master.awb)
+
 
         """ CONSIGNATARIO """
-        consignatario = SociosComerciales.objects.get(codigo=house.consignatario)
+        consignatario = SociosComerciales.objects.get(codigo=master.consignatario)
         con = str(consignatario.razonsocial) + '<br />\n' + \
               str(consignatario.direccion) + '<br />\n' + \
               str(consignatario.ciudad) + '<br />\n' + \
               str(consignatario.pais) + ' RUT: ' + str(consignatario.ruc)
         rep.consignatario = con
         """ SHIPPER """
-        shipper = SociosComerciales.objects.get(codigo=house.embarcador)
+        shipper = SociosComerciales.objects.get(codigo=houses[0].transportista)
         con = str(shipper.razonsocial) + '<br />\n' + \
               str(shipper.direccion) + '<br />\n' + \
               str(shipper.ciudad) + '<br />\n' + \
@@ -358,27 +362,35 @@ def descargar_hawb_operativas(request,row_id,draft=None):
         rep.shipper = con
         rep.shipper_nom = str(shipper.razonsocial)
         """ NOTIFY """
-        notify = 'FREIGHT ' + str(house.pago).upper() + '<br />\n'
-        notificador = SociosComerciales.objects.get(codigo=seg.notificar)
+        pago = 'COLLECT' if master.pagoflete == 'C' else 'PREPAID'
+        notify = 'FREIGHT ' + pago + '<br />\n'
+        notificador = SociosComerciales.objects.get(codigo=master.consignatario)
         notify += 'NOTIFY: ' + str(notificador.razonsocial) + '<br />\n' + \
                   str(notificador.direccion) + '<br />\n' + \
                   str(notificador.ciudad) + '<br />\n' + \
-                  str(notificador.pais) + ' RUT: ' + str(shipper.ruc)
+                  str(notificador.pais) + ' RUT: ' + str(notificador.ruc)
         rep.notify = notify
-        if house.awb is not None and len(house.awb) > 0:
-            awb = house.awb.split('-')
+        if master.awb is not None and len(master.awb) > 0 and master.awb != 'S/I':
+            awb = master.awb.split('-')
             rep.awb = awb[0] + '   MVD   ' + awb[1]
-        if house.hawb is not None and len(house.hawb) > 0:
-            rep.hawb = house.hawb
-        trasbordos = ExportConexaerea.objects.filter(numero=house.numero).order_by('llegada','id')
+            rep.awb_sf=master.awb
+
+        if houses[0].hawb is not None and len(houses[0].hawb) > 0 and houses[0].hawb != 'S/I':
+            rep.hawb = houses[0].hawb
+        trasbordos = ExportConexaerea.objects.filter(numero=houses[0].numero).order_by('llegada','id')
         arraydestinos = []
         if trasbordos.count() > 0:
             rep.routing += 'MONTEVIDEO  (' + str(trasbordos[0].origen)
             rep.compania = trasbordos[0].ciavuelo
             rep.destino = str(trasbordos[0].destino)
+            flag = True
             for x in trasbordos:
                 arraydestinos.append(str(x.destino) + '    ' + str(x.ciavuelo)[:2])
-                rep.fechas += str(x.ciavuelo) + str(x.vuelo) + '/' + x.salida.strftime("%m-%B")[:6].upper() + ' '
+                if flag:
+                    rep.fechas += str(x.ciavuelo) + str(x.vuelo) + '/' + x.salida.strftime("%m-%B")[:6].upper() + ' '
+                    flag = False
+                else:
+                    rep.fechas2 += str(x.ciavuelo) + str(x.vuelo) + '/' + x.salida.strftime("%m-%B")[:6].upper() + ' '
                 rep.routing += '/' + str(x.destino)
                 rep.final = str(x.destino)
 
@@ -394,72 +406,100 @@ def descargar_hawb_operativas(request,row_id,draft=None):
         ciudad = Ciudades.objects.filter(codigo=rep.final)
         if ciudad.count() > 0:
             rep.airport_final = ciudad[0].nombre
-        rep.modopago = house.pago
-        if house.pago == 'Collect':
+        rep.modopago = 'Collect' if master.pagoflete == 'C' else 'Prepaid'
+        if master.pagoflete == 'C':
             rep.pago = 'CC          C            C'
         else:
             rep.pago = 'PP    P           P'
-        cargas = ExportCargaaerea.objects.filter(numero=house.numero)
-        if cargas.count() > 0:
-            for x in cargas:
-                aux = [x.bultos,x.bruto,'K','']
-                if house.tomopeso == 2:
-                    if x.medidas is not None and len(x.medidas) > 0:
-                        medidas = x.medidas.split('*')
-                        if len(medidas) == 3 and all(m is not None and m.isdigit() for m in medidas):
-                            valor = float(medidas[0]) * float(medidas[1]) * float(medidas[2]) * 166.67
-                            aux.append(str(redondear_a_05_o_0(valor)) + ' AS VOL')
-                        else:
-                            # Manejar el caso de error o valores faltantes
-                            aux.append('Error en medidas')
-                else:
-                    aux.append(x.bruto)
-                aux.append(house.tarifaventa)
-                if house.aplicable is not None:
-                    aux.append(round(house.aplicable * float(house.tarifaventa), 2))
-                else:
-                    aux.append(0)
-                aux.append(x.producto.descripcion)
-                rep.mercaderias.append(aux)
+        cargas = ExportCargaaerea.objects.filter(numero=houses[0].numero)
 
-        rep.posicion = house.posicion
+        if cargas.exists():
+            # Inicializar acumuladores
+            total_bultos = 0
+            total_bruto = 0
+            total_volumen = 0
+            total_tarifa = master.tarifaawb
+            aplicable = 0
+            total = 0
+            productos = set()
+
+            for x in cargas:
+                total_bultos += x.bultos
+                total_bruto += x.bruto
+
+                volumen = x.bruto  # Por defecto, se usa el peso bruto si no se calcula el volumen
+
+                if houses[0].tomopeso == 2 and x.medidas:
+                    texto_medidas = '(' + str(x.bultos) + ') * ' + str(x.medidas)+' MTS'
+                    rep.medidas_text.append(texto_medidas)
+                    medidas = x.medidas.split('*')
+                    if len(medidas) == 3 and all(m.isdigit() for m in medidas):
+                        volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2]) * 166.67
+                        total_volumen += redondear_a_05_o_0(volumen)
+                    else:
+                        volumen = 'Error en medidas'
+
+                productos.add(x.producto.descripcion)
+            total=0
+            if master.aplicable is not None:
+                aplicable = master.aplicable
+                total += round(aplicable * float(total_tarifa), 2)
+            # Guardar solo un registro con los totales
+            rep.mercaderias.append([
+                total_bultos, total_bruto, 'K', '',
+                total_volumen if houses[0].tomopeso == 2 else total_bruto,
+                total_tarifa,aplicable, total,
+                ', '.join(productos)  # Unir los productos en una sola cadena
+            ])
+
+        rep.posicion = houses[0].posicion
         """ GASTOS """
-        gastos = ExportServiceaereo.objects.filter(numero=house.numero)
+        gastos = ExportServiceaereo.objects.filter(numero=houses[0].numero)
 
         if gastos.count() > 0:
             for g in gastos:
                 if g.modo == 'Collect':
-                    if g.tipogasto == 'DUE AGENT':
-                        rep.agentcol += g.precio
+                    if g.tipogasto == 'OTHER' and g.servicio==1:
+                        precio = float(round(g.precio,2))
+                        if precio != total:
+                            rep.otros_gastos += str(round(g.precio,2)) +'&nbsp;&nbsp;&nbsp;'
+                        rep.othcol+=g.precio
+                        rep.total_precio_c+=g.precio
                     elif g.tipogasto == 'DUE CARRIER':
                         rep.carriercol += g.precio
+                        rep.total_precio_c+=g.precio
                     elif g.tipogasto == 'TAX':
                         rep.taxcol += g.precio
+                        rep.total_precio_c+=g.precio
                     elif g.tipogasto == 'VALUATION CHARGES':
                         rep.valcol += g.precio
-                    else:
-                        rep.othcol += g.precio
+                        rep.total_precio_c+=g.precio
                 else:
-                    if g.tipogasto == 'DUE AGENT':
-                        rep.agentppd += g.precio
+                    if g.tipogasto == 'OTHER' and g.servicio==1:
+                        precio = float(round(g.precio,2))
+                        if precio != total:
+                            rep.otros_gastos += str(round(g.precio,2))+'&nbsp;&nbsp;&nbsp;'
+                        rep.othppd+=g.precio
+                        rep.total_precio_p+=g.precio
                     elif g.tipogasto == 'DUE CARRIER':
                         rep.carrierppd += g.precio
+                        rep.total_precio_p+=g.precio
                     elif g.tipogasto == 'TAX':
                         rep.taxppd += g.precio
+                        rep.total_precio_p+=g.precio
                     elif g.tipogasto == 'VALUATION CHARGES':
                         rep.valppd += g.precio
-                    else:
-                        rep.othppd += g.precio
+                        rep.total_precio_p+=g.precio
 
         """ OUTPUT """
-        name = 'HWBL_' + str(house.numero)
+        name = 'HWBL_' + str(houses[0].numero)
         output = str(BASE_DIR) + '/archivos/' + name + '.pdf'
         if draft is not None:
             rep.generar_hawb(output,fondo='carrier_hawb.jpg')
             rep.generar_hawb(output,fondo='consignee.jpg')
             rep.generar_hawb(output,fondo='shipper.jpg')
             rep.generar_hawb(output,fondo='delivery_receipt.jpg')
-            rep.generar_hawb(output,fondo='normal.jpg')
+            #rep.generar_hawb(output,fondo='normal.jpg')
         else:
             rep.generar_hawb(output)
 
@@ -467,9 +507,13 @@ def descargar_hawb_operativas(request,row_id,draft=None):
         return rep.descargo_archivo(output)
 
     except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
         import traceback
         print(traceback.format_exc())
         raise Http404(f"Error: {str(e)}")
+
 
 
 def reportes_operativas(request):
@@ -599,7 +643,7 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
                 elif columna == 'Transportista':
                     datos_finales.append(p.transportista)
                 elif columna == 'Conocimiento':
-                    datos_finales.append(str(p.master)+str(p.house))
+                    datos_finales.append(str(p.master.awb)+str(p.house))
                 elif columna == 'Tipo':
                     if p.tipo==0:
                         valor = 'Consolidado'

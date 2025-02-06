@@ -1,5 +1,6 @@
 import math
 import os
+from datetime import datetime
 from decimal import Decimal
 from django.http import HttpResponse
 from reportlab.lib import colors
@@ -18,6 +19,7 @@ class GuiasReport:
     def __init__(self):
         self.archivo = None
         self.awb = ''
+        self.awb_sf = ''
         self.hawb = ''
         # VARIABLES BL
         self.seguimiento = ''
@@ -36,7 +38,10 @@ class GuiasReport:
         self.compania = ''
         self.arraydestinos = ''
         self.fechas = ''
+        self.fechas2 = ''
         self.pago = ''
+        self.othppd=0
+        self.othcol=0
         self.mercaderias = []
         self.modopago = ''
         self.valppd = 0
@@ -47,9 +52,11 @@ class GuiasReport:
         self.agentcol = 0
         self.carrierppd = 0
         self.carriercol = 0
-        self.othppd = 0
-        self.othcol = 0
+        self.total_precio_p = 0
+        self.total_precio_c = 0
+        self.otros_gastos = ''
         self.posicion = ''
+        self.medidas_text = []
 
     def generar_hawb(self,output,fondo=None):
         try:
@@ -82,18 +89,24 @@ class GuiasReport:
                 fontSize=7,
                 leading=7
             )
-            """ SHIPPER """
-            data = [[Paragraph(self.shipper, encoding='utf-8', style=style_texto_7)]]
-            table = Table(data=data, colWidths=[9 * cm, ], rowHeights=[1.7 * cm, ],
+            style_texto_6 = ParagraphStyle(
+                name='BodyText',
+                fontName='Helvetica',
+                fontSize=6,
+                leading=5
+            )
+            """ EMPRESA """
+            data = [[Paragraph(self.empresa, encoding='utf-8', style=style_texto_7)]]
+            table = Table(data=data, colWidths=[8.5 * cm, ], rowHeights=[1.5 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
                               ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
                           ]
                           )
             table.wrapOn(c, 0, 0)
-            table.drawOn(c, 9 * mm, 265 * mm)
-            """ EMPRESA """
-            data = [[Paragraph(self.empresa, encoding='utf-8', style=style_texto_7)]]
+            table.drawOn(c, 18 * mm, 251 * mm)
+            """ SHIPPER """
+            data = [[Paragraph(self.shipper, encoding='utf-8', style=style_texto_7)]]
             table = Table(data=data, colWidths=[7 * cm, ], rowHeights=[1.1 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
@@ -101,7 +114,7 @@ class GuiasReport:
                           ]
                           )
             table.wrapOn(c, 0, 0)
-            table.drawOn(c, 127 * mm, 273.5 * mm)
+            table.drawOn(c, 130 * mm, 257.5 * mm)
             """ CONSIGNATARIO """
             data = [[Paragraph(self.consignatario, encoding='utf-8', style=style_texto_7)]]
             table = Table(data=data, colWidths=[9 * cm, ], rowHeights=[1.7 * cm, ],
@@ -111,7 +124,7 @@ class GuiasReport:
                           ]
                           )
             table.wrapOn(c, 0, 0)
-            table.drawOn(c, 9 * mm, 242.5 * mm)
+            table.drawOn(c, 18 * mm, 228 * mm)
             """ NOTIFY """
             data = [[Paragraph(self.notify, encoding='utf-8', style=style_texto_7)]]
             table = Table(data=data, colWidths=[9 * cm, ], rowHeights=[2.1 * cm, ],
@@ -121,98 +134,169 @@ class GuiasReport:
                           ]
                           )
             table.wrapOn(c, 0, 0)
-            table.drawOn(c, 110 * mm, 215 * mm)
+            table.drawOn(c, 110 * mm, 195 * mm)
             """ AGENTE """
             data = [[Paragraph(self.agente, encoding='utf-8', style=style_texto_7)]]
-            table = Table(data=data, colWidths=[9 * cm, ], rowHeights=[1.8 * cm, ],
+            table = Table(data=data, colWidths=[9 * cm, ], rowHeights=[1.6 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
                               ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
                           ]
                           )
             table.wrapOn(c, 0, 0)
-            table.drawOn(c, 9 * mm, 221 * mm)
+            table.drawOn(c, 18 * mm, 208.3 * mm)
             """ DATOS """
-            c.drawString(40,815,self.awb)
-            c.drawString(500,815,self.hawb)
+            c.drawString(49,785,self.awb)
+            c.drawString(500,785,self.awb_sf)
+            c.drawString(500,70,self.awb_sf)
             c.setFont("Helvetica", 8)
-            c.drawString(30,580,self.routing)
-            c.drawString(30,550,self.destino)
-            c.drawString(80,550,self.compania)
-            c.drawString(210,550,self.arraydestinos)
-            c.drawString(30,525,self.airport_final)
-            """ AGENTE """
-            data = [[Paragraph(self.fechas, encoding='utf-8', style=style_texto_7)]]
-            table = Table(data=data, colWidths=[4.5 * cm, ], rowHeights=[1 * cm, ],
+            c.drawString(55,550,self.routing)
+            c.drawString(55,527,self.destino)
+            c.drawString(80,527,self.compania)
+            c.drawString(217,527,self.arraydestinos)
+            c.drawString(55,505,self.airport_final)
+            """ FECHA1 """
+            data = [[Paragraph(self.fechas, encoding='utf-8', style=style_texto_6)]]
+            table = Table(data=data, colWidths=[2.5 * cm, ], rowHeights=[1 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
                               ('VALIGN', (0, 0), (0, 0), 'TOP'),
                           ]
                           )
             table.wrapOn(c, 0, 0)
-            table.drawOn(c, 60 * mm, 178 * mm)
-            c.drawString(305, 550, 'USD')
-            c.drawString(332, 550, self.pago)
-            c.drawString(440, 550, 'NVD')
-            c.drawString(520, 550, 'NCV')
-            c.drawString(335, 525, 'NIL')
+            table.drawOn(c, 61 * mm, 171 * mm)
+            """ FECHA2 """
+            data = [[Paragraph(self.fechas2, encoding='utf-8', style=style_texto_6)]]
+            table = Table(data=data, colWidths=[2.5 * cm, ], rowHeights=[1 * cm, ],
+                          style=[
+                              ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
+                              ('VALIGN', (0, 0), (0, 0), 'TOP'),
+                          ]
+                          )
+            table.wrapOn(c, 0, 0)
+            table.drawOn(c, 83 * mm, 171 * mm)
+
+            """ handling info """
+            data = [[Paragraph('MARKS: AS PER ATTACHED MANIFEST<br/><br/>ATTACHED: ENVELOPE WITH DOCS',
+                               encoding='utf-8',
+                               style=style_texto_7)]]
+            table = Table(data=data, colWidths=[5.5 * cm, ], rowHeights=[1.4 * cm, ],
+                          style=[
+                              ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
+                              ('VALIGN', (0, 0), (0, 0), 'TOP'),
+                          ]
+                          )
+            table.wrapOn(c, 0, 0)
+            table.drawOn(c, 20 * mm, 158 * mm)
+
+            c.drawString(305, 527, 'USD')
+            c.drawString(332, 527, self.pago)
+            c.drawString(440, 527, 'NVD')
+            c.drawString(520, 527, 'NCV')
+            c.drawString(335, 505, 'NIL')
             """ MERCADERIAS """
-            y = 430
+            y = 420
             bultos = 0
             pesos = 0
             fletes = 0
-            for m in self.mercaderias:
-                c.drawString(30,y,str(m[0]))
-                c.drawString(60,y,str(m[1]))
-                c.drawString(110,y,str(m[2]))
-                c.drawString(210,y,str(m[4]))
-                c.drawString(300,y,str(m[5]))
-                c.drawString(385,y,str(m[6]))
-                bultos += m[0]
-                pesos += m[1]
-                fletes += m[6]
-                # c.drawString(470,y,str(m[7]))
+            if self.mercaderias:
+                m = self.mercaderias[0]
+
+                c.drawString(52, y, str(m[0]))  # Total de bultos
+                c.drawString(82, y, str(m[1]))  # Total de peso bruto
+                c.drawString(127, y, str(m[2]))  # Unidad de medida (K)
+                c.drawString(205, y, str(m[6]))  # aplicable
+                c.drawString(280, y, str(m[5]))  # Tarifa de venta
+                c.drawString(340, y, str(m[7]))  # Total
+
+                # Asignar las sumas a las variables
+                bultos = m[0]
+                pesos = m[1]
+                fletes = m[7]
+
                 """ DESCRIPCION MERCADERIA """
-                data = [[Paragraph(str(m[7]), encoding='utf-8', style=style_texto_7)]]
-                table = Table(data=data, colWidths=[4 * cm, ], rowHeights=[1 * cm, ],
+                texto='CONSOLIDATION AS PER ATTACHED CARGO MANIFEST '+str(self.hawb)
+                for txt in self.medidas_text:
+                    texto+='<br/>'+txt
+
+                data = [[Paragraph(str(texto), encoding='utf-8', style=style_texto_7)]]
+                table = Table(data=data, colWidths=[5 * cm, ], rowHeights=[1 * cm, ],
                               style=[
                                   ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
                                   ('VALIGN', (0, 0), (0, 0), 'TOP'),
                               ]
                               )
                 table.wrapOn(c, 0, 0)
-                table.drawOn(c, 162 * mm, 145 * mm)
+                table.drawOn(c, 145 * mm, 142 * mm)
                 y -= 50
-            c.drawString(30,287,str(bultos))
-            c.drawString(60,287,str(pesos))
-            c.drawString(385,287,str(fletes))
+            c.drawString(52,280,str(bultos))
+            c.drawString(82,280,str(pesos))
+            c.drawString(340,280,str(fletes))
             if self.modopago == 'Prepaid':
-                c.drawString(40,255,str(fletes))
-                c.drawString(200,255,str(0))
+                c.drawString(80,250,str(fletes))
+                c.drawString(200,250,str(0))
                 montoppd = fletes
                 montocol = 0
             else:
-                c.drawString(40,255,str(0))
-                c.drawString(200,255,str(fletes))
+                c.drawString(80,250,str(0))
+                c.drawString(200,250,str(fletes))
                 montoppd = 0
                 montocol = fletes
-            c.drawString(300,130,str(self.posicion))
-            c.drawString(420,130,str(self.shipper_nom))
+            c.drawString(253,200,str(self.posicion))
+            #c.drawString(350,200,str(self.shipper_nom))
+            c.drawString(370,145,'OCEANLINK')
+
+            """ otros datos """
+            data = [[Paragraph('OCEANLINK AS AGENT<br/>OF DE CARRIER '+str(self.shipper_nom)+
+                               '<br/>'+str(datetime.now().strftime('%Y-%m-%d'))+' MONTEVIDEO'+ '     OCEAN LINK LTDA / LLB',
+                               encoding='utf-8',
+                               style=style_texto_7)]]
+            table = Table(data=data, colWidths=[10 * cm, ], rowHeights=[1.4 * cm, ],
+                          style=[
+                              ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
+                              ('VALIGN', (0, 0), (0, 0), 'TOP'),
+                          ]
+                          )
+            table.wrapOn(c, 0, 0)
+            table.drawOn(c, 90 * mm, 30 * mm)
+            total_oth_ppd=0
+            total_oth_col=0
+            if self.othppd !=0:
+                total_oth_ppd=float(self.othppd)-float(fletes)
+            if self.othcol !=0:
+                total_oth_col=float(self.othcol)-float(fletes)
             """ MONTOS """
-            c.drawString(40, 230, str(round(self.valppd,2)))
+            c.drawString(80, 230, str(round(self.valppd,2)))
             c.drawString(200, 230, str(round(self.valcol,2)))
-            c.drawString(40, 200, str(round(self.taxppd,2)))
+            c.drawString(80, 200, str(round(self.taxppd,2)))
             c.drawString(200, 200, str(round(self.taxcol,2)))
-            c.drawString(40, 170, str(round(self.agentppd,2)))
-            c.drawString(200, 170, str(round(self.agentcol,2)))
-            c.drawString(40, 140, str(round(self.carrierppd,2)))
-            c.drawString(200, 140, str(round(self.carriercol,2)))
+            c.drawString(80, 155, str(round(total_oth_ppd,2)))
+            c.drawString(200, 155, str(round(total_oth_col,2)))
             """ OTHER """
-            c.drawString(40, 115, str(round(self.othppd,2)))
-            c.drawString(200, 115, str(round(self.othcol,2)))
+
+            data = [[Paragraph(self.otros_gastos,encoding='utf-8',style=style_texto_7)]]
+            table = Table(data=data, colWidths=[10 * cm, ], rowHeights=[1 * cm, ],
+                          style=[
+                              ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
+                              ('VALIGN', (0, 0), (0, 0), 'TOP'),
+                          ]
+                          )
+            table.wrapOn(c, 0, 0)
+            table.drawOn(c, 90 * mm, 82 * mm)
             """ TOTALES """
-            c.drawString(40, 85, str(round(Decimal(montoppd) + self.othppd + self.valppd + self.taxppd + self.agentppd + self.carrierppd,2)))
-            c.drawString(200, 85, str(round(Decimal(montocol) + self.othcol + self.valcol + self.taxcol + self.agentcol + self.carriercol,2)))
+
+            fletes = Decimal(fletes)
+            if self.total_precio_p ==0 and self.total_precio_c==0:
+                self.total_precio_p= fletes if self.modopago=='Collect' else 0
+                self.total_precio_c= fletes if self.modopago=='Prepaid' else 0
+
+            if self.total_precio_p < fletes:
+                self.total_precio_p+= fletes
+            elif self.total_precio_c < fletes:
+                self.total_precio_c+= fletes
+
+            c.drawString(80, 107, str(round(self.total_precio_p,2)))
+            c.drawString(200, 107, str(round(self.total_precio_c,2)))
 
             self.archivo = c
         except Exception as e:
@@ -226,3 +310,7 @@ class GuiasReport:
             return HttpResponse(pdf_data, content_type="application/pdf")
         except Exception as e:
             raise TypeError(e)
+
+
+
+

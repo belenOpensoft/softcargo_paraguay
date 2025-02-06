@@ -674,6 +674,29 @@ $(document).ready(function () {
         }
     });
 
+    //rutas
+    $("#id_ciavuelo").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#id_cia').val(ui.item['id']);
+                 $('#codigo_cia').val(ui.item['id']);
+                 $('#id_cia').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#id_cia').val('');
+                $('#codigo_cia').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#id_cia').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+
     // autocompletes edit house form
     $("#armador_addh_e").autocomplete({
         source: '/autocomplete_clientes/',
@@ -3860,6 +3883,7 @@ function get_datos_seguimiento_rutas(numero) {
                 $("#id_origen").val(response.datos.origen || "");
                 $("#id_destino").val(response.datos.destino || "");
                 $("#id_ciavuelo").val(response.datos.cia || "");
+                $("#codigo_cia").val(response.datos.codigo_cia || "");
                 $("#id_modo_ruta").val(response.datos.modo || "");
                 $("#id_viaje_ruta").val(response.datos.viaje || "");
                 $("#id_vapor").val(response.datos.vapor || "");

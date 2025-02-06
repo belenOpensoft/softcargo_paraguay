@@ -59,7 +59,7 @@ def get_data_email_op(request):
             texto += '<b>OCEANLINK,</b><br>'
             # texto += str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>'
             texto += 'DEPARTAMENTO DE IMPORTACION MARITIMA, <br>'
-            texto += 'MISIONES 1574 OF 201 <br>'
+            texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
             texto += 'OPERACIONES <br>'
             texto += 'EMAIL: <br>'
             texto += 'TEL: 598 2917 0501 <br>'

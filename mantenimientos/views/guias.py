@@ -156,7 +156,7 @@ def is_ajax(request):
 @login_required(login_url="/")
 def agregar_guias(request):
     try:
-        if request.user.has_perms(["mantenimientos.add_basicoguias", ]):
+        if request.user.has_perms(["mantenimientos.add_guias", ]):
             ctx = {
                 'form': add_guia_form()
             }
@@ -198,7 +198,7 @@ def agregar_guias(request):
 @login_required(login_url='/')
 def anular_guia(request):
     resultado = {}
-    if request.user.has_perms(["mantenimientos.delete_basicoguias", ]):
+    if request.user.has_perms(["mantenimientos.delete_guias", ]):
         if is_ajax(request):
             try:
                 id = request.GET['id']
@@ -219,7 +219,7 @@ def anular_guia(request):
 @login_required(login_url='/')
 def asignar_guia_aerea(request):
     resultado = {}
-    if request.user.has_perms(["mantenimientos.add_basicoguias", ]):
+    if request.user.has_perms(["mantenimientos.add_guias", ]):
         if is_ajax(request):
             try:
                 id = request.POST['id']

@@ -198,10 +198,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 EMAIL_HOST = 's109.nty.uy'
-EMAIL_HOST_USER = 'soporte@opensoft.com.uy'
-EMAIL_HOST_PASSWORD = 'zoho@opensoft@1987'
+EMAIL_HOST_USER = 'opensoft@oceanlinkgroup.com'
+EMAIL_HOST_PASSWORD = 'W}}WN-~bn=Bl'
 EMAIL_PORT = 465
-DEFAULT_FROM_EMAIL = 'soporte@opensoft.com.uy'
+DEFAULT_FROM_EMAIL = 'opensoft@oceanlinkgroup.com'
 
 
 EMPRESA_HAWB = 'OCEANLINK' + '<br />\n' + 'Bolonia 2280 LATU,' + '<br />\n' + 'Edificio Los Álamos, Of.103' + '<br />\n'+ 'Montevideo, CP 11500' + '<br />\n' + 'PH:598 2917 0501 - FAX:598 2916 8215' + '<br />\n'

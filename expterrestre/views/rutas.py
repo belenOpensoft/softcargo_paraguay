@@ -127,8 +127,10 @@ def guardar_ruta(request):
 
         eta = next(item['value'] for item in data if item['name'] == 'llegada')
         etd = next(item['value'] for item in data if item['name'] == 'salida')
+        viaje = next(item['value'] for item in data if item['name'] == 'viaje')
+        cia = next(item['value'] for item in data if item['name'] == 'codigo_cia')
 
-        actualizar_fechas(etd, eta, numero)
+        actualizar_fechas(etd, eta, numero, viaje, cia)
 
         resultado['resultado'] = 'exito'
         resultado['numero'] = str(registro.numero)
@@ -141,7 +143,8 @@ def guardar_ruta(request):
     return HttpResponse(data_json, mimetype)
 
 
-def actualizar_fechas(etd, eta, numero):
+
+def actualizar_fechas(etd, eta, numero,viaje,cia):
     try:
         etd = datetime.strptime(etd, "%Y-%m-%d")
         eta = datetime.strptime(eta, "%Y-%m-%d")
@@ -150,6 +153,10 @@ def actualizar_fechas(etd, eta, numero):
         seg=Seguimiento.objects.get(numero=num)
         seg.etd=etd
         seg.eta=eta
+        seg.vapor=vaporx
+        seg.viaje=viaje
+        if cia is not None:
+            seg.transportista=cia
         seg.save()
     except Exception as e:
         resultado['resultado'] = f'Ocurrió un error: {str(e)}'
@@ -221,6 +228,7 @@ def datos_embarque_ruta(request):
             'origen': embarque.origen if embarque.origen else None,
             'destino': embarque.destino if embarque.destino else None,
             'cia': transportista if transportista else None,
+            'codigo_cia': embarque.transportista if embarque.transportista else None,
             'modo': 'TERRESTRE',
             'viaje': None,
             'vapor': None
