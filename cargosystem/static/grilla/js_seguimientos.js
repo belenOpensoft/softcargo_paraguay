@@ -1452,7 +1452,7 @@ $(document).ready(function () {
         if (row.length === 1) {
             if(row[0][2] == 'EXPORT AEREO'){
 //            console.log('row da esto: ' +row[0][0]);
-                   window.open('/descargar_hawb/' + row[0][0], '_blank');
+                   window.open('/descargar_awb_seguimientos/' + row[0][0], '_blank');
 
             }else{
                 alert('La guias solo pueden ser asignadas a EXPORTACION AEREA');
@@ -1466,7 +1466,7 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
             if(row[0][2] == 'EXPORT AEREO'){
-                   window.open('/descargar_hawb_draft/' + row[0][0] + '/d' ,'_blank');
+                   window.open('/descargar_awb_seguimientos_draft/' + row[0][0] + '/d' ,'_blank');
 
             }else{
                 alert('La guias solo pueden ser asignadas a EXPORTACION AEREA');

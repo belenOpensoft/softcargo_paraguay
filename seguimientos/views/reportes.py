@@ -13,9 +13,9 @@ from django.shortcuts import render
 
 from cargosystem.settings import BASE_DIR
 from expaerea.models import ExportEmbarqueaereo, ExportConexaerea, ExportCargaaerea, ExportServiceaereo, ExportReservas, \
-    VEmbarqueaereo
+    VEmbarqueaereo, ExportServireserva, ExportConexreserva
 from impomarit.models import VistaOperativas, VistaOperativasGastos
-from mantenimientos.models import Clientes as SociosComerciales, Ciudades
+from mantenimientos.models import Clientes as SociosComerciales, Ciudades, Servicios
 from cargosystem import settings
 from mantenimientos.forms import add_buque_form, reporte_seguimiento_form, reporte_operativas_form
 from seguimientos.models import Seguimiento, VGrillaSeguimientos, Envases, Conexaerea, Cargaaerea, Serviceaereo
@@ -202,7 +202,7 @@ def descargar_pdf(request, pdf_file_name):
     except FileNotFoundError:
         raise Http404("El archivo PDF no se encontró")
 
-def descargar_hawb(request,row_id,draft=None):
+def descargar_awb_seguimientos(request,row_id,draft=None):
     try:
         rep = GuiasReport()
         seg = Seguimiento.objects.get(id=row_id)
@@ -236,13 +236,21 @@ def descargar_hawb(request,row_id,draft=None):
             rep.hawb = seg.hawb
         trasbordos = Conexaerea.objects.filter(numero=seg.numero).order_by('llegada','id')
         arraydestinos = []
-        if trasbordos.count() > 0:
-            rep.routing += 'MONTEVIDEO  (' + str(trasbordos[0].origen)
+        if trasbordos.exists():
+            rep.routing += 'MONTEVIDEO (' + str(trasbordos[0].origen)
             rep.compania = trasbordos[0].cia
             rep.destino = str(trasbordos[0].destino)
-            for x in trasbordos:
+
+            for index, x in enumerate(trasbordos):
                 arraydestinos.append(str(x.destino) + '    ' + str(x.cia)[:2])
-                rep.fechas += str(x.cia) + str(x.vapor) + '/' + x.salida.strftime("%m-%B")[:6].upper() + ' '
+
+                fecha_str = f"{x.cia}{x.viaje}/{x.salida.strftime('%d-%B')[:6].upper()} "
+
+                if index % 2 == 0:
+                    rep.fechas += fecha_str
+                else:
+                    rep.fechas2 += fecha_str
+
                 rep.routing += '/' + str(x.destino)
                 rep.final = str(x.destino)
 
@@ -264,27 +272,44 @@ def descargar_hawb(request,row_id,draft=None):
         else:
             rep.pago = 'PP    P           P'
         cargas = Cargaaerea.objects.filter(numero=seg.numero)
-        if cargas.count() > 0:
+        if cargas.exists():
+            # Inicializar acumuladores
+            total_bultos = 0
+            total_bruto = 0
+            total_volumen = 0
+            total_tarifa = seg.tarifaventa
+            aplicable = 0
+            total = 0
+            productos = set()
+
             for x in cargas:
-                aux = [x.bultos,x.bruto,'K','']
-                if seg.tomopeso == 2:
-                    if x.medidas is not None and len(x.medidas) > 0:
-                        medidas = x.medidas.split('*')
-                        if len(medidas) == 3 and all(m is not None and m.isdigit() for m in medidas):
-                            valor = float(medidas[0]) * float(medidas[1]) * float(medidas[2]) * 166.67
-                            aux.append(str(redondear_a_05_o_0(valor)) + ' AS VOL')
-                        else:
-                            # Manejar el caso de error o valores faltantes
-                            aux.append('Error en medidas')
-                else:
-                    aux.append(x.bruto)
-                aux.append(seg.tarifaventa)
-                if seg.aplicable is not None:
-                    aux.append(round(seg.aplicable * seg.tarifaventa,2))
-                else:
-                    aux.append(0)
-                aux.append(x.producto.descripcion)
-                rep.mercaderias.append(aux)
+                total_bultos += x.bultos
+                total_bruto += x.bruto
+
+                volumen = x.bruto  # Por defecto, se usa el peso bruto si no se calcula el volumen
+
+                if seg.tomopeso == 2 and x.medidas:
+                    texto_medidas = '(' + str(x.bultos) + ') * ' + str(x.medidas) + ' MTS'
+                    rep.medidas_text.append(texto_medidas)
+                    medidas = x.medidas.split('*')
+                    if len(medidas) == 3 and all(m.isdigit() for m in medidas):
+                        volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2]) * 166.67
+                        total_volumen += redondear_a_05_o_0(volumen)
+                    else:
+                        volumen = 'Error en medidas'
+
+                productos.add(x.producto.descripcion)
+            total = 0
+            if seg.aplicable is not None:
+                aplicable = seg.aplicable
+                total += round(aplicable * float(total_tarifa), 2)
+            # Guardar solo un registro con los totales
+            rep.mercaderias.append([
+                total_bultos, total_bruto, 'K', '',
+                total_volumen if seg.tomopeso == 2 else total_bruto,
+                total_tarifa, aplicable, total,
+                ', '.join(productos)  # Unir los productos en una sola cadena
+            ])
 
         rep.posicion = seg.posicion
         """ GASTOS """
@@ -293,42 +318,69 @@ def descargar_hawb(request,row_id,draft=None):
         if gastos.count() > 0:
             for g in gastos:
                 if g.modo == 'Collect':
-                    if g.tipogasto == 'DUE AGENT':
-                        rep.agentcol += g.precio
+                    if g.tipogasto == 'OTHER':
+                        rep.othcol += g.precio
+                        rep.total_precio_c += g.precio
                     elif g.tipogasto == 'DUE CARRIER':
                         rep.carriercol += g.precio
+                        rep.total_precio_c += g.precio
                     elif g.tipogasto == 'TAX':
                         rep.taxcol += g.precio
+                        rep.total_precio_c += g.precio
                     elif g.tipogasto == 'VALUATION CHARGES':
                         rep.valcol += g.precio
-                    else:
-                        rep.othcol += g.precio
+                        rep.total_precio_c += g.precio
+
+                    servicio = Servicios.objects.get(codigo=g.servicio).nombre
+                    rep.otros_gastos += str(servicio if servicio else None) + ' ' + str(
+                        round(g.precio, 2)) + '&nbsp;&nbsp;&nbsp;'
                 else:
-                    if g.tipogasto == 'DUE AGENT':
-                        rep.agentppd += g.precio
+                    if g.tipogasto == 'OTHER':
+                        rep.othppd += g.precio
+                        rep.total_precio_p += g.precio
                     elif g.tipogasto == 'DUE CARRIER':
                         rep.carrierppd += g.precio
+                        rep.total_precio_p += g.precio
                     elif g.tipogasto == 'TAX':
                         rep.taxppd += g.precio
+                        rep.total_precio_p += g.precio
                     elif g.tipogasto == 'VALUATION CHARGES':
                         rep.valppd += g.precio
-                    else:
-                        rep.othppd += g.precio
+                        rep.total_precio_p += g.precio
+
+                    servicio = Servicios.objects.get(codigo=g.servicio).nombre
+                    rep.otros_gastos += str(servicio if servicio else None) + ' ' + str(
+                        round(g.precio, 2)) + '&nbsp;&nbsp;&nbsp;'
 
         """ OUTPUT """
         name = 'HWBL_' + str(seg.numero)
         output = str(BASE_DIR) + '/archivos/' + name + '.pdf'
         if draft is not None:
-            rep.generar_hawb(output,fondo='carrier_hawb.jpg')
-            rep.generar_hawb(output,fondo='consignee.jpg')
-            rep.generar_hawb(output,fondo='shipper.jpg')
-            rep.generar_hawb(output,fondo='delivery_receipt.jpg')
-            rep.generar_hawb(output,fondo='normal.jpg')
+            rep.generar_awb(output, fondo='carrier_hawb.jpg')
+            rep.generar_awb(output, fondo='dorso01.jpg', dorso=1)
+            rep.generar_awb(output, fondo='consignee.jpg')
+            rep.generar_awb(output, fondo='dorso02.jpg', dorso=1)
+            rep.generar_awb(output, fondo='shipper.jpg')
+            rep.generar_awb(output, fondo='dorso03.jpg', dorso=1)
+            rep.generar_awb(output, fondo='delivery_receipt.jpg')
+            rep.generar_awb(output, fondo='dorso04.jpg', dorso=1)
+            rep.generar_awb(output, fondo='copia1.jpg')
+            rep.generar_awb(output, fondo='dorso11.jpg', dorso=1)
+            rep.generar_awb(output, fondo='copia2.jpg')
+            rep.generar_awb(output, fondo='dorso12.jpg', dorso=1)
+            rep.generar_awb(output, fondo='copia3.jpg')
+            rep.generar_awb(output, fondo='dorso13.jpg', dorso=1)
+            rep.generar_awb(output, fondo='copia4.jpg')
+            rep.generar_awb(output, fondo='dorso14.jpg', dorso=1)
+            rep.generar_awb(output, fondo='copia5.jpg')
+            rep.generar_awb(output, fondo='dorso15.jpg', dorso=1)
+            rep.generar_awb(output, fondo='copia6.jpg')
+            rep.generar_awb(output, fondo='dorso16.jpg', dorso=1)
         else:
-            rep.generar_hawb(output)
-
+            rep.generar_awb(output)
 
         return rep.descargo_archivo(output)
+
 
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -338,12 +390,11 @@ def descargar_hawb(request,row_id,draft=None):
         print(traceback.format_exc())
         raise Http404(f"Error: {str(e)}")
 
-def descargar_hawb_operativas(request,row_id,draft=None):
+def descargar_awb_operativas(request,row_id,draft=None):
     try:
         rep = GuiasReport()
         master = ExportReservas.objects.get(numero=row_id)
         houses = ExportEmbarqueaereo.objects.filter(awb=master.awb)
-        housesV = VEmbarqueaereo.objects.filter(awb=master.awb)
 
 
         """ CONSIGNATARIO """
@@ -354,7 +405,7 @@ def descargar_hawb_operativas(request,row_id,draft=None):
               str(consignatario.pais) + ' RUT: ' + str(consignatario.ruc)
         rep.consignatario = con
         """ SHIPPER """
-        shipper = SociosComerciales.objects.get(codigo=houses[0].transportista)
+        shipper = SociosComerciales.objects.get(codigo=master.transportista)
         con = str(shipper.razonsocial) + '<br />\n' + \
               str(shipper.direccion) + '<br />\n' + \
               str(shipper.ciudad) + '<br />\n' + \
@@ -375,22 +426,26 @@ def descargar_hawb_operativas(request,row_id,draft=None):
             rep.awb = awb[0] + '   MVD   ' + awb[1]
             rep.awb_sf=master.awb
 
-        if houses[0].hawb is not None and len(houses[0].hawb) > 0 and houses[0].hawb != 'S/I':
-            rep.hawb = houses[0].hawb
-        trasbordos = ExportConexaerea.objects.filter(numero=houses[0].numero).order_by('llegada','id')
+        #if houses[0].hawb is not None and len(houses[0].hawb) > 0 and houses[0].hawb != 'S/I':
+            #rep.hawb = houses[0].hawb
+        trasbordos = ExportConexreserva.objects.filter(numero=master.numero).order_by('llegada', 'id')
         arraydestinos = []
-        if trasbordos.count() > 0:
-            rep.routing += 'MONTEVIDEO  (' + str(trasbordos[0].origen)
+
+        if trasbordos.exists():
+            rep.routing += 'MONTEVIDEO (' + str(trasbordos[0].origen)
             rep.compania = trasbordos[0].ciavuelo
             rep.destino = str(trasbordos[0].destino)
-            flag = True
-            for x in trasbordos:
+
+            for index, x in enumerate(trasbordos):
                 arraydestinos.append(str(x.destino) + '    ' + str(x.ciavuelo)[:2])
-                if flag:
-                    rep.fechas += str(x.ciavuelo) + str(x.vuelo) + '/' + x.salida.strftime("%m-%B")[:6].upper() + ' '
-                    flag = False
+
+                fecha_str = f"{x.ciavuelo}{x.vuelo}/{x.salida.strftime('%d-%B')[:6].upper()} "
+
+                if index % 2 == 0:
+                    rep.fechas += fecha_str
                 else:
-                    rep.fechas2 += str(x.ciavuelo) + str(x.vuelo) + '/' + x.salida.strftime("%m-%B")[:6].upper() + ' '
+                    rep.fechas2 += fecha_str
+
                 rep.routing += '/' + str(x.destino)
                 rep.final = str(x.destino)
 
@@ -452,56 +507,72 @@ def descargar_hawb_operativas(request,row_id,draft=None):
                 ', '.join(productos)  # Unir los productos en una sola cadena
             ])
 
-        rep.posicion = houses[0].posicion
+        rep.posicion = master.posicion
         """ GASTOS """
-        gastos = ExportServiceaereo.objects.filter(numero=houses[0].numero)
+        gastos = ExportServireserva.objects.filter(numero=master.numero)
 
         if gastos.count() > 0:
             for g in gastos:
                 if g.modo == 'Collect':
-                    if g.tipogasto == 'OTHER' and g.servicio==1:
-                        precio = float(round(g.precio,2))
-                        if precio != total:
-                            rep.otros_gastos += str(round(g.precio,2)) +'&nbsp;&nbsp;&nbsp;'
-                        rep.othcol+=g.precio
-                        rep.total_precio_c+=g.precio
+                    if g.tipogasto == 'OTHER':
+                        rep.othcol+=g.costo
+                        rep.total_precio_c+=g.costo
                     elif g.tipogasto == 'DUE CARRIER':
-                        rep.carriercol += g.precio
-                        rep.total_precio_c+=g.precio
+                        rep.carriercol += g.costo
+                        rep.total_precio_c+=g.costo
                     elif g.tipogasto == 'TAX':
-                        rep.taxcol += g.precio
-                        rep.total_precio_c+=g.precio
+                        rep.taxcol += g.costo
+                        rep.total_precio_c+=g.costo
                     elif g.tipogasto == 'VALUATION CHARGES':
-                        rep.valcol += g.precio
-                        rep.total_precio_c+=g.precio
+                        rep.valcol += g.costo
+                        rep.total_precio_c+=g.costo
+
+                    servicio = Servicios.objects.get(codigo=g.servicio).nombre
+                    rep.otros_gastos += str(servicio if servicio else None)+' '+str(round(g.costo,2)) +'&nbsp;&nbsp;&nbsp;'
                 else:
-                    if g.tipogasto == 'OTHER' and g.servicio==1:
-                        precio = float(round(g.precio,2))
-                        if precio != total:
-                            rep.otros_gastos += str(round(g.precio,2))+'&nbsp;&nbsp;&nbsp;'
-                        rep.othppd+=g.precio
-                        rep.total_precio_p+=g.precio
+                    if g.tipogasto == 'OTHER':
+                        rep.othppd+=g.costo
+                        rep.total_precio_p+=g.costo
                     elif g.tipogasto == 'DUE CARRIER':
-                        rep.carrierppd += g.precio
-                        rep.total_precio_p+=g.precio
+                        rep.carrierppd += g.costo
+                        rep.total_precio_p+=g.costo
                     elif g.tipogasto == 'TAX':
-                        rep.taxppd += g.precio
-                        rep.total_precio_p+=g.precio
+                        rep.taxppd += g.costo
+                        rep.total_precio_p+=g.costo
                     elif g.tipogasto == 'VALUATION CHARGES':
-                        rep.valppd += g.precio
-                        rep.total_precio_p+=g.precio
+                        rep.valppd += g.costo
+                        rep.total_precio_p+=g.costo
+
+                    servicio = Servicios.objects.get(codigo=g.servicio).nombre
+                    rep.otros_gastos += str(servicio if servicio else None) +' '+ str(round(g.costo, 2)) + '&nbsp;&nbsp;&nbsp;'
+
 
         """ OUTPUT """
-        name = 'HWBL_' + str(houses[0].numero)
+        name = 'HWBL_' + str(master.numero)
         output = str(BASE_DIR) + '/archivos/' + name + '.pdf'
         if draft is not None:
-            rep.generar_hawb(output,fondo='carrier_hawb.jpg')
-            rep.generar_hawb(output,fondo='consignee.jpg')
-            rep.generar_hawb(output,fondo='shipper.jpg')
-            rep.generar_hawb(output,fondo='delivery_receipt.jpg')
-            #rep.generar_hawb(output,fondo='normal.jpg')
+            rep.generar_awb(output,fondo='carrier_hawb.jpg')
+            rep.generar_awb(output,fondo='dorso01.jpg',dorso=1)
+            rep.generar_awb(output,fondo='consignee.jpg')
+            rep.generar_awb(output,fondo='dorso02.jpg',dorso=1)
+            rep.generar_awb(output,fondo='shipper.jpg')
+            rep.generar_awb(output,fondo='dorso03.jpg',dorso=1)
+            rep.generar_awb(output,fondo='delivery_receipt.jpg')
+            rep.generar_awb(output,fondo='dorso04.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia1.jpg')
+            rep.generar_awb(output,fondo='dorso11.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia2.jpg')
+            rep.generar_awb(output,fondo='dorso12.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia3.jpg')
+            rep.generar_awb(output,fondo='dorso13.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia4.jpg')
+            rep.generar_awb(output,fondo='dorso14.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia5.jpg')
+            rep.generar_awb(output,fondo='dorso15.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia6.jpg')
+            rep.generar_awb(output,fondo='dorso16.jpg',dorso=1)
         else:
-            rep.generar_hawb(output)
+            rep.generar_awb(output)
 
 
         return rep.descargo_archivo(output)
@@ -771,6 +842,8 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
 
     except Exception as e:
         raise TypeError(e)
+
+
 
 
 

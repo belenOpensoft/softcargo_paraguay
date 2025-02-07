@@ -205,3 +205,4 @@ DEFAULT_FROM_EMAIL = 'opensoft@oceanlinkgroup.com'
 
 
 EMPRESA_HAWB = 'OCEANLINK' + '<br />\n' + 'Bolonia 2280 LATU,' + '<br />\n' + 'Edificio Los Álamos, Of.103' + '<br />\n'+ 'Montevideo, CP 11500' + '<br />\n' + 'PH:598 2917 0501 - FAX:598 2916 8215' + '<br />\n'
+EMPRESA_AWB = 'LOGISTICA TOTAL LTDA.' + '<br />\n' + 'Bolonia 2280 LATU,' + '<br />\n' + 'Edificio Los Álamos, Of.103' + '<br />\n'+ 'Montevideo,Uruguay. CP 11500' + '<br />\n' + 'PH:598 2917 0501 - FAX:598 2916 8215' + '<br />\n'

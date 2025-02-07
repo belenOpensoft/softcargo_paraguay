@@ -1,0 +1,83 @@
+{% load static %}
+{% load widget_tweaks %}
+<style>
+
+    #tabla_rutas_house tr:hover::after {
+    content: 'Doble click para editar';
+    color: #f9edbe;
+    position: absolute;
+    right: 30px;
+    background-color: #333;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 3px;
+    }
+
+
+</style>
+<div id="rutas_modal_master"  style="display: none;">
+
+ <form id="rutas_form_master">
+
+     <table id="rutas_tabla_master" class="table" style="width: 100%">
+        <tbody>
+    <tr>
+        <input type="hidden" id="id_master_ruta" name="id_master_ruta">
+        <input type="hidden" id="codigo_cia_master" name="codigo_cia_master">
+
+        <!-- Primera columna: Origen y Destino -->
+        <td style="text-align: right;">{{ form_rutas_master.numero.label }}</td>
+        <td>{{ form_rutas_master.numero }}</td>
+        <td style="text-align: right;">{{ form_rutas_master.origen.label }}</td>
+        <td>{{ form_rutas_master.origen }}</td>
+        <td style="text-align: right;">{{ form_rutas_master.destino.label }}</td>
+        <td>{{ form_rutas_master.destino }}</td>
+        <!-- Segunda columna: Cía -->
+        <td style="text-align: right;">{{ form_rutas_master.ciavuelo.label }}</td>
+        <td>{{ form_rutas_master.ciavuelo }}</td>
+    </tr>
+    <tr>
+        <!-- Primera columna: Salida y Llegada -->
+        <td style="text-align: right;">{{ form_rutas_master.salida.label }}</td>
+        <td>{{ form_rutas_master.salida }}</td>
+        <td style="text-align: right;">{{ form_rutas_master.llegada.label }}</td>
+        <td>{{ form_rutas_master.llegada }}</td>
+        <td style="text-align: right;">{{ form_rutas_master.vuelo.label }}</td>
+        <td>{{ form_rutas_master.vuelo }}</td>
+    </tr>
+    <tr>
+
+        <td></td>
+        <td>
+            <button class="btn btn-dark" id="ingresar_ruta_master">Agregar</button>
+            <button class="btn btn-danger" id="cancelar_ruta_master">Cancelar</button>
+        </td>
+    </tr>
+</tbody>
+
+
+     </table>
+
+     <table id="tabla_rutas_master" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-right">Origen</th>
+            <th class="text-right">Destino</th>
+            <th class="text-left">Vuelo</th>
+            <th class="text-left">Salida</th>
+            <th class="text-left">Llegada</th>
+            <th class="text-left">Cia</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+
+    </form>
+</div>
+

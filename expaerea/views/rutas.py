@@ -5,7 +5,8 @@ import simplejson
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
-from expaerea.models import ExportConexaerea, ExportEmbarqueaereo, VEmbarqueaereo
+from expaerea.models import ExportConexaerea, ExportEmbarqueaereo, VEmbarqueaereo, ExportConexreserva, Master, \
+    ExportReservas
 from seguimientos.models import Seguimiento
 
 """ TABLA PUERTO """
@@ -234,6 +235,146 @@ def datos_embarque_ruta(request):
             'modo': 'AEREO',
             'viaje': None,
             'vapor': None
+        }
+
+        resultado['datos'] = data
+        resultado['resultado'] = 'exito'
+
+    except ExportEmbarqueaereo.DoesNotExist:
+        resultado['resultado'] = 'No se encontró el seguimiento con ese número.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+
+    return JsonResponse(resultado)
+
+
+#master
+def source_rutas_master(request):
+    if is_ajax(request):
+        start = int(request.GET['start'])
+        numero = request.GET['numero']
+        length = int(request.GET['length'])
+        end = start + length
+        order = get_order_master(request, columns_table)
+        registros = ExportConexreserva.objects.filter(numero=numero).order_by(*order)
+
+        resultado = {}
+        data = get_data_master(registros[start:end])
+        resultado['data'] = data
+
+        resultado['length'] = length
+        resultado['draw'] = request.GET['draw']
+        resultado['recordsTotal'] = ExportConexreserva.objects.filter(numero=numero).count()
+        resultado['recordsFiltered'] = str(registros.count())
+        data_json = json.dumps(resultado)
+    else:
+        data_json = 'fail'
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+def get_data_master(registros_filtrados):
+    try:
+
+        data = []
+        for registro in registros_filtrados:
+            registro_json = []
+            registro_json.append(str(registro.id))
+            registro_json.append('' if registro.origen is None else str(registro.origen))
+            registro_json.append('' if registro.destino is None else str(registro.destino))
+            registro_json.append('' if registro.vuelo is None else str(registro.vuelo))
+            registro_json.append('' if registro.salida is None else str(registro.salida)[:10])
+            registro_json.append('' if registro.llegada is None else str(registro.llegada)[:10])
+            registro_json.append('' if registro.ciavuelo is None else str(registro.ciavuelo))
+            data.append(registro_json)
+        return data
+    except Exception as e:
+        raise TypeError(e)
+def get_order_master(request, columns):
+    try:
+        result = []
+        order_column = request.GET['order[0][column]']
+        order_dir = request.GET['order[0][dir]']
+        order = columns[int(order_column)]
+        if order_dir == 'desc':
+            order = '-' + columns[int(order_column)]
+        result.append(order)
+        i = 1
+        while i > 0:
+            try:
+                order_column = request.GET['order[' + str(i) + '][column]']
+                order_dir = request.GET['order[' + str(i) + '][dir]']
+                order = columns[int(order_column)]
+                if order_dir == 'desc':
+                    order = '-' + columns[int(order_column)]
+                result.append(order)
+                i += 1
+            except Exception as e:
+                i = 0
+        result.append('id')
+        return result
+    except Exception as e:
+        raise TypeError(e)
+def eliminar_ruta_master(request):
+    resultado = {}
+    try:
+        id = request.POST['id']
+        ExportConexreserva.objects.get(id=id).delete()
+        resultado['resultado'] = 'exito'
+    except IntegrityError as e:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+    data_json = json.dumps(resultado)
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+def guardar_ruta_master(request):
+    resultado = {}
+    try:
+        numero = request.POST['numero']
+        data = simplejson.loads(request.POST['data'])
+        if len(data[0]['value']) > 0:
+            registro = ExportConexreserva.objects.get(id=data[0]['value'])
+        else:
+            registro = ExportConexreserva()
+        campos = vars(registro)
+        for x in data:
+            k = x['name']
+            v = x['value']
+            for name in campos:
+                if name == k:
+                    if v is not None and len(v) > 0:
+                        if v is not None:
+                            setattr(registro, name, v)
+                        else:
+                            if len(v) > 0:
+                                setattr(registro, name, v)
+                    else:
+                        setattr(registro, name, None)
+                    continue
+        registro.numero = numero
+        registro.save()
+
+        resultado['resultado'] = 'exito'
+        resultado['numero'] = str(registro.numero)
+    except IntegrityError as e:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+    data_json = json.dumps(resultado)
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+def datos_embarque_ruta_master(request):
+    resultado = {}
+    try:
+        numero = request.POST.get('numero')
+        embarque = ExportReservas.objects.get(numero=numero)
+        transportista = Master.objects.get(numero=numero).transportista
+
+        data = {
+            'salida': embarque.fecha.strftime('%Y-%m-%d') if embarque.fecha else None,
+            'origen': embarque.origen if embarque.origen else None,
+            'destino': embarque.destino if embarque.destino else None,
+            'cia': transportista if transportista else None,
+            'codigo_cia': embarque.transportista if embarque.transportista else None,
         }
 
         resultado['datos'] = data

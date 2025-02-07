@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from cargosystem.settings import RUTA_PROYECTO
 from expaerea.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
-    rutasFormHouse, emailsForm, embarquesFormHouse, NotasForm
+    rutasFormHouse, emailsForm, embarquesFormHouse, NotasForm, rutasFormMaster
 from expaerea.models import Master, ExportEmbarqueaereo, VEmbarqueaereo, ExportAttachhijo, ExportCargaaerea, \
     ExportServiceaereo, ExportConexaerea, ExportFaxes
 from seguimientos.forms import archivosForm, pdfForm
@@ -48,6 +48,7 @@ def master_expo_aerea(request):
                 'form_gastos': gastosForm(),
                 'form_gastos_house': gastosFormHouse(),
                 'form_rutas_house': rutasFormHouse(),
+                'form_rutas_master': rutasFormMaster(),
                 'form_emails': emailsForm(),
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),

@@ -199,7 +199,7 @@ $(document).ready(function () {
     $('#descargar_guia').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
-           window.open('/exportacion_aerea/descargar_hawb/' + row[0][0], '_blank');
+           window.open('/exportacion_aerea/descargar_awb/' + row[0][0], '_blank');
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -207,7 +207,7 @@ $(document).ready(function () {
     $('#descargar_guia_draft').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
-           window.open('/exportacion_aerea/descargar_hawb_draft/' + row[0][0] + '/d' ,'_blank');
+           window.open('/exportacion_aerea/descargar_awb_draft/' + row[0][0] + '/d' ,'_blank');
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -699,15 +699,15 @@ $(document).ready(function () {
         change: function (event, ui) {
             if (ui.item) {
                 $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-                 $('#id_cia').val(ui.item['id']);
+                 $('#id_ciavuelo').val(ui.item['id']);
                  $('#codigo_cia').val(ui.item['id']);
-                 $('#id_cia').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+                 $('#id_ciavuelo').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
                 $(this).val('');
-                $('#id_cia').val('');
+                $('#id_ciavuelo').val('');
                 $('#codigo_cia').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
-                $('#id_cia').css({"border-color": "", 'box-shadow': ''});
+                $('#id_ciavuelo').css({"border-color": "", 'box-shadow': ''});
             }
         }
     });
@@ -993,7 +993,36 @@ $(document).ready(function () {
             }
         }
     });
-
+    $("#id_origen_master").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+    $("#id_destino_master").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
     //botones funcionalidades
 
     //form addmaster
@@ -2043,6 +2072,76 @@ function aplicable_volumen(volumen){
         $("#cancelar_ruta_house").show();
     });
 
+    //rutas master
+    $('#ingresar_ruta_master').off('click').click(function (event) {
+    event.preventDefault();
+
+    if (confirm("¿Confirma guardar la ruta?")) {
+        var form = $('#rutas_form_master');
+        var formData = new FormData(form[0]);
+        if (form[0].checkValidity()) {
+        let numero=localStorage.getItem('numero_master_seleccionado');
+            let formData = $("#rutas_form_master").serializeArray();
+            let data = JSON.stringify(formData);
+            miurl = "/exportacion_aerea/add_ruta_master/";
+            var toData = {
+                'numero':numero ,
+                'data': data,
+                'csrfmiddlewaretoken': csrf_token,
+            };
+            $.ajax({
+                type: "POST",
+                url: miurl,
+                data: toData,
+                async: false,
+                success: function (resultado) {
+                    if (resultado['resultado'] === 'exito') {
+                        $("#id_master_ruta").val('');
+                        alert('Guardado con éxito.');
+                        $("#tabla_rutas_master").dataTable().fnDestroy();
+                        $("#ingresar_ruta_master").html('Agregar');
+                       get_datos_rutas_master();
+                       let aux= document.getElementById('id_ruta_id_master').value;
+                       $('#rutas_form_masterr').trigger("reset");
+                       document.getElementById('id_ruta_id_master').value=aux;
+                       $("#id_origen_master, #id_destino_master").css({"border-color": "", 'box-shadow': ''});
+                       /*
+                       if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        }*/
+
+                    } else {
+                        alert(resultado['resultado']);
+                    }
+                }
+            });
+        }else{
+            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+            invalidFields.forEach(field => {
+                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+            });
+
+            alert('Debe completar todos los campos.');
+        }
+    }
+});
+    $('#tabla_rutas_master tbody').off('click').on('click', 'tr', function () {
+        $('#tabla_rutas_master tbody tr').removeClass('selected');
+        $(this).addClass('selected');
+    });
+    $('#tabla_rutas_master tbody').off('dblclick').on('dblclick', 'tr', function () {
+        var data = table_rutas.row(this).data();
+        $("#id_master_ruta").val(data[0]);
+        $("#id_origen_master").val(data[1]);
+        $("#id_destino_master").val(data[2]);
+        $("#id_vuelo_master").val(data[3]);
+        $("#id_salida_master").val(data[4]);
+        $("#id_llegada_master").val(data[5]);
+        $("#id_ciavuelo_master").val(data[6]);
+
+        $("#ingresar_ruta_master").html('Modificar');
+        $("#cancelar_ruta_master").show();
+    });
 
     //embarques house
     $('#ingresar_embarque_house').off('click').click(function (event) {
@@ -3993,7 +4092,134 @@ function get_datos_seguimiento_rutas(numero) {
         }
     });
 }
+//rutas master
+function get_datos_rutas_master() {
+    let numero=localStorage.getItem('numero_master_seleccionado');
 
+   $("#tabla_rutas_master").dataTable().fnDestroy();
+    table_rutas = $('#tabla_rutas_master').DataTable({
+        "order": [[1, "desc"], [1, "desc"]],
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 10,
+        "language": {
+            url: "/static/datatables/es_ES.json"
+        },
+        "ajax": {
+            "url": "/exportacion_aerea/source_rutas_master/",
+            'type': 'GET',
+            "data": function (d) {
+                return $.extend({}, d, {
+                    "numero": numero,
+                });
+            }
+        },
+    });
+    get_datos_seguimiento_rutas_master(numero);
+}
+function rutas_btn_h_click_master(){
+  $("#id_master_ruta").val('');
+        //let selectedRowId = localStorage.getItem('numero_master_seleccionado');
+        let selectedRowN = localStorage.getItem('numero_master_seleccionado');
+        if (selectedRowN!=null) {
+        get_datos_rutas_master();
+            $('#rutas_form_master').trigger("reset");
+            $("#rutas_modal_master").dialog({
+                autoOpen: true,
+                open: function () {
+                document.getElementById('id_ruta_id_master').value=selectedRowN;
+                },
+                modal: true,
+                title: "Rutas para el Master N°: " + selectedRowN,
+                height: wHeight * 0.90,
+                width: wWidth * 0.50,
+                class: 'modal fade',
+                buttons: [
+                    {
+                        text: "Eliminar",
+                        class: "btn btn-danger",
+                        style: "width:100px",
+                        click: function () {
+                            if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
+                                var row = $('#tabla_rutas_master').DataTable().rows('.selected').data();
+                                if (row.length === 1) {
+                                    miurl = "/exportacion_aerea/eliminar_ruta_master/";
+                                    var toData = {
+                                        'id': row[0][0],
+                                        'csrfmiddlewaretoken': csrf_token,
+                                    };
+                                    $.ajax({
+                                        type: "POST",
+                                        url: miurl,
+                                        data: toData,
+                                        success: function (resultado) {
+                                            aux = resultado['resultado'];
+                                            if (aux === 'exito') {
+                                                $("#tabla_rutas_master").dataTable().fnDestroy();
+                                                get_datos_rutas_master();
+                                                alert('Eliminado correctamente');
+                                                /*
+                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                }*/
+                                            } else {
+                                                alert(aux);
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    alert('Debe seleccionar un unico registro');
+                                }
+                            }
+                        },
+                    }, {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        },
+                    }],
+                beforeClose: function (event, ui) {
+                //localStorage.removeItem('num_house_gasto');
+                 $("#table_rutas_master").dataTable().fnDestroy();
+//                 $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                }
+            })
+
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+}
+function get_datos_seguimiento_rutas_master(numero) {
+    $.ajax({
+        url: "/exportacion_aerea/datos_embarque_ruta_master/",  // Asegúrate de que esta URL coincida con tu Django URLConf
+        type: "POST",
+        data: {
+            numero: numero,
+            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val() // CSRF Token obligatorio en POST
+        },
+        dataType: "json",
+        success: function (response) {
+            if (response.resultado === "exito") {
+                // Asignar valores a los inputs si existen en el formulario
+                $("#id_salida_master").val(response.datos.salida || "");
+                $("#id_origen_master").val(response.datos.origen || "");
+                $("#id_destino_master").val(response.datos.destino || "");
+                $("#codigo_cia_master").val(response.datos.codigo_cia || "");
+            } else {
+                console.error("Error en la respuesta:", response.resultado);
+                alert("Error: " + response.resultado);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error en la petición AJAX:", error);
+            alert("No se pudo obtener la información. Verifica el número e intenta de nuevo.");
+        }
+    });
+}
 
 //embarques house
 function get_datos_embarques_house(){

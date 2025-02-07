@@ -29,7 +29,7 @@ class GuiasReport:
         self.consignatario = ''
         self.empresa = settings.EMPRESA_HAWB
         self.notify = ''
-        self.agente = settings.EMPRESA_HAWB
+        self.agente = settings.EMPRESA_AWB
         self.trasbordos = ''
         self.routing = ''
         self.destino = ''
@@ -58,7 +58,7 @@ class GuiasReport:
         self.posicion = ''
         self.medidas_text = []
 
-    def generar_hawb(self,output,fondo=None):
+    def generar_awb(self,output,fondo=None,dorso=0):
         try:
             i = 0
             if self.archivo is not None:
@@ -72,6 +72,10 @@ class GuiasReport:
                 ancho_imagen, alto_imagen = fondo.getSize()
                 escala = min(ancho_pagina / ancho_imagen, alto_pagina / alto_imagen)
                 c.drawImage(fondo, 0, 0, width=ancho_imagen * escala, height=alto_imagen * escala)
+                if dorso == 1:
+                    self.archivo = c
+                    return
+
             # Agrega la imagen de fondo en cada página
             auxCab = []
             y = 820
@@ -164,7 +168,7 @@ class GuiasReport:
                           ]
                           )
             table.wrapOn(c, 0, 0)
-            table.drawOn(c, 61 * mm, 171 * mm)
+            table.drawOn(c, 61 * mm, 172 * mm)
             """ FECHA2 """
             data = [[Paragraph(self.fechas2, encoding='utf-8', style=style_texto_6)]]
             table = Table(data=data, colWidths=[2.5 * cm, ], rowHeights=[1 * cm, ],
@@ -174,7 +178,7 @@ class GuiasReport:
                           ]
                           )
             table.wrapOn(c, 0, 0)
-            table.drawOn(c, 83 * mm, 171 * mm)
+            table.drawOn(c, 83 * mm, 172 * mm)
 
             """ handling info """
             data = [[Paragraph('MARKS: AS PER ATTACHED MANIFEST<br/><br/>ATTACHED: ENVELOPE WITH DOCS',
@@ -234,11 +238,11 @@ class GuiasReport:
             c.drawString(340,280,str(fletes))
             if self.modopago == 'Prepaid':
                 c.drawString(80,250,str(fletes))
-                c.drawString(200,250,str(0))
+                c.drawString(200,250,str(''))
                 montoppd = fletes
                 montocol = 0
             else:
-                c.drawString(80,250,str(0))
+                c.drawString(80,250,str(''))
                 c.drawString(200,250,str(fletes))
                 montoppd = 0
                 montocol = fletes
@@ -262,16 +266,16 @@ class GuiasReport:
             total_oth_ppd=0
             total_oth_col=0
             if self.othppd !=0:
-                total_oth_ppd=float(self.othppd)-float(fletes)
+                total_oth_ppd=float(self.othppd)
             if self.othcol !=0:
-                total_oth_col=float(self.othcol)-float(fletes)
+                total_oth_col=float(self.othcol)
             """ MONTOS """
-            c.drawString(80, 230, str(round(self.valppd,2)))
-            c.drawString(200, 230, str(round(self.valcol,2)))
-            c.drawString(80, 200, str(round(self.taxppd,2)))
-            c.drawString(200, 200, str(round(self.taxcol,2)))
-            c.drawString(80, 155, str(round(total_oth_ppd,2)))
-            c.drawString(200, 155, str(round(total_oth_col,2)))
+            c.drawString(80, 230, validar_valor(round(self.valppd,2)))
+            c.drawString(200, 230, validar_valor(round(self.valcol,2)))
+            c.drawString(80, 200, validar_valor(round(self.taxppd,2)))
+            c.drawString(200, 200, validar_valor(round(self.taxcol,2)))
+            c.drawString(80, 155, validar_valor(round(self.total_precio_p,2)))
+            c.drawString(200, 155, validar_valor(round(self.total_precio_c,2)))
             """ OTHER """
 
             data = [[Paragraph(self.otros_gastos,encoding='utf-8',style=style_texto_7)]]
@@ -295,8 +299,8 @@ class GuiasReport:
             elif self.total_precio_c < fletes:
                 self.total_precio_c+= fletes
 
-            c.drawString(80, 107, str(round(self.total_precio_p,2)))
-            c.drawString(200, 107, str(round(self.total_precio_c,2)))
+            c.drawString(80, 107, validar_valor(round(self.total_precio_p,2)))
+            c.drawString(200, 107, validar_valor(round(self.total_precio_c,2)))
 
             self.archivo = c
         except Exception as e:
@@ -311,6 +315,7 @@ class GuiasReport:
         except Exception as e:
             raise TypeError(e)
 
-
+def validar_valor(valor):
+    return str(valor) if valor != 0 else ' '
 
 

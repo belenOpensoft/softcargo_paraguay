@@ -34,7 +34,7 @@ from seguimientos.views.gastos import source_gastos, guardar_gasto, eliminar_gas
 from seguimientos.views.getdata import get_data_cronologia, get_data_seguimiento
 from seguimientos.views.logs import source_logs
 from seguimientos.views.pdf import get_datos_caratula
-from seguimientos.views.reportes import reportes_seguimiento, descargar_pdf, descargar_hawb, reportes_operativas
+from seguimientos.views.reportes import reportes_seguimiento, descargar_pdf, descargar_awb_seguimientos, reportes_operativas
 from seguimientos.views.rutas import source_rutas, guardar_ruta, eliminar_ruta, datos_seguimiento
 from seguimientos.views.seguimientos import grilla_seguimientos, source_seguimientos, guardar_notas, guardar_cronologia, \
     guardar_seguimiento, guardar_envases, eliminar_envase, clonar_seguimiento
@@ -95,8 +95,8 @@ urlpatterns = [
     path('desconsolidacion_aerea/', desconsolidacion_aerea, name='vista_desconsolidacion_aerea'),
     path('desconsolidar_aereo/', desconsolidar_aereo, name='vista_desconsolidar_aereo'),
     path('descargar_pdf/<str:pdf_file_name>/', descargar_pdf, name='descargar_pdf'),
-    path('descargar_hawb/<int:row_id>/', descargar_hawb, name='descargar_hawb'),
-    path('descargar_hawb_draft/<int:row_id>/<str:draft>', descargar_hawb, name='descargar_hawb'),
+    path('descargar_awb_seguimientos/<int:row_id>/', descargar_awb_seguimientos, name='descargar_hawb'),
+    path('descargar_awb_seguimientos_draft/<int:row_id>/<str:draft>', descargar_awb_seguimientos, name='descargar_hawb'),
 
 ]
 

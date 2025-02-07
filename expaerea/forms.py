@@ -981,6 +981,37 @@ class rutasFormHouse(forms.ModelForm):
         widget=forms.TextInput(attrs={"autocomplete": "off", 'required': True, 'id': 'id_ruta_id','readonly': 'readonly',}), required=True,
         label="Numero")
 
+class rutasFormMaster(forms.ModelForm):
+    class Meta:
+        model = ExportConexaerea
+        fields = ('origen',
+                  'destino',
+                  'vuelo',
+                  'salida',
+                  'llegada',
+                  'ciavuelo',
+                  )
+
+        widgets = {
+            'salida': forms.DateInput(attrs={'type': 'date','id': 'id_salida_master'}),
+            'llegada': forms.DateInput(attrs={'type': 'date','id': 'id_llegada_master'}),
+            'vuelo': forms.TextInput(attrs={'id': 'id_vuelo_master'}),
+            'ciavuelo': forms.TextInput(attrs={'id': 'id_ciavuelo_master'}),
+            'origen': forms.TextInput(attrs={'id': 'id_origen_master'}),
+            'destino': forms.TextInput(attrs={'id': 'id_destino_master'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+#ocultar este campo
+    numero = forms.IntegerField(
+        widget=forms.TextInput(attrs={"autocomplete": "off", 'required': True, 'id': 'id_ruta_id_master','readonly': 'readonly',}), required=True,
+        label="Numero")
+
 class emailsForm(forms.Form):
     # class Meta:
     #     model = Seguimiento
