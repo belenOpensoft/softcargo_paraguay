@@ -352,6 +352,7 @@ $.ajax({
 });
 return name;
 }
+/*
 function checkIfReferenceExists() {
     let numero = localStorage.getItem('num_house_gasto');
     $.ajax({
@@ -370,7 +371,7 @@ function checkIfReferenceExists() {
             return false;
         }
     });
-}
+}*/
 function sumar_ingresos_tabla() {
     let totalIngresos = 0;
     const tabla = $('#facturar_table').DataTable();
