@@ -1083,8 +1083,8 @@ $(document).ready(function () {
                 },
                 modal: true,
                 title: "Fechas de cronologia para el seguimiento N°: " + row[0][1],
-                height: wHeight * 0.80,
-                width: wWidth * 0.80,
+                height: wHeight * 0.50,
+                width: wWidth * 0.40,
                 class: 'modal fade',
                 buttons: [
                     {
@@ -2196,73 +2196,14 @@ function get_datos_cronologia(id) {
             if (datos['fecha'] !== null) {
                 $("#id_fecha").val(datos['fecha'].substring(0, 10))
             }
-            if (datos['estimadorecepcion'] !== null) {
-                $("#id_estimadorecepcion").val(datos['estimadorecepcion'].substring(0, 10))
-            }
-            if (datos['recepcion'] !== null) {
-                $("#id_recepcion").val(datos['recepcion'].substring(0, 10))
-            }
-            if (datos['fecemision'] !== null) {
-                $("#id_fecemision").val(datos['fecemision'].substring(0, 10))
-            }
-            if (datos['fecseguro'] !== null) {
-                $("#id_fecseguro").val(datos['fecseguro'].substring(0, 10))
-            }
-            if (datos['fecdocage'] !== null) {
-                $("#id_fecdocage").val(datos['fecdocage'].substring(0, 10))
-            }
-            if (datos['loadingdate'] !== null) {
-                $("#id_loadingdate").val(datos['loadingdate'].substring(0, 10))
-            }
-            if (datos['arriboreal'] !== null) {
-                $("#id_arriboreal").val(datos['arriboreal'].substring(0, 10))
-            }
-            if (datos['fecaduana'] !== null) {
-                $("#id_fecaduana").val(datos['fecaduana'].substring(0, 10))
-            }
-            if (datos['pagoenfirme'] !== null) {
-                $("#id_pagoenfirme").val(datos['pagoenfirme'].substring(0, 10))
-            }
-            if (datos['vencimiento'] !== null) {
-                $("#id_vencimiento").val(datos['vencimiento'].substring(0, 10))
-            }
+
             if (datos['etd'] !== null) {
                 $("#id_etd").val(datos['etd'].substring(0, 10))
             }
             if (datos['eta'] !== null) {
                 $("#id_eta").val(datos['eta'].substring(0, 10))
             }
-            if (datos['fechaonhand'] !== null) {
-                $("#id_fechaonhand").val(datos['fechaonhand'].substring(0, 10))
-            }
-            if (datos['fecrecdoc'] !== null) {
-                $("#id_fecrecdoc").val(datos['fecrecdoc'].substring(0, 10))
-            }
-            if (datos['recepcionprealert'] !== null) {
-                $("#id_recepcionprealert").val(datos['recepcionprealert'].substring(0, 10))
-            }
-            // campos sin fecha
-            if (datos['lugar'] !== null) {
-                $("#id_lugar").val(datos['lugar'])
-            }
-            if (datos['nroseguro'] !== null) {
-                $("#id_nroseguro").val(datos['nroseguro'])
-            }
-            if (datos['bltipo'] !== null) {
-                $("#id_bltipo").val(datos['bltipo'])
-            }
-            if (datos['lugar'] !== null) {
-                $("#id_lugar").val(datos['lugar'])
-            }
-            if (datos['manifiesto'] !== null) {
-                $("#id_manifiesto").val(datos['manifiesto'])
-            }
-            if (datos['credito'] !== null) {
-                $("#id_credito").val(datos['credito'])
-            }
-            if (datos['prima'] !== null) {
-                $("#id_prima").val(datos['prima'])
-            }
+
             if (datos['originales'] !== null) {
                 $("#id_originales").val(datos['originales'])
             }

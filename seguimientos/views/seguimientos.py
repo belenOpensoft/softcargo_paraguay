@@ -248,28 +248,9 @@ def get_data(registros_filtrados):
         data = []
         cronologia = [
             'fecha',
-            'estimadorecepcion',
-            'recepcion',
-            'fecemision',
-            'fecseguro',
-            'fecdocage',
-            'loadingdate',
-            'arriboreal',
-            'fecaduana',
-            'pagoenfirme',
-            'vencimiento',
+            'originales',
             'etd',
             'eta',
-            'fechaonhand',
-            'fecrecdoc',
-            'recepcionprealert',
-            'lugar',
-            'nroseguro',
-            'bltipo',
-            'manifiesto',
-            'credito',
-            'prima',
-            'observaciones',
 
         ]
         for registro in registros_filtrados:
@@ -508,52 +489,6 @@ def guardar_cronologia(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
-
-def guardar_cronologia_old(request):
-    resultado = {'resultado': 'exito', 'detalles': []}
-
-    try:
-        id = request.POST['id']
-        data = simplejson.loads(request.POST['data'])
-        registro = SeguimientoReal.objects.get(id=id)
-
-        fields = [
-            'fecha', 'estimadorecepcion', 'recepcion', 'fecemision', 'fecseguro',
-            'fecdocage', 'loadingdate', 'arriboreal', 'fecaduana', 'pagoenfirme',
-            'vencimiento', 'etd', 'eta', 'fechaonhand', 'fecrecdoc', 'recepcionprealert',
-            'lugar', 'nroseguro', 'bltipo', 'manifiesto', 'credito', 'prima',
-            'originales', 'observaciones'
-        ]
-
-        for d in data:
-            field_name = d.get('name')
-            value = d.get('value')
-
-            if field_name in fields:
-                try:
-                    if len(value) == 0:
-                        setattr(registro, field_name, None)
-                    else:
-                        # Intentar formatear fechas si el campo es de tipo fecha
-                        if field_name in ['fecha', 'estimadorecepcion', 'recepcion', 'fecemision', 'fecseguro',
-                                          'fecdocage', 'loadingdate', 'arriboreal', 'fecaduana', 'pagoenfirme',
-                                          'vencimiento', 'etd', 'eta', 'fechaonhand', 'fecrecdoc', 'recepcionprealert']:
-                            value = datetime.strptime(value, '%Y-%m-%d')  # Convertir a objeto fecha
-
-                        setattr(registro, field_name, value)
-                        registro.save(update_fields=[field_name])  # Guardar solo el campo modificado
-
-                except Exception as e:
-                    resultado['resultado'] = 'error'
-                    resultado['detalles'].append(f'Error en {field_name}: {str(e)}')
-
-    except IntegrityError:
-        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
-    except Exception as e:
-        resultado['resultado'] = str(e)
-
-    data_json = json.dumps(resultado)
-    return HttpResponse(data_json, content_type="application/json")
 
 def guardar_seguimiento(request):
     resultado = {}

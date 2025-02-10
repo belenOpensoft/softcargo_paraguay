@@ -257,72 +257,22 @@ class cronologiaForm(BSModalModelForm):
         model = Seguimiento
         fields = [
             'fecha',
-            'estimadorecepcion',
-            'recepcion',
-            'fecemision',
-            'fecseguro',
-            'fecdocage',
-            'loadingdate',
-            'arriboreal',
-            'fecaduana',
-            'pagoenfirme',
-            'vencimiento',
             'etd',
             'eta',
-            'fechaonhand',
-            'fecrecdoc',
-            'recepcionprealert',
-            'lugar',
-            'nroseguro',
-            'bltipo',
-            'manifiesto',
-            'credito',
-            'prima',
             'originales',
-            'observaciones',
 
         ]  # Agrega los campos que deseas actualizar
         labels = {
             'fecha': 'Activacion del seguimiento',
-            'estimadorecepcion': 'Entrega mercaderia proveedor',
-            'recepcion': 'Recepcion efectiva de mercaderia',
-            'fecemision': 'Emision conocimiento',
-            'fecseguro': 'Seguro',
-            'fecdocage': 'Envio de documentos',
-            'loadingdate': 'Fecha de carga',
-            'arriboreal': 'Arribo real',
-            'fecaduana': 'Ingreso DNA',
-            'pagoenfirme': 'Pago en firme',
-            'fechaonhand': 'On Hand',
-            'fecrecdoc': 'Recepcion de documentos',
-            'recepcionprealert': 'Recepcion prealert',
-            'lugar': 'Recepcionado en',
-            'nroseguro': 'N° seguro',
-            'bltipo': 'B/L tipo',
-            'prima': 'Prima USD',
             'etd': 'ETD',
             'eta': 'ETA',
-            'observaciones': 'Notas',
             'originales': 'Hay documentos originales',
             # 'hawb': 'House',
         }
         widgets = {
             'fecha': forms.DateInput(attrs={'type': 'date','id':'id_fecha_crono'}),
-            'estimadorecepcion': forms.DateInput(attrs={'type': 'date'}),
-            'recepcion': forms.DateInput(attrs={'type': 'date'}),
-            'fecemision': forms.DateInput(attrs={'type': 'date'}),
-            'fecseguro': forms.DateInput(attrs={'type': 'date'}),
-            'fecdocage': forms.DateInput(attrs={'type': 'date'}),
-            'loadingdate': forms.DateInput(attrs={'type': 'date'}),
-            'arriboreal': forms.DateInput(attrs={'type': 'date'}),
-            'fecaduana': forms.DateInput(attrs={'type': 'date'}),
-            'pagoenfirme': forms.DateInput(attrs={'type': 'date'}),
-            'vencimiento': forms.DateInput(attrs={'type': 'date'}),
             'etd': forms.DateInput(attrs={'type': 'date'}),
             'eta': forms.DateInput(attrs={'type': 'date'}),
-            'fechaonhand': forms.DateInput(attrs={'type': 'date'}),
-            'fecrecdoc': forms.DateInput(attrs={'type': 'date'}),
-            'recepcionprealert': forms.DateInput(attrs={'type': 'date'}),
             'originales': forms.Select(attrs={'type': 'date'})
         }
 
@@ -333,8 +283,6 @@ class cronologiaForm(BSModalModelForm):
         self.helper.form_id = 'cronologia-form'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Actualizar'))
-        self.fields['prima'].initial = 0
-        self.fields['nroseguro'].initial = 0
 
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
