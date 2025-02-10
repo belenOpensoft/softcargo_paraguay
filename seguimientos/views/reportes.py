@@ -21,6 +21,7 @@ from mantenimientos.forms import add_buque_form, reporte_seguimiento_form, repor
 from seguimientos.models import Seguimiento, VGrillaSeguimientos, Envases, Conexaerea, Cargaaerea, Serviceaereo
 from seguimientos.views.embarques import redondear_a_05_o_0
 from seguimientos.views.guias import GuiasReport
+from seguimientos.views.guias_hijas import GuiasReport as GuiasReportHijas
 
 
 def reportes_seguimiento(request):
@@ -585,6 +586,198 @@ def descargar_awb_operativas(request,row_id,draft=None):
         print(traceback.format_exc())
         raise Http404(f"Error: {str(e)}")
 
+def descargar_hawb_operativas(request,row_id,draft=None,asagreed=None):
+    try:
+        rep = GuiasReportHijas()
+        house = ExportEmbarqueaereo.objects.get(numero=row_id)
+        tarifa = ExportReservas.objects.get(posicion=house.posicion).tarifaawb
+
+
+        """ CONSIGNATARIO """
+        consignatario = SociosComerciales.objects.get(codigo=house.consignatario)
+        con = str(consignatario.razonsocial) + '<br />\n' + \
+              str(consignatario.direccion) + '<br />\n' + \
+              str(consignatario.ciudad) + '<br />\n' + \
+              str(consignatario.pais) + ' RUT: ' + str(consignatario.ruc)
+        rep.consignatario = con
+        """ SHIPPER """
+        shipper = SociosComerciales.objects.get(codigo=house.cliente)
+        con = str(shipper.razonsocial) + '<br />\n' + \
+              str(shipper.direccion) + '<br />\n' + \
+              str(shipper.ciudad) + '<br />\n' + \
+              str(shipper.pais) + ' RUT: ' + str(shipper.ruc)
+        rep.shipper = con
+        rep.shipper_nom = str(shipper.razonsocial)
+        """ NOTIFY """
+        pago = 'COLLECT' if house.pagoflete == 'C' else 'PREPAID'
+        notify = 'FREIGHT ' + pago + '<br />\n'
+        notificador = SociosComerciales.objects.get(codigo=house.consignatario)
+        notify += 'NOTIFY: ' + str(notificador.razonsocial) + '<br />\n' + \
+                  str(notificador.direccion) + '<br />\n' + \
+                  str(notificador.ciudad) + '<br />\n' + \
+                  str(notificador.pais) + ' RUT: ' + str(notificador.ruc)
+        rep.notify = notify
+        if house.awb is not None and len(house.awb) > 0 and house.awb != 'S/I':
+            awb = house.awb.split('-')
+            rep.awb = awb[0] + '   MVD   ' + awb[1]
+            rep.awb_sf=house.awb
+
+        if house.hawb is not None and len(house.hawb) > 0 and house.hawb != 'S/I':
+            rep.hawb = house.hawb
+
+        trasbordos = ExportConexaerea.objects.filter(numero=house.numero).order_by('llegada', 'id')
+        arraydestinos = []
+
+        if trasbordos.exists():
+            rep.routing += 'MONTEVIDEO (' + str(trasbordos[0].origen)
+            rep.compania = trasbordos[0].ciavuelo
+            rep.destino = str(trasbordos[0].destino)
+
+            for index, x in enumerate(trasbordos):
+                arraydestinos.append(str(x.destino) + '    ' + str(x.ciavuelo)[:2])
+
+                fecha_str = f"{x.ciavuelo}{x.vuelo}/{x.salida.strftime('%d-%B')[:6].upper()} "
+
+                if index % 2 == 0:
+                    rep.fechas += fecha_str
+                else:
+                    rep.fechas2 += fecha_str
+
+                rep.routing += '/' + str(x.destino)
+                rep.final = str(x.destino)
+
+        arraydestinos.reverse()
+        flag = 0
+        if len(arraydestinos) > 0:
+            for x in arraydestinos:
+                if flag < 2:
+                    rep.arraydestinos = x + '   ' + rep.arraydestinos
+                    flag += 1
+        if len(rep.routing) > 0:
+            rep.routing += ')'
+        ciudad = Ciudades.objects.filter(codigo=rep.final)
+        if ciudad.count() > 0:
+            rep.airport_final = ciudad[0].nombre
+        rep.modopago = 'Collect' if house.pagoflete == 'C' else 'Prepaid'
+        if house.pagoflete == 'C':
+            rep.pago = 'CC          C            C'
+        else:
+            rep.pago = 'PP    P           P'
+        cargas = ExportCargaaerea.objects.filter(numero=house.numero)
+
+        if cargas.exists():
+            # Inicializar acumuladores
+            total_bultos = 0
+            total_bruto = 0
+            total_volumen = 0
+            total_tarifa = house.tarifaventa
+            aplicable = 0
+            total = 0
+            productos = set()
+            vol=0
+
+            for x in cargas:
+                total_bultos += x.bultos
+                total_bruto += x.bruto
+
+                volumen = x.bruto  # Por defecto, se usa el peso bruto si no se calcula el volumen
+
+                if house.tomopeso == 2 and x.medidas:
+                    texto_medidas = '(' + str(x.bultos) + ') * ' + str(x.medidas)+' MTS'
+                    rep.medidas_text.append(texto_medidas)
+                    medidas = x.medidas.split('*')
+                    if len(medidas) == 3:
+                        vol+= float(medidas[0]) * float(medidas[1]) * float(medidas[2])
+                        volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2]) * 166.67
+                        total_volumen += redondear_a_05_o_0(volumen)
+                    else:
+                        volumen = 'Error en medidas'
+
+                productos.add(x.producto.nombre)
+
+            aplicable = total_volumen
+            rep.volumen_total_embarque=vol
+            total += round(aplicable * float(total_tarifa), 2)
+            # Guardar solo un registro con los totales
+            rep.mercaderias.append([
+                total_bultos, total_bruto, 'K', '',
+                total_volumen if house.tomopeso == 2 else total_bruto,
+                total_tarifa,aplicable, total,
+                productos  # Unir los productos en una sola cadena
+            ])
+
+
+        rep.posicion = house.posicion
+        """ GASTOS """
+        gastos = ExportServiceaereo.objects.filter(numero=house.numero)
+
+
+        if gastos.count() > 0:
+            for g in gastos:
+                if g.modo == 'C':
+                    if g.tipogasto == 'OTHER' and g.precio!=0:
+                        rep.othcol+=g.precio
+                        rep.total_precio_c+=g.precio
+                    elif g.tipogasto == 'DUE CARRIER' and g.precio!=0:
+                        rep.carriercol += g.precio
+                        rep.total_precio_c+=g.precio
+                    elif g.tipogasto == 'DUE AGENT' and g.precio!=0:
+                        rep.agentcol += g.precio
+                        rep.total_precio_c+=g.precio
+
+                    rep.otros_gastos += str(round(g.precio,2)) +'&nbsp;&nbsp;&nbsp;'
+                else:
+                    if g.tipogasto == 'OTHER' and g.precio!=0:
+                        rep.othppd+=g.precio
+                        rep.total_precio_p+=g.precio
+                    elif g.tipogasto == 'DUE CARRIER' and g.precio!=0:
+                        rep.carrierppd += g.precio
+                        rep.total_precio_p+=g.precio
+                    elif g.tipogasto == 'DUE AGENT' and g.precio!=0:
+                        rep.agentppd += g.precio
+                        rep.total_precio_p+=g.precio
+
+                    if g.precio !=0:
+                        rep.otros_gastos += str(round(g.precio, 2)) + '&nbsp;&nbsp;&nbsp;'
+
+
+        """ OUTPUT """
+        name = 'HWBL_' + str(house.numero)
+        output = str(BASE_DIR) + '/archivos/' + name + '.pdf'
+        if draft is not None:
+            rep.generar_awb(output,fondo='carrier_hawb.jpg')
+            rep.generar_awb(output,fondo='dorso01.jpg',dorso=1)
+            rep.generar_awb(output,fondo='consignee.jpg')
+            rep.generar_awb(output,fondo='dorso02.jpg',dorso=1)
+            rep.generar_awb(output,fondo='shipper.jpg')
+            rep.generar_awb(output,fondo='dorso03.jpg',dorso=1)
+            rep.generar_awb(output,fondo='delivery_receipt.jpg')
+            rep.generar_awb(output,fondo='dorso04.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia1.jpg')
+            rep.generar_awb(output,fondo='dorso11.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia2.jpg')
+            rep.generar_awb(output,fondo='dorso12.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia3.jpg')
+            rep.generar_awb(output,fondo='dorso13.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia4.jpg')
+            rep.generar_awb(output,fondo='dorso14.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia5.jpg')
+            rep.generar_awb(output,fondo='dorso15.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia6.jpg')
+            rep.generar_awb(output,fondo='dorso16.jpg',dorso=1)
+        else:
+            rep.generar_awb(output)
+
+
+        return rep.descargo_archivo(output)
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        import traceback
+        print(traceback.format_exc())
+        raise Http404(f"Error: {str(e)}")
 
 
 def reportes_operativas(request):

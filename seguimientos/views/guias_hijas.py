@@ -29,7 +29,7 @@ class GuiasReport:
         self.consignatario = ''
         self.empresa = settings.EMPRESA_HAWB
         self.notify = ''
-        self.agente = settings.EMPRESA_AWB
+        self.agente = settings.EMPRESA_HAWB
         self.trasbordos = ''
         self.routing = ''
         self.destino = ''
@@ -57,6 +57,7 @@ class GuiasReport:
         self.otros_gastos = ''
         self.posicion = ''
         self.medidas_text = []
+        self.volumen_total_embarque=0
 
     def generar_awb(self,output,fondo=None,dorso=0):
         try:
@@ -100,7 +101,7 @@ class GuiasReport:
                 leading=5
             )
             """ EMPRESA """
-            data = [[Paragraph(self.empresa, encoding='utf-8', style=style_texto_7)]]
+            data = [[Paragraph(self.shipper, encoding='utf-8', style=style_texto_7)]]
             table = Table(data=data, colWidths=[8.5 * cm, ], rowHeights=[1.5 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
@@ -110,7 +111,7 @@ class GuiasReport:
             table.wrapOn(c, 0, 0)
             table.drawOn(c, 18 * mm, 251 * mm)
             """ SHIPPER """
-            data = [[Paragraph(self.shipper, encoding='utf-8', style=style_texto_7)]]
+            data = [[Paragraph(self.empresa, encoding='utf-8', style=style_texto_7)]]
             table = Table(data=data, colWidths=[7 * cm, ], rowHeights=[1.1 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
@@ -151,8 +152,8 @@ class GuiasReport:
             table.drawOn(c, 18 * mm, 208.3 * mm)
             """ DATOS """
             c.drawString(49,785,self.awb)
-            c.drawString(500,785,self.awb_sf)
-            c.drawString(500,70,self.awb_sf)
+            c.drawString(500,785,self.hawb)
+            c.drawString(500,70,self.hawb)
             c.setFont("Helvetica", 8)
             c.drawString(55,550,self.routing)
             c.drawString(55,527,self.destino)
@@ -181,7 +182,7 @@ class GuiasReport:
             table.drawOn(c, 83 * mm, 172 * mm)
 
             """ handling info """
-            data = [[Paragraph('MARKS: AS PER ATTACHED MANIFEST<br/><br/>ATTACHED: ENVELOPE WITH DOCS',
+            data = [[Paragraph('ATTACHED: ENVELOPE WITH DOCS',
                                encoding='utf-8',
                                style=style_texto_7)]]
             table = Table(data=data, colWidths=[5.5 * cm, ], rowHeights=[1.4 * cm, ],
@@ -207,7 +208,7 @@ class GuiasReport:
                 m = self.mercaderias[0]
 
                 c.drawString(52, y, str(m[0]))  # Total de bultos
-                c.drawString(82, y, str(round(m[1], 2)))  # Total de peso bruto
+                c.drawString(82, y, str(round(m[1],2)))  # Total de peso bruto
                 c.drawString(127, y, str(m[2]))  # Unidad de medida (K)
                 c.drawString(205, y, str(m[6]))  # aplicable
                 c.drawString(280, y, str(m[5]))  # Tarifa de venta
@@ -219,7 +220,8 @@ class GuiasReport:
                 fletes = m[7]
 
                 """ DESCRIPCION MERCADERIA """
-                texto='CONSOLIDATION AS PER ATTACHED CARGO MANIFEST '+str(self.hawb)
+                texto = 'CONTAIN: ' + '<br/>' + ", ".join(map(str, m[8]))
+                texto+='<br/>'+str(validar_valor(round(self.volumen_total_embarque,4)))+' CBM <br/>'
                 for txt in self.medidas_text:
                     texto+='<br/>'+txt
 
@@ -248,7 +250,7 @@ class GuiasReport:
                 montocol = fletes
             c.drawString(253,200,str(self.posicion))
             #c.drawString(350,200,str(self.shipper_nom))
-            c.drawString(370,145,'OCEANLINK')
+            c.drawString(370,145,self.shipper_nom)
 
             """ otros datos """
             data = [[Paragraph('OCEANLINK AS AGENT<br/>OF DE CARRIER '+str(self.shipper_nom)+
@@ -274,8 +276,10 @@ class GuiasReport:
             c.drawString(200, 230, validar_valor(round(self.valcol,2)))
             c.drawString(80, 200, validar_valor(round(self.taxppd,2)))
             c.drawString(200, 200, validar_valor(round(self.taxcol,2)))
-            c.drawString(80, 155, validar_valor(round(self.total_precio_p,2)))
-            c.drawString(200, 155, validar_valor(round(self.total_precio_c,2)))
+            c.drawString(80, 180, validar_valor(round(self.agentppd,2)))
+            c.drawString(200, 180, validar_valor(round(self.agentcol,2)))
+            #c.drawString(80, 155, validar_valor(round(self.total_precio_c,2)))
+            #c.drawString(200, 155, validar_valor(round(self.total_precio_p,2)))
             """ OTHER """
 
             data = [[Paragraph(self.otros_gastos,encoding='utf-8',style=style_texto_7)]]
@@ -290,14 +294,10 @@ class GuiasReport:
             """ TOTALES """
 
             fletes = Decimal(fletes)
-            if self.total_precio_p ==0 and self.total_precio_c==0:
-                self.total_precio_p= fletes if self.modopago=='Collect' else 0
-                self.total_precio_c= fletes if self.modopago=='Prepaid' else 0
 
-            if self.total_precio_p < fletes:
-                self.total_precio_p+= fletes
-            elif self.total_precio_c < fletes:
-                self.total_precio_c+= fletes
+            self.total_precio_c+= fletes if self.modopago=='Collect' else 0
+            self.total_precio_p+= fletes if self.modopago=='Prepaid' else 0
+
 
             c.drawString(80, 107, validar_valor(round(self.total_precio_p,2)))
             c.drawString(200, 107, validar_valor(round(self.total_precio_c,2)))
@@ -314,6 +314,7 @@ class GuiasReport:
             return HttpResponse(pdf_data, content_type="application/pdf")
         except Exception as e:
             raise TypeError(e)
+
 
 def validar_valor(valor):
     return str(valor) if valor != 0 else ' '

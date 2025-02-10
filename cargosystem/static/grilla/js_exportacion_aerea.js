@@ -64,6 +64,9 @@ $(document).ready(function () {
         $(this).alert('close');
     });
 
+
+
+
     getCookie('row_selected_impomarit');
     let contador = 0;
 
@@ -5191,3 +5194,27 @@ $("#destinatario").autocomplete({
         }
     }
 });
+
+//descargar guias hijas
+function descargar_hawb(){
+let numero_hawb = localStorage.getItem('num_house_gasto');
+    row = table.rows('.table-secondary').data();
+    if (row.length === 1) {
+       window.open('/exportacion_aerea/descargar_hawb/' + numero_hawb, '_blank');
+    } else {
+        alert('Debe seleccionar al menos un registro');
+    }
+}
+function descargar_hawb_draft(){
+let numero_hawb = localStorage.getItem('num_house_gasto');
+console.log(numero_hawb);
+ row = table.rows('.table-secondary').data();
+    if (row.length === 1) {
+       window.open('/exportacion_aerea/descargar_hawb_draft/' + numero_hawb+ '/d' ,'_blank');
+    } else {
+        alert('Debe seleccionar al menos un registro');
+    }
+}
+
+
+

@@ -1,26 +1,3 @@
-//function toggle_collapse_menu(targetId) {
-//    // Obtén el elemento objetivo usando el id
-//    var targetElement = document.getElementById(targetId);
-//
-//    // Verifica si el elemento está actualmente colapsado o no
-//    if (targetElement.classList.contains('show')) {
-//        // Si está expandido, colápaselo
-//        var bsCollapse = bootstrap.Collapse.getInstance(targetElement);
-//        if (bsCollapse) {
-//            bsCollapse.hide();
-//        } else {
-//            new bootstrap.Collapse(targetElement).hide();
-//        }
-//    } else {
-//        // Si está colapsado, expándelo
-//        var bsCollapse = bootstrap.Collapse.getInstance(targetElement);
-//        if (bsCollapse) {
-//            bsCollapse.show();
-//        } else {
-//            new bootstrap.Collapse(targetElement).show();
-//        }
-//    }
-//}
 
 function toggle_collapse_menu(targetId, linkElement) {
     // Obtén el elemento objetivo usando el id

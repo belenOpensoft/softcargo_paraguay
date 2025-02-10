@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
-from expaerea.models import ExportCargaaerea
+from expaerea.models import ExportCargaaerea, ExportEmbarqueaereo
 from mantenimientos.models import Productos
 
 """ TABLA PUERTO """
@@ -146,6 +146,10 @@ def guardar_embarques(request):
 
         registro.numero = numero
         registro.save()
+        tarifa = next(item['value'] for item in data if item['name'] == 'tarifa')
+        embarque = ExportEmbarqueaereo.objects.get(numero=numero)
+        embarque.tarifaventa=tarifa
+        embarque.save()
 
         resultado['resultado'] = 'exito'
         resultado['numero'] = str(registro.numero)
