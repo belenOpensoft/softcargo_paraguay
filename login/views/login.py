@@ -76,4 +76,7 @@ def logout_view(request):
 
 def cambiar_modulo(request, modulo):
     request.session["rol"] = modulo
-    return HttpResponseRedirect('/')
+    if modulo == 'seguimientos':
+        return  HttpResponseRedirect('/seguimientos')
+    else:
+        return HttpResponseRedirect('/')
