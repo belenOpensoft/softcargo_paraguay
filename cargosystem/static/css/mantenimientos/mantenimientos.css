@@ -1,0 +1,11 @@
+.page-item.active .page-link {
+ background-color: var(--bs-danger) !important; /* Verde */
+ border-color: var(--bs-danger) !important; /* Verde */
+    color: white !important;
+ }
+ .page-link{
+ color: var(--bs-danger) !important;
+ }
+ .table-secondary td{
+    background-color: #fc99a2 !important;
+}

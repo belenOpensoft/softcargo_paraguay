@@ -149,9 +149,9 @@ $(document).ready(function()
 
         $('#tabla_vendedor tbody').on( 'click', 'tr', function()
         {
-            if ($(this).hasClass('selected') )
+            if ($(this).hasClass('table-secondary') )
             {
-                $(this).removeClass('selected');
+                $(this).removeClass('table-secondary');
             }
             else
             {

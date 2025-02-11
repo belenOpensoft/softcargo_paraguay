@@ -34,7 +34,7 @@ $(document).ready(function()
                     {
                         text: 'Modificar',
                         action: function (e, dt, button, config) {
-                            if(row = table.row('.selected').data()){
+                            if(row = table.row('.table-secondary').data()){
                                 window.location.replace("/modificar_banco/" + row[0]);
                             }else{
                                 alert('Debe seleccionar un registro');
@@ -44,7 +44,7 @@ $(document).ready(function()
                     {
                         text: 'Eliminar',
                         action: function (e, dt, button, config) {
-                            if(row = table.row('.selected').data()){
+                            if(row = table.row('.table-secondary').data()){
                                 if(confirm('Esta seguro de eliminar: ' + row[2])){
                                     miurl = "/eliminar_banco";
                                     var toData = { 'id' : row[0] };
@@ -141,15 +141,15 @@ $(document).ready(function()
 
         $('#tabla_banco tbody').on( 'click', 'tr', function()
         {
-            if ($(this).hasClass('selected') )
+            if ($(this).hasClass('table-secondary') )
             {
-                $(this).removeClass('selected');
+                $(this).removeClass('table-secondary');
             }
             else
             {
                 var row = table.row( $(this).closest('tr') ).data();
-                table.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
+                table.$('tr.table-secondary').removeClass('table-secondary');
+                $(this).addClass('table-secondary');
             }
         });
 

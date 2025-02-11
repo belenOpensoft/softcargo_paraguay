@@ -144,9 +144,9 @@ $(document).ready(function()
 
         $('#tabla_pais tbody').on( 'click', 'tr', function()
         {
-            if ($(this).hasClass('selected') )
+            if ($(this).hasClass('table-secondary') )
             {
-                $(this).removeClass('selected');
+                $(this).removeClass('table-secondary');
             }
             else
             {
