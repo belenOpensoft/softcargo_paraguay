@@ -267,8 +267,8 @@ $(document).ready(function () {
             var row = table_envases.row($(this).closest('tr')).data();
             row_selected_envase = row[0];
             row_number_envase = row[1];
-            table_envases.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
+            table_envases.$('tr.table-secondary').removeClass('table-secondary');
+            $(this).addClass('table-secondary');
         }
     });
     $('#tabla_embarques tbody').on('click', 'tr', function () {
@@ -278,8 +278,8 @@ $(document).ready(function () {
             var row = table_embarques.row($(this).closest('tr')).data();
             row_selected_embarque = row[0];
             row_number_embarque = row[1];
-            table_embarques.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
+            table_embarques.$('tr.table-secondary').removeClass('table-secondary');
+            $(this).addClass('table-secondary');
         }
     });
     $('#tabla_archivos tbody').on('click', 'tr', function () {
@@ -289,8 +289,8 @@ $(document).ready(function () {
             var row = table_archivos.row($(this).closest('tr')).data();
             row_selected_archivo = row[0];
             row_number_archivo = row[1];
-            table_archivos.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
+            table_archivos.$('tr.table-secondary').removeClass('table-secondary');
+            $(this).addClass('table-secondary');
         }
     });
     $('#tabla_gastos tbody').on('click', 'tr', function () {
@@ -300,8 +300,8 @@ $(document).ready(function () {
             var row = table_gastos.row($(this).closest('tr')).data();
             row_selected_gasto = row[0];
             row_number_archivo = row[1];
-            table_gastos.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
+            table_gastos.$('tr.table-secondary').removeClass('table-secondary');
+            $(this).addClass('table-secondary');
         }
     });
     $('#tabla_rutas tbody').on('click', 'tr', function () {
@@ -311,8 +311,8 @@ $(document).ready(function () {
             var row = table_rutas.row($(this).closest('tr')).data();
             row_selected_ruta = row[0];
             row_number_ruta = row[1];
-            table_rutas.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
+            table_rutas.$('tr.table-secondary').removeClass('table-secondary');
+            $(this).addClass('table-secondary');
         }
     });
     /* FIN DE TABLA DATATABLES*/
@@ -883,7 +883,7 @@ $(document).ready(function () {
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma descargar el archivo seleccionado?')) {
-                                row = table_archivos.rows('.selected').data();
+                                row = table_archivos.rows('.table-secondary').data();
                                 var url = '/descargar_archivo/' + row[0][0];  // Ruta de la vista que devuelve el archivo
                                 window.open(url, '_blank');
                             }
@@ -894,7 +894,7 @@ $(document).ready(function () {
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar archivo?')) {
-                                row = table_archivos.rows('.selected').data();
+                                row = table_archivos.rows('.table-secondary').data();
                                 if (row.length === 1) {
                                     miurl = "/eliminar_archivo/";
                                     var toData = {
@@ -908,8 +908,8 @@ $(document).ready(function () {
                                         success: function (resultado) {
                                             aux = resultado['resultado'];
                                             if (aux == 'exito') {
-                                                var idx = table.cell('.selected', 0).index();
-                                                table_archivos.$("tr.selected").removeClass('selected');
+                                                var idx = table.cell('.table-secondary', 0).index();
+                                                table_archivos.$("tr.table-secondary").removeClass('table-secondary');
                                                 table_archivos.row(idx).remove().draw(true);
                                                 mostrarToast('¡Archivo eliminado correctamente!', 'success');
                                                 table.ajax.reload();
@@ -965,7 +965,7 @@ $(document).ready(function () {
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma adjuntar el archivo seleccionado?')) {
-                                row = table_archivos.rows('.selected').data();
+                                row = table_archivos.rows('.table-secondary').data();
                                 let nombre = row[0][2].split("/")[1];
                                 let id = row[0][0];
                                 if(id in archivos_adjuntos) {
@@ -989,7 +989,7 @@ $(document).ready(function () {
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma descargar el archivo seleccionado?')) {
-                                row = table_archivos.rows('.selected').data();
+                                row = table_archivos.rows('.table-secondary').data();
                                 var url = '/descargar_archivo/' + row[0][0];  // Ruta de la vista que devuelve el archivo
                                 window.open(url, '_blank');
                             }
@@ -1000,7 +1000,7 @@ $(document).ready(function () {
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar archivo?')) {
-                                row = table_archivos.rows('.selected').data();
+                                row = table_archivos.rows('.table-secondary').data();
                                 if (row.length === 1) {
                                     miurl = "/eliminar_archivo/";
                                     var toData = {
@@ -1014,8 +1014,8 @@ $(document).ready(function () {
                                         success: function (resultado) {
                                             aux = resultado['resultado'];
                                             if (aux == 'exito') {
-                                                var idx = table.cell('.selected', 0).index();
-                                                table_archivos.$("tr.selected").removeClass('selected');
+                                                var idx = table.cell('.table-secondary', 0).index();
+                                                table_archivos.$("tr.table-secondary").removeClass('table-secondary');
                                                 table_archivos.row(idx).remove().draw(true);
                                                 mostrarToast('¡Archivo eliminado correctamente!', 'success');
                                             } else {
@@ -1162,7 +1162,7 @@ $(document).ready(function () {
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar?')) {
-                                row = table_envases.rows('.selected').data();
+                                row = table_envases.rows('.table-secondary').data();
                                 if (row.length === 1) {
                                     miurl = "/eliminar_envase/";
                                     var toData = {
@@ -1176,8 +1176,8 @@ $(document).ready(function () {
                                         success: function (resultado) {
                                             aux = resultado['resultado'];
                                             if (aux == 'exito') {
-                                                var idx = table.cell('.selected', 0).index();
-                                                table_envases.$("tr.selected").removeClass('selected');
+                                                var idx = table.cell('.table-secondary', 0).index();
+                                                table_envases.$("tr.table-secondary").removeClass('table-secondary');
                                                 table_envases.row(idx).remove().draw(true);
                                                 $('#tabla_seguimiento').DataTable().ajax.reload();
                                                 mostrarToast('¡Envase eliminado correctamente!', 'success');
@@ -1245,7 +1245,7 @@ $(document).ready(function () {
                                         success: function (resultado) {
                                             aux = resultado['resultado'];
                                             if (aux == 'exito') {
-                                                var idx = table.cell('.selected', 0).index();
+                                                var idx = table.cell('.table-secondary', 0).index();
                                                 alert('Seguimiento clonardo N° ' + resultado['numero'] )
                                                 mostrarToast('¡Seguimiento clonado correctamente!', 'success');
                                                 table.ajax.reload();
@@ -1303,7 +1303,7 @@ $(document).ready(function () {
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar?')) {
-                                row = table_rutas.rows('.selected').data();
+                                row = table_rutas.rows('.table-secondary').data();
                                 if (row.length === 1) {
                                     miurl = "/eliminar_ruta/";
                                     var toData = {
@@ -1317,8 +1317,8 @@ $(document).ready(function () {
                                         success: function (resultado) {
                                             aux = resultado['resultado'];
                                             if (aux === 'exito') {
-                                                var idx = table.cell('.selected', 0).index();
-                                                table_rutas.$("tr.selected").removeClass('selected');
+                                                var idx = table.cell('.table-secondary', 0).index();
+                                                table_rutas.$("tr.table-secondary").removeClass('table-secondary');
                                                 table_rutas.row(idx).remove().draw(true);
                                                 $('#tabla_gastos').DataTable().ajax.reload();
                                                 $('#tabla_seguimiento').DataTable().ajax.reload();
@@ -1402,7 +1402,7 @@ $(document).ready(function () {
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                row = table_gastos.rows('.selected').data();
+                                row = table_gastos.rows('.table-secondary').data();
                                 if (row.length === 1) {
                                     miurl = "/eliminar_gasto/";
                                     var toData = {

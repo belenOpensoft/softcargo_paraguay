@@ -1913,8 +1913,8 @@ function aplicable_volumen(volumen){
         $("#cancelar_gasto_master").show();
     });
     $('#tabla_gastos tbody').on('click', 'tr', function () {
-        $('#tabla_gastos tbody tr').removeClass('selected');
-        $(this).addClass('selected');
+        $('#tabla_gastos tbody tr').removeClass('table-secondary');
+        $(this).addClass('table-secondary');
     });
 
     //gastos house

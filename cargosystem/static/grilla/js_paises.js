@@ -34,7 +34,7 @@ $(document).ready(function()
                     {
                         text: 'Modificar',
                         action: function (e, dt, button, config) {
-                            if(row = table.row('.selected').data()){
+                            if(row = table.row('.table-secondary').data()){
                                 window.location.replace("/modificar_pais/" + row[0]);
                             }else{
                                 alert('Debe seleccionar un registro');
@@ -44,7 +44,7 @@ $(document).ready(function()
                     {
                         text: 'Eliminar',
                         action: function (e, dt, button, config) {
-                            if(row = table.row('.selected').data()){
+                            if(row = table.row('.table-secondary').data()){
                                 if(confirm('Esta seguro de eliminar: ' + row[1])){
                                     miurl = "/eliminar_pais";
                                     var toData = { 'id' : row[0] };
@@ -151,8 +151,8 @@ $(document).ready(function()
             else
             {
                 var row = table.row( $(this).closest('tr') ).data();
-                table.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
+                table.$('tr.table-secondary').removeClass('table-secondary');
+                $(this).addClass('table-secondary');
             }
         });
 

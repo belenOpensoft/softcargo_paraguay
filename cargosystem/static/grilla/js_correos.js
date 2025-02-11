@@ -111,8 +111,8 @@ $(document).ready(function()
             else
             {
                 var row = table.row( $(this).closest('tr') ).data();
-                table.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
+                table.$('tr.table-secondary').removeClass('table-secondary');
+                $(this).addClass('table-secondary');
             }
         });
         $('#tabla_correos tbody').on('click', 'td.details-control', function () {

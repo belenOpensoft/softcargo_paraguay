@@ -1778,8 +1778,8 @@ var expandedRow;
         $("#cancelar_gasto_master").show();
     });
     $('#tabla_gastos tbody').on('click', 'tr', function () {
-        $('#tabla_gastos tbody tr').removeClass('selected');
-        $(this).addClass('selected');
+        $('#tabla_gastos tbody tr').removeClass('table-secondary');
+        $(this).addClass('table-secondary');
     });
 
     //gastos house
@@ -1859,8 +1859,8 @@ var expandedRow;
         $("#cancelar_gasto_house").show();
     });
     $('#tabla_gastos_house tbody').off('click').on('click', 'tr', function () {
-        $('#tabla_gastos_house tbody tr').removeClass('selected');
-        $(this).addClass('selected');
+        $('#tabla_gastos_house tbody tr').removeClass('table-secondary');
+        $(this).addClass('table-secondary');
     });
 
     //rutas house
@@ -1922,8 +1922,8 @@ var expandedRow;
     }
 });
     $('#tabla_rutas_house tbody').off('click').on('click', 'tr', function () {
-        $('#tabla_rutas_house tbody tr').removeClass('selected');
-        $(this).addClass('selected');
+        $('#tabla_rutas_house tbody tr').removeClass('table-secondary');
+        $(this).addClass('table-secondary');
     });
     $('#tabla_rutas_house tbody').off('dblclick').on('dblclick', 'tr', function () {
         var data = table_rutas.row(this).data();
@@ -2003,8 +2003,8 @@ var expandedRow;
     }
 });
     $('#tabla_envases_house tbody').off('click').on('click', 'tr', function () {
-        $('#tabla_envases_house tbody tr').removeClass('selected');
-        $(this).addClass('selected');
+        $('#tabla_envases_house tbody tr').removeClass('table-secondary');
+        $(this).addClass('table-secondary');
     });
     $('#tabla_envases_house tbody').off('dblclick').on('dblclick', 'tr', function () {
     var data = table_envases.row(this).data();
@@ -2091,8 +2091,8 @@ var expandedRow;
     }
 });
     $('#tabla_embarques_house tbody').off('click').on('click', 'tr', function () {
-        $('#tabla_embarques_house tbody tr').removeClass('selected');
-        $(this).addClass('selected');
+        $('#tabla_embarques_house tbody tr').removeClass('table-secondary');
+        $(this).addClass('table-secondary');
     });
     $('#tabla_embarques_house tbody').off('dblclick').on('dblclick', 'tr', function () {
     var data = table_embarques.row(this).data();
