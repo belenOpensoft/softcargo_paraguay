@@ -71,13 +71,30 @@ $(document).ready(function () {
 
     /* DATATABLES */
     //buscadores
-    $('#tabla_importaerea tfoot th').each(function () {
-        let title = $(this).text();
-        if (title !== '') {
-            $(this).html('<input type="text" class="form-control"  autocomplete="off" id="buscoid_' + contador + '" type="text" placeholder="Buscar ' + title + '"  autocomplete="off" />');
-            contador++;
+$('#tabla_importmarit tfoot th').each(function(index) {
+    let title = $('#tabla_importmarit thead th').eq(index).text();
+
+    if (index === 0) {
+        // Si es la primera columna, colocar el botón de limpiar filtros
+        $(this).html('<button class="btn btn-danger" title="Borrar filtros" id="clear"><span class="glyphicon glyphicon-erase"></span> Limpiar</button>');
+    } else if (title !== '') {
+        // Agregar inputs de búsqueda en las demás columnas
+        $(this).html('<input type="text" class="form-control filter-input" autocomplete="off" id="buscoid_' + index + '" placeholder="Buscar ' + title + '" />');
+    }
+});
+
+    // Evento para limpiar todos los filtros
+    $(document).on("click", "#clear", function() {
+        $(".filter-input").val("").trigger("keyup"); // Limpia los inputs y activa la búsqueda
+        $(".filter-input").removeClass("is-invalid"); // Se quita el rojo si se vacía
+    });
+
+    // Evento para resaltar los inputs cuando tienen contenido
+    $(document).on("input", ".filter-input", function() {
+        if ($(this).val().trim() !== "") {
+            $(this).addClass("is-invalid"); // Se pone en rojo
         } else {
-            $(this).html('<button class="btn" title="Borrar filtros" id="clear" ><span class="glyphicon glyphicon-erase"></span></button> ');
+            $(this).removeClass("is-invalid"); // Se quita el rojo si se vacía
         }
     });
 
@@ -130,6 +147,7 @@ $(document).ready(function () {
             {
                 "targets": [9],
             },
+
         ],
         "order": [[1, "desc"],],
         "processing": true,
@@ -156,15 +174,40 @@ $(document).ready(function () {
         "language": {
             url: "/static/datatables/es_ES.json"
         },
-        initComplete: function () {
-            var api = this.api();
-            api.columns().every(function () {
-                var that = this;
-                $('input', this.footer()).on('keyup change', function () {
+                initComplete: function () {
+            let api = this.api();
+
+            // Cargar estado guardado
+            let state = table.state.loaded();
+            if (state) {
+                // Restaurar filtros en los inputs y aplicar clase si tienen valor
+                api.columns().every(function(index) {
+                    let colState = state.columns[index];
+                    if (colState && colState.search.search) {
+                        let input = $('#buscoid_' + index);
+                        input.val(colState.search.search); // Restaurar valor
+                        if (colState.search.search.trim() !== "") {
+                            input.addClass("is-invalid"); // Agregar clase roja si hay filtro
+                        }
+                    }
+                });
+            }
+
+            // Evento para resaltar inputs cuando tienen contenido
+            $(document).on("input", ".filter-input", function() {
+                if ($(this).val().trim() !== "") {
+                    $(this).addClass("is-invalid"); // Se pone en rojo
+                } else {
+                    $(this).removeClass("is-invalid"); // Se quita el rojo si se vacía
+                }
+            });
+
+            // Agregar funcionalidad de filtrado
+            api.columns().every(function() {
+                let that = this;
+                $('input', this.footer()).on('keyup change', function() {
                     if (that.search() !== this.value) {
-                        that
-                            .search(this.value)
-                            .draw();
+                        that.search(this.value).draw();
                     }
                 });
             });
