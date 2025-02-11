@@ -49,6 +49,9 @@ $(document).ready(function () {
         },
         "columnDefs": [
             { "orderable": true, "targets": "_all" },
+                        {
+                "targets":[0],"visible":false
+            },
             {
                 "targets": [3],
                 'class': 'derecha',
