@@ -102,6 +102,7 @@ $(document).ready(function () {
             {
                 "targets": [1],
                 "className": 'derecha archivos',
+                "visible":false
             },
             {
                 "targets": [2],
