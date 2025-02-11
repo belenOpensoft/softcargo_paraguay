@@ -329,6 +329,7 @@ var que_buscar = '';
     },
     "rowCallback": function (row, data) {}
 });
+
 });
 
 /* INITIAL CONTROL PAGE */

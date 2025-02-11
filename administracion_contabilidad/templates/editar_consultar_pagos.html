@@ -76,6 +76,7 @@
     }
 }
 </style>
+<link rel="stylesheet" type="text/css" href="{% static 'css/administracion/administracion.css'  %}">
 
 <div class="button-container">
     <button type="button" class="btn-filtrar" onclick="abrir_modalFiltro()" id="btnFiltrar"><i class="fas fa-filter"></i> Filtrar</button>
@@ -331,6 +332,7 @@
 <script src="{% static 'grilla/editar_consultar_pagos.js' %}"></script>
 
 {% endblock script_datatable %}
+{% include 'arbitraje.html' %}
 
 <script>
     var csrf_token = "{{ csrf_token }}";
