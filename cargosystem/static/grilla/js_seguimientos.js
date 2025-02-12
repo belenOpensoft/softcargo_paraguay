@@ -2825,6 +2825,7 @@ function get_data_email(row,title,row_number) {
 //                textarea.innerHTML = resultado['mensaje'];
                 textarea.value = resultado['mensaje'];
                 $("#id_subject").val(resultado['asunto']);
+                $("#id_to").val(resultado['email_cliente']);
             } else {
                 alert(resultado['resultado']);
             }

@@ -571,7 +571,7 @@ def get_data_email(request):
                 texto += f"<p>CLIENTE: {row.cliente}</p><br>"
                 texto += 'OCEANLINK'
 
-
+            resultado['email_cliente'] = email_cliente
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
         except Exception as e:

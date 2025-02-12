@@ -45,6 +45,7 @@ def get_data_email_op(request):
             row2 = ImportCargaaerea.objects.filter(numero=row_number)
             gastos = VGastosHouse.objects.filter(numero=row_number)
             master=ImportReservas.objects.filter(awb=embarque.awb)
+            email_cliente = Clientes.objects.get(codigo=embarque.consignatario).emailia
 
             try:
                 seg = VGrillaSeguimientos.objects.get(numero=row.seguimiento)
@@ -65,6 +66,7 @@ def get_data_email_op(request):
             texto += 'TEL: 598 2917 0501 <br>'
             texto += 'FAX: 598 2916 8215 <br><br><br><br>'
             texto += '</table>'
+            resultado['email_cliente'] = email_cliente
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
         except Exception as e:

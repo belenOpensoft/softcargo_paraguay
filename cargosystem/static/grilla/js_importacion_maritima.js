@@ -4407,6 +4407,12 @@ console.log(title);
                 let textarea = document.getElementById("email_add_input");
                 textarea.value = resultado['mensaje'];
                 $("#id_subject").val(resultado['asunto']);
+                let asunto = resultado['asunto'].toLowerCase();
+                if (asunto.includes("traspaso a operaciones") || asunto.includes("orden de facturacion")) {
+                    $("#id_to").val("");  // No colocar nada en id_to
+                } else {
+                    $("#id_to").val(resultado['email_cliente']);  // Asignar el email normalmente
+                }
             } else {
                 alert(resultado['resultado']);
             }
