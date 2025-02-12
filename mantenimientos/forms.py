@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import datetime
+from cProfile import label
 
 from django import forms
 from django.forms import ModelChoiceField
@@ -769,3 +770,47 @@ class desconsolidacion_form(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     llegada = forms.DateField(widget= forms.DateInput(attrs={"type":'date','class': 'form-control',}),label='Llegada',input_formats=['%Y-%m-%d', '%m/%d/%Y', '%m/%d/%y'],initial=datetime.datetime.now().strftime("%Y-%m-%d"))
+
+class add_servicio_form(forms.Form):
+    OPCIONES = [
+        ('V', 'Venta'),
+        ('C', 'Compra'),
+    ]
+
+    nombre = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 15, }),
+        label="Nombre", max_length=15)
+    contable = forms.IntegerField(widget=forms.NumberInput(
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': True}, ),
+                          required=False, label="Contabilidad")
+
+    tipo_gasto = forms.ChoiceField(
+        choices=OPCIONES,
+        widget=forms.Select(attrs={'class': 'form-control'}),label='Tipo Servicio'
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+class edit_servicio_form(forms.Form):
+    OPCIONES = [
+        ('V', 'Venta'),
+        ('C', 'Compra'),
+    ]
+    codigo = forms.IntegerField(widget=forms.NumberInput(
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': True,'readonly': True}, ), required=True,
+                                label="Código")
+    nombre = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 15, }),
+        label="Nombre", max_length=15)
+    contable = forms.IntegerField(widget=forms.NumberInput(
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': True,}, ),
+                          required=False, label="Contabilidad")
+
+    tipo_gasto = forms.ChoiceField(
+        choices=OPCIONES,
+        widget=forms.Select(attrs={'class': 'form-control'}),label='Tipo Servicio'
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

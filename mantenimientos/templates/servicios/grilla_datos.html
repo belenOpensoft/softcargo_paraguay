@@ -1,0 +1,39 @@
+{% extends 'base_table.html' %}
+{% load static %}
+{% block title_page %}Servicios{% endblock title_page %}
+
+
+{% block table_datatable %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/mantenimientos/mantenimientos.css'  %}">
+
+    <table id="tabla_servicio" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Codigo</th>
+            <th class="text-left">Nombre</th>
+            <th class="text-left">Contable</th>
+            <th class="text-left">Tipo</th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+            <th width="4%"></th>
+            <th class="text-left">Codigo</th>
+            <th class="text-left">Nombre</th>
+            <th class="text-left">Contable</th>
+            <th class="text-left">Tipo</th>
+        </tr>
+        </tfoot>
+    </table>
+    <hr>
+{% endblock table_datatable %}
+
+
+{% block script_datatable %}
+    <script src="{% static 'grilla/js_servicios.js' %}"></script>
+{% endblock script_datatable %}

@@ -1009,14 +1009,14 @@ class Servicios(models.Model):
     precio = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     imputar = models.CharField(max_length=1, blank=True, null=True)
     tipogasto = models.CharField(max_length=1, blank=True, null=True)
-    variable = models.BooleanField()
+    variable = models.BooleanField(default=False)
     tipovariable = models.CharField(max_length=1, blank=True, null=True)
     variablecada = models.FloatField(blank=True, null=True)
-    redondea = models.BooleanField()
+    redondea = models.BooleanField(default=False)
     baseminima = models.FloatField(blank=True, null=True)
-    ctaorden = models.BooleanField()
+    ctaorden = models.BooleanField(default=False)
     modo = models.CharField(max_length=1, blank=True, null=True)
-    ibruto = models.BooleanField()
+    ibruto = models.BooleanField(default=False)
     minimo = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     maximo = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     operacion = models.CharField(max_length=1, blank=True, null=True)
@@ -1029,7 +1029,7 @@ class Servicios(models.Model):
     preciod = models.DecimalField(db_column='precioD', max_digits=19, decimal_places=4, blank=True,
                                   null=True)  # Field name made lowercase.
     corporativo = models.CharField(max_length=15, blank=True, null=True)
-    ctaordeniva = models.BooleanField()
+    ctaordeniva = models.BooleanField(default=False)
     repartir = models.CharField(max_length=1, blank=True, null=True)
     tipoitem = models.CharField(max_length=1, blank=True, null=True)
     itemstock = models.CharField(max_length=1, blank=True, null=True)
@@ -1069,6 +1069,10 @@ class Servicios(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    def get_codigo(self):
+        codigo = Servicios.objects.order_by('-codigo').values('codigo').first()
+        return codigo['codigo'] + 1
 
 
 class Sociosweb(models.Model):

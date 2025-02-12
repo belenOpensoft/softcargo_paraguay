@@ -31,6 +31,8 @@ from mantenimientos.views.monedas import source_monedas, grilla_monedas, modific
 from mantenimientos.views.productos import source_productos, agregar_producto, modificar_producto, eliminar_producto, \
     grilla_productos
 
+from mantenimientos.views.servicios import source_servicios,agregar_servicio,modificar_servicio,eliminar_servicio,grilla_servicios
+
 urlpatterns = [
     ### CIUDADES ###
     path('ciudades', grilla_ciudades, name="vista_ciudades"),
@@ -80,4 +82,10 @@ urlpatterns = [
     path('agregar_buque', agregar_buque, name="agregar_buque"),
     path('modificar_buque/<int:id_buque>', modificar_buque, name="modificar_buque"),
     path('eliminar_buque', eliminar_buque, name="eliminar_buque"),
+    ### SERVICIOS ###
+    path('servicios', grilla_servicios, name="vista_servicios"),
+    path('source_servicios', source_servicios, name="source_servicios"),
+    path('agregar_servicio', agregar_servicio, name="agregar_servicio"),
+    path('modificar_servicio/<int:id_servicio>', modificar_servicio, name="modificar_servicio"),
+    path('eliminar_servicio', eliminar_servicio, name="eliminar_servicio")
 ]
