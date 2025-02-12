@@ -216,41 +216,6 @@ def agregar_socio_comercial_old(request, id_socio=None):
         if request.user.has_perms(["mantenimientos.add_clientes"]):
             if id_socio:
                 cliente = get_object_or_404(SociosComerciales, id=id_socio)
-                ctx = {'form': add_cliente_form(instance=cliente),
-                       'title_page': 'Modificar socio comercial',
-                       'tipo':'Modificar'
-                       }
-            else:
-                ctx = {'form': add_cliente_form(),
-                       'title_page': 'Agregar socio comercial',
-                       'tipo': 'Agregar'
-                       }
-            if request.method == 'POST':
-                form = add_cliente_form(request.POST, instance=cliente if id_socio else None)
-                if form.is_valid():
-                    cliente = form.save(commit=False)
-                    cliente.tipo = 1
-                    if ctx['tipo'] == 'Agregar':
-                        cliente.codigo = SociosComerciales().get_codigo()
-                    cliente.save()
-                    messages.success(request, 'Socio comercial ' + str(ctx['tipo']) + ' con éxito')
-                    return HttpResponseRedirect('/socios_comerciales')
-                else:
-                    messages.error(request, 'Formulario inválido, intente nuevamente.')
-                    return HttpResponseRedirect('/agregar_socio_comercial')
-
-            return render(request, "clientes/agregar.html", ctx)
-        else:
-            raise PermissionDenied('No tiene permisos para realizar esta acción.')
-    except Exception as e:
-        messages.error(request, str(e))
-        #return HttpResponseRedirect("/clientes")
-
-def agregar_socio_comercial(request, id_socio=None):
-    try:
-        if request.user.has_perms(["mantenimientos.add_clientes"]):
-            if id_socio:
-                cliente = get_object_or_404(SociosComerciales, id=id_socio)
                 form = add_cliente_form(initial={
                     'tipo': cliente.tipo,
                     'empresa': cliente.empresa,
@@ -332,6 +297,116 @@ def agregar_socio_comercial(request, id_socio=None):
         messages.error(request, str(e))
         return HttpResponseRedirect("/socios_comerciales")
 
+
+@login_required(login_url="/")
+def agregar_socio_comercial(request, id_socio=None):
+    try:
+        if request.user.has_perms(["mantenimientos.add_clientes"]):
+            cliente = None
+            if id_socio:
+                cliente = get_object_or_404(SociosComerciales, id=id_socio)
+                form = add_cliente_form(initial={
+                    'tipo': cliente.tipo,
+                    'empresa': cliente.empresa,
+                    'razonsocial': cliente.razonsocial,
+                    'direccion': cliente.direccion,
+                    'localidad': cliente.localidad,
+                    'cpostal': cliente.cpostal,
+                    'ruc': cliente.ruc,
+                    'telefono': cliente.telefono,
+                    'fecalta': cliente.fecalta.strftime('%Y-%m-%d') if cliente.fecalta else '',
+                    'contactos': cliente.contactos,
+                    'observaciones': cliente.observaciones,
+                    'ciudad': cliente.ciudad,
+                    'pais': cliente.pais,
+                    'emailad': cliente.emailad,
+                    'emailem': cliente.emailem,
+                    'emailea': cliente.emailea,
+                    'emailet': cliente.emailet,
+                    'emailim': cliente.emailim,
+                    'emailia': cliente.emailia,
+                    'emailit': cliente.emailit,
+                })
+                ctx = {
+                    'form': form,
+                    'title_page': 'Modificar socio comercial',
+                    'tipo': 'Modificar'
+                }
+            else:
+                form = add_cliente_form()
+                ctx = {
+                    'form': form,
+                    'title_page': 'Agregar socio comercial',
+                    'tipo': 'Agregar'
+                }
+
+            if request.method == 'POST':
+                form = add_cliente_form(request.POST)
+                if form.is_valid():
+                    try:
+                        if id_socio:
+                            cliente.tipo = form.cleaned_data['tipo']
+                            cliente.empresa = form.cleaned_data['empresa']
+                            cliente.razonsocial = form.cleaned_data['razonsocial']
+                            cliente.direccion = form.cleaned_data['direccion']
+                            cliente.localidad = form.cleaned_data['localidad']
+                            cliente.cpostal = form.cleaned_data['cpostal']
+                            cliente.ruc = form.cleaned_data['ruc']
+                            cliente.telefono = form.cleaned_data['telefono']
+                            cliente.fecalta = form.cleaned_data['fecalta']
+                            cliente.contactos = form.cleaned_data['contactos']
+                            cliente.observaciones = form.cleaned_data['observaciones']
+                            cliente.ciudad = form.cleaned_data['ciudad']
+                            cliente.pais = form.cleaned_data['pais']
+                            cliente.emailad = form.cleaned_data['emailad']
+                            cliente.emailem = form.cleaned_data['emailem']
+                            cliente.emailea = form.cleaned_data['emailea']
+                            cliente.emailet = form.cleaned_data['emailet']
+                            cliente.emailim = form.cleaned_data['emailim']
+                            cliente.emailia = form.cleaned_data['emailia']
+                            cliente.emailit = form.cleaned_data['emailit']
+                        else:
+                            cliente = SociosComerciales(
+                                tipo=form.cleaned_data['tipo'],
+                                empresa=form.cleaned_data['empresa'],
+                                razonsocial=form.cleaned_data['razonsocial'],
+                                direccion=form.cleaned_data['direccion'],
+                                localidad=form.cleaned_data['localidad'],
+                                cpostal=form.cleaned_data['cpostal'],
+                                ruc=form.cleaned_data['ruc'],
+                                telefono=form.cleaned_data['telefono'],
+                                fecalta=form.cleaned_data['fecalta'],
+                                contactos=form.cleaned_data['contactos'],
+                                observaciones=form.cleaned_data['observaciones'],
+                                ciudad=form.cleaned_data['ciudad'],
+                                pais=form.cleaned_data['pais'],
+                                # ✅ Guardando los emails al crear un nuevo socio comercial
+                                emailad=form.cleaned_data['emailad'],
+                                emailem=form.cleaned_data['emailem'],
+                                emailea=form.cleaned_data['emailea'],
+                                emailet=form.cleaned_data['emailet'],
+                                emailim=form.cleaned_data['emailim'],
+                                emailia=form.cleaned_data['emailia'],
+                                emailit=form.cleaned_data['emailit'],
+                            )
+                            if ctx['tipo'] == 'Agregar':
+                                cliente.codigo = SociosComerciales().get_codigo()
+
+                        cliente.save()
+                        messages.success(request, f'Socio comercial {ctx["tipo"]} con éxito')
+                        return HttpResponseRedirect('/socios_comerciales')
+                    except IntegrityError:
+                        messages.error(request, 'Error: Ya existe un socio comercial con el mismo código.')
+                else:
+                    messages.error(request, 'Formulario inválido, intente nuevamente.')
+                    return HttpResponseRedirect('/agregar_socio_comercial')
+
+            return render(request, "clientes/agregar.html", ctx)
+        else:
+            raise PermissionDenied('No tiene permisos para realizar esta acción.')
+    except Exception as e:
+        messages.error(request, str(e))
+        return HttpResponseRedirect("/socios_comerciales")
 
 @login_required(login_url='/')
 def eliminar_socio_comercial(request):

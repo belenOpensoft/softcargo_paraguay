@@ -232,10 +232,48 @@ class add_cliente_form(forms.Form):
         required=False
     )
 
+    # ✅ Añadiendo los campos de email
+    emailad = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+        label="Email Administrativo",
+        required=False
+    )
+    emailem = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+        label="Email Exportación Marítima",
+        required=False
+    )
+    emailea = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+        label="Email Exportación Aérea",
+        required=False
+    )
+    emailet = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+        label="Email Exportación Terrestre",
+        required=False
+    )
+    emailim = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+        label="Email Importación Marítima",
+        required=False
+    )
+    emailia = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+        label="Email Importación Aérea",
+        required=False
+    )
+    emailit = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+        label="Email Importación Terrestre",
+        required=False
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['pais'].choices = [('', 'Seleccione un país')] + [(pais.nombre, pais.nombre) for pais in Paises.objects.all()]
         self.fields['ciudad'].choices = [('', 'Seleccione una ciudad')] + [(ciudad.codigo, ciudad.nombre) for ciudad in Ciudades.objects.all()]
+
 
 class add_banco_form(forms.Form):
     codigo = forms.IntegerField(widget=forms.NumberInput(
