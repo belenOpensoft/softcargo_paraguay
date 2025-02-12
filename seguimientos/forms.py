@@ -248,7 +248,11 @@ class seguimientoForm(BSModalModelForm):
     unidadvolumen = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'unidadvolumen', 'required': False}),required=False,initial='B')
     tipobonifcli = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'tipobonifcli', 'required': False}),required=False,initial='P')
     editado = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'editado', 'required': False}),required=False)
-    volumen = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'volumen', 'required': False}),required=False,initial=0)
+    volumen = forms.DecimalField(
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'volumen', 'required': False}),
+        required=False,
+        initial=0.00
+    )
 
 
 

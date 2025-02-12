@@ -62,6 +62,7 @@ def source_gastos_house(request):
         order = get_order(request, columns_table)
         """FILTRO REGISTROS"""
         registros = VGastosHouse.objects.filter(numero=numero).order_by(*order)
+
         """PREPARO DATOS"""
         resultado = {}
         data = get_data(registros[start:end])

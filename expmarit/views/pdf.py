@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
 from impomarit.models import VEmbarqueaereo, Embarqueaereo, Cargaaerea
-from expmarit.models import VEmbarqueaereo, ExpmaritCargaaerea, ExpmaritEnvases, ExpmaritEmbarqueaereo
+from expmarit.models import VEmbarqueaereo, ExpmaritCargaaerea, ExpmaritEnvases, ExpmaritEmbarqueaereo, \
+    ExpmaritConexaerea
 from mantenimientos.models import Clientes
 from mantenimientos.views.bancos import is_ajax
 from seguimientos.models import VGrillaSeguimientos
@@ -20,6 +21,13 @@ def get_datos_caratula(request):
             embarque = ExpmaritEmbarqueaereo.objects.get(numero=id)
             embarcador = Clientes.objects.get(codigo=embarque.embarcador)
             consignatario = Clientes.objects.get(codigo=embarque.consignatario)
+            ruta = ExpmaritConexaerea.objects.filter(numero=id).order_by('-id').values_list('salida', 'llegada').first()
+
+            if ruta:
+                salida, llegada = ruta
+            else:
+                salida = None
+                llegada = None
             try:
                 seguimiento = VGrillaSeguimientos.objects.get(numero=Vembarque.seguimiento)
             except VGrillaSeguimientos.DoesNotExist:
@@ -37,13 +45,13 @@ def get_datos_caratula(request):
             texto = texto + 'Destino:  ' + str(Vembarque.destino if Vembarque.destino is not None else '') + '</p><br>'
             texto = texto + '<b>Master: </b>' + str(Vembarque.awb if Vembarque.awb is not None else '') + '<br>'
             texto = texto + '<b>House: </b>' + str(Vembarque.hawb if Vembarque.hawb is not None else '') + '<br>'
-            if isinstance(seguimiento.eta, datetime.datetime):
-                res = seguimiento.eta.strftime('%d-%m-%Y')
+            if isinstance(llegada, datetime.datetime):
+                res = llegada.strftime('%d-%m-%Y')
             else:
                 res = '?'
             texto = texto + '<b>ETA: </b>'+str(res)+'<br>'
-            if isinstance(seguimiento.etd, datetime.datetime):
-                res = seguimiento.etd.strftime('%d-%m-%Y')
+            if isinstance(salida, datetime.datetime):
+                res = salida.strftime('%d-%m-%Y')
             else:
                 res = '?'
             texto = texto + '<b>ETD: </b>'+str(res)+'<br>'
