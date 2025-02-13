@@ -907,12 +907,13 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
                 elif columna == 'Transportista':
                     datos_finales.append(p.transportista)
                 elif columna == 'Conocimiento':
-                    datos_finales.append(str(p.master.awb)+str(p.house))
+                    datos_finales.append(str(p.master)+str(p.house))
                 elif columna == 'Tipo':
                     if p.tipo==0:
                         valor = 'Consolidado'
                     else:
                         valor='Directo'
+
                     datos_finales.append(valor)
                 elif columna == 'House':
                     datos_finales.append(p.house)

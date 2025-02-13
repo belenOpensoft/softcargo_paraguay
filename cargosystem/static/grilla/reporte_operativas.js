@@ -59,7 +59,6 @@ $(document).ready(function () {
             reorderSelected();
         });
 
-
 function modal_columnas() {
     $("#config-modal").dialog({
         autoOpen: true,
