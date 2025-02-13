@@ -361,13 +361,14 @@ def get_data_embarque_aereo(registros_filtrados):
             gastos = Serviceaereo.objects.filter(numero=registro.numero).count()
             rutas = Conexaerea.objects.filter(numero=registro.numero).count()
             notas = Faxes.objects.filter(numero=registro.numero).count()
-            registro_json.append(archivos)
+            registro_json.append(archivos) #15
             registro_json.append(embarques)
             registro_json.append(envases)
             registro_json.append(gastos)
             registro_json.append(rutas)
             registro_json.append(notas)
             registro_json.append(registro.consignatario_id)
+            registro_json.append(registro.seguimiento) #22
 
             data.append(registro_json)
         return data

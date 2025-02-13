@@ -2517,24 +2517,103 @@ table_add_im = $('#table_add_im').DataTable({
     "bAutoWidth": false,
     "scrollX": true,
     "scrollY": wHeight * 0.60,
-   "columnDefs": [
-            {
-                "targets": [0],  // Nueva columna para detalles
-                "className": '',
-                "orderable": false,
-                "data": null,
-                "defaultContent": '',  // Contenido por defecto
-                "render": function (data, type, row) {
-                    // Define el contenido para la columna de detalles
-                   // return '<button class="btn btn-info btn-sm">Detalles</button>';  // Ejemplo de contenido
-                }
-            },
-            {
-                "targets": [3],
-                'class': 'derecha',
-            },
-
-        ],
+    "columnDefs": [
+    {
+        "targets": [0],  // Nueva columna para detalles
+        "className": '',
+        "orderable": false,
+        "data": null,
+        "defaultContent": '',  // Contenido por defecto
+        "render": function (data, type, row) {
+            // Define el contenido para la columna de detalles
+            // return '<button class="btn btn-info btn-sm">Detalles</button>';  // Ejemplo de contenido
+        }
+    },
+    {
+        "targets": [1],
+    },
+    {
+        "targets": [2],
+    },
+    {
+        "targets": [3],
+        "visible": false,
+        "className": 'derecha',
+    },
+    {
+        "targets": [4],
+        "className": 'derecha',
+        "render": function (data, type, row, meta) {
+            return row[20]; // Toma el índice 22 para la columna 4
+        }
+    },
+    {
+        "targets": [5],
+        "render": function (data, type, row, meta) {
+            return row[4]; // Toma el índice 4 para la columna 5
+        }
+    },
+    {
+        "targets": [6],
+        "render": function (data, type, row, meta) {
+            return row[5]; // Toma el índice 5 para la columna 6
+        }
+    },
+    {
+        "targets": [7],
+        "render": function (data, type, row, meta) {
+            return row[6]; // Toma el índice 6 para la columna 7
+        }
+    },
+    {
+        "targets": [8],
+        "render": function (data, type, row, meta) {
+            return row[7]; // Toma el índice 7 para la columna 8
+        }
+    },
+    {
+        "targets": [9],
+        "render": function (data, type, row, meta) {
+            return row[8]; // Toma el índice 8 para la columna 9
+        }
+    },
+    {
+        "targets": [10],
+        "render": function (data, type, row, meta) {
+            return row[9]; // Toma el índice 9 para la columna 10
+        }
+    },
+    {
+        "targets": [11],
+        "render": function (data, type, row, meta) {
+            return row[10]; // Toma el índice 10 para la columna 11
+        }
+    },
+    {
+        "targets": [12],
+        "render": function (data, type, row, meta) {
+            return row[11]; // Toma el índice 11 para la columna 12
+        }
+    },
+    {
+        "targets": [13],
+        "render": function (data, type, row, meta) {
+            return row[12]; // Toma el índice 12 para la columna 13
+        }
+    },
+    {
+        "targets": [14],
+        "render": function (data, type, row, meta) {
+            return row[13]; // Toma el índice 13 para la columna 14
+        }
+    },
+    {
+        "targets": [15],
+        "render": function (data, type, row, meta) {
+            return row[14]; // Toma el índice 14 para la columna 15
+        }
+    },
+],
     "order": [[0, "desc"]],
     "processing": true,
     "serverSide": true,
@@ -2612,7 +2691,7 @@ table_add_im = $('#table_add_im').DataTable({
             '</svg>';
 
                 }
-            $('td:eq(3)', row).html(texto + " " + data[3]);
+            $('td:eq(3)', row).html(texto + " " + data[20]);
 
         },
     "initComplete": function() {
@@ -2836,24 +2915,103 @@ table_edit_im = $('#table_edit_im').DataTable({
     "bAutoWidth": false,
     "scrollX": true,
     "scrollY": wHeight * 0.60,
-   "columnDefs": [
-            {
-                "targets": [0],  // Nueva columna para detalles
-                "className": '',
-                "orderable": false,
-                "data": null,
-                "defaultContent": '',  // Contenido por defecto
-                "render": function (data, type, row) {
-                    // Define el contenido para la columna de detalles
-                   // return '<button class="btn btn-info btn-sm">Detalles</button>';  // Ejemplo de contenido
-                }
-            },
-            {
-                "targets": [3],
-                'class': 'derecha',
-            },
-
-        ],
+    "columnDefs": [
+    {
+        "targets": [0],  // Nueva columna para detalles
+        "className": '',
+        "orderable": false,
+        "data": null,
+        "defaultContent": '',  // Contenido por defecto
+        "render": function (data, type, row) {
+            // Define el contenido para la columna de detalles
+            // return '<button class="btn btn-info btn-sm">Detalles</button>';  // Ejemplo de contenido
+        }
+    },
+    {
+        "targets": [1],
+    },
+    {
+        "targets": [2],
+    },
+    {
+        "targets": [3],
+        "visible": false,
+        "className": 'derecha',
+    },
+    {
+        "targets": [4],
+        "className": 'derecha',
+        "render": function (data, type, row, meta) {
+            return row[20]; // Toma el índice 22 para la columna 4
+        }
+    },
+    {
+        "targets": [5],
+        "render": function (data, type, row, meta) {
+            return row[4]; // Toma el índice 4 para la columna 5
+        }
+    },
+    {
+        "targets": [6],
+        "render": function (data, type, row, meta) {
+            return row[5]; // Toma el índice 5 para la columna 6
+        }
+    },
+    {
+        "targets": [7],
+        "render": function (data, type, row, meta) {
+            return row[6]; // Toma el índice 6 para la columna 7
+        }
+    },
+    {
+        "targets": [8],
+        "render": function (data, type, row, meta) {
+            return row[7]; // Toma el índice 7 para la columna 8
+        }
+    },
+    {
+        "targets": [9],
+        "render": function (data, type, row, meta) {
+            return row[8]; // Toma el índice 8 para la columna 9
+        }
+    },
+    {
+        "targets": [10],
+        "render": function (data, type, row, meta) {
+            return row[9]; // Toma el índice 9 para la columna 10
+        }
+    },
+    {
+        "targets": [11],
+        "render": function (data, type, row, meta) {
+            return row[10]; // Toma el índice 10 para la columna 11
+        }
+    },
+    {
+        "targets": [12],
+        "render": function (data, type, row, meta) {
+            return row[11]; // Toma el índice 11 para la columna 12
+        }
+    },
+    {
+        "targets": [13],
+        "render": function (data, type, row, meta) {
+            return row[12]; // Toma el índice 12 para la columna 13
+        }
+    },
+    {
+        "targets": [14],
+        "render": function (data, type, row, meta) {
+            return row[13]; // Toma el índice 13 para la columna 14
+        }
+    },
+    {
+        "targets": [15],
+        "render": function (data, type, row, meta) {
+            return row[14]; // Toma el índice 14 para la columna 15
+        }
+    },
+],
     "order": [[0, "desc"]],
     "processing": true,
     "serverSide": true,
@@ -2931,7 +3089,7 @@ table_edit_im = $('#table_edit_im').DataTable({
             '</svg>';
 
                 }
-            $('td:eq(3)', row).html(texto + " " + data[3]);
+            $('td:eq(3)', row).html(texto + " " + data[20]);
 
         },
     "initComplete": function() {

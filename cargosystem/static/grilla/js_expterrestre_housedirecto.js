@@ -11,13 +11,30 @@ $(document).ready(function () {
 //    }
 //});
     //buscadores
-    $('#tabla_house_directo tfoot th').each(function () {
-        let title = $(this).text();
-        if (title !== '') {
-            $(this).html('<input type="text" class="form-control" autocomplete="off" id="buscoid_' + contador + '" placeholder="Buscar ' + title + '" />');
-            contador++;
+    $('#tabla_house_directo tfoot th').each(function(index) {
+        let title = $('#tabla_house_directo th').eq(index).text();
+
+        if (index === 0) {
+            // Si es la primera columna, colocar el botón de limpiar filtros
+            $(this).html('<button class="btn btn-danger" title="Borrar filtros" id="clear"><span class="glyphicon glyphicon-erase"></span> Limpiar</button>');
+        } else if (title !== '') {
+            // Agregar inputs de búsqueda en las demás columnas
+            $(this).html('<input type="text" class="form-control filter-input" autocomplete="off" id="buscoid_' + index + '" placeholder="Buscar ' + title + '" />');
+        }
+    });
+
+    // Evento para limpiar todos los filtros
+    $(document).on("click", "#clear", function() {
+        $(".filter-input").val("").trigger("keyup"); // Limpia los inputs y activa la búsqueda
+        $(".filter-input").removeClass("is-invalid"); // Se quita el rojo si se vacía
+    });
+
+    // Evento para resaltar los inputs cuando tienen contenido
+    $(document).on("input", ".filter-input", function() {
+        if ($(this).val().trim() !== "") {
+            $(this).addClass("is-invalid"); // Se pone en rojo
         } else {
-            $(this).html('<button class="btn" title="Borrar filtros" id="clear"><span class="glyphicon glyphicon-erase"></span></button>');
+            $(this).removeClass("is-invalid"); // Se quita el rojo si se vacía
         }
     });
     // Tabla general
@@ -49,14 +66,95 @@ $(document).ready(function () {
         },
         "columnDefs": [
             { "orderable": true, "targets": "_all" },
-                        {
-                "targets":[0],"visible":false
+            {
+                "targets": [0],
+                "visible": true,  // La columna sigue existiendo en la tabla
+                "data": "id",  // Asegura que se use el ID del dataset
+                "render": function (data, type, row, meta) {
+                    return '<span style="display:none;">' + row[0] + '</span>'; // Oculta el número visualmente
+                }
+            },
+             {
+                "targets": [1],
+            },
+            {
+                "targets": [2],
             },
             {
                 "targets": [3],
-                'class': 'derecha',
+                "visible": false,
+                "className": 'derecha',
             },
+            {
+                "targets": [4],
+                "className": 'derecha',
+                "render": function (data, type, row, meta) {
+                    return row[21]; // Toma el índice 22 para la columna 4
+                }
+            },
+            {
+                "targets": [5],
+                "render": function (data, type, row, meta) {
+                    return row[4]; // Toma el índice 4 para la columna 5
+                }
+            },
+            {
+                "targets": [6],
+                "render": function (data, type, row, meta) {
+                    return row[5]; // Toma el índice 5 para la columna 6
+                }
+            },
+            {
+                "targets": [7],
+                "render": function (data, type, row, meta) {
+                    return row[6]; // Toma el índice 6 para la columna 7
+                }
+            },
+            {
+                "targets": [8],
+                "render": function (data, type, row, meta) {
+                    return row[7]; // Toma el índice 7 para la columna 8
+                }
+            },
+            {
+                "targets": [9],
+                "render": function (data, type, row, meta) {
+                    return row[8]; // Toma el índice 8 para la columna 9
+                }
+            },
+            {
+                "targets": [10],
+                "render": function (data, type, row, meta) {
+                    return row[9]; // Toma el índice 9 para la columna 10
+                }
+            },
+            {
+                "targets": [11],
+                "render": function (data, type, row, meta) {
+                    return row[10]; // Toma el índice 10 para la columna 11
+                }
+            },
+            {
+                "targets": [12],
+                "render": function (data, type, row, meta) {
+                    return row[11]; // Toma el índice 11 para la columna 12
+                }
+            },
+            {
+                "targets": [13],
+                "render": function (data, type, row, meta) {
+                    return row[12]; // Toma el índice 12 para la columna 13
+                }
+            },
+            {
+                "targets": [14],
+                "render": function (data, type, row, meta) {
+                    return row[13]; // Toma el índice 13 para la columna 14
+                }
+            },
+
         ],
+
         "language": {
             url: "/static/datatables/es_ES.json"
         },
@@ -99,7 +197,7 @@ $(document).ready(function () {
             '</svg>';
 
                 }
-            $('td:eq(3)', row).html(texto + " " + data[3]);
+            $('td:eq(3)', row).html(texto + " " + data[21]);
 
         },
         "initComplete": function() {
