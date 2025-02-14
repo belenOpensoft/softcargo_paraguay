@@ -234,8 +234,6 @@ var que_buscar = '';
                 data: data,
                 headers: { 'X-CSRFToken': csrf_token },
                 success: function(data) {
-                    console.log('Factura procesada:', data);
-                    alert('Factura procesada con éxito');
                     $('#facturaM').dialog('close');
                     $('#facturaForm').trigger('reset');
                     total=0;

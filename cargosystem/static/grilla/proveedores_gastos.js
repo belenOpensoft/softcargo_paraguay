@@ -335,9 +335,7 @@ $(document).ready(function() {
                 data: data,
                 headers: { 'X-CSRFToken': csrf_token },
                 success: function(data) {
-                    console.log('Factura procesada:', data);
-                    alert('Factura procesada con éxito');
-                    $('#facturaM').dialog('close');
+                    $('#proveedoresModal').dialog('close');
                     $('#facturaForm').trigger('reset');
                     total=0;
                     iva=0;
@@ -399,43 +397,7 @@ function abrir_modal() {
             alert("Error al cargar los datos iniciales: " + error);
         }
     });
-//    $('#proveedor2').autocomplete({
-//        source: function(request, response) {
-//            $.ajax({
-//                url: "/admin_cont/buscar_cliente",
-//                dataType: 'json',
-//                data: { term: request.term },
-//                success: function(data) {
-//                    response(data.map(cliente => ({
-//                        label: cliente.text,
-//                        value: cliente.text,
-//                        id: cliente.id
-//                    })));
-//                },
-//                error: xhr => console.error('Error al buscar clientes:', xhr)
-//            });
-//        },
-//        minLength: 2,
-//        appendTo: "##proveedoresModal",
-//        select: function(event, ui) {
-//            const { id } = ui.item;
-//            $.ajax({
-//                url: "/admin_cont/buscar_clientes",
-//                data: { id },
-//                dataType: 'json',
-//                success: cliente => {
-//                    const row = `
-//                        <tr id="cliente-${id}">
-//                            <td class="d-none">${cliente.codigo}</td>
-//                            <td>${cliente.empresa}</td>
-//                        </tr>`;
-//                    $('#proveedor2Table tbody').html(row);
-//                    $('#proveedor2Table').show();
-//                },
-//                error: xhr => console.error('Error al obtener los detalles del cliente:', xhr)
-//            });
-//        }
-//    });
+
     $('#item').autocomplete({
     source: function(request, response) {
         $.ajax({

@@ -8,9 +8,10 @@ from django.http import HttpResponse
 import base64
 
 from cargosystem import settings
-from mantenimientos.models import Clientes
+from impomarit.views.mails import formatear_linea
+from mantenimientos.models import Clientes, Servicios
 from mantenimientos.views.bancos import is_ajax
-from seguimientos.models import VGrillaSeguimientos, Envases, Cargaaerea
+from seguimientos.models import VGrillaSeguimientos, Envases, Cargaaerea, Conexaerea, Serviceaereo
 
 
 @login_required(login_url='/')
@@ -163,96 +164,81 @@ def get_data_email(request):
                 texto += 'EMAIL: <br>'
                 texto += 'TEL: 598 2917 0501 <br>'
                 texto += 'FAX: 598 2916 8215 <br><br><br><br>'
-
             elif title == 'Notificacion llegada de carga':
-                # cantidad_cntr = ''
-                # contenedores = ''
-                # precintos = ''
-                # movimiento = ''
-                # mercaderias = ''
-                # bultos = 0
-                # peso = 0
-                fecha_actual = datetime.datetime.now()
-                resultado['asunto'] = 'NOTIFICACION DE LLEGADA DE CARGA - Ref.: ' + str(row.refproveedor) + ' - CS: ' + str(row.numero) + \
-                                      '- HB/l: ' + str(row.hawb) + ' - Ship: ' + str(row.embarcador) + ' - Consig: ' \
-                                                                                                       '' + str(row.consignatario) + '; Vapor: ' + str(row.vapor)
+
+                resultado['asunto'] = 'NOTIFICACION DE LLEGADA DE CARGA - Ref.: ' + str(
+                    row.embarque) + ' - CS: ' + str(
+                    row.numero) + '- HB/l: ' + str(row.hawb) + ' - Ship: ' + str(row.embarcador) + ' - Consig: ' \
+                                                                                                        '' + str(
+                    row.consignatario) + '; Vapor: ' + str(row.vapor) if row.modo in ['EXPORT MARITIMO','IMPORT MARITIMO'] else str(row.transportista)
                 # # TEXTO DE CUERPO DEL MENSAJE
-                fecha_formateada = fecha_actual.strftime(f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y')
-                texto += fecha_formateada.capitalize().upper() + '<br><br>'
-                tabla_html = "<table style='width:40%'>"
-                campos = [
-                    ("Att.", ""),
-                    ("Cliente", str(row.cliente)),
-                    ("Vapor", str(row.vapor) if row.vapor is not None else ""),
-                    ("Viaje", str(row.viaje) if row.viaje is not None else ""),
-                    ("Embarque", str(row.etd.strftime("%d/%m/%Y")) if isinstance(row.etd, datetime.datetime) else ""),
-                    ("Llegada", str(row.eta.strftime("%d/%m/%Y")) if isinstance(row.eta, datetime.datetime) else ""),
-                ]
-                for campo, valor in campos:
-                    tabla_html += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Origen</th><td>{str(row.origen_text)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Loading</th><td>{str(row.loading)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Discharge</th><td>{str(row.discharge)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Destino</th><td>{str(row.destino_text)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Transportista</th><td>{str(row.transportista)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>B/L</th><td>{str(row.awb)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>H B/L</th><td>{str(row.hawb)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Referencia</th><td>{str(row.refproveedor)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Posicion</th><td>{str(row.posicion)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Seguimiento</th><td>{str(row.numero)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Embarcador</th><td>{str(row.embarcador)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Consignatario</th><td>{str(row.consignatario)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Notificante</th><td>{str(row.consignatario)}</td></tr>"
+                locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+                fecha_actual = datetime.datetime.now()
+                fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
 
-                # Detalles de los contenedores
-                cantidad_cntr = ""
-                contenedores = ""
-                precintos = ""
-                movimiento = ""
-                mercaderias = ""
-                bultos = 0
-                peso = 0
-                volumen = 0
-                cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto',
-                                                                             'bultos', 'peso', 'envase',
-                                                                             'movimiento','volumen').annotate(total=Count('id'))
-                if cant_cntr.count() > 0:
-                    for cn in cant_cntr:
-                        cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - '
-                        contenedores += f' {cn["nrocontenedor"]} - '
-                        if cn['precinto'] is not None and len(cn['precinto']) > 0:
-                            precintos += f'{cn["precinto"]} - '
-                        bultos += cn['bultos']
-                        if cn['peso'] is not None:
-                            peso += cn['peso']
-                        if cn['volumen'] is not None:
-                            volumen += cn['volumen']
-                        movimiento += cn['movimiento'] + ' - '
-                        mercaderias += cn['envase'] + ' - '
+                consigna = Clientes.objects.get(codigo=row.consignatario_codigo)
+                conex = Conexaerea.objects.filter(numero=row.numero).order_by('-id').last()
+                carga = Cargaaerea.objects.filter(numero=row.numero)
+                gastos = Serviceaereo.objects.filter(numero=row.numero)
 
-                tabla_html += f"<tr><th align='left'>Contenedores</th><td>{cantidad_cntr[:-3]}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Nro.Contenedor/es</th><td>{contenedores[:-3]}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Precintos/sellos</th><td>{precintos[:-3]}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Movimiento</th><td>{movimiento[:-3]}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Mercaderia</th><td>{mercaderias[:-3]}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Bultos</th><td>{bultos}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Peso</th><td>{peso} KGS</td></tr>"
-                tabla_html += f"<tr><th align='left'>CBM</th><td>{volumen} M³</td></tr>"
-                tabla_html += "</table><br><br>"
-                texto += tabla_html
+                texto += fecha_formateada + '<br>'
+                texto += '<p>Att. </p><br>'
+                texto += formatear_linea("Notificar a", row.consignatario)
+                texto += formatear_linea("Dirección", consigna.direccion if consigna else "")
+                texto += formatear_linea("Teléfono", consigna.telefono if consigna else "")
 
-                texto += '<b>Detalle de gastos  en Dólares</b><br><br>'
-                texto += 'Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar. <br>' \
-                         'Agradeciendo vuestra preferencia, le saludamos muy atentamente.<br><br>'
-                texto += '<b>OCEANLINK,</b><br>'
-                texto += str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>'
-                texto += 'DEPARTAMENTO DE ' + str(tipos_operativa[row.modo]) + ', <br>'
-                texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
-                texto += 'OPERACIONES <br>'
-                texto += 'EMAIL: <br>'
-                texto += 'TEL: 598 2917 0501 <br>'
-                texto += 'FAX: 598 2916 8215 <br><br><br><br>'
-                texto += '</table>'
+                texto += '<br>'
+
+                texto += formatear_linea("Salida", conex.salida if conex else "")
+                texto += formatear_linea("Llegada", conex.llegada if conex else "")
+                texto += formatear_linea("Origen", conex.origen if conex else "")
+                texto += formatear_linea("Destino", conex.destino if conex else "")
+                texto += formatear_linea("HAWB", row.hawb)
+                texto += formatear_linea("Referencia", row.embarque)
+                texto += formatear_linea("Posición", row.posicion)
+                texto += formatear_linea("Seguimiento", row.numero)
+                texto += formatear_linea("Embarcador", row.embarcador)
+                texto += formatear_linea("Ref. Proveedor", row.embarcador)
+
+                if carga:
+                    for c in carga:
+                        ap1 = float(c.cbm) * 166.67
+                        aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
+
+                        texto += formatear_linea("Mercadería", c.producto.nombre)
+                        texto += formatear_linea("Bultos", str(c.bultos))
+                        texto += formatear_linea("Peso", str(c.bruto))
+                        texto += formatear_linea("Aplicable", str(aplicable))
+
+                    texto += '<br>'
+
+                if gastos:
+                    texto += '<p>Detalle de gastos en Dólares U.S.A </p>'
+                    total_gastos = 0
+                    total_iva = 0
+                    for g in gastos:
+                        servicio = Servicios.objects.get(codigo=g.servicio)
+                        total_gastos += float(g.precio)
+                        iva = True if servicio.tasa == 'B' else False
+                        if iva:
+                            total_iva += float(g.precio) * 0.22
+                        if g.precio != 0:
+                            texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}")
+
+                    texto += '<br>'
+                    texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
+                    texto += formatear_linea("I.V.A", f"${total_iva:.2f}")
+                    texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
+                    texto += '<br>'
+
+                texto += 'Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta: <br><br>'
+                texto += 'BBVA URUGUAY S.A.<br>'
+                texto += '25 de Mayo 401 <br>'
+                texto += 'Cuenta Número: 5207347 <br>'
+                texto += 'OCEANLINK Ltda. <br><br>'
+                texto += 'Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR. <br>'
+                texto += 'Agradeciendo vuestra preferencia, le saludamos muy atentamente. <br><br>'
+
             elif title == 'Aviso de desconsolidacion':
                 # cantidad_cntr = ''
                 # contenedores = ''

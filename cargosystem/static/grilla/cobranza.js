@@ -1058,7 +1058,7 @@ let nuevaFila = {
 vector.asiento.push(nuevaFila);
 }
 
-console.log(vector);
+
 
 
 $.ajax({
@@ -1069,7 +1069,8 @@ $.ajax({
         contentType: 'application/json',
         success: function(response) {
             if (response.status === 'exito') {
-                alert("Datos guardados correctamente");
+                $('#dialog-form').dialog('close');
+
                 // Opcional: recargar una tabla o actualizar la UI
             } else {
                 alert("ghfghfgh: " + response.status);

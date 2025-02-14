@@ -257,112 +257,6 @@ function resetModal(modalId) {
     $('#id_importe').prop('readonly', false);
 
 }
-//function tabla_para_imputar(){
-//    $('#imputacionTablePagos').DataTable({
-//        "stateSave": true,
-//        "dom": 'Btlipr',
-//        'info':false,
-//        "scrollX": true,
-//        "bAutoWidth": false,
-//        "scrollY": $(window).height() * 0.60,
-//        "columnDefs": [
-//            {
-//                "targets": [0],
-//                "className": 'text-left',
-//                "data": 'vencimiento',
-//                "title": 'Vencimiento'
-//            },
-//            {
-//                "targets": [1],
-//                "className": 'text-left',
-//                "data": 'emision',
-//                "title": 'Emisión'
-//            },
-//            {
-//                "targets": [2],
-//                "className": 'text-left',
-//                "data": 'documento',
-//                "title": 'Documento'
-//            },
-//            {
-//                "targets": [3],
-//                "className": 'text-left',
-//                "data": 'total',
-//                "title": 'Total'
-//            },
-//            {
-//                "targets": [4],
-//                "className": 'text-left',
-//                "data": 'saldo',
-//                "title": 'Saldo'
-//            },
-//            {
-//                "targets": [5],
-//                "className": 'text-left',
-//                "data": 'imputado',
-//                "title": 'Imputado'
-//            },
-//            {
-//                "targets": [6],
-//                "className": 'text-center',
-//                "data": 't_cambio',
-//                "title": 'T. Cambio'
-//            },
-//            {
-//                "targets": [7],
-//                "className": 'text-left',
-//                "data": 'embarque',
-//                "title": 'Embarque'
-//            },
-//            {
-//                "targets": [8],
-//                "className": 'text-left',
-//                "data": 'detalle',
-//                "title": 'Detalle'
-//            },
-//            {
-//                "targets": [9],
-//                "className": 'text-left',
-//                "data": 'posicion',
-//                "title": 'Posición'
-//            },
-//            {
-//                "targets": [10],
-//                "className": 'text-left',
-//                "data": 'moneda',
-//                "title": 'Moneda'
-//            },
-//            {
-//                "targets": [11],
-//                "className": 'text-left',
-//                "data": 'paridad',
-//                "title": 'Paridad'
-//            },
-//            {
-//                "targets": [12],
-//                "className": 'text-left',
-//                "data": 'tipo_doc',
-//                "title": 'Tipo documento'
-//            }
-//        ],
-//        "order": [[0, "desc"]],
-//        "processing": true,
-//        "serverSide": true,
-//        "pageLength": 100,
-//        "ajax": {
-//            "url": "/admin_cont/source_cobranza/",
-//            'type': 'GET',
-//            "data": function (d) {
-//                return $.extend({}, d, {
-//                    "cliente": $('#socio_com_filtro').val()
-//                });
-//            }
-//        },
-//        "language": {
-//            "url": "/static/datatables/es_ES.json"
-//        }
-//    });
-//}
 
 function abrir_forma_pago() {
   $("#paymentModal").dialog({
@@ -1185,7 +1079,8 @@ $.ajax({
         contentType: 'application/json',
         success: function(response) {
             if (response.status === 'exito') {
-                alert("Datos guardados correctamente");
+                $('#dialog-form').dialog('close');
+
                 // Opcional: recargar una tabla o actualizar la UI
             } else {
                 alert("ghfghfgh: " + response.status);
