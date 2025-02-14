@@ -71,8 +71,8 @@ $(document).ready(function () {
 
     /* DATATABLES */
     //buscadores
-$('#tabla_importmarit tfoot th').each(function(index) {
-    let title = $('#tabla_importmarit thead th').eq(index).text();
+$('#tabla_importaerea tfoot th').each(function(index) {
+    let title = $('#tabla_importaerea thead th').eq(index).text();
 
     if (index === 0) {
         // Si es la primera columna, colocar el botón de limpiar filtros
