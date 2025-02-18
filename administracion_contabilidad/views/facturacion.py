@@ -173,11 +173,12 @@ def facturacion_view(request):
 def buscar_cliente(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
         query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
-        clientes = Clientes.objects.filter(empresa__icontains=query)[:10]  # Limitar resultados a 10
+        clientes = Clientes.objects.filter(empresa__istartswith=query)[:10]  # Filtra por inicio y limita a 10 resultados
         results = [{'id': cliente.codigo, 'text': cliente.empresa} for cliente in clientes]
         return JsonResponse(results, safe=False)
 
     return JsonResponse({'error': 'Solicitud inválida'}, status=400)
+
 
 
 def buscar_clientes(request):

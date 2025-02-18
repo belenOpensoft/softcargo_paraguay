@@ -44,7 +44,7 @@ def proveedores_gastos_view(request):
 def buscar_proveedor(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
         query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
-        proveedores = Clientes.objects.filter(empresa__icontains=query)[:10]  # Limitar resultados a 10
+        proveedores = Clientes.objects.filter(empresa__istartswith=query)[:10]  # Limitar resultados a 10
         results = [{'id': proveedor.id,'codigo': proveedor.codigo, 'text': proveedor.empresa} for proveedor in proveedores]
         return JsonResponse(results, safe=False)
 
