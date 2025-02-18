@@ -2321,6 +2321,19 @@ class VGrillaServiceaereo(models.Model):
         db_table = 'VGrillaServiceaereo'
 
 
+class PreferenciasReporteOp(models.Model):
+    opciones = models.TextField(verbose_name="Opciones")
+    usuario = models.ForeignKey(
+        User,
+        db_column='usuario',
+        on_delete=models.CASCADE,
+        verbose_name="Usuario"
+    )
+
+    class Meta:
+        db_table = 'preferencias_reporte_op'
+
+
 from inspect import getmembers
 from auditlog.registry import auditlog
 from seguimientos import models
@@ -2331,3 +2344,5 @@ for t in tablas:
         auditlog.register(t[1], serialize_data=True)
     except Exception as e:
         pass
+
+

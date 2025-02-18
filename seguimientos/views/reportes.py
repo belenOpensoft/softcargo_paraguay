@@ -3,7 +3,7 @@ import json
 import datetime
 import sys
 
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponseBadRequest, JsonResponse
 import os
 import xlsxwriter as xlsxwriter
 from django.contrib import messages
@@ -18,7 +18,8 @@ from impomarit.models import VistaOperativas, VistaOperativasGastos
 from mantenimientos.models import Clientes as SociosComerciales, Ciudades, Servicios
 from cargosystem import settings
 from mantenimientos.forms import add_buque_form, reporte_seguimiento_form, reporte_operativas_form
-from seguimientos.models import Seguimiento, VGrillaSeguimientos, Envases, Conexaerea, Cargaaerea, Serviceaereo
+from seguimientos.models import Seguimiento, VGrillaSeguimientos, Envases, Conexaerea, Cargaaerea, Serviceaereo, \
+    PreferenciasReporteOp
 from seguimientos.views.embarques import redondear_a_05_o_0
 from seguimientos.views.guias import GuiasReport
 from seguimientos.views.guias_hijas import GuiasReport as GuiasReportHijas
@@ -779,7 +780,6 @@ def descargar_hawb_operativas(request,row_id,draft=None,asagreed=None):
         print(traceback.format_exc())
         raise Http404(f"Error: {str(e)}")
 
-
 def reportes_operativas(request):
     try:
         if request.user.has_perms(["operativas.download_report", ]):
@@ -862,7 +862,6 @@ def reportes_operativas(request):
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect("/")
-
 
 def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
     try:
@@ -1038,106 +1037,61 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
         raise TypeError(e)
 
 
+def guardar_preferencia(request):
+    if request.method == "POST":
+        nombre = request.POST.get("nombre", "").strip()
+        selected_columns = request.POST.get("selected_columns", "")
+
+        if not nombre:
+            return HttpResponseBadRequest("El nombre es requerido.")
+        if not selected_columns:
+            return HttpResponseBadRequest("No se enviaron columnas seleccionadas.")
+
+        try:
+            columns_list = json.loads(selected_columns)
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("Formato de columnas seleccionado inválido.")
+
+        preferencias_data = {
+            "nombre": nombre,
+            "selected_columns": columns_list
+        }
+
+        preferencias_json = json.dumps(preferencias_data)
+
+        preferencia = PreferenciasReporteOp.objects.create(
+            opciones=preferencias_json,
+            usuario=request.user
+        )
+
+        return JsonResponse({
+            "success": True,
+            "preferencia_id": preferencia.id
+        })
+    else:
+        return HttpResponseBadRequest("Método no permitido.")
 
 
 
-# def genero_xls_operativas(resultados,desde,hasta,columnas):
-#     try:
-#         name = 'Reporte_op_' + str(desde) + '_' + str(hasta)
-#         output = io.BytesIO()
-#         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
-#         worksheet = workbook.add_worksheet('Reporte')
-#         header_format = workbook.add_format({'bold': True, 'bg_color': '#0D6EFD', 'font_color': 'white'})
-#         date_format = workbook.add_format({'num_format': 'yyyy-mm-dd'})
-#         row = 0
-#         col = 0
-#
-#         for header in columnas:
-#             worksheet.write(row, col, header, header_format)
-#             col += 1
-#
-#         row += 1
-#         col = 0
-#
-#         for p in resultados:
-#             cantidad_cntr = ""
-#             contenedores = ""
-#             mercaderias = ""
-#             precintos = ""
-#             bultos = 0
-#             peso = 0
-#             volumen = 0
-#             c20 = 0
-#             c40 = 0
-#             cant_cntr = Envases.objects.filter(numero=p.numero).values('tipo', 'nrocontenedor', 'precinto', 'bultos',
-#                                                                        'peso', 'envase', 'volumen', 'unidad').annotate(
-#                 total=Count('id'))
-#             if cant_cntr.count() > 0:
-#                 for cn in cant_cntr:
-#                     cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} -'
-#                     contenedores += f' {cn["nrocontenedor"]} -'
-#                     if cn['precinto'] is not None and len(cn['precinto']) > 0:
-#                         precintos += f'{cn["precinto"]} - '
-#                     if cn['bultos'] is not None:
-#                         bultos += cn['bultos']
-#                     if cn['peso'] is not None:
-#                         peso += cn['peso']
-#                     if cn['volumen'] is not None:
-#                         volumen += cn['volumen']
-#                     if cn['envase'] is not None:
-#                         mercaderias += cn['envase'] + ' - '
-#                     if cn['unidad'] == '20':
-#                         c20 += 1
-#                     if cn['unidad'] == '40':
-#                         c40 += 1
-#             if p.modo in ['IMPORT AEREO', 'EXPORT AEREO']:
-#                 vap = p.viaje
-#             else:
-#                 vap = p.vapor
-#             ## DATOS
-#             worksheet.write(row, col, str(p.numero).zfill(8))
-#             col += 1
-#             worksheet.write(row, col, p.eta,date_format)
-#             col += 1
-#             worksheet.write(row, col, p.modo)
-#             col += 1
-#             worksheet.write(row, col, p.cliente)
-#             col += 1
-#             worksheet.write(row, col, p.transportista)
-#             col += 1
-#             worksheet.write(row, col, p.awb)
-#             col += 1
-#             worksheet.write(row, col, p.hawb)
-#             col += 1
-#             worksheet.write(row, col, p.posicion)
-#             col += 1
-#             worksheet.write(row, col, vap)
-#             col += 1
-#             worksheet.write(row, col, volumen)
-#             col += 1
-#             worksheet.write(row, col, c20)
-#             col += 1
-#             worksheet.write(row, col, c40)
-#             col += 1
-#             worksheet.write(row, col, contenedores[:-3])
-#             col += 1
-#             worksheet.write(row, col, p.origen_text)
-#             col += 1
-#             worksheet.write(row, col, p.destino_text)
-#             col = 0
-#             row += 1
-#         # Ajustar el ancho de las columnas automáticamente al contenido de texto
-#         for i, header in enumerate(['Seguimiento','Llegada', 'Cliente', 'Transportista', 'Conocimiento', 'House', 'Posicion', 'Vapor/Vuelo','Volumen', "20'", "40'", 'Contenedor', 'Entrega de vacío en patio']):
-#             max_len = max([len(str(header)) for p in resultados]) + 2  # Agregar un pequeño margen
-#             worksheet.set_column(i, i, max_len)
-#         file_name = 'filename=' + str(name) + '.xlsx'
-#         # Fijar la primera columna
-#         worksheet.freeze_panes(1, 1)
-#         workbook.close()
-#         output.seek(0)
-#         response = HttpResponse(output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-#         response['Content-Disposition'] = "attachment; " + file_name + ""
-#         return response
-#
-#     except Exception as e:
-#         raise TypeError(e)
+def cargar_preferencias(request):
+    if request.method == "GET":
+        # Consulta las preferencias del usuario logueado
+        preferencias = PreferenciasReporteOp.objects.filter(usuario=request.user)
+        datos = []
+        for pref in preferencias:
+            try:
+                # Parseamos el JSON que se guardó en el campo 'opciones'
+                opciones_data = json.loads(pref.opciones)
+                nombre = opciones_data.get("nombre", "Sin nombre")
+                selected_columns = opciones_data.get("selected_columns", [])
+            except Exception as e:
+                nombre = "Sin nombre"
+                selected_columns = []
+            datos.append({
+                "id": pref.id,
+                "nombre": nombre,
+                "selected_columns": selected_columns,
+            })
+        return JsonResponse({"preferencias": datos})
+    else:
+        return HttpResponseBadRequest("Método no permitido.")

@@ -34,7 +34,8 @@ from seguimientos.views.gastos import source_gastos, guardar_gasto, eliminar_gas
 from seguimientos.views.getdata import get_data_cronologia, get_data_seguimiento
 from seguimientos.views.logs import source_logs
 from seguimientos.views.pdf import get_datos_caratula
-from seguimientos.views.reportes import reportes_seguimiento, descargar_pdf, descargar_awb_seguimientos, reportes_operativas
+from seguimientos.views.reportes import reportes_seguimiento, descargar_pdf, descargar_awb_seguimientos, \
+    reportes_operativas, guardar_preferencia, cargar_preferencias
 from seguimientos.views.rutas import source_rutas, guardar_ruta, eliminar_ruta, datos_seguimiento
 from seguimientos.views.seguimientos import grilla_seguimientos, source_seguimientos, guardar_notas, guardar_cronologia, \
     guardar_seguimiento, guardar_envases, eliminar_envase, clonar_seguimiento
@@ -91,6 +92,8 @@ urlpatterns = [
     path('asignar_guia_aerea/', asignar_guia_aerea, name='asignar_guia_aerea'),
     path('reportes_seguimiento/', reportes_seguimiento, name='vista_reportes'),
     path('reportes_operativas/', reportes_operativas, name='vista_reportes_op'),
+    path('guardar_preferencia/', guardar_preferencia, name='guardar_preferencia'),
+    path('cargar_preferencias/', cargar_preferencias, name='cargar_preferencias'),
     path('comprobar_vapores/', comprobar_vapores, name='comprobar_vapores'),
     path('desconsolidacion_aerea/', desconsolidacion_aerea, name='vista_desconsolidacion_aerea'),
     path('desconsolidar_aereo/', desconsolidar_aereo, name='vista_desconsolidar_aereo'),

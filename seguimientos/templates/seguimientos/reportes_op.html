@@ -183,7 +183,45 @@
         </ul>
 
         <button class="btn btn-primary" onclick="triggerFormSubmit()">Generar Reporte</button>
+        <button class="btn btn-warning" onclick="guardar_preferencia()">Guardar Preferencia</button>
+        <button class="btn btn-success" onclick="cargar_preferencia()">Cargar Preferencia</button>
     </div>
+
+    <!-- Modal: Guardar Preferencia -->
+    <div id="guardar-preferencia-modal" title="Guardar Preferencia" style="display: none;">
+      <form id="form-guardar-preferencia">
+        <div class="form-group">
+          <label for="nombre-preferencia">Nombre:</label>
+          <input type="text" id="nombre-preferencia" name="nombre-preferencia" class="form-control">
+        </div>
+        <button type="button" class="btn btn-primary btn-sm mt-3" id="btn-guardar-seleccion">Guardar Seleccion</button>
+        <div style="text-align:right">
+            <button type="button" class="btn btn-dark btn-sm" id="btn-cerrar-guardar-preferencia">Cerrar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Modal: Cargar Preferencia -->
+    <div id="cargar-preferencia-modal" title="Cargar Preferencia" style="display: none;">
+      <table id="tabla-preferencias" class="table">
+        <thead>
+          <tr>
+            <th style="visibility:hidden;">ID</th>
+            <th>Nombre</th>
+            <th>Acción</th>
+            <th style="display:none;">columnas</th>
+
+          </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+        <div style="text-align:right">
+            <button type="button" class="btn btn-dark btn-sm" id="btn-cerrar-cargar-preferencia">Cerrar</button>
+        </div>
+    </div>
+
 
 <script>
     var csrf_token = "{{ csrf_token }}";

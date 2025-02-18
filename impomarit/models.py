@@ -1,3 +1,4 @@
+
 from django.db import models
 
 from mantenimientos.models import Productos
@@ -994,3 +995,5 @@ class VistaOperativasGastos(models.Model):
     class Meta:
         managed = False  # No intentes modificar la tabla
         db_table = 'VOperativasGastos'
+
+
