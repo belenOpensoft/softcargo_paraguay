@@ -1286,5 +1286,9 @@ data = {
             }
 """
 
+def numero_manual(request):
+
+    rutas = Movims.objects.filter(numero=registro.numero).annotate(num_archivos=Count('id')).values('num_archivos').first()
+
 
 

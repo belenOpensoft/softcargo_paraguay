@@ -40,6 +40,8 @@ var archivos_adjuntos = {};
 var buscar = '';
 var que_buscar = '';
 var nombre_form = 'Nuevo'
+var awbRegex = "";
+
 
 let table_add_im;
 
@@ -64,22 +66,17 @@ $(document).ready(function () {
         $(this).alert('close');
     });
 
-
-
-
     getCookie('row_selected_impomarit');
     let contador = 0;
 
     /* DATATABLES */
     //buscadores
-$('#tabla_importmarit tfoot th').each(function(index) {
-    let title = $('#tabla_importmarit thead th').eq(index).text();
+    $('#tabla_exportaerea tfoot th').each(function(index) {
+    let title = $('#tabla_exportaerea thead th').eq(index).text();
 
     if (index === 0) {
-        // Si es la primera columna, colocar el botón de limpiar filtros
         $(this).html('<button class="btn btn-danger" title="Borrar filtros" id="clear"><span class="glyphicon glyphicon-erase"></span> Limpiar</button>');
     } else if (title !== '') {
-        // Agregar inputs de búsqueda en las demás columnas
         $(this).html('<input type="text" class="form-control filter-input" autocomplete="off" id="buscoid_' + index + '" placeholder="Buscar ' + title + '" />');
     }
 });
@@ -160,6 +157,8 @@ $('#tabla_importmarit tfoot th').each(function(index) {
                 return $.extend({}, d, {
                     "buscar": buscar,
                     "que_buscar": que_buscar,
+                    "awb_filter": JSON.stringify(awbRegex)
+
                 });
 
 
@@ -5418,5 +5417,60 @@ console.log(numero_hawb);
     }
 }
 
-
+//modal para buscar
+function modal_buscar(){
+$("#searchModal").dialog({
+        autoOpen: true,
+        modal: true,
+        width: 400,
+        buttons: [
+            {
+                text: "Buscar",
+                class: "btn btn-success",
+                click: function(e) {
+                    let formData = $("#searchForm").serialize();
+                    filtrar_tabla_master(formData,e);
+                    $(this).dialog("close");
+                }
+            },
+            {
+                text: "Cerrar",
+                class: "btn btn-dark",
+                click: function() {
+                    $(this).dialog("close");
+                }
+            }
+        ]
+    });
+}
+function filtrar_tabla_master(data, e) {
+    e.preventDefault();
+    $.ajax({
+        type: "POST",
+        url: '/exportacion_aerea/buscar_registros/',
+        data: $("#searchForm").serialize(),
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function(response) {
+            console.log(response);
+            let awbList = response.resultados;
+            if (awbList && awbList.length > 0) {
+                // Eliminar duplicados y construir la regex
+                let uniqueAwbs = [...new Set(awbList)];
+                awbRegex = uniqueAwbs.map(function(item) {
+                    return '.*' + $.trim(item) + '.*';
+                }).join('|');
+                awbRegex=uniqueAwbs;
+            } else {
+                awbRegex = "";
+            }
+            // Recargar la tabla para enviar el nuevo parámetro al servidor
+            table.ajax.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error("Error al obtener AWB:", error);
+        }
+    });
+}
 

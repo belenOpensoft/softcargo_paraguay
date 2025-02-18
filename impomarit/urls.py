@@ -11,7 +11,7 @@ from impomarit.views.house import add_house, add_house_impmarit, edit_house_func
     generar_posicion, source_embarque_importado, source_archivos_importado
 from impomarit.views.impo_maritima import master_importacion_maritima, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
-    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full
+    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros
 from impomarit.views.mails import get_data_email_op
 from impomarit.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
 from impomarit.views.notas import source, guardar_notas, eliminar_nota
@@ -73,6 +73,7 @@ urlpatterns = [
     path(r'add_house/', add_house_impmarit, name="add_house"),
     path(r'add_house_importado/', add_house_importado, name="add_house_importado"),
     path('master-detail/', master_detail, name='master_detail'),
+    path('buscar_registros/', buscar_registros, name='buscar_registros'),
     path('add_gasto_master/', add_gasto_master, name='add_gasto_master'),
     path('add_gasto_house/', add_gasto_house, name='add_gasto_house'),
     path('add_gasto_importado/', add_gasto_importado, name='add_gasto_house'),

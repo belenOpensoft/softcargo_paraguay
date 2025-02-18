@@ -40,6 +40,7 @@ var archivos_adjuntos = {};
 var buscar = '';
 var que_buscar = '';
 var nombre_form = 'Nuevo'
+var awbRegex = "";
 
 let table_add_im;
 
@@ -159,6 +160,7 @@ $('#tabla_expoterrestre tfoot th').each(function(index) {
                 return $.extend({}, d, {
                     "buscar": buscar,
                     "que_buscar": que_buscar,
+                    "awb_filter": JSON.stringify(awbRegex)
                 });
 
 
@@ -2962,12 +2964,13 @@ table_edit_im = $('#table_edit_im').DataTable({
             return row[13]; // Toma el índice 13 para la columna 14
         }
     },
+    /*
     {
         "targets": [15],
         "render": function (data, type, row, meta) {
             return row[14]; // Toma el índice 14 para la columna 15
         }
-    },
+    },*/
 ],
     "order": [[0, "desc"]],
     "processing": true,
@@ -5200,3 +5203,62 @@ $("#destinatario").autocomplete({
         }
     }
 });
+
+
+
+//modal para buscar
+function modal_buscar(){
+$("#searchModal").dialog({
+        autoOpen: true,
+        modal: true,
+        width: 400,
+        buttons: [
+            {
+                text: "Buscar",
+                class: "btn btn-success",
+                click: function(e) {
+                    let formData = $("#searchForm").serialize();
+                    filtrar_tabla_master(formData,e);
+                    $(this).dialog("close");
+                }
+            },
+            {
+                text: "Cerrar",
+                class: "btn btn-dark",
+                click: function() {
+                    $(this).dialog("close");
+                }
+            }
+        ]
+    });
+}
+function filtrar_tabla_master(data, e) {
+    e.preventDefault();
+    $.ajax({
+        type: "POST",
+        url: '/exportacion_terrestre/buscar_registros/',
+        data: $("#searchForm").serialize(),
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function(response) {
+            console.log(response);
+            let awbList = response.resultados;
+            if (awbList && awbList.length > 0) {
+                // Eliminar duplicados y construir la regex
+                let uniqueAwbs = [...new Set(awbList)];
+                awbRegex = uniqueAwbs.map(function(item) {
+                    return '.*' + $.trim(item) + '.*';
+                }).join('|');
+                awbRegex=uniqueAwbs;
+            } else {
+                awbRegex = "";
+            }
+            // Recargar la tabla para enviar el nuevo parámetro al servidor
+            table.ajax.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error("Error al obtener AWB:", error);
+        }
+    });
+}

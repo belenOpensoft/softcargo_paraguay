@@ -4,6 +4,7 @@ import os
 import traceback
 import unicodedata
 
+import simplejson
 from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.db import IntegrityError
@@ -176,8 +177,14 @@ def source_importacion_master(request):
             '10': request.GET['columns[10][search][value]'],
             '11': request.GET['columns[11][search][value]'],
         }
-        """PROCESO FILTRO Y ORDEN BY"""
         filtro = get_argumentos_busqueda(**args)
+
+        awb_filter_json = simplejson.loads(request.GET['awb_filter'])
+        if awb_filter_json:
+            regex = '|'.join(awb_filter_json)
+            filtro['awb__regex'] = regex
+
+        """PROCESO FILTRO Y ORDEN BY"""
         start = int(request.GET['start'])
         length = int(request.GET['length'])
         buscar = str(request.GET['buscar'])
@@ -362,7 +369,7 @@ def source_embarque_consolidado(request):
 
         # Mapeo de columnas
         columnas = [
-            'id', 'fecha_embarque', 'fecha_retiro', 'numero', 'consignatario', 'origen', 'destino',
+            'id', 'fecha_embarque', 'fecha_retiro', 'numero','seguimiento', 'consignatario', 'origen', 'destino',
             'status', 'posicion', 'operacion', 'awb', 'hawb', 'vapor', 'notificar_agente', 'notificar_cliente'
         ]
 
@@ -608,3 +615,38 @@ def modificar_fecha_retiro(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
+
+
+def buscar_registros(request):
+    if request.method == "POST":
+        seguimiento = request.POST.get("seguimiento", "")
+        embarque = request.POST.get("embarque", "")
+        reserva = request.POST.get("reserva", "")
+        master = request.POST.get("master", "")
+        house = request.POST.get("house", "")
+        consignatario = request.POST.get("consignatario", "")
+        transportista = request.POST.get("transportista", "")
+
+        if reserva:
+            resultados = Master.objects.filter(numero=reserva).values_list("awb", flat=True)
+        else:
+            resultados = VEmbarqueaereo.objects.all()
+
+            if seguimiento:
+                resultados = resultados.filter(seguimiento__icontains=seguimiento)
+            if embarque:
+                resultados = resultados.filter(numero__icontains=embarque)
+            if master:
+                resultados = resultados.filter(awb__icontains=master)
+            if house:
+                resultados = resultados.filter(hawb__icontains=house)
+            if consignatario:
+                resultados = resultados.filter(consignatario__icontains=consignatario)
+            if transportista:
+                resultados = resultados.filter(transportista__icontains=transportista)
+
+            resultados = resultados.values_list("awb", flat=True)
+
+        return JsonResponse({"resultados": list(resultados)}, safe=False)
+
+    return JsonResponse({"error": "Método no permitido"}, status=400)

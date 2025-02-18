@@ -11,7 +11,7 @@ from expmarit.views.house import add_house_impmarit, edit_house_function, house_
     generar_posicion, source_embarque_importado, source_archivos_importado
 from expmarit.views.expo_maritima import master_expo_maritima, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
-    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full
+    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros
 from expmarit.views.master import master_detail, add_importacion_maritima, edit_master, get_name_by_id, \
     consultar_seguimientos
 
@@ -26,6 +26,7 @@ from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
     path('source/', source, name='source'),
+    path('buscar_registros/', buscar_registros, name='buscar_registros'),
     path('guardar_notas/', guardar_notas, name='guardar_notas'),
     path('datos_embarque_ruta/', datos_embarque_ruta, name='datos_embarque_ruta'),
     path('eliminar_nota/', eliminar_nota, name='eliminar_nota'),

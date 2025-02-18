@@ -11,7 +11,7 @@ from impterrestre.views.house import add_house, add_house_impmarit, edit_house_f
 from impterrestre.views.impo_terrestre import master_importacion_maritima, source_importacion_master, \
     source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
-    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full
+    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros
 from impterrestre.views.mails import get_data_email_op
 from impterrestre.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
 from impterrestre.views.notas import guardar_notas, source, eliminar_nota
@@ -27,6 +27,7 @@ urlpatterns = [
     path('guardar_notas/', guardar_notas, name='guardar_notas'),
     path('eliminar_nota/', eliminar_nota, name='eliminar_nota'),
     path(r'source_embarque_aereo_full/<str:master>/', source_embarque_aereo_full, name="source_embarque_aereo_full"),
+    path('buscar_registros/', buscar_registros, name='buscar_registros'),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
     path(r'masters/', master_importacion_maritima, name="master_importacion_maritima"),
     path('descargar_archivo/<int:id>', descargar_archivo, name="descargar_archivo"),

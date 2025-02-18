@@ -10,7 +10,7 @@ from expaerea.views.house import add_house_impmarit, edit_house_function, house_
     generar_posicion, source_embarque_importado, source_archivos_importado
 from expaerea.views.exp_aerea import master_expo_aerea, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
-    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full
+    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros
 from expaerea.views.master import master_detail, add_importacion_maritima, edit_master, get_name_by_id, \
     consultar_seguimientos
 
@@ -67,6 +67,7 @@ urlpatterns = [
     path(r'source_embarque_aereo/<str:master>/', source_embarque_aereo, name="source_embarque_aereo"), #hauses
     path(r'source_embarque_aereo_full/<str:master>/', source_embarque_aereo_full, name="source_embarque_aereo_full"),  # hauses
     path(r'add_master/', add_importacion_maritima, name="add_master"),
+    path('buscar_registros/', buscar_registros, name='buscar_registros'),
     path('edit_master/<int:id_master>/', edit_master, name='edit_master'),
     path('edit_house/<int:numero>/', edit_house_function, name='edit_house'),
     path(r'add_house/', add_house_impmarit, name="add_house"),
