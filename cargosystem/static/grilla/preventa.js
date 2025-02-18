@@ -3,44 +3,74 @@ function facturar(){
     let selectedRowN = localStorage.getItem('num_house_gasto');
     const wHeight = $(window).height();
     const wWidth = $(window).width();
-                $('#destinatario').val('');
-                $('#destinatario_input').val('');
-                $('#destinatario').css({"border-color": "", 'box-shadow': ''});
-                $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
+    $('#destinatario').val('');
+    $('#destinatario_input').val('');
+    $('#destinatario').css({"border-color": "", 'box-shadow': ''});
+    $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
+    if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+        var table = $('#table_edit_im').DataTable();
+        var rowData = table.row('.table-secondary').data();
+        if (rowData) {
+            var $destinatario = $('#destinatario');
+            var term = rowData[4]; // Valor a buscar y mostrar
+
+            // Asigna el valor al input (simulando lo que escribe el usuario)
+            $destinatario.val(term);
+
+            // Inicia la búsqueda en el autocomplete
+            $destinatario.autocomplete("search", term);
+
+            // Una vez que se rendericen las sugerencias, espera un momento y simula el clic
+            setTimeout(function(){
+                // Busca el primer elemento de la lista de sugerencias
+                // La lista se genera con la clase ui-menu-item dentro del contenedor ui-autocomplete
+                var $firstItem = $(".ui-autocomplete li.ui-menu-item:first");
+                if ($firstItem.length > 0) {
+                    // Simula el clic sobre el primer elemento
+                    $firstItem.trigger("click");
+                }
+
+                var dataId = $('#destinatario').attr('data-id');
+                $('#destinatario_input').val(dataId);
+                $('#destinatario').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            }, 200);
+        }
+    } else {
+        console.log("La tabla no está inicializada.");
+    }
 
 
-
-            $("#facturar_modal").dialog({
-                autoOpen: true,
-                open: function (event, ui) {
-                cargar_gastos_factura(function() {
-                    sumar_ingresos_tabla();
-                });
-                },
-                modal: true,
-                title: "Facturar el House N°: " + selectedRowN,
-                height: wHeight * 0.90,
-                width: wWidth * 0.70,
-                class: 'modal fade',
-                       buttons: [
-                    {
-                        text: "Cancelar",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        }
-                    }
-                ],
-                beforeClose: function (event, ui) {
-                // localStorage.removeItem('num_house_gasto');
-                 $('#facturar_table').DataTable().destroy();
-                 $("#facturar_form").trigger("reset");
+    $("#facturar_modal").dialog({
+        autoOpen: true,
+        open: function (event, ui) {
+        cargar_gastos_factura(function() {
+            sumar_ingresos_tabla();
+        });
+        },
+        modal: true,
+        title: "Facturar el House N°: " + selectedRowN,
+        height: wHeight * 0.90,
+        width: wWidth * 0.70,
+        class: 'modal fade',
+               buttons: [
+            {
+                text: "Cancelar",
+                class: "btn btn-dark",
+                style: "width:100px",
+                click: function () {
+                    $(this).dialog("close");
+                }
+            }
+        ],
+        beforeClose: function (event, ui) {
+        // localStorage.removeItem('num_house_gasto');
+         $('#facturar_table').DataTable().destroy();
+         $("#facturar_form").trigger("reset");
 //                 $('#table_add_im tbody tr').removeClass('table-secondary');
 //                $('#table_edit_im tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
-                }
-            })
+        }
+    })
 }
 function asignar_costo(event) {
 event.preventDefault();
