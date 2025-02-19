@@ -323,16 +323,15 @@ class envasesForm(BSModalModelForm):
             'unidad': 'Unid/Vta',
         }
         widgets = {
-            'precio': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
-            'cantidad': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
-            'peso': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
-            'volumen': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
-            'bultos': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
-            'tara': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
-            'bonifcli': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
-            'profit': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
+            'precio': forms.NumberInput(attrs={'min': '0', 'value': '0'}),
+            'cantidad': forms.NumberInput(attrs={'min': '0', 'value': '0'}),
+            'peso': forms.NumberInput(attrs={'min': '0', 'value': '0'}),
+            'volumen': forms.NumberInput(attrs={'min': '0', 'value': '0'}),
+            'bultos': forms.NumberInput(attrs={'min': '0', 'value': '0'}),
+            'tara': forms.NumberInput(attrs={'min': '0', 'value': '0'}),
+            'bonifcli': forms.NumberInput(attrs={'min': '0', 'value': '0'}),
+            'profit': forms.NumberInput(attrs={'min': '0', 'value': '0'}),
         }
-
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
