@@ -566,7 +566,7 @@ class Conexreserva(models.Model):
     vapor = models.CharField(db_column='Vapor', max_length=30, blank=True, null=True)  # Field name made lowercase.
     salida = models.DateTimeField(db_column='Salida', blank=True, null=True)  # Field name made lowercase.
     llegada = models.DateTimeField(db_column='Llegada', blank=True, null=True)  # Field name made lowercase.
-    cia = models.CharField(db_column='Cia', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    cia = models.CharField(db_column='Cia', max_length=75, blank=True, null=True)  # Field name made lowercase.
     viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  # Field name made lowercase.
     modo = models.CharField(db_column='Modo', max_length=15, blank=True, null=True)  # Field name made lowercase.
 

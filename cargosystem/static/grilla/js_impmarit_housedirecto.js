@@ -469,7 +469,6 @@ function generar_posicion(){
         type: "GET",
         url: "/importacion_maritima/generar_posicion/",
         success: function(response) {
-        console.log(response);
             $('#posicion_gh').val(response.posicion);
         },
         error: function(error) {
@@ -556,7 +555,6 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
             "url": "/importacion_maritima/source_seguimientos_modo/IMPORT%20MARITIMO/",
             'type': 'GET',
             "data": function (d) {
-                console.log(d);
                 return $.extend({}, d, {
                     "buscar": buscar,
                     "que_buscar": que_buscar,

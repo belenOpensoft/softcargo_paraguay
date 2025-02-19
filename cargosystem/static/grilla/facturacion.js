@@ -95,9 +95,101 @@ var que_buscar = '';
     });
 
     let itemCounter = 0;
+    // Editar fila: al hacer doble clic sobre una fila, se cargan los datos en los campos de entrada
+    $("#itemTable").on("dblclick", "tr", function() {
+        var $row = $(this);
+        // Asume que la fila tiene las 6 celdas en el orden correcto
+        var codigo = $row.find("td").eq(0).text().trim();    // Código (oculto)
+        var item = $row.find("td").eq(1).text().trim();        // Item
+        var descripcion = $row.find("td").eq(2).text().trim(); // Descripción
+        var precio = $row.find("td").eq(3).text().trim();      // Precio
+        var iva = $row.find("td").eq(4).text().trim();         // IVA
+        var cuenta = $row.find("td").eq(5).text().trim();      // Cuenta
 
-    // Agregar Item a la tabla
+        // Cargar los datos en los campos de entrada
+        $("#item").val(item);
+        $("#id_descripcion_item input").val(descripcion);
+        $("#id_precio input").val(precio);
+
+        // Guardar datos adicionales en el input de precio (por si se necesitan al actualizar)
+        $("#id_precio input").data("iva", iva);
+        $("#id_precio input").data("cuenta", cuenta);
+        $("#id_precio input").data("codigo", codigo);
+
+        // Marcar la fila como "editing" para que se actualice en lugar de agregar una nueva
+        $("#itemTable tr").removeClass("editing");
+        $row.addClass("editing");
+    });
+
+    // Al hacer clic en "Agregar Item" se agrega una nueva fila o se actualiza la fila en edición
     $('#agregarItem').on('click', function() {
+        const item = $('#item').val();
+        const descripcion = $('#id_descripcion_item input').val();
+        const precio = parseFloat($('#id_precio input').val());
+
+        if (item && descripcion && !isNaN(precio)) {
+            const iva = $('#id_precio input').data('iva') || "";   // puede estar vacío en un nuevo item
+            const cuenta = $('#id_precio input').data('cuenta') || "";
+            const codigo = $('#id_precio input').data('codigo') || "";
+
+            if ($("#itemTable tr.editing").length > 0) {
+                var $editingRow = $("#itemTable tr.editing");
+                $editingRow.data("precio", precio);
+                $editingRow.data("iva", iva);
+                $editingRow.data("cuenta", cuenta);
+
+                $editingRow.find("td").eq(0).text(codigo);
+                $editingRow.find("td").eq(1).text(item);
+                $editingRow.find("td").eq(2).text(descripcion);
+                $editingRow.find("td").eq(3).text(precio.toFixed(2));
+                $editingRow.find("td").eq(4).text(iva);
+                $editingRow.find("td").eq(5).text(cuenta);
+
+                $editingRow.removeClass("editing");
+            }else {
+                itemCounter++;
+                const rowId = `item-${itemCounter}`;
+                const row = `
+                    <tr id="${rowId}" data-precio="${precio}" data-iva="${iva}" data-cuenta="${cuenta}">
+                        <td style="display:none;">${codigo}</td>
+                        <td>${item}</td>
+                        <td>${descripcion}</td>
+                        <td>${precio.toFixed(2)}</td>
+                        <td>${iva}</td>
+                        <td>${cuenta}</td>
+                    </tr>`;
+                $('#itemTable tbody').append(row);
+                $('#itemTable').show();
+            }
+            $('#eliminarSeleccionados').show();
+            $('#clonarItem').show();
+            actualizarTotal();
+            $('#totales').show();
+            limpiarCampos();
+        } else {
+            alert('Por favor, completa todos los campos antes de agregar el item.');
+        }
+    });
+
+    // Botón para clonar la fila seleccionada
+    $("#clonarItem").on("click", function() {
+        var $selected = $("#itemTable tr.table-active");
+        if ($selected.length > 0) {
+            itemCounter++;
+            var $clone = $selected.clone();
+            $clone.attr("id", "item-" + itemCounter);
+            $clone.removeClass("selected editing");
+            $clone.removeClass("table-active");
+            $clone.removeClass("table-primary");
+            $("#itemTable tbody").append($clone);
+            actualizarTotal();
+
+        } else {
+            alert("Selecciona una fila para clonar.");
+        }
+    });
+    // Agregar Item a la tabla
+    $('#agregarItem_old').on('click', function() {
         const item = $('#item').val();
         const descripcion = $('#id_descripcion_item input').val();
         const precio = parseFloat($('#id_precio input').val());

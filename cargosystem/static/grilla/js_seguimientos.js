@@ -562,16 +562,9 @@ $(document).ready(function () {
                             $("#ingresar_embarque").html('Agregar');
                             $('#embarques_btn').addClass('triggered').trigger('click');
                             $('#id_embarque_id').val("");
-                           // $('#tabla_embarques').DataTable().ajax.reload();
                             table.ajax.reload(function(json) {
-                                // Callback function to handle the response data
-                                console.log('Data reloaded:', json);
-
+                            console.log('Data reloaded:', json);
                             });
-
-                            //alert(resultado['resultado']);
-                            console.log(resultado['resultado']);
-
                     }
                 });
             }else{
@@ -1161,7 +1154,6 @@ $(document).ready(function () {
     $('#envases_btn').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
-        console.log(row[0][2]);
         if(row[0][2]=='IMPORT AEREO'){
         alert('No puede agregar envases a las operaciones aereas.');
         return;
@@ -1475,7 +1467,6 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
             if(row[0][2] == 'EXPORT AEREO'){
-//            console.log('row da esto: ' +row[0][0]);
                    window.open('/descargar_awb_seguimientos/' + row[0][0], '_blank');
 
             }else{
@@ -1529,7 +1520,6 @@ $(document).ready(function () {
     });
     $('#tabla_gastos tbody').on('dblclick', 'tr', function () {
         var data = table_gastos.row(this).data();
-        console.log(data);
         $("#id_gasto_id").val(data[0]);
         if(data[3] > 0){
             $("#id_compra_venta").val('C');
@@ -1561,7 +1551,6 @@ $(document).ready(function () {
     });
     $('#tabla_embarques tbody').on('dblclick', 'tr', function () {
         var data = table_embarques.row(this).data();
-        console.log(data);
         $("#id_embarque_id").val(data[0]);
         $("#id_producto").val(data[9]);
         $("#id_bultos_embarque").val(data[2]);
@@ -1646,7 +1635,6 @@ $(document).ready(function () {
                                                 $('#tabla_embarques').DataTable().ajax.reload();
                                                 $('#tabla_seguimiento').DataTable().ajax.reload();
 
-                                                console.log(resultado['resultado']);
 
                                         }
                                     });
@@ -2565,7 +2553,6 @@ function get_datos_embarques() {
                 }
             },
         ],"initComplete": function(settings, json) {
-            console.log('Datos JSON:', json['data_extra']);
             $("#id_aplicable").val(json['data_extra']['aplicable']);
             $("#id_tarifaprofit").val(json['data_extra']['tarifaprofit']);
             $("#id_tarifaventa").val(json['data_extra']['tarifaventa']);
@@ -2647,9 +2634,6 @@ function get_datos_gastos() {
             $('#gastos_diferencia').val((ingresos-egresos).toFixed(2));
         }
     });
-    console.log(ingresos.toFixed(2));
-    console.log(egresos.toFixed(2));
-    console.log(ingresos-egresos.toFixed(2));
 }
 function imprimirPDF() {
     var contenido = $('#pdf_add_input').summernote('code'); // Obtener el HTML del Summernote

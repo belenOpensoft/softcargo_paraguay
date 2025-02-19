@@ -24,7 +24,6 @@ $(document).ready(function()
 
     $('#informar').on('click', function () {
         var selectedData = table.rows({ selected: true }).data().toArray();
-        console.log(selectedData);
         if (selectedData.length === 0) {
               alert('Por favor, seleccione al menos una fila antes de enviar.');
               return;

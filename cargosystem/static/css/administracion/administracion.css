@@ -41,12 +41,12 @@
     }
 
 .page-item.active .page-link {
- background-color: var(--bs-success) !important; /* Verde */
- border-color: var(--bs-success) !important; /* Verde */
+ background-color: var(--bs-secondary) !important; /* Verde */
+ border-color: var(--bs-secondary) !important; /* Verde */
     color: white !important;
  }
  .page-link{
- color: var(--bs-success) !important;
+ color: var(--bs-secondary) !important;
  }
 
     .archivo {

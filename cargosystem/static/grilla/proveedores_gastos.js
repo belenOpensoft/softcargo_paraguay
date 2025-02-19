@@ -45,7 +45,7 @@ $(document).ready(function() {
         url: "/static/datatables/es_ES.json"
     },
     initComplete: function () {
-        var api = this.api();
+        let api = this.api();
         api.columns().every(function () {
             var that = this;
             $('input', this.footer()).on('keyup change', function () {
@@ -207,60 +207,101 @@ $(document).ready(function() {
         }
     });
 
-    // Agregar Item a la tabla
+    // Al hacer clic en "Agregar Item" se agrega una nueva fila o se actualiza la fila en edición
     $('#agregarItem').on('click', function() {
         const item = $('#item').val();
         const descripcion = $('#id_descripcion_item input').val();
         const precio = parseFloat($('#id_precio input').val());
-        const tipo = $('#id_tipo_cobro select').val();
-        const pago = $('#id_cobro select').val();
 
         if (item && descripcion && !isNaN(precio)) {
-            const iva = $('#id_precio input').data('iva');
-            const cuenta = $('#id_precio input').data('cuenta');
-            const codigo = $('#id_precio input').data('codigo');
-            const embarque = $('#id_precio input').data('embarque') || '';
-            const comp = $('#id_precio input').data('comp') || '';
-            const gasto = $('#id_precio input').data('gasto') || '';
+            const iva = $('#id_precio input').data('iva') || "";   // puede estar vacío en un nuevo item
+            const cuenta = $('#id_precio input').data('cuenta') || "";
+            const codigo = $('#id_precio input').data('codigo') || "";
 
-            itemCounter++;
-            const rowId = `item-${itemCounter}`;
+            // Si hay una fila en edición, se actualiza en lugar de agregar
+            if ($("#itemTable tr.editing").length > 0) {
+                var $editingRow = $("#itemTable tr.editing");
+                // Actualiza los atributos data del <tr>
+                $editingRow.data("precio", precio);
+                $editingRow.data("iva", iva);
+                $editingRow.data("cuenta", cuenta);
 
-            const row = `
-                <tr id="${rowId}" data-precio="${precio}" data-iva="${iva}" data-cuenta="${cuenta}">
-                    <td style="display:none;">${rowId}</td>
-                    <td>${codigo}</td>
-                    <td>${descripcion}</td>
-                    <td>${precio.toFixed(2)}</td>
-                    <td>${iva}</td>
-                    <td>${cuenta}</td>
-                    <td>${embarque}</td>
-                    <td>${''}</td>
-                    <td>${''}</td>
-                    <td>${comp}</td>
-                    <td>${''}</td>
-                    <td>${''}</td>
-                    <td>${gasto}</td>
-                    <td>${tipo}</td>
-                    <td>${pago}</td>
-                    <td>${''}</td>
-                    <td>${''}</td>
-                    <td>${''}</td>
-                </tr>`;
+                // Actualiza el contenido de cada celda
+                $editingRow.find("td").eq(0).text(codigo);
+                $editingRow.find("td").eq(1).text(item);
+                $editingRow.find("td").eq(2).text(descripcion);
+                $editingRow.find("td").eq(3).text(precio.toFixed(2));
+                $editingRow.find("td").eq(4).text(iva);
+                $editingRow.find("td").eq(5).text(cuenta);
 
-            // Añadir la fila a la tabla
-            $('#itemTable tbody').append(row);
-            $('#itemTable').css('visibility','visible');
+                $editingRow.removeClass("editing");
+            }else {
+                // Agregar nueva fila
+                itemCounter++;
+                const rowId = `item-${itemCounter}`;
+                const row = `
+                    <tr id="${rowId}" data-precio="${precio}" data-iva="${iva}" data-cuenta="${cuenta}">
+                        <td style="display:none;">${codigo}</td>
+                        <td>${item}</td>
+                        <td>${descripcion}</td>
+                        <td>${precio.toFixed(2)}</td>
+                        <td>${iva}</td>
+                        <td>${cuenta}</td>
+                    </tr>`;
+                $('#itemTable tbody').append(row);
+                $('#itemTable').show();
+
+            }
             $('#eliminarSeleccionados').show();
-            limpiarCampos();
+            $('#clonarItem').css('display','block');
+            $('#itemTable').css('visibility', 'visible');
             actualizarTotal();
-
             $('#totales').show();
+            limpiarCampos();
         } else {
             alert('Por favor, completa todos los campos antes de agregar el item.');
         }
     });
+    $("#itemTable").on("dblclick", "tr", function() {
+        var $row = $(this);
+        // Asume que la fila tiene las 6 celdas en el orden correcto
+        var codigo = $row.find("td").eq(0).text().trim();    // Código (oculto)
+        var item = $row.find("td").eq(1).text().trim();        // Item
+        var descripcion = $row.find("td").eq(2).text().trim(); // Descripción
+        var precio = $row.find("td").eq(3).text().trim();      // Precio
+        var iva = $row.find("td").eq(4).text().trim();         // IVA
+        var cuenta = $row.find("td").eq(5).text().trim();      // Cuenta
 
+        // Cargar los datos en los campos de entrada
+        $("#item").val(item);
+        $("#id_descripcion_item input").val(descripcion);
+        $("#id_precio input").val(precio);
+
+        // Guardar datos adicionales en el input de precio (por si se necesitan al actualizar)
+        $("#id_precio input").data("iva", iva);
+        $("#id_precio input").data("cuenta", cuenta);
+        $("#id_precio input").data("codigo", codigo);
+
+        // Marcar la fila como "editing" para que se actualice en lugar de agregar una nueva
+        $("#itemTable tr").removeClass("editing");
+        $row.addClass("editing");
+    });
+    // Botón para clonar la fila seleccionada
+    $("#clonarItem").on("click", function() {
+        var $selected = $("#itemTable tr.table-active");
+        if ($selected.length > 0) {
+            itemCounter++;
+            var $clone = $selected.clone();
+            $clone.attr("id", "item-" + itemCounter);
+            $clone.removeClass("selected editing");
+            $clone.removeClass("table-active");
+            $clone.removeClass("table-primary");
+            $("#itemTable tbody").append($clone);
+            actualizarTotal();
+        } else {
+            alert("Selecciona una fila para clonar.");
+        }
+    });
 
     $('#itemTable tbody').on('click', 'tr', function() {
         $(this).toggleClass('table-active table-primary');
@@ -398,85 +439,6 @@ function abrir_modal() {
         }
     });
 
-    $('#item').autocomplete({
-    source: function(request, response) {
-        $.ajax({
-            url: "/admin_cont/buscar_item_v",
-            dataType: 'json',
-            data: {
-                term: request.term
-            },
-            success: data => response(data.map(item => ({
-                label: item.text,
-                value: item.text,
-                id: item.id
-            }))),
-            error: xhr => console.error('Error al buscar items:', xhr)
-        });
-    },
-    minLength: 2,
-    appendTo: "#proveedoresModal", // Asegúrate de usar el contenedor modal adecuado
-    select: function(event, ui) {
-        $.ajax({
-            url: "/admin_cont/buscar_items_v",
-            data: { id: ui.item.id },
-            dataType: 'json',
-            success: servicio => {
-                $('#id_precio input').data({
-                    iva: servicio.iva,
-                    cuenta: servicio.cuenta,
-                    codigo: servicio.item
-                });
-                $('#id_descripcion_item input').val(servicio.nombre);
-            },
-            error: xhr => console.error('Error al obtener los detalles del item:', xhr)
-        });
-    }
-});
-let itemCounter = 0;
-
-$('#agregarItem').off('click').on('click', function() {
-    // Obtén los valores antes de cualquier operación
-    const item = $('#item').val();
-    const descripcion = $('#id_descripcion_item input').val();
-    const precio = parseFloat($('#id_precio input').val());
-    const iva = $('#id_precio input').data('iva');
-    const cuenta = $('#id_precio input').data('cuenta');
-    const codigo = $('#id_precio input').data('codigo');
-
-    // Valida los campos antes de proceder
-    if (item && descripcion && !isNaN(precio)) {
-        itemCounter++;
-        const rowId = `item-${itemCounter}`;
-
-        // Agrega una nueva fila a la tabla
-        const row = `
-            <tr id="${rowId}" data-precio="${precio}" data-iva="${iva}" data-cuenta="${cuenta}">
-                <td>${codigo}</td>
-                <td>${descripcion}</td>
-                <td>${precio.toFixed(2)}</td>
-                <td>${iva}</td>
-                <td>${cuenta}</td>
-            </tr>`;
-
-        $('#itemTable tbody').append(row);
-        $('#itemTable').css('visibility', 'visible'); // Asegúrate de que la tabla sea visible
-        $('#eliminarSeleccionados').show();
-
-        // Limpia solo los campos relevantes
-        $('#item').val('');
-        $('#id_descripcion_item input').val('');
-        $('#id_precio input').val('');
-        $('#id_precio input').data('iva', '');
-        $('#id_precio input').data('cuenta', '');
-        $('#id_precio input').data('codigo', '');
-
-        actualizarTotal(); // Actualiza los totales después de agregar el ítem
-        $('#totales').show();
-    } else {
-        alert('Por favor, completa todos los campos antes de agregar el item.');
-    }
-});
 
 }
 function resetModal(modalId) {
@@ -516,6 +478,7 @@ function actualizarTotal() {
     $('#itemTable tbody tr').each(function() {
         const precio = parseFloat($(this).data('precio')) || 0;
         neto += precio;
+        console.log($(this));
     });
 
     $('#id_neto input').val(neto.toFixed(2)).prop('readonly', true);
@@ -528,14 +491,11 @@ function actualizarTotal() {
         const precioFinal = iva === 'Basico' ? precio * 1.22 : precio;
         total += precioFinal;
 
-        console.log(iva);
-        console.log('precio ' + precio);
     });
 
     $('#id_total input').val(total.toFixed(2)).prop('readonly', true);
 
     const iva_t = total - neto;
-    console.log('total ' + total);
     $('#id_iva input').val(iva_t.toFixed(2)).prop('readonly', true);
 }
 $('#abrir_arbi_prov').on('click', function (event) {

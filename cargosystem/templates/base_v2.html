@@ -54,7 +54,6 @@
             const miBoton = document.getElementById("btntoggle");
             // Verificar si la cookie existe
             const aux = getCookie('toggle');
-            console.log(aux);
             if (aux == null) {
                 setCookieToggle();
                 event.preventDefault();
@@ -64,7 +63,6 @@
 
         function setCookieToggle() {
             aux = getCookie('toggle');
-            console.log(aux);
             if (aux == null) {
                  document.cookie = 'toggle=true'; // Establecer la cookie con el valor booleano "true"
             } else {

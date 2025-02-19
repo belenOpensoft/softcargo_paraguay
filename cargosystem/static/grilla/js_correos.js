@@ -137,7 +137,6 @@ function format ( d ) {
     // `d` is the original data object for the row
     text = '<table cellpadding="5" class="table table-condensed" cellspacing="0" border="0" style="padding-left:50px;"><tfoot>';
     mensaje = d[10].replace('\n','<br>');
-    console.log(d[10]);
     text += '<tr><td><p>MENSAJE: ' + mensaje + '</p></td></tr>';
     if(d[9].length > 0){
         text += '<tr><td>ERROR: ' + d[9] + '</td></tr>';

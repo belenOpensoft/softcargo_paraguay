@@ -202,8 +202,9 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-end mt-3">
+         <div class="d-flex justify-content-end mt-3 gap-2">
             <button type="button" id="eliminarSeleccionados" class="btn btn-danger" style="display:none;">Eliminar</button>
+            <button type="button" id="clonarItem" class="btn btn-secondary btn-sm" style="display:block;">Clonar Item</button>
         </div>
 
         <table id="itemTable" class="table table-striped mt-4 flex-wrap" style="display: block !important; visibility:hidden; overflow-x:auto;">
@@ -262,7 +263,6 @@
 {% include 'arbitraje.html' %}
 
 <script src="{% static 'js/jquery-ui.min_last.js' %}"></script>
-<script src="{% static 'datatables/jquery.dataTables_last.min.js' %}"></script>
 <script src="{% static 'grilla/proveedores_gastos.js' %}"></script>
 <link rel="stylesheet" href="{% static 'jquery-ui/jquery-ui_last.css' %}">
 {% endblock contenido %}

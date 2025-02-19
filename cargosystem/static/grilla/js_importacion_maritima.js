@@ -87,8 +87,10 @@ $(document).ready(function () {
 
     // Evento para limpiar todos los filtros
     $(document).on("click", "#clear", function() {
+        awbRegex='';
         $(".filter-input").val("").trigger("keyup"); // Limpia los inputs y activa la búsqueda
         $(".filter-input").removeClass("is-invalid"); // Se quita el rojo si se vacía
+        table.ajax.reload();
     });
 
     // Evento para resaltar los inputs cuando tienen contenido
@@ -165,7 +167,6 @@ $(document).ready(function () {
             "url": "/importacion_maritima/source_master",
             'type': 'GET',
             "data": function (d) {
-            console.log(awbRegex);
                 return $.extend({}, d, {
                     "buscar": buscar,
                     "que_buscar": que_buscar,
@@ -1256,7 +1257,6 @@ var expandedRow;
                 url: '/importacion_maritima/source_embarque_aereo/' + selectedRowId + '/',
                 type: 'GET',
                 success: function (response) {
-               // console.log(data);
                     row.child(format(response.data)).show();
                     tr.addClass('shown');
                     expandedRow = row;
@@ -3330,7 +3330,6 @@ table_seg = $('#tabla_seguimiento_IH').DataTable({
             "url": "/importacion_maritima/source_seguimientos_modo/IMPORT%20MARITIMO/",
             'type': 'GET',
             "data": function (d) {
-                console.log(d);
                 return $.extend({}, d, {
                     "buscar": buscar,
                     "que_buscar": que_buscar,
@@ -3958,8 +3957,6 @@ let numero=localStorage.getItem('numero_master_seleccionado');
         ],"rowCallback": function (row, data) {
                 $(row).find('td:eq(3)').css('background-color', '#99cc99');
                 $(row).find('td:eq(4)').css('background-color', '#CC9393');
-                console.log(data[3]);
-                console.log(data[4]);
                 if (parseFloat(data[4]) > 0){
                  //ingresos += parseFloat(data[4]);
                  egresos += parseFloat(data[4]);
@@ -4550,7 +4547,6 @@ $('.email').click(function () {
         }
     });
 function get_data_email(row,title,numero,id) {
-console.log(title);
     let miurl = "/importacion_maritima/get_data_email/";
     var toData = {
         'title': title,
@@ -5288,7 +5284,6 @@ function filtrar_tabla_master(data, e) {
             'X-CSRFToken': csrf_token
         },
         success: function(response) {
-            console.log(response);
             let awbList = response.resultados;
             if (awbList && awbList.length > 0) {
                 // Eliminar duplicados y construir la regex

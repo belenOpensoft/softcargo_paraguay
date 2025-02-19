@@ -85,8 +85,10 @@ $('#tabla_importterrestre tfoot th').each(function(index) {
 
     // Evento para limpiar todos los filtros
     $(document).on("click", "#clear", function() {
+        awbRegex='';
         $(".filter-input").val("").trigger("keyup"); // Limpia los inputs y activa la búsqueda
         $(".filter-input").removeClass("is-invalid"); // Se quita el rojo si se vacía
+        table.ajax.reload();
     });
 
     // Evento para resaltar los inputs cuando tienen contenido

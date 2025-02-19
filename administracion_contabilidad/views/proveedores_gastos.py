@@ -25,7 +25,7 @@ param_busqueda = {
 columns_table = {
     0: 'autogenerado',
     1: 'fecha',
-    2: 'proveedor',
+    2: 'cliente',
     3: 'numero',
     4: 'detalle',
     5: 'tipo',
@@ -401,6 +401,7 @@ def source_proveedoresygastos(request):
 
         # Filtros y lógica de búsqueda
         filtro = get_argumentos_busqueda(**args)
+        order = get_order(request, columns_table)
         start = int(request.GET.get('start', 0))
         length = int(request.GET.get('length', 10))
         buscar = request.GET.get('buscar', '')
@@ -413,9 +414,9 @@ def source_proveedoresygastos(request):
 
         # Consulta a la base de datos
         if filtro:
-            registros = VistaProveedoresygastos.objects.filter(**filtro).order_by()
+            registros = VistaProveedoresygastos.objects.filter(**filtro).order_by(*order)
         else:
-            registros = VistaProveedoresygastos.objects.all().order_by()
+            registros = VistaProveedoresygastos.objects.all().order_by(*order)
 
         # Preparación de la respuesta
         resultado = {
@@ -429,6 +430,30 @@ def source_proveedoresygastos(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+def get_order(request, columns):
+    try:
+        result = []
+        order_column = request.GET['order[0][column]']
+        order_dir = request.GET['order[0][dir]']
+        order = columns[int(order_column)]
+        if order_dir == 'desc':
+            order = '-' + columns[int(order_column)]
+        result.append(order)
+        i = 1
+        while i > 0:
+            try:
+                order_column = request.GET['order[' + str(i) + '][column]']
+                order_dir = request.GET['order[' + str(i) + '][dir]']
+                order = columns[int(order_column)]
+                if order_dir == 'desc':
+                    order = '-' + columns[int(order_column)]
+                result.append(order)
+                i += 1
+            except Exception as e:
+                i = 0
+        return result
+    except Exception as e:
+        raise TypeError(e)
 
 def get_data(registros_filtrados):
     try:

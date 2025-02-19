@@ -1095,3 +1095,21 @@ def cargar_preferencias(request):
         return JsonResponse({"preferencias": datos})
     else:
         return HttpResponseBadRequest("Método no permitido.")
+
+
+def eliminar_preferencia(request):
+    if request.method == "POST":
+        pref_id = request.POST.get("id")
+        if not pref_id:
+            return HttpResponseBadRequest("Falta el parámetro 'id'.")
+        try:
+            # Asegúrate de que solo el usuario propietario pueda eliminar su preferencia
+            preferencia = PreferenciasReporteOp.objects.get(id=pref_id, usuario=request.user)
+            preferencia.delete()
+            return JsonResponse({"success": True})
+        except PreferenciasReporteOp.DoesNotExist:
+            return JsonResponse({"error": "Preferencia no encontrada."}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=400)

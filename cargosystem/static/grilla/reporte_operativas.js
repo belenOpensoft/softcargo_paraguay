@@ -146,6 +146,32 @@ $(document).ready(function () {
         $("#guardar-preferencia-modal").dialog("close");
     });
 
+    $("#tabla-preferencias").on("click", ".eliminar-preferencia", function() {
+        var $row = $(this).closest("tr");
+        var prefId = $row.data("preferencia-id");
+
+        if (confirm("¿Estás seguro de eliminar esta preferencia?")) {
+            $.ajax({
+                url: "/eliminar_preferencia/",
+                type: "POST",
+                data: { id: prefId },
+                headers: {
+                    'X-CSRFToken': csrf_token
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $row.remove();
+                    } else {
+                        alert("Error al eliminar la preferencia: " + response.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert("Error al eliminar la preferencia.");
+                }
+            });
+        }
+    });
+
 
 
 });
@@ -160,7 +186,15 @@ function modal_columnas() {
             at: "center top+20", // Agregar desplazamiento de 20px desde la parte superior
             of: window // Referencia a la ventana del navegador
         },
-        buttons: [{
+        buttons: [
+         {
+            class: "btn btn-primary",
+            text: "Generar Reporte",
+            click: function () {
+                triggerFormSubmit();
+            }
+        },
+        {
             class: "btn btn-dark",
             style: "width:100px",
             text: "Cerrar",
@@ -205,6 +239,7 @@ function cargar_preferencia() {
                                 '<td style="visibility:hidden;">' + pref.id + '</td>' +
                                 '<td>' + pref.nombre + '</td>' +
                                 '<td><button type="button" class="btn btn-success btn-sm seleccionar-preferencia">Seleccionar</button></td>' +
+                                '<td><button type="button" class="btn btn-danger btn-sm eliminar-preferencia">Eliminar</button></td>' +
                                 '<td style="display:none;">' + pref.selected_columns + '</td>' +
                                '</tr>';
                     $("#tabla-preferencias tbody").append(fila);
