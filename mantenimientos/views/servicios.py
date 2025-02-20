@@ -2,8 +2,9 @@ import datetime
 import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
-from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render
+from django.db import IntegrityError
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.shortcuts import render, get_object_or_404
 
 from mantenimientos.forms import add_banco_form, edit_banco_form, edit_servicio_form, add_servicio_form
 from mantenimientos.models import Bancos, Paises, Servicios
@@ -151,8 +152,11 @@ def agregar_servicio(request):
                     servicio.nombre = form.cleaned_data['nombre']
                     servicio.contable = form.cleaned_data['contable']
                     servicio.tipogasto = form.cleaned_data['tipo_gasto']
+                    servicio.nombreingles = form.cleaned_data['nombreingles']
+                    servicio.activa = 0 if form.cleaned_data['activa'] == False else 1
+                    servicio.tasa = form.cleaned_data['tasa']
                     servicio.save()
-                    messages.success(request, 'Banco agregada con èxito')
+                    messages.success(request, 'Servicio agregado con èxito')
                     return HttpResponseRedirect('/servicios')
                 else:
                     messages.error(request, 'Formulario invalido, intente nuevamente.')
@@ -163,6 +167,7 @@ def agregar_servicio(request):
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect("/servicios")
+
 
 @login_required(login_url='/')
 def modificar_servicio(request, id_servicio):
@@ -175,6 +180,9 @@ def modificar_servicio(request, id_servicio):
                 'codigo': servicio.codigo,
                 'contable': servicio.contable,
                 'tipo_gasto': servicio.tipogasto,
+                'nombreingles': servicio.nombreingles,
+                'activa': servicio.activa,
+                'tasa': servicio.tasa,
             },
 
             ),
@@ -186,6 +194,9 @@ def modificar_servicio(request, id_servicio):
                     servicio.nombre = form.cleaned_data['nombre']
                     servicio.contable = form.cleaned_data['contable']
                     servicio.tipogasto = form.cleaned_data['tipo_gasto']
+                    servicio.nombreingles = form.cleaned_data['nombreingles']
+                    servicio.activa = 0 if form.cleaned_data['activa'] == False else 1
+                    servicio.tasa = form.cleaned_data['tasa']
                     servicio.save()
                     messages.success(request, 'Servicio modificado con èxito')
                     return HttpResponseRedirect('/servicios')
@@ -223,3 +234,37 @@ def eliminar_servicio(request):
     return HttpResponse(data_json, mimetype)
 
 
+@login_required(login_url="/")
+def clonar_servicio(request, id_servicio):
+    try:
+        resultado = {}
+        if not request.user.has_perms(["mantenimientos.add_servicios"]):
+            resultado['resultado'] = 'No tiene permisos para realizar esta accion.'
+
+        servicio_original = get_object_or_404(Servicios, id=id_servicio)
+        ser = Servicios()
+        opuesto = request.POST.get('opuesto')
+        tipo = servicio_original.tipogasto
+        if opuesto==True:
+            if tipo == 'V':
+                tipo='C'
+            else:
+                tipo = 'V'
+        # Crear un nuevo servicio basado en el original
+        nuevo_servicio = Servicios.objects.create(
+            nombre=servicio_original.nombre,
+            codigo=ser.get_codigo(),
+            contable=servicio_original.contable,
+            tipogasto=tipo,
+            nombreingles=servicio_original.nombreingles,
+            activa=servicio_original.activa,
+            tasa=servicio_original.tasa,
+        )
+
+        return JsonResponse({'status': 'success', 'message': 'Servicio clonado con éxito'})
+
+    except IntegrityError:
+        return JsonResponse({'status': 'error', 'message': 'Error: No se pudo clonar el servicio (posible código duplicado)'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})

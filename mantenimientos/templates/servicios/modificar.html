@@ -2,19 +2,15 @@
 
 {% block formulario %}
 <form method="POST">
-    <table class="form-control form-control-a">
-        {% csrf_token %}
-         <tr>
-                <th>{{ form.codigo.label }}</th>
-                <td>{{ form.codigo }}</td>
-            </tr>
+        <table class="form-control form-control-a">
+            {% csrf_token %}
             <tr>
                 <th>{{ form.nombre.label }}</th>
                 <td>{{ form.nombre }}</td>
             </tr>
             <tr>
-                <th>{{ form.observaciones.label }}</th>
-                <td>{{ form.observaciones }}</td>
+                <th>{{ form.nombreingles.label }}</th>
+                <td>{{ form.nombreingles }}</td>
             </tr>
             <tr>
                 <th>{{ form.contable.label }}</th>
@@ -24,7 +20,16 @@
                 <th>{{ form.tipo_gasto.label }}</th>
                 <td>{{ form.tipo_gasto }}</td>
             </tr>
-    </table>
+            <tr>
+                <th>{{ form.tasa.label }}</th>
+                <td>{{ form.tasa }}</td>
+            </tr>
+            <tr>
+                <th>{{ form.activa.label }}</th>
+                <td>{{ form.activa }}</td>
+            </tr>
+
+        </table>
     <br>
     <button type="submit" class="btn btn-primary">Modificar</button>
     <a href="/servicios" class="btn btn-dark" onclick="return(confirm('¿Esta seguro de cancelar?'))">Cancelar</a>

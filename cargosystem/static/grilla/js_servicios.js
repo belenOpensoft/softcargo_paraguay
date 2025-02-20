@@ -32,6 +32,39 @@ $(document).ready(function()
                         }
                     },
                     {
+                        text: 'Clonar',
+                        action: function (e, dt, button, config) {
+                            var row = table.row('.table-secondary').data();
+                            if (row) {
+                                let opuesto = confirm('¿Desea crear el opuesto?');
+                                var id_servicio = row[0]; // Obtiene el ID del servicio seleccionado
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/clonar_servicio/" + id_servicio,  // Llama a la vista en Django
+                                    data: {
+                                        csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                                        opuesto: opuesto
+                                    },
+                                    success: function(response) {
+                                        if (response.status === "success") {
+                                            alert(response.message);
+                                            table.ajax.reload();  // Recargar la tabla después de clonar
+                                        } else {
+                                            alert("Error: " + response.message);
+                                        }
+                                    },
+                                    error: function() {
+                                        alert("Ocurrió un error al clonar el servicio.");
+                                    }
+                                });
+
+                            } else {
+                                alert('Debe seleccionar un servicio para clonar.');
+                            }
+                        }
+                    },
+                    {
                         text: 'Modificar',
                         action: function (e, dt, button, config) {
                             if(row = table.row('.table-secondary').data()){

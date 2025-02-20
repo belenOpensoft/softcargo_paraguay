@@ -37,20 +37,29 @@ def get_datos_caratula(request):
             else:
                 res = '?'
 
-            emb = MantenimientosClientes.objects.get(codigo=row.embarcador_codigo)
-            emb_dir = emb.direccion
-            emb_c = emb.ciudad
-            emb_cc = MantenimientosCiudades.objects.get(codedi=emb_c).nombre
-            emb_p = emb.pais
+            if MantenimientosClientes.objects.filter(codigo=row.embarcador_codigo).exists():
+                emb = MantenimientosClientes.objects.get(codigo=row.embarcador_codigo)
+                emb_dir = emb.direccion
+                emb_c = emb.ciudad
+                emb_cc = MantenimientosCiudades.objects.get(codedi=emb_c).nombre
+                emb_p = emb.pais
+            else:
+                emb = emb_dir = emb_c = emb_cc = emb_p = "S/I"
 
-            con = MantenimientosClientes.objects.get(codigo=row.consignatario_codigo)
-            con_dir = con.direccion
-            con_c = con.ciudad
-            con_cc = MantenimientosCiudades.objects.get(codedi=con_c).nombre
-            con_p = con.pais
-            con_r = con.ruc
+            if MantenimientosClientes.objects.filter(codigo=row.consignatario_codigo).exists():
+                con = MantenimientosClientes.objects.get(codigo=row.consignatario_codigo)
+                con_dir = con.direccion
+                con_c = con.ciudad
+                con_cc = MantenimientosCiudades.objects.get(codedi=con_c).nombre
+                con_p = con.pais
+                con_r = con.ruc
+            else:
+                con = con_dir = con_c = con_cc = con_p = con_r = "S/I"
 
-            agen_c = MantenimientosClientes.objects.get(codigo=row.agente_codigo).ciudad
+            if MantenimientosClientes.objects.filter(codigo=row.agente_codigo).exists():
+                agen_c = MantenimientosClientes.objects.get(codigo=row.agente_codigo).ciudad
+            else:
+                agen_c = "S/I"
 
             texto = texto + '<b>ETD: </b>'+str(res)+'<br>'
             texto = texto + '<b>Vapor: </b>'+str(row.vapor if row.vapor is not None else 'S/I')+'<br>'
@@ -64,23 +73,20 @@ def get_datos_caratula(request):
             texto = texto + str(con_dir if con_dir is not None else '') + ', ' + str(con_cc if con_cc is not None else '') + ', ' + str(con_c if con_c is not None else '') + ', ' + str(con_p if con_p is not None else '') + '<br>'
             texto = texto + 'RUT: ' + str(con_r if con_r is not None else '') + '<br><br>'
             texto = texto + '<strong>Agente: ' + str(f'{row.agente} - ' if row.agente is not None else '') + str(agen_c if agen_c is not None else '') + '<br><br>'
-            texto = texto + 'Deposito: '+str(row.deposito if row.deposito is not None else '') + '</strong><br><br><hr>'
+            texto = texto + 'Deposito: '+str(row.deposito if row.deposito is not None else '') + '</strong><br><br>'
             # Detalle del embarque
             # texto = texto + '<hr><b>Detalle del embarque</b>'
             envase = Envases.objects.filter(numero=id)
-            mercaderia = VCargaaerea.objects.get(numero=row.numero).mercaderia
+            mercaderia = VCargaaerea.objects.filter(numero=row.numero)
+            reg = ''
+            if mercaderia.exists():
+                reg = ', '.join([mer.mercaderia for mer in mercaderia if mer.mercaderia])
             if row.modo == 'IMPORT AEREO':
                 if envase.count() > 0 :
                     for registro in envase:
-                        # texto += '<br><b>'+ str(registro.tipo if registro.tipo is not None else '').upper() +'</b>: <b>'+ str(registro.unidad if registro.unidad is not None else '').upper() +'</b>: '+ str('{:.3f}'.format(registro.cantidad) if registro.cantidad is not None else '')
-                        # texto += ' <b>CNTR:</b> '+ str(registro.nrocontenedor if registro.nrocontenedor is not None else '')
-                        # texto += ' <b>SEAL:</b> '+ str(registro.precinto if registro.precinto is not None else '')
-                        # texto += ' <b>WT:</b> '+ str('{:.3f}'.format(registro.peso) if registro.peso is not None else '')
-                        # texto += ' <b>VOL:</b> '+ str('{:.3f}'.format(registro.volumen) if registro.volumen is not None else '')
-                        # texto += ' <b>BULTOS:</b> '+ str(registro.bultos) if registro.bultos is not None else ''
                         texto += 'Nro Contenedor: ' + str(registro.nrocontenedor if registro.nrocontenedor is not None else '') + '<br>'
                         texto += 'Nro Bultos: ' + str(f'{registro.bultos} {registro.envase}' if registro.bultos is not None else '') + '<br>'
-                        texto += 'Mercaderia: ' + str(mercaderia if mercaderia is not None else '') + '<br><br>'
+                        texto += 'Mercaderia: ' + str(reg if reg is not None else '') + '<br><br>'
 
                         texto += 'Peso: ' + str(registro.peso if registro.peso is not None else '') + '<br>'
                         texto += 'Volumen: ' + str(registro.volumen if registro.volumen is not None else '') + '<br>'
@@ -94,7 +100,7 @@ def get_datos_caratula(request):
 
                         texto += 'Nro Contenedor: ' + str(registro.nrocontenedor if registro.nrocontenedor is not None else '') + '<br>'
                         texto += 'Nro Bultos: ' + str(f'{registro.bultos} {registro.envase}' if registro.bultos is not None else '') + '<br>'
-                        texto += 'Mercaderia: ' + str(mercaderia if mercaderia is not None else '') + '<br><br>' '<br><br>'
+                        texto += 'Mercaderia: ' + str(reg if reg is not None else '') + '<br><br>' '<br><br>'
 
                         texto += 'Peso: ' + str(registro.peso if registro.peso is not None else '') + '<br>'
                         texto += 'Volumen: ' + str(registro.volumen if registro.volumen is not None else '') + '<br>'

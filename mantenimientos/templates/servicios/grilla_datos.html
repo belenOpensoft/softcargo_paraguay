@@ -5,6 +5,7 @@
 
 {% block table_datatable %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/mantenimientos/mantenimientos.css'  %}">
+            {% csrf_token %}
 
     <table id="tabla_servicio" class="table table-striped table-bordered" cellspacing="0" width="100%">
         <thead>

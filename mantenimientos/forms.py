@@ -878,19 +878,34 @@ class add_servicio_form(forms.Form):
     ]
 
     nombre = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 15, }),
-        label="Nombre", max_length=15)
-    contable = forms.IntegerField(widget=forms.NumberInput(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True}, ),
-                          required=False, label="Contabilidad")
+        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", }),
+        label="Nombre")
+
+    contable = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}), label="Cuenta", required=False)
+
 
     tipo_gasto = forms.ChoiceField(
         choices=OPCIONES,
         widget=forms.Select(attrs={'class': 'form-control'}),label='Tipo Servicio'
     )
 
+    tasa = forms.ChoiceField(
+        choices=[
+            ('B', 'Básico'),
+            ('X', 'Exento'),
+        ],
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="IVA"
+    )
+    nombreingles = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", }),
+        label="Inglés")
+
+    activa = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}), label="Servicio activo")
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['contable'].choices = [('', 'Seleccione una cuenta')] + [(c.xcodigo, c.xnombre) for c in Cuentas.objects.all()]
 
 class edit_servicio_form(forms.Form):
     OPCIONES = [
@@ -901,16 +916,32 @@ class edit_servicio_form(forms.Form):
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True,'readonly': True}, ), required=True,
                                 label="Código")
     nombre = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 15, }),
-        label="Nombre", max_length=15)
-    contable = forms.IntegerField(widget=forms.NumberInput(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True,}, ),
-                          required=False, label="Contabilidad")
+        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", }),
+        label="Nombre")
+
+    contable = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}), label="Cuenta", required=False)
 
     tipo_gasto = forms.ChoiceField(
         choices=OPCIONES,
-        widget=forms.Select(attrs={'class': 'form-control'}),label='Tipo Servicio'
+        widget=forms.Select(attrs={'class': 'form-control'}), label='Tipo Servicio'
     )
+
+    tasa = forms.ChoiceField(
+        choices=[
+            ('B', 'Básico'),
+            ('X', 'Exento'),
+        ],
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="IVA"
+    )
+    nombreingles = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", }),
+        label="Inglés")
+
+    activa = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+                                label="Servicio activo")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['contable'].choices = [('', 'Seleccione una cuenta')] + [(c.xcodigo, c.xnombre) for c in
+                                                                             Cuentas.objects.all()]
