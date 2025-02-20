@@ -5,6 +5,34 @@ var wHeight = $(window).height();
 var dHeight = wHeight * 0.30;
 
 $(document).ready(function() {
+
+    $("#cliente-modal").dialog({
+        autoOpen: false,
+        width: 800,
+        modal: true
+    });
+    $("#cliente-modal").tabs();
+
+    $("#id_vendedor").autocomplete({
+        source: '/autocomplete_vendedores/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#id_vendedor').val(ui.item['label']);
+                 $('#vendedor_input').val(ui.item['id']);
+                 $('#id_vendedor').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+            } else {
+                $(this).val('');
+                $('#id_vendedor').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#id_vendedor').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
     var contador = 1;
 
     $('#tabla_cliente tfoot th').each(function(index) {
@@ -26,19 +54,76 @@ $(document).ready(function() {
             {
                 text: 'Agregar',
                 action: function (e, dt, button, config) {
-                    window.location.replace("/agregar_socio_comercial");
+                    //window.location.replace("/agregar_socio_comercial");
+                    $('#clienteform')[0].reset();
+                    $("#cliente-modal").tabs("refresh");
+                    $('#cliente-modal').dialog("open");
+                    $('#id_socio').val('');
                 }
             },
             {
-                text: 'Modificar',
-                action: function (e, dt, button, config) {
-                    if (row = table.row('.table-secondary').data()) {
-                        window.location.replace("/modificar_socio_comercial/" + row[0]);
-                    } else {
-                        alert('Debe seleccionar un registro');
-                    }
+            text: 'Modificar',
+            action: function (e, dt, button, config) {
+                if (row = table.row('.table-secondary').data()) {
+                    var id_socio = row[0];  // ID del socio comercial seleccionado
+
+                    // Hacer la petición AJAX para obtener los datos
+                    $.ajax({
+                        type: "GET",
+                        url: "/modificar_socio_comercial/" + id_socio,  // Llama a la vista con el ID
+                        success: function(response) {
+                        console.log(response);
+                            if (response.status === "success") {
+                                var formData = response.form_data;
+
+                                // Llenar los campos del formulario con los datos recibidos
+                                $("#id_socio").val(id_socio); // Asignar ID al campo oculto
+                                $("#id_tipo").val(formData.tipo);
+                                $("#id_empresa").val(formData.empresa);
+                                $("#id_razonsocial").val(formData.razonsocial);
+                                $("#id_direccion").val(formData.direccion);
+                                $("#id_localidad").val(formData.localidad);
+                                $("#id_cpostal").val(formData.cpostal);
+                                $("#id_ruc").val(formData.ruc);
+                                $("#id_telefono").val(formData.telefono);
+                                $("#id_fecalta").val(formData.fecalta);
+                                $("#id_contactos").val(formData.contactos);
+                                $("#id_observaciones").val(formData.observaciones);
+                                $("#ciudad-select").val(formData.ciudad);
+                                $("#pais-select").val(formData.pais);
+                                $("#id_activo").prop("checked", formData.activo);
+                                $("#vendedor_input").val(formData.vendedor);
+                                $("#id_vendedor").val(formData.vendedor);
+                                $("#id_plazo").val(formData.plazo);
+                                $("#id_limite").val(formData.limite);
+                                $("#id_ctavta").val(formData.ctavta);
+                                $("#id_ctacomp").val(formData.ctacomp);
+                                $("#id_emailad").val(formData.emailad);
+                                $("#id_emailem").val(formData.emailem);
+                                $("#id_emailea").val(formData.emailea);
+                                $("#id_emailet").val(formData.emailet);
+                                $("#id_emailim").val(formData.emailim);
+                                $("#id_emailia").val(formData.emailia);
+                                $("#id_emailit").val(formData.emailit);
+                                // Actualizar las pestañas del modal
+                                $("#cliente-modal").tabs("refresh");
+
+                                // Abrir el modal
+                                $('#cliente-modal').dialog("open");
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function() {
+                            alert("Ocurrió un error al obtener los datos del socio comercial.");
+                        }
+                    });
+                } else {
+                    alert('Debe seleccionar un registro');
                 }
-            },
+            }
+        },
+
             {
                 text: 'Eliminar',
                 action: function (e, dt, button, config) {
@@ -133,6 +218,9 @@ $(document).ready(function() {
         }
     });
 
+
+
+
     $(table.table().container()).on('keyup', 'tfoot input', function() {
         table.column($(this).data('index')).search(this.value).draw();
     });
@@ -168,175 +256,27 @@ $(document).ready(function() {
 });
 
 
+function enviar_form(e){
+    console.log('entro');
+    e.preventDefault();
+
+    $.ajax({
+        type: "POST",
+        url: "/agregar_socio_comercial" + ($('#id_socio').val() || ""),  // Agregar ID si es edición
+        data: $('#clienteform').serialize(),
+        success: function(response) {
+            if (response.status === 'success') {
+                alert(response.message);
+                $('#cliente-modal').dialog("close");
+                table.ajax.reload(); // Recargar la tabla
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function() {
+            alert("Ocurrió un error inesperado.");
+        }
+    });
+}
 
 
-
-
-//$(document).ready(function()
-//    {
-//        var contador = 1;
-//
-//        $('#tabla_cliente tfoot th').each( function () {
-//            var title = $(this).text();
-//            if(title != ''){
-//                $(this).html( '<input type="text" class="form-control" id="buscoid_' + contador + '" type="text" placeholder="Buscar '+title+'"  autocomplete="off" />' );
-//                contador++;
-//            }else{
-//                var aux2 = 'Borrar';
-//                $(this).html( '<button class="btn" title="Borrar filtros" id="clear" ><span class="glyphicon glyphicon-erase"></span></button> ' );
-//            }
-//        });
-//
-//        table = $('#tabla_cliente').DataTable( {
-//             "stateSave": true,
-//              "dom": 'Btlipr',
-//              "scrollX": true,
-////             dom: 'Brtl',
-//             buttons: [
-//
-//                    {
-//                        text: 'Agregar',
-//                        action: function (e, dt, button, config) {
-//                            window.location.replace("/agregar_socio_comercial");
-//                        }
-//                    },
-//                    {
-//                        text: 'Modificar',
-//                        action: function (e, dt, button, config) {
-//                            if(row = table.row('.selected').data()){
-//                                window.location.replace("/modificar_socio_comercial/" + row[0]);
-//                            }else{
-//                                alert('Debe seleccionar un registro');
-//                            }
-//                        }
-//                    },
-//                    {
-//                        text: 'Eliminar',
-//                        action: function (e, dt, button, config) {
-//                            if(row = table.row('.selected').data()){
-//                                if(confirm('Esta seguro de eliminar: ' + row[2])){
-//                                    miurl = "/eliminar_socio_comercial";
-//                                    var toData = { 'id' : row[0] };
-//                                    $.ajax({
-//                                        type: "GET",
-//                                        url: miurl,
-//                                        data: toData,
-//                                        success:function(resultado){
-//                                            aux = resultado['resultado'];
-//                                            if(aux == 'exito'){
-//                                                table.ajax.reload();
-//
-//                                            }else{
-//                                                alert(aux);
-//                                            }
-//                                        }
-//                                    });
-//                                }
-//                            }else{
-//                                alert('Debe seleccionar un registro');
-//                            }
-//                        }
-//                    },
-//
-//            ],
-//             "columnDefs": [
-//                {
-//                    "targets": [ 0 ],
-//                    "orderable": false,
-//                    "data": null,
-//                    "defaultContent": '',
-//                    "visible": false
-//                },
-//                {
-//                    "targets": [ 1 ],
-//                },
-//                {
-//                    "targets": [ 2],
-//                },
-//                {
-//                    "targets": [ 3],
-//                },
-//                {
-//                    "targets": [ 4],
-//                },
-//                {
-//                    "targets": [ 5],
-//                },
-//                {
-//                    "targets": [ 6],
-//                },
-//                {
-//                    "targets": [ 7],
-//                },
-//                {
-//                    "targets": [ 8],
-//                },
-//                {
-//                "targets": [ 9],  // Ajusta el número de columnas para la posición de "tipo"
-////                "data": null,     // Esto asegura que la columna se rellene con datos
-////                "render": function ( data, type, row ) {
-////                    return data || ''; // Renderiza el texto de "tipo"
-//                }
-//            ],
-//            "order": [[ 1, "asc" ]],
-//            "processing": true,
-//            "serverSide": true,
-//            "ajax": "/source_socios_comerciales",
-//            "language": {
-//                url: "/static/datatables/es_ES.json"
-//            },
-//            initComplete: function() {
-////                  $(".dataTables_length select").addClass("form-control");
-//                  var api = this.api();
-//                  // Apply the search
-//                  api.columns().every(function() {
-//                    var that = this;
-//                    $('input', this.footer()).on('keyup change', function() {
-//                      if (that.search() !== this.value) {
-//                        that
-//                          .search(this.value)
-//                          .draw();
-//                      }
-//                    });
-//                  });
-//                },
-//                "drawCallback": function( settings ) {
-//
-//                }
-//        } );
-//        $( table.table().container() ).on( 'keyup', 'tfoot input', function () {
-//            table
-//                .column( $(this).data('index') )
-//                .search( this.value )
-//                .draw();
-//        } );
-//        var state = table.state.loaded();
-//        if ( state ) {
-//
-//          table.columns().eq( 0 ).each( function ( colIdx ) {
-//                var colSearch = state.columns[colIdx].search;
-//                if ( colSearch.search) {
-//                  var aux = colSearch.search;
-//                  document.getElementById('buscoid_' + colIdx).value = aux;
-//                }
-//          } );
-//          table.draw();
-//        };
-//
-//        $('#tabla_cliente tbody').on( 'click', 'tr', function()
-//        {
-//            if ($(this).hasClass('selected') )
-//            {
-//                $(this).removeClass('selected');
-//            }
-//            else
-//            {
-//                var row = table.row( $(this).closest('tr') ).data();
-//                table.$('tr.selected').removeClass('selected');
-//                $(this).addClass('selected');
-//            }
-//        });
-//
-//    $(".alert").delay(4000).slideUp(200, function() {$(this).alert('close');});
-//    }
-//);

@@ -1,49 +1,147 @@
-{% extends 'base_form.html' %}
+<div id="cliente-modal" title="Agregar Cliente" style="display:none;">
+    <form method="POST" id="clienteform">
+        {% csrf_token %}
 
-{% block formulario %}
-    <form method="POST">
-    {% csrf_token %}
+        <ul>
+            <li><a href="#general">General</a></li>
+            <li><a href="#emails">Emails</a></li>
+            <li><a href="#datos-contables">Datos Contables</a></li>
+        </ul>
 
-    <div class="container">
-        <div class="row">
-            {% for field in form.visible_fields %}
-                <div class="col-md-4 mb-3">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger">
-                            {{ field.errors.0 }}
-                        </div>
-                    {% endif %}
+        <!-- Pestaña General (3 columnas) -->
+        <div id="general">
+            <input type="hidden" id="id_socio" name="id_socio" value="">
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="{{ form.empresa.id_for_label }}">{{ form.empresa.label }}</label>
+                        {{ form.empresa }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.razonsocial.id_for_label }}">{{ form.razonsocial.label }}</label>
+                        {{ form.razonsocial }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.direccion.id_for_label }}">{{ form.direccion.label }}</label>
+                        {{ form.direccion }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.localidad.id_for_label }}">{{ form.localidad.label }}</label>
+                        {{ form.localidad }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.cpostal.id_for_label }}">{{ form.cpostal.label }}</label>
+                        {{ form.cpostal }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.ruc.id_for_label }}">{{ form.ruc.label }}</label>
+                        {{ form.ruc }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.telefono.id_for_label }}">{{ form.telefono.label }}</label>
+                        {{ form.telefono }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.fecalta.id_for_label }}">{{ form.fecalta.label }}</label>
+                        {{ form.fecalta }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.contactos.id_for_label }}">{{ form.contactos.label }}</label>
+                        {{ form.contactos }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.observaciones.id_for_label }}">{{ form.observaciones.label }}</label>
+                        {{ form.observaciones }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.ciudad.id_for_label }}">{{ form.ciudad.label }}</label>
+                        {{ form.ciudad }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.pais.id_for_label }}">{{ form.pais.label }}</label>
+                        {{ form.pais }}
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label for="{{ form.activo.id_for_label }}">{{ form.activo.label }}</label>
+                        {{ form.activo }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.tipo.id_for_label }}">{{ form.tipo.label }}</label>
+                        {{ form.tipo }}
+                    </div>
+                    {{ form.vendedor_input }}
+                    <div class="col-md-4">
+                        <label for="{{ form.vendedor.id_for_label }}">{{ form.vendedor.label }}</label>
+                        {{ form.vendedor }}
+                    </div>
                 </div>
-
-                {% if forloop.counter|divisibleby:3 %}
-                    </div><div class="row">  <!-- Cierra la fila y abre una nueva cada 3 campos -->
-                {% endif %}
-            {% endfor %}
+            </div>
         </div>
-    </div>
 
-    <br>
-    <button type="submit" class="btn btn-primary">Guardar</button>
-    <a href="{% url 'vista_socios_comerciales' %}" class="btn btn-dark" onclick="return confirm('¿Está seguro de cancelar?')">Cancelar</a>
-</form>
+        <!-- Pestaña Emails (2 columnas) -->
+        <div id="emails">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="{{ form.emailad.id_for_label }}">{{ form.emailad.label }}</label>
+                        {{ form.emailad }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.emailem.id_for_label }}">{{ form.emailem.label }}</label>
+                        {{ form.emailem }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.emailea.id_for_label }}">{{ form.emailea.label }}</label>
+                        {{ form.emailea }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.emailet.id_for_label }}">{{ form.emailet.label }}</label>
+                        {{ form.emailet }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.emailim.id_for_label }}">{{ form.emailim.label }}</label>
+                        {{ form.emailim }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.emailia.id_for_label }}">{{ form.emailia.label }}</label>
+                        {{ form.emailia }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.emailit.id_for_label }}">{{ form.emailit.label }}</label>
+                        {{ form.emailit }}
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var paisSeleccionado = '{{ form.initial.pais|default_if_none:"" }}'.trim();
+        <!-- Pestaña Datos Contables (2 columnas) -->
+        <div id="datos-contables">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="{{ form.plazo.id_for_label }}">{{ form.plazo.label }}</label>
+                        {{ form.plazo }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.limite.id_for_label }}">{{ form.limite.label }}</label>
+                        {{ form.limite }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.ctavta.id_for_label }}">{{ form.ctavta.label }}</label>
+                        {{ form.ctavta }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.ctacomp.id_for_label }}">{{ form.ctacomp.label }}</label>
+                        {{ form.ctacomp }}
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    if (paisSeleccionado) {
-        var select = document.getElementById('pais-select');
+        <br>
+        <button type="submit" class="btn btn-success" onclick="enviar_form(event)">Guardar</button>
+        <button type="button" class="btn btn-secondary" id="cancelar-modal" onclick="$('#cliente-modal').dialog('close');">Cancelar</button>
+    </form>
+</div>
 
-        for (var i = 0; i < select.options.length; i++) {
-        var valor = String(select.options[i].value).trim();
-            if (valor === String(paisSeleccionado)) {
-                select.options[i].selected = true;
-                break;
-            }
-        }
-    }
-});
-</script>
-{% endblock formulario %}

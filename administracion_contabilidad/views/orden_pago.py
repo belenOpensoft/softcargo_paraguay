@@ -61,6 +61,7 @@ def source_ordenes(request):
         length = int(request.GET.get('length', 10))
         buscar = request.GET.get('buscar', '')
         que_buscar = request.GET.get('que_buscar', '')
+        order = get_order(request, columns_table)
 
         if buscar:
             filtro[que_buscar] = buscar
@@ -69,9 +70,9 @@ def source_ordenes(request):
 
         # Consulta a la base de datos
         if filtro:
-            registros = VistaPagos.objects.filter(**filtro,tipo_factura='O/PAGO').order_by()
+            registros = VistaPagos.objects.filter(**filtro,tipo_factura='O/PAGO').order_by(*order)
         else:
-            registros = VistaPagos.objects.all().order_by()
+            registros = VistaPagos.objects.all().order_by(*order)
 
         finales=[]
 
@@ -106,6 +107,30 @@ def source_ordenes(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+def get_order(request, columns):
+    try:
+        result = []
+        order_column = request.GET['order[0][column]']
+        order_dir = request.GET['order[0][dir]']
+        order = columns[int(order_column)]
+        if order_dir == 'desc':
+            order = '-' + columns[int(order_column)]
+        result.append(order)
+        i = 1
+        while i > 0:
+            try:
+                order_column = request.GET['order[' + str(i) + '][column]']
+                order_dir = request.GET['order[' + str(i) + '][dir]']
+                order = columns[int(order_column)]
+                if order_dir == 'desc':
+                    order = '-' + columns[int(order_column)]
+                result.append(order)
+                i += 1
+            except Exception as e:
+                i = 0
+        return result
+    except Exception as e:
+        raise TypeError(e)
 
 def get_argumentos_busqueda(**kwargs):
     try:

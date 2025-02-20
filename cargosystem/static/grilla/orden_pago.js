@@ -158,9 +158,6 @@ $('#id_importe').on('focusout', function () {
     $('#a_imputar').val(resultado.toFixed(2));
 });
 
-
-
-
 });
 /* INITIAL CONTROL PAGE */
 var wWidth = $(window).width();
