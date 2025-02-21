@@ -4,6 +4,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
+
 from impterrestre.models import ImpterraCargaaerea
 from mantenimientos.models import Productos
 
@@ -247,6 +249,20 @@ def redondear_a_05_o_0(numero):
 #     data_json = json.dumps(resultado)
 #     mimetype = "application/json"
 #     return HttpResponse(data_json, mimetype)
+def get_sugerencias_envases(request, numero):
+    try:
+        carga = get_object_or_404(ImpterraCargaaerea, numero=numero)
+
+        data = {
+            'bultos': carga.bultos,
+            'bruto': carga.bruto,
+            'cbm': carga.cbm
+        }
+
+        return JsonResponse({'status': 'success', 'data': data})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 def eliminar_embarque(request):
     resultado = {}

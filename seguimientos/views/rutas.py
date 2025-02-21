@@ -163,7 +163,8 @@ def datos_seguimiento(request):
         transportista = VGrillaSeguimientos.objects.get(numero=numero).transportista
 
         data = {
-            'salida': seguimiento.loadingdate.strftime('%Y-%m-%d') if seguimiento.loadingdate else None,
+            'salida': seguimiento.etd.strftime('%Y-%m-%d') if seguimiento.etd else None,
+            'llegada': seguimiento.eta.strftime('%Y-%m-%d') if seguimiento.eta else None,
             'origen': seguimiento.origen if seguimiento.origen else None,
             'destino': seguimiento.destino if seguimiento.destino else None,
             'cia': transportista if transportista else None,

@@ -3,7 +3,9 @@ import simplejson
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
+
 from seguimientos.models import Cargaaerea, VCargaaerea, VGrillaSeguimientos, Seguimiento
 
 """ TABLA PUERTO """
@@ -114,8 +116,21 @@ def is_ajax(request):
     except Exception as e:
         messages.error(request,e)
 
+def get_sugerencias_envases(request, numero):
+    try:
+        carga = get_object_or_404(Cargaaerea, numero=numero)
 
+        data = {
+            'bultos': carga.bultos,
+            'bruto': carga.bruto,
+            'nrocontenedor': carga.nrocontenedor,
+            'cbm': carga.cbm
+        }
 
+        return JsonResponse({'status': 'success', 'data': data})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 
 @login_required(login_url='/login/')

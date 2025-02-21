@@ -4,6 +4,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
+
 from impomarit.models import Cargaaerea
 from mantenimientos.models import Productos
 
@@ -261,3 +263,19 @@ def eliminar_embarque(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
+def get_sugerencias_envases(request, numero):
+    try:
+        carga = get_object_or_404(Cargaaerea, numero=numero)
+
+        data = {
+            'bultos': carga.bultos,
+            'bruto': carga.bruto,
+            'nrocontenedor': carga.nrocontenedor,
+            'cbm': carga.cbm
+        }
+
+        return JsonResponse({'status': 'success', 'data': data})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})

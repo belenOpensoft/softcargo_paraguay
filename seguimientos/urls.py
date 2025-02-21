@@ -28,7 +28,7 @@ from seguimientos.views.autocompletes import autocomplete_clientes, autocomplete
     autocomplete_depositos, autocomplete_ciudades_codigo, agregar_buque
 from seguimientos.views.email import get_data_email
 from seguimientos.views.embarques import source_embarques, guardar_embarques, actualizo_datos_embarque, \
-    eliminar_embarque
+    eliminar_embarque, get_sugerencias_envases
 from seguimientos.views.envases import source_envases
 from seguimientos.views.gastos import source_gastos, guardar_gasto, eliminar_gasto
 from seguimientos.views.getdata import get_data_cronologia, get_data_seguimiento
@@ -47,6 +47,7 @@ urlpatterns = [
     path('source_seguimientos', source_seguimientos, name="source_seguimientos"),
     path('datos_seguimiento', datos_seguimiento, name="datos_seguimiento"),
     path('source_envases', source_envases, name="source_envases"),
+    path('get_sugerencias_envases/<int:numero>/', get_sugerencias_envases, name="get_sugerencias_envases"),
     path('source_rutas', source_rutas, name="source_rutas"),
     path('source_logs_seguimiento', source_logs, name="source_logs_seguimiento"),
     path('source_embarques', source_embarques, name="source_embarques"),

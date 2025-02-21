@@ -468,8 +468,7 @@ $(document).ready(function () {
             invalidFields.forEach(field => {
                 console.log('Campo no válido:', field.name); // Muestra los campos no válidos
             });
-
-            alert('Debe completar todos los campos.');
+            alert("Error: " + campo.validationMessage);
         }
         }
 
@@ -1168,67 +1167,68 @@ $(document).ready(function () {
         return;
         }
         get_datos_envases();
+        $('#envases_form').trigger("reset");
 
-            $('#envases_form').trigger("reset");
-            $("#envases_modal").dialog({
-                autoOpen: true,
-                open: function () {
+        $("#envases_modal").dialog({
+            autoOpen: true,
+            open: function () {
 
-                },
-                modal: true,
-                title: "Envases para el seguimiento N°: " + row[0][1],
-                height: wHeight * 0.80,
-                width: wWidth * 0.80,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Eliminar",
-                        class: "btn btn-danger",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma eliminar?')) {
-                                row = table_envases.rows('.table-secondary').data();
-                                if (row.length === 1) {
-                                    miurl = "/eliminar_envase/";
-                                    var toData = {
-                                        'id': row[0][0],
-                                        'csrfmiddlewaretoken': csrf_token,
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        url: miurl,
-                                        data: toData,
-                                        success: function (resultado) {
-                                            aux = resultado['resultado'];
-                                            if (aux == 'exito') {
-                                                var idx = table.cell('.table-secondary', 0).index();
-                                                table_envases.$("tr.table-secondary").removeClass('table-secondary');
-                                                table_envases.row(idx).remove().draw(true);
-                                                $('#tabla_seguimiento').DataTable().ajax.reload();
-                                                mostrarToast('¡Envase eliminado correctamente!', 'success');
-                                            } else {
-                                                alert(aux);
-                                            }
+            },
+            modal: true,
+            title: "Envases para el seguimiento N°: " + row[0][1],
+            height: wHeight * 0.80,
+            width: wWidth * 0.80,
+            class: 'modal fade',
+            buttons: [
+                {
+                    text: "Eliminar",
+                    class: "btn btn-danger",
+                    style: "width:100px",
+                    click: function () {
+                        if (confirm('¿Confirma eliminar?')) {
+                            row = table_envases.rows('.table-secondary').data();
+                            if (row.length === 1) {
+                                miurl = "/eliminar_envase/";
+                                var toData = {
+                                    'id': row[0][0],
+                                    'csrfmiddlewaretoken': csrf_token,
+                                };
+                                $.ajax({
+                                    type: "POST",
+                                    url: miurl,
+                                    data: toData,
+                                    success: function (resultado) {
+                                        aux = resultado['resultado'];
+                                        if (aux == 'exito') {
+                                            var idx = table.cell('.table-secondary', 0).index();
+                                            table_envases.$("tr.table-secondary").removeClass('table-secondary');
+                                            table_envases.row(idx).remove().draw(true);
+                                            $('#tabla_seguimiento').DataTable().ajax.reload();
+                                            mostrarToast('¡Envase eliminado correctamente!', 'success');
+                                        } else {
+                                            alert(aux);
                                         }
-                                    });
-                                } else {
-                                    alert('Debe seleccionar un unico registro');
-                                }
+                                    }
+                                });
+                            } else {
+                                alert('Debe seleccionar un unico registro');
                             }
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    }],
-                beforeClose: function (event, ui) {
-                    // table.ajax.reload();
+                        }
+                    },
+                }, {
+                    text: "Salir",
+                    class: "btn btn-dark",
+                    style: "width:100px",
+                    click: function () {
+                        $(this).dialog("close");
+                    },
+                }],
+            beforeClose: function (event, ui) {
+                // table.ajax.reload();
 
-                }
-            })
+            }
+        })
+        get_sugerencias_envases(row_number);
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -1345,7 +1345,7 @@ $(document).ready(function () {
                                                 var idx = table.cell('.table-secondary', 0).index();
                                                 table_rutas.$("tr.table-secondary").removeClass('table-secondary');
                                                 table_rutas.row(idx).remove().draw(true);
-                                                $('#tabla_gastos').DataTable().ajax.reload();
+                                                $('#tabla_rutas').DataTable().ajax.reload();
                                                 $('#tabla_seguimiento').DataTable().ajax.reload();
                                                 mostrarToast('¡Ruta eliminada correctamente!', 'success');
                                             } else {
@@ -2598,6 +2598,7 @@ function get_datos_seguimiento_rutas(numero) {
 
                 // Asignar valores a los inputs si existen en el formulario
                 $("#id_salida").val(response.datos.salida || "");
+                $("#id_llegada").val(response.datos.llegada || "");
                 $("#id_origen").val(response.datos.origen || "");
                 $("#id_destino").val(response.datos.destino || "");
                 $("#id_cia").val(response.datos.cia || "");
@@ -3019,4 +3020,37 @@ function calcular_volumen(medidas,bultos){
     }
     return total;
 }
+function get_sugerencias_envases(numero) {
 
+    if (numero.trim() === "") {
+        alert("Por favor ingrese un número válido.");
+        return;
+    }
+
+    $.ajax({
+        type: "GET",
+        url: "get_sugerencias_envases/" + numero,
+        success: function(response) {
+        console.log(response.data);
+            if (response.status === "success") {
+                if (response.data.bultos !== null && response.data.bultos !== undefined && response.data.bultos !== "") {
+                    $("#id_bultos").val(response.data.bultos);
+                }
+                if (response.data.bruto !== null && response.data.bruto !== undefined && response.data.bruto !== "") {
+                    $("#id_peso").val(response.data.bruto);
+                }
+                if (response.data.nrocontenedor !== null && response.data.nrocontenedor !== undefined && response.data.nrocontenedor !== "") {
+                    $("#id_nrocontenedor").val(response.data.nrocontenedor);
+                }
+                if (response.data.cbm !== null && response.data.cbm !== undefined && response.data.cbm !== "") {
+                    $("#id_volumen").val(response.data.cbm);
+                }
+            } else {
+                alert("No se encontró la carga aérea.");
+            }
+        },
+        error: function() {
+            alert("Ocurrió un error en la búsqueda.");
+        }
+    });
+}

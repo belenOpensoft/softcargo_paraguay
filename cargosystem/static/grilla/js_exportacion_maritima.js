@@ -4336,12 +4336,46 @@ $("#id_envase_id").val('');
 //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
+            get_sugerencias_envases(selectedRowN);
 
         } else {
             alert('Debe seleccionar al menos un registro');
         }
 }
+function get_sugerencias_envases(numero) {
 
+    if (numero.trim() === "") {
+        alert("Por favor ingrese un número válido.");
+        return;
+    }
+
+    $.ajax({
+        type: "GET",
+        url: "/exportacion_maritima/get_sugerencias_envases/" + numero,
+        success: function(response) {
+        console.log(response.data);
+            if (response.status === "success") {
+                if (response.data.bultos !== null && response.data.bultos !== undefined && response.data.bultos !== "") {
+                    $("#id_bultos").val(response.data.bultos);
+                }
+                if (response.data.bruto !== null && response.data.bruto !== undefined && response.data.bruto !== "") {
+                    $("#id_peso").val(response.data.bruto);
+                }
+                if (response.data.nrocontenedor !== null && response.data.nrocontenedor !== undefined && response.data.nrocontenedor !== "") {
+                    $("#id_nrocontenedor").val(response.data.nrocontenedor);
+                }
+                if (response.data.cbm !== null && response.data.cbm !== undefined && response.data.cbm !== "") {
+                    $("#id_volumen").val(response.data.cbm);
+                }
+            } else {
+                alert("No se encontró la carga aérea.");
+            }
+        },
+        error: function() {
+            alert("Ocurrió un error en la búsqueda.");
+        }
+    });
+}
 //embarques house
 function get_datos_embarques_house(){
  let numero=localStorage.getItem('num_house_gasto');

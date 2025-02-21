@@ -1,7 +1,8 @@
 from django.urls import path
 
 from impomarit.views.calendar import calendario, eventos_calendario, generar_reporte_excel
-from impomarit.views.embarques import source_embarques, eliminar_embarque, guardar_embarques, add_embarque_importado
+from impomarit.views.embarques import source_embarques, eliminar_embarque, guardar_embarques, add_embarque_importado, \
+    get_sugerencias_envases
 from impomarit.views.envases import source_envases, eliminar_envase, guardar_envases, add_envase_importado
 from impomarit.views.gastos import add_gasto_master, source_gastos, eliminar_gasto_master, source_gastos_house, \
     eliminar_gasto_house, add_gasto_house, add_gasto_importado
@@ -22,6 +23,7 @@ from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
+    path('get_sugerencias_envases/<int:numero>/', get_sugerencias_envases, name="get_sugerencias_envases"),
     path(r'source_embarque_aereo_full/<str:master>/', source_embarque_aereo_full, name="source_embarque_aereo_full"),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
     path('source/', source, name='source'),
