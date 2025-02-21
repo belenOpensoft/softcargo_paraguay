@@ -13,6 +13,7 @@ urlpatterns = [
     path('', include('seguimientos.urls')),
     path('', include('notificaciones.urls')),
     path('admin_cont/', include('administracion_contabilidad.urls')),
+    path('consultas_administrativas/', include('consultas_administrativas.urls')),
     path('importacion_maritima/', include('impomarit.urls')),
     path('exportacion_maritima/', include('expmarit.urls')),
     path('importacion_aerea/', include('impaerea.urls')),
@@ -21,8 +22,8 @@ urlpatterns = [
     path('exportacion_terrestre/', include('expterrestre.urls')),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='vista_logout'),
-    path('login/selecccionarol/', select_rol, name="vista_roles"),
-    path('login/selecccionarol/<str:rol>', select_rol, name="vista_roles"),
+    path('login/seleccionarol/', select_rol, name="vista_roles"),
+    path('login/seleccionarol/<str:rol>', select_rol, name="vista_roles"),
     path('cambiar_modulo/<str:modulo>', cambiar_modulo, name="vista_cambiar_modulo"),
     path('correos/', correos, name='vista_correos'),
     path('source_correos/', source_correo, name='source_correos')

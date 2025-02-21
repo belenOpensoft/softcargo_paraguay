@@ -1,3 +1,4 @@
+{% load filtros %}
 <aside id="sidebar" class="bg-success">
             <div class="h-100">
                 <div class="sidebar-logo">
@@ -26,23 +27,23 @@
                         </a>
                     </li>
                     <li class="sidebar-header">
-                        Modulo
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="#" class="sidebar-link" data-bs-toggle="collapse" onclick="toggle_collapse_menu('auth1', this)" >
-                            <i class="fa fa-puzzle-piece pe-2"></i>
-                            {{ request.session.rol }}
-                        </a>
-                        <ul id="auth1" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                           {% for modulo in request.session.roles %}
-                                {% if modulo != request.session.rol %}
-                                    <li class="sidebar-item">
-                                        <a href="{% url 'vista_cambiar_modulo' modulo %}" class="sidebar-link">{{ modulo|capfirst }}</a>
-                                    </li>
-                                {% endif %}
-                           {% endfor %}
-                        </ul>
-                    </li>
+                Modulo
+            </li>
+            <li class="sidebar-item">
+                <a href="#" class="sidebar-link" data-bs-toggle="collapse" onclick="toggle_collapse_menu('auth1', this)" >
+                    <i class="fa fa-puzzle-piece pe-2"></i>
+                    {{ request.session.rol|filtro_menu|capfirst }}
+                </a>
+                <ul id="auth1" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                   {% for modulo in request.session.roles %}
+                        {% if modulo != request.session.rol %}
+                            <li class="sidebar-item">
+                                <a href="{% url 'vista_cambiar_modulo' modulo %}" class="sidebar-link">{{ modulo|capfirst|filtro_menu }}</a>
+                            </li>
+                        {% endif %}
+                   {% endfor %}
+                </ul>
+            </li>
                      <li class="sidebar-header">
                         Sesion usuario
                     </li>

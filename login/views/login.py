@@ -32,7 +32,7 @@ def login_view(request):
                         request.session['roles'] = l_roles
                         if len(l_roles) > 1:
                             request.session['roles'] = l_roles
-                            return HttpResponseRedirect('selecccionarol/')
+                            return HttpResponseRedirect('seleccionarol/')
                         elif len(l_roles) == 1:
                             request.session['rol'] = str(l_roles[0])
                             request.session['empresa'] = settings.EMPRESA

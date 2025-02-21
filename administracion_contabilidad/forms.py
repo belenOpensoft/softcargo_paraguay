@@ -372,17 +372,6 @@ class ProveedoresGastos(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'}),
     )
 
-    tercerizado = forms.BooleanField(
-        required=False,
-        label="Por cuenta y orden de",
-    )
-
-    proveedor2 = forms.CharField(
-        required=False,
-        label="",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Buscar cliente'}),
-    )
-
     mes_anio_actual = datetime.datetime.now().strftime('%m/%Y')
 
     imputar = forms.CharField(

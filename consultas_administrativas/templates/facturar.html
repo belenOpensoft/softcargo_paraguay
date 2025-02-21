@@ -1,0 +1,65 @@
+
+{% load static %}
+<style>
+    #segundo_grupo{
+    margin-top:5%;
+    }
+    #segundo_grupo button{
+        padding: 6px 18px;
+    }
+</style>
+<div id="facturar_modal" style="display:none;">
+    <form id="facturar_form" method="post">
+
+        <div class="form-row" style="display:flex; justify-content:space-between; align-items: flex-end; width:90%;">
+        <div class="form-group col-md-4" style="display:flex; justify-content:space-around;">
+            </th> <label for="destinatario" > <b> Destinatario de facturación </b></label>
+            <input type="hidden" class="form-control" id="destinatario_input" style="width:30px;margin-right: 5px;" readonly>
+            <input class="form-control" type="text" name="destinatario" id="destinatario">
+        </div>
+
+        <div class="form-group col-md-2" style="display: flex;justify-content: space-around;align-items: baseline;">
+        <label for="concepto_detalle">Concepto + detalle</label>
+        <input type="checkbox" name="concepto_detalle" id="concepto_detalle">
+        </div>
+        <button class="btn btn-secondary" onclick="asignar_costo(event)" id="facturar_a"> Facturar a..</button>
+        <button class="btn btn-secondary" onclick="asignar_costo_todos(event)" id="facturar_todos"> Facturar a todos</button>
+        <button class="btn btn-secondary" onclick="asignar_no(event)" id="no_facturar"> No facturar</button>
+        <button class="btn btn-secondary" onclick="asignar_no_todos(event)" id="ninguno"> No facturar a ninguno</button>
+
+        </div>
+
+    </form>
+        <div class="form-row" style="display:flex; align-items: flex-end;">
+        <div class="form-group col-md-2" style="margin-right:10px;">
+            <label for="total_ingresos" > <b>Total de ingresos</b> </label>
+            <input class="form-control" type="number" name="total_ingresos" id="total_ingresos" readonly>
+        </div>
+        <div id="segundo_grupo" class="form-group col-md-4">
+        <button class="btn btn-secondary" id="excel_factura"> Excel</button>
+        <button class="btn btn-secondary" id="orden_factura"> Orden factura</button>
+        <button class="btn btn-warning" onclick="enviarDatosTabla()" id="enviar_factura"> Enviar</button>
+        </div>
+        </div>
+
+    <div class="container mt-4" style="overflow-x:auto;">
+        <h3>Concepto de ingresos</h3>
+    <table id="facturar_table" class="table table-striped" >
+        <thead>
+            <tr>
+                <th>Concepto</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Facturar a..</th>
+                <th>Moneda</th>
+                <th>Arbitraje</th>
+                <th>Detalle</th>
+                <th>Concepto + Detalle</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+
+
+</div>
