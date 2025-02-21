@@ -5,6 +5,17 @@ $(document).ready(function() {
 
     verificarTipoFactura();
 
+
+    // Evento para el primer campo (id_fecha_registro)
+    $("#id_fecha_registro").change(function () {
+        actualizarFechas(this, "#id_fecha_documento");  // Copia la fecha al segundo campo
+        actualizarFechas(this, "#id_vencimiento");  // Copia la fecha al tercer campo
+    });
+
+    // Evento para el segundo campo (id_fecha_documento)
+    $("#id_fecha_documento").change(function () {
+        actualizarFechas(this, "#id_vencimiento");  // Copia la fecha al tercer campo
+    });
     $('#tabla_proveedoresygastos tfoot th').each(function(index) {
         let title = $('#tabla_proveedoresygastos thead th').eq(index).text();
 
@@ -593,3 +604,9 @@ $('#abrir_arbi_prov').on('click', function (event) {
         }
     });
 });
+function actualizarFechas(origen, destino) {
+    let fechaSeleccionada = $(origen).val();
+    if (fechaSeleccionada) {
+        $(destino).val(fechaSeleccionada);
+    }
+}

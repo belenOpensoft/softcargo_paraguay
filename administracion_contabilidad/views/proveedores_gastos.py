@@ -36,7 +36,9 @@ columns_table = {
 
 @login_required(login_url='/login')
 def proveedores_gastos_view(request):
-    form = ProveedoresGastos(request.POST or None)
+
+    hoy = datetime.now().strftime('%Y-%m-%d')
+    form = ProveedoresGastos(initial={'fecha_registro':hoy,'fecha_documento':hoy,'vencimiento':hoy})
 
     return render(request, 'proveedores_gastos.html', {'form': form})
 

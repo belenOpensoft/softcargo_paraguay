@@ -310,45 +310,39 @@ class ProveedoresGastos(forms.Form):
     fecha_registro = forms.DateField(
         required=True,
         label="Fecha de registro",
-        initial=datetime.date.today,
-        widget=forms.TextInput(attrs={
+        widget=forms.DateInput(attrs={
             'class': 'form-control',
-            'placeholder': 'DD/MM/YY'
+            'type': 'date'  # Esto convierte el campo en un calendario
         }),
-        input_formats=['%d/%m/%y'],
         error_messages={
             'required': 'La fecha es obligatoria',
-            'invalid': 'Ingresa una fecha válida en formato DD/MM/YY'
+            'invalid': 'Ingresa una fecha válida'
         }
     )
 
     fecha_documento = forms.DateField(
         required=True,
         label="Fecha documento",
-        initial=datetime.date.today,
-        widget=forms.TextInput(attrs={
+        widget=forms.DateInput(attrs={
             'class': 'form-control',
-            'placeholder': 'DD/MM/YY'
+            'type': 'date'  # Campo de calendario
         }),
-        input_formats=['%d/%m/%y'],
         error_messages={
             'required': 'La fecha es obligatoria',
-            'invalid': 'Ingresa una fecha válida en formato DD/MM/YY'
+            'invalid': 'Ingresa una fecha válida'
         }
     )
 
     vencimiento = forms.DateField(
         required=True,
         label="Fecha de vencimiento",
-        initial=datetime.date.today,
-        widget=forms.TextInput(attrs={
+        widget=forms.DateInput(attrs={
             'class': 'form-control',
-            'placeholder': 'DD/MM/YY'
+            'type': 'date'  # Campo de calendario
         }),
-        input_formats=['%d/%m/%y'],
         error_messages={
             'required': 'La fecha es obligatoria',
-            'invalid': 'Ingresa una fecha válida en formato DD/MM/YY'
+            'invalid': 'Ingresa una fecha válida'
         }
     )
 
