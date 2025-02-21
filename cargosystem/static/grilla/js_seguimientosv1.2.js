@@ -223,7 +223,13 @@ $(document).ready(function () {
             }
         },
     });
-
+    $('#tabla_seguimiento tbody').on('dblclick', 'tr', function() {
+            // Remover selección previa y marcar esta fila como seleccionada
+            $('#tabla_seguimiento tbody tr').removeClass('table-secondary');
+            $(this).addClass('table-secondary');
+            // Ejecutar la misma lógica que el botón Editar
+            $('#editar_btn').trigger('click');
+        });
      $('input.autocomplete').on('keydown', function(event) {
         var keyCode = event.keyCode || event.which;
 
