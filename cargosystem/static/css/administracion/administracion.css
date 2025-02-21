@@ -1,6 +1,10 @@
     .minavbar-nav .nav-link {
         width: 80px; /* Establece el ancho deseado para los elementos del menú */
     }
+    .invisible-column {
+        color: transparent !important;  /* Hace que el texto sea invisible */
+        pointer-events: none;  /* Evita que el usuario seleccione el contenido */
+    }
 
     .minavbar {
         background-color: #f1f1f1;

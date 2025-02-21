@@ -304,6 +304,7 @@ class add_cliente_form(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'}),
         label="Tipo de Socio"
     )
+    (1, 'Cliente'),(2, 'Proveedor'),(3, 'Mixto'),(4, 'Armador'),(5, 'Transportista'),(6, 'Agente de carga')
     vendedor = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Vendedor", required=False)
 
     # **Pestaña Emails**

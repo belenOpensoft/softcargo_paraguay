@@ -47,14 +47,15 @@ $(document).ready(function () {
     getCookie('row_selected_seguimiento');
     var contador = 0;
     /* DATATABLES */
-    $('#tabla_seguimiento tfoot th').each(function () {
-        var title = $(this).text();
-        if (title !== '') {
-            $(this).html('<input type="text" class="form-control"  autocomplete="off" id="buscoid_' + contador + '" type="text" placeholder="Buscar ' + title + '"  autocomplete="off" />');
-            contador++;
-        } else {
-            var aux2 = 'Borrar';
-            $(this).html('<button class="btn" title="Borrar filtros" id="clear" ><span class="glyphicon glyphicon-erase"></span></button> ');
+    $('#tabla_seguimiento tfoot th').each(function(index) {
+        let title = $('#tabla_seguimiento thead th').eq(index).text();
+
+        if (index === 0) {
+            // Si es la primera columna, colocar el botón de limpiar filtros
+            $(this).html('<button class="btn btn-danger" title="Borrar filtros" id="clear"><span class="glyphicon glyphicon-erase"></span> Limpiar</button>');
+        } else if (title !== '') {
+            // Agregar inputs de búsqueda en las demás columnas
+            $(this).html('<input type="text" class="form-control filter-input" autocomplete="off" id="buscoid_' + index + '" placeholder="Buscar ' + title + '" />');
         }
     });
     table = $('#tabla_seguimiento').DataTable({
@@ -230,7 +231,7 @@ $(document).ready(function () {
             // Ejecutar la misma lógica que el botón Editar
             $('#editar_btn').trigger('click');
         });
-     $('input.autocomplete').on('keydown', function(event) {
+    $('input.autocomplete').on('keydown', function(event) {
         var keyCode = event.keyCode || event.which;
 
         if (keyCode === 13 || keyCode === 9) { // 'Enter' (13) o 'Tab' (9)
@@ -239,6 +240,21 @@ $(document).ready(function () {
                 var selectedValue = activeItem.find("a").text();
                 $(this).val(selectedValue);  // Establece el valor automáticamente
             }
+        }
+    });
+    // Evento para limpiar todos los filtros
+    $(document).on("click", "#clear", function() {
+        awbRegex='';
+        $(".filter-input").val("").trigger("keyup"); // Limpia los inputs y activa la búsqueda
+        $(".filter-input").removeClass("is-invalid"); // Se quita el rojo si se vacía
+        table.ajax.reload();
+    });
+    // Evento para resaltar los inputs cuando tienen contenido
+    $(document).on("input", ".filter-input", function() {
+        if ($(this).val().trim() !== "") {
+            $(this).addClass("is-invalid"); // Se pone en rojo
+        } else {
+            $(this).removeClass("is-invalid"); // Se quita el rojo si se vacía
         }
     });
 

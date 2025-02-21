@@ -5,16 +5,32 @@ $(document).ready(function() {
 
     verificarTipoFactura();
 
-    $('#tabla_proveedoresygastos tfoot th').each(function () {
-        let title = $(this).text();
-        if (title !== '') {
-            $(this).html('<input type="text" class="form-control"  autocomplete="off" id="buscoid_' + contador + '" type="text" placeholder="Buscar ' + title + '"  autocomplete="off" />');
-            contador++;
-        } else {
-            $(this).html('<button class="btn" title="Borrar filtros" id="clear" ><span class="glyphicon glyphicon-erase"></span></button> ');
+    $('#tabla_proveedoresygastos tfoot th').each(function(index) {
+        let title = $('#tabla_proveedoresygastos thead th').eq(index).text();
+
+        if (index === 0) {
+            // Si es la primera columna, colocar el botón de limpiar filtros
+            $(this).html('<button class="btn btn-danger" title="Borrar filtros" id="clear"><span class="glyphicon glyphicon-erase"></span> Limpiar</button>');
+        } else if (title !== '') {
+            // Agregar inputs de búsqueda en las demás columnas
+            $(this).html('<input type="text" class="form-control filter-input" autocomplete="off" id="buscoid_' + index + '" placeholder="Buscar ' + title + '" />');
         }
     });
-    //tabla general master
+    // Evento para limpiar todos los filtros
+    $(document).on("click", "#clear", function() {
+        awbRegex='';
+        $(".filter-input").val("").trigger("keyup"); // Limpia los inputs y activa la búsqueda
+        $(".filter-input").removeClass("is-invalid"); // Se quita el rojo si se vacía
+        table.ajax.reload();
+    });
+    // Evento para resaltar los inputs cuando tienen contenido
+    $(document).on("input", ".filter-input", function() {
+        if ($(this).val().trim() !== "") {
+            $(this).addClass("is-invalid"); // Se pone en rojo
+        } else {
+            $(this).removeClass("is-invalid"); // Se quita el rojo si se vacía
+        }
+    });
     table = $('#tabla_proveedoresygastos').DataTable({
     "dom": 'Btlipr',
     "scrollX": true,
@@ -23,8 +39,12 @@ $(document).ready(function() {
     "columnDefs": [
         {
             "targets": [0],  // Ocultamos ambas columnas en una sola configuración
-            "visible": false,
-            "searchable": false  // Opcional: evita que se incluyan en las búsquedas
+            "visible": true,
+            "searchable": false ,
+            "className": "invisible-column",
+             "render": function(data, type, row) {
+            return "";  // Devuelve una celda vacía
+        }
         },
     ],
     "order": [[2, "desc"]],
