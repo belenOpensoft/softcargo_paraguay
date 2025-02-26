@@ -42,7 +42,6 @@ def proveedores_gastos_view(request):
 
     return render(request, 'proveedores_gastos.html', {'form': form})
 
-
 def buscar_proveedor(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
         query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
@@ -51,7 +50,6 @@ def buscar_proveedor(request):
         return JsonResponse(results, safe=False)
 
     return JsonResponse({'error': 'Solicitud inválida'}, status=400)
-
 
 def buscar_proveedores(request):
     if request.method == "GET":
@@ -71,7 +69,6 @@ def buscar_proveedores(request):
 
     return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
 
-
 def buscar_item_c(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
         query = request.GET.get('term', '').strip()
@@ -80,7 +77,6 @@ def buscar_item_c(request):
         return JsonResponse(results, safe=False)
 
     return JsonResponse({'error': 'Solicitud inválida'}, status=400)
-
 
 def buscar_items_c(request):
     if request.method == "GET":
@@ -103,7 +99,6 @@ def buscar_items_c(request):
             return JsonResponse(data)
 
     return JsonResponse({'error': 'Servicio no encontrado'}, status=404)
-
 
 @transaction.atomic
 def procesar_factura_proveedor(request):
@@ -146,7 +141,7 @@ def procesar_factura_proveedor(request):
             tipo_mov = tipo
             tipo_asiento = 'V'
             detalle1 = 'S/I'
-            detalle_mov = "detallemov"  #va a tener un house asociado
+            detalle_mov = ""
             nombre_mov = ""
             asiento = generar_numero()
             movimiento_num = modificar_numero(asiento)
@@ -183,7 +178,7 @@ def procesar_factura_proveedor(request):
                 'fecha': fecha_obj,
                 'imputacion': 2,
                 'tipo': tipo_asiento,
-                'cuenta': 0,
+                'cuenta': cliente.ctacomp,
                 'documento': str(numero),
                 'vencimiento': fecha_obj,
                 'pasado': 0,
@@ -195,17 +190,20 @@ def procesar_factura_proveedor(request):
                 'anio': fecha_obj.year,
                 'mes': fecha_obj.month,
                 'fechacheque': fecha_obj,
-                'paridad': paridad
+                'paridad': paridad,
+                'posicion':'S/I'
             }
 
             crear_asiento(asiento_general)
 
+            coniva = 0
+            totaliva = 0
+
+
             for item_data in items_data:
-                aux = int(movimiento_num) + 1
+                #aux = int(movimiento_num) + 1
 
                 precio = float(item_data.get('precio'))
-                coniva = 0
-                totaliva = 0
                 key = False
                 if item_data.get('iva') == 'Basico':
                     coniva = precio * 1.22
@@ -216,31 +214,6 @@ def procesar_factura_proveedor(request):
                     totaliva = 0
                     key = False
 
-                movimiento = {
-                    'tipo': tipo_mov,
-                    'fecha': fecha_obj,
-                    'boleta': numero,
-                    'monto': precio,
-                    'iva': totaliva,
-                    'total': coniva,
-                    'saldo': coniva,
-                    'moneda': moneda,
-                    'detalle': detalle_mov,
-                    'cliente': cliente.codigo,
-                    'nombre': cliente.empresa,
-                    'nombremov': nombre_mov,
-                    'cambio': arbitraje,
-                    'autogenerado': autogenerado,
-                    'serie': serie,
-                    'prefijo': prefijo,
-                    'posicion': posicion,
-                    'anio': fecha_obj.year,
-                    'mes': fecha_obj.month,
-                    'monedaoriginal': moneda,
-                    'montooriginal': precio_total,
-                    'arbitraje': arbitraje
-                }
-                crear_movimiento(movimiento)
                 if key==True:
                     iva_total_asiento = {
                         'detalle': detalle_asiento,
@@ -261,11 +234,12 @@ def procesar_factura_proveedor(request):
                         'cliente': cliente.codigo,
                         'banco': 'S/I',
                         'centro': 'S/I',
-                        'mov': aux,
+                        'mov': movimiento_num,
                         'anio': fecha_obj.year,
                         'mes': fecha_obj.month,
                         'fechacheque': fecha_obj,
-                        'paridad': paridad
+                        'paridad': paridad,
+                        'posicion': item_data.get('posicion')
                     }
                     monto_original_asiento = {
                         'detalle': detalle_asiento,
@@ -286,11 +260,12 @@ def procesar_factura_proveedor(request):
                         'cliente': cliente.codigo,
                         'banco': 'S/I',
                         'centro': 'S/I',
-                        'mov': aux,
+                        'mov': movimiento_num,
                         'anio': fecha_obj.year,
                         'mes': fecha_obj.month,
                         'fechacheque': fecha_obj,
-                        'paridad': paridad
+                        'paridad': paridad,
+                        'posicion': item_data.get('posicion')
                     }
 
                     crear_asiento(iva_total_asiento)
@@ -315,15 +290,42 @@ def procesar_factura_proveedor(request):
                         'cliente': cliente.codigo,
                         'banco': 'S/I',
                         'centro': 'S/I',
-                        'mov': aux,
+                        'mov': movimiento_num,
                         'anio': fecha_obj.year,
                         'mes': fecha_obj.month,
                         'fechacheque': fecha_obj,
-                        'paridad': paridad
+                        'paridad': paridad,
+                        'posicion': item_data.get('posicion')
                     }
                     crear_asiento(asiento_vector)
 
-                movimiento_num = aux
+                #movimiento_num = aux
+
+            movimiento = {
+                'tipo': tipo_mov,
+                'fecha': fecha_obj,
+                'boleta': numero,
+                'monto': precio_total,
+                'iva': totaliva,
+                'total': precio_total,
+                'saldo': precio_total,
+                'moneda': moneda,
+                'detalle': detalle_mov,
+                'cliente': cliente.codigo,
+                'nombre': cliente.empresa,
+                'nombremov': nombre_mov,
+                'cambio': arbitraje,
+                'autogenerado': autogenerado,
+                'serie': serie,
+                'prefijo': prefijo,
+                'posicion': posicion,
+                'anio': fecha_obj.year,
+                'mes': fecha_obj.month,
+                'monedaoriginal': moneda,
+                'montooriginal': precio_total,
+                'arbitraje': arbitraje
+            }
+            crear_movimiento(movimiento)
 
             return JsonResponse({'status': 'Factura procesada correctamente N° ' + str(numero)})
     except Exception as e:
@@ -355,6 +357,7 @@ def crear_asiento(asiento):
         lista.detalle = asiento['detalle']
         lista.cambio = asiento['cambio']
         lista.moneda = asiento['moneda']
+        lista.posicion = asiento['posicion']
         lista.save()
 
     except Exception as e:
@@ -476,7 +479,6 @@ def get_data(registros_filtrados):
     except Exception as e:
         raise TypeError(e)
 
-
 def get_argumentos_busqueda(**kwargs):
     try:
         result = {}
@@ -486,3 +488,4 @@ def get_argumentos_busqueda(**kwargs):
         return result
     except Exception as e:
         raise TypeError(e)
+

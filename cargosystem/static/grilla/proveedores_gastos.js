@@ -1,18 +1,229 @@
+var wWidth = $(window).width();
+var dWidth = wWidth * 0.40;
+var wHeight = $(window).height();
+var dHeight = wHeight * 0.30;
+
 $(document).ready(function() {
     var buscar = '';
     var que_buscar = '';
     let contador = 0;
 
+       // Evento cuando se cambia de pestaña
+
+    let radioMasters = document.getElementById("imputar-masters");
+    let radioHouses = document.getElementById("imputar-houses");
+
+    radioMasters.addEventListener("change", actualizarPestañas);
+    radioHouses.addEventListener("change", actualizarPestañas);
+
+    actualizarPestañas();
+
     verificarTipoFactura();
 
+    $("#modal-embarque").dialog({
+        autoOpen: false,
+        width: wWidth * 0.90,
+        height: wHeight,
+        modal: true,
+        position: { my: "center top", at: "center top+20", of: window }, // Ajusta la posición
+        create: function () {
+            var $buttons = $(this).parent().find(".ui-dialog-buttonpane button");
+            $buttons.eq(0).addClass("btn btn-warning"); // Botón Guardar
+            $buttons.eq(1).addClass("btn btn-success"); // Botón Guardar
+            $buttons.eq(2).addClass("btn btn-dark"); // Botón Cerrar
+        },
+        buttons: {
+            "Armar": function () {
+                // Lógica para guardar los cambios
+                let precio = parseFloat($("#seleccionado-precio").val()) || 0;
+                let cliente = $("#seleccionado-cliente").val();
+                let lugar = $("#seleccionado-lugar").val();
+                let embarque = $("#seleccionado-embarque").text();
+                let total = parseFloat(localStorage.getItem('precio_item_imputar')) || 0;
 
-    // Evento para el primer campo (id_fecha_registro)
+                if (precio>total){
+                alert('El monto ingresado: ' +precio+', es mayor al original: '+total);
+                return;
+                }
+
+                let nuevaFila = `
+                    <tr>
+                        <td>${posicion}</td>
+                        <td>${precio}</td>
+                        <td><button class="btn btn-danger btn-sm eliminar-fila">Eliminar</button></td>
+                        <td style="display:none;">${cliente}</td>
+                        <td style="display:none;">${lugar}</td>
+                        <td style="display:none;">${embarque}</td>
+                    </tr>
+                `;
+
+                $("#guardado-tabla tbody").append(nuevaFila);
+
+                // Agregar evento para eliminar fila al botón generado dinámicamente
+                $(".eliminar-fila").off("click").on("click", function () {
+                    $(this).closest("tr").remove();
+                });
+
+                // Limpiar los valores seleccionados después de agregar la fila
+                $("#seleccionado-posicion").text("");
+                $("#seleccionado-embarque").text("");
+                $("#seleccionado-precio").val("");
+                $("#seleccionado-tipo").val("");
+                //$(this).dialog("close");
+            },
+            "Guardar y Cerrar": function () {
+                let total= localStorage.getItem('precio_item_imputar');
+                let total_tabla = 0;
+                let filas = document.querySelectorAll("#guardado-tabla tbody tr");
+                if(filas.length==0){
+                alert('No se ha armado nada.');
+                return;
+                }
+                filas.forEach(fila => {
+                    let montoCelda = fila.querySelector("td:nth-child(2)");
+
+                    if (montoCelda) {
+                        let monto = parseFloat(montoCelda.textContent.trim().replace(',', '.')) || 0;
+                        total_tabla += monto;
+                    }
+                });
+                if(total!=total_tabla){
+                alert('Los montos armados: '+ total_tabla+', difieren del ingresado: '+total);
+                return;
+                }
+
+                //guardar_impucompra();
+                rellenar_tabla();
+                $(this).dialog("close");
+            },
+            "Cancelar": function () {
+                $(this).dialog("close");
+            }
+        }
+    });
+
+    let table = document.querySelector("#tabla-embarque-container tbody");
+    let selectedRow = null;
+
+    table.addEventListener("click", function (event) {
+        let row = event.target.closest("tr");
+        if (!row) return;
+
+        if (selectedRow) {
+            selectedRow.classList.remove("table-secondary");
+        }
+
+        row.classList.add("table-secondary");
+        selectedRow = row;
+    });
+    //rellenar seleccionados
+    table.addEventListener("dblclick", function (event) {
+        let row = event.target.closest("tr");
+        if (!row) return;
+
+        let embarque = row.cells[0].textContent.trim();
+        let tipo = row.cells[1].textContent.trim();
+        posicion = row.cells[3].textContent.trim();
+        cliente = row.cells[9].textContent.trim();
+
+        let selectedRadio = $('input[name="imputar"]:checked').attr('id');
+        let impucompra_tipo;
+        if(selectedRadio=='imputar-masters'){
+            impucompra_tipo='M';
+        }else{
+            impucompra_tipo='H';
+        }
+
+        document.querySelector("#seleccionado-embarque").textContent = embarque;
+        document.querySelector("#seleccionado-tipo").textContent = tipo === "CONSOLIDADO" ? "C" : "D";
+        document.querySelector("#seleccionado-posicion").textContent = posicion;
+        $("#seleccionado-cliente").val(cliente);
+        $("#seleccionado-precio").val(localStorage.getItem('precio_item_imputar'));
+        $("#seleccionado-lugar").val(impucompra_tipo);
+
+    });
+    //buscadores
+    document.querySelectorAll("button.btn-primary").forEach(button => {
+        button.addEventListener("click", function () {
+            let selectedRadio = $('input[name="imputar"]:checked').attr('id');
+            let impucompra_tipo;
+            if(selectedRadio=='imputar-masters'){
+                impucompra_tipo='master';
+            }else{
+                impucompra_tipo='house';
+            }
+            let departamento = document.getElementById("departamento").value;
+            if(departamento==''){
+                alert('Seleccione una Operativa');
+                return;
+            }
+            let fechaDesde = document.getElementById("fecha-desde")?.value || "";
+            let fechaHasta = document.getElementById("fecha-hasta")?.value || "";
+            let posicion = document.getElementById("posicion-input")?.value || "";
+            let tipoEmbarque = document.querySelector('input[name="tipo-embarque"]:checked')?.value || "todos";
+            let conocimiento = document.getElementById("contenedor-input")?.value || "";
+            let transportista = document.getElementById("transportista-input")?.value || "";
+            let agente = document.getElementById("agente-input")?.value || "";
+            let status = document.getElementById("status-input")?.value || "";
+            let contenedor = document.getElementById("contenedor-input")?.value || "";
+            let vapor = document.getElementById("vapor-input")?.value || "";
+            let seguimiento = document.getElementById("seguimiento-input")?.value || "";
+            let master = document.getElementById("master-input")?.value || "";
+            let house = document.getElementById("house-input")?.value || "";
+            let embarque = document.getElementById("embarque-input-buscar")?.value || "";
+
+            let params = new URLSearchParams({
+                departamento: departamento,
+                fecha_desde: fechaDesde,
+                fecha_hasta: fechaHasta,
+                posicion: posicion,
+                tipo_embarque: tipoEmbarque,
+                conocimiento: conocimiento,
+                transportista: transportista,
+                agente: agente,
+                status: status,
+                contenedor: contenedor,
+                vapor: vapor,
+                seguimiento: seguimiento,
+                master: master,
+                house: house,
+                embarque:embarque,
+                cual:impucompra_tipo
+            });
+
+            fetch(`/admin_cont/buscar_embarques/?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    let tbody = document.querySelector("#tabla-embarque-container tbody");
+                    tbody.innerHTML = "";  // Limpiar la tabla antes de cargar nuevos datos
+
+                    data.resultados.forEach(item => {
+                        let row = `<tr>
+                            <td>${item.embarque}</td>
+                            <td>${item.tipo}</td>
+                            <td>${item.fecha}</td>
+                            <td>${item.posicion}</td>
+                            <td>${item.conocimiento}</td>
+                            <td>${item.transportista}</td>
+                            <td>${item.agente}</td>
+                            <td>${item.tarifa}</td>
+                            <td>${item.status}</td>
+                            <td>${item.cliente}</td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                })
+                .catch(error => console.error("Error al buscar embarques:", error));
+     });
+     });
+
+
+    $("#modal-embarque").tabs();
     $("#id_fecha_registro").change(function () {
         actualizarFechas(this, "#id_fecha_documento");  // Copia la fecha al segundo campo
         actualizarFechas(this, "#id_vencimiento");  // Copia la fecha al tercer campo
     });
 
-    // Evento para el segundo campo (id_fecha_documento)
     $("#id_fecha_documento").change(function () {
         actualizarFechas(this, "#id_vencimiento");  // Copia la fecha al tercer campo
     });
@@ -91,11 +302,6 @@ $(document).ready(function() {
     const valorInicial = $('#id_tipo').find('option:selected').text();
 
     $('#tipoSeleccionado').text(valorInicial);
-
-    $('#id_tipo').change(function() {
-        const valorSeleccionado = $(this).find('option:selected').text();
-        $('#tipoSeleccionado').text(valorSeleccionado);
-    });
 
     $('#id_tipo').change(function() {
         const valorSeleccionado = $(this).find('option:selected').text();
@@ -278,6 +484,9 @@ $(document).ready(function() {
                         <td>${precio.toFixed(2)}</td>
                         <td>${iva}</td>
                         <td>${cuenta}</td>
+                        <td>PENDIENTE</td>
+                        <td>S/I</td>
+                        <td>S/I</td>
                     </tr>`;
                 $('#itemTable tbody').append(row);
                 $('#itemTable').show();
@@ -370,14 +579,21 @@ $(document).ready(function() {
                 rut: $('#proveedorTable tbody tr td').eq(2).text(),
             };
 
+            if (!clienteData.codigo.trim() || !clienteData.empresa.trim() || !clienteData.rut.trim()) {
+                alert('Faltan datos del proveedor.');
+                return;
+            }
+
+
             let items = [];
             $('#itemTable tbody tr').each(function() {
                 const itemData = {
                     id: $(this).find('td').eq(0).text(),
                     descripcion: $(this).find('td').eq(1).text(),
-                    precio: $(this).find('td').eq(2).text(),
-                    iva: $(this).find('td').eq(3).text(),
-                    cuenta: $(this).find('td').eq(4).text(),
+                    precio: $(this).find('td').eq(3).text(),
+                    iva: $(this).find('td').eq(4).text(),
+                    cuenta: $(this).find('td').eq(5).text(),
+                    posicion: $(this).find('td').eq(7).text(),
                 };
                 items.push(itemData);
             });
@@ -421,13 +637,105 @@ $(document).ready(function() {
             });
         }
     });
-});
-var wWidth = $(window).width();
-var dWidth = wWidth * 0.40;
-var wHeight = $(window).height();
-var dHeight = wHeight * 0.30;
-let total=0;
 
+    let filaSeleccionada = null;
+
+    // Detectar doble clic en la celda de la columna "Embarque" (índice 7)
+    $("#itemTable tbody").on("dblclick", "td:nth-child(7)", function () {
+        filaSeleccionada = $(this).closest("tr"); // Guardar la fila completa
+
+        let embarqueValor = $(this).text().trim(); // Obtener el valor de la celda "Embarque"
+        let precioValor = filaSeleccionada.find("td:nth-child(4)").text().trim(); // Obtener "Precio"
+
+        // Guardar el precio en localStorage
+        localStorage.setItem("precio_item_imputar", precioValor);
+
+        // Colocar el valor en un campo dentro del modal
+        $("#modal-embarque #embarque-input").val(embarqueValor);
+
+        // Abrir el modal
+        $("#modal-embarque").dialog("open");
+    });
+
+    // Botón para cerrar el modal
+    $("#cerrar-modal").click(function () {
+        $("#modal-embarque").dialog("close");
+    });
+
+    function rellenar_tabla() {
+    if (!filaSeleccionada || filaSeleccionada.length === 0) {
+        alert("No se ha seleccionado ninguna fila para actualizar.");
+        return;
+    }
+
+    let guardadoFilas = document.querySelectorAll("#guardado-tabla tbody tr");
+
+    if (guardadoFilas.length === 0) {
+        alert("No hay registros en la tabla guardado-tabla.");
+        return;
+    }
+
+    if (guardadoFilas.length === 1) {
+        let fila = guardadoFilas[0];
+        let posicion = fila.querySelector("td:nth-child(1)")?.textContent.trim() || "";
+        let precio = fila.querySelector("td:nth-child(2)")?.textContent.trim() || "";
+        let embarque = fila.querySelector("td:nth-child(6)")?.textContent.trim() || "";
+        let lugar = fila.querySelector("td:nth-child(5)")?.textContent.trim() || "";
+        let cliente = fila.querySelector("td:nth-child(4)")?.textContent.trim() || "";
+        let embarqueFinal = embarque + lugar;
+
+        filaSeleccionada.find("td").eq(7).text(posicion);
+        filaSeleccionada.find("td").eq(8).text(cliente);
+        filaSeleccionada.find("td").eq(6).text(embarqueFinal);
+
+    } else {
+        let filaBase = filaSeleccionada.clone();
+
+        filaSeleccionada.remove();
+
+        guardadoFilas.forEach(fila => {
+            let posicion = fila.querySelector("td:nth-child(1)")?.textContent.trim() || "";
+            let precio = fila.querySelector("td:nth-child(2)")?.textContent.trim() || "";
+            let embarque = fila.querySelector("td:nth-child(6)")?.textContent.trim() || "";
+            let lugar = fila.querySelector("td:nth-child(5)")?.textContent.trim() || "";
+            let cliente = fila.querySelector("td:nth-child(4)")?.textContent.trim() || "";
+            let embarqueFinal = embarque + lugar;
+
+            let nuevaFila = filaBase.clone();
+            nuevaFila.find("td").eq(7).text(posicion);
+            nuevaFila.find("td").eq(8).text(cliente);
+            nuevaFila.find("td").eq(6).text(embarqueFinal);
+            nuevaFila.find("td").eq(3).text(precio);
+
+            $("#itemTable tbody").append(nuevaFila);
+        });
+    }
+
+    // Cerramos el modal
+    $("#modal-embarque").dialog("close");
+    console.log("Tabla actualizada con registros del guardado-tabla.");
+}
+
+});
+
+let total=0;
+function actualizarPestañas() {
+    let radioMasters = document.getElementById("imputar-masters");
+    let radioHouses = document.getElementById("imputar-houses");
+    let tabMaster = document.querySelector('a[href="#master"]').parentElement;
+    let tabHouse = document.querySelector('a[href="#house"]').parentElement;
+
+    // Mostrar todas las pestañas antes de aplicar restricciones
+    tabMaster.style.display = "block";
+    tabHouse.style.display = "block";
+
+    if (radioMasters.checked) {
+        tabMaster.style.display = "none"; // Ocultar Master
+        tabHouse.style.display = "none"; // Ocultar Master
+    } else if (radioHouses.checked) {
+        tabHouse.style.display = "none"; // Ocultar House
+    }
+}
 // Mostrar u ocultar tipo_factura
 function verificarTipoFactura() {
     const valorSeleccionado = $('#id_tipo').find('option:selected').val();

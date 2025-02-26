@@ -202,6 +202,8 @@ class seguimientoForm(BSModalModelForm):
     armador = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'armador_add','required': False}),required=False)
     agecompras = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'agecompras_add',"required":False}),required=False,label='Ag.Compras')
     ageventas = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'ageventas_add',"required":False}),required=False,label='Ag.Ventas')
+    refproveedor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control',"required":False}),required=False,label='Ref. Proveedor')
+    refcliente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control',"required":False}),required=False,label='Ref. Cliente')
     # segunda columna
     deposito = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'deposito_add'}),required=False)
     origen = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'origen_add'}))

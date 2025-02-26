@@ -1,0 +1,240 @@
+<!-- Modal de jQuery UI -->
+<style>
+/* Contenedor de la tabla con altura fija y scroll vertical */
+#tabla-embarque-container {
+    max-width: 100%; /* Asegura que no crezca más allá del contenedor */
+    overflow-x: auto; /* Activa el scroll horizontal si es necesario */
+    overflow-y: auto; /* Activa el scroll vertical si la tabla crece demasiado */
+    height: 300px; /* Ajusta la altura fija de la tabla */
+    display: block; /* Permite que el overflow funcione correctamente */
+}
+
+/* Asegura que la tabla mantenga su estructura sin expandirse */
+#tabla-embarque-container table {
+    width: max-content; /* Permite que la tabla use su tamaño real */
+    min-width: 100%; /* Evita que sea más pequeña que su contenedor */
+    table-layout: auto; /* Ajusta automáticamente el tamaño de las columnas */
+    border-collapse: collapse; /* Evita espacios extra entre celdas */
+}
+
+/* Fija el encabezado de la tabla para que no desaparezca al hacer scroll */
+#tabla-embarque-container thead {
+    position: sticky;
+    top: 0;
+    background: white; /* Asegura que el fondo sea visible */
+    z-index: 2;
+}
+
+/* Evita que las celdas se desborden y se mantengan en una sola línea */
+#tabla-embarque-container th,
+#tabla-embarque-container td {
+    white-space: nowrap; /* Mantiene el contenido en una sola línea */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 8px;
+    border: 1px solid #ddd; /* Opcional: bordes para mejor visualización */
+}
+
+</style>
+<div id="modal-embarque" title="Gestión de Embarques">
+    <form id="form-embarque" style="flex: 1;">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-8 bg-light p-3" style="">
+
+                    <!-- Selección de Departamento -->
+                    <div style="display:flex;gap: 20px;">
+                        <label for="departamento">Departamento:</label>
+                    <select id="departamento" class="form-control w-auto" >
+                        <option value="">Seleccione</option>
+                        <option value="1">Importación Marítima</option>
+                        <option value="2">Importación Terrestre</option>
+                        <option value="3">Importación Aérea</option>
+                        <option value="4">Exportación Marítima</option>
+                        <option value="5">Exportación Aérea</option>
+                        <option value="6">Exportación Terrestre</option>
+                    </select>
+
+                    <div class="d-flex gap-3 align-items-center">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="imputar" id="imputar-masters">
+                            <label class="form-check-label" for="imputar-masters">Imputar Masters</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="imputar" id="imputar-houses" checked>
+                            <label class="form-check-label" for="imputar-houses">Imputar Houses</label>
+                        </div>
+                    </div>
+
+                    </div>
+
+                    <!-- Pestañas Bootstrap -->
+                    <ul class="nav nav-tabs" id="embarqueTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#posicion">Posición</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#fechas">Fechas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#contenedor">Contenedor</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#vapor">Vapor</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#embarque">Embarque</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#seguimiento">Seguimiento</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#master">Master</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#house">House</a>
+                        </li>
+                    </ul>
+
+                    <!-- Contenido de pestañas -->
+                    <div class="tab-content mt-3">
+
+                        <div id="posicion" class="tab-pane fade show active">
+                            <div class="card p-3">
+                                <label for="posicion-input">Posición:</label>
+                                <input type="text" id="posicion-input" class="form-control w-50">
+                                <button type="button" class="btn btn-primary mt-2 w-50">Buscar</button>
+                            </div>
+                        </div>
+
+                        <div id="fechas" class="tab-pane fade">
+                            <div class="card p-3">
+                                <div class="d-flex gap-3">
+                                    <div>
+                                        <label for="fecha-desde" class="fw-bold">Desde:</label>
+                                        <input type="date" id="fecha-desde" class="form-control w-auto">
+                                    </div>
+                                    <div>
+                                        <label for="fecha-hasta" class="fw-bold">Hasta:</label>
+                                        <input type="date" id="fecha-hasta" class="form-control w-auto">
+                                    </div>
+                                    <button type="button" class="btn btn-primary align-self-end">Buscar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="contenedor" class="tab-pane fade">
+                            <div class="card p-3">
+                                <label for="contenedor-input">Contenedor:</label>
+                                <input type="text" id="contenedor-input" class="form-control w-50">
+                                <button type="button" class="btn btn-primary mt-2 w-50">Buscar</button>
+                            </div>
+                        </div>
+
+                        <div id="vapor" class="tab-pane fade">
+                            <div class="card p-3">
+                                <label for="vapor-input">Vapor:</label>
+                                <input type="text" id="vapor-input" class="form-control w-50">
+                                <button type="button" class="btn btn-primary mt-2 w-50">Buscar</button>
+                            </div>
+                        </div>
+
+                        <div id="embarque" class="tab-pane fade">
+                            <div class="card p-3">
+                                <label for="embarque-input-buscar">Embarque:</label>
+                                <input type="text" id="embarque-input-buscar" class="form-control w-50">
+                                <button type="button" class="btn btn-primary mt-2 w-50">Buscar</button>
+                                <br>
+                                <div class="mt-2">
+                                    <input type="radio" name="tipo-embarque" value="consolidado"> Consolidado
+                                    <input type="radio" name="tipo-embarque" value="directo"> Directo
+                                    <input type="radio" name="tipo-embarque" value="todos"> Todos
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="seguimiento" class="tab-pane fade">
+                            <div class="card p-3">
+                                <label for="seguimiento-input">Seguimiento:</label>
+                                <input type="text" id="seguimiento-input" class="form-control w-50">
+                                <button type="button" class="btn btn-primary mt-2 w-50">Buscar</button>
+                            </div>
+                        </div>
+
+                        <div id="master" class="tab-pane fade">
+                            <div class="card p-3">
+                                <label for="master-input">Master:</label>
+                                <input type="text" id="master-input" class="form-control w-50">
+                                <button type="button" class="btn btn-primary mt-2 w-50">Buscar</button>
+                            </div>
+                        </div>
+
+                        <div id="house" class="tab-pane fade">
+                            <div class="card p-3">
+                                <label for="house-input">House:</label>
+                                <input type="text" id="house-input" class="form-control w-50">
+                                <button type="button" class="btn btn-primary mt-2 w-50">Buscar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 p-3">
+                      <!-- Panel lateral (convertido en tabla) -->
+                    <div id="panel-lateral" style="margin-right:5%;">
+                    <h4>Información</h4>
+                    <table  id="guardado-tabla" class="table">
+                        <thead>
+                            <tr>
+                                <th>Posición</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+
+                    <div class="mt-3 p-2 bg-light border rounded d-flex flex-column">
+                        <strong class="fs-6 mb-1">Seleccionado:</strong>
+                        <div class="d-flex align-items-center gap-2 fs-6">
+                            <span id="seleccionado-embarque" class="badge bg-secondary p-1"></span>
+                            <span id="seleccionado-tipo" class="badge bg-secondary p-1"></span>
+                            <span id="seleccionado-posicion" class="border px-2 py-1 bg-white"></span>
+                            <input id="seleccionado-precio" type="number" style="width:100px" class="form-control"></input>
+                            <input type="hidden" id="seleccionado-cliente">
+                            <input type="hidden" id="seleccionado-lugar">
+                        </div>
+                    </div>
+
+                </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8 bg-light p-3">
+                      <!-- Tabla de Embarques -->
+                <div id="tabla-embarque-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Embarque</th>
+                        <th>Tipo</th>
+                        <th>Fecha</th>
+                        <th>Posición</th>
+                        <th>Conocimiento</th>
+                        <th>Transportista</th>
+                        <th>Agente</th>
+                        <th>Tarifa</th>
+                        <th>Status</th>
+                        <th>Cliente</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se llenarán los datos dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

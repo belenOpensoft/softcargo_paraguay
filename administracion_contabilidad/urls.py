@@ -6,6 +6,7 @@ from administracion_contabilidad.views.cobranza import cobranza_view, source_cob
 from administracion_contabilidad.views.facturacion import facturacion_view, buscar_clientes, buscar_cliente, \
     buscar_item_v, buscar_items_v, procesar_factura, source_facturacion, source_infofactura, \
     cargar_preventa_infofactura, source_infofactura_cliente, cargar_preventa_infofactura_multiple, guardar_arbitraje
+from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
 from administracion_contabilidad.views.proveedores_gastos import proveedores_gastos_view, buscar_proveedor, \
     buscar_proveedores, buscar_item_c, buscar_items_c, procesar_factura_proveedor, source_proveedoresygastos
@@ -75,7 +76,7 @@ urlpatterns = [
     #proveedores
     path('procesar_factura_proveedor/', procesar_factura_proveedor, name='procesar_factura_proveedor'),
     path('source_proveedoresygastos/', source_proveedoresygastos, name="source_proveedoresygastos"),
-
+    path('buscar_embarques/', buscar_embarques, name='buscar_embarques'),
     #proveedores
 
 ]

@@ -155,6 +155,9 @@ def add_house_importado(request):
                     reserva.fechaembarque=house_data.get('fechaembarque')
                     reserva.pagoflete=house_data.get('pagoflete')
                     reserva.status=house_data.get('estado')
+                    reserva.refproveedor = house_data.get('refproveedor')
+                    reserva.ordencliente = house_data.get('refcliente')
+                    reserva.fechaingreso=datetime.now()
 
                     reserva.save()
 
@@ -235,6 +238,8 @@ def source_seguimientos_importado(request):
                     "pagoflete": 'C' if registro.pago == 'Collect' else 'P',
                     "estado": registro.status,
                     "fechaembarque": registro.loadingdate,
+                    "refproveedor": registro.refproveedor,
+                    "refcliente": registro.refcliente
                 })
 
             return JsonResponse({"data": resultado}, safe=False)

@@ -182,7 +182,7 @@
 
          <div class="d-flex justify-content-end mt-3 gap-2">
             <button type="button" id="eliminarSeleccionados" class="btn btn-danger" style="display:none;">Eliminar</button>
-            <button type="button" id="clonarItem" class="btn btn-secondary btn-sm" style="display:block;">Clonar Item</button>
+            <button type="button" id="clonarItem" class="btn btn-secondary" style="display:none;">Clonar Item</button>
         </div>
 
         <table id="itemTable" class="table table-striped mt-4 flex-wrap" style="display: block !important; visibility:hidden; overflow-x:auto;">
@@ -196,15 +196,6 @@
                     <th>Cuenta</th>
                     <th>Embarque</th>
                     <th>Posición</th>
-                    <th>E/F</th>
-                    <th>Comp</th>
-                    <th>Área</th>
-                    <th>T.C.</th>
-                    <th>Gasto</th>
-                    <th>Tipo</th>
-                    <th>Pago</th>
-                    <th>Venta Asociada</th>
-                    <th>Estación</th>
                     <th>Socio Comercial</th>
                 </tr>
             </thead>
@@ -239,6 +230,7 @@
     var csrf_token = "{{ csrf_token }}";
 </script>
 {% include 'arbitraje.html' %}
+{% include 'embarque.html' %}
 
 <script src="{% static 'js/jquery-ui.min_last.js' %}"></script>
 <script src="{% static 'grilla/proveedores_gastos.js' %}"></script>

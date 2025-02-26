@@ -890,6 +890,8 @@ class Master(models.Model):
 
 class VEmbarqueaereo(models.Model):
     numero = models.IntegerField(unique=True, primary_key=True)
+    fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)
+
     transportista = models.CharField(max_length=255, blank=True, null=True)  # Nombre del transportista
     awb = models.CharField(max_length=40, blank=True, null=True)
     hawb = models.CharField(max_length=50, blank=True, null=True)

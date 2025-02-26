@@ -2530,6 +2530,12 @@ function get_datos_seguimiento(id, modo = '') {
             if (datos['modo'] !== null) {
                 $("#id_modo").val(datos['modo'])
             }
+            if (datos['refcliente'] !== null) {
+                $("#id_refcliente").val(datos['refcliente'])
+            }
+            if (datos['refproveedor'] !== null) {
+                $("#id_refproveedor").val(datos['refproveedor'])
+            }
             return datos;
         },
         error: function (xhr, status, error) {

@@ -169,6 +169,8 @@ def get_data_seguimiento(request,id):
                                                                 'id',
                                                                 'origen_text',
                                                                 'destino_text',
+                                                                'refproveedor',
+                                                                'refcliente'
                                                               )
         if data:
                 # Convertir los valores en una lista de diccionarios clave-valor

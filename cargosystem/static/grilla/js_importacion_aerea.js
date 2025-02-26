@@ -2838,7 +2838,7 @@ let master = localStorage.getItem('master_editar');
 //let master='MOLU13000250048';
 let csrftoken = getCookie2('csrftoken');
 table_edit_im = $('#table_edit_im').DataTable({
-    "stateSave": true,
+    "stateSave": false,
     "dom": 'Btlipr',
     "bAutoWidth": false,
     "scrollX": true,
@@ -2933,12 +2933,7 @@ table_edit_im = $('#table_edit_im').DataTable({
             return row[13]; // Toma el índice 13 para la columna 14
         }
     },
-    {
-        "targets": [15],
-        "render": function (data, type, row, meta) {
-            return row[14]; // Toma el índice 14 para la columna 15
-        }
-    },
+
 ],
     "order": [[0, "desc"]],
     "processing": true,

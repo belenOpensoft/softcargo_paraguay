@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.http import HttpResponse
 import base64
 from django.views.decorators.csrf import csrf_exempt
@@ -528,72 +529,154 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         return tabla_html, resultado
 
     elif title == 'Aviso de embarque':
-        cliente=Clientes.objects.get(codigo=embarque.cliente)
-        tabla_html = "<table style='width:40%'>"
-        # Definir los campos y sus respectivos valores
-        resultado['asunto'] = 'AVISO DE EMBARQUE / CS: ' + str(row.numero) + ' ' \
-                                                                             '- HB/l: ' + str(
+
+        resultado['asunto'] = 'AVISO DE EMBARQUE / Ref: ' + str(row.seguimiento) + ' ' \
+         \
+        '- HB/l: ' + str(
+
             row.hawb) + ' - Shipper: ' + str(row.embarcador) + ' - Consig: ' \
-                                                               '' + str(row.consignatario) + '; Vapor: ' + str(
-            seg.vapor)
+         \
+        '' + str(row.consignatario)
+
         fecha_actual = datetime.now()
+
         fecha_formateada = fecha_actual.strftime(
+
             f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
-        texto += fecha_formateada.capitalize() + '<br><br>'
+
+        texto = fecha_formateada.capitalize() + '<br><br>'
+
         texto += 'Sres.: <br>'
-        texto += str(cliente.empresa) + '<br>'
+
+        texto += str(row.consignatario) + '<br>'
+
         texto += '<b>DEPARTAMENTO DE COMERCIO EXTERIOR </b><br><br>'
+
         if isinstance(seguimiento.etd, datetime):
+
             salida = str(seguimiento.etd.strftime("%d/%m/%Y"))
+
+
+
         else:
+
             salida = ''
+
         if isinstance(seguimiento.eta, datetime):
+
             llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
+
+
+
         else:
+
             llegada = ''
-        campos = [
-            ("Referencia", ""),
-            ("Embarcador", str(row.embarcador) if row.embarcador is not None else ""),
-            ("Consignatario", str(row.consignatario) if row.consignatario is not None else ""),
-            ("Ref.Proveedor", str(seguimiento.refproveedor) if seguimiento.refproveedor is not None else ""),
-            ("Términos", str(row.terminos) if row.terminos is not None else ""),
-            ("Transportista", str(row.transportista) if row.transportista is not None else ""),
-            ("Vapor", str(seg.vapor) if seg.vapor is not None else ""),
-            ("Origen", str(row.origen) if row.origen is not None else ""),
-            ("Destino", str(row.destino) if row.destino is not None else ""),
-            ("Salida", str(salida) if salida is not None else ""),
-            ("Llegada", str(llegada) if llegada is not None else ""),
-            ("Llegada estimadas", str(llegada) if llegada is not None else ""),
-            ("Posicion", str(row.posicion) if row.posicion is not None else ""),
-            ("Agente", str(row.agente) if row.agente is not None else ""),
-            ("H B/L", str(row.hawb) if row.hawb is not None else ""),
-            ("B/L", str(row.awb) if row.awb is not None else ""),
-            ("Seguimiento", str(seguimiento.numero) if seguimiento.numero is not None else ""),
-        ]
-        for campo, valor in campos:
-            tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
-        try:
-            carga = ImportCargaaerea.objects.get(numero=row.numero)
-            master = ImportReservas.objects.get(awb=row.awb)
-        except VGrillaSeguimientos.DoesNotExist:
-            carga = ImportCargaaerea(bruto=0,bultos=0,volumen=0)
-            master = ImportReservas(producto=None)
-        except Exception as e:
-            print(e)
 
-        tabla_html += f"<tr><th>Peso</th><td>{carga.bruto if carga.bruto else 0} KGS</td></tr>"
-        tabla_html += f"<tr><th>Bultos</th><td>{carga.bultos if carga.bultos else 0}</td></tr>"
-        tabla_html += f"<tr><th>CBM</th><td>{master.volumen if master.volumen else 0} M³</td></tr>"
-        tabla_html += f"<tr><th>Mercaderia</th><td>" + str(carga.producto) if carga.producto else None + "</td></tr>"
-        # Agregar más campos de contenedores aquí
+        # Campos con valores formateados
 
-        # Cerrar la etiqueta de la tabla
-        tabla_html += "</table><br><br>"
-        texto += tabla_html
+
+        ref = str(row.seguimiento) + "/" + str(row.numero)
+
+        texto += formatear_linea("Referencia", ref)
+
+        texto += formatear_linea("Posición", str(row.posicion) if row.posicion else "")
+
+        # texto += formatear_linea("Proveedor", str(row.cliente) if row.cliente else "")
+
+
+        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario else "")
+
+        texto += formatear_linea("Orden Cliente", str(embarque.ordencliente) if embarque.ordencliente else "")
+
+        texto += formatear_linea("Ref. Proveedor", str(embarque.refproveedor) if embarque.refproveedor else "")
+
+        texto += formatear_linea("Términos de Compra", str(row.terminos) if row.terminos else "")
+
+        texto += formatear_linea("Transportista", str(row.transportista) if row.transportista else "")
+
+        texto += '<br>'
+
+        texto += formatear_linea("Origen", str(row.origen) if row.origen else "")
+
+        texto += formatear_linea("Destino", str(row.destino) if row.destino else "")
+
+        texto += formatear_linea("Salida", salida)
+
+        texto += formatear_linea("Llegada", llegada)
+
+        texto += '<br>'
+
+        texto += formatear_linea("Agente", str(row.agente) if row.agente else "")
+
+        # Datos de contenedores
+
+        mercaderias = ""
+
+        bultos = 0
+
+        peso = 0
+
+        volumen = 0
+
+        cant_cntr = ImportCargaaerea.objects.filter(numero=row.numero).values('medidas', 'bruto', 'bultos', 'producto').annotate(
+            total=Count('id'))
+
+        if cant_cntr.count() > 0:
+
+            for cn in cant_cntr:
+                if cn['medidas']:
+                    medidas = cn['medidas'].split('*')
+                    if len(medidas) == 3 and all(m.isdigit() for m in medidas):
+                        volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
+
+                bultos += cn['bultos']
+
+                peso += cn['bruto'] if cn['bruto'] else 0
+
+
+                producto = Productos.objects.get(codigo=int(cn['producto'])).nombre
+
+                mercaderias += producto + ' - '
+
+        texto += formatear_linea("House", str(row.hawb) if row.hawb else "")
+
+        texto += formatear_linea("Peso", f"{peso} KGS")
+
+        texto += formatear_linea("Bultos", str(bultos))
+
+        texto += formatear_linea("CBM", f"{volumen} M³")
+
+        texto += '<br>'
+
+        texto += formatear_linea("Mercadería", mercaderias)
+
+        texto += formatear_linea("Depósito", str(seguimiento.deposito) if seguimiento.deposito else "")
+
+        texto += formatear_linea("Doc. Originales", 'SI' if seguimiento.originales and seguimiento.originales == True else 'NO')
+
+        # Agregar información en 6 columnas
+
+
+        texto += "<br>"
+
+        texto += "<table style='width:100%; text-align:center;'>"
+
+        texto += "<tr><th>Origen</th><th>Destino</th><th>Vapor/Vuelo</th><th>Salida</th><th>Llegada</th></tr>"
+
+        texto += f"<tr><td>{row.origen}</td><td>{row.destino}</td><td>{row.transportista}</td><td>{salida}</td><td>{llegada}</td></tr>"
+
+        texto += "</table>"
+
+        texto += '<br>'
+
+        # Agregar mensaje final
+
+
         texto += 'Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar. <br>' \
-                 'Agradeciendo vuestra preferencia, le saludamos muy atentamente.<br><br>'
+         \
+        'Agradeciendo vuestra preferencia, le saludamos muy atentamente.<br><br>'
 
-        return texto,resultado
+        return texto, resultado
 
     elif title == 'Orden de facturacion':
 

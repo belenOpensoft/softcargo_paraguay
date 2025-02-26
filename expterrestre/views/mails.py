@@ -323,7 +323,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         return texto, resultado
 
-
     elif title == 'Notificación de llegada de carga':
 
         resultado['asunto'] = 'NOTIFICACION DE LLEGADA DE CARGA - Ref.: ' + str(embarque.numero) + ' - CS: ' + str(
