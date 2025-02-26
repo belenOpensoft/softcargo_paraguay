@@ -1094,6 +1094,7 @@ $(document).ready(function () {
         }
     });
     $('#editar_btn').click(function () {
+        $('#impo_marit_form').trigger('reset');
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
             let tipo = row[0][2];
@@ -2354,8 +2355,18 @@ function get_datos_seguimiento(id, modo = '') {
         type: 'GET',
         async: false,
         success: function (data) {
+
             var datos = data;
             // Establece los valores en los campos del formulario
+            if (datos['fecha'] !== null) {
+                $("#id_fecha").val(datos['fecha']);
+            }
+            if (datos['loadingdate'] !== null) {
+                $("#id_loadingdate").val(datos['loadingdate']);
+            }
+            if (datos['vencimiento'] !== null) {
+                $("#id_vencimiento").val(datos['vencimiento']);
+            }
             if (datos['cliente'] !== null && datos['cliente'] !== 0) {
                 $("#cliente_add").val(datos['cliente'])
                 $("#cliente_add").attr('data-id', datos['cliente_codigo']);

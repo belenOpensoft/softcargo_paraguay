@@ -609,8 +609,4 @@ class clonarForm(forms.Form):
         choices=yes_no_choices,
         widget=forms.Select(attrs={'class': 'form-control'}),
     )
-    trasbordo = forms.ChoiceField(
-        label='¿Clonar trasbordo?',
-        choices=yes_no_choices,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-    )
+

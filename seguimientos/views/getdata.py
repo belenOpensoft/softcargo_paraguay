@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.http import JsonResponse
 from seguimientos.models import Seguimiento, VGrillaSeguimientos
 
@@ -71,45 +73,7 @@ def get_data_cronologia(request, id):
     except Exception as e:
         return JsonResponse({'error': 'El objeto no existe'}, status=404)
 
-
-# def get_data_cronologia(request,id):
-#     try:
-#         data = Seguimiento.objects.filter(id=id).values(
-#                 'fecha',
-#                 'estimadorecepcion',
-#                 'recepcion',
-#                 'fecemision',
-#                 'fecseguro',
-#                 'fecdocage',
-#                 'loadingdate',
-#                 'arriboreal',
-#                 'fecaduana',
-#                 'pagoenfirme',
-#                 'vencimiento',
-#                 'etd',
-#                 'eta',
-#                 'fechaonhand',
-#                 'fecrecdoc',
-#                 'recepcionprealert',
-#                 'lugar',
-#                 'nroseguro',
-#                 'bltipo',
-#                 'manifiesto',
-#                 'credito',
-#                 'prima',
-#                 'originales',)
-#
-#
-#         if data:
-#                 # Convertir los valores en una lista de diccionarios clave-valor
-#                 return JsonResponse(data[0], safe=False)
-#         else:
-#                 return JsonResponse({'error': 'El objeto no existe'}, status=404)
-#         #return JsonResponse(list(data), safe=False)
-#     except Exception as e:
-#         return JsonResponse({'error': 'El objeto no existe'}, status=404)
-
-def get_data_seguimiento(request,id):
+def get_data_seguimiento_old(request,id):
     try:
         data = VGrillaSeguimientos.objects.filter(id=id).values('numero',
                                                                 'cliente',
@@ -170,7 +134,10 @@ def get_data_seguimiento(request,id):
                                                                 'origen_text',
                                                                 'destino_text',
                                                                 'refproveedor',
-                                                                'refcliente'
+                                                                'refcliente',
+                                                                'loadingdate',
+                                                                'fecha',
+                                                                'vencimiento',
                                                               )
         if data:
                 # Convertir los valores en una lista de diccionarios clave-valor
@@ -180,3 +147,41 @@ def get_data_seguimiento(request,id):
         return JsonResponse(list(data), safe=False)
     except Exception as e:
         return JsonResponse({'error': 'El objeto no existe'}, status=404)
+
+
+
+def get_data_seguimiento(request, id):
+    try:
+        data = VGrillaSeguimientos.objects.filter(id=id).values(
+            'numero', 'cliente', 'cliente_codigo', 'embarcador', 'embarcador_codigo',
+            'consignatario', 'consignatario_codigo', 'agente', 'agente_codigo',
+            'armador', 'armador_codigo', 'transportista', 'transportista_codigo',
+            'agecompras', 'agecompras_codigo', 'ageventas', 'ageventas_codigo',
+            'origen', 'destino', 'status', 'moneda', 'loading', 'discharge',
+            'posicion', 'pago', 'vendedor', 'vendedor_codigo', 'deposito',
+            'deposito_codigo', 'vapor', 'vapor_codigo', 'viaje', 'arbitraje',
+            'awb', 'hawb', 'operacion', 'wreceipt', 'pago', 'notificar',
+            'notificar_codigo', 'valor', 'notas', 'viaje', 'ubicacion',
+            'booking', 'trackid', 'proyecto', 'proyecto_codigo', 'trafico',
+            'trafico_codigo', 'actividad', 'actividad_codigo', 'diasalmacenaje',
+            'demora', 'modo', 'id', 'origen_text', 'destino_text',
+            'refproveedor', 'refcliente', 'loadingdate', 'fecha', 'vencimiento'
+        )
+
+        if data:
+            item = dict(data[0])
+
+            # Campos de fecha que queremos formatear
+            campos_fecha = ['loadingdate', 'fecha', 'vencimiento']
+
+            for field_name in campos_fecha:
+                value = item.get(field_name)
+                if isinstance(value, datetime):
+                    item[field_name] = value.strftime('%Y-%m-%d')
+
+            return JsonResponse(item, safe=False)
+        else:
+            return JsonResponse({'error': 'El objeto no existe'}, status=404)
+
+    except Exception as e:
+        return JsonResponse({'error': 'Error interno: ' + str(e)}, status=500)
