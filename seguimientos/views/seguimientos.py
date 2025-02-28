@@ -33,7 +33,7 @@ def grilla_seguimientos(request):
             return render(request, 'seguimientos/grilla_datos.html', {
                 'form_notas': notasForm(),
                 'form_emails': emailsForm(),
-                'form': seguimientoForm(initial={'fecha':datetime.now().strftime('%Y-%m-%d'),'vencimiento':datetime.now().strftime('%Y-%m-%d'),'loadingdate':datetime.now().strftime('%Y-%m-%d')}),
+                'form': seguimientoForm(initial={'fecha':datetime.now().strftime('%Y-%m-%d'),'vencimiento':datetime.now().strftime('%Y-%m-%d')}),
                 'form_cronologia': cronologiaForm(),
                 'form_envases': envasesForm(),
                 'form_embarques': embarquesForm(),
@@ -472,22 +472,31 @@ def guardar_cronologia(request):
         data = simplejson.loads(request.POST['data'])
         registro = SeguimientoReal.objects.get(id=id)
         campos = vars(registro)
+        etd_valor = None  # Variable temporal para almacenar el valor de etd
+
         for name in campos:
             for d in data:
                 if name in d['name']:
                     if len(d['value']) > 0:
                         setattr(registro, name, d['value'])
+                        if name == "etd":  # Si estamos procesando el campo 'etd'
+                            etd_valor = d['value']
                     else:
                         setattr(registro, name, None)
+
+        if etd_valor:
+            setattr(registro, "loadingdate", etd_valor)
+
         registro.save()
         resultado['resultado'] = 'exito'
-    except IntegrityError as e:
+    except IntegrityError:
         resultado['resultado'] = 'Error de integridad, intente nuevamente.'
     except Exception as e:
         resultado['resultado'] = str(e)
+
     data_json = json.dumps(resultado)
-    mimetype = "application/json"
-    return HttpResponse(data_json, mimetype)
+    return HttpResponse(data_json, content_type="application/json")
+
 
 
 def guardar_seguimiento(request):

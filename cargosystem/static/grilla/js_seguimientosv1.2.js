@@ -2355,7 +2355,7 @@ function get_datos_seguimiento(id, modo = '') {
         type: 'GET',
         async: false,
         success: function (data) {
-
+            console.log(data);
             var datos = data;
             // Establece los valores en los campos del formulario
             if (datos['fecha'] !== null) {
@@ -2546,6 +2546,15 @@ function get_datos_seguimiento(id, modo = '') {
             }
             if (datos['refproveedor'] !== null) {
                 $("#id_refproveedor").val(datos['refproveedor'])
+            }
+            if (datos['terminos'] !== null) {
+                $("#terminos").val(datos['terminos'])
+            }
+            if (datos['volumen'] !== null) {
+                $("#id_volumen_seg").val(datos['volumen'])
+            }
+            if (datos['trafico'] !== null) {
+                $("#id_trafico_seg").val(datos['trafico'])
             }
             return datos;
         },

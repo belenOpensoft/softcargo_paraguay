@@ -396,19 +396,7 @@ class ProveedoresGastos(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'}),
     )
 
-    tipo_cobro = forms.ChoiceField(
-        required=True,
-        choices=CHOICE_TCOBRO,
-        label='Tipo',
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        error_messages={'required': 'Este campo es obligatorio'}
-    )
 
-    cobro = forms.ChoiceField(
-        choices=CHOICE_COBRO,
-        label='',
-        widget=forms.Select(attrs={'class': 'form-control'}),
-    )
 
     precio = forms.FloatField(
         required=False,

@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from django.http import JsonResponse
+
+from mantenimientos.models import Vapores
 from seguimientos.models import Seguimiento, VGrillaSeguimientos
 
 
@@ -165,7 +167,7 @@ def get_data_seguimiento(request, id):
             'booking', 'trackid', 'proyecto', 'proyecto_codigo', 'trafico',
             'trafico_codigo', 'actividad', 'actividad_codigo', 'diasalmacenaje',
             'demora', 'modo', 'id', 'origen_text', 'destino_text',
-            'refproveedor', 'refcliente', 'loadingdate', 'fecha', 'vencimiento'
+            'refproveedor', 'refcliente', 'loadingdate', 'fecha', 'vencimiento','terminos','volumen','trafico'
         )
 
         if data:
@@ -178,6 +180,13 @@ def get_data_seguimiento(request, id):
                 value = item.get(field_name)
                 if isinstance(value, datetime):
                     item[field_name] = value.strftime('%Y-%m-%d')
+
+                vapor_codigo = item.get('vapor')  # Obtener el valor del campo vapor
+
+                if isinstance(vapor_codigo, int):  # Verificar si es un número
+                    vapor_obj = Vapores.objects.filter(codigo=vapor_codigo).first()
+                    if vapor_obj:
+                        item['vapor'] = vapor_obj.nombre
 
             return JsonResponse(item, safe=False)
         else:

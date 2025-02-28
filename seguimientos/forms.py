@@ -216,7 +216,7 @@ class seguimientoForm(BSModalModelForm):
     loading = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'loading_add', 'required': False}),required=False)
     discharge = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'discharge_add', 'required': False}),required=False)
     proyecto = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'proyecto_add', 'required': False}),required=False)
-    trafico = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'trafico_add', 'required': False}),required=False)
+    trafico = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'id_trafico_seg', 'required': False}),required=False)
     actividad = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'actividad_add', 'required': False}),required=False)
     terminos = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'id': 'terminos', 'required': True}),required=True,choices=CHOICE_TERMINOS)
     # observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'notas_seguimiento',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"10","class":"form-control"}, ), required=False,label="Notas", max_length=500)
@@ -251,7 +251,7 @@ class seguimientoForm(BSModalModelForm):
     tipobonifcli = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'tipobonifcli', 'required': False}),required=False,initial='P')
     editado = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'editado', 'required': False}),required=False)
     volumen = forms.DecimalField(
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'volumen', 'required': False}),
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_volumen_seg', 'required': False}),
         required=False,
         initial=0.00
     )

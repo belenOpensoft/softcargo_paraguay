@@ -3,6 +3,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from administracion_contabilidad.models import MantenimientosClientes, MantenimientosCiudades
+from mantenimientos.models import Vapores
 from mantenimientos.views.bancos import is_ajax
 from seguimientos.models import VGrillaSeguimientos, Envases, VCargaaerea
 
@@ -41,7 +42,12 @@ def get_datos_caratula(request):
                 emb = MantenimientosClientes.objects.get(codigo=row.embarcador_codigo)
                 emb_dir = emb.direccion
                 emb_c = emb.ciudad
-                emb_cc = MantenimientosCiudades.objects.get(codedi=emb_c).nombre
+
+                if MantenimientosCiudades.objects.filter(codedi=emb_c).exists():
+                    emb_cc = MantenimientosCiudades.objects.get(codedi=emb_c).nombre
+                else:
+                    emb_cc = "S/I"
+
                 emb_p = emb.pais
             else:
                 emb = emb_dir = emb_c = emb_cc = emb_p = "S/I"
@@ -50,7 +56,12 @@ def get_datos_caratula(request):
                 con = MantenimientosClientes.objects.get(codigo=row.consignatario_codigo)
                 con_dir = con.direccion
                 con_c = con.ciudad
-                con_cc = MantenimientosCiudades.objects.get(codedi=con_c).nombre
+
+                if MantenimientosCiudades.objects.filter(codedi=con_c).exists():
+                    con_cc = MantenimientosCiudades.objects.get(codedi=con_c).nombre
+                else:
+                    con_cc = "S/I"
+
                 con_p = con.pais
                 con_r = con.ruc
             else:
@@ -62,7 +73,14 @@ def get_datos_caratula(request):
                 agen_c = "S/I"
 
             texto = texto + '<b>ETD: </b>'+str(res)+'<br>'
-            texto = texto + '<b>Vapor: </b>'+str(row.vapor if row.vapor is not None else 'S/I')+'<br>'
+            if isinstance(row.vapor, int):
+                vapor_obj = Vapores.objects.filter(codigo=row.vapor).first()
+                nombre_vapor = vapor_obj.nombre if vapor_obj else 'S/I'
+            else:
+                nombre_vapor = row.vapor if row.vapor is not None else 'S/I'
+
+            texto = texto + f'<b>Vapor: </b>{nombre_vapor}<br>'
+
             texto = texto + '<b>Transportista: </b>'+str(row.transportista if row.transportista is not None else '')+'<br>'
             texto = texto + '<b>Orden cliente: </b>'+str(row.refcliente if row.refcliente is not None else 'S/O')+'</strong><hr>'
             texto = texto + '<b><strong>Embarcador: </b>' + str(row.embarcador if row.embarcador is not None else '') + '</strong><br>'

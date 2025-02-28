@@ -1,11 +1,12 @@
 import json
 from datetime import datetime
+from random import randint
 
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import render
 
-from administracion_contabilidad.models import Movims, Asientos, VistaProveedoresygastos
+from administracion_contabilidad.models import Movims, Asientos, VistaProveedoresygastos, Impucompras
 from administracion_contabilidad.views.facturacion import generar_autogenerado, generar_numero, modificar_numero
 from mantenimientos.models import Clientes, Servicios
 from administracion_contabilidad.forms import ProveedoresGastos
@@ -128,12 +129,14 @@ def procesar_factura_proveedor(request):
             arbitraje = request.POST.get('arbitraje', 0)
             paridad = request.POST.get('paridad', 0)
             cliente_data = json.loads(request.POST.get('clienteData'))
+            facturas_imputadas = json.loads(request.POST.get('facturas_imputadas'))
+            saldo_nota_cred = request.POST.get('saldo_nota_cred', 0)
             codigo_cliente = cliente_data['codigo']
             cliente = Clientes.objects.get(codigo=codigo_cliente)
             fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
 
-            precio_total = request.POST.get('total', 0) #con iva
-            neto = request.POST.get('neto', 0) #sin iva
+            precio_total = request.POST.get('total', 0)
+            neto = request.POST.get('neto', 0)
             iva = request.POST.get('iva', 0)
 
             items_data = json.loads(request.POST.get('items'))
@@ -163,6 +166,16 @@ def procesar_factura_proveedor(request):
                 detalle1 = 'CPRA/CRED'
                 tipo_asiento = 'P'
                 nombre_mov = 'FACTURA'
+
+            if int(tipo)==41 and facturas_imputadas:
+                for fac in facturas_imputadas:
+
+                    impuc=Impucompras()
+                    impuc.autogen=str(autogenerado)+str(randint(1,10))
+                    impuc.cliente=codigo_cliente
+                    impuc.monto=fac.get('monto_imputado')
+                    impuc.autofac=fac.get('autogenerado')
+                    impuc.save()
 
             detalle_asiento = detalle1 + '-' + serie + '-' + str(prefijo) + '-' + str(numero) + '-' + cliente.empresa
 
@@ -308,7 +321,7 @@ def procesar_factura_proveedor(request):
                 'monto': precio_total,
                 'iva': totaliva,
                 'total': precio_total,
-                'saldo': precio_total,
+                'saldo': precio_total if int(tipo) !=41 else saldo_nota_cred,
                 'moneda': moneda,
                 'detalle': detalle_mov,
                 'cliente': cliente.codigo,
@@ -489,3 +502,34 @@ def get_argumentos_busqueda(**kwargs):
     except Exception as e:
         raise TypeError(e)
 
+
+def cargar_pendientes_imputacion(request):
+    try:
+        nrocliente = request.GET.get('nrocliente', None)
+
+        if not nrocliente:
+            return JsonResponse({'error': 'Debe proporcionar un nrocliente'}, status=400)
+
+        registros = VistaProveedoresygastos.objects.filter(
+            nrocliente=nrocliente
+        ).exclude(saldo=0)
+
+        data = []
+        for registro in registros:
+            data.append({
+                'autogenerado': registro.autogenerado,
+                'vto': registro.fecha.strftime('%Y-%m-%d') if registro.fecha else '',
+                'emision': registro.fecha.strftime('%Y-%m-%d') if registro.fecha else '',
+                'num_completo': registro.num_completo,
+                'total': float(registro.total) if registro.total else 0,
+                'saldo': float(registro.saldo) if registro.saldo else 0,
+                'imputado': 0,
+                'tipo_cambio': float(registro.tipo_cambio) if registro.tipo_cambio else 0,
+                'detalle': registro.detalle if registro.detalle else '',
+            })
+
+        # Retornar los datos en formato JSON sin paginación
+        return JsonResponse({'data': data}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

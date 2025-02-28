@@ -9,7 +9,8 @@ from administracion_contabilidad.views.facturacion import facturacion_view, busc
 from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
 from administracion_contabilidad.views.proveedores_gastos import proveedores_gastos_view, buscar_proveedor, \
-    buscar_proveedores, buscar_item_c, buscar_items_c, procesar_factura_proveedor, source_proveedoresygastos
+    buscar_proveedores, buscar_item_c, buscar_items_c, procesar_factura_proveedor, source_proveedoresygastos, \
+    cargar_pendientes_imputacion
 from administracion_contabilidad.views.orden_pago import orden_pago_view, obtener_imputables, \
     obtener_cheques_disponibles, source_ordenes, guardar_impuorden, guardar_anticipo_orden
 from administracion_contabilidad.views.preventa import guardar_infofactura, source_embarques_factura, \
@@ -77,6 +78,7 @@ urlpatterns = [
     path('procesar_factura_proveedor/', procesar_factura_proveedor, name='procesar_factura_proveedor'),
     path('source_proveedoresygastos/', source_proveedoresygastos, name="source_proveedoresygastos"),
     path('buscar_embarques/', buscar_embarques, name='buscar_embarques'),
+    path('cargar_pendientes_imputacion/', cargar_pendientes_imputacion, name='cargar_pendientes_imputacion'),
     #proveedores
 
 ]

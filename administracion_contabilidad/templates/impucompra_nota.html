@@ -1,0 +1,54 @@
+<style>
+  /* Ajusta el tamaño del modal dinámicamente */
+#impucompra_nota {
+    max-width: 90vw;  /* Evita que sea demasiado ancho */
+    max-height: 90vh; /* Evita que sea demasiado alto */
+    overflow: hidden;  /* Evita scroll innecesario */
+    font-size: 14px;   /* Tamaño de fuente optimizado */
+}
+
+/* Estilos para la tabla */
+#tabla-impucompra tbody tr {
+    cursor: pointer;  /* Hace que las filas sean seleccionables */
+}
+
+</style>
+<!-- MODAL: IMPUCOMPRA NOTA -->
+<div id="impucompra_nota" title="Imputación de Compras" style="display: none;">
+    <form id="form-impucompra">
+        <div class="container-fluid d-grid" style="grid-template-rows: auto 1fr auto; gap: 15px;">
+
+            <!-- 📌 Tabla en la parte superior -->
+            <div class="table-responsive border rounded p-2" style="height:300px;">
+                <table id="tabla-impucompra" class="table table-sm" style="overflow-y:auto;">
+                    <thead style="position:sticky;">
+                        <tr>
+                            <th style="display:none"></th>
+                            <th>Vto</th>
+                            <th>Emisión</th>
+                            <th>Factura</th>
+                            <th>Total</th>
+                            <th>Saldo</th>
+                            <th>Imputado</th>
+                            <th>T. Cambio</th>
+                            <th>Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Filas generadas dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 📌 Sección de botones -->
+            <div class="d-flex justify-content-between align-items-center">
+                <button type="button" id="btn-imputar" class="btn btn-warning btn-sm" disabled>Imputar Seleccionado</button>
+              <label for="monto-imputar">Monto a imputar:</label>
+              <input type="number" id="monto-imputar" class="form-control form-control-sm text-end" style="width: 150px;" readonly >
+             <label for="se-imputaran">Se imputarán:</label>
+              <input type="number" id="se-imputaran" class="form-control form-control-sm text-end" style="width: 150px;" readonly >
+            </div>
+
+        </div>
+    </form>
+</div>
