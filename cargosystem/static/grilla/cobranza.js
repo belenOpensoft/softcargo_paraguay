@@ -181,12 +181,16 @@ function abrir_cobranza() {
     $("#dialog-form").dialog({
         autoOpen: true,
         modal: true,
-        width: wWidth * 0.60,
-        height: wHeight * 0.90,
+        width:'auto',
+        height:'auto',
+        maxWidth: $(window).width() * 0.90,
+        maxHeight: $(window).height() * 0.90,
+        minWidth: 500,
+        minHeight: 200,
         buttons: [
             {
-                class: "btn btn-dark",
-                style: "width:100px",
+                class: "btn btn-dark btn-sm",
+                style: "width:90px; height:30px; font-size:14px;",
                 text: "Salir",
                 click: function() {
                     $(this).dialog("close");
@@ -240,9 +244,9 @@ function resetModal(modalId) {
 }
 function tabla_para_imputar(){
     $('#imputacionTable').DataTable({
-        "stateSave": true,
         "dom": 'Btlipr',
         "scrollX": true,
+        "responsive":false,
         "bAutoWidth": false,
         "scrollY": $(window).height() * 0.60,
         "columnDefs": [
@@ -383,6 +387,7 @@ function abrir_forma_pago() {
     $(".payment-section").hide(); // Oculta todas las secciones
     const selectedSection = `#${$(this).val()}Section`;
     $(selectedSection).show(); // Muestra la sección seleccionada
+    $(selectedSection).addClass('d-grid'); // Muestra la sección seleccionada
   });
 
   // Mostrar por defecto la sección de efectivo

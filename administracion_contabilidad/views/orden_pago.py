@@ -21,7 +21,7 @@ from administracion_contabilidad.models import Asientos, VistaPagos, Dolar, Cheq
 def orden_pago_view(request):
     #if request.user.has_perms(["administracion_contabilidad.view_vistapagos", ]):
     if request.user.has_perms(["administracion_contabilidad.view_forzarerror", ]):
-        form = OrdenPago(request.POST or None)
+        form = OrdenPago(initial={'fecha':datetime.now()})
         return render(request, 'orden_pago.html', {'form': form})
     else:
         messages.error(request,'Funcionalidad en construcción.')

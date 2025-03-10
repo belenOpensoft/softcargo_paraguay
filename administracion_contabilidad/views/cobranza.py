@@ -43,7 +43,7 @@ columns_table = {
 @login_required(login_url='/login')
 def cobranza_view(request):
     if request.user.has_perms(["administracion_contabilidad.view_listacobranzas", ]):
-        form = Cobranza(request.POST or None)
+        form = Cobranza(initial={'fecha':datetime.now().strftime('%Y-%m-%d')})
         return render(request, 'cobranza.html', {'form': form})
     else:
         messages.error(request, 'No tiene permisos para realizar esta accion.')
@@ -355,8 +355,8 @@ def source_facturas_pendientes(request):
 
             data.append({
                 'id': 0,
-                'vencimiento': pendiente.vencimiento,
-                'emision': pendiente.emision,
+                'vencimiento': pendiente.vencimiento.strftime('%Y-%m-%d') if pendiente.vencimiento is not None else '',
+                'emision': pendiente.emision.strftime('%Y-%m-%d') if pendiente.emision is not None else '',
                 'documento': pendiente.documento,
                 'total': pendiente.total,
                 'saldo': pendiente.saldo,

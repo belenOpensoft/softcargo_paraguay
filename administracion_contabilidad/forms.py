@@ -661,15 +661,9 @@ class Cobranza(forms.Form):
         required=True,
         label="Fecha",
         initial=datetime.date.today,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'DD/MM/YY'
+        widget=forms.DateInput(attrs={
+            'type':'date','class': 'form-control'
         }),
-        input_formats=['%d/%m/%y'],
-        error_messages={
-            'required': 'La fecha es obligatoria',
-            'invalid': 'Ingresa una fecha válida en formato DD/MM/YY'
-        }
     )
 
     importe = forms.FloatField(
@@ -933,16 +927,9 @@ class OrdenPago(forms.Form):
     fecha = forms.DateField(
         required=True,
         label="Fecha",
-        initial=datetime.date.today,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'DD/MM/YY'
+        widget=forms.DateInput(attrs={
+            'type': 'date', 'class': 'form-control'
         }),
-        input_formats=['%d/%m/%y'],
-        error_messages={
-            'required': 'La fecha es obligatoria',
-            'invalid': 'Ingresa una fecha válida en formato DD/MM/YY'
-        }
     )
 
     importe = forms.FloatField(
