@@ -31,8 +31,37 @@
             let path = window.location.pathname;
             let partes = path.split('/').filter(p => p);
             let modulo= partes.length >= 1 ? partes[0] : null;
+            let modulo2= partes.length >= 1 ? partes[1] : null;
             if(modulo=='exportacion_aerea'){
                 $('#modulo_nombre').html('EXPORTACIÓN AÉREA');
+            }else if(modulo=='exportacion_maritima'){
+                $('#modulo_nombre').html('EXPORTACIÓN MARÍTIMA');
+            }else if(modulo=='exportacion_terrestre'){
+                $('#modulo_nombre').html('EXPORTACIÓN TERRESTRE');
+            }else if(modulo=='importacion_maritima'){
+                $('#modulo_nombre').html('IMPORTACIÓN MARÍTIMA');
+            }else if(modulo=='importacion_aerea'){
+                $('#modulo_nombre').html('IMPORTACIÓN AÉREA');
+            }else if(modulo=='importacion_terrestre'){
+                $('#modulo_nombre').html('IMPORTACIÓN TERRESTRE');
+            }else if(modulo=='admin_cont'){
+                if(modulo2=='facturacion'){
+                    $('#modulo_nombre').html('FACTURACIÓN');
+                }else if(modulo2=='proveedores_gastos'){
+                    $('#modulo_nombre').html('PROVEEDORES Y GASTOS');
+                }else if(modulo2=='cobranza'){
+                    $('#modulo_nombre').html('COBRANZA');
+                }else if(modulo2=='orden_pago'){
+                    $('#modulo_nombre').html('ORDEN DE PAGO');
+                }else if(modulo2=='editar_consultar_pagos'){
+                    $('#modulo_nombre').html('EDITAR Y CONSULTAR ORDENES DE PAGO');
+                }else if(modulo2=='editar_consultar_ventas'){
+                    $('#modulo_nombre').html('EDITAR Y CONSULTAR VENTAS');
+                }else if(modulo2=='editar_consultar_compras'){
+                    $('#modulo_nombre').html('EDITAR Y CONSULTAR COMPRAS');
+                }else if(modulo2=='editar_consultar_cobranzas'){
+                    $('#modulo_nombre').html('EDITAR Y CONSULTAR COBRANZAS');
+                }
             }
 
             var alerts = document.querySelectorAll(".alert");
