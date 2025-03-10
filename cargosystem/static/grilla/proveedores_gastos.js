@@ -909,7 +909,7 @@ $("#proveedoresModal").dialog({
     buttons: [
         {
             class: "btn btn-dark btn-sm",
-            style: "width:90px; height:25px; font-size:14px;",
+            style: "width:90px; height:30px; font-size:14px;",
             text: "Salir",
             click: function() {
                 $(this).dialog("close");

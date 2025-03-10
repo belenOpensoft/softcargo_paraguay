@@ -162,6 +162,7 @@ var que_buscar = '';
                 $('#itemTable').show();
             }
             $('#eliminarSeleccionados').show();
+            $('#itemTable').css('visibility', 'visible');
             $('#clonarItem').show();
             actualizarTotal();
             $('#totales').show();
@@ -237,107 +238,6 @@ var que_buscar = '';
                 $('#eliminarSeleccionados').hide();
                 $('#totales').hide();
             }
-        }
-    });
-
-    $('#facturaForm').submit(function(event) {
-        event.preventDefault();
-        if (confirm('¿Está seguro de que desea facturar?')) {
-            let tipoFac = $('#id_tipo').val();
-            let serie = $('#id_serie').val();
-            let prefijo = $('#id_prefijo').val();
-            let numero = $('#id_numero').val();
-            let cliente = $('#cliente').val();
-            let fecha = $('#id_fecha').val();
-            let paridad = $('#id_paridad').val();
-            let arbitraje = $('#id_arbitraje').val();
-            let imputar = $('#id_imputar').val();
-            let moneda = $('#id_moneda select').val();
-            let clienteData = {
-                codigo: $('#clienteTable tbody tr td').eq(0).text(),
-                empresa: $('#clienteTable tbody tr td').eq(1).text(),
-                rut: $('#clienteTable tbody tr td').eq(2).text(),
-                direccion: $('#clienteTable tbody tr td').eq(3).text(),
-                localidad: $('#clienteTable tbody tr td').eq(4).text(),
-                telefono: $('#clienteTable tbody tr td').eq(5).text()
-            };
-
-            let items = [];
-            $('#itemTable tbody tr').each(function() {
-                const itemData = {
-                    id: $(this).find('td').eq(0).text(),
-                    descripcion: $(this).find('td').eq(1).text(),
-                    precio: $(this).find('td').eq(2).text(),
-                    iva: $(this).find('td').eq(3).text(),
-                    cuenta: $(this).find('td').eq(4).text(),
-                };
-                items.push(itemData);
-            });
-
-            let preventa = JSON.parse(localStorage.getItem('preventa')) || [];
-            let data=[];
-            if (preventa!=null){
-                //es preventa
-                data={
-                    csrfmiddlewaretoken: csrf_token,
-                    fecha: fecha,
-                    tipoFac: tipoFac,
-                    serie: serie,
-                    prefijo: prefijo,
-                    numero: numero,
-                    cliente: cliente,
-                    arbitraje: arbitraje,
-                    paridad: paridad,
-                    imputar: imputar,
-                    moneda: moneda,
-                    clienteData: JSON.stringify(clienteData),
-                    items: JSON.stringify(items),
-                    total:total,
-                    iva:iva,
-                    neto:neto,
-                    preventa:JSON.stringify(preventa),
-                }
-            }else{
-                data={
-                    csrfmiddlewaretoken: csrf_token,
-                    fecha: fecha,
-                    tipoFac: tipoFac,
-                    serie: serie,
-                    prefijo: prefijo,
-                    numero: numero,
-                    cliente: cliente,
-                    arbitraje: arbitraje,
-                    paridad: paridad,
-                    imputar: imputar,
-                    moneda: moneda,
-                    clienteData: JSON.stringify(clienteData),
-                    items: JSON.stringify(items),
-                    total:total,
-                    iva:iva,
-                    neto:neto,
-                    preventa:0,
-                }
-            }
-
-            $.ajax({
-                url: "/admin_cont/procesar_factura/",
-                dataType: 'json',
-                type: 'POST',
-                data: data,
-                headers: { 'X-CSRFToken': csrf_token },
-                success: function(data) {
-                    $('#facturaM').dialog('close');
-                    $('#facturaForm').trigger('reset');
-                    total=0;
-                    iva=0;
-                    neto=0;
-                    //window.location.reload();
-                },
-                error: function(xhr) {
-                    console.error('Error al facturar:', xhr);
-                    alert('Error al procesar la factura');
-                }
-            });
         }
     });
 
@@ -453,21 +353,22 @@ var dHeight = wHeight * 0.30;
 function abrir_modalfactura(){
 $('#facturaForm').trigger('reset');
 $('#itemTable tbody').empty();
-$('#itemTable').hide();
 $('#clienteTable tbody').empty();
 $('#clienteTable').hide();
-$('#totales').hide();
 
 $("#facturaM").dialog({
         autoOpen: true,
         modal: true,
-        width: wWidth*0.60,
-        height: wHeight*0.80,
-        position: { my: "top", at: "top+20", of: window },
+        resizable: false,
+        draggable: true,
+        maxWidth: $(window).width() * 0.90,
+        maxHeight: $(window).height() * 0.90,
+        minWidth: 500,
+        minHeight: 200,
         buttons: [{
             text: "Salir",
-            class: "btn btn-dark",
-            style: "width:100px",
+            class: "btn btn-dark btn-sm",
+            style: "width:90px; height:30px; font-size:14px;",
             click: function () {
                 $(this).dialog("close");
                 localStorage.removeItem('preventa');
@@ -475,26 +376,37 @@ $("#facturaM").dialog({
 
             },
         }],
+        open: function() {
+        // 🔹 Ajustar el tamaño dinámicamente según el contenido
+        $(this).dialog("option", "width", "auto");
+        $(this).dialog("option", "height", "auto");
+        $(this).dialog("option", "position", { my: "center", at: "center", of: window });
+    }
     }).prev('.ui-dialog-titlebar').remove();
 }
 
 $('#preventa').on('click', function() {
-    $("#preventa_modal").dialog({
-        autoOpen: true,
-        modal: true,
-        width: wWidth*0.90,
-        height: wHeight*0.90,
-        buttons: [{
-        class: "btn btn-dark",
-                    style: "width:100px",
-                    text:"Cerrar",
-                    click: function() {
-                $(this).dialog("close");
-                $('#preventa_table').DataTable().destroy();
+$("#preventa_modal").dialog({
+    autoOpen: true,
+    modal: true,
+    resizable: false,
+    draggable: true,
+    width: 'auto',  // Se ajusta al contenido
+    height: 'auto', // Se ajusta al contenido
+    minWidth: 500,  // Evita que sea demasiado pequeño
+    minHeight: 200, // Evita que sea demasiado pequeño
+    position: { my: "center", at: "center", of: window }, // Centrar el modal
+    buttons: [{
+        class: "btn btn-dark btn-sm",
+        style: "width:90px; height:30px; font-size:14px;",
+        text:"Cerrar",
+        click: function() {
+            $(this).dialog("close");
+            $('#preventa_table').DataTable().destroy();
+        }
+    }]
+});
 
-            }
-        }]
-    });
     $('#preventa_table').DataTable({
         serverSide: true,
         ajax: {
@@ -513,7 +425,8 @@ $('#preventa').on('click', function() {
             { data: 'referencia' },
             { data: 'fecha' }
         ],
-        responsive: true,
+        "scrollX": true,  // Activa el scroll horizontal sobre la tabla
+        "scrollCollapse": true,  // Evita que el contenedor crezca si hay poco contenido
         processing: true,
         language: {
             url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
@@ -753,7 +666,7 @@ $('#itemTable tbody tr').each(function() {
 neto = neto_fun;
 
 // Actualiza el valor del neto en el campo correspondiente
-$('#id_neto input').val(neto.toFixed(2)).prop('readonly', true);
+$('#id_neto').val(neto.toFixed(2)).prop('readonly', true);
 
 // Recorre cada fila y calcula el total con IVA
 $('#itemTable tbody tr').each(function() {
@@ -765,11 +678,11 @@ $('#itemTable tbody tr').each(function() {
 });
 
 // Actualiza el valor del total en el campo correspondiente
-$('#id_total input').val(total.toFixed(2)).prop('readonly', true);
+$('#id_total').val(total.toFixed(2)).prop('readonly', true);
 
 // Calcula y actualiza el IVA
 iva = total - neto;
-$('#id_iva input').val(iva.toFixed(2)).prop('readonly', true);
+$('#id_iva').val(iva.toFixed(2)).prop('readonly', true);
 }
 
 function cancelar_preventa(){
@@ -968,13 +881,15 @@ function multiples_preventas(){
 $("#prev_multiple_modal").dialog({
         autoOpen: true,
         modal: true,
-        width: wWidth*0.60,
-        height: wHeight*0.80,
+        width: 'auto',
+        height: 'auto',
+        "scrollX": true,
+        "scrollCollapse": true,
         position: { my: "top", at: "top+20", of: window },
         buttons: [{
             text: "Salir",
-            class: "btn btn-dark",
-            style: "width:100px",
+            class: "btn btn-dark btn-sm",
+            style: "width:90px:font-size:14px;height:30px;",
             click: function () {
                 $(this).dialog("close");
                 $('#pendientes_tabla').DataTable().destroy();
@@ -1546,3 +1461,102 @@ $('#abrir_arbi').on('click', function (event) {
 });
 
 
+function procesar_fatura(){
+        if (confirm('¿Está seguro de que desea facturar?')) {
+            let tipoFac = $('#id_tipo').val();
+            let serie = $('#id_serie').val();
+            let prefijo = $('#id_prefijo').val();
+            let numero = $('#id_numero').val();
+            let cliente = $('#cliente').val();
+            let fecha = $('#id_fecha').val();
+            let paridad = $('#id_paridad').val();
+            let arbitraje = $('#id_arbitraje').val();
+            let imputar = $('#id_imputar').val();
+            let moneda = $('#id_moneda select').val();
+            let clienteData = {
+                codigo: $('#clienteTable tbody tr td').eq(0).text(),
+                empresa: $('#clienteTable tbody tr td').eq(1).text(),
+                rut: $('#clienteTable tbody tr td').eq(2).text(),
+                direccion: $('#clienteTable tbody tr td').eq(3).text(),
+                localidad: $('#clienteTable tbody tr td').eq(4).text(),
+                telefono: $('#clienteTable tbody tr td').eq(5).text()
+            };
+
+            let items = [];
+            $('#itemTable tbody tr').each(function() {
+                const itemData = {
+                    id: $(this).find('td').eq(0).text(),
+                    descripcion: $(this).find('td').eq(1).text(),
+                    precio: $(this).find('td').eq(2).text(),
+                    iva: $(this).find('td').eq(3).text(),
+                    cuenta: $(this).find('td').eq(4).text(),
+                };
+                items.push(itemData);
+            });
+
+            let preventa = JSON.parse(localStorage.getItem('preventa')) || [];
+            let data=[];
+            if (preventa!=null){
+                //es preventa
+                data={
+                    csrfmiddlewaretoken: csrf_token,
+                    fecha: fecha,
+                    tipoFac: tipoFac,
+                    serie: serie,
+                    prefijo: prefijo,
+                    numero: numero,
+                    cliente: cliente,
+                    arbitraje: arbitraje,
+                    paridad: paridad,
+                    imputar: imputar,
+                    moneda: moneda,
+                    clienteData: JSON.stringify(clienteData),
+                    items: JSON.stringify(items),
+                    total:total,
+                    iva:iva,
+                    neto:neto,
+                    preventa:JSON.stringify(preventa),
+                }
+            }else{
+                data={
+                    csrfmiddlewaretoken: csrf_token,
+                    fecha: fecha,
+                    tipoFac: tipoFac,
+                    serie: serie,
+                    prefijo: prefijo,
+                    numero: numero,
+                    cliente: cliente,
+                    arbitraje: arbitraje,
+                    paridad: paridad,
+                    imputar: imputar,
+                    moneda: moneda,
+                    clienteData: JSON.stringify(clienteData),
+                    items: JSON.stringify(items),
+                    total:total,
+                    iva:iva,
+                    neto:neto,
+                    preventa:0,
+                }
+            }
+
+            $.ajax({
+                url: "/admin_cont/procesar_factura/",
+                dataType: 'json',
+                type: 'POST',
+                data: data,
+                headers: { 'X-CSRFToken': csrf_token },
+                success: function(data) {
+                    $('#facturaM').dialog('close');
+                    $('#facturaForm').trigger('reset');
+                    total=0;
+                    iva=0;
+                    neto=0;
+                    //window.location.reload();
+                },
+                error: function(xhr) {
+                    console.error('Error al facturar:', xhr);
+                    alert('Error al procesar la factura');
+                }
+            });
+        }
+}

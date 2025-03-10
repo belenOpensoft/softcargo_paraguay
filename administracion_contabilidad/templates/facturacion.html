@@ -13,7 +13,30 @@
 .ui-autocomplete {
     z-index: 2050;
 }
+#facturaM .form-control {
+    font-size: 0.85rem; /* Reducir tamaño del texto */
+    padding: 2px 5px; /* Ajustar padding */
+    height: 30px; /* Reducir altura */
+}
 
+#facturaM select {
+    font-size: 0.85rem;
+    height: 30px;
+}
+
+#facturaM label {
+    font-size: 0.8rem;
+    margin-bottom: 2px; /* Reducir espacio entre label e input */
+}
+
+#facturaM .table {
+    font-size: 0.8rem; /* Reducir tamaño de texto en la tabla */
+}
+
+#facturaM .row {
+    margin-left: 0;
+    margin-right: 0;
+}
 </style>
 
 <table id="tabla_facturas" class="table table-striped table-bordered" cellspacing="0" width="100%">
@@ -59,132 +82,140 @@
         </tfoot>
     </table>
 
-<div id="facturaM" style="display: none;padding:20px;">
-    <div class="border rounded p-4 bg-light" >
+<div id="facturaM" class="border rounded p-2 bg-light" style="max-width: 80vw; max-height: 90vh; overflow: hidden; display:none; font-size:14px;height:auto;">
+    <div class="border rounded p-2 bg-light">
         <form method="post" action="" id="facturaForm">
             {% csrf_token %}
-            <div style="display:grid;align-content:baseline;justify-content:start;">
-                 <h3 id="tipoSeleccionado" style="font-weight: bold; color: white; font-family: Arial, sans-serif; background-color: black; display: inline-block; padding: 3px; border-radius: 3px">
-            </h3>
-            <button type="button" id="preventa" class="btn btn-warning">Preventa</button>
-            </div>
-            <br>
-            <div class="col-md-2">
-                {{ form.tipo.label_tag }}
-                {{ form.tipo }}
-            </div>
-            <br>
-            <div class="row">
-                <div class="col-md-1">
-                    {{ form.serie.label_tag }}
-                    {{ form.serie }}
-                </div>
-                <div class="col-md-1">
-                    {{ form.prefijo.label_tag }}
-                    {{ form.prefijo }}
-                </div>
-                <div class="col-md-2">
-                    {{ form.numero.label_tag }}
-                    {{ form.numero }}
-                </div>
-                <div class="col-md-2 offset-md-6">
-                    {{ form.fecha.label_tag }}
-                    {{ form.fecha }}
-                </div>
-            </div>
-            <br>
-            <div class="row mt-3">
-                <div class="col-md-2" id="id_moneda">
-                    {{ form.moneda.label_tag }}
-                    {{ form.moneda }}
-                </div>
-                <div class="col-md-2">
-                    {{ form.arbitraje.label_tag }}
-                    {{ form.arbitraje }}
-                </div>
-                <div class="col-md-2">
-                    {{ form.paridad.label_tag }}
-                    {{ form.paridad }}
-                </div>
-                <div class="col-md-2">
-                    {{ form.imputar.label_tag }}
-                    {{ form.imputar }}
-                </div>
-            </div>
-            <div class="row mt-3">
-                <div class="col-md-3">
-                    <label for="cliente">Buscar Cliente</label>
-                    <input type="text" id="cliente" class="form-control" name="cliente" placeholder="Buscar cliente" required>
-                </div>
-            </div>
-            <table id="clienteTable" class="table table-striped mt-4" style="display:none;">
-                <thead>
-                        <th style="display:none;">Id</th>
-                        <th>Empresa</th>
-                        <th>RUT</th>
-                        <th>Dirección</th>
-                        <th>Localidad</th>
-                        <th>Teléfono</th>
 
-                </thead>
-                <tbody></tbody>
-            </table>
-            <div class="row mt-3">
-                <div class="col-md-3">
-                    <label for="item">Buscar Item</label>
-                    <input type="text" id="item" class="form-control" name="item" placeholder="Buscar item">
-                </div>
-                <div class="col-md-4" id="id_descripcion_item">
-                    {{ form.descripcion_item.label_tag }}
-                    {{ form.descripcion_item }}
-                </div>
-                <div class="col-md-2" id="id_precio">
-                    {{ form.precio.label_tag }}
-                    {{ form.precio }}
-                </div>
-                <div class="col-md-2">
-                    <br>
-                    <button type="button" id="agregarItem" class="btn btn-success">Agregar Item</button>
-                </div>
-            </div>
-            <div class="d-flex justify-content-end mt-3 gap-2">
-                <button type="button" id="eliminarSeleccionados" class="btn btn-danger" style="display:none;">Eliminar</button>
-                <button type="button" id="clonarItem" class="btn btn-secondary btn-sm" style="display:none;">Clonar Item</button>
-            </div>
+            <div class="d-grid" style="grid-template-columns: 5fr 1fr; gap: 15px; align-items: start;">
+                <!-- 📌 Contenedor principal del formulario -->
+                <div class="p-2">
+                    <div class="d-grid" style="grid-template-columns: repeat(5, 1fr); gap: 10px;align-items: end;">
+                        <div>
+                            {{ form.tipo.label_tag }}
+                            {{ form.tipo }}
+                        </div>
+                        <div>
+                            <button type="button" id="preventa" class="form-control btn btn-warning btn-sm mt-3">Preventa</button>
+                        </div>
+                        <div>
+                            {{ form.serie.label_tag }}
+                            {{ form.serie }}
+                        </div>
+                        <div>
+                            {{ form.prefijo.label_tag }}
+                            {{ form.prefijo }}
+                        </div>
+                        <div>
+                            {{ form.fecha.label_tag }}
+                            {{ form.fecha }}
+                        </div>
+                    </div>
 
-            <table id="itemTable" class="table table-striped mt-4" style="display:none;">
-                <thead>
-                    <tr>
-                        <th style="display:none;">Id</th>
-                        <th>Item</th>
-                        <th>Descripcion</th>
-                        <th>Precio</th>
-                        <th>IVA</th>
-                        <th>Cuenta</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <div id="totales" style="display: none;">
-                <div class="col-md-2 offset-md-10" id="id_neto">
-                    {{ form.neto.label_tag }}
-                    <input type="text" class="form-control text-end" readonly>
+                    <div class="d-grid mt-2" style="grid-template-columns: repeat(4, 1fr); gap: 10px;align-items: end;">
+                        <div id="id_moneda">
+                            {{ form.moneda.label_tag }}
+                            {{ form.moneda }}
+                        </div>
+                        <div>
+                            {{ form.arbitraje.label_tag }}
+                            {{ form.arbitraje }}
+                        </div>
+                        <div>
+                            {{ form.paridad.label_tag }}
+                            {{ form.paridad }}
+                        </div>
+                        <div>
+                            {{ form.imputar.label_tag }}
+                            {{ form.imputar }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-2" style="grid-template-columns: 3fr 6fr; gap: 10px;align-items: end;">
+                        <div>
+                            <label for="cliente">Buscar Cliente</label>
+                            <input type="text" id="cliente" class="form-control form-control-sm" name="cliente" placeholder="Buscar cliente" required>
+                        </div>
+                        <div>
+                            <table id="clienteTable" class="table table-striped table-sm" style="display:none;">
+                                <thead>
+                                    <tr>
+                                        <th style="display:none;">Id</th>
+                                        <th>Empresa</th>
+                                        <th>RUT</th>
+                                        <th>Dirección</th>
+                                        <th>Localidad</th>
+                                        <th>Teléfono</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-2" style="grid-template-columns: repeat(5, 1fr); gap: 10px;align-items: end;">
+                        <div>
+                            <label for="item">Buscar Item</label>
+                            <input type="text" id="item" class="form-control form-control-sm" name="item" placeholder="Buscar item">
+                        </div>
+                        <div id="id_descripcion_item">
+                            {{ form.descripcion_item.label_tag }}
+                            {{ form.descripcion_item }}
+                        </div>
+                        <div id="id_precio">
+                            {{ form.precio.label_tag }}
+                            {{ form.precio }}
+                        </div>
+                        <div class="mt-4">
+                            <button type="button" id="agregarItem" class="btn btn-success btn-sm" style="font-size:12px">Agregar Item</button>
+                        </div>
+                        <div class="d-flex justify-content-end mt-4 gap-2">
+                            <button type="button" id="eliminarSeleccionados" class="btn btn-danger btn-sm" style="display:none;font-size:12px">Eliminar</button>
+                            <button type="button" id="clonarItem" class="btn btn-secondary btn-sm" style="display:none;font-size:12px">Clonar Item</button>
+                        </div>
+                    </div>
+
+                    <div style="height: 8rem; overflow-y: scroll; border-radius: 5px;">
+                        <table id="itemTable" class="table table-striped table-sm mt-2" style="border-collapse: collapse;visibility:visible;">
+                            <thead style="position: sticky; top: 0; background: white; z-index: 2;">
+                                <tr>
+                                    <th style="display:none;">Id</th>
+                                    <th>Item</th>
+                                    <th>Descripcion</th>
+                                    <th>Precio</th>
+                                    <th>IVA</th>
+                                    <th>Cuenta</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="col-md-2 offset-md-10" id="id_iva">
-                    {{ form.iva.label_tag }}
-                    <input type="text" class="form-control text-end" readonly>
-                </div>
-                <div class="col-md-2 offset-md-10" id="id_total">
-                    {{ form.total.label_tag }}
-                    <input type="text" class="form-control text-end" readonly>
-                </div>
-                <div class="mt-4">
-                    <button type="submit" id="facturar" name="facturar" class="btn btn-primary">Finalizar</button>
+
+                <!-- 📌 Sección de Totales (Lateral derecho) -->
+                <div id="totales" class="border p-3 rounded bg-light w-30" style="display: block;">
+                    <h5 class="text-center">Totales</h5>
+                    <div>
+                        {{ form.neto.label_tag }}
+                        {{ form.neto }}
+                    </div>
+                    <div>
+                        {{ form.iva.label_tag }}
+                        {{ form.iva}}
+                    </div>
+                    <div>
+                        {{ form.total.label_tag }}
+                        {{ form.total }}
+                    </div>
+                    <div class="mt-2">
+                        <button type="button" id="facturar" name="facturar" onclick="procesar_fatura()" class="btn btn-primary btn-sm" style="font-size:14px">Finalizar</button>
+                    </div>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
 
 
 

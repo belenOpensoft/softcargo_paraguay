@@ -1,114 +1,148 @@
 {% load static %}
+<style>
+    /* Ajustar tamaño general del modal */
+#prev_multiple_modal {
+    font-size: 12px;
+    max-width: 70vw;
+    max-height: 80vh;
+    padding: 10px;
+}
 
+/* Reducir tamaño de inputs */
+#prev_multiple_modal input.form-control {
+    font-size: 12px;
+    padding: 4px;
+    height: 24px;
+}
 
-<div id="prev_multiple_modal" style="display:none;" class="container-fluid">
-    <div class="row mt-4">
+/* Reducir margen y padding de los labels */
+#prev_multiple_modal label {
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+
+/* Ajustar tamaño de los botones */
+#prev_multiple_modal button {
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+/* Evitar que las tablas se expandan */
+.dataTables_wrapper {
+    width: 100%;
+}
+
+/* La tabla tendrá scroll horizontal si es necesario */
+.table-responsive {
+    overflow-x: auto;
+    max-height: 180px;
+}
+
+/* Asegurar que DataTables mantenga su tamaño */
+.dataTables_scrollBody {
+    overflow-x: auto !important;
+    max-height: 180px;
+}
+
+</style>
+<div id="prev_multiple_modal" style="display:none;" class="container-fluid p-2">
+    <div class="row">
+
         <!-- Filtro -->
-        <div class="col-12 mb-3">
-            <label for="socio_com_filtro">Filtrar por socio comercial</label>
-            <input
-                class="form-control"
-                id="socio_com_filtro"
-                type="text"
-                placeholder="Filtrar..."
-            >
+        <div class="col-12 mb-2">
+            <label for="socio_com_filtro" class="small">Filtrar por socio comercial</label>
+            <input class="form-control form-control-sm" id="socio_com_filtro" type="text" placeholder="Filtrar...">
         </div>
 
         <!-- Tabla de pendientes -->
-        <div class="col-12 mb-4">
-            <table id="pendientes_tabla" class="table table-bordered">
-                <thead class="table-primary text-center">
-                    <tr>
-                        <th>Número</th>
-                        <th>Sale/Llega</th>
-                        <th>Ref.</th>
-                        <th>Consignatario</th>
-                        <th>Máster</th>
-                        <th>House</th>
-                        <th>Seleccionar</th>
-                        <th>Vuelo/vapor</th>
-                        <th>Clase</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Datos dinámicos -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Botones -->
-        <div class="col-12 text-center">
-            <div id=""
-                class="d-flex justify-content-center gap-3 flex-wrap py-2 border rounded bg-light shadow-sm">
-
-                <button onclick="unificar(0)" type="button" class="btn btn-primary px-4">
-                    <i class="bi bi-hand-index"></i> Tomar preventas
-                </button>
-                <button onclick="unificar(1)" type="button" class="btn btn-primary px-4">
-                    <i class="bi bi-hand-index"></i> Tomar preventas y gastos
-                </button>
-
+        <div class="col-12 mb-3">
+            <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
+                <table id="pendientes_tabla" class="table table-bordered table-sm">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th>Número</th>
+                            <th>Sale/Llega</th>
+                            <th>Ref.</th>
+                            <th>Consignatario</th>
+                            <th>Máster</th>
+                            <th>House</th>
+                            <th>Seleccionar</th>
+                            <th>Vuelo/vapor</th>
+                            <th>Clase</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
 
-<h6 class="text-center mb-3" style="color:black;padding-top:2%;">Preview Preventa unificada</h6>
-        <div class="col-12 mb-4" style="overflow-x:auto;">
-            <table id="preventa_unificada_tabla" class="table table-bordered">
-                <thead class="table-primary text-center">
-                    <tr>
-                        <th>Sale/Llega</th>
-                        <th>Ref.</th>
-                        <th>Consignatario</th>
-                        <th>Máster</th>
-                        <th>House</th>
-                        <th>Posición</th>
-                        <th>Seguimiento</th>
-                        <th>Cliente</th>
-                        <th>Vuelo/vapor</th>
-                        <th>Clase</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Datos dinámicos -->
-                </tbody>
-            </table>
+        <!-- Botones -->
+        <div class="col-12 text-center mb-2">
+            <div class="d-flex justify-content-center gap-2 flex-wrap py-2 border rounded bg-light shadow-sm">
+                <button onclick="unificar(0)" type="button" class="btn btn-primary btn-sm">
+                    <i class="bi bi-hand-index"></i> Tomar preventas
+                </button>
+                <button onclick="unificar(1)" type="button" class="btn btn-primary btn-sm">
+                    <i class="bi bi-hand-index"></i> Tomar preventas y gastos
+                </button>
+            </div>
         </div>
 
-            <h6 class="text-center mb-3" style="color:black;padding-top:2%;">Preview gastos</h6>
-        <div class="col-12 mb-4">
-            <!-- Tabla de conceptos -->
-            <table id="conceptos_unificar_tabla" class="table table-bordered table-hover">
-                <thead class="table-secondary text-center">
-                    <tr>
-                        <th>Descripción</th>
-                        <th>Total</th>
-                        <th>IVA</th>
-                        <th>Original</th>
-                        <th>Moneda</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Datos dinámicos -->
-                </tbody>
-            </table>
+        <h6 class="text-center mb-2 small">Preview Preventa unificada</h6>
+        <div class="col-12 mb-3">
+            <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
+                <table id="preventa_unificada_tabla" class="table table-bordered table-sm">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th>Sale/Llega</th>
+                            <th>Ref.</th>
+                            <th>Consignatario</th>
+                            <th>Máster</th>
+                            <th>House</th>
+                            <th>Posición</th>
+                            <th>Seguimiento</th>
+                            <th>Cliente</th>
+                            <th>Vuelo/vapor</th>
+                            <th>Clase</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
 
+        <h6 class="text-center mb-2 small">Preview gastos</h6>
+        <div class="col-12 mb-3">
+            <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
+                <table id="conceptos_unificar_tabla" class="table table-bordered table-hover table-sm">
+                    <thead class="table-secondary text-center">
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Total</th>
+                            <th>IVA</th>
+                            <th>Original</th>
+                            <th>Moneda</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
 
         <!-- Botones -->
         <div class="col-12 text-center">
-            <div id="estilospan"
-                class="d-flex justify-content-center gap-3 flex-wrap py-3 border rounded bg-light shadow-sm">
-
-                <button type="button" class="btn btn-warning">
+            <div class="d-flex justify-content-center gap-2 flex-wrap py-2 border rounded bg-light shadow-sm">
+                <button type="button" class="btn btn-warning btn-sm">
                     <i class="bi bi-printer"></i> Imprimir
                 </button>
-                <button type="button" class="btn btn-success">
+                <button type="button" class="btn btn-success btn-sm">
                     <i class="bi bi-file-earmark-excel"></i> MS-Excel
                 </button>
-                <button type="button" onclick="guardar_preventa_unificada()" id="guardar_preventa_unificada" class="btn btn-info">
+                <button type="button" onclick="guardar_preventa_unificada()" id="guardar_preventa_unificada" class="btn btn-info btn-sm">
                     <i class="bi bi-check-circle"></i> Unificar
                 </button>
             </div>
         </div>
+
     </div>
 </div>

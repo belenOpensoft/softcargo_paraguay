@@ -1,243 +1,166 @@
 {% load static %}
 
+<style>
+/* Estilos generales para hacer más compacto el modal */
+#preventa_modal {
+    max-width: 70vw; /* Ajusta el ancho del modal */
+    max-height: 80vh; /* Ajusta la altura del modal */
+    overflow: hidden;
+    font-size: 12px; /* Reduce el tamaño del texto */
+    padding: 10px;
+}
 
-<div id="preventa_modal" style="display:none
-">
-    <div style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
-        <div class="col-12" style="padding: 0; width: 100%;">
-            <table id="preventa_table" class="table table-striped mt-4" style="width: 100%; margin: 0; padding: 0;">
+/* Ajustar inputs y botones */
+#preventa_modal input.form-control, #preventa_modal select {
+    font-size: 12px;
+    padding: 4px;
+    height: 24px;
+}
+
+#preventa_modal label {
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+
+#preventa_modal button {
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+/* Tabla con scroll vertical */
+#preventa_table {
+    max-height: 200px; /* Limita la altura de la tabla */
+    overflow-y: auto;
+    display: block;
+}
+
+/* Ajuste de contenedores en grid para mejor distribución */
+.modal-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas principales */
+    gap: 10px;
+}
+
+/* Estilo de los bloques de contenido */
+.modal-block {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    padding: 10px;
+}
+</style>
+
+<div id="preventa_modal" style="display:none">
+    <div class="modal-content">
+
+<!-- Bloque izquierdo con tamaño fijo -->
+<div class="modal-block" style="width: 900px; max-height: 250px; overflow: hidden;">
+    <div style="max-height: 200px; border: 1px solid #ccc; width: 100%;">
+        <table id="preventa_table" class="table table-striped mt-2" style="min-width: 900px; table-layout: fixed;">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Preventa</th>
+                    <th style="width: 120px;">Cliente</th>
+                    <th style="width: 100px;">Posición</th>
+                    <th style="width: 100px;">Master</th>
+                    <th style="width: 100px;">House</th>
+                    <th style="width: 100px;">Vuelo/Vapor</th>
+                    <th style="width: 120px;">Contenedores</th>
+                    <th style="width: 80px;">Clase</th>
+                    <th style="width: 100px;">Referencia</th>
+                    <th style="width: 100px;">Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="10" style="height: 30px;"></td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+        <!-- Bloque derecho -->
+        <div class="modal-block">
+            <div class="row">
+                <div class="col-6">
+                    <label for="moneda">Moneda:</label>
+                    <input id="moneda" type="text" class="form-control">
+                </div>
+                <div class="col-6">
+                    <label for="total_con_iva">Total con IVA:</label>
+                    <input id="total_con_iva" type="text" class="form-control">
+                </div>
+                <div class="col-6">
+                    <label for="total_sin_iva">Total sin IVA:</label>
+                    <input id="total_sin_iva" type="text" class="form-control">
+                </div>
+                <div class="col-6">
+                    <label for="cliente_i">Cliente:</label>
+                    <input id="cliente_i" type="text" class="form-control">
+                </div>
+                <div class="col-6">
+                    <label for="direccion">Dirección:</label>
+                    <input id="direccion" type="text" class="form-control">
+                </div>
+                <div class="col-6">
+                    <label for="localidad">Localidad:</label>
+                    <input id="localidad" type="text" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <!-- Segunda fila de contenido -->
+        <div class="modal-block">
+            <table id="tabla_gastos_preventa_factura" class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Preventa</th>
-                        <th>Cliente</th>
-                        <th>Posición</th>
-                        <th>Master</th>
-                        <th>House</th>
-                        <th>Vuelo/Vapor</th>
-                        <th>Contenedores</th>
-                        <th>Clase</th>
-                        <th>Referencia</th>
-                        <th>Fecha</th>
+                        <th>Descripcion</th>
+                        <th>Total</th>
+                        <th>IVA</th>
+                        <th>Original</th>
+                        <th>Moneda</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td colspan="11" style="height: 40px;"></td></tr>
+                    <tr><td colspan="5" style="height: 30px;"></td></tr>
                 </tbody>
             </table>
         </div>
-    </div>
 
-    <!-- Contenedor de los bloques de contenido -->
-    <div class="row mt-4">
-
-        <!-- Contenedor izquierdo (Block 1 y Block 2) -->
-        <div class="col-md-6" style="padding: 10px; display: flex; flex-direction: column; gap: 20px;">
-            <!-- Botones como iconos con títulos -->
-          <div id="estilospan" class="navbar minavbar navbar-expand-lg navbar-light bg-primary" style="display: flex; justify-content: center; align-items: center; gap: 60px; margin-bottom: 20px; padding: 20px; border: 2px solid #ccc; border-radius: 10px; background-color: #f9f9f9; height: 100%;">
-            <div title="Facturar" onclick="facturar_preventa()" style="display: flex; flex-direction: column; align-items: center; gap: 5px; flex-grow: 1;">
-                <i class="fa-solid fa-file-invoice text-white" style="cursor: pointer; font-size: 20px;"></i>
-            </div>
-
-            <div title="Cancelar" onclick="cancelar_preventa()" style="display: flex; flex-direction: column; align-items: center; gap: 5px; flex-grow: 1;">
-                <i class="fa-solid fa-ban text-white" style="cursor: pointer; font-size: 20px;"></i>
-            </div>
-
-            <div title="Borrar" onclick="borrar_preventa()" style="display: flex; flex-direction: column; align-items: center; gap: 5px; flex-grow: 1;">
-                <i class="fa-solid fa-trash text-white" style="cursor: pointer; font-size: 20px;"></i>
-            </div>
-
-            <div title="Imprimir" onclick="imprimir_preventa()" style="display: flex; flex-direction: column; align-items: center; gap: 5px; flex-grow: 1;">
-                <i class="fa-solid fa-print text-white" style="cursor: pointer; font-size: 20px;"></i>
-            </div>
-
-            <div title="Multiples preventas" onclick="multiples_preventas()" style="display: flex; flex-direction: column; align-items: center; gap: 5px; flex-grow: 1;">
-                <i class="fa-solid fa-list text-white" style="cursor: pointer; font-size: 20px;"></i>
+        <div class="modal-block">
+            <div class="row">
+                <div class="col-4">
+                    <label for="peso">Peso:</label>
+                    <input id="peso" type="text" class="form-control">
+                </div>
+                <div class="col-4">
+                    <label for="bultos">Bultos:</label>
+                    <input id="bultos" type="text" class="form-control">
+                </div>
+                <div class="col-4">
+                    <label for="volumen">Volumen:</label>
+                    <input id="volumen" type="text" class="form-control">
+                </div>
+                <div class="col-6">
+                    <label for="inconterms">Inconterms:</label>
+                    <input id="inconterms" type="text" class="form-control">
+                </div>
+                <div class="col-6">
+                    <label for="flete">Flete:</label>
+                    <input id="flete" type="text" class="form-control">
+                </div>
             </div>
         </div>
 
-            <form id="pararesetear">
-            <!-- Block 1 -->
-            <div style="padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
-
-                     <div class="form-group">
-                        <label for="moneda">Moneda:</label>
-                        <input id="moneda" type="text" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="total_con_iva">Total con IVA:</label>
-                        <input id="total_con_iva" type="text" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="total_sin_iva">Total sin IVA:</label>
-                        <input id="total_sin_iva" type="text" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="cliente_i">Cliente:</label>
-                        <input id="cliente_i" type="text" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="direccion">Dirección:</label>
-                        <input id="direccion" type="text" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="localidad">Localidad:</label>
-                        <input id="localidad" type="text" class="form-control">
-                    </div>
-
-            </div>
-
-            <div style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
-                <table id="tabla_gastos_preventa_factura" class="table table-striped mt-4" style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>Descripcion</th>
-                            <th>Total</th>
-                            <th>IVA</th>
-                            <th>Original</th>
-                            <th>Moneda</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td colspan="5" style="height: 40px;"></td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Block 2 -->
-            <div style="padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
-                <!-- block A -->
-                <div class="row">
-                    <div class="col-2 form-group">
-                        <label for="peso">Peso:</label>
-                        <input id="peso" type="text" class="form-control">
-                    </div>
-                    <div class="col-2 form-group">
-                        <label for="aplic">Aplic:</label>
-                        <input id="aplic" type="text" class="form-control">
-                    </div>
-
-                    <div class="col-2 form-group">
-                        <label for="bultos">Bultos:</label>
-                        <input id="bultos" type="text" class="form-control">
-                    </div>
-                    <div class="col-2 form-group">
-                        <label for="volumen">Volumen:</label>
-                        <input id="volumen" type="text" class="form-control">
-                    </div>
-                    <div class="col-4 form-group">
-                        <label for="commodity">Commodity:</label>
-                        <input id="commodity" type="text" class="form-control">
-                    </div>
-                </div>
-
-                <!-- block B -->
-                <div class="row">
-                    <div class="col-2 form-group">
-                        <label for="inconterms">Inconterms:</label>
-                        <input id="inconterms" type="text" class="form-control">
-                    </div>
-                    <div class="col-2 form-group">
-                        <label for="flete">Flete:</label>
-                        <input id="flete" type="text" class="form-control">
-                    </div>
-                    <div class="col-2 form-group">
-                        <label for="deposito">Depósito:</label>
-                        <input id="deposito" type="text" class="form-control">
-                    </div>
-                    <div class="col-2 form-group">
-                        <label for="wr">WR:</label>
-                        <input id="wr" type="text" class="form-control">
-                    </div>
-                </div>
-            </div>
-            </form>
+        <!-- Botones de acciones -->
+        <div class="modal-block" style="text-align: center;">
+            <button type="button" class="btn btn-primary" onclick="facturar_preventa()">Facturar</button>
+            <button type="button" class="btn btn-secondary" onclick="cancelar_preventa()">Cancelar</button>
+            <button type="button" class="btn btn-danger" onclick="borrar_preventa()">Borrar</button>
+            <button type="button" class="btn btn-warning" onclick="imprimir_preventa()">Imprimir</button>
+            <button type="button" class="btn btn-dark" onclick="multiples_preventas()">Multiples preventas</button>
         </div>
-
-        <!-- Contenedor derecho (Block 3 y Block 4) -->
-
-           <div class="col-md-6" style="padding: 10px; display: flex; flex-direction: column; gap: 20px;">
-               <form id="pararesetear2">
-            <!-- Block 3 -->
-            <div class="navbar minavbar navbar-expand-lg navbar-light" style="padding: 15px; border: 2px solid #ccc; border-radius: 10px; display: flex; gap: 20px; justify-content: space-between; background-color: #f9f9f9; height: auto; margin-bottom: 20px;">
-                <div class="form-group" style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                    <label for="referencia">Referencia:</label>
-                    <input id="referencia" type="text" class="form-control" style="width: 100%;">
-                </div>
-                <div class="form-group" style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                    <label for="llegada_salida">Llegada Salida:</label>
-                    <input id="llegada_salida" type="text" class="form-control" style="width: 100%;">
-                </div>
-                <div class="form-group" style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                    <label for="origen">Origen:</label>
-                    <input id="origen" type="text" class="form-control" style="width: 100%;">
-                </div>
-                <div class="form-group" style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                    <label for="destino">Destino:</label>
-                    <input id="destino" type="text" class="form-control" style="width: 100%;">
-                </div>
-            </div>
-
-            <!-- division1 -->
-            <div style="padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
-                <div class="form-group">
-                    <label for="transportista">Transportista:</label>
-                    <input id="transportista" type="text" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="consignatario">Consignatario:</label>
-                    <input id="consignatario" type="text" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="embarcador">Embarcador:</label>
-                    <input id="embarcador" type="text" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="agente">Agente:</label>
-                    <input id="agente" type="text" class="form-control">
-                </div>
-            </div>
-
-            <!-- division2 -->
-            <div style="padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
-                <div class="row">
-                    <div class="col-6 form-group">
-                        <label for="vuelo_vapor">Vuelo/Vapor:</label>
-                        <input id="vuelo_vapor" type="text" class="form-control">
-                    </div>
-                    <div class="col-6 form-group">
-                        <label for="seguimiento">Seguimiento:</label>
-                        <input id="seguimiento" type="text" class="form-control">
-                    </div>
-                    <div class="col-6 form-group">
-                        <label for="mawb_mbl_mcrt">MAWB/MBL/MCRT:</label>
-                        <input id="mawb_mbl_mcrt" type="text" class="form-control">
-                    </div>
-                    <div class="col-6 form-group">
-                        <label for="hawb_hbl_hcrt">HAWB/HBL/HCRT:</label>
-                        <input id="hawb_hbl_hcrt" type="text" class="form-control">
-                    </div>
-                    <div class="col-6 form-group">
-                        <label for="posicion">Posicion:</label>
-                        <input id="posicion" type="text" class="form-control">
-                    </div>
-                    <div class="col-6 form-group">
-                        <label for="status">Status:</label>
-                        <input id="status" type="text" class="form-control">
-                    </div>
-                    <div class="col-6 form-group">
-                        <label for="orden">Orden:</label>
-                        <input id="orden" type="text" class="form-control">
-                    </div>
-                    <div class="col-6 form-group">
-                        <label for="modo">Modo:</label>
-                        <input id="modo" type="text" class="form-control">
-                    </div>
-                </div>
-            </div>
-                   </form>
-        </div>
-
-
 
     </div>
 </div>

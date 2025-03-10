@@ -65,7 +65,7 @@ class Factura(forms.Form):
     prefijo = forms.CharField(
         max_length=4,
         required=True,
-        label="",
+        label="Prefijo",
         initial="0001",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
         error_messages={

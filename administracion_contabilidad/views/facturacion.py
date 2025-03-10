@@ -859,7 +859,7 @@ def source_infofactura_cliente(request):
         length = int(request.GET.get('length', 5))
         cliente = str(request.GET.get('cliente'))
 
-        registros = VPreventas.objects.filter(zcliente=cliente)
+        registros = VPreventas.objects.filter(zconsignatario=cliente)
 
         total_registros = len(registros)
 
@@ -869,7 +869,7 @@ def source_infofactura_cliente(request):
         # Construir los datos para la tabla
         data = [{
             'numero': item.znumero,
-            'cliente': item.zconsignatario,
+            'consignatario': item.zconsignatario,
             'posicion': item.zposicion,
             'master': item.zmaster,
             'house': item.zhouse,
@@ -880,7 +880,7 @@ def source_infofactura_cliente(request):
             ),
             'clase': item.zclase,
             'referencia': item.zrefer,
-            'fecha': item.zllegasale.strftime('%Y-%m-%d') if item.zllegasale else None,
+            'sale_llega': item.zllegasale.strftime('%Y-%m-%d') if item.zllegasale else None,
         } for item in registros_paginated]
         # Respuesta JSON
         return JsonResponse({
