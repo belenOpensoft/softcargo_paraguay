@@ -175,7 +175,7 @@ class Factura(forms.Form):
         required=False,
         label="Neto",
         initial=0.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control text-end','readonly':True}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número decimal válido'
@@ -186,7 +186,7 @@ class Factura(forms.Form):
         required=False,
         label="IVA",
         initial=0.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control text-right'}),
+        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control text-right text-end','readonly':True}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número decimal válido'
@@ -197,7 +197,7 @@ class Factura(forms.Form):
         required=False,
         label="Total",
         initial=0.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control text-end','readonly':True}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número decimal válido'
@@ -413,7 +413,7 @@ class ProveedoresGastos(forms.Form):
         required=False,
         label="Neto",
         initial=0.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control text-end','readonly':True}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número decimal válido'
@@ -424,7 +424,7 @@ class ProveedoresGastos(forms.Form):
         required=False,
         label="IVA",
         initial=0.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control text-right'}),
+        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control text-end','readonly':True}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número decimal válido'
@@ -435,7 +435,7 @@ class ProveedoresGastos(forms.Form):
         required=False,
         label="Total",
         initial=0.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+        widget=forms.NumberInput(attrs={'step': '0.01', 'class': 'form-control text-end','readonly':True}),
         error_messages={
             'required': 'Este campo es obligatorio',
             'invalid': 'Por favor, ingresa un número decimal válido'

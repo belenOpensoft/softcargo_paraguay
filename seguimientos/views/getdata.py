@@ -183,8 +183,8 @@ def get_data_seguimiento(request, id):
 
                 vapor_codigo = item.get('vapor')  # Obtener el valor del campo vapor
 
-                if isinstance(vapor_codigo, int):  # Verificar si es un número
-                    vapor_obj = Vapores.objects.filter(codigo=vapor_codigo).first()
+                if isinstance(vapor_codigo, int) or (isinstance(vapor_codigo, str) and vapor_codigo.isdigit()):
+                    vapor_obj = Vapores.objects.filter(codigo=int(vapor_codigo)).first()
                     if vapor_obj:
                         item['vapor'] = vapor_obj.nombre
 

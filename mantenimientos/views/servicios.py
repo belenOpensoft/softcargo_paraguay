@@ -154,6 +154,7 @@ def agregar_servicio(request):
                     servicio.tipogasto = form.cleaned_data['tipo_gasto']
                     servicio.nombreingles = form.cleaned_data['nombreingles']
                     servicio.activa = 0 if form.cleaned_data['activa'] == False else 1
+                    servicio.imputar = form.cleaned_data['imputable']
                     servicio.tasa = form.cleaned_data['tasa']
                     servicio.save()
                     messages.success(request, 'Servicio agregado con èxito')
@@ -183,6 +184,7 @@ def modificar_servicio(request, id_servicio):
                 'nombreingles': servicio.nombreingles,
                 'activa': servicio.activa,
                 'tasa': servicio.tasa,
+                'imputable':servicio.imputar
             },
 
             ),
@@ -196,6 +198,7 @@ def modificar_servicio(request, id_servicio):
                     servicio.tipogasto = form.cleaned_data['tipo_gasto']
                     servicio.nombreingles = form.cleaned_data['nombreingles']
                     servicio.activa = 0 if form.cleaned_data['activa'] == False else 1
+                    servicio.imputar = form.cleaned_data['imputable']
                     servicio.tasa = form.cleaned_data['tasa']
                     servicio.save()
                     messages.success(request, 'Servicio modificado con èxito')
@@ -250,7 +253,7 @@ def clonar_servicio(request, id_servicio):
                 tipo='C'
             else:
                 tipo = 'V'
-        # Crear un nuevo servicio basado en el original
+
         nuevo_servicio = Servicios.objects.create(
             nombre=servicio_original.nombre,
             codigo=ser.get_codigo(),
@@ -259,6 +262,7 @@ def clonar_servicio(request, id_servicio):
             nombreingles=servicio_original.nombreingles,
             activa=servicio_original.activa,
             tasa=servicio_original.tasa,
+            imputar=servicio_original.imputar,
         )
 
         return JsonResponse({'status': 'success', 'message': 'Servicio clonado con éxito'})

@@ -877,7 +877,10 @@ class add_servicio_form(forms.Form):
         ('V', 'Venta'),
         ('C', 'Compra'),
     ]
-
+    OPCIONES_2 = [
+        ('S', 'SÍ'),
+        ('N', 'NO'),
+    ]
     nombre = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", }),
         label="Nombre")
@@ -888,6 +891,10 @@ class add_servicio_form(forms.Form):
     tipo_gasto = forms.ChoiceField(
         choices=OPCIONES,
         widget=forms.Select(attrs={'class': 'form-control'}),label='Tipo Servicio'
+    )
+    imputable = forms.ChoiceField(
+        choices=OPCIONES_2,
+        widget=forms.Select(attrs={'class': 'form-control'}),label='Imputable a Embarques'
     )
 
     tasa = forms.ChoiceField(
@@ -913,6 +920,10 @@ class edit_servicio_form(forms.Form):
         ('V', 'Venta'),
         ('C', 'Compra'),
     ]
+    OPCIONES_2 = [
+        ('S', 'SÍ'),
+        ('N', 'NO'),
+    ]
     codigo = forms.IntegerField(widget=forms.NumberInput(
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True,'readonly': True}, ), required=True,
                                 label="Código")
@@ -926,7 +937,10 @@ class edit_servicio_form(forms.Form):
         choices=OPCIONES,
         widget=forms.Select(attrs={'class': 'form-control'}), label='Tipo Servicio'
     )
-
+    imputable = forms.ChoiceField(
+        choices=OPCIONES_2,
+        widget=forms.Select(attrs={'class': 'form-control'}),label='Imputable a Embarques'
+    )
     tasa = forms.ChoiceField(
         choices=[
             ('B', 'Básico'),

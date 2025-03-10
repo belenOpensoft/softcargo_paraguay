@@ -208,7 +208,7 @@ class seguimientoForm(BSModalModelForm):
     deposito = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'deposito_add'}),required=False)
     origen = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'origen_add'}))
     destino = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'destino_add'}))
-    operacion = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True,'id':'id_operacion'}),required=True,label="Operacion",choices=choice_op,initial='')
+    operacion = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True,'id':'id_operacion_seg'}),required=True,label="Operacion",choices=choice_op,initial='')
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True}),required=True,label="Moneda", choices=(),initial='')
     vendedor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'vendedor_add'}))
     vapor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'vapor_add'}),required=False)

@@ -73,8 +73,8 @@ def get_datos_caratula(request):
                 agen_c = "S/I"
 
             texto = texto + '<b>ETD: </b>'+str(res)+'<br>'
-            if isinstance(row.vapor, int):
-                vapor_obj = Vapores.objects.filter(codigo=row.vapor).first()
+            if isinstance(row.vapor, int) or (isinstance(row.vapor, str) and row.vapor.isdigit()):
+                vapor_obj = Vapores.objects.filter(codigo=int(row.vapor)).first()
                 nombre_vapor = vapor_obj.nombre if vapor_obj else 'S/I'
             else:
                 nombre_vapor = row.vapor if row.vapor is not None else 'S/I'

@@ -96,6 +96,7 @@ def buscar_items_c(request):
                 'embarque': embarque_texto,
                 'comp': servicio.activa,
                 'gasto': servicio.modo,
+                'imputar': servicio.imputar
             }
             return JsonResponse(data)
 

@@ -1759,6 +1759,7 @@ $(document).ready(function () {
                                 var name = $(this).attr('name');
                                 formData[name] = [value, dataId];
                             });
+                            console.log(formData);
                             let data = JSON.stringify(formData);
                             miurl = "/guardar_seguimiento/";
                             var toData = {
@@ -2065,7 +2066,7 @@ $(document).ready(function () {
     },
     minLength: 2,
     select: function (event, ui) {
-        $(this).attr('data-id', ui.item['id']);  // Guarda el ID si es un item de la lista
+        $(this).attr('data-id', ui.item['codigo']);  // Guarda el ID si es un item de la lista
     },
     change: function (event, ui) {
         var input = $(this);
@@ -2355,7 +2356,6 @@ function get_datos_seguimiento(id, modo = '') {
         type: 'GET',
         async: false,
         success: function (data) {
-            console.log(data);
             var datos = data;
             // Establece los valores en los campos del formulario
             if (datos['fecha'] !== null) {
@@ -2429,9 +2429,9 @@ function get_datos_seguimiento(id, modo = '') {
             }
             if (datos['operacion'] !== '') {
                 if (datos['operacion'] !== null) {
-                    $("#id_operacion").val(datos['operacion'])
+                    $("#id_operacion_seg").val(datos['operacion']);
                 }
-                $("#id_operacion").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
+                $("#id_operacion_seg").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
             }
             if (datos['moneda'] !== '') {
                 if (datos['moneda'] !== null) {

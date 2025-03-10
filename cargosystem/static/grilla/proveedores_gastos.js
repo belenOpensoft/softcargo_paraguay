@@ -250,7 +250,7 @@ $(document).ready(function() {
 
     });
     //buscadores
-    document.querySelectorAll("button.btn-primary").forEach(button => {
+    document.querySelectorAll(".buscador").forEach(button => {
         button.addEventListener("click", function () {
             let selectedRadio = $('input[name="imputar"]:checked').attr('id');
             let impucompra_tipo;
@@ -538,7 +538,8 @@ $(document).ready(function() {
                         cuenta: servicio.cuenta,
                         codigo: servicio.item,
                         embarque: servicio.embarque,
-                        gasto: servicio.gasto
+                        gasto: servicio.gasto,
+                        imputar: servicio.imputar,
                     });
                     $('#id_descripcion_item input').val(servicio.nombre);
                     $('#id_cobro select').val(cobroActual);
@@ -559,6 +560,8 @@ $(document).ready(function() {
             const iva = $('#id_precio input').data('iva') || "";   // puede estar vacío en un nuevo item
             const cuenta = $('#id_precio input').data('cuenta') || "";
             const codigo = $('#id_precio input').data('codigo') || "";
+            const imputar = $('#id_precio input').data('imputar') || "";
+            let texto = (imputar === 'S') ? 'PENDIENTE' : 'NO IMPUTABLE';
 
             // Si hay una fila en edición, se actualiza en lugar de agregar
             if ($("#itemTable tr.editing").length > 0) {
@@ -575,6 +578,7 @@ $(document).ready(function() {
                 $editingRow.find("td").eq(3).text(precio.toFixed(2));
                 $editingRow.find("td").eq(4).text(iva);
                 $editingRow.find("td").eq(5).text(cuenta);
+                $editingRow.find("td").eq(6).text(texto);
 
                 $editingRow.removeClass("editing");
             }else {
@@ -589,7 +593,7 @@ $(document).ready(function() {
                         <td>${precio.toFixed(2)}</td>
                         <td>${iva}</td>
                         <td>${cuenta}</td>
-                        <td>PENDIENTE</td>
+                        <td>${texto}</td>
                         <td>S/I</td>
                         <td>S/I</td>
                     </tr>`;
@@ -670,19 +674,14 @@ $(document).ready(function() {
 
     // Detectar doble clic en la celda de la columna "Embarque" (índice 7)
     $("#itemTable tbody").on("dblclick", "td:nth-child(7)", function () {
-        filaSeleccionada = $(this).closest("tr"); // Guardar la fila completa
+        filaSeleccionada = $(this).closest("tr");
 
-        let embarqueValor = $(this).text().trim(); // Obtener el valor de la celda "Embarque"
-        let precioValor = filaSeleccionada.find("td:nth-child(4)").text().trim(); // Obtener "Precio"
-
-        // Guardar el precio en localStorage
-        localStorage.setItem("precio_item_imputar", precioValor);
-
-        // Colocar el valor en un campo dentro del modal
-        $("#modal-embarque #embarque-input").val(embarqueValor);
-
-        // Abrir el modal
-        $("#modal-embarque").dialog("open");
+        let embarqueValor = $(this).text().trim();
+        if (embarqueValor==='PENDIENTE'){
+            let precioValor = filaSeleccionada.find("td:nth-child(4)").text().trim();
+            localStorage.setItem("precio_item_imputar", precioValor);
+            $("#modal-embarque").dialog("open");
+        }
     });
 
     // Botón para cerrar el modal
