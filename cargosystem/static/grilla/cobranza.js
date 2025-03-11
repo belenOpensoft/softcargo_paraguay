@@ -3,11 +3,15 @@ $(document).ready(function() {
 
     $("input[name='paymentType']").on("change", function () {
     $(".payment-section").addClass("d-none");
+    $(".payment-section").removeClass("d-grid");
     const selectedSection = `#${$(this).val()}Section`;
     $(selectedSection).removeClass("d-none");
+    $(selectedSection).addClass('d-grid');
+    if($(this).val()=='terceros'){
+        abrir_cheques();
+    }
   });
-    $("#cashSection").removeClass("d-none");
-
+  $("#cashSection").removeClass("d-none");
     var buscar = '';
     var que_buscar = '';
     let contador = 0;
@@ -175,7 +179,6 @@ function borrar_datos() {
         alert('Por favor, selecciona una fila para borrar.');
     }
 }
-
 
 function abrir_cobranza() {
     $("#dialog-form").dialog({
@@ -352,12 +355,16 @@ function abrir_forma_pago() {
   $("#paymentModal").dialog({
     autoOpen: true,
     modal: true,
-    width: $(window).width() * 0.6,
-    height: $(window).height() * 0.9,
+    width:'auto',
+    height:'auto',
+    maxWidth: $(window).width() * 0.90,
+    maxHeight: $(window).height() * 0.90,
+    minWidth: 500,
+    minHeight: 200,
     buttons: [
-      {
-        text: "Salir",
-        class: "btn btn-secondary",
+      {text: "Salir",
+       class: "btn btn-dark btn-sm",
+        style: "width:90px; height:30px; font-size:14px;",
         click: function () {
           $(this).dialog("close");
 
@@ -365,7 +372,8 @@ function abrir_forma_pago() {
       },
       {
         text: "Grabar",
-        class: "btn btn-primary",
+        class: "btn btn-primary btn-sm",
+        style: "width:90px; height:30px; font-size:14px;",
         click: function () {
           let acumulado=$('#accumulated').val();
           let monto=$('#amount').val();
@@ -382,13 +390,6 @@ function abrir_forma_pago() {
 
   cargar_datos_formadepago();
 
-  // Manejo de los botones de radio para mostrar las secciones correspondientes
-  $("input[name='paymentType']").on("change", function () {
-    $(".payment-section").hide(); // Oculta todas las secciones
-    const selectedSection = `#${$(this).val()}Section`;
-    $(selectedSection).show(); // Muestra la sección seleccionada
-    $(selectedSection).addClass('d-grid'); // Muestra la sección seleccionada
-  });
 
   // Mostrar por defecto la sección de efectivo
   $("#cashSection").show();

@@ -164,7 +164,7 @@
         <form method="post" action="" id="cobranzaForm">
             {% csrf_token %}
 
-            <div class="d-grid" style="grid-template-columns: 5fr 1fr; gap: 10px; align-items: start;">
+            <div class="d-grid" style="grid-template-columns: 4fr 1fr 1fr; gap: 10px; align-items: start;">
                 <!-- 📌 Sección Principal -->
                 <div class="p-2">
                     <!-- 📌 Primera fila con serie, cobro, prefijo y número -->
@@ -191,20 +191,15 @@
                         </div>-->
                     </div>
 
-                    <!-- 📌 Fecha de la cobranza -->
-                    <div class="d-grid mt-2" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                    <!-- 📌 Datos monetarios -->
+                    <div class="d-grid mt-2" style="grid-template-columns: repeat(5, 1fr); gap: 10px;">
+                        <div>{{ form.moneda.label_tag }} {{ form.moneda }}</div>
+                        <div>{{ form.arbitraje.label_tag }} {{ form.arbitraje }}</div>
+                        <div>{{ form.paridad.label_tag }} {{ form.paridad }}</div>
                         <div>
                             {{ form.fecha.label_tag }}
                             {{ form.fecha }}
                         </div>
-                    </div>
-
-                    <!-- 📌 Datos monetarios -->
-                    <div class="d-grid mt-2" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
-                        <div>{{ form.moneda.label_tag }} {{ form.moneda }}</div>
-                        <div>{{ form.arbitraje.label_tag }} {{ form.arbitraje }}</div>
-                        <div>{{ form.paridad.label_tag }} {{ form.paridad }}</div>
-                        <div>{{ form.imputar.label_tag }} {{ form.imputar }}</div>
                     </div>
 
                     <!-- 📌 Importe -->
@@ -225,14 +220,8 @@
                         <button type="button" class="btn btn-warning btn-sm w-100 mb-2" id="imputarSeleccion" disabled>Imputar selección</button>
                         <button type="button" class="btn btn-success btn-sm w-100 mb-2" onclick="abrir_forma_pago()" id="abrirpago">Cobrar</button>
                     </div>
-
-                    <div class="input-group mb-2">
-                        <input type="text" id="embarque" class="form-control form-control-sm" name="embarque" placeholder="Nro embarque">
-                        <button class="btn btn-primary btn-sm" type="button">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-
+                </div>
+                <div class="border p-3 rounded bg-light w-30">
                     <div>
                         <label for="a_imputar">A imputar</label>
                         <input type="number" id="a_imputar" class="form-control form-control-sm mb-2" name="a_imputar" value="0.0" readonly>
@@ -281,6 +270,8 @@
 
 <div id="paymentModal" title="Forma de Cobro" style="display: none;">
   <!-- Header del modal -->
+     <div class="d-grid" style="grid-template-columns: 3fr 1fr; gap: 15px; align-items: start;">
+<div class="p-2">
   <div class="modal-header d-flex justify-content-between align-items-center">
     <h3 style="color:black;">A cobrar: <span id="amount" class="text-primary fw-bold"></span></h3>
     <div class="modal-icons">
@@ -481,14 +472,12 @@
 
 </div>
 
-  <!-- Observaciones y cierre -->
-    <br>
-    <div style="text-align:right;">
-        <button type="button" style="font-size:12px;" class="btn btn-success" onclick="ingresar_datos()">Ingresar datos</button>
-        <button type="button" style="font-size:12px;" class="btn btn-danger" onclick="borrar_datos()">Borrar datos</button>
+    <div class="text-end mt-1">
+        <button type="button" style="font-size:12px;" class="btn btn-success btn-sm" onclick="ingresar_datos()">Ingresar datos</button>
+        <button type="button" style="font-size:12px;" class="btn btn-danger btn-sm" onclick="borrar_datos()">Borrar datos</button>
     </div>
     <hr>
-    <div class="container mt-4">
+
   <div class="table-responsive">
     <table id="exampleTable" class="table table-bordered table-hover table-striped">
       <thead class="table-light">
@@ -510,29 +499,31 @@
     </table>
   </div>
 </div>
- <hr>
-  <div class="observations d-grid" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
-      <div>
-          <label for="observations">Obs.:</label>
-        <input type="text" id="observations">
-      </div>
+         <div class="border p-3 rounded bg-light w-100">
+  <!-- Observaciones y cierre -->
 
-      <div>
-        <label for="id_cuenta_observaciones">Diferencia a: </label>
-        {{ form.cuenta_observaciones }}
-      </div>
-
+  <div class="observations d-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
+    <div>
+      <label for="observations">Obs.:</label>
+      <input type="text" id="observations" class="form-control form-control-sm">
+    </div>
+    <div>
+      <label for="id_cuenta_observaciones">Diferencia a:</label>
+      {{ form.cuenta_observaciones }}
+    </div>
   </div>
-  <div class="footer-section d-flex justify-content-between mt-4">
+    <div class="footer-section d-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
     <div>
       <label for="accumulated">Acumulado:</label>
-      <input type="text" id="accumulated" value="0.0000" class="form-control" readonly>
-      <label for="difference">Diferencia:</label>
-      <input type="text" id="difference" value="0.0000" class="form-control" readonly>
+      <input type="text" id="accumulated" value="0.0000" class="form-control form-control-sm" readonly>
     </div>
-
-
+      <div>
+      <label for="difference">Diferencia:</label>
+      <input type="text" id="difference" value="0.0000" class="form-control form-control-sm" readonly>
+    </div>
   </div>
+ </div>
+ </div>
 </div>
 
 

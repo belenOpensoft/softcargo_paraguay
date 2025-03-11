@@ -58,6 +58,70 @@
 
 </style>
 
+<style>
+     #dialog-form {
+    max-width: 80vw; /* Limitar el ancho del modal */
+    max-height: 90vh; /* Limitar la altura */
+    overflow: hidden; /* Evitar scroll */
+}
+
+#dialog-form .form-control {
+    font-size: 0.85rem; /* Reducir tamaño del texto */
+    padding: 2px 5px; /* Ajustar padding */
+    height: 30px; /* Reducir altura */
+}
+
+#dialog-form select {
+    font-size: 0.85rem;
+    height: 30px;
+}
+
+#dialog-form label {
+    font-size: 0.8rem;
+    margin-bottom: 2px; /* Reducir espacio entre label e input */
+}
+
+#dialog-form .table {
+    font-size: 0.8rem; /* Reducir tamaño de texto en la tabla */
+}
+
+#dialog-form .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+
+#paymentModal {
+    max-width: 80vw; /* Limitar el ancho del modal */
+    max-height: 90vh; /* Limitar la altura */
+    overflow: hidden; /* Evitar scroll */
+}
+
+#paymentModal .form-control {
+    font-size: 0.85rem; /* Reducir tamaño del texto */
+    padding: 2px 5px; /* Ajustar padding */
+    height: 30px; /* Reducir altura */
+}
+
+#paymentModal select {
+    font-size: 0.85rem;
+    height: 30px;
+}
+
+#paymentModal label {
+    font-size: 0.8rem;
+    margin-bottom: 2px; /* Reducir espacio entre label e input */
+}
+
+#paymentModal .table {
+    font-size: 0.8rem; /* Reducir tamaño de texto en la tabla */
+}
+
+#paymentModal .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+</style>
 
 
 <link rel="stylesheet" type="text/css" href="{% static 'css/administracion/administracion.css'  %}">
@@ -93,165 +157,120 @@
         </tfoot>
     </table>
 
-
 <div id="dialog-form" title="Formulario de Pago" style="display: none;">
-<div class="border rounded p-4 bg-light">
+    <div class="border rounded p-3 bg-light">
+        <form method="post" action="" id="cobranzaForm">
+            {% csrf_token %}
+
+            <div class="d-grid" style="grid-template-columns: 4fr 1fr 1fr; gap: 10px; align-items: start;">
+                <!-- 📌 Sección Principal -->
+                <div class="p-2">
+                    <!-- 📌 Primera fila con título y número -->
+                    <div class="d-grid" style="grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <h3 class="text-center" style="font-weight: bold; color: white; font-family: Arial, sans-serif; background-color: black;
+                            padding: 5px; border-radius: 3px; display: flex; align-items: center; justify-content: center;">
+                            Orden de Pago
+                        </h3>
+                        <div>{{ form.numero }}</div>
+                    </div>
+
+                    <!-- 📌 Opciones de Pago -->
+                    <div class="d-grid mt-2" style="grid-template-columns: repeat(5, 1fr); gap: 10px;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="definitivo" name="opcion" checked>
+                            <label class="form-check-label small" for="definitivo">Definitivo</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="intencion" name="opcion">
+                            <label class="form-check-label small" for="intencion">Intención</label>
+                        </div>
+                    </div>
 
 
-    <form method="post" action="" id="cobranzaForm">
-        {% csrf_token %}
-        <div style="display:inline-flex;width:100%;">
-        <div class="col-md-10">
-        <div class="row d-flex align-items-center">
+                    <!-- 📌 Datos Monetarios -->
+                    <div class="d-grid mt-2" style="grid-template-columns: repeat(5, 1fr); gap: 10px;">
+                        <div>{{ form.moneda.label_tag }} {{ form.moneda }}</div>
+                        <div>{{ form.arbitraje.label_tag }} {{ form.arbitraje }}</div>
+                        <div>{{ form.paridad.label_tag }} {{ form.paridad }}</div>
+                        <div>
+                            {{ form.fecha.label_tag }}
+                            {{ form.fecha }}
+                        </div>
+                    </div>
 
-
-           <h3 class="col-md-3 text-center"
-                style="font-weight: bold; color: white; font-family: Arial, sans-serif; background-color: black;
-               padding: 2px 2px; border-radius: 3px; height: 40px; display: flex; align-items: center; justify-content: center;
-               margin-top: 8px;">
-                Orden de Pago
-            </h3>
-
-            <div class="col-md-2">
-                {{ form.numero }}
-            </div>
-        </div>
-        <br>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" id="definitivo" name="opcion" checked>
-                    <label class="form-check-label" for="definitivo">
-                        Definitivo
-                    </label>
+                    <!-- 📌 Importe y Cliente -->
+                    <div class="d-grid mt-2" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                        <div>{{ form.importe.label_tag }} {{ form.importe }}</div>
+                        <div>
+                            <label for="cliente_cobranza">Buscar Proveedor</label>
+                            <input type="text" id="cliente_cobranza" class="form-control form-control-sm" placeholder="Buscar proveedor">
+                            <input type="hidden" id="cliente_cobranza_hidden">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" id="intencion" name="opcion">
-                    <label class="form-check-label" for="intencion">
-                        Intención
-                    </label>
-                </div>
-            </div>
-        </div>
-        <br>
-        <div class="row">
 
-            <div class="col-md-2">
-                {{ form.fecha.label_tag }}
-                {{ form.fecha }}
-            </div>
-        </div>
-        <br>
-        <div class="row mt-3">
-            <div class="col-md-4">
-                {{ form.moneda.label_tag }}
-                {{ form.moneda }}
-            </div>
-            <div class="col-md-2">
-                {{ form.arbitraje.label_tag }}
-                {{ form.arbitraje }}
-            </div>
-            <div class="col-md-2">
-                {{ form.paridad.label_tag }}
-                {{ form.paridad }}
-            </div>
-            <div class="col-md-2">
-                {{ form.imputar.label_tag }}
-                {{ form.imputar }}
-            </div>
-        </div>
-        <br>
-        <div class="col-md-2">
-            {{form.importe.label_tag}}
-            {{form.importe}}
-        </div>
-        <div class="row mt-3">
-            <div class="d-flex align-items-center col-md-12">
-                <div class="col-md-3">
-                    <label for="cliente">Buscar Cliente</label>
-                    <input type="text" id="cliente_cobranza" class="form-control" name="cliente" placeholder="Buscar cliente">
-                    <input type="hidden" id="cliente_cobranza_hidden">
+                <!-- 📌 Sección Lateral (Botones y Totales) -->
+                <div class="border p-3 rounded bg-light w-30">
+                    <div>
+                        <button type="button" id="deshacer" class="btn btn-danger btn-sm w-100 mb-2" disabled>Deshacer</button>
+                        <button type="button" class="btn btn-warning btn-sm w-100 mb-2" id="imputarSeleccion" disabled>Imputar selección</button>
+                        <button type="button" class="btn btn-success btn-sm w-100 mb-2" onclick="abrir_forma_pago()" id="abrirpago" disabled>Pagar</button>
+                    </div>
+
+                    </div>
+
+                <div class="border p-3 rounded bg-light w-30">
+                    <div>
+                        <label for="a_imputar">A imputar</label>
+                        <input type="number" id="a_imputar" class="form-control form-control-sm mb-2" name="a_imputar" value="0.0" readonly>
+                    </div>
+                    <div>
+                        <label for="acumulado">Acumulado</label>
+                        <input type="number" id="acumulado" class="form-control form-control-sm mb-2" name="acumulado" value="0.0" readonly>
+                    </div>
+                    <div>
+                        <label for="balance">Balance</label>
+                        <input type="number" id="balance" class="form-control form-control-sm mb-2" name="balance" value="0.0" readonly>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6 offset-md-1">
-                <table id="clienteTable" class="table table-striped" style="display:none;">
-                    <thead>
+
+            <!-- 📌 Tabla de Imputación -->
+            <div style="height: 10rem; overflow-y: auto; border-radius: 5px;">
+                <table id="imputacionTablePagos" class="table table-striped table-sm mt-2">
+                    <thead style="position: sticky; top: 0; background: white; z-index: 2;">
                         <tr>
-                            <th class="d-none">Codigo</th>
-                            <th>Empresa</th>
-                            <th>RUT</th>
+                            <th style="display:none;">Id</th>
+                            <th>Fecha</th>
+                            <th>Documento</th>
+                            <th>Total</th>
+                            <th>Monto</th>
+                            <th>IVA</th>
+                            <th>Tipo</th>
+                            <th>Moneda</th>
+                            <th>Saldo</th>
+                            <th>Imputado</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
             </div>
-        </div>
-        </div>
-        <div class="col-md-2" >
 
-        <div>
-            <button type="button" id="deshacer" class="btn btn-danger w-100 mb-3" disabled>Deshacer</button>
-            <button type="button" class="btn btn-warning w-100 mb-3" id="imputarSeleccion" disabled>Imputar selección</button>
-            <button type="button" class="btn btn-success w-100 mb-3" onclick="abrir_forma_pago()" id="abrirpago" disabled>Cobrar</button>
-        </div>
-        <div class="input-group mb-3">
-            <input type="text" id="embarque" class="form-control" name="embarque" placeholder="Nro embarque">
-            <button class="btn btn-primary" type="button">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-        <div>
-            <label for="a_imputar">A imputar</label>
-            <input type="number" id="a_imputar" class="form-control mb-3" name="a_imputar" value="0.0" readonly>
-        </div>
-        <div>
-            <label for="acumulado">Acumulado</label>
-            <input type="number" id="acumulado" class="form-control mb-3" name="acumulado" value="0.0" readonly>
-        </div>
-        <div>
-            <label for="balance">Balance</label>
-            <input type="number" id="balance" class="form-control mb-3" name="balance" value="0.0" readonly>
-        </div>
+        </form>
     </div>
-        </div>
-
-        <table id="imputacionTablePagos" class="table table-striped mt-4" style="display:block; overflow-x:auto;">
-            <thead>
-                <tr>
-                    <th style="display:none;">Id</th>
-                    <th>Fecha</th>
-                    <th>Documento</th>
-                    <th>Total</th>
-                    <th>Monto</th>
-                    <th>IVA</th>
-                    <th>Tipo</th>
-                    <th>Moneda</th>
-                    <th>Saldo</th>
-                    <th>Imputado</th>
-                </tr>
-            </thead>
-            <tbody>
-
-            </tbody>
-        </table>
-
-    </form>
-
-
-</div>
 </div>
 
 <div id="paymentModal" title="Forma de Pago" style="display: none;">
+
+ <div class="d-grid" style="grid-template-columns: 3fr 1fr; gap: 15px; align-items: start;">
+<div class="p-2">
   <!-- Header del modal -->
   <div class="modal-header d-flex justify-content-between align-items-center">
-    <h3 style="color:black;">A cobrar: <span id="amount" class="text-primary fw-bold"></span></h3>
-    <div class="modal-icons">
-      <button class="icon-btn"><i class="ui-icon-folder-open"></i></button>
-      <button class="icon-btn"><i class="ui-icon-disk"></i></button>
-    </div>
+    <h5 style="color:black;">A pagar: <span id="amount" class="text-primary fw-bold"></span></h5>
+
   </div>
 
-  <!-- Radio buttons -->
+  <!-- Métodos de pago -->
   <div class="payment-methods">
     <label><input type="radio" name="paymentType" id="efectivo" value="cash" checked> Efectivo</label>
     <label><input type="radio" name="paymentType" id="cheque" value="check"> Cheque</label>
@@ -261,160 +280,73 @@
     <label><input type="radio" name="paymentType" id="cheque_terceros" value="terceros"> Cheque de terceros</label>
   </div>
 
-  <!-- Secciones dinámicas -->
-  <!-- efectivo -->
-  <div id="cashSection" class="payment-section">
+  <!-- 📌 Secciones dinámicas -->
+  <!-- Efectivo -->
+  <div id="cashSection" class="payment-section d-grid" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
     <div>
-      <label for="id_cuenta_efectivo">Caja o Banco imputado:</label>
-        {{ form.cuenta_efectivo }}
+      <label for="id_cuenta_efectivo">Caja o Banco:</label>
+      {{ form.cuenta_efectivo }}
     </div>
     <div>
       <label for="cashAmount">Monto:</label>
-      <input type="number" id="cashAmount" value="200" class="form-control">
+      <input type="number" id="cashAmount" class="form-control form-control-sm">
     </div>
     <div>
       <label for="id_moneda_efectivo">Moneda:</label>
-        {{ form.moneda_efectivo }}
+      {{ form.moneda_efectivo }}
     </div>
   </div>
 
-  <!-- cheques -->
-<div id="checkSection" class="payment-section" style="display: none;">
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label for="id_cuenta_cheque" class="form-label">Caja o Banco imputado:</label>
-        {{ form.cuenta_cheque }}
-    </div>
-    <div class="col-md-6">
-      <label for="checkAmount" class="form-label">Monto:</label>
-      <input type="number" class="form-control" id="checkAmount" value="900">
-    </div>
+  <!-- Cheque -->
+  <div id="checkSection" class="payment-section" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
+    <div><label for="id_cuenta_cheque">Caja/Banco:</label> {{ form.cuenta_cheque }}</div>
+    <div><label for="checkAmount">Monto:</label><input type="number" class="form-control form-control-sm" id="checkAmount"></div>
+    <div><label for="checkEmission">Emisión:</label><input type="date" class="form-control form-control-sm" id="checkEmission"></div>
+    <div><label for="checkDueDate">Vto.:</label><input type="date" class="form-control form-control-sm" id="checkDueDate"></div>
+    <div><label for="checkNumber">Número:</label><input type="number" class="form-control form-control-sm" id="checkNumber"></div>
+    <div><label for="id_banco_cheque">Banco:</label> {{ form.banco_cheque }}</div>
+    <div><label for="id_moneda_cheque">Moneda:</label> {{ form.moneda_cheque }}</div>
   </div>
 
-  <div class="row mb-3">
-          <div class="col-md-6">
-      <label for="checkEmission" class="form-label">Emisión:</label>
-      <input type="date" class="form-control" id="checkEmission">
-    </div>
-<div class="col-md-6">
-      <label for="checkDueDate" class="form-label">Vto.:</label>
-      <input type="date" class="form-control" id="checkDueDate">
-    </div>
-
+  <!-- Transferencia -->
+  <div id="transferSection" class="payment-section" style="grid-template-columns: repeat(4, 1fr); gap: 10px; ">
+    <div><label for="id_cuenta_transferencia">Caja/Banco:</label> {{ form.cuenta_transferencia }}</div>
+    <div><label for="checkAmount_trans">Monto:</label><input type="number" class="form-control form-control-sm" id="checkAmount_trans"></div>
+    <div><label for="checkEmission_trans">Emisión:</label><input type="date" class="form-control form-control-sm" id="checkEmission_trans"></div>
+    <div><label for="id_moneda_transferencia">Moneda:</label> {{ form.moneda_transferencia }}</div>
   </div>
-
-
-
-  <div class="row mb-3">
-
-      <div class="col-md-6">
-      <label for="checkNumber" class="form-label">Número de Cheque:</label>
-      <input type="number" class="form-control" id="checkNumber">
-    </div>
-    <div class="col-md-6">
-      <label for="id_banco_cheque" class="form-label">Banco:</label>
-        {{ form.banco_cheque }}
-    </div>
-  </div>
-    <div class="col-md-6">
-    <div>
-      <label for="id_moneda_cheque">Moneda:</label>
-        {{ form.moneda_cheque }}
-    </div>
-    </div>
-
-</div>
-
-      <!-- transferencia -->
-<div id="transferSection" class="payment-section" style="display: none;">
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label for="id_cuenta_transferencia" class="form-label">Caja o Banco imputado:</label>
-{{ form.cuenta_transferencia }}
-    </div>
-    <div class="col-md-6">
-      <label for="checkAmount_trans" class="form-label">Monto:</label>
-      <input type="number" class="form-control" id="checkAmount_trans" value="900">
-    </div>
-  </div>
-
-  <div class="row mb-3">
-          <div class="col-md-6">
-      <label for="checkEmission_trans" class="form-label">Emisión:</label>
-      <input type="date" class="form-control" id="checkEmission_trans">
-    </div>
-<div class="col-md-6">
-      <label for="checkDueDate_trans" class="form-label">Vto.:</label>
-      <input type="date" class="form-control" id="checkDueDate_trans">
-    </div>
-
-  </div>
-
-  <div class="row mb-3">
-
-      <div class="col-md-6">
-      <label for="checkNumber_trans" class="form-label">Número:</label>
-      <input type="number" class="form-control" id="checkNumber_trans">
-    </div>
-    <div class="col-md-6">
-      <label for="id_banco_transferencia" class="form-label">Banco:</label>
-        {{ form.banco_transferencia }}
-    </div>
-  </div>
-
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <label for="cuenta_trans" class="form-label">Cuenta:</label>
-            <input type="number" class="form-control" id="cuenta_trans">
-        </div>
-            <div>
-      <label for="id_moneda_transferencia">Moneda:</label>
-        {{ form.moneda_transferencia }}
-    </div>
-    </div>
-
-
-</div>
-
       <!-- deposito -->
-<div id="depositSection" class="payment-section" style="display: none;">
-  <div class="row mb-3">
-    <div class="col-md-6">
+<div id="depositSection" class="payment-section" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
+    <div>
       <label for="id_cuenta_deposito" class="form-label">Caja o Banco imputado:</label>
 {{ form.cuenta_deposito }}
     </div>
-    <div class="col-md-6">
+    <div>
       <label for="checkAmount_deposito" class="form-label">Monto:</label>
       <input type="number" class="form-control" id="checkAmount_deposito" value="900">
     </div>
-  </div>
 
-  <div class="row mb-3">
-          <div class="col-md-6">
+          <div>
       <label for="checkEmission_deposito" class="form-label">Emisión:</label>
       <input type="date" class="form-control" id="checkEmission_deposito">
     </div>
-<div class="col-md-6">
+<div>
       <label for="checkDueDate_deposito" class="form-label">Vto.:</label>
       <input type="date" class="form-control" id="checkDueDate_deposito">
     </div>
 
-  </div>
 
-  <div class="row mb-3">
 
-      <div class="col-md-6">
+      <div>
       <label for="checkNumber_deposito" class="form-label">Número:</label>
       <input type="number" class="form-control" id="checkNumber_deposito">
     </div>
-    <div class="col-md-6">
+    <div>
       <label for="id_banco_deposito" class="form-label">Banco:</label>
 {{ form.banco_deposito }}
     </div>
-  </div>
 
-    <div class="row mb-3">
-        <div class="col-md-6">
+        <div>
             <label for="cuenta_deposito" class="form-label">Cuenta:</label>
             <input type="number" class="form-control" id="cuenta_deposito">
         </div>
@@ -422,49 +354,41 @@
       <label for="id_moneda_deposito">Moneda:</label>
         {{ form.moneda_deposito }}
     </div>
-    </div>
 
 </div>
 
       <!-- otro -->
-<div id="otherSection" class="payment-section" style="display: none;">
-  <div class="row mb-3">
-    <div class="col-md-6">
+<div id="otherSection" class="payment-section" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
+    <div >
       <label for="id_cuenta_otro" class="form-label">Cuenta:</label>
     {{ form.cuenta_otro }}
     </div>
-    <div class="col-md-6">
+    <div>
       <label for="checkAmount_otro" class="form-label">Monto:</label>
       <input type="number" class="form-control" id="checkAmount_otro" value="900">
     </div>
-  </div>
 
-  <div class="row mb-3">
-          <div class="col-md-6">
+          <div >
       <label for="checkEmission_otro" class="form-label">Emisión:</label>
       <input type="date" class="form-control" id="checkEmission_otro">
     </div>
-<div class="col-md-6">
+<div >
       <label for="checkDueDate_otro" class="form-label">Vto.:</label>
       <input type="date" class="form-control" id="checkDueDate_otro">
     </div>
 
-  </div>
 
-  <div class="row mb-3">
 
-      <div class="col-md-6">
+      <div >
       <label for="checkNumber_otro" class="form-label">Número:</label>
       <input type="number" class="form-control" id="checkNumber_otro">
     </div>
-    <div class="col-md-6">
+    <div >
       <label for="id_banco_otro" class="form-label">Banco:</label>
     {{ form.banco_otro }}
     </div>
-  </div>
 
-    <div class="row mb-3">
-        <div class="col-md-6">
+        <div >
             <label for="cuenta_otro" class="form-label">Cuenta:</label>
             <input type="number" class="form-control" id="cuenta_otro">
         </div>
@@ -472,36 +396,16 @@
       <label for="id_moneda_otro">Moneda:</label>
         {{ form.moneda_otro }}
     </div>
-    </div>
 
 </div>
 
-<div id="tercerosSection" class="payment-section" style="display: none;">
-  <div class="row mb-3">
-    <div class="col-md-6">
-    <div>
-      <label for="id_moneda_cheque_terceros" class="form-label">Moneda:</label>
-        {{ form.moneda_cheque_terceros }}
-    </div>
-    </div>
-    <div class="col-md-6">
-      <label for="checkAmount" class="form-label">Monto:</label>
-      <input type="number" class="form-control" id="checkAmountTerceros" value="" readonly>
-    </div>
+
+  <div class="text-end mt-1">
+    <button type="button" style="font-size:12px;" class="btn btn-success btn-sm" onclick="ingresar_datos()">Ingresar datos</button>
+    <button type="button" style="font-size:12px;" class="btn btn-danger btn-sm" onclick="borrar_datos()">Borrar datos</button>
   </div>
-
-
-
-
-</div>
-  <!-- Observaciones y cierre -->
-    <br>
-    <div style="text-align:right;">
-        <button type="button" class="btn btn-success" onclick="ingresar_datos()">Ingresar datos</button>
-        <button type="button" class="btn btn-danger" onclick="borrar_datos()">Borrar datos</button>
-    </div>
     <hr>
-    <div class="container mt-4">
+  <!-- 📌 Tabla de pagos -->
   <div class="table-responsive">
     <table id="exampleTable" class="table table-bordered table-hover table-striped">
       <thead class="table-light">
@@ -522,80 +426,37 @@
       </tbody>
     </table>
   </div>
+        <hr>
 </div>
- <hr>
-<div class="extras">
-    <!-- Fila de Retención IRPF -->
-    <div class="row mb-3">
-        <div class="col-2">
-            <label for="retencion_irpf" class="me-3">Retención IRPF</label>
-            <input type="checkbox" name="" id="retencion_irpf">
-        </div>
-        <div class="col-1">
-            <input type="number" name="" id="monto_irpf" class="form-control" value="0" disabled>
-        </div>
-        <div class="col-3">
-            <select class="form-control" id="retenciones_irpf_select" disabled>
-                <!-- Opciones -->
-            </select>
-        </div>
+<div class="border p-3 rounded bg-light w-100">
+  <!-- 📌 Observaciones -->
+  <div class="observations d-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
+    <div>
+      <label for="observations">Obs.:</label>
+      <input type="text" id="observations" class="form-control form-control-sm">
     </div>
-
-    <!-- Fila de Retención IVA -->
-    <div class="row mb-3">
-        <div class="col-2">
-            <label for="retencion_iva" class="me-3">Retención IVA</label>
-            <input type="checkbox" name="" id="retencion_iva">
-        </div>
-        <div class="col-1">
-            <input type="number" name="" id="monto_iva" class="form-control" value="0" disabled>
-        </div>
-        <div class="col-3">
-            <select class="form-control" id="retenciones_iva_select" disabled>
-                <!-- Opciones -->
-            </select>
-        </div>
+    <div>
+      <label for="id_cuenta_observaciones">Diferencia a:</label>
+      {{ form.cuenta_observaciones }}
     </div>
-</div>
-
-    <hr>
-  <div class="observations">
-    <label for="observations">Obs.:</label>
-    <input type="text" id="observations">
-      <label for="id_cuenta_observaciones">Diferencia a: </label>
-        {{ form.cuenta_observaciones }}
   </div>
-    <hr>
-    <div class="iva_container">
 
-    <div class="row mb-3">
-        <div class="col-2">
-            <label for="descuento" class="me-3">Descuento</label>
-            <input type="checkbox" name="" id="descuento">
-        </div>
-        <div class="col-1">
-            <input type="number" name="" id="monto_iva_dos" class="form-control" value="0" >
-        </div>
-        <div class="col-3">
-            <select class="form-control" id="retenciones_iva_select_dos" >
-                <!-- Opciones -->
-            </select>
-        </div>
-    </div>
-
-    </div>
-    <hr>
-  <div class="footer-section d-flex justify-content-between mt-4">
+  <!-- 📌 Totales -->
+  <div class="footer-section d-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
     <div>
       <label for="accumulated">Acumulado:</label>
-      <input type="text" id="accumulated" value="0.0000" class="form-control" readonly>
-      <label for="difference">Diferencia:</label>
-      <input type="text" id="difference" value="0.0000" class="form-control" readonly>
+      <input type="text" id="accumulated" value="0.0000" class="form-control form-control-sm" readonly>
     </div>
-
-
+      <div>
+      <label for="difference">Diferencia:</label>
+      <input type="text" id="difference" value="0.0000" class="form-control form-control-sm" readonly>
+    </div>
   </div>
 </div>
+</div>
+</div>
+
+
 
 <div id="cheques_disponibles" title="Cheques disponibles" style="display: none;">
 <div class="d-flex align-items-center col-md-12">
