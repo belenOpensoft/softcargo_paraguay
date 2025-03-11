@@ -1748,16 +1748,17 @@ $(document).ready(function () {
                                             mostrarToast("!Seguimiento MODIFICADO con exito¡", 'success');
                                         }
                                         table.ajax.reload();
+                                            $(this).dialog("close");
                                     } else {
-                                        //alert(resultado['resultado']);
-                                        console.log(resultado['resultado']);
+                                        alert(resultado['resultado']);
+                                        //console.log(resultado['resultado']);
                                     }
                                 },
                                 error: function (e) {
                                     alert(e);
                                 }
                             });
-                            $(this).dialog("close");
+
                         } else {
                             var isValid = document.querySelector('#impo_marit_form').reportValidity();
                         }
