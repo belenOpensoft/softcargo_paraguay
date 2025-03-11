@@ -38,7 +38,7 @@ from seguimientos.views.reportes import reportes_seguimiento, descargar_pdf, des
     reportes_operativas, guardar_preferencia, cargar_preferencias, eliminar_preferencia
 from seguimientos.views.rutas import source_rutas, guardar_ruta, eliminar_ruta, datos_seguimiento
 from seguimientos.views.seguimientos import grilla_seguimientos, source_seguimientos, guardar_notas, guardar_cronologia, \
-    guardar_seguimiento, guardar_envases, eliminar_envase, clonar_seguimiento
+    guardar_seguimiento, guardar_envases, eliminar_envase, clonar_seguimiento, eliminar_nota, source
 from seguimientos.views.vapores import comprobar_vapores
 
 urlpatterns = [
@@ -55,6 +55,8 @@ urlpatterns = [
     path('source_archivos', source_archivos, name="source_archivos"),
     # path('source_envases', source_envases, name="source_envases"),
     path('guardar_notas/', guardar_notas, name="guardar_notas"),
+    path('eliminar_nota/', eliminar_nota, name="eliminar_nota"),
+    path('source/', source, name="source"), #de notas
     path('guardar_envases/', guardar_envases, name="guardar_envases"),
     path('guardar_ruta/', guardar_ruta, name="guardar_ruta"),
     path('guardar_gasto/', guardar_gasto, name="guardar_gasto"),

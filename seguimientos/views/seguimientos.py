@@ -4,14 +4,14 @@ import simplejson as simplejson
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.datetime_safe import datetime
 from datetime import datetime
-from seguimientos.forms import notasForm, seguimientoForm, cronologiaForm, envasesForm, embarquesForm, gastosForm, \
+from seguimientos.forms import NotasForm, seguimientoForm, cronologiaForm, envasesForm, embarquesForm, gastosForm, \
     pdfForm, archivosForm, rutasForm, emailsForm, clonarForm
 from seguimientos.models import VGrillaSeguimientos as Seguimiento, Seguimiento as SeguimientoReal, Envases, Cargaaerea, \
-    Attachhijo, Serviceaereo, Conexaerea
+    Attachhijo, Serviceaereo, Conexaerea, Faxes
 
 
 @login_required(login_url='/')
@@ -31,7 +31,7 @@ def grilla_seguimientos(request):
                 # 'contenedores__icontains': 'Contenedor',
             }
             return render(request, 'seguimientos/grilla_datos.html', {
-                'form_notas': notasForm(),
+                'form_notas': NotasForm(initial={'fecha':datetime.now().strftime('%Y-%m-%d')}),
                 'form_emails': emailsForm(),
                 'form': seguimientoForm(initial={'fecha':datetime.now().strftime('%Y-%m-%d'),'vencimiento':datetime.now().strftime('%Y-%m-%d')}),
                 'form_cronologia': cronologiaForm(),
@@ -115,54 +115,6 @@ def source_seguimientos(request):
         data_json = json.dumps(resultado)
     else:
         data_json = 'fail'
-    mimetype = "application/json"
-    return HttpResponse(data_json, mimetype)
-
-
-def source_seguimientos_modo_old(request, modo):
-    if is_ajax(request):
-        """ BUSCO ORDEN """
-        args = {
-            '1': request.GET['columns[1][search][value]'],
-            '2': request.GET['columns[2][search][value]'],
-            '3': request.GET['columns[3][search][value]'],
-            '4': request.GET['columns[4][search][value]'],
-            '5': request.GET['columns[5][search][value]'],
-            '6': request.GET['columns[6][search][value]'],
-            '7': request.GET['columns[7][search][value]'],
-        }
-        """PROCESO FILTRO Y ORDEN BY"""
-        filtro = get_argumentos_busqueda(**args)
-        start = int(request.GET['start'])
-        length = int(request.GET['length'])
-
-        # Agrega el filtro de modo
-        filtro['modo'] = modo  # Aquí se asegura que solo traiga registros que coincidan con el modo
-
-        end = start + length
-        order = get_order(request, columns_table)
-
-        """FILTRO REGISTROS"""
-        if filtro:
-            registros = Seguimiento.objects.filter(**filtro).order_by(*order)
-        else:
-            registros = Seguimiento.objects.all().order_by(*order)
-
-        """PREPARO DATOS"""
-        resultado = {}
-        data = get_data(registros[start:end])
-
-        """Devuelvo parametros"""
-        resultado['data'] = data
-        resultado['length'] = length
-        resultado['draw'] = request.GET['draw']
-        resultado['recordsTotal'] = Seguimiento.objects.all().count()
-        resultado['recordsFiltered'] = str(registros.count())
-
-        data_json = json.dumps(resultado)
-    else:
-        data_json = 'fail'
-
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
@@ -313,6 +265,9 @@ def get_data(registros_filtrados):
             envases = Envases.objects.filter(numero=registro.numero).count()
             gastos = Serviceaereo.objects.filter(numero=registro.numero).count()
             rutas = Conexaerea.objects.filter(numero=registro.numero).count()
+            notas = Faxes.objects.filter(numero=registro.numero).count()
+
+
             #falta historial
             registro_json.append(archivos)
             registro_json.append(embarques)
@@ -345,6 +300,7 @@ def get_data(registros_filtrados):
                 registro_json.append('')
 
             registro_json.append(get_datos_embarque(registro.numero))
+            registro_json.append(notas)
             data.append(registro_json)
         return data
     except Exception as e:
@@ -398,22 +354,91 @@ def is_ajax(request):
         messages.error(request, e)
 
 
+def source(request):
+
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+    if is_ajax:
+        numero = request.GET.get('numero')
+        if numero:
+            notas_list = Faxes.objects.filter(numero=numero).values('id', 'fecha', 'asunto', 'tipo','notas')
+        else:
+            notas_list = Faxes.objects.all().values('id', 'fecha', 'asunto', 'tipo','notas')
+
+        response_data = {"data": list(notas_list)}
+        return JsonResponse(response_data)
+
+    # Renderiza la plantilla cuando no es una solicitud AJAX
+    return render(request, 'notas.html')  # Ajusta 'notas.html' con el nombre de tu plantilla real
+
 def guardar_notas(request):
     resultado = {}
     try:
-        id = request.POST['id']
-        data = simplejson.loads(request.POST['data'])
-        registro = SeguimientoReal.objects.get(id=id)
-        registro.observaciones = data[0]['value']
-        registro.save()
+        # Verifica que request.body contenga datos
+        if not request.body:
+            return JsonResponse({"resultado": "error", "mensaje": "No data received"}, status=400)
+
+        # Carga los datos JSON desde request.body
+        data = json.loads(request.body)  # Convierte JSON a diccionario
+
+        # Extrae los valores de los campos
+        id_nota = data.get('id_nota')  # ID de la nota, si existe
+        numero = data.get('numero')
+        fecha = data.get('fecha')
+        asunto = data.get('asunto')
+        tipo = data.get('tipo')
+        notas = data.get('notas')
+
+        # Si id_nota está presente, trata la solicitud como una actualización
+        if id_nota:
+            registro = Faxes.objects.get(id=id_nota)
+            registro.numero = numero
+            registro.fecha = fecha
+            registro.asunto = asunto
+            registro.tipo = tipo
+            registro.notas = notas
+            registro.save()
+            resultado['resultado'] = 'exito'
+            resultado['mensaje'] = 'Nota actualizada correctamente'
+        else:
+            # Si no hay id_nota, crea un nuevo registro
+            registro = Faxes(
+                numero=numero,
+                fecha=fecha,
+                asunto=asunto,
+                tipo=tipo,
+                notas=notas
+            )
+            registro.save()
+            resultado['resultado'] = 'exito'
+            resultado['mensaje'] = 'Nota creada correctamente'
+            resultado['id'] = registro.id
+
+    except Faxes.DoesNotExist:
+        resultado['resultado'] = 'error'
+        resultado['mensaje'] = 'Nota no encontrada para actualización.'
+    except IntegrityError:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = 'error'
+        resultado['mensaje'] = str(e)
+
+    return JsonResponse(resultado)
+
+def eliminar_nota(request):
+    resultado = {}
+    try:
+        id = request.POST.get('id')
+        Faxes.objects.get(id=id).delete()
         resultado['resultado'] = 'exito'
-    except IntegrityError as e:
+    except Faxes.DoesNotExist:
+        resultado['resultado'] = 'La nota no existe.'
+    except IntegrityError:
         resultado['resultado'] = 'Error de integridad, intente nuevamente.'
     except Exception as e:
         resultado['resultado'] = str(e)
-    data_json = json.dumps(resultado)
-    mimetype = "application/json"
-    return HttpResponse(data_json, mimetype)
+
+    return JsonResponse(resultado)
 
 
 def guardar_envases(request):

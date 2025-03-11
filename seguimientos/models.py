@@ -840,11 +840,24 @@ class Envases(models.Model):
 
 
 class Faxes(models.Model):
+    TIPO_CHOICES = [
+        ('CL', 'CLIENTE'),
+        ('IN', 'INTERNO'),
+        ('FF', 'AGENTE CARGA'),
+        ('TR', 'TRANSPORTISTA'),
+        ('AV', 'AGENTE VENTAS'),
+        ('AC', 'AGENTE COMPRAS'),
+        ('TK', 'TRACKING'),
+        ('EM', 'EMBARCADOR'),
+        ('AD', 'ADUANA'),
+        ('DE', 'DESPACHANTE'),
+
+    ]
     numero = models.IntegerField(blank=True, null=True)
     fecha = models.DateTimeField(blank=True, null=True)
     notas = models.TextField(blank=True, null=True)  # This field type is a guess.
     asunto = models.TextField(blank=True, null=True)  # This field type is a guess.
-    tipo = models.CharField(max_length=2, blank=True, null=True)
+    tipo = models.CharField(max_length=2, choices=TIPO_CHOICES, blank=True, null=True)
 
 
 class Faxesoc(models.Model):

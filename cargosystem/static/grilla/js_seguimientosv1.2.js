@@ -156,6 +156,7 @@ $(document).ready(function () {
             });
         },
         "rowCallback": function (row, data) {
+        console.log(data);
         $('td:eq(1)', row).html('');
             let texto = ''
             if (data[8].length > 0 && data[8] !== 'S/I') {
@@ -217,6 +218,13 @@ $(document).ready(function () {
                     '<path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>\n' +
                     '</svg>';
             }
+            if (data[52] > 0) {
+    //notas
+            texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">\n' +
+            '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
+            '</svg>';
+
+                }
             $('td:eq(1)', row).html(texto + " " +  data[1] + " ");
             if (data[0] === row_selected) {
                 row_number = data[1];
@@ -688,81 +696,40 @@ $(document).ready(function () {
 
     /* FIN FUNCIONES MODALES */
 
+
     /* BOTONES ACCIONES */
     $('#notas_btn').click(function () {
         row = table.rows('.table-secondary').data();
         $("#notas_add_input").val(row[0][8]);
         if (row.length === 1) {
+
             $("#notas_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
-                    $('#notas_add_input').summernote('destroy');
-
-                    $('#notas_add_input').summernote({
-                        placeholder: 'Ingrese sus notas aqui',
-                        tabsize: 10,
-                        height: wHeight * 0.78,
-                        width: wWidth * 0.48,
-                        toolbar: [
-                            ['style', ['style']],
-                            ['font', ['bold', 'underline', 'clear']],
-                            ['color', ['color']],
-                            ['para', ['ul', 'ol', 'paragraph']],
-                            ['table', ['table']],
-                            ['insert', ['link', 'picture', 'video']],
-                            ['view', ['fullscreen', 'codeview']]
-                        ]
-                    });
-                    $('#notas_add_input').focus();
+                cargar_notas(row[0][1]);
                 },
                 modal: true,
-                title: "Notas para el seguimiento N°: " + row[0][1],
-                height: wHeight * 0.80,
-                width: wWidth * 0.50,
+                title: "Notas para el Seguimiento N°: " + row[0][1],
+                height: wHeight * 0.90,
+                width: wWidth * 0.70,
                 class: 'modal fade',
-                buttons: [
+                       buttons: [
                     {
-                        text: "Guardar",
-                        class: "btn btn-primary",
-                        style: "width:100px",
-                        click: function () {
-                            let formData = $("#notas_form").serializeArray();
-                            let data = JSON.stringify(formData);
-                            miurl = "/guardar_notas/";
-                            var toData = {
-                                'id': row[0][0],
-                                'data': data,
-                                'csrfmiddlewaretoken': csrf_token,
-                            };
-                            $.ajax({
-                                type: "POST",
-                                url: miurl,
-                                data: toData,
-                                async: true,
-                                success: function (resultado) {
-                                    if (resultado['resultado'] === 'exito') {
-                                        mostrarToast('¡Notas actualizadas con exito!', 'success');
-                                        $(".alert").delay(4000).slideUp(200, function () {
-                                            $(this).alert('close');
-                                        });
-                                        table.ajax.reload();
-                                    } else {
-                                        alert(resultado['resultado']);
-                                    }
-                                }
-                            });
-                            $(this).dialog("close");
-                        },
-                    }, {
-                        text: "Salir",
+                        text: "Cancelar",
                         class: "btn btn-dark",
                         style: "width:100px",
                         click: function () {
                             $(this).dialog("close");
-                        },
-                    }],
+                        }
+                    }
+                ],
                 beforeClose: function (event, ui) {
-                    // table.ajax.reload();
+                // localStorage.removeItem('num_house_gasto');
+                 $('#notas_table').DataTable().destroy();
+                 $("#notas_form").trigger("reset");
+//                 $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
         } else {
@@ -3101,4 +3068,110 @@ function get_sugerencias_envases(numero) {
             alert("Ocurrió un error en la búsqueda.");
         }
     });
+}
+function cargar_notas(numero) {
+    $('#notas_table').DataTable({
+        destroy: true,  // Asegura que se destruya cualquier instancia anterior
+        ajax: {
+            url: `/source/?numero=${numero}`,  // URL de la vista source
+            dataSrc: 'data'
+        },
+        columns: [
+            { data: 'id' },
+            { data: 'fecha' },
+            { data: 'asunto' },
+            { data: 'tipo' },
+            {
+                data: null,
+                render: function(data, type, row) {
+                    return `
+                        <button class="btn btn-danger" onclick="eliminarNota(${row.id})">Eliminar</button>
+                    `;
+                }
+            }
+        ],
+        rowCallback: function(row, data) {
+            // Configura el evento de doble clic para cada fila
+            $(row).off('dblclick').on('dblclick', function() {
+
+                $("#notas_add_input").val(data.notas);          // ID del registro
+                $("#id_fecha_notas").val(formatDateToYYYYMMDD(data.fecha));
+                $("#id_nota").val(data.id);      // Notas
+                $("#id_asunto").val(data.asunto);    // Asunto
+                $("#id_tipo_notas").val(data.tipo);        // Tipo
+                $("#guardar_nota").html('Modificar');  // Cambia el botón de guardar a "Modificar"
+            });
+            $(row).off('click').on('click', function () {
+                $('#notas_table tbody tr').removeClass('table-secondary');
+                $(this).addClass('table-secondary');
+            });
+
+        }
+    });
+}
+function agregar_nota(event) {
+    event.preventDefault();
+    // Convierte los datos del formulario en un JSON estructurado
+    let formDataArray = $("#notas_form").serializeArray();
+    let formData = {};
+    formDataArray.forEach(item => {
+        formData[item.name] = item.value;
+    });
+    row = table.rows('.table-secondary').data();
+    let numero = row[0][1]
+    formData.numero = numero;
+
+    // Verifica si estamos editando una nota existente
+    const idNota = $("#id_nota").val();
+    const url = "/guardar_notas/";
+
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function(response) {
+            if (response.resultado === 'exito') {
+            $("#guardar_nota").html('Agregar');
+                alert("Notas guardadas exitosamente");
+                //$("#notas_modal").dialog("close");
+                $('#notas_table').DataTable().ajax.reload();
+                $("#notas_form")[0].reset();  // Limpia el formulario después de guardar
+                $("#id_nota").val('');  // Restablece el campo oculto para futuras creaciones
+                table.ajax.reload();
+            } else {
+                alert("Error al guardar las notas: " + response.errores);
+            }
+        },
+        error: function() {
+            alert("Error en la solicitud");
+        }
+    });
+}
+function eliminarNota(id) {
+    if (confirm("¿Desea eliminar esta nota?")) {
+        $.ajax({
+            type: "POST",
+            url: `/eliminar_nota/`,
+            data: {
+                id: id,  // Corrige la clave `íd` a `id`
+                csrfmiddlewaretoken: csrf_token  // Asegúrate de incluir el token CSRF
+            },
+            success: function(response) {
+                if (response.resultado === 'exito') {
+                    alert("Nota eliminada exitosamente");
+                    $('#notas_table').DataTable().ajax.reload();
+                    table.ajax.reload();
+                } else {
+                    alert("Error al eliminar la nota");
+                }
+            },
+            error: function() {
+                alert("Error en la solicitud");
+            }
+        });
+    }
 }

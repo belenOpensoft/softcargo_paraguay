@@ -53,7 +53,7 @@ def master_importacion_maritima(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
-                'form_notas': NotasForm(),
+                'form_notas': NotasForm(initial={'fecha':datetime.datetime.now().strftime('%Y-%m-%d')}),
 
             })
         else:
@@ -90,7 +90,8 @@ def house_importacion_maritima(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
-                'form_notas': NotasForm(),
+                'form_notas': NotasForm(initial={'fecha':datetime.datetime.now().strftime('%Y-%m-%d')}),
+
 
             })
         else:

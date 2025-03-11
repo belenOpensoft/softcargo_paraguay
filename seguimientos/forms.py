@@ -2,16 +2,25 @@
 from bootstrap_modal_forms.forms import BSModalModelForm
 from mantenimientos.models import Clientes, Monedas, Depositos, Servicios
 from seguimientos.models import Seguimiento, VGrillaSeguimientos, Envases, Cargaaerea, Serviceaereo, Attachhijo, \
-    Conexaerea
+    Conexaerea, Faxes
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
 
-class notasForm(BSModalModelForm):
+class NotasForm(BSModalModelForm):
     class Meta:
-        model = Seguimiento
-        fields = ['observaciones',]  # Agrega los campos que deseas actualizar
+        model = Faxes
+        fields = ['fecha', 'notas', 'asunto', 'tipo']
+
+    # Define el ChoiceField para el campo 'tipo'
+    tipo = forms.ChoiceField(
+        choices=Faxes.TIPO_CHOICES,
+        widget=forms.Select(attrs={
+            "id": 'id_tipo_notas',
+            "class": "form-control"
+        })
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -20,7 +29,26 @@ class notasForm(BSModalModelForm):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Actualizar'))
 
-    observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'notas_add_input',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"25"," cols":"100","class":"form-control"}, ), required=False,label="Notas", max_length=500)
+        # Configuración de widgets personalizados en el __init__
+        self.fields['fecha'].widget = forms.DateInput(
+            attrs={"type": "date", "class": "form-control", 'id': 'id_fecha_notas'}
+        )
+        self.fields['notas'].widget = forms.Textarea(
+            attrs={
+                "id": 'notas_add_input',
+                "autocomplete": "off",
+                "rows": "5",
+                "cols": "100",
+                "class": "form-control"
+            }
+        )
+        self.fields['asunto'].widget = forms.TextInput(
+            attrs={
+                "autocomplete": "off",
+                "class": "form-control",
+                "max_length": 100
+            }
+        )
 
 
 class emailsForm(forms.Form):
