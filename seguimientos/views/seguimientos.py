@@ -655,6 +655,19 @@ def guardar_seguimiento(request):
 
     return HttpResponse(json.dumps(resultado), content_type="application/json")
 
+def eliminar_seguimiento(request):
+    resultado = {}
+    try:
+        id = request.POST['id']
+        SeguimientoReal.objects.get(id=id).delete()
+        resultado['resultado'] = 'exito'
+    except IntegrityError as e:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+    data_json = json.dumps(resultado)
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
 
 def clonar_seguimiento(request):
     resultado = {}

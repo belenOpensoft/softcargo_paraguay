@@ -1093,8 +1093,6 @@ let nuevaFila = {
 vector.asiento.push(nuevaFila);
 }
 
-console.log(vector);
-
 
 $.ajax({
         url: '/admin_cont/guardar_impuorden/', // Cambia esto a la URL correcta
@@ -1103,12 +1101,14 @@ $.ajax({
         data: JSON.stringify({ 'vector':vector }),
         contentType: 'application/json',
         success: function(response) {
+        console.log(response);
             if (response.status === 'exito') {
                 $('#dialog-form').dialog('close');
-
+                $('#dialog-form').dialog('close');
+                //$('#dialog-form').dialog('destroy').remove();
                 // Opcional: recargar una tabla o actualizar la UI
             } else {
-                alert("ghfghfgh: " + response.status);
+                alert(response.status);
             }
         },
         error: function(xhr) {

@@ -1099,7 +1099,7 @@ $.ajax({
 
                 // Opcional: recargar una tabla o actualizar la UI
             } else {
-                alert("ghfghfgh: " + response.status);
+                alert(response.status);
             }
         },
         error: function(xhr) {

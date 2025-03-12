@@ -281,6 +281,11 @@ def guardar_impuorden(request):
             movimiento = vector.get('movimiento', [])
             cobranza = vector.get('cobranza', [])
 
+            verificar_num = int(cobranza[0]['numero'])
+            verif = Movims.objects.filter(mboleta=verificar_num, mnombremov='O/PAGO')
+            if verif.exists():
+                return JsonResponse({'status': 'Error: ' + 'El número ingresado para la orden de pago, ya existe.'})
+
             autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))
             fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

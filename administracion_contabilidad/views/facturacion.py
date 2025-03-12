@@ -243,6 +243,7 @@ def generar_autogenerado(tipo, hora, fecha, numero):
 def procesar_factura(request):
     try:
         if request.method == 'POST':
+
             lista = Boleta.objects.last()
             numero = int(lista.numero) + 1
             hora = datetime.now().strftime('%H%M%S%f')

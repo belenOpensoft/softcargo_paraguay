@@ -1085,6 +1085,17 @@ $(document).ready(function () {
             alert('Debe seleccionar al menos un registro');
         }
     });
+    $('#eliminar_btn').click(function () {
+        row = table.rows('.table-secondary').data();
+        if (row.length === 1) {
+            let id = row[0][0];
+            if(confirm('¿Realmente desea eliminar el seguimiento: '+row[0][1]+'? Esta acción es irreversible.')){
+                eliminar_seguimiento(id);
+            }
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+    });
     $('#cronologia_btn').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
@@ -2530,6 +2541,26 @@ function get_datos_seguimiento(id, modo = '') {
             alert(error);
         }
     });
+}
+function eliminar_seguimiento(id) {
+miurl = "/eliminar_seguimiento/";
+            var toData = {
+                'id': id,
+                'csrfmiddlewaretoken': csrf_token,
+            };
+            $.ajax({
+                type: "POST",
+                url: miurl,
+                data: toData,
+                success: function (resultado) {
+                    aux = resultado['resultado'];
+                    if (aux === 'exito') {
+                        table.ajax.reload();
+                    } else {
+                        alert(aux);
+                    }
+                }
+            });
 }
 function get_datos_envases() {
     $("#tabla_envases").dataTable().fnDestroy();
