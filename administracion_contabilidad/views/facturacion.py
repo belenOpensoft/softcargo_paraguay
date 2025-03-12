@@ -40,19 +40,20 @@ param_busqueda = {
 }
 
 columns_table = {
-    0: 'autogenerado',
-    1: 'fecha',
-    2: 'serie',
-    3: 'prefijo',
-    4: 'numero',
-    5: 'cliente',
-    6: 'master',
-    7: 'house',
-    8: 'concepto',
-    9: 'monto',
-    10: 'iva',
-    11: 'totiva',
-    12: 'total',
+    0:'vacia',
+    1: 'autogenerado',
+    2: 'fecha',
+    3: 'serie',
+    4: 'prefijo',
+    5: 'numero',
+    6: 'cliente',
+    7: 'master',
+    8: 'house',
+    9: 'concepto',
+    10: 'monto',
+    11: 'iva',
+    12: 'totiva',
+    13: 'total',
 }
 
 
@@ -268,7 +269,6 @@ def procesar_factura(request):
                 for r in reg:
                     r.zfacturado='S'
                     r.save()
-
 
             else:
                 autogenerado=generar_autogenerado(tipo, hora, fecha, numero)
