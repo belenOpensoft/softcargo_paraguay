@@ -169,6 +169,7 @@ def add_house_importado(request):
                     reserva.ordencliente = house_data.get('refcliente')
 
                     reserva.fechaembarque=house_data.get('fechaembarque')
+                    reserva.fecharetiro=house_data.get('fecharetiro')
                     reserva.pagoflete=house_data.get('pagoflete')
                     reserva.status=house_data.get('estado')
                     reserva.fechaingreso=datetime.now()
@@ -257,7 +258,8 @@ def source_seguimientos_importado(request):
                     "agventas": registro.ageventas,
                     "pagoflete":'C' if registro.pago == 'Collect' else 'P',
                     "estado":registro.status,
-                    "fechaembarque":registro.loadingdate,
+                    "fechaembarque":registro.etd,
+                    "fecharetiro":registro.eta,
                     "refproveedor":registro.refproveedor,
                     "refcliente":registro.refcliente
                 })

@@ -4077,6 +4077,7 @@ function get_datos_seguimiento_rutas(numero) {
             if (response.resultado === "exito") {
                 // Asignar valores a los inputs si existen en el formulario
                 $("#id_salida").val(response.datos.salida || "");
+                $("#id_llegada").val(response.datos.llegada || "");
                 $("#id_origen").val(response.datos.origen || "");
                 $("#id_destino").val(response.datos.destino || "");
                 $("#id_ciavuelo").val(response.datos.cia || "");

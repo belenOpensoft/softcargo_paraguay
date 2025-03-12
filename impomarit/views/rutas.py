@@ -226,6 +226,7 @@ def datos_embarque_ruta(request):
 
         data = {
             'salida': embarque.fechaembarque.strftime('%Y-%m-%d') if embarque.fechaembarque else None,
+            'llegada': embarque.fecharetiro.strftime('%Y-%m-%d') if embarque.fecharetiro else None,
             'origen': embarque.origen if embarque.origen else None,
             'destino': embarque.destino if embarque.destino else None,
             'cia': transportista if transportista else None,
