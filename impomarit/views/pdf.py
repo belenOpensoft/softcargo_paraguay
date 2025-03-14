@@ -3,10 +3,10 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
-from impomarit.models import VEmbarqueaereo, Embarqueaereo, Cargaaerea, Conexaerea
+from impomarit.models import VEmbarqueaereo, Embarqueaereo, Cargaaerea, Conexaerea, Envases
 from mantenimientos.models import Clientes
 from mantenimientos.views.bancos import is_ajax
-from seguimientos.models import VGrillaSeguimientos, Envases
+from seguimientos.models import VGrillaSeguimientos
 
 
 @login_required(login_url='/')
