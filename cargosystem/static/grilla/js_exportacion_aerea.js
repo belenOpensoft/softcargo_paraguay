@@ -4442,6 +4442,18 @@ function get_datos_embarques_house(){
                 });
             }
         },
+        "columnDefs": [
+        {
+            "targets": 6,  // Índice de la columna a ocultar (empieza en 0)
+            "visible": false,
+            "searchable": false // También oculta de la búsqueda
+        },
+        {
+            "targets": 0,  // Índice de la columna a ocultar (empieza en 0)
+            "visible": false,
+            "searchable": false // También oculta de la búsqueda
+        }
+    ]
     });
 }
 function embarques_btn_h_click(){

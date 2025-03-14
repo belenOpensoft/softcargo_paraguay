@@ -72,7 +72,7 @@ $(document).ready(function () {
 
     /* DATATABLES */
     //buscadores
-$('#tabla_importaerea tfoot th').each(function(index) {
+    $('#tabla_importaerea tfoot th').each(function(index) {
     let title = $('#tabla_importaerea thead th').eq(index).text();
 
     if (index === 0) {
@@ -2066,6 +2066,7 @@ var expandedRow;
     });
     $('#tabla_embarques_house tbody').off('dblclick').on('dblclick', 'tr', function () {
     var data = table_embarques.row(this).data();
+    console.log(data);
     $("#id_embarque_id").val(data[0]);         // ID del registro
     $("#id_producto").val(data[6]);                // Unidad
     $("#id_bultos_embarque").val(data[2]);                  // Tipo
@@ -4118,6 +4119,18 @@ function get_datos_embarques_house(){
                 });
             }
         },
+        "columnDefs": [
+        {
+            "targets": 6,  // Índice de la columna a ocultar (empieza en 0)
+            "visible": false,
+            "searchable": false // También oculta de la búsqueda
+        },
+        {
+            "targets": 0,  // Índice de la columna a ocultar (empieza en 0)
+            "visible": false,
+            "searchable": false // También oculta de la búsqueda
+        }
+    ]
     });
 }
 function embarques_btn_h_click(){
