@@ -125,15 +125,15 @@ WSGI_APPLICATION = 'cargosystem.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        'NAME': 'cargosystem_prod',
-        #'NAME': 'cargosystem',
+        #'NAME': 'cargosystem_prod',
+        'NAME': 'cargosystem',
         # 'NAME': 'cargo',
-        # 'USER': 'sistemas',
-        'USER': 'root',
+        'USER': 'sistemas',
+        #'USER': 'root',
         'PASSWORD': 'Rincon@1956',
         # 'PASSWORD': 'PassCargo2023',
-        # 'HOST': '104.248.118.19',
-        'HOST': 'localhost',
+        'HOST': 'opensoft.uy',
+        #'HOST': 'localhost',
         'PORT': '3306',
         "OPTIONS": {
             'init_command': "SET default_storage_engine='INNODB'; SET sql_mode='STRICT_TRANS_TABLES'",

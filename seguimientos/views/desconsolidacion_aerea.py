@@ -34,6 +34,7 @@ def desconsolidacion_aerea(request):
                     vuelo = form.cleaned_data['numero_vuelo']
                     llegada = form.cleaned_data['llegada']
                     registros = ImportConexaerea.objects.filter(vuelo=vuelo, llegada=str(llegada), ciavuelo=cia)
+                    print(registros.query)
                     if registros.count() > 0:
                         for reg in registros:
                             embarque=ImportEmbarqueaereo.objects.get(numero=reg.numero)
@@ -61,7 +62,6 @@ def desconsolidacion_aerea(request):
         messages.error(request, str(e))
         return HttpResponseRedirect("/desconsolidacion_aerea")
 
-
 @csrf_exempt
 def desconsolidar_aereo(request):
     resultado = {}
@@ -85,10 +85,10 @@ def desconsolidar_aereo(request):
                     alta_baja = None
 
                 data = genero_xml_desconsolidacion(seg, con, alta_baja,res)
-                if data['Codigo'] == codigo_exito:
-                        embarque=ImportEmbarqueaereo()
-                        embarque.envioaduana='S'
-                        embarque.save()
+                # if data['Codigo'] == codigo_exito:
+                #         embarque=ImportEmbarqueaereo()
+                #         embarque.envioaduana='S'
+                #         embarque.save()
 
                 respuestas[d[1]] = envio_msj(url, data, username, password)
 
@@ -102,7 +102,6 @@ def desconsolidar_aereo(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
-
 
 @csrf_exempt
 def genero_xml_desconsolidacion(seg, con, alta_baja,res):
@@ -196,10 +195,10 @@ def genero_xml_desconsolidacion(seg, con, alta_baja,res):
                         <LugarPartidaCodigo>{origen}</LugarPartidaCodigo>
                         <LugarDestinoCodigo>{destino}</LugarDestinoCodigo>
                         <UltimoPuerto>{destino}</UltimoPuerto>
-                        <MedioTransporteMatricula>CXCAR</MedioTransporteMatricula>
-                        <MedioTransporteNacionalidad>032</MedioTransporteNacionalidad>
+                        <MedioTransporteMatricula>CXCR54</MedioTransporteMatricula>
+                        <MedioTransporteNacionalidad>805</MedioTransporteNacionalidad>
                         <Observacion/>
-                        <MedioTransporteNombre>{vuelo}</MedioTransporteNombre>
+                        <MedioTransporteNombre>AVION</MedioTransporteNombre>
                         <Conocimientos>
                             <Conocimiento>
                                 <ConocimientoNumeroSecuencial>{num_sec_conocimiento}</ConocimientoNumeroSecuencial>
@@ -240,22 +239,23 @@ def genero_xml_desconsolidacion(seg, con, alta_baja,res):
                 </Manifiestos>
             </Objeto>
         </DAE>'''
+        print(xml_str)
         return xml_str
     except Exception as e:
-        return JsonResponse({'error':e})
-
+        raise TypeError(e)
 
 def envio_msj(url, datos, usuario, contrasena):
     try:
         # Asegurarse de que los datos estén en formato bytes
         if isinstance(datos, str):
-            datos = datos.encode('utf-8')
+            datos = datos.encode('ISO-8859-1')
 
         # Crear el encabezado de autorización Basic
         auth_value = f'{usuario}:{contrasena}'
         auth_value = base64.b64encode(auth_value.encode()).decode('utf-8')
         headers = {
-            'Authorization': f'Basic {auth_value}'
+            'Authorization': f'Basic {auth_value}',
+            'Content-Type': 'application/xml'
         }
 
         # Crear la solicitud con los encabezados
@@ -265,6 +265,7 @@ def envio_msj(url, datos, usuario, contrasena):
         # resp = str(sl)[2:].replace('\\r\\n', '')
         xml_str = sl.decode('ISO-8859-1')
         xml_doc = minidom.parseString(xml_str)
+        print(xml_str)
 
         # Ejemplo de cómo acceder a los elementos del XML
         # Obtén el primer nodo (ejemplo: <response>)
@@ -285,7 +286,7 @@ def envio_msj(url, datos, usuario, contrasena):
     except Exception as e:
         raise TypeError(e)
 
-def get_status(url, usuario, contrasena):
+def get_status_old(url, usuario, contrasena):
     try:
         datos = """<?xml version = "1.0" encoding = "ISO-8859-1"?>
             <DAE xmlns="http://www.aduanas.gub.uy/LUCIA/DAE">
@@ -298,6 +299,7 @@ def get_status(url, usuario, contrasena):
                 </Objeto>
             </DAE>
         """
+        print(datos)
         # Crear el encabezado de autorización Basic
         auth_value = f'{usuario}:{contrasena}'
         auth_value = base64.b64encode(auth_value.encode()).decode('utf-8')
@@ -335,3 +337,27 @@ def get_status(url, usuario, contrasena):
             return False
     except Exception as e:
         return False
+
+def get_status(url, usuario, contrasena):
+    try:
+        xml_test = """<?xml version="1.0" encoding="ISO-8859-1"?>
+        <DAE xmlns="http://www.aduanas.gub.uy/LUCIA/DAE">
+            <TipoDocumento>4</TipoDocumento>
+            <IdDocumento>213971080016</IdDocumento> 
+            <CodigoIntercambio>WS_MANIFIESTO</CodigoIntercambio>
+        </DAE>"""
+
+        auth_value = f'{usuario}:{contrasena}'
+        auth_value = base64.b64encode(auth_value.encode()).decode('utf-8')
+        headers = {
+            'Authorization': f'Basic {auth_value}',
+            'Content-Type': 'application/xml'
+        }
+
+        req = Request(url, data=xml_test.encode('ISO-8859-1'), headers=headers, method='POST')
+        response = urlopen(req)
+        print(f"Respuesta del servidor: {response.read().decode('ISO-8859-1')}")
+        return True
+    except Exception as e:
+        print(f"Error al enviar el XML: {e}")
+        raise TypeError(e)

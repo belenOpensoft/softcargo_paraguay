@@ -1736,7 +1736,7 @@ $(document).ready(function () {
                                 var name = $(this).attr('name');
                                 formData[name] = [value, dataId];
                             });
-
+                           let data = JSON.stringify(formData);
                             miurl = "/guardar_seguimiento/";
                             var toData = {
                                 'tipo': tipo,

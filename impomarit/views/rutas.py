@@ -133,9 +133,8 @@ def guardar_ruta(request):
         etd = next(item['value'] for item in data if item['name'] == 'salida')
         vapor = next(item['value'] for item in data if item['name'] == 'vapor')
         viaje = next(item['value'] for item in data if item['name'] == 'viaje')
-        cia = next(item['value'] for item in data if item['name'] == 'codigo_cia')
 
-        actualizar_fechas(etd,eta,numero,vapor,viaje,cia)
+        actualizar_fechas(etd,eta,numero,viaje,vapor)
 
         resultado['resultado'] = 'exito'
         resultado['numero'] = str(registro.numero)
@@ -147,20 +146,23 @@ def guardar_ruta(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
-def actualizar_fechas(etd, eta, numero,vapor,viaje,cia):
+def actualizar_fechas(etd, eta, numero,viaje,vapor):
     try:
         etd = datetime.strptime(etd, "%Y-%m-%d")
         eta = datetime.strptime(eta, "%Y-%m-%d")
         resultado = {}
         num=Embarqueaereo.objects.get(numero=numero).seguimiento
         seg=Seguimiento.objects.get(numero=num)
-        seg.etd=etd
-        seg.eta=eta
-        seg.vapor=vapor
-        seg.viaje=viaje
-        if cia is not None:
-            seg.transportista=cia
-        seg.save()
+        if seg is not None:
+            if etd is not None:
+                seg.etd=etd
+            if eta is not None:
+                seg.eta=eta
+            if viaje is not None:
+                seg.viaje=viaje
+            if vapor is not None:
+                seg.vapor=vapor
+            seg.save()
     except Exception as e:
         resultado['resultado'] = f'Ocurrió un error: {str(e)}'
     return JsonResponse(resultado)

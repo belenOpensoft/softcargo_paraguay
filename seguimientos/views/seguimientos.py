@@ -689,6 +689,7 @@ def clonar_seguimiento(request):
         clonado.vapor=None
         clonado.awb=None
         clonado.hawb=None
+        clonado.volumen=None
 
         #cambiar cosas del clonado fechas
         for row in data:

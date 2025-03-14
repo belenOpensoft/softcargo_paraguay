@@ -137,3 +137,4 @@ def get_datos_caratula(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
