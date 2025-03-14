@@ -126,7 +126,7 @@ def genero_xml_desconsolidacion(seg, con, alta_baja,res):
         else:
             email_agente = ''
         direccion_consignatario = consignatario[0].direccion
-        nombre_consignatario = consignatario[0].razonsocial
+        nombre_consignatario = consignatario[0].empresa
         origen = con.origen
         destino = con.destino
         envases = ImportCargaaerea.objects.filter(numero=seg.numero).values('tipo', 'bultos', 'bruto', 'medidas','producto').annotate(total=Count('id'))

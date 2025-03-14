@@ -585,35 +585,37 @@ def guardar_seguimiento(request):
         data = simplejson.loads(request.POST['form'])
         tipo = request.POST['tipo']
 
-        hawb = data.get('hawb', [''])[0]
-        awb = data.get('awb', [''])[0]
-
-        # Verificación individual y combinada
-        if hawb and awb:
-            existe = SeguimientoReal.objects.filter(hawb=hawb, awb=awb).exists()
-            if existe:
-                resultado['resultado'] = f'Error: La combinación HAWB {hawb} y AWB {awb} ya fue ingresada previamente.'
-                return HttpResponse(json.dumps(resultado), content_type="application/json")
-        elif hawb:
-            existe = SeguimientoReal.objects.filter(hawb=hawb).exists()
-            if existe:
-                resultado['resultado'] = f'Error: El HAWB {hawb} ya fue ingresado previamente.'
-                return HttpResponse(json.dumps(resultado), content_type="application/json")
-        elif awb:
-            existe = SeguimientoReal.objects.filter(awb=awb).exists()
-            if existe:
-                resultado['resultado'] = f'Error: El AWB {awb} ya fue ingresado previamente.'
-                return HttpResponse(json.dumps(resultado), content_type="application/json")
-
         # Determinar si se está modificando un registro o creando uno nuevo
         if 'id' in data and data['id'][0] != '':
             registro = SeguimientoReal.objects.get(id=data['id'][0])
             tiporeg = 'modifica'
         else:
+            hawb = data.get('hawb', [''])[0]
+            awb = data.get('awb', [''])[0]
+
+            # Verificación individual y combinada
+            if hawb and awb:
+                existe = SeguimientoReal.objects.filter(hawb=hawb, awb=awb).exists()
+                if existe:
+                    resultado[
+                        'resultado'] = f'Error: La combinación HAWB {hawb} y AWB {awb} ya fue ingresada previamente.'
+                    return HttpResponse(json.dumps(resultado), content_type="application/json")
+            elif hawb:
+                existe = SeguimientoReal.objects.filter(hawb=hawb).exists()
+                if existe:
+                    resultado['resultado'] = f'Error: El HAWB {hawb} ya fue ingresado previamente.'
+                    return HttpResponse(json.dumps(resultado), content_type="application/json")
+            elif awb:
+                existe = SeguimientoReal.objects.filter(awb=awb).exists()
+                if existe:
+                    resultado['resultado'] = f'Error: El AWB {awb} ya fue ingresado previamente.'
+                    return HttpResponse(json.dumps(resultado), content_type="application/json")
+
             registro = SeguimientoReal()
             numero = SeguimientoReal.objects.all().values_list('numero', flat=True).order_by('-numero').first()
             registro.numero = (numero + 1) if numero else 1  # Manejo de caso si no hay registros previos
             tiporeg = 'nuevo'
+
 
         campos = vars(registro)
 
@@ -655,6 +657,7 @@ def guardar_seguimiento(request):
 
     return HttpResponse(json.dumps(resultado), content_type="application/json")
 
+
 def eliminar_seguimiento(request):
     resultado = {}
     try:
@@ -674,6 +677,7 @@ def clonar_seguimiento(request):
     try:
         data = simplejson.loads(request.POST['data'])
         original = SeguimientoReal.objects.get(id=request.POST['id'])
+        key = False
         numero = SeguimientoReal.objects.all().values_list('numero').order_by('-numero')[:1][0][0]
         clonado = deepcopy(original)
         clonado.id = None
@@ -682,11 +686,10 @@ def clonar_seguimiento(request):
         clonado.posicion = None
         clonado.numero = numero + 1
         clonado.fecha = datetime.now().date()
-        clonado.etd=None
-        clonado.eta=None
         clonado.vapor=None
         clonado.awb=None
         clonado.hawb=None
+
         #cambiar cosas del clonado fechas
         for row in data:
             registros = None
@@ -696,6 +699,10 @@ def clonar_seguimiento(request):
                 registros = Cargaaerea.objects.filter(numero=original.numero)
             elif row['name'] == 'gastos' and row['value'] == 'SI':
                 registros = Serviceaereo.objects.filter(numero=original.numero)
+            elif row['name'] == 'rutas' and row['value'] == 'SI':
+                registros = Conexaerea.objects.filter(numero=original.numero)
+            elif row['name'] == 'cronologia' and row['value'] == 'SI':
+                key = True
 
             if registros is not None and registros.exists():
                 for r in registros:
@@ -717,6 +724,10 @@ def clonar_seguimiento(request):
 
                     aux.id = None
                     aux.save()
+
+        if not key:
+            clonado.etd = None
+            clonado.eta = None
 
         clonado.save()
         resultado['resultado'] = 'exito'

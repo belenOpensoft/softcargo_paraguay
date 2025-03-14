@@ -210,23 +210,23 @@ def descargar_awb_seguimientos(request,row_id,draft=None):
         seg = Seguimiento.objects.get(id=row_id)
         """ CONSIGNATARIO """
         consignatario = SociosComerciales.objects.get(codigo=seg.consignatario)
-        con = str(consignatario.razonsocial) + '<br />\n' + \
+        con = str(consignatario.empresa) + '<br />\n' + \
               str(consignatario.direccion) + '<br />\n' + \
               str(consignatario.ciudad) + '<br />\n' + \
               str(consignatario.pais) + ' RUT: ' + str(consignatario.ruc)
         rep.consignatario = con
         """ SHIPPER """
         shipper = SociosComerciales.objects.get(codigo=seg.embarcador)
-        con = str(shipper.razonsocial) + '<br />\n' + \
+        con = str(shipper.empresa) + '<br />\n' + \
               str(shipper.direccion) + '<br />\n' + \
               str(shipper.ciudad) + '<br />\n' + \
               str(shipper.pais) + ' RUT: ' + str(shipper.ruc)
         rep.shipper = con
-        rep.shipper_nom = str(shipper.razonsocial)
+        rep.shipper_nom = str(shipper.empresa)
         """ NOTIFY """
         notify = 'FREIGHT ' + str(seg.pago).upper() + '<br />\n'
         notificador = SociosComerciales.objects.get(codigo=seg.notificar)
-        notify += 'NOTIFY: ' + str(notificador.razonsocial) + '<br />\n' + \
+        notify += 'NOTIFY: ' + str(notificador.empresa) + '<br />\n' + \
                   str(notificador.direccion) + '<br />\n' + \
                   str(notificador.ciudad) + '<br />\n' + \
                   str(notificador.pais) + ' RUT: ' + str(shipper.ruc)
@@ -401,24 +401,24 @@ def descargar_awb_operativas(request,row_id,draft=None):
 
         """ CONSIGNATARIO """
         consignatario = SociosComerciales.objects.get(codigo=master.consignatario)
-        con = str(consignatario.razonsocial) + '<br />\n' + \
+        con = str(consignatario.empresa) + '<br />\n' + \
               str(consignatario.direccion) + '<br />\n' + \
               str(consignatario.ciudad) + '<br />\n' + \
               str(consignatario.pais) + ' RUT: ' + str(consignatario.ruc)
         rep.consignatario = con
         """ SHIPPER """
         shipper = SociosComerciales.objects.get(codigo=master.transportista)
-        con = str(shipper.razonsocial) + '<br />\n' + \
+        con = str(shipper.empresa) + '<br />\n' + \
               str(shipper.direccion) + '<br />\n' + \
               str(shipper.ciudad) + '<br />\n' + \
               str(shipper.pais) + ' RUT: ' + str(shipper.ruc)
         rep.shipper = con
-        rep.shipper_nom = str(shipper.razonsocial)
+        rep.shipper_nom = str(shipper.empresa)
         """ NOTIFY """
         pago = 'COLLECT' if master.pagoflete == 'C' else 'PREPAID'
         notify = 'FREIGHT ' + pago + '<br />\n'
         notificador = SociosComerciales.objects.get(codigo=master.consignatario)
-        notify += 'NOTIFY: ' + str(notificador.razonsocial) + '<br />\n' + \
+        notify += 'NOTIFY: ' + str(notificador.empresa) + '<br />\n' + \
                   str(notificador.direccion) + '<br />\n' + \
                   str(notificador.ciudad) + '<br />\n' + \
                   str(notificador.pais) + ' RUT: ' + str(notificador.ruc)
@@ -596,24 +596,24 @@ def descargar_hawb_operativas(request,row_id,draft=None,asagreed=None):
 
         """ CONSIGNATARIO """
         consignatario = SociosComerciales.objects.get(codigo=house.consignatario)
-        con = str(consignatario.razonsocial) + '<br />\n' + \
+        con = str(consignatario.empresa) + '<br />\n' + \
               str(consignatario.direccion) + '<br />\n' + \
               str(consignatario.ciudad) + '<br />\n' + \
               str(consignatario.pais) + ' RUT: ' + str(consignatario.ruc)
         rep.consignatario = con
         """ SHIPPER """
         shipper = SociosComerciales.objects.get(codigo=house.cliente)
-        con = str(shipper.razonsocial) + '<br />\n' + \
+        con = str(shipper.empresa) + '<br />\n' + \
               str(shipper.direccion) + '<br />\n' + \
               str(shipper.ciudad) + '<br />\n' + \
               str(shipper.pais) + ' RUT: ' + str(shipper.ruc)
         rep.shipper = con
-        rep.shipper_nom = str(shipper.razonsocial)
+        rep.shipper_nom = str(shipper.empresa)
         """ NOTIFY """
         pago = 'COLLECT' if house.pagoflete == 'C' else 'PREPAID'
         notify = 'FREIGHT ' + pago + '<br />\n'
         notificador = SociosComerciales.objects.get(codigo=house.consignatario)
-        notify += 'NOTIFY: ' + str(notificador.razonsocial) + '<br />\n' + \
+        notify += 'NOTIFY: ' + str(notificador.empresa) + '<br />\n' + \
                   str(notificador.direccion) + '<br />\n' + \
                   str(notificador.ciudad) + '<br />\n' + \
                   str(notificador.pais) + ' RUT: ' + str(notificador.ruc)

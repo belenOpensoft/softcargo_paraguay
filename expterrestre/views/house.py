@@ -358,7 +358,7 @@ def source_rutas_importado(request):
                 "vapor": registro.vapor,
                 "salida": registro.salida,
                 "llegada": registro.llegada,
-                "cia": registro.cia,
+                "ciavuelo": registro.cia,
                 "viaje": registro.viaje,
                 "modo": registro.modo,
             })

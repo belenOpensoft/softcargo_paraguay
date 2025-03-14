@@ -115,7 +115,6 @@ class seguimientoForm(BSModalModelForm):
                   'ubicacion',
                   'booking',
                   'trackid',
-                  'trafico',
                   'proyecto',
                   'actividad',
                   'demora',
@@ -152,7 +151,6 @@ class seguimientoForm(BSModalModelForm):
         }
         widgets = {
             # 'cliente': autocomplete.ModelSelect2(url='cliente_autocomplete')
-
             'modo': forms.HiddenInput(),
         }
         attrs = {
@@ -634,6 +632,16 @@ class clonarForm(forms.Form):
     )
     gastos = forms.ChoiceField(
         label='¿Clonar gastos?',
+        choices=yes_no_choices,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+    rutas = forms.ChoiceField(
+        label='¿Clonar rutas?',
+        choices=yes_no_choices,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+    cronologia = forms.ChoiceField(
+        label='¿Clonar cronologia?',
         choices=yes_no_choices,
         widget=forms.Select(attrs={'class': 'form-control'}),
     )

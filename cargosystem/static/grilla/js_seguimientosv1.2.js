@@ -156,7 +156,6 @@ $(document).ready(function () {
             });
         },
         "rowCallback": function (row, data) {
-        console.log(data);
         $('td:eq(1)', row).html('');
             let texto = ''
             if (data[8].length > 0 && data[8] !== 'S/I') {
@@ -1245,8 +1244,8 @@ $(document).ready(function () {
                 },
                 modal: true,
                 title: "Clonar el seguimiento N°: " + row[0][1],
-                height: wHeight * 0.40,
-                width: wWidth * 0.30,
+                height: wHeight * 0.50,
+                width: wWidth * 0.40,
                 class: 'modal fade',
                 buttons: [
                     {
@@ -1737,8 +1736,7 @@ $(document).ready(function () {
                                 var name = $(this).attr('name');
                                 formData[name] = [value, dataId];
                             });
-                            console.log(formData);
-                            let data = JSON.stringify(formData);
+
                             miurl = "/guardar_seguimiento/";
                             var toData = {
                                 'tipo': tipo,
@@ -1751,15 +1749,17 @@ $(document).ready(function () {
                                 data: toData,
                                 async: false,
                                 success: function (resultado) {
+                                console.log(resultado);
                                     if (resultado['resultado'] === 'exito') {
                                         if (resultado['tipo'] === 'nuevo') {
                                             mostrarToast("!Seguimiento GUARDADO con exito¡", 'success');
                                             alert('Número de seguimiento: ' + resultado['numero']);
                                         } else {
-                                            mostrarToast("!Seguimiento MODIFICADO con exito¡", 'success');
+                                            //mostrarToast("!Seguimiento MODIFICADO con exito¡", 'success');
+                                            alert("!Seguimiento MODIFICADO con exito¡");
                                         }
                                         table.ajax.reload();
-                                            $(this).dialog("close");
+                                        $(this).dialog("close");
                                     } else {
                                         alert(resultado['resultado']);
                                         //console.log(resultado['resultado']);
@@ -2442,11 +2442,6 @@ function get_datos_seguimiento(id, modo = '') {
                 $("#proyecto_add").val(datos['proyecto'])
                 $("#proyecto_add").attr('data-id', datos['proyecto_codigo']);
                 $("#proyecto_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['trafico'] !== null && datos['trafico'] !== 0) {
-                $("#trafico_add").val(datos['trafico'])
-                $("#trafico_add").attr('data-id', datos['trafico_codigo']);
-                $("#trafico_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
             }
             if (datos['actividad'] !== null && datos['actividad'] !== 0) {
                 $("#actividad_add").val(datos['actividad'])

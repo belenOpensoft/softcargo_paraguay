@@ -4174,8 +4174,6 @@ function get_datos_seguimiento_rutas(numero) {
                 $("#id_llegada").val(response.datos.llegada || "");
                 $("#id_origen").val(response.datos.origen || "");
                 $("#id_destino").val(response.datos.destino || "");
-                $("#id_cia").val(response.datos.cia || "");
-                $("#codigo_cia").val(response.datos.codigo_cia || "");
                 $("#id_modo_ruta").val(response.datos.modo || "");
                 $("#id_viaje_ruta").val(response.datos.viaje || "");
                 $("#id_vapor").val(response.datos.vapor || "");
