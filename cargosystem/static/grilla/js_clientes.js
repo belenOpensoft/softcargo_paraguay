@@ -18,12 +18,12 @@ $(document).ready(function() {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $('#vendedor_input').val(ui.item['id']);
         },
         change: function (event, ui) {
             if (ui.item) {
                 $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
                  $('#id_vendedor').val(ui.item['label']);
-                 $('#vendedor_input').val(ui.item['id']);
                  $('#id_vendedor').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
                 $(this).val('');
@@ -66,13 +66,13 @@ $(document).ready(function() {
             action: function (e, dt, button, config) {
                 if (row = table.row('.table-secondary').data()) {
                     var id_socio = row[0];  // ID del socio comercial seleccionado
+                    console.log(id_socio);
 
                     // Hacer la petición AJAX para obtener los datos
                     $.ajax({
                         type: "GET",
                         url: "/modificar_socio_comercial/" + id_socio,  // Llama a la vista con el ID
                         success: function(response) {
-                        console.log(response);
                             if (response.status === "success") {
                                 var formData = response.form_data;
 
@@ -92,7 +92,7 @@ $(document).ready(function() {
                                 $("#ciudad-select").val(formData.ciudad);
                                 $("#pais-select").val(formData.pais);
                                 $("#id_activo").prop("checked", formData.activo);
-                                $("#vendedor_input").val(formData.vendedor);
+                                $("#vendedor_input").val(formData.vendedor_input);
                                 $("#id_vendedor").val(formData.vendedor);
                                 $("#id_plazo").val(formData.plazo);
                                 $("#id_limite").val(formData.limite);
@@ -105,6 +105,8 @@ $(document).ready(function() {
                                 $("#id_emailim").val(formData.emailim);
                                 $("#id_emailia").val(formData.emailia);
                                 $("#id_emailit").val(formData.emailit);
+                                $("#id_prefijoguia").val(formData.prefijoguia);
+
                                 // Actualizar las pestañas del modal
                                 $("#cliente-modal").tabs("refresh");
 
@@ -251,16 +253,35 @@ $(document).ready(function() {
         var selectedTipo = $(this).val();
         table.column(9).search(selectedTipo).draw();
     });
+
+    $("#id_emailad").on("blur", function() {
+        var emailVal = $(this).val();
+        if (emailVal.trim() !== "") {
+            $("#id_emailem").val(emailVal);
+            $("#id_emailea").val(emailVal);
+            $("#id_emailet").val(emailVal);
+            $("#id_emailim").val(emailVal);
+            $("#id_emailia").val(emailVal);
+            $("#id_emailit").val(emailVal);
+        }
+    });
 });
 
 
 function enviar_form(e){
-    console.log('entro');
     e.preventDefault();
+    let id_socio=$('#id_socio').val();
+    let url;
+    if (id_socio){
+    url="/modificar_socio_comercial/" + id_socio;
+    }else{
+    url="/agregar_socio_comercial";
+    }
+
 
     $.ajax({
         type: "POST",
-        url: "/agregar_socio_comercial" + ($('#id_socio').val() || ""),  // Agregar ID si es edición
+        url: url ,  // Agregar ID si es edición
         data: $('#clienteform').serialize(),
         success: function(response) {
             if (response.status === 'success') {

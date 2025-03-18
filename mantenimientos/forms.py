@@ -108,49 +108,6 @@ class edit_vendedor_form(forms.Form):
         self.fields['ciudad'].choices = [('', 'Seleccione una ciudad')] + [(ciudad.codigo, ciudad.nombre) for ciudad in
                                                                            Ciudades.objects.all()]
 
-class add_cliente_form_old(forms.ModelForm):
-        class Meta:
-            model = Clientes
-            fields = ['tipo',
-                      'empresa',
-                      'razonsocial',
-                      'direccion',
-                      'localidad',
-                      'cpostal',
-                      'ruc',
-                      'telefono',
-                      'fecalta',
-                      'contactos',
-                      'observaciones',
-                      ]
-            widgets = {
-                'fecalta': forms.DateInput(attrs={'type': 'date'}),
-            }
-            labels = {
-                'fecalta': 'Fecha de alta',
-                'ruc': 'RUT',
-
-            }
-
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            for field in self.fields:
-                self.fields[field].widget.attrs['class'] = 'form-control'
-                self.fields[field].widget.attrs['autocomplete'] = 'off'
-
-        CHOICES = [
-            (9, 'Cliente'),
-            (9, 'Proveedor'),
-            (9, 'Mixto'),
-            (9, 'Armador'),
-            (9, 'Transportista'),
-            (9, 'Agente de carga'),
-            (9, 'Despachante'),
-            (9, 'Otro tipo'),
-        ]
-
-        tipo = forms.ChoiceField(choices=CHOICES, label='Tipo', widget=forms.Select(attrs={'class': 'form-control'}))
-
 class add_cliente_form_old_last(forms.Form):
     tipo = forms.ChoiceField(
         choices=[
@@ -277,21 +234,39 @@ class add_cliente_form_old_last(forms.Form):
 
 class add_cliente_form(forms.Form):
 
-    empresa = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Empresa", required=False)
-    razonsocial = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Razón Social", max_length=100, required=True)
-    direccion = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Dirección", max_length=150, required=True)
-    localidad = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Localidad", max_length=100, required=True)
-    cpostal = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Código Postal", max_length=10, required=False)
-    ruc = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="RUT", max_length=20)
-    telefono = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Teléfono", max_length=20, required=True)
-    fecalta = forms.DateField(widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), label="Fecha de Alta", required=True)
-    contactos = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Contactos", max_length=100, required=False)
-    observaciones = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}), label="Observaciones", required=False)
-    ciudad = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'id': 'ciudad-select'}), label="Ciudad", required=False)
-    pais = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'id': 'pais-select'}), label="País", required=False)
+    empresa = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Empresa",
+                              required=True)
+    razonsocial = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Razón Social",
+                                  max_length=100, required=True)
+    ruc = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="RUT", max_length=20,
+                          required=True)
+
+    # Campos opcionales
+    prefijoguia = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Prefijo Guia",
+                                  required=False)
+    direccion = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Dirección",
+                                max_length=150, required=False)
+    localidad = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Localidad",
+                                max_length=100, required=False)
+    cpostal = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Código Postal",
+                              max_length=10, required=False)
+    telefono = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Teléfono",
+                               max_length=20, required=False)
+    fecalta = forms.DateField(widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+                              label="Fecha de Alta", required=False)
+    contactos = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Contactos",
+                                max_length=100, required=False)
+    observaciones = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+                                    label="Observaciones", required=False)
+
+    ciudad = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'id': 'ciudad-select'}),
+                               label="Ciudad", required=False)
+    pais = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'id': 'pais-select'}),
+                             label="País", required=False)
 
     # **Nuevos Campos**
-    activo = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}), label="Activo")
+    activo = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+                                label="Activo")
     tipo = forms.ChoiceField(
         choices=[
             (1, 'Cliente'),
@@ -302,40 +277,59 @@ class add_cliente_form(forms.Form):
             (6, 'Agente de carga'),
         ],
         widget=forms.Select(attrs={'class': 'form-control'}),
-        label="Tipo de Socio"
+        label="Tipo de Socio",
+        required=False
     )
-    (1, 'Cliente'),(2, 'Proveedor'),(3, 'Mixto'),(4, 'Armador'),(5, 'Transportista'),(6, 'Agente de carga')
-    vendedor = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Vendedor", required=False)
+    vendedor = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Vendedor",
+                               required=False)
 
     # **Pestaña Emails**
-    emailad = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}), label="Email Administrativo", required=False)
-    emailem = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}), label="Email Exportación Marítima", required=False)
-    emailea = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}), label="Email Exportación Aérea", required=False)
-    emailet = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}), label="Email Exportación Terrestre", required=False)
-    emailim = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}), label="Email Importación Marítima", required=False)
-    emailia = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}), label="Email Importación Aérea", required=False)
-    emailit = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}), label="Email Importación Terrestre", required=False)
+    emailad = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
+                               label="Email Administrativo", required=False)
+    emailem = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
+                               label="Email Exportación Marítima", required=False)
+    emailea = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
+                               label="Email Exportación Aérea", required=False)
+    emailet = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
+                               label="Email Exportación Terrestre", required=False)
+    emailim = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
+                               label="Email Importación Marítima", required=False)
+    emailia = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
+                               label="Email Importación Aérea", required=False)
+    emailit = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
+                               label="Email Importación Terrestre", required=False)
 
     # **Pestaña Datos Contables**
-    plazo = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}), label="Plazo Crédito (días)", required=False)
-    limite = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), label="Límite de Crédito (USD)", required=False)
+    plazo = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}),
+                               label="Plazo Crédito (días)", required=False)
+    limite = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}),
+                              label="Límite de Crédito (USD)", required=False)
 
-    ctavta = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}), label="Cuenta de Venta", required=False)
-    ctacomp = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}), label="Cuenta de Compra", required=False)
+    ctavta = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}), label="Cuenta de Venta",
+                               required=False,initial=0)
+    ctacomp = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}), label="Cuenta de Compra",
+                                required=False,initial=0)
 
     vendedor_input = forms.CharField(
         widget=forms.HiddenInput(attrs={'id': 'vendedor_input'}),
-        required=False
+        required=False,
+        initial=0
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs['autocomplete'] = 'off'
-        self.fields['pais'].choices = [('', 'Seleccione un país')] + [(pais.nombre, pais.nombre) for pais in Paises.objects.all()]
-        self.fields['ciudad'].choices = [('', 'Seleccione una ciudad')] + [(ciudad.codigo, ciudad.nombre) for ciudad in Ciudades.objects.all()]
-        self.fields['ctavta'].choices = [('', 'Seleccione una cuenta')] + [(c.xcodigo, c.xnombre) for c in Cuentas.objects.all()]
-        self.fields['ctacomp'].choices = [('', 'Seleccione una cuenta')] + [(c.xcodigo, c.xnombre) for c in Cuentas.objects.all()]
+
+        # Cargar opciones en los selects con un valor por defecto opcional
+        self.fields['pais'].choices = [('', 'Seleccione un país')] + [(pais.nombre, pais.nombre) for pais in
+                                                                      Paises.objects.all()]
+        self.fields['ciudad'].choices = [('', 'Seleccione una ciudad')] + [(ciudad.codigo, ciudad.nombre) for ciudad
+                                                                           in Ciudades.objects.all()]
+        self.fields['ctavta'].choices = [('0', 'Seleccione una cuenta')] + [(c.xcodigo, c.xnombre) for c in
+                                                                           Cuentas.objects.all()]
+        self.fields['ctacomp'].choices = [('0', 'Seleccione una cuenta')] + [(c.xcodigo, c.xnombre) for c in
+                                                                            Cuentas.objects.all()]
 
 
 class add_banco_form(forms.Form):

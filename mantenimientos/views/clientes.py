@@ -307,41 +307,42 @@ def agregar_socio_comercial(request, id_socio=None):
     try:
         if not request.user.has_perms(["mantenimientos.add_clientes"]):
             raise PermissionDenied('No tiene permisos para realizar esta acción.')
-
-        cliente = None
-        if id_socio:
-            cliente = get_object_or_404(SociosComerciales, id=id_socio)
-            form = add_cliente_form(initial={
-                'empresa': cliente.empresa,
-                'razonsocial': cliente.razonsocial,
-                'direccion': cliente.direccion,
-                'localidad': cliente.localidad,
-                'cpostal': cliente.cpostal,
-                'ruc': cliente.ruc,
-                'telefono': cliente.telefono,
-                'fecalta': cliente.fecalta.strftime('%Y-%m-%d') if cliente.fecalta else '',
-                'contactos': cliente.contactos,
-                'observaciones': cliente.observaciones,
-                'ciudad': cliente.ciudad,
-                'pais': cliente.pais,
-                'emailad': cliente.emailad,
-                'emailem': cliente.emailem,
-                'emailea': cliente.emailea,
-                'emailet': cliente.emailet,
-                'emailim': cliente.emailim,
-                'emailia': cliente.emailia,
-                'emailit': cliente.emailit,
-                # ✅ Nuevos campos
-                'activo': cliente.activo,
-                'tipo': cliente.tipo,
-                'vendedor': Vendedores.objects.get(codigo=cliente.vendedor).nombre if cliente.vendedor else None,
-                'plazo': cliente.plazo,
-                'limite': cliente.limite,
-                'ctavta': cliente.ctavta if cliente.ctavta else '',
-                'ctacomp': cliente.ctacomp if cliente.ctacomp else '',
-            })
-            tipo_accion = "Modificar"
-            return JsonResponse({'status': 'success', 'form_data': form.initial})
+        if request.method == 'GET':
+            cliente = None
+            if id_socio:
+                cliente = get_object_or_404(SociosComerciales, id=id_socio)
+                form = add_cliente_form(initial={
+                    'empresa': cliente.empresa,
+                    'razonsocial': cliente.razonsocial,
+                    'direccion': cliente.direccion,
+                    'localidad': cliente.localidad,
+                    'cpostal': cliente.cpostal,
+                    'ruc': cliente.ruc,
+                    'telefono': cliente.telefono,
+                    'fecalta': cliente.fecalta.strftime('%Y-%m-%d') if cliente.fecalta else '',
+                    'contactos': cliente.contactos,
+                    'observaciones': cliente.observaciones,
+                    'ciudad': cliente.ciudad,
+                    'pais': cliente.pais,
+                    'emailad': cliente.emailad,
+                    'emailem': cliente.emailem,
+                    'emailea': cliente.emailea,
+                    'emailet': cliente.emailet,
+                    'emailim': cliente.emailim,
+                    'emailia': cliente.emailia,
+                    'emailit': cliente.emailit,
+                    'activo': cliente.activo,
+                    'prefijoguia': cliente.prefijoguia,
+                    'tipo': cliente.tipo,
+                    'vendedor': Vendedores.objects.get(codigo=cliente.vendedor).nombre if cliente.vendedor else None,
+                    'vendedor_input': cliente.vendedor,
+                    'plazo': cliente.plazo,
+                    'limite': cliente.limite,
+                    'ctavta': cliente.ctavta if cliente.ctavta else '',
+                    'ctacomp': cliente.ctacomp if cliente.ctacomp else '',
+                })
+                tipo_accion = "Modificar"
+                return JsonResponse({'status': 'success', 'form_data': form.initial})
 
         form = add_cliente_form()
         tipo_accion = "Agregar"
@@ -351,40 +352,42 @@ def agregar_socio_comercial(request, id_socio=None):
             if form.is_valid():
                 try:
                     if id_socio:
+                        cliente = get_object_or_404(SociosComerciales, id=id_socio)
                         # **Actualizar cliente existente**
                         cliente.tipo = form.cleaned_data['tipo']
-                        cliente.empresa = form.cleaned_data['empresa']
-                        cliente.razonsocial = form.cleaned_data['razonsocial']
-                        cliente.direccion = form.cleaned_data['direccion']
-                        cliente.localidad = form.cleaned_data['localidad']
-                        cliente.cpostal = form.cleaned_data['cpostal']
-                        cliente.ruc = form.cleaned_data['ruc']
-                        cliente.telefono = form.cleaned_data['telefono']
-                        cliente.fecalta = form.cleaned_data['fecalta']
-                        cliente.contactos = form.cleaned_data['contactos']
-                        cliente.observaciones = form.cleaned_data['observaciones']
-                        cliente.ciudad = form.cleaned_data['ciudad']
-                        cliente.pais = form.cleaned_data['pais']
-                        cliente.emailad = form.cleaned_data['emailad']
-                        cliente.emailem = form.cleaned_data['emailem']
-                        cliente.emailea = form.cleaned_data['emailea']
-                        cliente.emailet = form.cleaned_data['emailet']
-                        cliente.emailim = form.cleaned_data['emailim']
-                        cliente.emailia = form.cleaned_data['emailia']
-                        cliente.emailit = form.cleaned_data['emailit']
-                        # ✅ Nuevos campos
+                        cliente.empresa = form.cleaned_data['empresa'] if form.cleaned_data['empresa'] else 'S/I'
+                        cliente.razonsocial = form.cleaned_data['razonsocial'] if form.cleaned_data['razonsocial'] else 'S/I'
+                        cliente.direccion = form.cleaned_data['direccion'] if form.cleaned_data['direccion'] else 'S/I'
+                        cliente.localidad = form.cleaned_data['localidad'] if form.cleaned_data['localidad'] else 'S/I'
+                        cliente.cpostal = form.cleaned_data['cpostal'] if form.cleaned_data['cpostal'] else 0
+                        cliente.ruc = form.cleaned_data['ruc'] if form.cleaned_data['ruc'] else 0
+                        cliente.telefono = form.cleaned_data['telefono'] if form.cleaned_data['telefono'] else 0
+                        cliente.fecalta = form.cleaned_data['fecalta'] if form.cleaned_data['fecalta'] else None
+                        cliente.contactos = form.cleaned_data['contactos'] if form.cleaned_data['contactos'] else 'S/I'
+                        cliente.observaciones = form.cleaned_data['observaciones'] if form.cleaned_data['observaciones'] else 'S/I'
+                        cliente.ciudad = form.cleaned_data['ciudad'] if form.cleaned_data['ciudad'] else 0
+                        cliente.pais = form.cleaned_data['pais'] if form.cleaned_data['pais'] else 0
+                        cliente.emailad = form.cleaned_data['emailad'] if form.cleaned_data['emailad'] else 'S/I'
+                        cliente.emailem = form.cleaned_data['emailem'] if form.cleaned_data['emailem'] else 'S/I'
+                        cliente.emailea = form.cleaned_data['emailea'] if form.cleaned_data['emailea'] else 'S/I'
+                        cliente.emailet = form.cleaned_data['emailet'] if form.cleaned_data['emailet'] else 'S/I'
+                        cliente.emailim = form.cleaned_data['emailim'] if form.cleaned_data['emailim'] else 'S/I'
+                        cliente.emailia = form.cleaned_data['emailia'] if form.cleaned_data['emailia'] else 'S/I'
+                        cliente.emailit = form.cleaned_data['emailit'] if form.cleaned_data['emailit'] else 'S/I'
                         cliente.activo = 0 if form.cleaned_data['activo'] == False else 1
-                        cliente.tipo = form.cleaned_data['tipo']
-                        cliente.vendedor = form.cleaned_data['vendedor_input']
-                        cliente.plazo = form.cleaned_data['plazo']
-                        cliente.limite= form.cleaned_data['limite']
-                        cliente.ctavta =form.cleaned_data['ctavta']
-                        cliente.ctacomp = form.cleaned_data['ctacomp']
+                        cliente.tipo = form.cleaned_data['tipo'] if form.cleaned_data['tipo'] else 'S/I'
+                        cliente.vendedor = form.cleaned_data['vendedor_input'] if form.cleaned_data['vendedor_input'] else 0
+                        cliente.plazo = form.cleaned_data['plazo'] if form.cleaned_data['plazo'] else 0
+                        cliente.limite= form.cleaned_data['limite'] if form.cleaned_data['limite'] else 0
+                        cliente.ctavta =form.cleaned_data['ctavta'] if form.cleaned_data['ctavta'] else 0
+                        cliente.ctacomp = form.cleaned_data['ctacomp'] if form.cleaned_data['ctacomp'] else 0
+                        cliente.prefijoguia = form.cleaned_data['prefijoguia'] if form.cleaned_data['prefijoguia'] else 0
 
                     else:
                         # **Crear un nuevo cliente**
                         cliente = SociosComerciales(
                             tipo=form.cleaned_data['tipo'],
+                            prefijoguia=form.cleaned_data['prefijoguia'],
                             empresa=form.cleaned_data['empresa'],
                             razonsocial=form.cleaned_data['razonsocial'],
                             direccion=form.cleaned_data['direccion'],
