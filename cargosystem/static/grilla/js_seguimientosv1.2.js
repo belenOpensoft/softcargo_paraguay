@@ -2636,7 +2636,6 @@ function get_datos_seguimiento_rutas(numero) {
         success: function (response) {
             if (response.resultado === "exito") {
                 let modo = response.datos.modo.split(' ');
-                console.log(modo[1]);
 
                 // Asignar valores a los inputs si existen en el formulario
                 $("#id_salida").val(response.datos.salida || "");

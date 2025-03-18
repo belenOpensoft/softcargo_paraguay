@@ -8,7 +8,7 @@ from django.http import HttpResponse, JsonResponse
 
 from expmarit.models import VEmbarqueaereo
 from impomarit.models import Conexaerea, Embarqueaereo, VEmbarqueaereo
-from mantenimientos.models import Clientes
+from mantenimientos.models import Clientes, Vapores
 from seguimientos.models import Seguimiento
 
 """ TABLA PUERTO """
@@ -225,7 +225,10 @@ def datos_embarque_ruta(request):
         numero = request.POST.get('numero')
         embarque = Embarqueaereo.objects.get(numero=numero)
         transportista = VEmbarqueaereo.objects.get(numero=numero).transportista
-
+        if str(embarque.vapor).isdigit():
+            vapor = Vapores.objects.get(codigo=embarque.vapor).nombre
+        else:
+            vapor = embarque.vapor
         data = {
             'salida': embarque.fechaembarque.strftime('%Y-%m-%d') if embarque.fechaembarque else None,
             'llegada': embarque.fecharetiro.strftime('%Y-%m-%d') if embarque.fecharetiro else None,
@@ -235,7 +238,7 @@ def datos_embarque_ruta(request):
             'codigo_cia':embarque.transportista if embarque.transportista else None,
             'modo': 'MARITIMO',
             'viaje': embarque.viaje if embarque.viaje else None,
-            'vapor': embarque.vapor if embarque.vapor else None
+            'vapor': vapor
         }
 
         resultado['datos'] = data

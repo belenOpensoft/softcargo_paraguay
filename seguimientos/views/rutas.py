@@ -4,6 +4,8 @@ import simplejson
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
+
+from mantenimientos.models import Vapores
 from seguimientos.models import Conexaerea, VGrillaSeguimientos, Seguimiento
 
 """ TABLA PUERTO """
@@ -161,6 +163,10 @@ def datos_seguimiento(request):
         numero = request.POST.get('numero')  # Evita errores si el número no está en la petición
         seguimiento = Seguimiento.objects.get(numero=numero)
         transportista = VGrillaSeguimientos.objects.get(numero=numero).transportista
+        if str(seguimiento.vapor).isdigit():
+            vapor = Vapores.objects.get(codigo=seguimiento.vapor).nombre
+        else:
+            vapor = seguimiento.vapor
 
         data = {
             'salida': seguimiento.etd.strftime('%Y-%m-%d') if seguimiento.etd else None,
@@ -170,7 +176,7 @@ def datos_seguimiento(request):
             'cia': transportista if transportista else None,
             'modo': seguimiento.modo if seguimiento.modo else None,
             'viaje': seguimiento.viaje if seguimiento.viaje else None,
-            'vapor': seguimiento.vapor if seguimiento.vapor else None
+            'vapor': vapor
         }
 
         resultado['datos'] = data
