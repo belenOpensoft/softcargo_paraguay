@@ -384,6 +384,8 @@ def source_embarque_importado(request):
                 "tipo": registro.tipo,
                 "medidas": registro.medidas,
                 "cbm": registro.cbm,
+                "nrocontenedor": registro.nrocontenedor,
+
             })
 
         # field_names = [field.name for field in Cargaaerea._meta.fields]

@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
 from impomarit.models import VEmbarqueaereo, Embarqueaereo, Cargaaerea, Conexaerea, Envases
-from mantenimientos.models import Clientes
+from mantenimientos.models import Clientes, Vapores
 from mantenimientos.views.bancos import is_ajax
 from seguimientos.models import VGrillaSeguimientos
 
@@ -52,8 +52,15 @@ def get_datos_caratula(request):
                 res = salida.strftime('%d-%m-%Y')
             else:
                 res = '?'
+
+            if isinstance(embarque.vapor, int) or (isinstance(embarque.vapor, str) and embarque.vapor.isdigit()):
+                vapor_obj = Vapores.objects.filter(codigo=int(embarque.vapor)).first()
+                nombre_vapor = vapor_obj.nombre if vapor_obj else 'S/I'
+            else:
+                nombre_vapor = embarque.vapor if embarque.vapor is not None else 'S/I'
+
             texto = texto + '<b>ETD: </b>'+str(res)+'<br>'
-            texto = texto + '<b>Vapor: </b>'+str(embarque.vapor if embarque.vapor is not None else '')+'<br>'
+            texto = texto + '<b>Vapor: </b>'+str(nombre_vapor)+'<br>'
             texto = texto + '<b>Transportista: </b>'+str(Vembarque.transportista if Vembarque.transportista is not None else '')+'<br>'
             texto = texto + '<b>Orden cliente: </b>'+str(seguimiento.refcliente if seguimiento.refcliente is not None else '')+'<hr>'
             texto = texto + '<b>Embarcador: </b>'+str(Vembarque.embarcador if Vembarque.embarcador is not None else '')+'<br>'
@@ -78,7 +85,11 @@ def get_datos_caratula(request):
             embarque = Cargaaerea.objects.filter(numero=id)
             if envase.count() > 0 :
                 for registro in envase:
-                    texto += '<br><b>'+ str(registro.unidad if registro.unidad is not None else '').upper() +'</b>: '+ str('{:.3f}'.format(registro.cantidad) if registro.cantidad is not None else '')
+                    texto += '<br><b>' + (
+                        str(registro.cantidad) if registro.cantidad is not None else '') + 'x' + (
+                                 str(registro.unidad).upper() if registro.unidad is not None else '') + '</b>: ' + (
+                                 str(registro.tipo).upper() if hasattr(registro,
+                                                                       'tipo') and registro.tipo is not None else '')
                     texto += ' <b>CNTR:</b> '+ str(registro.nrocontenedor if registro.nrocontenedor is not None else '')
                     texto += ' <b>SEAL:</b> '+ str(registro.precinto if registro.precinto is not None else '')
                     texto += ' <b>WT:</b> '+ str('{:.3f}'.format(registro.peso) if registro.peso is not None else '')

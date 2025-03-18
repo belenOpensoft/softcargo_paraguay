@@ -332,6 +332,7 @@ def source_envases_importado(request):
                 "peso": registro.peso,
                 "profit": registro.profit,
                 "volumen": registro.volumen,
+                "nrocontenedor": registro.nrocontenedor,
             })
 
         #field_names = [field.name for field in Envases._meta.fields]
@@ -400,6 +401,8 @@ def source_embarque_importado(request):
                 "tipo": registro.tipo,
                 "medidas": registro.medidas,
                 "cbm": registro.cbm,
+                "nrocontenedor": registro.nrocontenedor,
+
             })
 
         # field_names = [field.name for field in Cargaaerea._meta.fields]

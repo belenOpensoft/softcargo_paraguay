@@ -131,7 +131,11 @@ def get_datos_caratula(request):
             if not aereo:
                 if envase.count() > 0 :
                     for registro in envase:
-                        texto += '<br><b>'+ str(registro.unidad if registro.unidad is not None else '').upper() +'</b>: '+ str('{:.3f}'.format(registro.cantidad) if registro.cantidad is not None else '')
+                        texto += '<br><b>' + (
+                            str(registro.cantidad) if registro.cantidad is not None else '') + 'x' + (
+                                     str(registro.unidad).upper() if registro.unidad is not None else '') + '</b>: ' + (
+                                     str(registro.tipo).upper() if hasattr(registro,
+                                                                           'tipo') and registro.tipo is not None else '')
                         texto += ' <b>CNTR:</b> '+ str(registro.nrocontenedor if registro.nrocontenedor is not None else '')
                         texto += ' <b>SEAL:</b> '+ str(registro.precinto if registro.precinto is not None else '')
                         texto += ' <b>WT:</b> '+ str('{:.3f}'.format(registro.peso) if registro.peso is not None else '')
