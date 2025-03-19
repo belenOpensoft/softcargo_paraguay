@@ -489,7 +489,7 @@ function generar_posicion(){
 function eliminar_house_directo(){
 if (confirm('¿Confirma eliminar seleccionado?')) {
 
-      let id= localStorage.getItem('id_house_gasto');
+      let id= localStorage.getItem('num_house_gasto');
         if (id) {
             miurl = "/importacion_maritima/eliminar_house/";
             var toData = {

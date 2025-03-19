@@ -3827,9 +3827,10 @@ function eliminar_house(){
             let master = localStorage.getItem('master_editar');
             eliminar_agregado(master,row[0][0]);
 
+
             miurl = "/importacion_maritima/eliminar_house/";
             var toData = {
-                'id': row[0][0],
+                'id': row[0][3],
                 'csrfmiddlewaretoken': csrf_token,
             };
             $.ajax({
@@ -3858,7 +3859,7 @@ function eliminar_house(){
         if (row.length === 1) {
             miurl = "/importacion_maritima/eliminar_house/";
             var toData = {
-                'id': row[0][0],
+                'id': row[0][3],
                 'csrfmiddlewaretoken': csrf_token,
             };
             $.ajax({
