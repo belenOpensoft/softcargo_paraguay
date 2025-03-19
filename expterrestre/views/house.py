@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 import json
-from expterrestre.models import ExpterraEmbarqueaereo
+from expterrestre.models import ExpterraEmbarqueaereo, ExpterraCargaaerea, ExpterraConexaerea, ExpterraServiceaereo, \
+    ExpterraEnvases
 from mantenimientos.models import Vendedores
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.contrib import messages
@@ -562,6 +563,10 @@ def eliminar_house(request):
     try:
         id = request.POST['id']
         ExpterraEmbarqueaereo.objects.get(numero=id).delete()
+        ExpterraCargaaerea.objects.filter(numero=id).delete()
+        ExpterraConexaerea.objects.filter(numero=id).delete()
+        ExpterraServiceaereo.objects.filter(numero=id).delete()
+        ExpterraEnvases.objects.filter(numero=id).delete()
         resultado['resultado'] = 'exito'
     except IntegrityError as e:
         resultado['resultado'] = 'Error de integridad, intente nuevamente.'

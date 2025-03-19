@@ -662,15 +662,27 @@ def eliminar_seguimiento(request):
     resultado = {}
     try:
         id = request.POST['id']
-        SeguimientoReal.objects.get(id=id).delete()
+        seguimiento = SeguimientoReal.objects.get(id=id)
+        numero = seguimiento.numero  # Obtener el número antes de borrar el seguimiento
+
+        # Eliminar registros relacionados
+        Cargaaerea.objects.filter(numero=numero).delete()
+        Conexaerea.objects.filter(numero=numero).delete()
+        Serviceaereo.objects.filter(numero=numero).delete()
+        Envases.objects.filter(numero=numero).delete()
+
+        # Eliminar el seguimiento
+        seguimiento.delete()
         resultado['resultado'] = 'exito'
-    except IntegrityError as e:
+
+    except IntegrityError:
         resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except SeguimientoReal.DoesNotExist:
+        resultado['resultado'] = 'El seguimiento no existe.'
     except Exception as e:
         resultado['resultado'] = str(e)
-    data_json = json.dumps(resultado)
-    mimetype = "application/json"
-    return HttpResponse(data_json, mimetype)
+
+    return HttpResponse(json.dumps(resultado), content_type="application/json")
 
 def clonar_seguimiento_old(request):
     resultado = {}

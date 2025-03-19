@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 import json
-from impomarit.models import Embarqueaereo, Serviceaereo
+from impomarit.models import Embarqueaereo, Serviceaereo,Envases as Env, Conexaerea as Conex , Cargaaerea as Carga
 from mantenimientos.models import Vendedores, Vapores
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.contrib import messages
@@ -578,11 +578,17 @@ def edit_house_function(request, numero):
                 'errors': form.errors.as_json()
             })
 
+
 def eliminar_house(request):
     resultado = {}
     try:
         id = request.POST['id']
-        Embarqueaereo.objects.get(id=id).delete()
+        Embarqueaereo.objects.get(numero=id).delete()
+        Carga.objects.filter(numero=id).delete()
+        Conex.objects.filter(numero=id).delete()
+        Serviceaereo.objects.filter(numero=id).delete()
+        Env.objects.filter(numero=id).delete()
+
         resultado['resultado'] = 'exito'
     except IntegrityError as e:
         resultado['resultado'] = 'Error de integridad, intente nuevamente.'
