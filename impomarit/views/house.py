@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 import json
 from impomarit.models import Embarqueaereo, Serviceaereo
-from mantenimientos.models import Vendedores
+from mantenimientos.models import Vendedores, Vapores
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from django.db import IntegrityError
@@ -450,6 +450,10 @@ def house_detail(request):
         if numero:
             try:
                 house = Embarqueaereo.objects.get(numero=numero)
+                if str(house.vapor).isdigit():
+                    vapor = Vapores.objects.get(codigo=house.vapor).nombre
+                else:
+                    vapor = house.vapor
                 data = {
                     'id': house.id,
                     'cliente_e': house.cliente,
@@ -465,7 +469,7 @@ def house_detail(request):
                     'operacion_e': house.operacion,
                     'awb_e': house.awb,
                     'hawb_e': house.hawb,
-                    'vapor_e': house.vapor,
+                    'vapor_e': vapor,
                     'viaje_e': house.viaje,
                     'pagoflete_e': house.pago,
                     'moneda_e': house.moneda,

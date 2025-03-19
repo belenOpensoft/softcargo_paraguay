@@ -672,7 +672,7 @@ def eliminar_seguimiento(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
-def clonar_seguimiento(request):
+def clonar_seguimiento_old(request):
     resultado = {}
     try:
         data = simplejson.loads(request.POST['data'])
@@ -707,9 +707,9 @@ def clonar_seguimiento(request):
 
             if registros is not None and registros.exists():
                 for r in registros:
-                    if row['name'] == 'embarques':
+                    if row['name'] == 'embarques' and row['value'] == 'SI':
                         aux = Cargaaerea(numero=clonado.numero, producto=r.producto)
-                    elif row['name'] == 'envases':
+                    elif row['name'] == 'envases' and row['value'] == 'SI':
                         aux = Envases(
                             numero=clonado.numero,
                             unidad=r.unidad,
@@ -740,3 +740,87 @@ def clonar_seguimiento(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
+
+def clonar_seguimiento(request):
+    resultado = {}
+    try:
+        data = simplejson.loads(request.POST['data'])
+        original = SeguimientoReal.objects.get(id=request.POST['id'])
+        key = False
+        numero = SeguimientoReal.objects.all().values_list('numero').order_by('-numero')[:1][0][0]
+        clonado = deepcopy(original)
+        clonado.id = None
+        clonado.awb = None
+        clonado.hawb = None
+        clonado.posicion = None
+        clonado.numero = numero + 1
+        clonado.fecha = datetime.now().date()
+        clonado.vapor = None
+        clonado.awb = None
+        clonado.hawb = None
+        clonado.volumen = None
+
+        # Revisar las opciones seleccionadas antes de clonar
+        clonar_envases = clonar_embarques = clonar_gastos = clonar_rutas = False
+
+        for row in data:
+            if row['name'] == 'envases' and row['value'] == 'SI':
+                clonar_envases = True
+            elif row['name'] == 'embarques' and row['value'] == 'SI':
+                clonar_embarques = True
+            elif row['name'] == 'gastos' and row['value'] == 'SI':
+                clonar_gastos = True
+            elif row['name'] == 'rutas' and row['value'] == 'SI':
+                clonar_rutas = True
+            elif row['name'] == 'cronologia' and row['value'] == 'SI':
+                key = True
+
+        # Clonar solo lo que se seleccionó
+        if clonar_envases:
+            for r in Envases.objects.filter(numero=original.numero):
+                aux = Envases(
+                    numero=clonado.numero,
+                    unidad=r.unidad,
+                    tipo=r.tipo,
+                    movimiento=r.movimiento,
+                    terminos=r.terminos,
+                    cantidad=r.cantidad
+                )
+                aux.id = None
+                aux.save()
+
+        if clonar_embarques:
+            for r in Cargaaerea.objects.filter(numero=original.numero):
+                aux = Cargaaerea(numero=clonado.numero, producto=r.producto)
+                aux.id = None
+                aux.save()
+
+        if clonar_gastos:
+            for r in Serviceaereo.objects.filter(numero=original.numero):
+                aux = deepcopy(r)
+                aux.numero = clonado.numero
+                aux.id = None
+                aux.save()
+
+        if clonar_rutas:
+            for r in Conexaerea.objects.filter(numero=original.numero):
+                aux = deepcopy(r)
+                aux.numero = clonado.numero
+                aux.id = None
+                aux.save()
+
+        if not key:
+            clonado.etd = None
+            clonado.eta = None
+
+        clonado.save()
+        resultado['resultado'] = 'exito'
+        resultado['numero'] = str(clonado.numero)
+    except IntegrityError as e:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente:. ' + str(e)
+    except Exception as e:
+        resultado['resultado'] = str(e)
+
+    data_json = json.dumps(resultado)
+    return HttpResponse(data_json, content_type="application/json")
