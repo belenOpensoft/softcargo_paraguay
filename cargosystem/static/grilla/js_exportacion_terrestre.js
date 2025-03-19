@@ -2681,7 +2681,16 @@ table_add_im = $('#table_add_im').DataTable({
                                $(this).dialog("close");
                            },
                        },
-
+                       {
+                           text: "Modificar",
+                           class: "btn btn-primary",
+                           style: "width:100px",
+                           click: function () {
+                            if (confirm('¿Confirma la acción de modificar el H B/L?')) {
+                                $('#edit_house_form').trigger('submit'); // Dispara el evento submit del formulario
+                            }
+                           },
+                       },
                     ],
                     beforeClose: function (event, ui) {
                     localStorage.removeItem('fecha_editada_house');
@@ -3088,7 +3097,16 @@ table_edit_im = $('#table_edit_im').DataTable({
                                $(this).dialog("close");
                            },
                        },
-
+                       {
+                           text: "Modificar",
+                           class: "btn btn-primary",
+                           style: "width:100px",
+                           click: function () {
+                            if (confirm('¿Confirma la acción de modificar el H B/L?')) {
+                                $('#edit_house_form').trigger('submit'); // Dispara el evento submit del formulario
+                            }
+                           },
+                       },
                     ],
                     beforeClose: function (event, ui) {
 

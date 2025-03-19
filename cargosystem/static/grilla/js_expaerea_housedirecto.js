@@ -247,6 +247,16 @@ $(document).ready(function () {
                                            $(this).dialog("close");
                                        },
                                    },
+                                                          {
+                           text: "Modificar",
+                           class: "btn btn-primary",
+                           style: "width:100px",
+                           click: function () {
+                               if(confirm('¿Confirma la acción de modificar el H B/L?')){
+                               modificar_house();
+                               }
+                           },
+                       },
 
                                 ],
                                 beforeClose: function (event, ui) {

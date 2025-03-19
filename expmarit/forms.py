@@ -728,34 +728,34 @@ class edit_house(BSModalModelForm):
         required=False,initial=0)
 
     # inputs
-    transportista_i = forms.CharField(widget=forms.TextInput(
+    transportista_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'transportista_ih_e', 'name': 'transportista_ih'}), required=False)
-    vendedor_i = forms.CharField(widget=forms.TextInput(
+    vendedor_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'vendedor_ih_e', 'name': 'vendedor_ih'}), required=False)
-    agente_i = forms.CharField(widget=forms.TextInput(
+    agente_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width: 50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'agente_ih_e', 'name': 'agente_ih'}), required=False)
-    consignatario_i = forms.CharField(widget=forms.TextInput(
+    consignatario_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'consignatario_ih_e', 'name': 'consignatario_ih'}), required=False)
-    armador_i = forms.CharField(widget=forms.TextInput(
+    armador_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'armador_ih_e', 'name': 'armador_ih'}), required=False)
-    cliente_i = forms.CharField(widget=forms.TextInput(
+    cliente_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'cliente_ih_e', 'name': 'cliente_ih'}), required=False)
-    agventas_i = forms.CharField(widget=forms.TextInput(
+    agventas_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'agventas_ih_e', 'name': 'agventas_ih'}), required=False)
-    agcompras_i = forms.CharField(widget=forms.TextInput(
+    agcompras_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'agcompras_ih_e', 'name': 'agcompras_ih'}), required=False)
-    embarcador_i = forms.CharField(widget=forms.TextInput(
+    embarcador_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'embarcador_ih_e', 'name': 'embarcador_ih'}), required=False)
-    deposito_i = forms.CharField(widget=forms.TextInput(
+    deposito_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'deposito_ih_e', 'name': 'deposito_ih'}), required=False)
 

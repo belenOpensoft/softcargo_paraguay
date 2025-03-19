@@ -496,7 +496,7 @@ def get_name_by_id_vendedores(request):
         client_id = request.GET.get('id')
 
         if client_id:
-            vendedor = Vendedores.objects.get(id=client_id)
+            vendedor = Vendedores.objects.get(codigo=client_id)
             name = vendedor.nombre
 
             return JsonResponse({'name': name})
@@ -526,7 +526,7 @@ def edit_house_function(request, numero):
             house.ageventas = int(form.cleaned_data.get('agventas_i', 0)) if form.cleaned_data.get('agventas_i') else 0
             house.embarcador = int(form.cleaned_data.get('embarcador_i', 0)) if form.cleaned_data.get('embarcador_i') else 0
 
-            house.consolidado = request.POST.get('consolidado', 0)
+            #house.consolidado = request.POST.get('consolidado', 0)
             house.vapor = form.cleaned_data.get('vapor', "")
             house.viaje = form.cleaned_data.get('viaje', "") if form.cleaned_data.get('viaje') not in [None, ''] else 0
             house.moneda = form.cleaned_data.get('moneda', 0)

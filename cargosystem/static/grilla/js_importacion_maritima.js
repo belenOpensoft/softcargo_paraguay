@@ -1597,8 +1597,8 @@ var expandedRow;
 });
    //modificar house
     $('#edit_house_form').submit(function(e){
+     e.preventDefault();
     let lugar=localStorage.getItem('lugar');
-       e.preventDefault();
         if(document.getElementById('arbitraje_house_e').value<0||document.getElementById('dias_demora_e').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
@@ -2754,6 +2754,17 @@ table_add_im = $('#table_add_im').DataTable({
                                $(this).dialog("close");
                            },
                        },
+                       {
+                           text: "Modificar",
+                           class: "btn btn-primary",
+                           style: "width:100px",
+                           click: function () {
+                            if (confirm('¿Confirma la acción de modificar el H B/L?')) {
+                                $('#edit_house_form').trigger('submit'); // Dispara el evento submit del formulario
+                            }
+
+                           },
+                       },
 
                     ],
                     beforeClose: function (event, ui) {
@@ -3157,7 +3168,17 @@ table_edit_im = $('#table_edit_im').DataTable({
                                $(this).dialog("close");
                            },
                        },
+                       {
+                           text: "Modificar",
+                           class: "btn btn-primary",
+                           style: "width:100px",
+                           click: function () {
+                            if (confirm('¿Confirma la acción de modificar el H B/L?')) {
+                                $('#edit_house_form').trigger('submit'); // Dispara el evento submit del formulario
+                            }
 
+                           },
+                       },
                     ],
                     beforeClose: function (event, ui) {
 
