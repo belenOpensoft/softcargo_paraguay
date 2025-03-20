@@ -931,6 +931,47 @@ class VEmbarqueaereo(models.Model):
         managed = False
         db_table = 'VExpAereaEmbarqueAereo'
 
+class VEmbarqueaereoDirecto(models.Model):
+    numero = models.IntegerField(unique=True, primary_key=True)
+    fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)
+    transportista = models.CharField(max_length=255, blank=True, null=True)  # Nombre del transportista
+    awb = models.CharField(max_length=40, blank=True, null=True)
+    hawb = models.CharField(max_length=50, blank=True, null=True)
+    agente = models.CharField(max_length=255, blank=True, null=True)  # Nombre del agente
+    consignatario = models.CharField(max_length=255, blank=True, null=True)
+    consignatario_id = models.IntegerField()
+    # Nombre del consignatario
+    posicion = models.CharField(max_length=20, blank=True, null=True)
+    operacion = models.CharField(max_length=25, blank=True, null=True)
+    origen = models.CharField(max_length=5, blank=True, null=True)
+    destino = models.CharField(max_length=5, blank=True, null=True)
+    status = models.CharField(max_length=20, blank=True, null=True)
+    fecha_embarque = models.DateTimeField(blank=True, null=True)
+    fecha_retiro = models.DateTimeField(blank=True, null=True)
+    valor_transporte = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    valor_aduana = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    tarifa_venta = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    tarifa_compra = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    volumen_cubico = models.FloatField(blank=True, null=True)
+    notas = models.TextField(blank=True, null=True)
+    referencia = models.IntegerField(null=True, blank=True, default=None)
+    seguimiento = models.IntegerField(null=True, blank=True, default=None)
+    orden_cliente = models.CharField(max_length=850, null=True, blank=True, default=None)
+    ref_proveedor = models.CharField(max_length=250, null=True, blank=True, default=None)
+    embarcador = models.CharField(max_length=50, null=True, blank=True, default=None)
+    direccion_embarcador = models.CharField(max_length=50, null=True, blank=True, default=None)
+    ciudad_embarcador = models.CharField(max_length=5, null=True, blank=True, default=None)
+    pais_embarcador = models.CharField(max_length=50, null=True, blank=True, default=None)
+    direccion_consignatario = models.CharField(max_length=50, null=True, blank=True, default=None)
+    ciudad_consignatario = models.CharField(max_length=5, null=True, blank=True, default=None)
+    pais_consignatario = models.CharField(max_length=50, null=True, blank=True, default=None)
+    terminos = models.CharField(max_length=3, null=True, blank=True, default=None)
+    pago_flete = models.CharField(max_length=1, null=True, blank=True, default=None)
+    consolidado = models.CharField(max_length=1, null=True, blank=True, default=None)
+
+    class Meta:
+        managed = False
+        db_table = 'VExpAereaEmbarqueAereoDirecto'
 
 class VGastosMaster(models.Model):
     numero = models.IntegerField(blank=True, null=True)

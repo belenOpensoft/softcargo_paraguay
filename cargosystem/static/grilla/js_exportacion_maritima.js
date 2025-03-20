@@ -4529,7 +4529,7 @@ $('.email').click(function () {
         archivos_adjuntos = {};
         if (row.length === 1) {
             get_data_email(row,title,numero,id);
-            $("#id_to").val(row[0][50]);
+            //$("#id_to").val(row[0][50]);
             $("#emails_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
@@ -4605,14 +4605,16 @@ function get_data_email(row,title,numero,id) {
         success: function (resultado) {
             if (resultado['resultado'] === 'exito') {
                 let textarea = document.getElementById("email_add_input");
-//                textarea.innerHTML = resultado['mensaje'];
                 textarea.value = resultado['mensaje'];
                 $("#id_subject").val(resultado['asunto']);
+
                 let asunto = resultado['asunto'].toLowerCase();
                 if (asunto.includes("traspaso a operaciones") || asunto.includes("orden de facturacion")) {
                     $("#id_to").val("");  // No colocar nada en id_to
+                }else if(asunto.includes("instrucción de embarque") || asunto.includes("shipping instruction")){
+                $("#id_to").val(resultado['email_agente']);
                 } else {
-                    $("#id_to").val(resultado['email_cliente']);  // Asignar el email normalmente
+                    $("#id_to").val(resultado['email_cliente']);
                 }
             } else {
                 alert(resultado['resultado']);

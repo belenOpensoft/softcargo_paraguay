@@ -9,7 +9,7 @@ import base64
 
 from cargosystem import settings
 from impomarit.views.mails import formatear_linea
-from mantenimientos.models import Clientes, Servicios, Vapores
+from mantenimientos.models import Clientes, Servicios, Vapores, Monedas
 from mantenimientos.views.bancos import is_ajax
 from seguimientos.models import VGrillaSeguimientos, Envases, Cargaaerea, Conexaerea, Serviceaereo
 
@@ -41,16 +41,27 @@ def get_data_email(request):
             texto += f'<br>'
             if row.modo == 'IMPORT MARITIMO':
                 email_cliente = row.emailim
+                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailim
             elif row.modo == 'EXPORT MARITIMO':
                 email_cliente = row.emailem
+                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailem
+
             elif row.modo == 'IMPORT AEREO':
                 email_cliente = row.emailia
+                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailia
+
             elif row.modo == 'EXPORT AEREO':
                 email_cliente = row.emailea
+                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailea
+
             elif row.modo == 'IMPORT TERRESTRE':
                 email_cliente = row.emailit
+                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailit
+
             elif row.modo == 'EXPORT TERRESTRE':
                 email_cliente = row.emailet
+                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailet
+
             if title == 'Traspaso a operaciones':
                 texto += 'SEGUIMIENTO: ' + str(row.numero) + '<br>'
                 texto += 'CLIENTE: ' + str(row.cliente) + '<br>'
@@ -215,7 +226,7 @@ def get_data_email(request):
 
                 if carga:
                     for c in carga:
-                        ap1 = float(c.cbm) * 166.67
+                        ap1 = float(c.cbm) if c.cbm is not None else 0 * 166.67
                         aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
 
                         texto += formatear_linea("Mercadería", c.producto.nombre)
@@ -568,8 +579,100 @@ def get_data_email(request):
                 texto += f"<p>ETA {llegada} </p><br>"
                 texto += f"<p>CLIENTE: {row.cliente}</p><br>"
                 texto += 'OCEANLINK'
+            elif title == 'Instruccion de embarque':
+                embarcador = Clientes.objects.get(codigo=row.embarcador_codigo)
+                if row.modo !='IMPORT AEREO' and row.modo !='EXPORT AEREO':
+                    row3=Envases.objects.filter(numero=row.numero)
 
+                if embarcador:
+                    direccion = embarcador.direccion
+                    empresa = embarcador.empresa
+                    ciudad = embarcador.ciudad
+                    pais = embarcador.pais
+                else:
+                    direccion=''
+                    empresa =''
+                    ciudad = ''
+                    pais = ''
+                consignatario = Clientes.objects.get(codigo=row.consignatario_codigo)
+                cliente = Clientes.objects.get(codigo=row.cliente_codigo)
+                agente = Clientes.objects.get(codigo=row.agente_codigo)
+                mercaderia = Cargaaerea.objects.filter(numero=row.numero)
+                #moneda = Monedas.objects.get(codigo=row.moneda)
+                moneda = row.moneda
+
+                resultado['asunto'] = 'INSTRUCCIÓN DE EMBARQUE - Ref.: ' + str(row.numero) + ' - Shipper: ' + str(
+                    embarcador.empresa) + ' - Consignee: ' + str(consignatario.empresa)
+
+                locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+                fecha_actual = datetime.datetime.now()
+                fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+                if isinstance(row.eta, datetime.datetime):
+                    llegada = str(row.eta.strftime("%d/%m/%Y"))
+                else:
+                    llegada = ''
+
+                tabla_html = "<table style='width:40%'>"
+                tabla_html += f"<tr><th align='left'>Fecha: </th><td>{fecha_formateada}</td></tr>"
+                tabla_html += f"<tr><th align='left'>A: </th><td>{str(agente.empresa)}</td></tr>"
+                tabla_html += f"<tr><th align='left'>Departamento: </th><td>MARITIMO</td></tr>"
+                tabla_html += f"<tr><th align='left'>Envíado: </th><td>...</td></tr>"
+                tabla_html += "</table><br>"
+                tabla_html += "<p>Estimados Seres.:</p><br>"
+                tabla_html += "<p>Por favor, contactar a la siguiente compañía para coordinar la operación referenciada:</p><br>"
+                tabla_html += "<table style='width:40%'>"
+                tabla_html += f"<tr><th align='left'>Proveedor: </th><td>{str(empresa)}</td></tr>"
+                tabla_html += f"<tr><th align='left'>Dirección: </th><td>{str(direccion)}</td></tr>"
+                tabla_html += f"<tr><th align='left'>Ciudad: </th><td>{str(ciudad)}</td></tr>"
+                tabla_html += f"<tr><th align='left'>País: </th><td>{str(pais)}</td></tr><br><br>"
+                tabla_html += f"<tr><th align='left'>Consignatario: </th><td>{str(consignatario.empresa)}</td></tr>"
+                tabla_html += f"<tr><th align='left'>Dirección: </th><td>{str(consignatario.direccion)}</td></tr>"
+                tabla_html += f"<tr><th align='left'>País: </th><td>{str(consignatario.pais)}</td></tr>"
+                tabla_html += f"<tr><th align='left'>RUC: </th><td>{str(consignatario.ruc)}</td></tr><br><br>"
+                tabla_html += f"<tr><th align='left'>Referencia interna: </th><td>{row.numero}/{row.numero}</td></tr>"
+                tabla_html += f"<tr><th align='left'>Posición: </th><td>{str(row.posicion)}</td></tr>"
+                tabla_html += f"<tr><th align='left'>Recepcion estimada de mercaderia </th><td>{str(llegada)}</td></tr>"
+                tabla_html += f"<tr><th align='left'>Puerto de carga: </th><td>{str(row.loading)}</td></tr>"
+                tabla_html += f"<tr><th align='left'>Puerto de descarga: </th><td>{str(row.discharge)}</td></tr>"
+                tabla_html += "</table><br>"
+
+                for m in mercaderia:
+                    tabla_html += "<table style='width:40%'>"
+                    tabla_html += f"<tr><th align='left'>Mercaderia: </th><td>{m.producto}</td></tr>"
+                    tabla_html += f"<tr><th align='left'>Bultos: </th><td>{m.bultos}</td></tr>"
+                    tabla_html += f"<tr><th align='left'>Kilos: </th><td>{m.bruto}</td></tr>"
+                    tabla_html += f"<tr><th align='left'>Volúmen: </th><td>{m.cbm}</td></tr>"
+                envase_text = ''
+                if row.modo != 'IMPORT AEREO' and row.modo != 'EXPORT AEREO':
+                    if row3:
+                        for e in row3:
+                            cantidad = e.cantidad if e.cantidad is not None else 0
+                            tipo = e.tipo if e.tipo is not None else 'S/I'
+                            unidad = e.unidad if e.unidad is not None else 'S/I'
+                            nrocontenedor = e.nrocontenedor if e.nrocontenedor is not None else 'S/I'
+                            envase_text += str(cantidad) + 'x' + str(unidad) + ' ' + str(tipo) + ': ' + str(nrocontenedor)
+                            if len(row3) > 1:
+                                envase_text += '<br>'
+
+                condicion_pago = "Collect" if row.pago == "C" else "Prepaid" if row.pago == "P" else ""
+                tabla_html += f"<tr><th align='left'>Condiciones de pago: </th><td>{condicion_pago}</td></tr>"
+                tabla_html += f"<tr><th align='left'>Términos de compra: </th><td>{row.terminos}</td></tr>"
+                tabla_html += f"<tr><th align='left'>Envase: </th><td>{envase_text}</td></tr>"
+                tabla_html += f"<tr><th align='left'>Modo de Embarque: </th><td>MARITIMO</td></tr>"
+                tabla_html += f"<tr><th align='left'>Moneda: </th><td>{moneda}</td></tr>"
+                tabla_html += "</table><br>"
+                texto = tabla_html
+            texto += '<b>OCEANLINK,</b><br>'
+            # texto += str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>'
+            texto += 'DEPARTAMENTO DE IMPORTACION MARITIMA, <br>'
+            texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
+            texto += 'OPERACIONES <br>'
+            texto += 'EMAIL: <br>'
+            texto += 'TEL: 598 2917 0501 <br>'
+            texto += 'FAX: 598 2916 8215 <br><br><br><br>'
+            texto += '</table>'
             resultado['email_cliente'] = email_cliente
+            resultado['email_agente'] = email_agente
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
         except Exception as e:
@@ -579,7 +682,6 @@ def get_data_email(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
-
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:

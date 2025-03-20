@@ -413,7 +413,7 @@ $(document).ready(function () {
                 archivos_adjuntos = {};
                 if (row.length === 1) {
                     get_data_email(row,title,numero,id);
-                    $("#id_to").val(row[0][50]);
+                    //$("#id_to").val(row[0][50]);
                     $("#emails_modal").dialog({
                         autoOpen: true,
                         open: function (event, ui) {

@@ -45,6 +45,7 @@ def get_data_email_op(request):
             row3 = ExpterraEnvases.objects.filter(numero=row_number)
             gastos = VGastosHouse.objects.filter(numero=row_number)
             email_cliente = Clientes.objects.get(codigo=embarque.consignatario).emailet
+            email_agente = Clientes.objects.get(codigo=embarque.agente).emailet
 
 
             try:
@@ -64,6 +65,8 @@ def get_data_email_op(request):
             texto += '</table>'
 
             resultado['email_cliente'] = email_cliente
+            resultado['email_agente'] = email_agente
+
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
         except Exception as e:
@@ -384,7 +387,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         if carga:
 
             for c in carga:
-                ap1 = float(c.cbm) * 166.67
+                ap1 = float(c.cbm) if c.cbm is not None else 0 * 166.67
 
                 aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
 

@@ -45,6 +45,8 @@ def get_data_email_op(request):
             row2 = ExportCargaaerea.objects.filter(numero=row_number)
             gastos = VGastosHouse.objects.filter(numero=row_number)
             email_cliente = Clientes.objects.get(codigo=embarque.consignatario).emailea
+            email_agente = Clientes.objects.get(codigo=embarque.agente).emailea
+
 
             try:
                 seg = VGrillaSeguimientos.objects.get(numero=row.seguimiento)
@@ -67,6 +69,8 @@ def get_data_email_op(request):
             texto += '</table>'
 
             resultado['email_cliente'] = email_cliente
+            resultado['email_agente'] = email_agente
+
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
         except Exception as e:
@@ -434,8 +438,8 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         moneda=Monedas.objects.get(codigo=embarque.moneda)
 
         try:
-            if seguimiento.refproveedor.isdigit():
-                proveedor = Clientes.objects.get(codigo=seguimiento.refproveedor)
+            if seguimiento.embarcador is not None and seguimiento.embarcador.isdigit():
+                proveedor = Clientes.objects.get(codigo=seguimiento.embarcador)
                 direccion = proveedor.direccion
                 empresa = proveedor.empresa
                 ciudad = proveedor.ciudad
@@ -452,14 +456,16 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             ciudad = ''
             pais = ''
 
-        resultado['asunto'] = 'INSTRUCCIÓN DE EMBARQUE - Ref.: ' + str(seguimiento.refproveedor) + ' - Shipper: ' + str(
+        resultado['asunto'] = 'INSTRUCCIÓN DE EMBARQUE - Ref.: ' + str(seguimiento.numero) + ' - Shipper: ' + str(
             embarcador.empresa) + ' - Consignee: ' + str(consignatario.empresa)
 
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
         fecha_actual = datetime.now()
         fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
-
-        texto += '<br><br>'
+        if isinstance(seguimiento.eta, datetime):
+            llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
+        else:
+            llegada = ''
         tabla_html = "<table style='width:40%'>"
         tabla_html += f"<tr><th align='left'>Fecha: </th><td>{fecha_formateada}</td></tr>"
         tabla_html += f"<tr><th align='left'>A: </th><td>{str(cliente.empresa)}</td></tr>"
@@ -467,7 +473,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         tabla_html += f"<tr><th align='left'>Envíado: </th><td>...</td></tr>"
         tabla_html += "</table><br>"
         tabla_html+="<p>Estimados Seres.:</p><br>"
-        tabla_html+="<p>Por favor, contactar a la siguiente compañía para coordinar la operación referenciada:</p><br>"
+        tabla_html+="<p>Por favor, contactar a la siguiente compañía para coordinar la operación referenciada:</p>"
         tabla_html += "<table style='width:40%'>"
         tabla_html += f"<tr><th align='left'>Proveedor: </th><td>{str(empresa)}</td></tr>"
         tabla_html += f"<tr><th align='left'>Dirección: </th><td>{str(direccion)}</td></tr>"
@@ -479,6 +485,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         tabla_html += f"<tr><th align='left'>RUC: </th><td>{str(consignatario.ruc)}</td></tr><br><br>"
         tabla_html += f"<tr><th align='left'>Referencia interna: </th><td>{seguimiento.refproveedor}/{row.numero}</td></tr>"
         tabla_html += f"<tr><th align='left'>Posición: </th><td>{str(row.posicion)}</td></tr>"
+        tabla_html += f"<tr><th align='left'>Recepcion estimada de mercaderia </th><td>{str(llegada)}</td></tr>"
         tabla_html += f"<tr><th align='left'>Puerto de carga: </th><td>{str(embarque.origen)}</td></tr>"
         tabla_html += f"<tr><th align='left'>Puerto de descarga: </th><td>{str(embarque.destino)}</td></tr>"
         tabla_html += "</table><br>"
@@ -488,6 +495,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             tabla_html += f"<tr><th align='left'>Mercaderia: </th><td>{m.producto}</td></tr>"
             tabla_html += f"<tr><th align='left'>Bultos: </th><td>{m.bultos}</td></tr>"
             tabla_html += f"<tr><th align='left'>Kilos: </th><td>{m.bruto}</td></tr>"
+
 
         condicion_pago = "Collect" if row.pago_flete == "C" else "Prepaid" if row.pago_flete == "P" else ""
         tabla_html += f"<tr><th align='left'>Condiciones de pago: </th><td>{condicion_pago}</td></tr>"

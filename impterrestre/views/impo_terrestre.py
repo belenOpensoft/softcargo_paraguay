@@ -18,7 +18,7 @@ from impterrestre.forms import add_im_form, add_form, add_house, edit_form, edit
     rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse, NotasForm
 from impterrestre.models import Master, ImpterraReservas, ImpterraEmbarqueaereo, VEmbarqueaereo, ImpterraAttachhijo, \
     ImpterraCargaaerea, ImpterraEnvases, \
-    ImpterraServiceaereo, ImpterraConexaerea, ImpterraFaxes
+    ImpterraServiceaereo, ImpterraConexaerea, ImpterraFaxes, VEmbarqueaereoDirecto
 from seguimientos.forms import archivosForm, pdfForm
 
 
@@ -369,6 +369,7 @@ def get_data_embarque_aereo(registros_filtrados):
     except Exception as e:
         raise TypeError(e)
 
+
 def source_embarque_consolidado(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         start = int(request.GET.get('start', 0))
@@ -377,19 +378,20 @@ def source_embarque_consolidado(request):
 
         # Mapeo de columnas
         columnas = [
-            'id', 'fecha_embarque', 'fecha_retiro', 'numero','seguimiento', 'consignatario', 'origen', 'destino',
+            'id', 'fecha_embarque', 'fecha_retiro', 'numero', 'seguimiento', 'consignatario', 'origen', 'destino',
             'status', 'posicion', 'operacion', 'awb', 'hawb', 'vapor', 'notificar_agente', 'notificar_cliente'
         ]
 
-        # Filtrar registros en base a la búsqueda
-        registros = VEmbarqueaereo.objects.all()
-
+        filtros = {}
         # Aplicar búsqueda por columna
         for index, column in enumerate(columnas):
             search_value = request.GET.get(f'columns[{index}][search][value]', '').strip()
             if search_value:
-                filtros = {f"{column}__icontains": search_value}
-                registros = registros.filter(**filtros)
+                filtros[f"{column}__icontains"] = search_value
+        if len(filtros) > 0:
+            registros = VEmbarqueaereoDirecto.objects.filter(**filtros)
+        else:
+            registros = VEmbarqueaereoDirecto.objects.all()
 
         # Ordenar registros (aplicamos el orden enviado por DataTables)
         order_column_index = int(request.GET.get('order[0][column]', 0))  # Índice de la columna
@@ -398,11 +400,11 @@ def source_embarque_consolidado(request):
         if order_column_index < len(columnas):
             order_column = columnas[order_column_index]  # Obtener el nombre de la columna
             if order_dir == 'desc':
-                order_column = f"-{order_column}"
+                order_column = f"-{order_column}"  # Prefijar con '-' para orden descendente
             registros = registros.order_by(order_column)
 
         # Obtener el número total de registros y registros filtrados
-        total_records = VEmbarqueaereo.objects.all().count()
+        total_records = VEmbarqueaereoDirecto.objects.all().count()
         filtered_records = registros.count()
 
         # Paginación

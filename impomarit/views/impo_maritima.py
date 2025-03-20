@@ -16,7 +16,7 @@ from django.shortcuts import render
 from cargosystem.settings import RUTA_PROYECTO
 from impomarit.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
     rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse, NotasForm
-from impomarit.models import Master, Embarqueaereo, VEmbarqueaereo, Attachhijo, Cargaaerea, Envases, \
+from impomarit.models import Master, Embarqueaereo, VEmbarqueaereo, VEmbarqueaereoDirecto, Attachhijo, Cargaaerea, Envases, \
     Serviceaereo, Conexaerea, Faxes, Reservas
 from seguimientos.forms import archivosForm, pdfForm
 
@@ -445,16 +445,18 @@ def source_embarque_consolidado(request):
             'status', 'posicion', 'operacion', 'awb', 'hawb', 'vapor', 'notificar_agente', 'notificar_cliente'
         ]
 
-        # Filtrar registros en base a la búsqueda
-        registros = VEmbarqueaereo.objects.filter(consolidado=1)
 
+        filtros = {}
         # Aplicar búsqueda por columna
         for index, column in enumerate(columnas):
             search_value = request.GET.get(f'columns[{index}][search][value]', '').strip()
             if search_value:
-                filtros = {f"{column}__icontains": search_value}
-                registros = registros.filter(**filtros)
-
+                filtros[f"{column}__icontains"] = search_value
+        if len(filtros) > 0:
+            registros = VEmbarqueaereoDirecto.objects.filter(**filtros)
+        else:
+            registros = VEmbarqueaereoDirecto.objects.all()
+            
         # Ordenar registros (aplicamos el orden enviado por DataTables)
         order_column_index = int(request.GET.get('order[0][column]', 0))  # Índice de la columna
         order_dir = request.GET.get('order[0][dir]', 'asc')  # Dirección del orden
@@ -466,7 +468,7 @@ def source_embarque_consolidado(request):
             registros = registros.order_by(order_column)
 
         # Obtener el número total de registros y registros filtrados
-        total_records = VEmbarqueaereo.objects.filter(consolidado=1).count()
+        total_records = VEmbarqueaereoDirecto.objects.all().count()
         filtered_records = registros.count()
 
         # Paginación
@@ -485,6 +487,7 @@ def source_embarque_consolidado(request):
         return JsonResponse(resultado)
     else:
         return JsonResponse({"error": "Invalid request"}, status=400)
+
 
 
 #mails archivo

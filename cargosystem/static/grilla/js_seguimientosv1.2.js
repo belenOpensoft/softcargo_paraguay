@@ -594,7 +594,7 @@ $(document).ready(function () {
                            // $('#tabla_embarques').DataTable().ajax.reload();
                             table.ajax.reload(function(json) {
                                 // Callback function to handle the response data
-                                console.log('Data reloaded:', json);
+
 
                             });
 
@@ -748,9 +748,10 @@ $(document).ready(function () {
         archivos_adjuntos = {};
         if (row.length === 1) {
             get_data_email(row,title,row_number);
+            /*
             if(mail_to==='1'){
                 $("#id_to").val(row[0][50]);
-            }
+            }*/
             $("#emails_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
@@ -1161,7 +1162,6 @@ $(document).ready(function () {
     $('#envases_btn').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
-        console.log(row[0][2]);
         if(row[0][2]=='IMPORT AEREO'){
         alert('No puede agregar envases a las operaciones aereas.');
         return;
@@ -1476,7 +1476,6 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
             if(row[0][2] == 'EXPORT AEREO'){
-//            console.log('row da esto: ' +row[0][0]);
                    window.open('/descargar_awb_seguimientos/' + row[0][0], '_blank');
 
             }else{
@@ -1530,7 +1529,6 @@ $(document).ready(function () {
     });
     $('#tabla_gastos tbody').on('dblclick', 'tr', function () {
         var data = table_gastos.row(this).data();
-        console.log(data);
         $("#id_gasto_id").val(data[0]);
         if(data[3] > 0){
             $("#id_compra_venta").val('C');
@@ -1562,7 +1560,6 @@ $(document).ready(function () {
     });
     $('#tabla_embarques tbody').on('dblclick', 'tr', function () {
         var data = table_embarques.row(this).data();
-        console.log(data);
         $("#id_embarque_id").val(data[0]);
         $("#id_producto").val(data[9]);
         $("#id_bultos_embarque").val(data[2]);
@@ -1641,13 +1638,12 @@ $(document).ready(function () {
                                                 $('#id_embarque_id').val("");
                                                 table.ajax.reload(function(json) {
                                                     // Callback function to handle the response data
-                                                    console.log('Data reloaded:', json);
+
 
                                                 });
                                                 $('#tabla_embarques').DataTable().ajax.reload();
                                                 $('#tabla_seguimiento').DataTable().ajax.reload();
 
-                                                console.log(resultado['resultado']);
 
                                         }
                                     });
@@ -1749,7 +1745,6 @@ $(document).ready(function () {
                                 data: toData,
                                 async: false,
                                 success: function (resultado) {
-                                console.log(resultado);
                                     if (resultado['resultado'] === 'exito') {
                                         if (resultado['tipo'] === 'nuevo') {
                                             mostrarToast("!Seguimiento GUARDADO con exito¡", 'success');
@@ -2729,7 +2724,6 @@ function get_datos_embarques() {
                 }
             },
         ],"initComplete": function(settings, json) {
-            console.log('Datos JSON:', json['data_extra']);
             $("#id_aplicable").val(json['data_extra']['aplicable']);
             $("#id_tarifaprofit").val(json['data_extra']['tarifaprofit']);
             $("#id_tarifaventa").val(json['data_extra']['tarifaventa']);
@@ -2811,9 +2805,7 @@ function get_datos_gastos() {
             $('#gastos_diferencia').val((ingresos-egresos).toFixed(2));
         }
     });
-    console.log(ingresos.toFixed(2));
-    console.log(egresos.toFixed(2));
-    console.log(ingresos-egresos.toFixed(2));
+
 }
 function imprimirPDF() {
     var contenido = $('#pdf_add_input').summernote('code'); // Obtener el HTML del Summernote
@@ -2985,15 +2977,16 @@ function get_data_email(row,title,row_number) {
         success: function (resultado) {
             if (resultado['resultado'] === 'exito') {
                 let textarea = document.getElementById("email_add_input");
-//                textarea.innerHTML = resultado['mensaje'];
                 textarea.value = resultado['mensaje'];
                 $("#id_subject").val(resultado['asunto']);
 
                 let asunto = resultado['asunto'].toLowerCase();
                 if (asunto.includes("traspaso a operaciones") || asunto.includes("orden de facturacion")) {
                     $("#id_to").val("");  // No colocar nada en id_to
+                }else if(asunto.includes("instrucción de embarque") || asunto.includes("shipping instruction")){
+                $("#id_to").val(resultado['email_agente']);
                 } else {
-                    $("#id_to").val(resultado['email_cliente']);  // Asignar el email normalmente
+                    $("#id_to").val(resultado['email_cliente']);
                 }
             } else {
                 alert(resultado['resultado']);
@@ -3072,7 +3065,6 @@ function get_sugerencias_envases(numero) {
         type: "GET",
         url: "get_sugerencias_envases/" + numero,
         success: function(response) {
-        console.log(response.data);
             if (response.status === "success") {
                 if (response.data.bultos !== null && response.data.bultos !== undefined && response.data.bultos !== "") {
                     $("#id_bultos").val(response.data.bultos);

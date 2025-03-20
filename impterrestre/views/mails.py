@@ -48,6 +48,7 @@ def get_data_email_op(request):
             row3 = ImpterraEnvases.objects.filter(numero=row_number)
             gastos = VGastosHouse.objects.filter(numero=row_number)
             email_cliente = Clientes.objects.get(codigo=embarque.consignatario).emailit
+            email_agente = Clientes.objects.get(codigo=embarque.agente).emailit
 
             try:
                 seguimiento = VGrillaSeguimientos.objects.get(numero=row.seguimiento)
@@ -66,6 +67,7 @@ def get_data_email_op(request):
             texto += 'FAX: 598 2916 8215 <br><br><br><br>'
             texto += '</table>'
             resultado['email_cliente'] = email_cliente
+            resultado['email_agente'] = email_agente
 
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
@@ -387,7 +389,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         if carga:
 
             for c in carga:
-                ap1 = float(c.cbm) * 166.67
+                ap1 = float(c.cbm) if c.cbm is not None else 0 * 166.67
 
                 aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
 
