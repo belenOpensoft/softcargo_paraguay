@@ -345,7 +345,7 @@ def source_rutas_importado(request):
                 "seguimiento_control": registro.numero,
                 "origen": registro.origen,
                 "destino": registro.destino,
-                "vapor": registro.vapor,
+                "vuelo": registro.vapor,
                 "salida": registro.salida,
                 "llegada": registro.llegada,
                 "ciavuelo": registro.cia,

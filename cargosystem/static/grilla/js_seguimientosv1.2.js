@@ -2638,7 +2638,6 @@ function get_datos_seguimiento_rutas(numero) {
                 $("#id_llegada").val(response.datos.llegada || "");
                 $("#id_origen").val(response.datos.origen || "");
                 $("#id_destino").val(response.datos.destino || "");
-                $("#id_cia").val(response.datos.cia || "");
                 $("#id_modo_ruta").val(modo[1] || "");
                 $("#id_viaje_ruta").val(response.datos.viaje || "");
                 $("#id_vapor").val(response.datos.vapor || "");

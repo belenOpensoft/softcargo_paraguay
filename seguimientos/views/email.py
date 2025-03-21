@@ -64,7 +64,7 @@ def get_data_email(request):
 
             if title == 'Traspaso a operaciones':
                 texto += 'SEGUIMIENTO: ' + str(row.numero) + '<br>'
-                texto += 'CLIENTE: ' + str(row.cliente) + '<br>'
+                texto += 'CLIENTE: ' + str(row.consignatario) + '<br>'
                 texto += 'BL: ' + str(row.awb) + '<br>'
                 texto += 'HBL: ' + str(row.hawb) + '<br><br><br>'
                 texto += 'EMBARQUE TRASPASADO A DEPARTAMENTO DE OPERACIONES <br><br>'
@@ -84,6 +84,7 @@ def get_data_email(request):
                 texto += 'OPERACIONES <br>'
                 texto += 'PH: 59829170501 <br>'
                 resultado['asunto'] = 'SEGUIMIENTO ' + str(row.numero) + ' // TRASPASO A OPERACIONES'
+
             elif title == 'Aviso de embarque':
                 resultado['asunto'] = 'AVISO DE EMBARQUE / Ref: ' + str(row.numero) + ' ' \
                                                                                      '- HB/l: ' + str(

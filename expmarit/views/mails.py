@@ -705,7 +705,27 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
 
         return texto, resultado
 
-
+    elif title == 'Traspaso a operaciones':
+        texto += 'SEGUIMIENTO: ' + str(row.numero) + '<br>'
+        texto += 'CLIENTE: ' + str(row.consignatario) + '<br>'
+        texto += 'BL: ' + str(row.awb) + '<br>'
+        texto += 'HBL: ' + str(row.hawb) + '<br><br><br>'
+        texto += 'EMBARQUE TRASPASADO A DEPARTAMENTO DE OPERACIONES <br><br>'
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+        texto += 'FECHA: ' + fecha_formateada + '<br><br>'
+        texto += 'CONDICION MBL: <br>'
+        texto += 'CONDICION HBL: <br>'
+        texto += 'COURRIER CON DOCUMENTOS ENVIADO: <br>'
+        texto += 'COURRIER/GUIA: <br><br><br><br>'
+        texto += 'SALUDOS, <br><br>'
+        texto += '<b>OCEANLINK,</b> <br>'
+        texto += 'DEPARTAMENTO DE Expo Marítimo, <br>'
+        texto += 'OPERACIONES <br>'
+        texto += 'PH: 59829170501 <br>'
+        resultado['asunto'] = 'SEGUIMIENTO ' + str(row.numero) + ' // TRASPASO A OPERACIONES'
+        return texto,resultado
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:
