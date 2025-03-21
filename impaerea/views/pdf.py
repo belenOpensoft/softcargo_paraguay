@@ -19,13 +19,14 @@ def get_datos_caratula(request):
             embarque = ImportEmbarqueaereo.objects.get(numero=id)
             embarcador = Clientes.objects.get(codigo=embarque.embarcador)
             consignatario = Clientes.objects.get(codigo=embarque.consignatario)
-            ruta =  ImportConexaerea.objects.filter(numero=id).order_by('-id').values_list('salida', 'llegada').first()
+            ruta =  ImportConexaerea.objects.filter(numero=id).order_by('-id').values_list('salida', 'llegada','vuelo').first()
 
             if ruta:
-                salida, llegada = ruta
+                salida, llegada,vuelo = ruta
             else:
                 salida = None
                 llegada = None
+                vuelo = None
             try:
                 seguimiento = VGrillaSeguimientos.objects.get(numero=Vembarque.seguimiento)
             except VGrillaSeguimientos.DoesNotExist:
@@ -53,7 +54,7 @@ def get_datos_caratula(request):
             else:
                 res = '?'
             texto = texto + '<b>ETD: </b>'+str(res)+'<br>'
-            texto = texto + '<b>Vapor: </b>'+str(seguimiento.vapor if seguimiento.vapor is not None else '')+'<br>'
+            texto = texto + '<b>Vuelo: </b>'+str(vuelo if vuelo is not None else 'S/I')+'<br>'
             texto = texto + '<b>Transportista: </b>'+str(Vembarque.transportista if Vembarque.transportista is not None else '')+'<br>'
             texto = texto + '<b>Orden cliente: </b>'+str(seguimiento.refcliente if seguimiento.refcliente is not None else '')+'<hr>'
             texto = texto + '<b>Embarcador: </b>'+str(Vembarque.embarcador if Vembarque.embarcador is not None else '')+'<br>'
