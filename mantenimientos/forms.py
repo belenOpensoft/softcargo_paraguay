@@ -245,7 +245,7 @@ class add_cliente_form(forms.Form):
     prefijoguia = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Prefijo Guia",
                                   required=False)
     direccion = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Dirección",
-                                max_length=150, required=False)
+                                max_length=50, required=False)
     localidad = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Localidad",
                                 max_length=100, required=False)
     cpostal = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Código Postal",

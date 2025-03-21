@@ -467,7 +467,6 @@ def source_embarque_consolidado(request):
 
         # Obtener el número total de registros y registros filtrados
         total_records = VEmbarqueaereoDirecto.objects.all().count()
-        print(total_records.query)
         filtered_records = registros.count()
 
         # Paginación

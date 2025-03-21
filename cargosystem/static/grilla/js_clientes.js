@@ -279,23 +279,39 @@ function enviar_form(e){
     }
 
 
-    $.ajax({
-        type: "POST",
-        url: url ,  // Agregar ID si es edición
-        data: $('#clienteform').serialize(),
-        success: function(response) {
-            if (response.status === 'success') {
-                alert(response.message);
-                $('#cliente-modal').dialog("close");
-                table.ajax.reload(); // Recargar la tabla
+$.ajax({
+    type: "POST",
+    url: url,  // Agregar ID si es edición
+    data: $('#clienteform').serialize(),
+    success: function(response) {
+        if (response.status === 'success') {
+            alert(response.message);
+            $('#cliente-modal').dialog("close");
+            table.ajax.reload(); // Recargar la tabla
+        } else {
+            if (response.errors) {
+                let errorMessages = "";
+                $(".error-message").remove(); // Limpiar errores anteriores
+
+                $.each(response.errors, function(field, errorList) {
+                    let inputField = $(`[name="${field}"]`);
+                    // Mostrar errores en los campos correspondientes
+                    inputField.after(`<span class="error-message" style="color: red;">${errorList.join(", ")}</span>`);
+
+                    errorMessages += `${field}: ${errorList.join(", ")}\n`;
+                });
+
+                console.log("Errores en el formulario:\n" + errorMessages);
             } else {
                 alert(response.message);
             }
-        },
-        error: function() {
-            alert("Ocurrió un error inesperado.");
         }
-    });
+    },
+    error: function() {
+        alert("Ocurrió un error inesperado.");
+    }
+});
+
 }
 
 

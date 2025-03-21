@@ -17,7 +17,7 @@ from mantenimientos.models import Clientes as SociosComerciales, VSociosComercia
 def grilla_clientes(request):
     try:
         if request.user.has_perms(["mantenimientos.view_clientes",]):
-            form = add_cliente_form()
+            form = add_cliente_form(initial={'fecalta':datetime.datetime.now().strftime('%Y-%m-%d')})
             return render(request, 'clientes/grilla_datos.html',{'form': form,'title_page':'Mantenimiento de socios comerciales'})
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
