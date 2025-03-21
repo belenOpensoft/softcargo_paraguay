@@ -4176,8 +4176,9 @@ function rutas_btn_h_click(){
                 },
                 modal: true,
                 title: "Rutas para el House N°: " + selectedRowN,
-                height: wHeight * 0.90,
-                width: wWidth * 0.50,
+                height: 'auto',
+                width: 'auto',
+                position: { my: "top", at: "top+20", of: window },
                 class: 'modal fade',
                 buttons: [
                     {

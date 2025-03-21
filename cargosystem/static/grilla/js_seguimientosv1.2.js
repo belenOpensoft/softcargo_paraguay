@@ -1318,8 +1318,9 @@ $(document).ready(function () {
                 },
                 modal: true,
                 title: "Ingreso de datos para transbordos en el seguimiento N°: " + row[0][1],
-                height: wHeight * 0.80,
-                width: wWidth * 0.80,
+                height: 'auto',
+                width: 'auto',
+                position: { my: "top", at: "top+20", of: window },
                 class: 'modal fade',
                 buttons: [
                     {
