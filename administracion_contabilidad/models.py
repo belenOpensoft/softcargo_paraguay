@@ -1917,7 +1917,7 @@ class ExpmaritConexaerea(models.Model):
     vapor = models.CharField(db_column='Vapor', max_length=30, blank=True, null=True)  # Field name made lowercase.
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
-    cia = models.CharField(max_length=30, blank=True, null=True)
+    cia = models.CharField(max_length=3, blank=True, null=True)
     viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  # Field name made lowercase.
     modo = models.CharField(max_length=15, blank=True, null=True)
     horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
@@ -2723,7 +2723,7 @@ class ExportConexaerea(models.Model):
     vuelo = models.CharField(max_length=30, blank=True, null=True)
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
-    ciavuelo = models.CharField(max_length=30, blank=True, null=True)
+    ciavuelo = models.CharField(max_length=3, blank=True, null=True)
     viaje = models.CharField(max_length=10, blank=True, null=True)
     modo = models.CharField(max_length=15, blank=True, null=True)
     horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
@@ -3600,7 +3600,7 @@ class ExpterraConexaerea(models.Model):
     destino = models.CharField(max_length=5, blank=True, null=True)
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
-    cia = models.CharField(max_length=30, blank=True, null=True)
+    cia = models.CharField(max_length=3, blank=True, null=True)
     modo = models.CharField(max_length=15, blank=True, null=True)
     viaje = models.CharField(max_length=10, blank=True, null=True)
     vuelo = models.CharField(max_length=30, blank=True, null=True)
@@ -4489,7 +4489,7 @@ class ImpmaritConexaerea(models.Model):
     vapor = models.CharField(db_column='Vapor', max_length=30, blank=True, null=True)  # Field name made lowercase.
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
-    cia = models.CharField(max_length=50, blank=True, null=True)
+    cia = models.CharField(max_length=3, blank=True, null=True)
     viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  # Field name made lowercase.
     modo = models.CharField(max_length=15, blank=True, null=True)
     horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True,
@@ -5227,7 +5227,7 @@ class ImportConexaerea(models.Model):
     numero = models.IntegerField(blank=True, null=True)
     origen = models.CharField(max_length=5, blank=True, null=True)
     destino = models.CharField(max_length=5, blank=True, null=True)
-    vuelo = models.CharField(max_length=30, blank=True, null=True)
+    vuelo = models.CharField(max_length=3, blank=True, null=True)
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
     ciavuelo = models.CharField(max_length=30, blank=True, null=True)
@@ -5911,7 +5911,7 @@ class ImpterraConexaerea(models.Model):
     destino = models.CharField(max_length=5, blank=True, null=True)
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
-    cia = models.CharField(max_length=30, blank=True, null=True)
+    cia = models.CharField(max_length=3, blank=True, null=True)
     modo = models.CharField(max_length=15, blank=True, null=True)
     viaje = models.CharField(max_length=10, blank=True, null=True)
     vuelo = models.CharField(max_length=30, blank=True, null=True)
@@ -9192,7 +9192,7 @@ class SeguimientosConexaerea(models.Model):
     vapor = models.CharField(db_column='Vapor', max_length=30, blank=True, null=True)  # Field name made lowercase.
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
-    cia = models.CharField(max_length=30, blank=True, null=True)
+    cia = models.CharField(max_length=3, blank=True, null=True)
     viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  # Field name made lowercase.
     modo = models.CharField(max_length=15, blank=True, null=True)
     accion = models.CharField(db_column='Accion', max_length=15, blank=True, null=True)  # Field name made lowercase.

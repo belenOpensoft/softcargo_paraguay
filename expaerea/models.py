@@ -144,7 +144,7 @@ class ExportConexaerea(models.Model):
     vuelo = models.CharField(max_length=30, blank=True, null=True)
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
-    ciavuelo = models.CharField(max_length=30, blank=True, null=True)
+    ciavuelo = models.CharField(max_length=3, blank=True, null=True)
     viaje = models.CharField(max_length=10, blank=True, null=True)
     modo = models.CharField(max_length=15,choices=choice_modo)
     horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  # Field name made lowercase.

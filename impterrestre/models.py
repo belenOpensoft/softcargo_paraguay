@@ -119,7 +119,7 @@ class ImpterraConexaerea(models.Model):
     destino = models.CharField(max_length=5, blank=True, null=True)
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
-    cia = models.CharField(max_length=30, blank=True, null=True)
+    cia = models.CharField(max_length=3, blank=True, null=True)
     modo = models.CharField(max_length=15,choices=choice_modo)
     viaje = models.CharField(max_length=10, blank=True, null=True)
     vuelo = models.CharField(max_length=30, blank=True, null=True)

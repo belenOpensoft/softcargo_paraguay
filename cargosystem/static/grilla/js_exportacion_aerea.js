@@ -737,28 +737,7 @@ $(document).ready(function () {
         }
     });
 
-    //rutas
-    $("#id_ciavuelo").autocomplete({
-        source: '/autocomplete_clientes/',
-        minLength: 2,
-        select: function (event, ui) {
-            $(this).attr('data-id', ui.item['id']);
-        },
-        change: function (event, ui) {
-            if (ui.item) {
-                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-                 $('#id_ciavuelo').val(ui.item['id']);
-                 $('#codigo_cia').val(ui.item['id']);
-                 $('#id_ciavuelo').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
-            } else {
-                $(this).val('');
-                $('#id_ciavuelo').val('');
-                $('#codigo_cia').val('');
-                $(this).css({"border-color": "", 'box-shadow': ''});
-                $('#id_ciavuelo').css({"border-color": "", 'box-shadow': ''});
-            }
-        }
-    });
+
     // autocompletes edit house form
     $("#armador_addh_e").autocomplete({
         source: '/autocomplete_clientes/',
