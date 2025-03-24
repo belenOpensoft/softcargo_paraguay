@@ -4460,8 +4460,27 @@ $('.email').click(function () {
         $('#email_add_input').summernote('destroy');
         $("#arhivos_adjuntos").html('');
         archivos_adjuntos = {};
+            let transportista=false;
+                let master=false;
+                let gastos = false;
+                if(title=='Notificación de llegada de carga'){
+                    if(confirm('¿Desea informar Máster?')){
+                        master=true;
+                    }
+                    if(confirm('¿Desea informar Gastos?')){
+                        gastos=true;
+                    }
+                }
+                if(title=='Aviso de embarque'){
+                    if(confirm('¿Desea informar Transportista?')){
+                        transportista=true;
+                    }
+                    if(confirm('¿Desea informar Máster?')){
+                        master=true;
+                    }
+                }
         if (row.length === 1) {
-            get_data_email(row,title,numero,id);
+            get_data_email(row,title,numero,id,transportista,master,gastos);
             //$("#id_to").val(row[0][50]);
             $("#emails_modal").dialog({
                 autoOpen: true,
@@ -4522,13 +4541,16 @@ $('.email').click(function () {
             alert('Debe seleccionar al menos un registro');
         }
     });
-function get_data_email(row,title,numero,id) {
+function get_data_email(row,title,numero,id,transportista,master,gastos) {
     let miurl = "/importacion_terrestre/get_data_email/";
     var toData = {
         'title': title,
         'row_number': numero,
         'id':id,
         'csrfmiddlewaretoken': csrf_token,
+        'transportista':transportista,
+        'master':master,
+        'gastos':gastos,
     };
     $.ajax({
         type: "POST",

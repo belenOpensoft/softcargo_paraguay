@@ -41,15 +41,22 @@ def get_data_email_op(request):
         try:
             title = request.POST['title']
             row_number = request.POST['row_number']
+            transportista = request.POST['transportista']
+            master_boolean = request.POST['master']
+            gastos_boolean = request.POST['gastos']
             #9155
             embarque = ImpterraEmbarqueaereo.objects.get(numero=row_number)
             row = VEmbarqueaereo.objects.get(numero=row_number)
             row2 = ImpterraCargaaerea.objects.filter(numero=row_number)
             row3 = ImpterraEnvases.objects.filter(numero=row_number)
             gastos = VGastosHouse.objects.filter(numero=row_number)
-            email_cliente = Clientes.objects.get(codigo=embarque.consignatario).emailit
-            email_agente = Clientes.objects.get(codigo=embarque.agente).emailit
-
+            email_cliente = Clientes.objects.get(codigo=embarque.consignatario).emailit if embarque.consignatario is not None else 'S/I'
+            email_agente = Clientes.objects.get(codigo=embarque.agente).emailit if embarque.agente is not None else 'S/I'
+            conex = ImpterraConexaerea.objects.filter(numero=embarque.numero).order_by('-id').last()
+            if conex:
+                viaje = conex.viaje if conex.viaje else 'S/I'
+            else:
+                viaje = 'S/I'
             try:
                 seguimiento = VGrillaSeguimientos.objects.get(numero=row.seguimiento)
             except VGrillaSeguimientos.DoesNotExist:
@@ -57,7 +64,7 @@ def get_data_email_op(request):
                                                   vendedor='')
             texto = ''
             texto += f'<br>'
-            texto, resultado = get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque)
+            texto, resultado = get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque,conex,viaje,transportista,master_boolean,gastos_boolean)
             texto += '<b>OCEANLINK,</b><br>'
             texto += 'DEPARTAMENTO DE IMPORTACION TERRESTRE, <br>'
             texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
@@ -80,7 +87,7 @@ def get_data_email_op(request):
     return HttpResponse(data_json, mimetype)
 
 
-def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque):
+def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque,conex,viaje,transportista_boolean,master_boolean,gastos_boolean):
     # merca = Productos.objects.get(codigo=row2.producto.codigo)
     if row2 is not None:
         merca = []
@@ -113,7 +120,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             cont = cont + 1
 
         campos.extend([
-            ("Vapor: ", str(row.vapor) if row.vapor is not None else "S/I"),
+            ("Viaje: ", str(viaje)),
             ("Viaje: ", str(row.viaje) if row.viaje is not None else "S/I"),
             ("Llegada estimada: ", format_fecha(row.fecha_retiro)),
             ("Origen: ", str(row.origen) if row.origen is not None else "S/I"),
@@ -141,7 +148,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                         <tr>
                             <th style="padding: 8px; text-align: left;">Origen</th>
                             <th style="padding: 8px; text-align: left;">Destino</th>
-                            <th style="padding: 8px; text-align: left;">Vapor/Vuelo</th>
+                            <th style="padding: 8px; text-align: left;">Viaje/Vuelo</th>
                             <th style="padding: 8px; text-align: left;">Viaje</th>
                             <th style="padding: 8px; text-align: left;">Salida</th>
                             <th style="padding: 8px; text-align: left;">Llegada</th>
@@ -205,28 +212,12 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             ("LLegada: ", format_fecha(row.fecha_retiro)),
             ("Origen: ", str(row.origen) if row.origen is not None else "S/I"),
             ("Destino: ", str(row.destino) if row.destino is not None else "S/I"),
-            ("Vapor: ", str(row.vapor) if row.vapor is not None else "S/I"),
+            ("Viaje: ", str(viaje)),
             ("H B/L: ", str(row.hawb) if row.hawb is not None else "S/I"),
             ("Embarcador: ", str(row.embarcador) if row.embarcador is not None else "S/I"),
             ("Consignatario: ", str(row.consignatario) if row.consignatario is not None else "S/I"),
         ])
 
-
-        # campos = [
-        #     ("Embarque: ", str(row_number) if row_number is not None else "S/I"),
-        #     ("Posición: ", str(row.posicion) if row.posicion is not None else "S/I"),
-        #     ("Salida: ", format_fecha(row.fecha_embarque)),
-        #     ("LLegada: ", format_fecha(row.fecha_retiro)),
-        #     ("Origen: ", str(row.origen) if row.origen is not None else "S/I"),
-        #     ("Destino: ", str(row.destino) if row.destino is not None else "S/I"),
-        #     ("Vapor: ", str(row.vapor) if row.vapor is not None else "S/I"),
-        #     ("H B/L: ", str(row.hawb) if row.hawb is not None else "S/I"),
-        #     ("Embarcador: ", str(row.embarcador) if row.embarcador is not None else "S/I"),
-        #     ("Consignatario: ", str(row.consignatario) if row.consignatario is not None else "S/I"),
-        #     #("Depósito: ", str() if  is not None else "S/I"),
-        #
-        #
-        # ]
 
         for campo, valor in campos:
             tabla_html += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
@@ -335,7 +326,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
          \
         '' + str(
 
-            row.consignatario) + '; Vapor: ' + str(row.transportista)
+            row.consignatario) + '; Viaje: ' + str(viaje)
 
         # # TEXTO DE CUERPO DEL MENSAJE
 
@@ -347,8 +338,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
 
         consigna = Clientes.objects.get(codigo=embarque.consignatario)
-
-        conex = ImpterraConexaerea.objects.filter(numero=embarque.numero).order_by('-id').last()
 
         carga = ImpterraCargaaerea.objects.filter(numero=embarque.numero)
 
@@ -375,6 +364,8 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("Destino", conex.destino if conex else "")
 
         texto += formatear_linea("HAWB", embarque.hawb)
+        if master_boolean == 'true':
+            texto += formatear_linea("AWB", embarque.awb)
 
         texto += formatear_linea("Referencia", embarque.numero)
 
@@ -402,38 +393,38 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                 texto += formatear_linea("Aplicable", str(aplicable))
 
             texto += '<br>'
+        if gastos_boolean == 'true':
+            if gastos:
 
-        if gastos:
+                texto += '<p>Detalle de gastos en Dólares U.S.A </p>'
 
-            texto += '<p>Detalle de gastos en Dólares U.S.A </p>'
+                total_gastos = 0
 
-            total_gastos = 0
+                total_iva = 0
 
-            total_iva = 0
+                for g in gastos:
 
-            for g in gastos:
+                    servicio = Servicios.objects.get(codigo=g.servicio)
 
-                servicio = Servicios.objects.get(codigo=g.servicio)
+                    total_gastos += float(g.precio)
 
-                total_gastos += float(g.precio)
+                    iva = True if servicio.tasa == 'B' else False
 
-                iva = True if servicio.tasa == 'B' else False
+                    if iva:
+                        total_iva += float(g.precio) * 0.22
 
-                if iva:
-                    total_iva += float(g.precio) * 0.22
+                    if g.precio != 0:
+                        texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}")
 
-                if g.precio != 0:
-                    texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}")
+                texto += '<br>'
 
-            texto += '<br>'
+                texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
 
-            texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
+                texto += formatear_linea("I.V.A", f"${total_iva:.2f}")
 
-            texto += formatear_linea("I.V.A", f"${total_iva:.2f}")
+                texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
 
-            texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
-
-            texto += '<br>'
+                texto += '<br>'
 
         texto += 'Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta: <br><br>'
 
@@ -513,7 +504,10 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("Términos de Compra", str(row.terminos) if row.terminos else "")
 
-        texto += formatear_linea("Transportista", str(row.transportista) if row.transportista else "")
+        if master_boolean == 'true':
+            texto += formatear_linea("AWB", str(row.awb) if row.awb else "")
+        if transportista_boolean == 'true':
+            texto += formatear_linea("Transportista", str(row.transportista) if row.transportista else "")
 
         texto += '<br>'
 
@@ -591,7 +585,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += "<table style='width:100%; text-align:center;'>"
 
-        texto += "<tr><th>Origen</th><th>Destino</th><th>Vapor/Vuelo</th><th>Salida</th><th>Llegada</th></tr>"
+        texto += "<tr><th>Origen</th><th>Destino</th><th>Viaje/Vuelo</th><th>Salida</th><th>Llegada</th></tr>"
 
         texto += f"<tr><td>{row.origen}</td><td>{row.destino}</td><td>{row.transportista}</td><td>{salida}</td><td>{llegada}</td></tr>"
 

@@ -413,8 +413,18 @@ if (!$('#id_awbhijo').val()) {
                 $('#email_add_input').summernote('destroy');
                 $("#arhivos_adjuntos").html('');
                 archivos_adjuntos = {};
+                let master=false;
+                let gastos = false;
+                    if(title=='Notificación de llegada de carga'){
+                        if(confirm('¿Desea informar Máster?')){
+                            master=true;
+                        }
+                        if(confirm('¿Desea informar Gastos?')){
+                            gastos=true;
+                        }
+                    }
                 if (row.length === 1) {
-                    get_data_email(row,title,numero,id);
+                    get_data_email(row,title,numero,id,master,gastos);
                     //$("#id_to").val(row[0][50]);
                     $("#emails_modal").dialog({
                         autoOpen: true,

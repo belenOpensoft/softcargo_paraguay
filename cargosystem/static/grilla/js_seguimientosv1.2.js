@@ -746,12 +746,27 @@ $(document).ready(function () {
         $('#email_add_input').summernote('destroy');
         $("#arhivos_adjuntos").html('');
         archivos_adjuntos = {};
+        let transportista=false;
+        let master=false;
+        let gastos = false;
+        if(title=='Notificacion llegada de carga'){
+            if(confirm('¿Desea informar Máster?')){
+                master=true;
+            }
+            if(confirm('¿Desea informar Gastos?')){
+                gastos=true;
+            }
+        }
+        if(title=='Aviso de embarque'){
+            if(confirm('¿Desea informar Transportista?')){
+                transportista=true;
+            }
+            if(confirm('¿Desea informar Máster?')){
+                master=true;
+            }
+        }
         if (row.length === 1) {
-            get_data_email(row,title,row_number);
-            /*
-            if(mail_to==='1'){
-                $("#id_to").val(row[0][50]);
-            }*/
+            get_data_email(row,title,row_number,transportista,master,gastos);
             $("#emails_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
@@ -2962,12 +2977,15 @@ function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
 
 
 }
-function get_data_email(row,title,row_number) {
+function get_data_email(row,title,row_number,transportista,master,gastos) {
     let miurl = "/get_data_email/";
     var toData = {
         'title': title,
         'row_number': row_number,
         'csrfmiddlewaretoken': csrf_token,
+        'transportista':transportista,
+        'master':master,
+        'gastos':gastos
     };
     $.ajax({
         type: "POST",
