@@ -53,33 +53,30 @@
 <div id="preventa_modal" style="display:none">
     <div class="modal-content">
 
-<!-- Bloque izquierdo con tamaño fijo -->
-<div class="modal-block" style="max-height: 250px; overflow: hidden;">
-    <div style="max-height: 200px; border: 1px solid #ccc; width: 100%;">
-        <table id="preventa_table" class="table table-striped mt-2" style="min-width: 900px; table-layout: fixed;">
-            <thead>
-                <tr>
-                    <th style="width: 80px;">Preventa</th>
-                    <th style="width: 120px;">Cliente</th>
-                    <th style="width: 100px;">Posición</th>
-                    <th style="width: 100px;">Master</th>
-                    <th style="width: 100px;">House</th>
-                    <th style="width: 100px;">Vuelo/Vapor</th>
-                    <th style="width: 120px;">Contenedores</th>
-                    <th style="width: 80px;">Clase</th>
-                    <th style="width: 100px;">Referencia</th>
-                    <th style="width: 100px;">Fecha</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td colspan="10" style="height: 30px;"></td></tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-
-
+        <div class="modal-block" style="">
+            <div style="max-width:700px;">
+                <table id="preventa_table" class="table table-striped mt-2" style="table-layout: fixed;">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">Preventa</th>
+                            <th style="width: 120px;">Cliente</th>
+                            <th style="width: 100px;">Posición</th>
+                            <th style="width: 100px;">Master</th>
+                            <th style="width: 100px;">House</th>
+                            <th style="width: 100px;">Vuelo/Vapor</th>
+                            <th style="width: 120px;">Contenedores</th>
+                            <th style="width: 80px;">Clase</th>
+                            <th style="width: 100px;">Referencia</th>
+                            <th style="width: 100px;">Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="10" style="height: 30px;"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <form id="form_preventa_modal_derecho">
         <!-- Bloque derecho -->
         <div class="modal-block">
             <div class="row">
@@ -109,6 +106,7 @@
                 </div>
             </div>
         </div>
+        </form>
 
         <!-- Segunda fila de contenido -->
         <div class="modal-block">
@@ -127,7 +125,7 @@
                 </tbody>
             </table>
         </div>
-
+        <form id="form_preventa_modal_segunda">
         <div class="modal-block">
             <div class="row">
                 <div class="col-4">
@@ -152,7 +150,7 @@
                 </div>
             </div>
         </div>
-
+        </form>
         <!-- Botones de acciones -->
         <div class="modal-block" style="text-align: center;">
             <button type="button" class="btn btn-primary" onclick="facturar_preventa()">Facturar</button>

@@ -909,7 +909,7 @@ def cargar_preventa_infofactura(request):
 
         try:
             prev = VPreventas.objects.get(znumero=preventa)
-            gastos = VistaGastosPreventa.objects.filter(numero=referencia)
+            gastos = VistaGastosPreventa.objects.filter(numero=referencia,source=clase)
 
             total_gastos = gastos.count()
             gastos_paginated = gastos[start:start + length]

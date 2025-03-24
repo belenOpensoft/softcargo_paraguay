@@ -190,7 +190,7 @@ let preventa;
                                     const tabla = $('#facturar_table').DataTable();
                                     let datosTabla = [];
 
-                                    tabla.rows().every(function() {
+                                   tabla.rows().every(function() {
                                         const data = this.data();
 
                                         datosTabla.push({
@@ -338,7 +338,6 @@ function update_gastos(x){
     });
 }
 function guardar_preventa(preventa){
-console.log(preventa);
     $.ajax({
         type: "POST",
         url: "/admin_cont/preventa/",
@@ -384,26 +383,6 @@ $.ajax({
 });
 return name;
 }
-/*
-function checkIfReferenceExists() {
-    let numero = localStorage.getItem('num_house_gasto');
-    $.ajax({
-        url: '/admin_cont/check_if_reference_exists/',
-        type: 'GET',
-        data: { numero: numero },
-        success: function(response) {
-            if (response.exists) {
-                alert('Ya ingresó una preventa para este registro.');
-            } else {
-                facturar();
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error en la solicitud:', error);
-            return false;
-        }
-    });
-}*/
 function sumar_ingresos_tabla() {
     let totalIngresos = 0;
     const tabla = $('#facturar_table').DataTable();

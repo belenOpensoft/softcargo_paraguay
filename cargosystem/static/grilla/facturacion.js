@@ -395,7 +395,7 @@ $("#preventa_modal").dialog({
     height: 'auto', // Se ajusta al contenido
     minWidth: 500,  // Evita que sea demasiado pequeño
     minHeight: 200, // Evita que sea demasiado pequeño
-    position: { my: "center", at: "center", of: window }, // Centrar el modal
+    position: { my: "top", at: "top+20", of: window }, // Centrar el modal
     buttons: [{
         class: "btn btn-dark btn-sm",
         style: "width:90px; height:30px; font-size:14px;",
@@ -403,35 +403,41 @@ $("#preventa_modal").dialog({
         click: function() {
             $(this).dialog("close");
             $('#preventa_table').DataTable().destroy();
+            $('#tabla_gastos_preventa_factura').DataTable().destroy();
+            $('#form_preventa_modal_derecho').trigger('reset');
+            $('#form_preventa_modal_segunda').trigger('reset');
         }
     }]
+}).prev(".ui-dialog-titlebar").hide();
+$('#preventa_table').DataTable({
+    serverSide: true,
+    ajax: {
+        url: "/admin_cont/source_infofactura",
+        type: "GET"
+    },
+    scrollY: "200px",         // Altura visible
+    scrollCollapse: true,     // Ajuste al contenido
+    info: false,              // Oculta "Mostrando X de Y"
+    searching: false,         // Sin barra de búsqueda
+    columns: [
+        { data: 'numero' },
+        { data: 'cliente' },
+        { data: 'posicion' },
+        { data: 'master' },
+        { data: 'house' },
+        { data: 'vapor_vuelo' },
+        { data: 'contenedor' },
+        { data: 'clase' },
+        { data: 'referencia' },
+        { data: 'fecha' }
+    ],
+    scrollX: true,            // Scroll horizontal
+    processing: true,
+    language: {
+        url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+    }
 });
 
-    $('#preventa_table').DataTable({
-        serverSide: true,
-        ajax: {
-            url: "/admin_cont/source_infofactura",
-            type: "GET"
-        },
-        columns: [
-            { data: 'numero' },
-            { data: 'cliente' },
-            { data: 'posicion' },
-            { data: 'master' },
-            { data: 'house' },
-            { data: 'vapor_vuelo' },
-            { data: 'contenedor' },
-            { data: 'clase' },
-            { data: 'referencia' },
-            { data: 'fecha' }
-        ],
-        "scrollX": true,  // Activa el scroll horizontal sobre la tabla
-        "scrollCollapse": true,  // Evita que el contenedor crezca si hay poco contenido
-        processing: true,
-        language: {
-            url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
-        }
-    });
 });
 
 $('#preventa_table tbody').on('dblclick', 'tr', function() {
