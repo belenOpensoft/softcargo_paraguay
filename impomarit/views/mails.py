@@ -639,14 +639,13 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         volumen = 0
 
         cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto', 'bultos', 'peso',
-                                                                     'envase', 'volumen').annotate(total=Count('id'))
+                                                                     'unidad', 'volumen').annotate(total=Count('id'))
+        carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre')
 
         if cant_cntr.count() > 0:
 
             for cn in cant_cntr:
-
-                cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - '
-
+                cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - {cn["unidad"]} - '
                 contenedores += f' {cn["nrocontenedor"]} - '
 
                 if cn['precinto']:
@@ -658,13 +657,15 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
                 volumen += cn['volumen'] if cn['volumen'] else 0
 
-                mercaderias += cn['envase'] + ' - '
+            if carga.count() > 0:
+                for c in carga:
+                    mercaderias+= c['producto__nombre'] + ' - '
 
         texto += formatear_linea("Contenedores", cantidad_cntr[:-3])
 
         texto += formatear_linea("Nro. Contenedor/es", contenedores[:-3])
 
-        # texto += formatear_linea("Precintos/Sellos", precintos[:-3])
+        texto += formatear_linea("Precintos/Sellos", precintos[:-3])
 
         texto += formatear_linea("House", str(row.hawb) if row.hawb else "")
 

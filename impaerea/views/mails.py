@@ -570,21 +570,12 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += '<b>DEPARTAMENTO DE COMERCIO EXTERIOR </b><br><br>'
 
         if isinstance(seguimiento.etd, datetime):
-
             salida = str(seguimiento.etd.strftime("%d/%m/%Y"))
 
-
-
         else:
-
             salida = ''
-
         if isinstance(seguimiento.eta, datetime):
-
             llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
-
-
-
         else:
 
             llegada = ''
@@ -597,8 +588,6 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += formatear_linea("Referencia", ref)
 
         texto += formatear_linea("Posición", str(row.posicion) if row.posicion else "")
-
-        # texto += formatear_linea("Proveedor", str(row.cliente) if row.cliente else "")
 
 
         texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario else "")
@@ -652,7 +641,6 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                 bultos += cn['bultos']
 
                 peso += cn['bruto'] if cn['bruto'] else 0
-
 
                 producto = Productos.objects.get(codigo=int(cn['producto'])).nombre
 

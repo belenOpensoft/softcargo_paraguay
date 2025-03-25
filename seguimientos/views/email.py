@@ -146,25 +146,28 @@ def get_data_email(request):
                 peso = 0
                 volumen = 0
 
-                cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto','bultos', 'peso', 'envase', 'volumen').annotate(total=Count('id'))
-
+                cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto','bultos', 'peso', 'unidad', 'volumen').annotate(total=Count('id'))
+                carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre')
                 if cant_cntr.count() > 0:
                     for cn in cant_cntr:
-                        cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - '
+                        cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - {cn["unidad"]} - '
                         contenedores += f' {cn["nrocontenedor"]} - '
                         if cn['precinto']:
                             precintos += f'{cn["precinto"]} - '
                         bultos += cn['bultos']
                         peso += cn['peso'] if cn['peso'] else 0
                         volumen += cn['volumen'] if cn['volumen'] else 0
-                        mercaderias += cn['envase'] + ' - '
+
+                if carga.count() > 0:
+                    for c in carga:
+                        mercaderias+= c['producto__nombre'] + ' - '
 
                 texto += formatear_linea("Contenedores", cantidad_cntr[:-3])
                 texto += formatear_linea("Nro. Contenedor/es", contenedores[:-3])
-                #texto += formatear_linea("Precintos/Sellos", precintos[:-3])
-                texto += formatear_linea("HAWB", str(row.hawb) if row.hawb else "")
+                texto += formatear_linea("Precintos/Sellos", precintos[:-3])
+                texto += formatear_linea("House", str(row.hawb) if row.hawb else "")
                 if master=='true':
-                    texto += formatear_linea("AWB", str(row.awb) if row.awb else "")
+                    texto += formatear_linea("Master", str(row.awb) if row.awb else "")
                 if transportista=='true':
                     texto += formatear_linea("Transportista", str(row.transportista) if row.transportista else "")
                 texto += formatear_linea("Peso", f"{peso} KGS")
@@ -610,9 +613,21 @@ def get_data_email(request):
                     empresa =''
                     ciudad = ''
                     pais = ''
-                consignatario = Clientes.objects.get(codigo=row.consignatario_codigo)
-                cliente = Clientes.objects.get(codigo=row.cliente_codigo)
-                agente = Clientes.objects.get(codigo=row.agente_codigo)
+
+                if row.consignatario_codigo is not None:
+                    consignatario = Clientes.objects.get(codigo=row.consignatario_codigo)
+                else:
+                    consignatario = None
+                if row.cliente is not None:
+                    cliente = Clientes.objects.get(codigo=row.cliente_codigo)
+                else:
+                    cliente = None
+
+                if row.agente_codigo:
+                    agente = Clientes.objects.get(codigo=row.agente_codigo)
+                else:
+                    agente = None
+
                 mercaderia = Cargaaerea.objects.filter(numero=row.numero)
                 #moneda = Monedas.objects.get(codigo=row.moneda)
                 moneda = row.moneda
@@ -630,7 +645,7 @@ def get_data_email(request):
 
                 tabla_html = "<table style='width:40%'>"
                 tabla_html += f"<tr><th align='left'>Fecha: </th><td>{fecha_formateada}</td></tr>"
-                tabla_html += f"<tr><th align='left'>A: </th><td>{str(agente.empresa)}</td></tr>"
+                tabla_html += f"<tr><th align='left'>A: </th><td>{str(agente.empresa) if agente is not None else ''}</td></tr>"
                 tabla_html += f"<tr><th align='left'>Departamento: </th><td>MARITIMO</td></tr>"
                 tabla_html += f"<tr><th align='left'>Envíado: </th><td>...</td></tr>"
                 tabla_html += "</table><br>"
@@ -698,6 +713,7 @@ def get_data_email(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:
