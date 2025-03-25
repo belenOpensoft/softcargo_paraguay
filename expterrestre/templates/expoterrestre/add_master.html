@@ -21,6 +21,55 @@
 
 
 </style>
+<style>
+    #add_master_modal input,
+    #add_master_modal select,
+    #add_master_modal textarea {
+        font-size: 12px !important;
+        padding: 2px 4px !important;
+        height: auto !important;
+    }
+
+    #add_master_modal label,
+    #add_master_modal th,
+    #add_master_modal td {
+        font-size: 12px !important;
+        padding: 4px 6px !important;
+    }
+
+    #add_master_modal table {
+        font-size: 12px;
+    }
+
+    #add_master_modal .btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    #add_master_modal {
+        zoom: 0.95; /* Alternativamente podés usar scale o font-size base */
+    }
+    /* Achicar barra de título del modal */
+.ui-dialog .ui-dialog-titlebar {
+    padding: 4px 10px !important;
+    font-size: 13px !important;
+    min-height: unset !important;
+    height: auto !important;
+    line-height: 1.2;
+}
+
+/* Achicar el texto del título */
+.ui-dialog .ui-dialog-title {
+    font-size: 13px !important;
+}
+
+/* Opcional: reducir tamaño de botones del modal */
+.ui-dialog .ui-dialog-buttonpane .ui-button {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+}
+
+</style>
 <div id="add_master_modal" style="display: none;" tabindex="-1">
 <form id="add_master_form" method="POST" style="width:fit-content;" action="{% url 'add_master' %}">
     {% csrf_token %}

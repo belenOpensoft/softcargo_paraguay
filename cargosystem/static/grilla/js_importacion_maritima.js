@@ -1136,7 +1136,7 @@ $(document).ready(function () {
                     modal: true,
                     title: "Ingresar un nuevo máster",
                     height: wHeight * 0.85,
-                    width: wWidth * 0.70,
+                    width: 'auto',
                     position: { my: "top", at: "top+20", of: window },
                     buttons: [
                         {
@@ -1144,6 +1144,7 @@ $(document).ready(function () {
                            class: "btn btn-dark",
                            style: "width:100px",
                            click: function () {
+                                validarCoincidenciaAcumulados();
                                 $('#agregar_hijo').css({'visibility':'hidden'});
                                 $('#importar_hijo_add_master').css({'visibility':'hidden'});
                                 $('#segment_response').css({'display':'none'});
@@ -1279,7 +1280,7 @@ var expandedRow;
                     modal: true,
                     title: "Editar máster",
                     height: wHeight * 0.85,
-                    width: wWidth * 0.70,
+                    width: 'auto',
                     position: { my: "top", at: "top+20", of: window },
                     buttons: [
                         {
@@ -1287,6 +1288,7 @@ var expandedRow;
                             class: "btn btn-dark",
                             style: "width:100px",
                             click: function () {
+                            validarCoincidenciaAcumulados();
                                 $(this).dialog("close");
                                 localStorage.removeItem('id_master_editar');
                                 $('#table_edit_im').DataTable().destroy();
@@ -2518,6 +2520,7 @@ let master = localStorage.getItem('master');
 let csrftoken = getCookie2('csrftoken');
 table_add_im = $('#table_add_im').DataTable({
     "stateSave": true,
+    "info":false,
     "dom": 'Btlipr',
     "bAutoWidth": false,
     "scrollX": true,
@@ -2899,6 +2902,7 @@ function fillFormWithData(data) {
                 $('#cantidad_acumulados').val(result.cantidad);
                 $('#peso_acumulados').val(result.peso);
                 $('#volumen_acumulados').val(result.volumen);
+                $('#bultos_acumulados').val(result.bultos);
             } else {
                 console.log("Elementos de entrada no encontrados en el DOM.");
             }
@@ -2934,6 +2938,7 @@ let csrftoken = getCookie2('csrftoken');
 table_edit_im = $('#table_edit_im').DataTable({
     "stateSave": true,
     "dom": 'Btlipr',
+    "info":false,
     "bAutoWidth": false,
     "scrollX": true,
     "scrollY": wHeight * 0.60,
@@ -5012,7 +5017,7 @@ function get_datos_pdf() {
 //}
 //acumulados
 function acumulados(master, callback) {
-    let peso = 0, volumen = 0;
+    let peso = 0, volumen = 0,bultos=0;
 
     $.ajax({
         url: '/importacion_maritima/source_embarque_aereo_full/' + master + '/',
@@ -5035,14 +5040,17 @@ function acumulados(master, callback) {
                     }
 
                     volumen += volumen_aux ? parseFloat(volumen_aux) : 0;
+                    bultos += item.bultos ? parseInt(item.bultos) : 0;
+
                 });
 
                 // Llamada al callback con los resultados
-                callback({ 'volumen': volumen, 'peso': peso, 'cantidad': cant });
+                callback({ 'volumen': volumen, 'peso': peso, 'cantidad': cant, 'bultos': bultos });
+
             } else {
                 console.log("No se encontraron datos.");
                 // Callback con valores por defecto
-                callback({ 'volumen': 0, 'peso': 0, 'cantidad': cant });
+                callback({ 'volumen': 0, 'peso': 0, 'cantidad': cant,'bultos':0 });
             }
         },
         error: function(error) {
@@ -5375,4 +5383,24 @@ function filtrar_tabla_master(data, e) {
     });
 }
 
+//acumulados comprobacion:
+function validarCoincidenciaAcumulados() {
+    const kilosMadre = parseFloat(document.getElementById("id_kilosmadre_e").value) || 0;
+    const pesoAcumulado = parseFloat(document.getElementById("peso_acumulados").value) || 0;
+
+    const bultosMadre = parseInt(document.getElementById("id_bultosmadre_e").value) || 0;
+    const bultosAcumulado = parseInt(document.getElementById("bultos_acumulados").value) || 0;
+
+    const difPeso = Math.abs(kilosMadre - pesoAcumulado);
+    const difBultos = Math.abs(bultosMadre - bultosAcumulado);
+
+    if (difPeso > 0.01 || difBultos > 0) {
+        alert("⚠️ Los valores ingresados en el máster no coinciden con los acumulados de los hijos.\n\n" +
+              `Peso máster: ${kilosMadre} / Acumulado: ${pesoAcumulado}\n` +
+              `Bultos máster: ${bultosMadre} / Acumulado: ${bultosAcumulado}`);
+        return false;
+    }
+
+    return true;
+}
 

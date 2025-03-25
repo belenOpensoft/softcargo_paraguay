@@ -20,7 +20,54 @@
     }
 
 </style>
+<style>
+    #edit_master_modal input,
+    #edit_master_modal select,
+    #edit_master_modal textarea {
+        font-size: 12px !important;
+        padding: 2px 4px !important;
+        height: auto !important;
+    }
 
+    #edit_master_modal label,
+    #edit_master_modal th,
+    #edit_master_modal td {
+        font-size: 12px !important;
+        padding: 4px 6px !important;
+    }
+
+    #edit_master_modal table {
+        font-size: 12px;
+    }
+
+    #edit_master_modal .btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    #edit_master_modal {
+        zoom: 0.95; /* Alternativamente podés usar scale o font-size base */
+    }
+        /* Achicar barra de título del modal */
+.ui-dialog .ui-dialog-titlebar {
+    padding: 4px 10px !important;
+    font-size: 13px !important;
+    min-height: unset !important;
+    height: auto !important;
+    line-height: 1.2;
+}
+
+/* Achicar el texto del título */
+.ui-dialog .ui-dialog-title {
+    font-size: 13px !important;
+}
+
+/* Opcional: reducir tamaño de botones del modal */
+.ui-dialog .ui-dialog-buttonpane .ui-button {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+}
+</style>
 <div id="edit_master_modal" style="display: none;" tabindex="-1">
 <form id="edit_master_form" method="POST" style="width:fit-content;" >
     {% csrf_token %}
@@ -98,6 +145,9 @@
 
             <th><label for="volumen_acumulados">Volumen:</label></th>
             <td><input readonly type="number" class="form-control" name="" id="volumen_acumulados"></td>
+
+            <th><label for="bultos_acumulados">Bultos:</label></th>
+            <td><input readonly type="number" class="form-control" name="" id="bultos_acumulados"></td>
         </tr>
 </table>
 
