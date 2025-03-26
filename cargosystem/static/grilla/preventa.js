@@ -123,8 +123,6 @@ function asignar_no(event) {
         const data = $('#facturar_table').DataTable().row(filaSeleccionada).data();
         const mensaje = 'NO SE FACTURA EL CONCEPTO'; // Texto a asignar
 
-        console.log(data[0]);
-        console.log(mensaje);
 
         // Asigna el valor a la columna y al DOM
         $('#facturar_table').DataTable().cell(filaSeleccionada, 3).data(mensaje);
@@ -151,12 +149,13 @@ function enviarDatosTabla() {
 let preventa;
     let num=localStorage.getItem('num_house_gasto');
     let clase=localStorage.getItem('clase_house');
+    let num_destina=$('#destinatario_input').val();
+    let dest=$('#destinatario').val();
     $.ajax({
                 url: '/admin_cont/house_detail_factura',
                 data: { numero: num, clase:clase},
                 method: 'GET',
                 success: function (house) {
-                    console.log(house.awb_e);
                     if(house.awb_e==0){
                         $.ajax({
                         url: '/admin_cont/source_embarque_factura/',
@@ -176,7 +175,8 @@ let preventa;
                                     volumen:0,
                                     origen:house.origen_e,
                                     destino:house.destino_e,
-                                    consigna:getNameByIdClientes(house.consignatario_e),
+                                    consigna:dest,
+                                    cliente:num_destina,
                                     embarca:getNameByIdClientes(house.embarcador_e),
                                     agente:getNameByIdClientes(house.agente_e),
                                     posicion:house.posicion_e,
@@ -223,7 +223,6 @@ let preventa;
                         data: { master: house.awb_e, clase:clase},
                         method: 'GET',
                         success: function (master) {
-                        console.log(master);
                             $.ajax({
                         url: '/admin_cont/source_embarque_factura/',
                         data: { numero: num, clase:clase},
@@ -242,7 +241,8 @@ let preventa;
                                     volumen:master.volumen,
                                     origen:house.origen_e,
                                     destino:house.destino_e,
-                                    consigna:getNameByIdClientes(house.consignatario_e),
+                                    consigna:dest,
+                                    cliente:num_destina,
                                     embarca:getNameByIdClientes(house.embarcador_e),
                                     agente:getNameByIdClientes(house.agente_e),
                                     posicion:house.posicion_e,
@@ -251,7 +251,6 @@ let preventa;
                                     wr:house.wr,
                                     commodity:getNameByIdProductos(embarque[0].producto_id),
                                 });
-                                console.log(preventa);
                                     //guardar la preventa
                                     guardar_preventa(preventa);
                                     const tabla = $('#facturar_table').DataTable();
@@ -347,7 +346,6 @@ function guardar_preventa(preventa){
             'X-CSRFToken': csrf_token
         },
         success: function(response) {
-        console.log(response);
             if (response.resultado === 'exito') {
                 alert("Los datos se han enviado correctamente.");
             } else {
@@ -402,8 +400,6 @@ function sumar_ingresos_tabla() {
         const valor = parseFloat(data[3]) // Elimina caracteres no numéricos si es necesario
         totalIngresos += valor;
 
-        console.log("Valor actual:", valor);
-        console.log("Total acumulado:", totalIngresos);
     });
 
     // Asigna el resultado total al input con ID #total_ingresos

@@ -741,6 +741,7 @@ class Envases(models.Model):
         ("LT", "LT"),
     )
     choice_envase = (
+        ("S/I", "Seleccionar"),
         ("Bags", "Bags"),
         ("Bales", "Bales"),
         ("Big bags", "Big bags"),
@@ -791,7 +792,7 @@ class Envases(models.Model):
     precinto = models.CharField(max_length=100, blank=True, null=True,default='S/I')
     tara = models.FloatField(blank=True, null=True,default=0)
     bonifcli = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True,default=0)
-    envase = models.CharField(db_column='Envase', max_length=15, choices=choice_envase)  # Field name made lowercase.
+    envase = models.CharField(db_column='Envase', max_length=15, choices=choice_envase,default='S/I')  # Field name made lowercase.
     bultos = models.IntegerField()
     peso = models.FloatField(db_column='Peso', blank=True, null=True)  # Field name made lowercase.
 

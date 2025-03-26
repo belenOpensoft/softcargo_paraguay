@@ -99,6 +99,7 @@ def guardar_infofactura(request):
                 nueva_infofactura.zorigen = datos.get("origen")
                 nueva_infofactura.zdestino = datos.get("destino")
                 nueva_infofactura.zconsignatario = datos.get("consigna") or datos.get("consignatario")
+                nueva_infofactura.zcliente = datos.get("cliente")
                 nueva_infofactura.zembarcador = datos.get("embarca")
                 nueva_infofactura.zagente = datos.get("agente")
                 nueva_infofactura.zposicion = datos.get("posicion")
@@ -128,6 +129,7 @@ def source_embarques_factura(request):
     numero = request.GET.get('numero')
     clase = request.GET.get('clase')
 
+
     if numero and clase:
 
         if clase == "IM":
@@ -156,6 +158,7 @@ def house_detail_factura(request):
     if request.method == 'GET':
         numero = request.GET.get('numero', None)
         clase = request.GET.get('clase', None)
+
 
         if numero and clase:
 

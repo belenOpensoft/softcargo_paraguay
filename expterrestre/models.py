@@ -506,7 +506,7 @@ class ExpterraEnvases(models.Model):
     volumen = models.FloatField(blank=True, null=True)
     tara = models.FloatField(blank=True, null=True)
     bonifcli = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    envase = models.CharField(db_column='Envase', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    envase = models.CharField(db_column='Envase', max_length=15, blank=True, null=True,default='S/I')  # Field name made lowercase.
     bultos = models.SmallIntegerField(blank=True, null=True)
     peso = models.FloatField(db_column='Peso', blank=True, null=True)  # Field name made lowercase.
     profit = models.FloatField(blank=True, null=True)
