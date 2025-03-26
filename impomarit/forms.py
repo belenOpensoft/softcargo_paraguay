@@ -1191,6 +1191,10 @@ class embarquesFormHouse(BSModalModelForm):
             'cbm': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
         }
 
+    producto = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'autocomplete': 'off'
+    }))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

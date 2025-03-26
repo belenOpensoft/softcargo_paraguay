@@ -73,8 +73,7 @@ def get_data_email_op(request):
             texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
             texto += 'OPERACIONES <br>'
             texto += 'EMAIL: <br>'
-            texto += 'TEL: 598 2917 0501 <br>'
-            texto += 'FAX: 598 2916 8215 <br><br><br><br>'
+            texto += 'TEL: +5982 2605 2332 <br>'
             texto += '</table>'
             resultado['email_cliente'] = email_cliente
             resultado['email_agente'] = email_agente
@@ -872,11 +871,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += 'CONDICION HBL: <br>'
         texto += 'COURRIER CON DOCUMENTOS ENVIADO: <br>'
         texto += 'COURRIER/GUIA: <br><br><br><br>'
-        texto += 'SALUDOS, <br><br>'
-        texto += '<b>OCEANLINK,</b> <br>'
-        texto += 'DEPARTAMENTO DE Impo Maritimo, <br>'
-        texto += 'OPERACIONES <br>'
-        texto += 'PH: 59829170501 <br>'
+
         resultado['asunto'] = 'SEGUIMIENTO ' + str(row.numero) + ' // TRASPASO A OPERACIONES'
         return texto,resultado
 

@@ -1096,7 +1096,10 @@ class embarquesFormHouse(BSModalModelForm):
             'bultos': forms.NumberInput(attrs={'id':'id_bultos_embarque','min': '0'}),
             'bruto': forms.NumberInput(attrs={'id':'id_bruto_embarque','min': '0'}),
         }
-
+    producto = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'autocomplete': 'off'
+    }))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

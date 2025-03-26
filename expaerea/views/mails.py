@@ -70,8 +70,7 @@ def get_data_email_op(request):
             texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
             texto += 'OPERACIONES <br>'
             texto += 'EMAIL: <br>'
-            texto += 'TEL: 598 2917 0501 <br>'
-            texto += 'FAX: 598 2916 8215 <br><br><br><br>'
+            texto += 'TEL: +5982 2605 2332 <br>'
             texto += '</table>'
 
             resultado['email_cliente'] = email_cliente

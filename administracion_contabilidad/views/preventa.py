@@ -734,7 +734,7 @@ def genero_xls_seguimientos(embarque, fecha, cliente, conexion, total, carga, pr
         worksheet.write(row, col + 1, "Bolonia 2280 LATU, Edificio Los Álamos, Of.103 ", border_format)
         row += 1
         worksheet.write(row, col, "Phone:", header_format)
-        worksheet.write(row, col + 1, "PH: 598 2917 0501", border_format)
+        worksheet.write(row, col + 1, "PH: +5982 2605 2332", border_format)
         row += 1
         worksheet.write(row, col, "Balance Due:", header_format)
         worksheet.write(row, col + 1, "USD 0.00", currency_format)

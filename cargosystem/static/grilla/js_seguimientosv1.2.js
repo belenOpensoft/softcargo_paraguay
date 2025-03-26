@@ -1577,7 +1577,7 @@ $(document).ready(function () {
     $('#tabla_embarques tbody').on('dblclick', 'tr', function () {
         var data = table_embarques.row(this).data();
         $("#id_embarque_id").val(data[0]);
-        $("#id_producto").val(data[9]);
+        $("#id_producto").val(data[1]);
         $("#id_bultos_embarque").val(data[2]);
         $("#id_tipo_embarque").val(data[3]);
         $("#id_bruto_embarque").val(data[4]);

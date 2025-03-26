@@ -126,7 +126,7 @@ def guardar_embarques(request):
             v = x['value']
 
             # Procesar el campo 'producto' de manera especial
-            if k == 'producto' and v:
+            if k == 'cod_producto' and v:
                 try:
                     # Buscar el producto en la base de datos usando el valor proporcionado (código del producto)
                     producto = Productos.objects.get(codigo=v)

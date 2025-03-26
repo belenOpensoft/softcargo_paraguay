@@ -215,7 +215,7 @@ def source_seguimientos_importado(request):
             resultado = []
             for registro in registros:
                 resultado.append({
-                    "awb": 0,
+                    "awb": registro.awb,
                     "posicion": 0,
                     "seguimiento":registro.numero,
                     "origen": registro.origen,

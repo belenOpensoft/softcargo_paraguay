@@ -1044,7 +1044,51 @@ $('#tabla_expoterrestre tfoot th').each(function(index) {
             }
         }
     });
+    //productos para el embarque
+    $("#id_producto").autocomplete({
+    source: function (request, response) {
+        $.getJSON('/autocomplete_productos/', { term: request.term }, response);
+    },
+    minLength: 2,
+    select: function (event, ui) {
+        $(this).attr('data-id', ui.item['id']);  // Guarda el ID si es un item de la lista
+        $('#cod_producto').val(ui.item['id']);
+    },
+    change: function (event, ui) {
+        var input = $(this);
+        var valorIngresado = input.val();
 
+        if (ui.item) {
+            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+        } else {
+            if (valorIngresado.trim() !== '') {
+                $.ajax({
+                    url: '/agregar_producto/',
+                    method: 'POST',
+                    data: {
+                        nombre: valorIngresado,
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            input.attr('data-id', data.id);
+                            $('#cod_producto').val(data.id);
+                            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                        } else {
+                            alert("No se pudo guardar el vapor.");
+                        }
+                    },
+                    error: function () {
+                        alert("Error en la comunicación con el servidor.");
+                    }
+                });
+            } else {
+                input.val('');
+                input.css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    }
+});
     //botones funcionalidades
 
     //form addmaster
@@ -1634,7 +1678,7 @@ var expandedRow;
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                row = table_gastos.rows('.selected').data();
+                                row = table_gastos.rows('.table-secondary').data();
                                 if (row.length === 1) {
                                     miurl = "/exportacion_terrestre/eliminar_gasto_master/";
                                     var toData = {
@@ -2039,6 +2083,8 @@ var expandedRow;
                 async: false,
                 success: function (resultado) {
                     if (resultado['resultado'] === 'exito') {
+                        $("#id_producto").val('');
+                        $("#id_producto").css({"border-color": "", 'box-shadow': ''});
                         $("#id_embarque_id").val('');
                         alert('Guardado con éxito.');
                         $("#tabla_embarques_house").dataTable().fnDestroy();
@@ -2080,7 +2126,7 @@ var expandedRow;
     $('#tabla_embarques_house tbody').off('dblclick').on('dblclick', 'tr', function () {
     var data = table_embarques.row(this).data();
     $("#id_embarque_id").val(data[0]);         // ID del registro
-    $("#id_producto").val(data[8]);                // Unidad
+    $("#id_producto").val(data[1]);                // Unidad
     $("#id_bultos_embarque").val(data[2]);                  // Tipo
     $("#id_tipo_embarque").val(data[3]);            // Movimiento
     $("#id_bruto_embarque").val(data[4]);              // Términos
@@ -2271,7 +2317,7 @@ var expandedRow;
                         click: function () {
                             if (confirm('¿Confirma adjuntar el archivo seleccionado?')) {
                                     let table = $('#tabla_archivos').DataTable();
-                                    let row = table.rows('.selected').data();
+                                    let row = table.rows('.table-secondary').data();
                                 let nombre = row[0][2].split("/")[1];
                                 let id = row[0][0];
                                 if(id in archivos_adjuntos) {
@@ -2319,7 +2365,7 @@ var expandedRow;
                                     success: function (resultado) {
                                         aux = resultado['resultado'];
                                         if (aux == 'exito') {
-                                            var idx = table.cell('.selected', 0).index();
+                                            var idx = table.cell('.table-secondary', 0).index();
                                             $("#tabla_archivos tr.selected").removeClass('selected');
                                             $('#tabla_archivos').DataTable().ajax.reload(null, false);
                                                 if ($.fn.DataTable.isDataTable('#table_add_im')) {
@@ -3998,7 +4044,7 @@ function gastos_btn_h_click(){
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                row = table_gastos.rows('.selected').data();
+                                row = table_gastos.rows('.table-secondary').data();
                                 if (row.length === 1) {
                                     miurl = "/exportacion_terrestre/eliminar_gasto_house/";
                                     var toData = {
@@ -4108,7 +4154,7 @@ function rutas_btn_h_click(){
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                var row = $('#tabla_rutas_house').DataTable().rows('.selected').data();
+                                var row = $('#tabla_rutas_house').DataTable().rows('.table-secondary').data();
                                 if (row.length === 1) {
                                     miurl = "/exportacion_terrestre/eliminar_ruta_house/";
                                     var toData = {
@@ -4245,7 +4291,7 @@ $("#id_envase_id").val('');
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar el seleccionado?')) {
-                                var row = $('#tabla_envases_house').DataTable().rows('.selected').data();
+                                var row = $('#tabla_envases_house').DataTable().rows('.table-secondary').data();
                                 if (row.length === 1) {
                                     miurl = "/exportacion_terrestre/eliminar_envases_house/";
                                     var toData = {
@@ -4395,7 +4441,7 @@ $("#id_embarque_id").val('');
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar el embarque seleccionado?')) {
-                                var row = $('#tabla_embarques_house').DataTable().rows('.selected').data();
+                                var row = $('#tabla_embarques_house').DataTable().rows('.table-secondary').data();
                                 if (row.length === 1) {
                                     miurl = "/exportacion_terrestre/eliminar_embarques_house/";
                                     var toData = {
@@ -4747,7 +4793,7 @@ function archivos_btn_h_click(){
                                     success: function (resultado) {
                                         aux = resultado['resultado'];
                                         if (aux == 'exito') {
-                                            var idx = table.cell('.selected', 0).index();
+                                            var idx = table.cell('.table-secondary', 0).index();
                                             $("#tabla_archivos tr.selected").removeClass('selected');
                                             $('#tabla_archivos').DataTable().ajax.reload(null, false);
                                                  if ($.fn.DataTable.isDataTable('#table_add_im')) {
@@ -5329,16 +5375,18 @@ function filtrar_tabla_master(data, e) {
 }
 //acumulados comprobacion:
 function validarCoincidenciaAcumulados() {
-    const kilosMadre = parseFloat(document.getElementById("id_kilosmadre_e").value) || 0;
+    const kilosMadre = parseFloat(document.getElementById("id_kilos_e").value) || 0;
     const pesoAcumulado = parseFloat(document.getElementById("peso_acumulados").value) || 0;
 
-    const bultosMadre = parseInt(document.getElementById("id_bultosmadre_e").value) || 0;
-    const bultosAcumulado = parseInt(document.getElementById("bultos_acumulados").value) || 0;
+    //const bultosMadre = parseInt(document.getElementById("id_bultosmadre_e").value) || 0;
+    const bultosMadre = 0;
+    //const bultosAcumulado = parseInt(document.getElementById("bultos_acumulados").value) || 0;
+    const bultosAcumulado = 0;
 
     const difPeso = Math.abs(kilosMadre - pesoAcumulado);
     const difBultos = Math.abs(bultosMadre - bultosAcumulado);
-
-    if (difPeso > 0.01 || difBultos > 0) {
+//|| difBultos > 0
+    if (difPeso > 0.01 ) {
         alert("⚠️ Los valores ingresados en el máster no coinciden con los acumulados de los hijos.\n\n" +
               `Peso máster: ${kilosMadre} / Acumulado: ${pesoAcumulado}\n` +
               `Bultos máster: ${bultosMadre} / Acumulado: ${bultosAcumulado}`);

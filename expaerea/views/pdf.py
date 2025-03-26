@@ -19,14 +19,15 @@ def get_datos_caratula(request):
             embarque = ExportEmbarqueaereo.objects.get(numero=id)
             embarcador = Clientes.objects.get(codigo=embarque.embarcador)
             consignatario = Clientes.objects.get(codigo=embarque.consignatario)
-            ruta = ExportConexaerea.objects.filter(numero=id).order_by('-id').values_list('salida', 'llegada','vuelo').first()
+            ruta = ExportConexaerea.objects.filter(numero=id).order_by('-id').values_list('salida', 'llegada','vuelo','ciavuelo').first()
 
             if ruta:
-                salida, llegada ,vuelo = ruta
+                salida, llegada ,vuelo, cia = ruta
             else:
                 salida = None
                 llegada = None
                 vuelo = None
+                cia = None
             try:
                 seguimiento = VGrillaSeguimientos.objects.get(numero=Vembarque.seguimiento)
             except VGrillaSeguimientos.DoesNotExist:
@@ -55,6 +56,7 @@ def get_datos_caratula(request):
                 res = '?'
             texto = texto + '<b>ETD: </b>'+str(res)+'<br>'
             texto = texto + '<b>Vuelo: </b>'+str(vuelo if vuelo is not None else 'S/I')+'<br>'
+            texto = texto + '<b>Compañía: </b>' + str(cia if cia is not None else 'S/I') + '<br>'
             texto = texto + '<b>Transportista: </b>'+str(Vembarque.transportista if Vembarque.transportista is not None else '')+'<br>'
             texto = texto + '<b>Orden cliente: </b>'+str(seguimiento.refcliente if seguimiento.refcliente is not None else '')+'<hr>'
             texto = texto + '<b>Embarcador: </b>'+str(Vembarque.embarcador if Vembarque.embarcador is not None else '')+'<br>'

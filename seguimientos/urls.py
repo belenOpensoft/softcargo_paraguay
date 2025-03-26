@@ -25,7 +25,7 @@ from seguimientos.views.desconsolidacion_aerea import desconsolidacion_aerea, de
 from seguimientos.views.archivos import source_archivos, guardar_archivo, eliminar_archivo, descargar_archivo
 from seguimientos.views.autocompletes import autocomplete_clientes, autocomplete_ciudades, autocomplete_vendedores, \
     autocomplete_vapores, autocomplete_proyectos, autocomplete_traficos, autocomplete_actividades, \
-    autocomplete_depositos, autocomplete_ciudades_codigo, agregar_buque
+    autocomplete_depositos, autocomplete_ciudades_codigo, agregar_buque, autocomplete_productos, agregar_producto_ajax
 from seguimientos.views.email import get_data_email
 from seguimientos.views.embarques import source_embarques, guardar_embarques, actualizo_datos_embarque, \
     eliminar_embarque, get_sugerencias_envases
@@ -81,10 +81,12 @@ urlpatterns = [
     path('autocomplete_vendedores/', autocomplete_vendedores, name='autocomplete_vendedores'),
     path('autocomplete_vapores/', autocomplete_vapores, name='autocomplete_vapores'),
     path('agregar_buque/', agregar_buque, name='guardar_buque'),
+    path('agregar_producto/', agregar_producto_ajax, name='agregar_producto'),
     path('autocomplete_proyectos/', autocomplete_proyectos, name='autocomplete_proyectos'),
     path('autocomplete_traficos/', autocomplete_traficos, name='autocomplete_traficos'),
     path('autocomplete_actividades/', autocomplete_actividades, name='autocomplete_actividades'),
     path('autocomplete_depositos/', autocomplete_depositos, name='autocomplete_depositos'),
+    path('autocomplete_productos/', autocomplete_productos, name='autocomplete_productos'),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),
     path('get_data_cronologia/<int:id>/', get_data_cronologia, name='get_data_cronologia'),
     path('get_data_seguimiento/<int:id>/', get_data_seguimiento, name='get_data_seguimiento'),

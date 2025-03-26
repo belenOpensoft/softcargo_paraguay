@@ -2,7 +2,8 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponseRedirect
 
 from mantenimientos.forms import add_buque_form
-from mantenimientos.models import Clientes, Ciudades, Vendedores, Vapores, Proyectos, Traficos, Actividades, Depositos
+from mantenimientos.models import Clientes, Ciudades, Vendedores, Vapores, Proyectos, Traficos, Actividades, Depositos, \
+    Productos
 
 
 # class ClienteAutocomplete(autocomplete.Select2QuerySetView):
@@ -129,5 +130,37 @@ def agregar_buque(request):
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
+def autocomplete_productos(request):
+    if 'term' in request.GET:
+        qs = Productos.objects.filter(nombre__istartswith=request.GET.get('term')).order_by('nombre')
+        lista = []
+        for x in qs:
+            lista.append({'id':x.codigo,
+                          'codigo':x.codigo,
+                          'label':x.nombre,
+                          'value':x.nombre,}
+                         )
+        return JsonResponse(lista,safe=False)
 
 
+def agregar_producto_ajax(request):
+    if request.method == 'POST':
+        if not request.user.has_perms(["mantenimientos.add_productos"]):
+            return JsonResponse({'success': False, 'error': 'Sin permisos'}, status=403)
+
+        nombre = request.POST.get('nombre', '').strip()
+        if not nombre:
+            return JsonResponse({'success': False, 'error': 'Nombre vacío'})
+
+        # Verificamos si ya existe por nombre o código
+        producto_existente = Productos.objects.filter(nombre__iexact=nombre).first()
+        if producto_existente:
+            return JsonResponse({'success': True, 'id': producto_existente.codigo, 'nombre': producto_existente.nombre})
+
+        # Creamos un producto nuevo
+        nuevo_producto = Productos(nombre=nombre.upper(), descripcion=nombre.upper())
+        nuevo_producto.save()
+
+        return JsonResponse({'success': True, 'id': nuevo_producto.codigo, 'nombre': nuevo_producto.nombre})
+
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)

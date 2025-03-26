@@ -1104,7 +1104,10 @@ class embarquesFormHouse(BSModalModelForm):
             'medidas': forms.TextInput(attrs={'id': 'id_medidas_embarque', 'min': '0'}),
         }
 
-
+    producto = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'autocomplete': 'off'
+    }))
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
