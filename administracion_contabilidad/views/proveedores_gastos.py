@@ -130,7 +130,12 @@ def procesar_factura_proveedor(request):
             arbitraje = request.POST.get('arbitraje', 0)
             paridad = request.POST.get('paridad', 0)
             cliente_data = json.loads(request.POST.get('clienteData'))
-            facturas_imputadas = json.loads(request.POST.get('facturas_imputadas'))
+            facturas_json = request.POST.get('facturas_imputadas')
+            if facturas_json:
+                facturas_imputadas = json.loads(facturas_json)
+            else:
+                facturas_imputadas = []
+
             saldo_nota_cred = request.POST.get('saldo_nota_cred', 0)
             codigo_cliente = cliente_data['codigo']
             cliente = Clientes.objects.get(codigo=codigo_cliente)

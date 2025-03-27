@@ -1134,3 +1134,40 @@ class EditarConsultarPagos(forms.Form):
     )
 
 
+class EditarConsultarCompras(forms.Form):
+    omitir_fechas = forms.BooleanField(required=False, label="Omitir fechas")
+    fecha_desde = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    fecha_hasta = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+
+    monedas = forms.ModelChoiceField(queryset=Monedas.objects.all(), required=False, label="Moneda")
+
+    monto = forms.DecimalField(required=False, max_digits=12, decimal_places=2, label="Monto")
+    proveedor = forms.CharField(required=False, max_length=100, label="Proveedor")
+    documento = forms.CharField(required=False, max_length=100, label="Documento")
+    posicion = forms.CharField(required=False, max_length=100, label="Posición")
+
+    TIPO_CHOICES = [
+        ('factura', 'Factura'),
+        ('contado', 'Contado'),
+        ('nota_debito', 'Nota Débito'),
+        ('nota_credito', 'Nota Crédito'),
+        ('devol_contado', 'Devol Contado'),
+    ]
+    tipo = forms.ChoiceField(widget=forms.RadioSelect, choices=TIPO_CHOICES, required=False, label="Tipo")
+
+    ESTADO_CHOICES = [
+        ('todas', 'Todas'),
+        ('pendientes', 'Pendientes'),
+        ('cerradas', 'Cerradas'),
+    ]
+    estado = forms.ChoiceField(widget=forms.RadioSelect, choices=ESTADO_CHOICES, required=False, label="Estado")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field_name, field in self.fields.items():
+            widget = field.widget
+            # Aplicar `form-control` solo a campos que no sean Checkbox o Radio
+            if not isinstance(widget, (forms.CheckboxInput, forms.RadioSelect)):
+                existing_classes = widget.attrs.get('class', '')
+                widget.attrs['class'] = f'{existing_classes} form-control'.strip()

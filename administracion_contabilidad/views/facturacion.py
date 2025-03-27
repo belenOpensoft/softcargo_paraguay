@@ -13,7 +13,7 @@ from impaerea.models import ImportEmbarqueaereo
 from impterrestre.models import ImpterraEmbarqueaereo
 from mantenimientos.models import Clientes, Servicios, Monedas
 from administracion_contabilidad.forms import Factura
-from administracion_contabilidad.models import Boleta, PendienteFacturar, Asientos, Movims, Infofactura, \
+from administracion_contabilidad.models import Boleta, Asientos, Movims, Infofactura, \
     VistaGastosPreventa, Dolar, Factudif, VPreventas
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from datetime import datetime
@@ -1288,9 +1288,7 @@ data = {
             }
 """
 
-def numero_manual(request):
 
-    rutas = Movims.objects.filter(numero=registro.numero).annotate(num_archivos=Count('id')).values('num_archivos').first()
 
 
 

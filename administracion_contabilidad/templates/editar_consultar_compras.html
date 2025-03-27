@@ -1,0 +1,180 @@
+{% extends 'base_table_v2.html' %}
+{% load static %}
+{% block contenido %}
+<title>Consultar Compras</title>
+
+<style>
+  .tabla-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    display: block;
+  }
+  .oculto {
+    display: none;
+  }
+</style>
+
+<style>
+  /* Reduce tamaño de fuente general */
+  #consultaCompras input,
+  #consultaCompras select,
+  #consultaCompras label,
+  #consultaCompras legend {
+    font-size: 0.85rem;
+  }
+
+  #consultaCompras .form-control {
+    height: calc(1.5em + 0.5rem + 2px);
+    padding: 0.25rem 0.5rem;
+  }
+
+  #consultaCompras .form-check-input {
+    transform: scale(0.85);
+    margin-top: 0.2rem;
+  }
+
+  #consultaCompras .form-check-label {
+    padding-left: 0.25rem;
+  }
+
+  #consultaCompras .d-grid {
+    gap: 5px !important;
+  }
+
+  #consultaCompras fieldset {
+    padding: 0.5rem;
+  }
+
+  #consultaCompras .btn {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+  }
+
+  #consultaCompras .table {
+    font-size: 0.85rem;
+  }
+</style>
+
+
+<div id="consultaCompras" class="border rounded p-3 bg-light" style="max-width: 80vw; overflow: hidden; font-size: 14px;">
+<form method="get" id="consultaComprasForm" action="{% url 'editar_consultar_compras' %}">
+
+    {% csrf_token %}
+
+    <div class="d-grid" style="grid-template-columns: 3fr 1fr; gap: 15px; align-items: start;">
+      <!-- 📌 Contenedor principal del formulario -->
+      <div class="p-2">
+
+        <!-- Omitir fechas, fechas desde y hasta -->
+        <div class="d-grid mb-2" style="grid-template-columns: 1fr 2fr 2fr; gap: 10px; align-items: end;">
+          <div class="form-check">
+            {{ form.omitir_fechas }}
+            <label class="form-check-label" for="{{ form.omitir_fechas.id_for_label }}">
+              {{ form.omitir_fechas.label }}
+            </label>
+          </div>
+          <div>
+            {{ form.fecha_desde.label_tag }}
+            {{ form.fecha_desde }}
+          </div>
+          <div>
+            {{ form.fecha_hasta.label_tag }}
+            {{ form.fecha_hasta }}
+          </div>
+        </div>
+
+        <!-- Moneda y Monto -->
+        <div class="d-grid mb-2" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            {{ form.monedas.label_tag }}
+            {{ form.monedas }}
+          </div>
+          <div>
+            {{ form.monto.label_tag }}
+            {{ form.monto }}
+          </div>
+        </div>
+
+        <!-- Proveedor y Documento -->
+        <div class="d-grid mb-2" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            {{ form.proveedor.label_tag }}
+            {{ form.proveedor }}
+          </div>
+          <div>
+            {{ form.documento.label_tag }}
+            {{ form.documento }}
+          </div>
+        </div>
+
+        <!-- Posición -->
+        <div class="mb-2">
+          {{ form.posicion.label_tag }}
+          {{ form.posicion }}
+        </div>
+      </div>
+
+      <!-- 📌 Sección lateral con radios y botón -->
+      <div class="border p-3 rounded bg-light w-30">
+        <fieldset class="border p-2 mb-3">
+          <legend class="w-auto px-2">Tipo</legend>
+          {% for radio in form.tipo %}
+            <div class="form-check">
+              {{ radio.tag }}
+              <label class="form-check-label" for="{{ radio.id_for_label }}">
+                {{ radio.choice_label }}
+              </label>
+            </div>
+          {% endfor %}
+        </fieldset>
+
+        <fieldset class="border p-2 mb-3">
+          <legend class="w-auto px-2">Estado</legend>
+          {% for radio in form.estado %}
+            <div class="form-check">
+              {{ radio.tag }}
+              <label class="form-check-label" for="{{ radio.id_for_label }}">
+                {{ radio.choice_label }}
+              </label>
+            </div>
+          {% endfor %}
+        </fieldset>
+
+        <button type="submit" class="btn btn-primary btn-sm w-100">Buscar</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- 📌 Tabla de resultados -->
+  <div class="tabla-scroll mt-4 border rounded">
+    <table class="table table-striped table-sm mb-0">
+      <thead class="thead-light">
+        <tr>
+          <th>Documento</th>
+          <th>Fecha</th>
+          <th>Proveedor</th>
+          <th>Importe</th>
+          <th class="oculto">Autogenerado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in resultados %}
+          <tr>
+            <td>{{ item.documento }}</td>
+            <td>{{ item.fecha }}</td>
+            <td>{{ item.proveedor }}</td>
+            <td>{{ item.importe }}</td>
+            <td class="oculto">{{ item.autogenerado }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="text-center">No hay resultados.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="{% static 'grilla/editar_consultar_compras.js' %}"></script>
+{% endblock contenido %}

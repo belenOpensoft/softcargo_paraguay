@@ -10435,19 +10435,6 @@ class SeguimientosTraceop(models.Model):
         db_table = 'seguimientos_traceop'
 
 
-class PendienteFacturar(models.Model):
-    autogenerado = models.CharField(max_length=40, blank=True, null=True)
-
-    def save(self, *args, **kwargs):
-        from administracion_contabilidad.views.facturacion import facturar_pendiente
-        es_nuevo = self.pk is None  # Verifica si es una nueva instancia (sin ID asignada)
-
-        super().save(*args, **kwargs)  # Guarda el objeto en la base de datos
-
-        if es_nuevo:
-            facturar_pendiente(self.autogenerado)
-
-
 class VistaGastosPreventa(models.Model):
     numero = models.CharField(max_length=255, blank=True, null=True)
     servicio = models.CharField(max_length=255, blank=True, null=True)

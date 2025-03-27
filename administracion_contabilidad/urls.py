@@ -1,5 +1,6 @@
 from django.urls import path
 
+from administracion_contabilidad.views.editar_consultar_compras import editar_consultar_compras
 from administracion_contabilidad.views.editar_consultar_pagos import editar_consultar_pagos
 from administracion_contabilidad.views.cobranza import cobranza_view, source_cobranza, source_cobranza_imputacion, \
     source_facturas_pendientes, guardar_impuventa, guardar_anticipo, cargar_arbitraje
@@ -80,5 +81,10 @@ urlpatterns = [
     path('buscar_embarques/', buscar_embarques, name='buscar_embarques'),
     path('cargar_pendientes_imputacion/', cargar_pendientes_imputacion, name='cargar_pendientes_imputacion'),
     #proveedores
+
+    #editar y consultar compras#
+    path('editar_consultar_compras/', editar_consultar_compras, name='editar_consultar_compras'),
+
+    #editar y consultar compras#
 
 ]
