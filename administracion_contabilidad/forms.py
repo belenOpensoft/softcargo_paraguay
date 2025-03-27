@@ -1147,11 +1147,11 @@ class EditarConsultarCompras(forms.Form):
     posicion = forms.CharField(required=False, max_length=100, label="Posición")
 
     TIPO_CHOICES = [
-        ('factura', 'Factura'),
-        ('contado', 'Contado'),
-        ('nota_debito', 'Nota Débito'),
-        ('nota_credito', 'Nota Crédito'),
-        ('devol_contado', 'Devol Contado'),
+        ('FACTURA', 'Factura'),
+        ('CONTADO', 'Contado'),
+        ('NOTA DEB.', 'Nota Débito'),
+        ('NOTA CRED.', 'Nota Crédito'),
+        ('DEVOLUCION', 'Devol Contado'),
     ]
     tipo = forms.ChoiceField(widget=forms.RadioSelect, choices=TIPO_CHOICES, required=False, label="Tipo")
 
