@@ -309,17 +309,11 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
         return texto, resultado
 
+
     elif title == 'Notificación de llegada de carga':
 
-
-        resultado['asunto'] = 'NOTIFICACION DE LLEGADA DE CARGA - Ref.: ' + str(embarque.numero) + ' - CS: ' + str(
-
-            row.seguimiento) + '- HB/l: ' + str(row.hawb) + ' - Ship: ' + str(row.embarcador) + ' - Consig: ' \
-         \
-                                                                                                '' + str(
-
-            row.consignatario) + '; Vuelo: ' + str(vapor)
-
+        resultado[
+            'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {embarque.numero} - CS: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vuelo: {vapor}'
 
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 
@@ -329,15 +323,15 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
         consigna = Clientes.objects.get(codigo=embarque.consignatario)
 
-
-
         carga = ExportCargaaerea.objects.filter(numero=embarque.numero)
 
         gastos = ExportServiceaereo.objects.filter(numero=embarque.numero)
 
-        texto += fecha_formateada + '<br>'
+        texto = formatear_linea("Fecha", fecha_formateada)
 
-        texto += '<p>Att. </p><br>'
+        texto += "<br>"
+
+        texto += formatear_linea("Att.", "")
 
         texto += formatear_linea("Notificar a", row.consignatario)
 
@@ -345,7 +339,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
         texto += formatear_linea("Teléfono", consigna.telefono if consigna else "")
 
-        texto += '<br>'
+        texto += "<br>"
 
         texto += formatear_linea("Salida", conex.salida if conex else "")
 
@@ -356,6 +350,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += formatear_linea("Destino", conex.destino if conex else "")
 
         texto += formatear_linea("HAWB", embarque.hawb)
+
         if master == 'true':
             texto += formatear_linea("AWB", row.awb)
 
@@ -372,18 +367,24 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         if carga:
 
             for c in carga:
+
                 if c.medidas is not None:
+
                     medidas = c.medidas.split('*')
+
                 else:
+
                     medidas = None
-                if medidas:
-                    if len(medidas) == 3 and all(m.isdigit() for m in medidas):
-                        volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
-                        ap1 = volumen * 166.67
-                    else:
-                        ap1=0
+
+                if medidas and len(medidas) == 3 and all(m.isdigit() for m in medidas):
+
+                    volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
+
+                    ap1 = volumen * 166.67
+
                 else:
-                    ap1=0
+
+                    ap1 = 0
 
                 aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
 
@@ -395,11 +396,13 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
                 texto += formatear_linea("Aplicable", str(aplicable))
 
-            texto += '<br>'
+            texto += "<br>"
+
         if gastos_boolean == 'true':
+
             if gastos:
 
-                texto += '<p>Detalle de gastos en Dólares U.S.A </p>'
+                texto += formatear_linea("Detalle", "Gastos en Dólares U.S.A")
 
                 total_gastos = 0
 
@@ -411,7 +414,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
                     total_gastos += float(g.precio)
 
-                    iva = True if servicio.tasa == 'B' else False
+                    iva = servicio.tasa == 'B'
 
                     if iva:
                         total_iva += float(g.precio) * 0.22
@@ -419,7 +422,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                     if g.precio != 0:
                         texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}")
 
-                texto += '<br>'
+                texto += "<br>"
 
                 texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
 
@@ -427,23 +430,28 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
                 texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
 
-                texto += '<br>'
+                texto += "<br>"
 
-        texto += 'Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta: <br><br>'
+        texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
 
-        texto += 'BBVA URUGUAY S.A.<br>'
+        texto += "Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta:\n\n"
 
-        texto += '25 de Mayo 401 <br>'
+        texto += "BBVA URUGUAY S.A.\n"
 
-        texto += 'Cuenta Número: 5207347 <br>'
+        texto += "25 de Mayo 401\n"
 
-        texto += 'OCEANLINK Ltda. <br><br>'
+        texto += "Cuenta Número: 5207347\n"
 
-        texto += 'Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR. <br>'
+        texto += "OCEANLINK Ltda.\n\n"
 
-        texto += 'Agradeciendo vuestra preferencia, le saludamos muy atentamente. <br><br>'
+        texto += "Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR.\n"
+
+        texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
+
+        texto += "</pre>"
 
         return texto, resultado
+
 
     elif title == 'Instruccion de embarque':
         embarcador = Clientes.objects.get(codigo=embarque.embarcador)

@@ -315,85 +315,133 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
     elif title == 'Notificación de llegada de carga':
 
-        resultado['asunto'] = 'NOTIFICACION DE LLEGADA DE CARGA - Ref.: ' + str(embarque.numero) + ' - CS: ' + str(
-            row.seguimiento) + '- HB/l: ' + str(row.hawb) + ' - Ship: ' + str(row.embarcador) + ' - Consig: ' \
-                                                                                               '' + str(
-            row.consignatario) + '; Vapor: ' + str(vapor)
-        # # TEXTO DE CUERPO DEL MENSAJE
+        resultado[
+            'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {embarque.numero} - CS: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}'
+
+        # Fecha formateada
+
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
         fecha_actual = datetime.now()
+
         fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
 
         consigna = Clientes.objects.get(codigo=embarque.consignatario)
+
         conex = Conexaerea.objects.filter(numero=embarque.numero).order_by('-id').last()
+
         carga = Cargaaerea.objects.filter(numero=embarque.numero)
+
         gastos = Serviceaereo.objects.filter(numero=embarque.numero)
 
+        texto = formatear_linea("Fecha", fecha_formateada)
 
-        texto += fecha_formateada + '<br>'
-        texto += '<p>Att. </p><br>'
+        texto += "<br>"
+
+        texto += formatear_linea("Att.", "")
+
         texto += formatear_linea("Notificar a", row.consignatario)
+
         texto += formatear_linea("Dirección", consigna.direccion if consigna else "")
+
         texto += formatear_linea("Teléfono", consigna.telefono if consigna else "")
 
-        texto +='<br>'
+        texto += "<br>"
 
         texto += formatear_linea("Salida", conex.salida if conex else "")
+
         texto += formatear_linea("Llegada", conex.llegada if conex else "")
+
         texto += formatear_linea("Origen", conex.origen if conex else "")
+
         texto += formatear_linea("Destino", conex.destino if conex else "")
+
         texto += formatear_linea("HAWB", embarque.hawb)
+
         if master_boolean == 'true':
             texto += formatear_linea("AWB", embarque.awb)
+
         texto += formatear_linea("Referencia", embarque.numero)
+
         texto += formatear_linea("Posición", embarque.posicion)
+
         texto += formatear_linea("Seguimiento", row.seguimiento)
+
         texto += formatear_linea("Embarcador", row.embarcador)
+
         texto += formatear_linea("Ref. Proveedor", row.embarcador)
 
         if carga:
+
             for c in carga:
-                #ap1 = float(c.cbm) * 166.67
-                ap1 = float(c.cbm) if c.cbm is not None else 0 * 166.67
+                ap1 = float(c.cbm) if c.cbm is not None else 0
+
                 aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
 
                 texto += formatear_linea("Mercadería", c.producto.nombre)
+
                 texto += formatear_linea("Bultos", str(c.bultos))
+
                 texto += formatear_linea("Peso", str(c.bruto))
+
                 texto += formatear_linea("Aplicable", str(aplicable))
 
-            texto += '<br>'
+            texto += "<br>"
 
         if gastos_boolean == 'true':
+
             if gastos:
-                texto += '<p>Detalle de gastos en Dólares U.S.A </p>'
-                total_gastos=0
-                total_iva=0
+
+                texto += formatear_linea("Detalle", "Gastos en Dólares U.S.A")
+
+                total_gastos = 0
+
+                total_iva = 0
+
                 for g in gastos:
+
                     servicio = Servicios.objects.get(codigo=g.servicio)
-                    total_gastos+= float(g.precio)
-                    iva = True if servicio.tasa == 'B' else False
+
+                    total_gastos += float(g.precio)
+
+                    iva = servicio.tasa == 'B'
+
                     if iva:
-                        total_iva+=float(g.precio) * 0.22
-                    if g.precio !=0:
+                        total_iva += float(g.precio) * 0.22
+
+                    if g.precio != 0:
                         texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}")
 
-                texto += '<br>'
+                texto += "<br>"
+
                 texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
+
                 texto += formatear_linea("I.V.A", f"${total_iva:.2f}")
+
                 texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
-                texto += '<br>'
 
-        texto += 'Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta: <br><br>'
-        texto += 'BBVA URUGUAY S.A.<br>'
-        texto += '25 de Mayo 401 <br>'
-        texto += 'Cuenta Número: 5207347 <br>'
-        texto += 'OCEANLINK Ltda. <br><br>'
-        texto += 'Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR. <br>'
-        texto+='Agradeciendo vuestra preferencia, le saludamos muy atentamente. <br><br>'
+                texto += "<br>"
 
+        texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
+
+        texto += "Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta:\n\n"
+
+        texto += "BBVA URUGUAY S.A.\n"
+
+        texto += "25 de Mayo 401\n"
+
+        texto += "Cuenta Número: 5207347\n"
+
+        texto += "OCEANLINK Ltda.\n\n"
+
+        texto += "Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR.\n"
+
+        texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
+
+        texto += "</pre>"
 
         return texto, resultado
+
 
     elif title == 'Release documentacion':
 
@@ -889,34 +937,7 @@ def image_to_base64(image_path):
         return base64_data
 
 
-def formatear_linea_old(titulo, valor, ancho_fijo=30):
-    max_titulo = ancho_fijo - 1
-
-    if len(titulo) < max_titulo:
-        puntos = '.' * (max_titulo - len(titulo))
-        linea = titulo + puntos
-    else:
-        linea = titulo[:max_titulo]
-
-    return f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{linea}: {valor}</p>"
-
-
-def formatear_linea_old_last(titulo, valor, ancho_total=50):
-    linea = f"{titulo}"
-    puntos = '.' * (30 - len(titulo))
-    linea += puntos
-
-    # Calcular espacios hasta llegar al ancho total
-    espacio_restante = ancho_total - len(linea) - len(str(valor))
-    if espacio_restante < 1:
-        espacio_restante = 1
-
-    espacios = ' ' * espacio_restante
-    texto = f"<pre style='font-family: Courier New, monospace; font-size: 13px;'>{linea}{espacios}{valor}</pre>"
-    return texto
-
-
-def formatear_linea(titulo, valor, ancho_total=70, ancho_col_izq=30):
+def formatear_linea_old(titulo, valor, ancho_total=70, ancho_col_izq=30):
     # Asegurarse que título + puntos tenga ancho exacto
     puntos = '.' * (ancho_col_izq - len(titulo))
     col_izq = titulo + puntos
@@ -925,6 +946,31 @@ def formatear_linea(titulo, valor, ancho_total=70, ancho_col_izq=30):
     espacios = ' ' * (ancho_total - len(col_izq) - len(str(valor)))
     return f"<pre style='font-family: Courier New, monospace; font-size: 13px;'>{col_izq}{espacios}{valor}</pre>"
 
+
+def formatear_linea(titulo, valor, ancho_total=70, ancho_col_izq=30):
+    import textwrap
+
+    puntos = '.' * (ancho_col_izq - len(titulo))
+    col_izq = titulo + puntos
+
+    valor = str(valor).strip()
+
+    ancho_valor = ancho_total - len(col_izq)
+
+    # Si el valor está vacío, mostrar solo el título
+    if not valor:
+        return f"<pre style='font-family: Courier New, monospace; font-size: 13px;'>{col_izq}</pre>"
+
+    # Cortar el valor largo en líneas
+    lineas_valor = textwrap.wrap(valor, width=ancho_valor)
+
+    primera = f"<pre style='font-family: Courier New, monospace; font-size: 13px;'>{col_izq}{lineas_valor[0]:>{ancho_valor}}</pre>"
+
+    resto = ""
+    for linea in lineas_valor[1:]:
+        resto += f"<pre style='font-family: Courier New, monospace; font-size: 13px;'>{' ' * len(col_izq)}{linea:>{ancho_valor}}</pre>"
+
+    return primera + resto
 
 
 

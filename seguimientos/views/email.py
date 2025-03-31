@@ -83,7 +83,6 @@ def get_data_email(request):
 
                 resultado['asunto'] = f'SEGUIMIENTO {row.numero} // TRASPASO A OPERACIONES'
 
-
             elif title == 'Aviso de embarque':
 
                 resultado[
@@ -244,89 +243,134 @@ def get_data_email(request):
 
                 texto += "</pre>"
 
-
             elif title == 'Notificacion llegada de carga':
 
                 consigna = Clientes.objects.get(codigo=row.consignatario_codigo)
-                conex = Conexaerea.objects.filter(numero=row.numero).order_by('-id').last()
-                carga = Cargaaerea.objects.filter(numero=row.numero)
-                gastos = Serviceaereo.objects.filter(numero=row.numero)
-                if conex:
-                    vapor = conex.vapor if conex.vapor else 'S/I'
-                else:
-                    vapor = 'S/I'
 
-                resultado['asunto'] = 'NOTIFICACION DE LLEGADA DE CARGA - Ref.: ' + str(
-                    row.embarque) + ' - CS: ' + str(
-                    row.numero) + '- HB/l: ' + str(row.hawb) + ' - Ship: ' + str(row.embarcador) + ' - Consig: ' \
-                                                                                                        '' + str(
-                    row.consignatario) + '; Vapor/vuelo: ' + str(vapor)
-                # # TEXTO DE CUERPO DEL MENSAJE
+                conex = Conexaerea.objects.filter(numero=row.numero).order_by('-id').last()
+
+                carga = Cargaaerea.objects.filter(numero=row.numero)
+
+                gastos = Serviceaereo.objects.filter(numero=row.numero)
+
+                vapor = conex.vapor if conex and conex.vapor else 'S/I'
+
+                resultado[
+                    'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {row.embarque} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vapor/vuelo: {vapor}'
+
+                # Fecha formateada
+
                 locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
                 fecha_actual = datetime.datetime.now()
+
                 fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
 
+                texto = formatear_linea("Fecha", fecha_formateada)
 
+                texto += "<br>"
 
-                texto += fecha_formateada + '<br>'
-                texto += '<p>Att. </p><br>'
+                texto += formatear_linea("Att.", "")
+
                 texto += formatear_linea("Notificar a", row.consignatario)
+
                 texto += formatear_linea("Dirección", consigna.direccion if consigna else "")
+
                 texto += formatear_linea("Teléfono", consigna.telefono if consigna else "")
 
-                texto += '<br>'
+                texto += "<br>"
 
                 texto += formatear_linea("Salida", conex.salida if conex else "")
+
                 texto += formatear_linea("Llegada", conex.llegada if conex else "")
+
                 texto += formatear_linea("Origen", conex.origen if conex else "")
+
                 texto += formatear_linea("Destino", conex.destino if conex else "")
+
                 texto += formatear_linea("HAWB", row.hawb)
-                if master=='true':
+
+                if master == 'true':
                     texto += formatear_linea("AWB", row.awb)
+
                 texto += formatear_linea("Referencia", row.embarque)
+
                 texto += formatear_linea("Posición", row.posicion)
+
                 texto += formatear_linea("Seguimiento", row.numero)
+
                 texto += formatear_linea("Embarcador", row.embarcador)
+
                 texto += formatear_linea("Ref. Proveedor", row.embarcador)
 
                 if carga:
+
                     for c in carga:
                         ap1 = float(c.cbm) if c.cbm is not None else 0 * 166.67
+
                         aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
 
                         texto += formatear_linea("Mercadería", c.producto.nombre)
+
                         texto += formatear_linea("Bultos", str(c.bultos))
+
                         texto += formatear_linea("Peso", str(c.bruto))
+
                         texto += formatear_linea("Aplicable", str(aplicable))
 
-                    texto += '<br>'
-                if gastos_boolean=='true':
+                    texto += "<br>"
+
+                if gastos_boolean == 'true':
+
                     if gastos:
-                        texto += '<p>Detalle de gastos en Dólares U.S.A </p>'
+
+                        texto += formatear_linea("Detalle", "Gastos en Dólares U.S.A")
+
                         total_gastos = 0
+
                         total_iva = 0
+
                         for g in gastos:
+
                             servicio = Servicios.objects.get(codigo=g.servicio)
+
                             total_gastos += float(g.precio)
+
                             iva = True if servicio.tasa == 'B' else False
+
                             if iva:
                                 total_iva += float(g.precio) * 0.22
+
                             if g.precio != 0:
                                 texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}")
 
-                        texto += '<br>'
-                        texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
-                        texto += formatear_linea("I.V.A", f"${total_iva:.2f}")
-                        texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
-                        texto += '<br>'
+                        texto += "<br>"
 
-                texto += 'Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta: <br><br>'
-                texto += 'BBVA URUGUAY S.A.<br>'
-                texto += '25 de Mayo 401 <br>'
-                texto += 'Cuenta Número: 5207347 <br>'
-                texto += 'OCEANLINK Ltda. <br><br>'
-                texto += 'Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR. <br>'
-                texto += 'Agradeciendo vuestra preferencia, le saludamos muy atentamente. <br><br>'
+                        texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
+
+                        texto += formatear_linea("I.V.A", f"${total_iva:.2f}")
+
+                        texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
+
+                        texto += "<br>"
+
+                texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
+
+                texto += "Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta:\n\n"
+
+                texto += "BBVA URUGUAY S.A.\n"
+
+                texto += "25 de Mayo 401\n"
+
+                texto += "Cuenta Número: 5207347\n"
+
+                texto += "OCEANLINK Ltda.\n\n"
+
+                texto += "Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR.\n"
+
+                texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
+
+                texto += "</pre>"
 
             elif title == 'Aviso de desconsolidacion':
                 # cantidad_cntr = ''
