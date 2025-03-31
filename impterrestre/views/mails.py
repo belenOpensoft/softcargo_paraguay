@@ -65,13 +65,11 @@ def get_data_email_op(request):
             texto = ''
             texto += f'<br>'
             texto, resultado = get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque,conex,viaje,transportista,master_boolean,gastos_boolean)
-            texto += '<b>OCEANLINK,</b><br>'
-            texto += 'DEPARTAMENTO DE IMPORTACION TERRESTRE, <br>'
-            texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
-            texto += 'OPERACIONES <br>'
-            texto += 'EMAIL: <br>'
-            texto += 'TEL: +5982 2605 2332 <br>'
-            texto += '</table>'
+            texto += "<b><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OCEANLINK,</p></b>"
+            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>DEPARTAMENTO DE IMPORTACIÓN MARITIMA,</p>"
+            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{request.user.first_name} {request.user.last_name}</p>"
+            texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OPERACIONES</p>"
+            texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>PH: 59829170501</p>"
             resultado['email_cliente'] = email_cliente
             resultado['email_agente'] = email_agente
 
@@ -762,22 +760,36 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         return texto, resultado
 
     elif title == 'Traspaso a operaciones':
-        texto += 'SEGUIMIENTO: ' + str(row.numero) + '<br>'
-        texto += 'CLIENTE: ' + str(row.consignatario) + '<br>'
-        texto += 'BL: ' + str(row.awb) + '<br>'
-        texto += 'HBL: ' + str(row.hawb) + '<br><br><br>'
-        texto += 'EMBARQUE TRASPASADO A DEPARTAMENTO DE OPERACIONES <br><br>'
-        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-        fecha_actual = datetime.now()
-        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
-        texto += 'FECHA: ' + fecha_formateada + '<br><br>'
-        texto += 'CONDICION MBL: <br>'
-        texto += 'CONDICION HBL: <br>'
-        texto += 'COURRIER CON DOCUMENTOS ENVIADO: <br>'
-        texto += 'COURRIER/GUIA: <br><br><br><br>'
 
-        resultado['asunto'] = 'SEGUIMIENTO ' + str(row.numero) + ' // TRASPASO A OPERACIONES'
-        return texto,resultado
+        texto += formatear_linea("SEGUIMIENTO", row.numero)
+
+        texto += formatear_linea("CLIENTE", row.consignatario)
+
+        texto += formatear_linea("BL", row.awb)
+
+        texto += formatear_linea("HBL", row.hawb)
+
+        texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>EMBARQUE TRASPASADO A DEPARTAMENTO DE OPERACIONES</p>"
+
+        fecha_actual = datetime.now()
+
+        fecha_formateada = fecha_actual.strftime(
+
+            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
+
+        texto += formatear_linea("FECHA", fecha_formateada.capitalize())
+
+        texto += formatear_linea("CONDICION MBL", "")
+
+        texto += formatear_linea("CONDICION HBL", "")
+
+        texto += formatear_linea("COURIER CON DOCS", "")
+
+        texto += formatear_linea("COURIER/GUIA", "")
+
+        resultado['asunto'] = f'SEGUIMIENTO {row.numero} // TRASPASO A OPERACIONES'
+
+        return texto, resultado
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:

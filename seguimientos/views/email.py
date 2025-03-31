@@ -66,27 +66,23 @@ def get_data_email(request):
                 email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailet if row.agente_codigo is not None else 'S/I'
 
             if title == 'Traspaso a operaciones':
-                texto += 'SEGUIMIENTO: ' + str(row.numero) + '<br>'
-                texto += 'CLIENTE: ' + str(row.consignatario) + '<br>'
-                texto += 'BL: ' + str(row.awb) + '<br>'
-                texto += 'HBL: ' + str(row.hawb) + '<br><br><br>'
-                texto += 'EMBARQUE TRASPASADO A DEPARTAMENTO DE OPERACIONES <br><br>'
-                # Obtener la fecha actual
+                texto += formatear_linea("SEGUIMIENTO", row.numero)
+                texto += formatear_linea("CLIENTE", row.consignatario)
+                texto += formatear_linea("BL", row.awb)
+                texto += formatear_linea("HBL", row.hawb)
+                texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>EMBARQUE TRASPASADO A DEPARTAMENTO DE OPERACIONES</p>"
+
                 fecha_actual = datetime.datetime.now()
-                # Formatear la fecha en español
-                fecha_formateada = fecha_actual.strftime(f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y')
-                texto += 'FECHA: ' + fecha_formateada.capitalize() + '<br><br>'
-                texto += 'CONDICION MBL: <br>'
-                texto += 'CONDICION HBL: <br>'
-                texto += 'COURRIER CON DOCUMENTOS ENVIADO: <br>'
-                texto += 'COURRIER/GUIA: <br><br><br><br>'
-                texto += 'SALUDOS, <br><br>'
-                texto += '<b>OCEANLINK,</b> <br>'
-                texto += 'DEPARTAMENTO DE ' + str(tipos_operativa[row.modo]) + ', <br>'
-                texto += str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>'
-                texto += 'OPERACIONES <br>'
-                texto += 'PH: 59829170501 <br>'
-                resultado['asunto'] = 'SEGUIMIENTO ' + str(row.numero) + ' // TRASPASO A OPERACIONES'
+                fecha_formateada = fecha_actual.strftime(
+                    f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y')
+                texto += formatear_linea("FECHA", fecha_formateada.capitalize())
+                texto += formatear_linea("CONDICION MBL", "")
+                texto += formatear_linea("CONDICION HBL", "")
+                texto += formatear_linea("COURIER CON DOCS", "")
+                texto += formatear_linea("COURIER/GUIA", "")
+
+                resultado['asunto'] = f'SEGUIMIENTO {row.numero} // TRASPASO A OPERACIONES'
+
 
             elif title == 'Aviso de embarque':
                 resultado['asunto'] = 'AVISO DE EMBARQUE / Ref: ' + str(row.numero) + ' ' \
@@ -685,13 +681,13 @@ def get_data_email(request):
                 tabla_html += "</table><br>"
                 texto = tabla_html
 
-            texto += '<b>OCEANLINK,</b><br>'
-            texto += str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>'
-            texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
-            texto += 'OPERACIONES <br>'
-            texto += 'EMAIL: <br>'
-            texto += 'TEL: +5982 2605 2332 <br>'
-            texto += '</table>'
+            texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>SALUDOS,</p>"
+            texto += "<b><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OCEANLINK,</p></b>"
+            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>DEPARTAMENTO DE {tipos_operativa[row.modo]},</p>"
+            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{request.user.first_name} {request.user.last_name}</p>"
+            texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OPERACIONES</p>"
+            texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>PH: 59829170501</p>"
+
             resultado['email_cliente'] = email_cliente
             resultado['email_agente'] = email_agente
             resultado['resultado'] = 'exito'
