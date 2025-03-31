@@ -214,7 +214,10 @@ $('#id_proveedor').autocomplete({
             "Cancelar": function () {
                 $(this).dialog("close");
             }
-        }
+        },
+        beforeClose: function(event, ui) {
+        limpiarModalEmbarque();
+    }
     }).prev('.ui-dialog-titlebar').remove();
 
     let table = document.querySelector("#tabla-embarque-container tbody");
@@ -507,4 +510,26 @@ function buscar_gastos(autogenerado){
         alert("No se pudo obtener el detalle de la compra.");
       }
     });
+}
+function limpiarModalEmbarque() {
+    // Limpiar todos los inputs (texto, número, fecha) y selects dentro del modal
+    $("#modal-embarque").find("input[type='text'], input[type='number'], input[type='date'], textarea").val("");
+    $("#modal-embarque").find("select").prop("selectedIndex", 0);
+
+    // Desmarcar todos los radio buttons
+    $("#modal-embarque").find("input[type='radio']").prop("checked", false);
+
+    // Limpiar los spans y campos ocultos de la sección de "Seleccionado"
+    $("#seleccionado-embarque").text("");
+    $("#seleccionado-tipo").text("");
+    $("#seleccionado-posicion").text("");
+    $("#seleccionado-precio").val("0.00");
+    $("#seleccionado-cliente").val("");
+    $("#seleccionado-lugar").val("");
+
+    // Limpiar la tabla de información lateral
+    $("#guardado-tabla tbody").empty();
+
+    // Limpiar la tabla de embarques (dentro de #tabla-embarque-container)
+    $("#tabla-embarque-container table tbody").empty();
 }

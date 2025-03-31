@@ -189,13 +189,6 @@ def get_data_email(request):
                 # Agregar mensaje final
                 texto += 'Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar. <br>' \
                          'Agradeciendo vuestra preferencia, le saludamos muy atentamente.<br><br>'
-                texto += '<b>OCEANLINK,</b><br>'
-                texto += f"{request.user.first_name} {request.user.last_name} <br>"
-                texto += f"DEPARTAMENTO DE {tipos_operativa[row.modo]}, <br>"
-                texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
-                texto += 'OPERACIONES <br>'
-                texto += 'EMAIL: <br>'
-                texto += 'TEL: +5982 2605 2332 <br>'
 
             elif title == 'Notificacion llegada de carga':
 
@@ -691,9 +684,9 @@ def get_data_email(request):
                 tabla_html += f"<tr><th align='left'>Moneda: </th><td>{moneda}</td></tr>"
                 tabla_html += "</table><br>"
                 texto = tabla_html
+
             texto += '<b>OCEANLINK,</b><br>'
-            # texto += str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>'
-            texto += 'DEPARTAMENTO DE IMPORTACION MARITIMA, <br>'
+            texto += str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>'
             texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
             texto += 'OPERACIONES <br>'
             texto += 'EMAIL: <br>'

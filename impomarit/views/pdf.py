@@ -31,13 +31,13 @@ def get_datos_caratula(request):
             except VGrillaSeguimientos.DoesNotExist:
                 seguimiento = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='',deposito='', pago='', vendedor='')
             # Añadir un contenedor con ancho máximo
-            texto = '<div style=" margin: 0 auto;">'
+            texto = '<div style="margin: 0 auto; font-family: Courier New, Courier, monospace; font-size: 12px;">'
             texto = texto + '<h2 style="text-align: left;">OCEANLINK LTDA.</h2>'
             # Ajustar el texto que se cortaba
             texto = texto + '<b><p style="font-size:20px;text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
             texto = texto + 'Seguimiento: ' + str(seguimiento.numero if seguimiento.numero is not None else '') + '<br>'
             texto = texto + 'Posicion:  ' + str(Vembarque.posicion if Vembarque.posicion is not None else '') + '<br>'
-            texto = texto + 'Incoterms: ' + str(seguimiento.terminos if seguimiento.terminos is not None else '') + '</p></b><hr>'
+            texto = texto + 'Incoterms: ' + str(seguimiento.terminos if seguimiento.terminos is not None else '') + '</p></b>'
             texto = texto + '<p style="text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
             texto = texto + 'Origen: ' + str(Vembarque.origen if Vembarque.origen is not None else '') + '<br>'
             texto = texto + 'Destino:  ' + str(Vembarque.destino if Vembarque.destino is not None else '') + '</p><br>'
@@ -62,7 +62,7 @@ def get_datos_caratula(request):
             texto = texto + '<b>ETD: </b>'+str(res)+'<br>'
             texto = texto + '<b>Vapor: </b>'+str(nombre_vapor)+'<br>'
             texto = texto + '<b>Transportista: </b>'+str(Vembarque.transportista if Vembarque.transportista is not None else '')+'<br>'
-            texto = texto + '<b>Orden cliente: </b>'+str(seguimiento.refcliente if seguimiento.refcliente is not None else '')+'<hr>'
+            texto = texto + '<b>Orden cliente: </b>'+str(seguimiento.refcliente if seguimiento.refcliente is not None else '')
             texto = texto + '<b>Embarcador: </b>'+str(Vembarque.embarcador if Vembarque.embarcador is not None else '')+'<br>'
             texto = texto + '<b>Datos del embarcador: </b><br>'
             texto = texto + '<b>Dirección: </b>' +str(embarcador.direccion if embarcador.direccion is not None else '')+' -'+str(embarcador.ciudad if embarcador.ciudad is not None else '')+'-'+str(embarcador.pais if embarcador.pais is not None else '')+'<br>'
@@ -80,7 +80,7 @@ def get_datos_caratula(request):
             texto = texto + '<b>Agente: </b>'+str(Vembarque.agente if Vembarque.agente is not None else '')+'<br>'
             texto = texto + '<b>Deposito: </b>'+str(seguimiento.deposito if seguimiento.deposito is not None else '')
             # Detalle del embarque
-            texto = texto + '<hr><b>Detalle del embarque</b>'
+            texto = texto + '<b>Detalle del embarque</b>'
             envase = Envases.objects.filter(numero=id)
             embarque = Cargaaerea.objects.filter(numero=id)
             if envase.count() > 0 :
@@ -95,7 +95,6 @@ def get_datos_caratula(request):
                     texto += ' <b>WT:</b> '+ str('{:.3f}'.format(registro.peso) if registro.peso is not None else '')
                     texto += ' <b>VOL:</b> '+ str('{:.3f}'.format(registro.volumen) if registro.volumen is not None else '')
 
-            texto = texto + '<hr>'
             if embarque.count()>0:
                 for e in embarque:
                     texto += '<br><b>Bultos:</b> ' + str(e.bultos if e.bultos is not None else '')+'<br>'
@@ -104,7 +103,6 @@ def get_datos_caratula(request):
                     texto += ' <b>Volumen:</b> ' + str(e.cbm if e.cbm is not None else '')+'<br>'
                     texto = texto + '<br>'
 
-            texto = texto + '<hr>'
             texto = texto + '<b>Forma de pago: </b>'+str(seguimiento.pago if seguimiento.pago is not None else '')+'<br>'
             texto = texto + '<b>Vendedor: </b>'+str(seguimiento.vendedor if seguimiento.vendedor is not None else '')+'<br>'
             # Cerrar el contenedor

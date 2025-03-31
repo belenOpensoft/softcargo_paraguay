@@ -20,7 +20,7 @@ def get_datos_caratula(request):
                 aereo = True
 
             # Añadir un contenedor con ancho máximo
-            texto = '<div style=" margin: 0 auto;">'
+            texto = '<div style="margin: 0 auto; font-family: Courier New, Courier, monospace; font-size: 12px;">'
             texto = texto + '<h2 style="text-align: left;">OCEANLINK LTDA.</h2><HR>'
             # Ajustar el texto que se cortaba
             texto = texto + '<b><p style="text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
@@ -101,7 +101,7 @@ def get_datos_caratula(request):
             texto = texto + f'<b>Vapor: </b>{nombre_vapor}<br>' if not aereo else texto + f'<b>Vuelo: </b>{nombre_vapor}<br>'
 
             texto = texto + '<b>Transportista: </b>'+str(row.transportista if row.transportista is not None else '')+'<br>'
-            texto = texto + '<b>Orden cliente: </b>'+str(row.refcliente if row.refcliente is not None else 'S/O')+'</strong><hr>'
+            texto = texto + '<b>Orden cliente: </b>'+str(row.refcliente if row.refcliente is not None else 'S/O')+'</strong>'
             texto = texto + '<b>Embarcador: </b>' + str(emb_empresa) + '<br>'
             texto = texto + '<b>Datos del embarcador: </b><br>'
             texto = texto + '<b>Dirección: </b>' + str(emb_dir) + ' -' + str(emb_cc) + '-' + str(emb_p) + '<br>'
@@ -119,7 +119,7 @@ def get_datos_caratula(request):
             texto = texto + '<strong>Agente: ' + str(f'{row.agente} - ' if row.agente is not None else '') + str(agen_c if agen_c is not None else '') + '<br><br>'
             texto = texto + 'Deposito: '+str(row.deposito if row.deposito is not None else '') + '</strong><br><br>'
             # Detalle del embarque
-            texto = texto + '<hr><b>Detalle del embarque</b>'
+            texto = texto + '<b>Detalle del embarque</b>'
 
             if row.modo=='IMPORT AEREO' or row.modo == 'EXPORT AEREO':
                 envase=None
@@ -141,7 +141,6 @@ def get_datos_caratula(request):
                         texto += ' <b>WT:</b> '+ str('{:.3f}'.format(registro.peso) if registro.peso is not None else '')
                         texto += ' <b>VOL:</b> '+ str('{:.3f}'.format(registro.volumen) if registro.volumen is not None else '')
 
-                texto = texto + '<hr>'
 
             if embarque.count()>0:
                 for e in embarque:
@@ -150,7 +149,6 @@ def get_datos_caratula(request):
                     texto += ' <b>Peso:</b> ' + str(e.bruto if e.bruto is not None else '')+'<br>'
                     texto += ' <b>Volumen:</b> ' + str(e.cbm if e.cbm is not None else '')+'<br>'
                     texto = texto + '<br>'
-            texto = texto + '<hr>'
             texto = texto + 'Forma de pago: '+str(row.pago if row.pago is not None else '')+'<br>'
             texto = texto + 'Vendedor: '+str(row.vendedor if row.vendedor is not None else '')+'<br>'
             # Cerrar el contenedor

@@ -428,66 +428,80 @@ def get_datos_ordenfactura(request):
                 Vembarque=Vaereo.objects.get(numero=idembarque)
                 con=ImportConexaerea.objects.filter(numero=idembarque).last()
                 carga=ImportCargaaerea.objects.filter(numero=idembarque).last()
-                if embarque.consolidado!=1:
-                    master=ImportReservas.objects.get(awb=embarque.awb)
+                if embarque.awb:
+                    try:
+                        master = ImportReservas.objects.get(awb=embarque.awb)
+                    except ImportReservas.DoesNotExist:
+                        master = ImportReservas(numero=None)
                 else:
-                    master=ImportReservas(numero=None)
+                    master = ImportReservas(numero=None)
+
                 aux='IMPORTACION AEREA'
             elif clase == 'importacion_maritima':
                 embarque = Embarqueaereo.objects.get(numero=idembarque)
                 Vembarque=Vmarit.objects.get(numero=idembarque)
                 con=Conexaerea.objects.filter(numero=idembarque).last()
                 carga=Cargaaerea.objects.filter(numero=idembarque).last()
-                if embarque.consolidado != 1:
-                    master=Reservas.objects.get(awb=embarque.awb)
+                if embarque.awb:
+                    try:
+                        master = Reservas.objects.get(awb=embarque.awb)
+                    except Reservas.DoesNotExist:
+                        master = Reservas(numero=None)
                 else:
-                    master=Reservas(numero=None)
+                    master = Reservas(numero=None)
+
                 aux ='IMPORTACION MARITIMA'
             elif clase == 'importacion_terrestre':
                 embarque = ImpterraEmbarqueaereo.objects.get(numero=idembarque)
                 Vembarque=Vterrestre.objects.get(numero=idembarque)
                 con=ImpterraConexaerea.objects.filter(numero=idembarque).last()
                 carga=ImpterraCargaaerea.objects.filter(numero=idembarque).last()
-                if embarque.consolidado != 1:
+                if embarque.awb:
                     try:
                         master = ImpterraReservas.objects.get(awb=embarque.awb)
                     except ImpterraReservas.DoesNotExist:
-                        master=ImpterraReservas(numero=None)
+                        master = ImpterraReservas(numero=None)
                 else:
-                    master=ImpterraReservas(numero=None)
+                    master = ImpterraReservas(numero=None)
                 aux='IMPORTACION TERRESTRE'
             elif clase == 'exportacion_aerea':
                 embarque = ExportEmbarqueaereo.objects.get(numero=idembarque)
                 Vembarque=Vexpaerea.objects.get(numero=idembarque)
                 con=ExportConexaerea.objects.filter(numero=idembarque).last()
                 carga=ExportCargaaerea.objects.filter(numero=idembarque).last()
-                if embarque.consolidado != 1:
-                    master=ExportReservas.objects.get(awb=embarque.awb)
+                if embarque.awb:
+                    try:
+                        master = ExportReservas.objects.get(awb=embarque.awb)
+                    except ExportReservas.DoesNotExist:
+                        master = ExportReservas(numero=None)
                 else:
-                    master=ExportReservas(numero=None)
+                    master = ExportReservas(numero=None)
                 aux='EXPORTACION AEREA'
             elif clase == 'exportacion_maritima':
                 embarque = ExpmaritEmbarqueaereo.objects.get(numero=idembarque)
                 Vembarque=Vexpmarit.objects.get(numero=idembarque)
                 con=ExpmaritConexaerea.objects.filter(numero=idembarque).last()
                 carga=ExpmaritCargaaerea.objects.filter(numero=idembarque).last()
-                if embarque.consolidado != 1:
-                    master=ExpmaritReservas.objects.get(awb=embarque.awb)
+                if embarque.awb:
+                    try:
+                        master = ExpmaritReservas.objects.get(awb=embarque.awb)
+                    except ExpmaritReservas.DoesNotExist:
+                        master = ExpmaritReservas(numero=None)
                 else:
-                    master=ExpmaritReservas(numero=None)
+                    master = ExpmaritReservas(numero=None)
                 aux='EXPORTACION MARITIMA'
             elif clase == 'exportacion_terrestre':
                 embarque = ExpterraEmbarqueaereo.objects.get(numero=idembarque)
                 Vembarque=Vexpterrestre.objects.get(numero=idembarque)
                 con=ExpterraConexaerea.objects.filter(numero=idembarque).last()
                 carga=ExpterraCargaaerea.objects.filter(numero=idembarque).last()
-                if embarque.consolidado != 1:
+                if embarque.awb:
                     try:
-                        master = ImpterraReservas.objects.get(awb=embarque.awb)
-                    except ImpterraReservas.DoesNotExist:
-                        master = ImpterraReservas(numero=None)
+                        master = ExpterraReservas.objects.get(awb=embarque.awb)
+                    except ExpterraReservas.DoesNotExist:
+                        master = ExpterraReservas(numero=None)
                 else:
-                    master=ExpterraReservas(numero=None)
+                    master = ExpterraReservas(numero=None)
                 aux='EXPORTACION TERRESTRE'
             else:
                 return JsonResponse({'error':'la clase es incorrecta'})
