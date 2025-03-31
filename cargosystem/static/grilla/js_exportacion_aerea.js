@@ -5561,16 +5561,12 @@ function validarCoincidenciaAcumulados() {
     const kilosMadre = parseFloat(document.getElementById("id_kilos_e").value) || 0;
     const pesoAcumulado = parseFloat(document.getElementById("peso_acumulados").value) || 0;
 
-    const bultosMadre = parseInt(document.getElementById("id_bultos_e").value) || 0;
-    const bultosAcumulado = parseInt(document.getElementById("bultos_acumulados").value) || 0;
 
     const difPeso = Math.abs(kilosMadre - pesoAcumulado);
-    const difBultos = Math.abs(bultosMadre - bultosAcumulado);
 
-    if (difPeso > 0.01 || difBultos > 0) {
+    if (difPeso > 0.01) {
         alert("⚠️ Los valores ingresados en el máster no coinciden con los acumulados de los hijos.\n\n" +
-              `Peso máster: ${kilosMadre} / Acumulado: ${pesoAcumulado}\n` +
-              `Bultos máster: ${bultosMadre} / Acumulado: ${bultosAcumulado}`);
+              `Peso máster: ${kilosMadre} / Acumulado: ${pesoAcumulado}\n` );
         return false;
     }
 

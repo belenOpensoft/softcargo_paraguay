@@ -92,508 +92,57 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             merca.append(m.producto)
 
     fecha_actual = datetime.now()
+    #formateado listo
     if title == 'Notificación de transbordo de carga':
         fecha_actual = datetime.now()
-        # ASUNTO DEL MENSAJE
+
         resultado['asunto'] = 'NOTIFICACIÓN DE TRABSBORDO DE CARGA - Ref.: ' + str(row.referencia) + \
                               '/ CS: ' + str(row.seguimiento) + '- H B/L: ' + str(row.hawb) + '- Shipper: '
-        # CUERPO DEL MENSAJE
+
         fecha_formateada = fecha_actual.strftime(
-            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
-        texto += fecha_formateada.capitalize().upper() + '<br><br>'
-        tabla_html = "<table border= '1' style='width: 40%; border-collapse: collapse;'>"
-
-        campos = []
-
-        cont = 1
-        for b in row2:
-            campos.append((f"Bultos {cont}: ", b.bultos if b.bultos is not None else "S/I"))
-            campos.append((f"Peso {cont}: ", b.bruto if b.bruto is not None else "S/I"))
-            cont = cont + 1
-
-        cont = 1
-        for e in row3:
-            campos.append((f"Nro. Contenedor {cont}: ", str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I"))
-            cont = cont + 1
-
-        campos.extend([
-            ("Viaje: ", str(viaje)),
-            ("Viaje: ", str(row.viaje) if row.viaje is not None else "S/I"),
-            ("Llegada estimada: ", format_fecha(row.fecha_retiro)),
-            ("Origen: ", str(row.origen) if row.origen is not None else "S/I"),
-            ("B/L: ", str(row.awb) if row.awb is not None else "S/I"),
-            ("H B/L: ", str(row.hawb) if row.hawb is not None else "S/I"),
-            ("Referencia: ", str(row_number) if row_number is not None else "S/I"),
-            ("Posición: ", str(row.posicion) if row.posicion is not None else "S/I"),
-            ("Seguimiento: ", str(row.seguimiento) if row.seguimiento is not None else "S/I"),
-            ("Consignatario: ", str(row.consignatario) if row.consignatario is not None else "S/I"),
-            ("Embarcador: ", str(row.embarcador) if row.embarcador is not None else "S/I"),
-            ("Orden cliente: ", str(row.orden_cliente) if row.orden_cliente is not None else "S/I"),
-            ("Ref. proveedor: ", str(row.ref_proveedor) if row.ref_proveedor is not None else "S/I"),
-            ("Mercadería: ", str(merca) if merca is not None else "S/I"),
-        ])
-
-        for campo, valor in campos:
-            tabla_html += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
-
-        tabla_html += "</table> <br><br>"
-        texto += tabla_html
-
-        mini_tabla_html = f"""
-                <table border= "1" style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr>
-                            <th style="padding: 8px; text-align: left;">Origen</th>
-                            <th style="padding: 8px; text-align: left;">Destino</th>
-                            <th style="padding: 8px; text-align: left;">Viaje/Vuelo</th>
-                            <th style="padding: 8px; text-align: left;">Viaje</th>
-                            <th style="padding: 8px; text-align: left;">Salida</th>
-                            <th style="padding: 8px; text-align: left;">Llegada</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style='padding: 8px;'>{str(row.origen) if row.origen is not None else "S/I"}</td>
-                            <td style="padding: 8px;">{str(row.destino) if row.destino is not None else "S/I"}</td>
-                            <td style="padding: 8px;">{str(row.vapor) if row.vapor is not None else "S/I"}</td>
-                            <td style="padding: 8px;">{str(row.viaje) if row.viaje is not None else "S/I"}</td>
-                            <td style="padding: 8px;">{format_fecha(row.fecha_embarque)}</td>
-                            <td style="padding: 8px;">{format_fecha(row.fecha_retiro)}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <br>
-                """
-
-        texto += mini_tabla_html
-
-        return texto, resultado
-
-    elif title == 'Novedades sobre la carga':
-
-        fecha_actual = datetime.now()
-        # ASUNTO DEL MENSAJE
-        resultado['asunto'] = 'NOVEDADES SOBRE LA CARGA - Ref.: ' + str(row.referencia) + \
-                              '/ CS: ' + str(row.seguimiento) + '- Shipper: ' + str(row.embarcador) + \
-                              '; Consignee: ' + str(row.consignatario)
-        # CUERPO DEL MENSAJE
-        fecha_formateada = fecha_actual.strftime(
-            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
-        texto += fecha_formateada.capitalize().upper() + '<br><br>'
-        tabla_html = "<table border= '1' style='width: 40%; border-collapse: collapse;'>"
-
-        campos = []
-
-        cont = 1
-        for m in merca:
-            campos.append((f"Mercadería {cont}: ", str(m.nombre) if m.nombre is not None else "S/I"))
-            cont = cont + 1
-
-        cont = 1
-        for b in row2:
-            campos.append((f"Bultos {cont}: ", b.bultos if b.bultos is not None else "S/I"))
-            campos.append((f"Peso {cont}: ", b.bruto if b.bruto is not None else "S/I"))
-            campos.append((f"CBM {cont}: ", b.cbm if b.cbm is not None else "S/I"))
-            cont = cont + 1
-
-        cont = 1
-        for e in row3:
-            campos.append((f"Nro. Contenedor {cont}: ", str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I"))
-            campos.append((f"Precintos {cont}: ", str(e.precinto) if e.precinto is not None else "S/I"))
-            cont = cont + 1
-
-        campos.extend([
-            ("Embarque: ", str(row_number) if row_number is not None else "S/I"),
-            ("Posición: ", str(row.posicion) if row.posicion is not None else "S/I"),
-            ("Salida: ", format_fecha(row.fecha_embarque)),
-            ("LLegada: ", format_fecha(row.fecha_retiro)),
-            ("Origen: ", str(row.origen) if row.origen is not None else "S/I"),
-            ("Destino: ", str(row.destino) if row.destino is not None else "S/I"),
-            ("Viaje: ", str(viaje)),
-            ("H B/L: ", str(row.hawb) if row.hawb is not None else "S/I"),
-            ("Embarcador: ", str(row.embarcador) if row.embarcador is not None else "S/I"),
-            ("Consignatario: ", str(row.consignatario) if row.consignatario is not None else "S/I"),
-        ])
-
-
-        for campo, valor in campos:
-            tabla_html += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
-
-        tabla_html += "</table> <br><br>"
-        texto += tabla_html
-
-        return texto, resultado
-
-    elif title == 'Routing Order':
-        hora_actual = datetime.now().strftime("%H:%M")
-        # ASUNTO DEL MENSAJE
-        resultado['asunto'] = 'ROUTING ORDER - Ref.: ' + str(row.referencia) + \
-                              '/ CS: ' + str(row.seguimiento) + '- Shipper: ' + str(row.embarcador) + \
-                              '; Consignee: ' + str(row.consignatario)
-        # CUERPO DEL MENSAJE
-        texto += f'{hora_actual} <br>'
-        tabla_html1 = "<table border= '1' style='width: 40%; border-collapse: collapse;'>"
-        campos1 = [
-            ("Fecha: ", format_fecha(fecha_actual)),
-            ("A: ", str(row.agente) if row.agente is not None else "S/I"),
-            ("Departamento: ", "MARITIMO"),
-            #("Enviado: ", str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>')
-        ]
-
-        for campo, valor in campos1:
-            tabla_html1 += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
-
-        tabla_html1 += "</table> <br><br>"
-        texto += tabla_html1
-        texto += ("Estimados Sres.: <br>"
-                  "Por favor, contactar la siguiente compañía para coordinar la operación referenciada: <br><br>")
-
-        tabla_html2 = "<table border= '1' style='width: 40%; border-collapse: collapse;'>"
-        campos2 = [
-            ("Proveedor: ", str(row.embarcador) if row.embarcador is not None else "S/I"),
-            ("Direccion: ", str(row.direccion_embarcador) if row.direccion_embarcador is not None else "S/I"),
-            ("Ciudad: ", str(row.ciudad_embarcador) if row.ciudad_embarcador is not None else "S/I"),
-            ("Pais: ", str(row.pais_embarcador) if row.pais_embarcador is not None else "S/I"),
-        ]
-
-        for campo, valor in campos2:
-            tabla_html2 += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
-
-        tabla_html2 += "</table> <br><br>"
-        texto += tabla_html2
-
-        tabla_html3 = "<table border= '1' style='width: 40%; border-collapse: collapse;'>"
-        campos3 = [
-            ("Proveedor: ", str(row.consignatario) if row.consignatario is not None else "S/I"),
-            ("Direccion: ", str(row.direccion_consignatario) if row.direccion_consignatario is not None else "S/I"),
-            ("Ciudad: ", str(row.ciudad_consignatario) if row.ciudad_consignatario is not None else "S/I"),
-            ("Pais: ", str(row.pais_consignatario) if row.pais_consignatario is not None else "S/I"),
-        ]
-
-        for campo, valor in campos3:
-            tabla_html3 += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
-
-        tabla_html3 += "</table> <br><br>"
-        texto += tabla_html3
-
-        tabla_html4 = "<table border= '1' style='width: 40%; border-collapse: collapse;'>"
-        campos4 = [
-            ("Referencia interna: ", str(row_number) if row_number is not None else "S/I"),
-            ("Orden cliente: ", str(row.orden_cliente) if row.orden_cliente is not None else "S/I"),
-            ("Origen: ", str(row.origen) if row.origen is not None else "S/I"),
-            ("Destino: ", str(row.destino) if row.destino is not None else "S/I"),
-        ]
-
-        for campo, valor in campos4:
-            tabla_html4 += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
-
-        tabla_html4 += "</table> <br><br>"
-        texto += tabla_html4
-
-        tabla_html5 = "<table border= '1' style='width: 40%; border-collapse: collapse;'>"
-        campos5 = []
-        cont = 1
-        for m in merca:
-            campos5.append((f"Mercadería {cont}: ", str(m.nombre) if m.nombre is not None else "S/I"))
-            cont = cont + 1
-
-        cont = 1
-        for b in row2:
-            campos5.append((f"Bultos {cont}: ", b.bultos if b.bultos is not None else "S/I"))
-            campos5.append((f"Peso {cont}: ", b.bruto if b.bruto is not None else "S/I"))
-            cont = cont + 1
-
-        campos5.append(("Condiciones de pago: ", str(row.pago_flete) if row.pago_flete is not None else "S/I"))
-        campos5.append(("Términos de compra: ", str(row.terminos) if row.terminos is not None else "S/I"))
-        campos5.append(("Modo de embarque: ", "MARITIMO"))
-
-        for campo, valor in campos5:
-            tabla_html5 += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
-
-        tabla_html5 += "</table> <br><br>"
-        texto += tabla_html5
-
-        return texto, resultado
-
-
-    elif title == 'Notificación de llegada de carga':
-
-        resultado['asunto'] = (
-
-            f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {embarque.numero} - CS: {row.seguimiento} - '
-
-            f'HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Viaje: {viaje}'
-
+            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y'
         )
+        texto += fecha_formateada.capitalize().upper() + '<br><br>'
 
-        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        cont = 1
+        for b in row2:
+            texto += formatear_linea(f"Bultos {cont}", b.bultos if b.bultos is not None else "S/I")
+            texto += formatear_linea(f"Peso {cont}", b.bruto if b.bruto is not None else "S/I")
+            cont += 1
 
-        fecha_actual = datetime.now()
+        cont = 1
+        for e in row3:
+            texto += formatear_linea(f"Nro. Contenedor {cont}",
+                                     str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I")
+            cont += 1
 
-        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+        texto += formatear_linea("Viaje", str(viaje))
+        texto += formatear_linea("Llegada estimada", format_fecha(row.fecha_retiro))
+        texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
+        texto += formatear_linea("B/L", str(row.awb) if row.awb is not None else "S/I")
+        texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I")
+        texto += formatear_linea("Referencia", str(row_number) if row_number is not None else "S/I")
+        texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
+        texto += formatear_linea("Seguimiento", str(row.seguimiento) if row.seguimiento is not None else "S/I")
+        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario is not None else "S/I")
+        texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
+        texto += formatear_linea("Orden cliente", str(row.orden_cliente) if row.orden_cliente is not None else "S/I")
+        texto += formatear_linea("Ref. proveedor", str(row.ref_proveedor) if row.ref_proveedor is not None else "S/I")
+        texto += formatear_linea("Mercadería", str(merca) if merca is not None else "S/I")
 
-        consigna = Clientes.objects.get(codigo=embarque.consignatario)
-
-        carga = ImpterraCargaaerea.objects.filter(numero=embarque.numero)
-
-        gastos = ImpterraServiceaereo.objects.filter(numero=embarque.numero)
-
-        texto = formatear_linea("Fecha", fecha_formateada)
-
-        texto += "<br>"
-
-        texto += formatear_linea("Att.", "")
-
-        texto += formatear_linea("Notificar a", row.consignatario)
-
-        texto += formatear_linea("Dirección", consigna.direccion if consigna else "")
-
-        texto += formatear_linea("Teléfono", consigna.telefono if consigna else "")
-
-        texto += "<br>"
-
-        texto += formatear_linea("Salida", conex.salida if conex else "")
-
-        texto += formatear_linea("Llegada", conex.llegada if conex else "")
-
-        texto += formatear_linea("Origen", conex.origen if conex else "")
-
-        texto += formatear_linea("Destino", conex.destino if conex else "")
-
-        texto += formatear_linea("HAWB", embarque.hawb)
-
-        if master_boolean == 'true':
-            texto += formatear_linea("AWB", embarque.awb)
-
-        texto += formatear_linea("Referencia", embarque.numero)
-
-        texto += formatear_linea("Posición", embarque.posicion)
-
-        texto += formatear_linea("Seguimiento", row.seguimiento)
-
-        texto += formatear_linea("Embarcador", row.embarcador)
-
-        texto += formatear_linea("Ref. Proveedor", row.embarcador)
-
-        if carga:
-
-            for c in carga:
-                ap1 = float(c.cbm) if c.cbm is not None else 0
-
-                aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
-
-                texto += formatear_linea("Mercadería", c.producto.nombre)
-
-                texto += formatear_linea("Bultos", str(c.bultos))
-
-                texto += formatear_linea("Peso", str(c.bruto))
-
-                texto += formatear_linea("Aplicable", str(aplicable))
-
-            texto += "<br>"
-
-        if gastos_boolean == 'true' and gastos:
-
-            texto += formatear_linea("Detalle", "Gastos en Dólares U.S.A")
-
-            total_gastos = 0
-
-            total_iva = 0
-
-            for g in gastos:
-
-                servicio = Servicios.objects.get(codigo=g.servicio)
-
-                total_gastos += float(g.precio)
-
-                if servicio.tasa == 'B':
-                    total_iva += float(g.precio) * 0.22
-
-                if g.precio != 0:
-                    texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}")
-
-            texto += "<br>"
-
-            texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
-
-            texto += formatear_linea("I.V.A", f"${total_iva:.2f}")
-
-            texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
-
-            texto += "<br>"
-
-        texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
-
-        texto += "Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta:\n\n"
-
-        texto += "BBVA URUGUAY S.A.\n"
-
-        texto += "25 de Mayo 401\n"
-
-        texto += "Cuenta Número: 5207347\n"
-
-        texto += "OCEANLINK Ltda.\n\n"
-
-        texto += "Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR.\n"
-
-        texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
-
-        texto += "</pre>"
+        # Mini tabla como bloque visual horizontal (si es imprescindible mantenerla)
+        texto += "<br><b>Resumen del viaje:</b><br><br>"
+        texto += formatear_linea("Origen", str(row.origen) if row.origen else "S/I")
+        texto += formatear_linea("Destino", str(row.destino) if row.destino else "S/I")
+        texto += formatear_linea("Vuelo/Viaje", str(row.vapor) if row.vapor else "S/I")
+        texto += formatear_linea("Viaje", str(row.viaje) if row.viaje else "S/I")
+        texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
+        texto += formatear_linea("Llegada", format_fecha(row.fecha_retiro))
 
         return texto, resultado
 
 
-    elif title == 'Aviso de embarque':
-
-        resultado[
-            'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.seguimiento} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}'
-
-        fecha_actual = datetime.now()
-
-        fecha_formateada = fecha_actual.strftime(
-
-            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
-
-        texto = formatear_linea("Fecha", fecha_formateada.capitalize())
-
-        texto += "<br>"
-
-        texto += formatear_linea("Sres.", str(row.consignatario))
-
-        texto += formatear_linea("Depto.", "COMERCIO EXTERIOR")
-
-        texto += "<br>"
-
-        salida = seguimiento.etd.strftime("%d/%m/%Y") if isinstance(seguimiento.etd, datetime) else ""
-
-        llegada = seguimiento.eta.strftime("%d/%m/%Y") if isinstance(seguimiento.eta, datetime) else ""
-
-        ref = f"{row.seguimiento}/{row.numero}"
-
-        texto += formatear_linea("Referencia", ref)
-
-        texto += formatear_linea("Posición", row.posicion or "")
-
-        texto += formatear_linea("Consignatario", row.consignatario or "")
-
-        texto += formatear_linea("Orden Cliente", embarque.ordencliente or "")
-
-        texto += formatear_linea("Ref. Proveedor", embarque.refproveedor or "")
-
-        texto += formatear_linea("Términos de Compra", row.terminos or "")
-
-        if master_boolean == 'true':
-            texto += formatear_linea("AWB", row.awb or "")
-
-        if transportista_boolean == 'true':
-            texto += formatear_linea("Transportista", row.transportista or "")
-
-        texto += "<br>"
-
-        texto += formatear_linea("Origen", row.origen or "")
-
-        texto += formatear_linea("Destino", row.destino or "")
-
-        texto += formatear_linea("Salida", salida)
-
-        texto += formatear_linea("Llegada", llegada)
-
-        texto += "<br>"
-
-        texto += formatear_linea("Agente", row.agente or "")
-
-        # Datos de contenedores
-
-        mercaderias = ""
-
-        bultos = 0
-
-        peso = 0
-
-        volumen = 0
-
-        cant_cntr = ImpterraCargaaerea.objects.filter(numero=row.numero).values(
-
-            'cbm', 'bruto', 'bultos', 'producto'
-
-        ).annotate(total=Count('id'))
-
-        if cant_cntr.exists():
-
-            for cn in cant_cntr:
-                bultos += cn['bultos']
-
-                peso += cn['bruto'] if cn['bruto'] else 0
-
-                volumen += cn['cbm'] if cn['cbm'] else 0
-
-                producto = Productos.objects.get(codigo=int(cn['producto'])).nombre
-
-                mercaderias += producto + ' - '
-
-        texto += formatear_linea("House", row.hawb or "")
-
-        texto += formatear_linea("Peso", f"{peso} KGS")
-
-        texto += formatear_linea("Bultos", str(bultos))
-
-        texto += formatear_linea("CBM", f"{volumen:.3f} M³")
-
-        texto += "<br>"
-
-        texto += formatear_linea("Mercadería", mercaderias.rstrip(' -'))
-
-        texto += formatear_linea("Depósito", seguimiento.deposito or "")
-
-        texto += formatear_linea("Doc. Originales", "SI" if seguimiento.originales else "NO")
-
-        texto += "<br>"
-
-        # Reemplazo de tabla por líneas alineadas
-
-        texto += formatear_linea("Origen", row.origen or "")
-
-        texto += formatear_linea("Destino", row.destino or "")
-
-        texto += formatear_linea("Viaje/Vuelo", row.transportista or "")
-
-        texto += formatear_linea("Salida", salida)
-
-        texto += formatear_linea("Llegada", llegada)
-
-        texto += "<br>"
-
-        texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
-
-        texto += "Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar.\n"
-
-        texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
-
-        texto += "</pre>"
-
-        return texto, resultado
-
-    elif title == 'Orden de facturacion':
-
-        resultado['asunto'] = 'ORDEN DE FACTURACION: - seguimiento: ' + str(
-            row.seguimiento)
-
-        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-        fecha_actual = datetime.now()
-        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
-        if isinstance(seguimiento.eta, datetime):
-            llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
-        else:
-            llegada = ''
-        tabla_html = fecha_formateada+"<br><br>"
-        tabla_html += f"<p>ORDEN DE FACTURACIÓN SEGUIMIENTO: {row.seguimiento}</p><br>"
-        tabla_html += f"<p>POSICIÓN: {row.posicion}</p><br>"
-        tabla_html += f"<p>MASTER: {row.awb}</p><br>"
-        tabla_html += f"<p>ETA {llegada} </p><br>"
-        tabla_html += f"<p>CLIENTE: {seguimiento.cliente}</p><br>"
-
-        return tabla_html, resultado
-
+    #hacer de nuevo y falta en español
     elif title == 'Shipping instruction':
         tabla_html = "<table style='width:40%'>"
         # Definir los campos y sus respectivos valores
@@ -732,6 +281,386 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         return texto, resultado
 
+    elif title == 'Novedades sobre la carga':
+        fecha_actual = datetime.now()
+
+        resultado['asunto'] = 'NOVEDADES SOBRE LA CARGA - Ref.: ' + str(row.referencia) + \
+                              '/ CS: ' + str(row.seguimiento) + '- Shipper: ' + str(row.embarcador) + \
+                              '; Consignee: ' + str(row.consignatario)
+
+        fecha_formateada = fecha_actual.strftime(
+            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y'
+        )
+        texto += fecha_formateada.capitalize().upper() + '<br><br>'
+
+        cont = 1
+        for m in merca:
+            texto += formatear_linea(f"Mercadería {cont}", str(m.nombre) if m.nombre is not None else "S/I")
+            cont += 1
+
+        cont = 1
+        for b in row2:
+            texto += formatear_linea(f"Bultos {cont}", b.bultos if b.bultos is not None else "S/I")
+            texto += formatear_linea(f"Peso {cont}", b.bruto if b.bruto is not None else "S/I")
+            texto += formatear_linea(f"CBM {cont}", b.cbm if b.cbm is not None else "S/I")
+            cont += 1
+
+        cont = 1
+        for e in row3:
+            texto += formatear_linea(f"Nro. Contenedor {cont}",
+                                     str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I")
+            texto += formatear_linea(f"Precintos {cont}", str(e.precinto) if e.precinto is not None else "S/I")
+            cont += 1
+
+        texto += formatear_linea("Embarque", str(row_number) if row_number is not None else "S/I")
+        texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
+        texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
+        texto += formatear_linea("LLegada", format_fecha(row.fecha_retiro))
+        texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
+        texto += formatear_linea("Destino", str(row.destino) if row.destino is not None else "S/I")
+        texto += formatear_linea("Viaje", str(viaje))
+        texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I")
+        texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
+        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario is not None else "S/I")
+
+        return texto, resultado
+    elif title == 'Routing Order':
+        hora_actual = datetime.now().strftime("%H:%M")
+        fecha_actual = datetime.now()
+
+        resultado['asunto'] = 'ROUTING ORDER - Ref.: ' + str(row.referencia) + \
+                              '/ CS: ' + str(row.seguimiento) + '- Shipper: ' + str(row.embarcador) + \
+                              '; Consignee: ' + str(row.consignatario)
+
+        texto += f'{hora_actual} <br><br>'
+
+        texto += formatear_linea("Fecha", format_fecha(fecha_actual))
+        texto += formatear_linea("A", str(row.agente) if row.agente is not None else "S/I")
+        texto += formatear_linea("Departamento", "MARITIMO")
+
+        texto += "<br>Estimados Sres.: <br>"
+        texto += "Por favor, contactar la siguiente compañía para coordinar la operación referenciada: <br><br>"
+
+        # Proveedor
+        texto += formatear_linea("Proveedor", str(row.embarcador) if row.embarcador is not None else "S/I")
+        texto += formatear_linea("Dirección",
+                                 str(row.direccion_embarcador) if row.direccion_embarcador is not None else "S/I")
+        texto += formatear_linea("Ciudad", str(row.ciudad_embarcador) if row.ciudad_embarcador is not None else "S/I")
+        texto += formatear_linea("País", str(row.pais_embarcador) if row.pais_embarcador is not None else "S/I")
+
+        texto += "<br>"
+
+        # Consignee
+        texto += formatear_linea("Consignee", str(row.consignatario) if row.consignatario is not None else "S/I")
+        texto += formatear_linea("Dirección",
+                                 str(row.direccion_consignatario) if row.direccion_consignatario is not None else "S/I")
+        texto += formatear_linea("Ciudad",
+                                 str(row.ciudad_consignatario) if row.ciudad_consignatario is not None else "S/I")
+        texto += formatear_linea("País", str(row.pais_consignatario) if row.pais_consignatario is not None else "S/I")
+
+        texto += "<br>"
+
+        # Detalles de la operación
+        texto += formatear_linea("Referencia interna", str(row_number) if row_number is not None else "S/I")
+        texto += formatear_linea("Orden cliente", str(row.orden_cliente) if row.orden_cliente is not None else "S/I")
+        texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
+        texto += formatear_linea("Destino", str(row.destino) if row.destino is not None else "S/I")
+
+        texto += "<br>"
+
+        # Mercadería y detalles de envío
+        cont = 1
+        for m in merca:
+            texto += formatear_linea(f"Mercadería {cont}", str(m.nombre) if m.nombre is not None else "S/I")
+            cont += 1
+
+        cont = 1
+        for b in row2:
+            texto += formatear_linea(f"Bultos {cont}", b.bultos if b.bultos is not None else "S/I")
+            texto += formatear_linea(f"Peso {cont}", b.bruto if b.bruto is not None else "S/I")
+            cont += 1
+
+        texto += formatear_linea("Condiciones de pago", str(row.pago_flete) if row.pago_flete is not None else "S/I")
+        texto += formatear_linea("Términos de compra", str(row.terminos) if row.terminos is not None else "S/I")
+        texto += formatear_linea("Modo de embarque", "TERRESTRE")
+
+        texto += "<br>"
+
+        return texto, resultado
+    elif title == 'Notificación de llegada de carga':
+
+        resultado['asunto'] = (
+
+            f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {embarque.numero} - CS: {row.seguimiento} - '
+
+            f'HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Viaje: {viaje}'
+
+        )
+
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
+        fecha_actual = datetime.now()
+
+        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+
+        consigna = Clientes.objects.get(codigo=embarque.consignatario)
+
+        carga = ImpterraCargaaerea.objects.filter(numero=embarque.numero)
+
+        gastos = ImpterraServiceaereo.objects.filter(numero=embarque.numero)
+
+        texto = formatear_linea("Fecha", fecha_formateada)
+
+        texto += "<br>"
+
+        texto += formatear_linea("Att.", "")
+
+        texto += formatear_linea("Notificar a", row.consignatario)
+
+        texto += formatear_linea("Dirección", consigna.direccion if consigna else "")
+
+        texto += formatear_linea("Teléfono", consigna.telefono if consigna else "")
+
+        texto += "<br>"
+
+        texto += formatear_linea("Salida", conex.salida if conex else "")
+
+        texto += formatear_linea("Llegada", conex.llegada if conex else "")
+
+        texto += formatear_linea("Origen", conex.origen if conex else "")
+
+        texto += formatear_linea("Destino", conex.destino if conex else "")
+
+        texto += formatear_linea("HAWB", embarque.hawb)
+
+        if master_boolean == 'true':
+            texto += formatear_linea("AWB", embarque.awb)
+
+        texto += formatear_linea("Referencia", embarque.numero)
+
+        texto += formatear_linea("Posición", embarque.posicion)
+
+        texto += formatear_linea("Seguimiento", row.seguimiento)
+
+        texto += formatear_linea("Embarcador", row.embarcador)
+
+        texto += formatear_linea("Ref. Proveedor", row.embarcador)
+
+        if carga:
+
+            for c in carga:
+                ap1 = float(c.cbm) if c.cbm is not None else 0
+
+                aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
+
+                texto += formatear_linea("Mercadería", c.producto.nombre)
+
+                texto += formatear_linea("Bultos", str(c.bultos))
+
+                texto += formatear_linea("Peso", str(c.bruto))
+
+                texto += formatear_linea("Aplicable", str(aplicable))
+
+            texto += "<br>"
+
+        if gastos_boolean == 'true' and gastos:
+
+            texto += formatear_linea("Detalle", "Gastos en Dólares U.S.A")
+
+            total_gastos = 0
+
+            total_iva = 0
+
+            for g in gastos:
+
+                servicio = Servicios.objects.get(codigo=g.servicio)
+
+                total_gastos += float(g.precio)
+
+                if servicio.tasa == 'B':
+                    total_iva += float(g.precio) * 0.22
+
+                if g.precio != 0:
+                    texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}")
+
+            texto += "<br>"
+
+            texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
+
+            texto += formatear_linea("I.V.A", f"${total_iva:.2f}")
+
+            texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
+
+            texto += "<br>"
+
+        texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
+
+        texto += "Les informamos que por razones de seguridad los pagos solo pueden hacerse por transferencia bancaria a la siguiente cuenta:\n\n"
+
+        texto += "BBVA URUGUAY S.A.\n"
+
+        texto += "25 de Mayo 401\n"
+
+        texto += "Cuenta Número: 5207347\n"
+
+        texto += "OCEANLINK Ltda.\n\n"
+
+        texto += "Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR.\n"
+
+        texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
+
+        texto += "</pre>"
+
+        return texto, resultado
+    elif title == 'Aviso de embarque':
+
+        resultado[
+            'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.seguimiento} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}'
+
+        fecha_actual = datetime.now()
+
+        fecha_formateada = fecha_actual.strftime(
+
+            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
+
+        texto = formatear_linea("Fecha", fecha_formateada.capitalize())
+
+        texto += "<br>"
+
+        texto += formatear_linea("Sres.", str(row.consignatario))
+
+        texto += formatear_linea("Depto.", "COMERCIO EXTERIOR")
+
+        texto += "<br>"
+
+        salida = seguimiento.etd.strftime("%d/%m/%Y") if isinstance(seguimiento.etd, datetime) else ""
+
+        llegada = seguimiento.eta.strftime("%d/%m/%Y") if isinstance(seguimiento.eta, datetime) else ""
+
+        ref = f"{row.seguimiento}/{row.numero}"
+
+        texto += formatear_linea("Referencia", ref)
+
+        texto += formatear_linea("Posición", row.posicion or "")
+
+        texto += formatear_linea("Consignatario", row.consignatario or "")
+
+        texto += formatear_linea("Orden Cliente", embarque.ordencliente or "")
+
+        texto += formatear_linea("Ref. Proveedor", embarque.refproveedor or "")
+
+        texto += formatear_linea("Términos de Compra", row.terminos or "")
+
+        if master_boolean == 'true':
+            texto += formatear_linea("AWB", row.awb or "")
+
+        if transportista_boolean == 'true':
+            texto += formatear_linea("Transportista", row.transportista or "")
+
+        texto += "<br>"
+
+        texto += formatear_linea("Origen", row.origen or "")
+
+        texto += formatear_linea("Destino", row.destino or "")
+
+        texto += formatear_linea("Salida", salida)
+
+        texto += formatear_linea("Llegada", llegada)
+
+        texto += "<br>"
+
+        texto += formatear_linea("Agente", row.agente or "")
+
+        # Datos de contenedores
+
+        mercaderias = ""
+
+        bultos = 0
+
+        peso = 0
+
+        volumen = 0
+
+        cant_cntr = ImpterraCargaaerea.objects.filter(numero=row.numero).values(
+
+            'cbm', 'bruto', 'bultos', 'producto'
+
+        ).annotate(total=Count('id'))
+
+        if cant_cntr.exists():
+
+            for cn in cant_cntr:
+                bultos += cn['bultos']
+
+                peso += cn['bruto'] if cn['bruto'] else 0
+
+                volumen += cn['cbm'] if cn['cbm'] else 0
+
+                producto = Productos.objects.get(codigo=int(cn['producto'])).nombre
+
+                mercaderias += producto + ' - '
+
+        texto += formatear_linea("House", row.hawb or "")
+
+        texto += formatear_linea("Peso", f"{peso} KGS")
+
+        texto += formatear_linea("Bultos", str(bultos))
+
+        texto += formatear_linea("CBM", f"{volumen:.3f} M³")
+
+        texto += "<br>"
+
+        texto += formatear_linea("Mercadería", mercaderias.rstrip(' -'))
+
+        texto += formatear_linea("Depósito", seguimiento.deposito or "")
+
+        texto += formatear_linea("Doc. Originales", "SI" if seguimiento.originales else "NO")
+
+        texto += "<br>"
+
+        # Reemplazo de tabla por líneas alineadas
+
+        texto += formatear_linea("Origen", row.origen or "")
+
+        texto += formatear_linea("Destino", row.destino or "")
+
+        texto += formatear_linea("Viaje/Vuelo", row.transportista or "")
+
+        texto += formatear_linea("Salida", salida)
+
+        texto += formatear_linea("Llegada", llegada)
+
+        texto += "<br>"
+
+        texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
+
+        texto += "Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar.\n"
+
+        texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
+
+        texto += "</pre>"
+
+        return texto, resultado
+    elif title == 'Orden de facturacion':
+
+        resultado['asunto'] = 'ORDEN DE FACTURACION: - seguimiento: ' + str(
+            row.seguimiento)
+
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+        if isinstance(seguimiento.eta, datetime):
+            llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
+        else:
+            llegada = ''
+        tabla_html = fecha_formateada+"<br><br>"
+        tabla_html += f"<p>ORDEN DE FACTURACIÓN SEGUIMIENTO: {row.seguimiento}</p><br>"
+        tabla_html += f"<p>POSICIÓN: {row.posicion}</p><br>"
+        tabla_html += f"<p>MASTER: {row.awb}</p><br>"
+        tabla_html += f"<p>ETA {llegada} </p><br>"
+        tabla_html += f"<p>CLIENTE: {seguimiento.cliente}</p><br>"
+
+        return tabla_html, resultado
     elif title == 'Traspaso a operaciones':
 
         texto += formatear_linea("SEGUIMIENTO", row.numero)

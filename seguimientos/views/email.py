@@ -82,7 +82,6 @@ def get_data_email(request):
                 texto += formatear_linea("COURIER/GUIA", "")
 
                 resultado['asunto'] = f'SEGUIMIENTO {row.numero} // TRASPASO A OPERACIONES'
-
             elif title == 'Aviso de embarque':
 
                 resultado[
@@ -242,7 +241,6 @@ def get_data_email(request):
                 texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
 
                 texto += "</pre>"
-
             elif title == 'Notificacion llegada de carga':
 
                 consigna = Clientes.objects.get(codigo=row.consignatario_codigo)
@@ -371,171 +369,292 @@ def get_data_email(request):
                 texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
 
                 texto += "</pre>"
-
             elif title == 'Aviso de desconsolidacion':
-                # cantidad_cntr = ''
-                # contenedores = ''
-                # precintos = ''
-                # movimiento = ''
-                # mercaderias = ''
-                # bultos = 0
-                # peso = 0
+
                 fecha_actual = datetime.datetime.now()
-                resultado['asunto'] = 'AVISO DE DESCONSOLIDACION - Ref.: ' + str(row.refproveedor) + ' - CS: ' + str(row.numero) + \
-                                      '- HB/l: ' + str(row.hawb) + ' - Ship: ' + str(row.embarcador)
-                # # TEXTO DE CUERPO DEL MENSAJE
-                fecha_formateada = fecha_actual.strftime(f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y')
-                texto += fecha_formateada.capitalize().upper() + '<br><br>'
-                tabla_html = "<table style='width:40%'>"
-                campos = [
-                    ("Att.", str("Departamento de operaciones").upper()),
-                    ("Cliente", str(row.cliente)),
-                    ("Direccion", str(row.direccion_cliente) if row.direccion_cliente is not None else ""),
-                    ("Telefono", str(row.telefono_cliente) if row.telefono_cliente is not None else ""),
-                    ("Vapor", str(row.vapor) if row.vapor is not None else ""),
-                    ("Viaje", str(row.viaje) if row.viaje is not None else ""),
-                    # ("Embarque", str(row.etd.strftime("%d/%m/%Y")) if isinstance(row.etd, datetime.datetime) else ""),
-                    ("Llegada", str(row.eta.strftime("%d/%m/%Y")) if isinstance(row.eta, datetime.datetime) else ""),
-                    ("Posicion", str(row.posicion) if row.posicion is not None else ""),
-                ]
-                for campo, valor in campos:
-                    tabla_html += f"<tr><th align='left'>{campo}</th><td>{valor}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Seguimiento</th><td>{str(row.numero)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Embarcador</th><td>{str(row.embarcador)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Consignatario</th><td>{str(row.consignatario)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Orden cliente</th><td></td></tr>"
-                tabla_html += f"<tr><th align='left'>Referencia proveedor</th><td>{str(row.refproveedor)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Origen</th><td>{str(row.origen_text)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Destino</th><td>{str(row.destino_text)}</td></tr>"
-                # tabla_html += f"<tr><th align='left'>Loading</th><td>{str(row.loading)}</td></tr>"
-                # tabla_html += f"<tr><th align='left'>Discharge</th><td>{str(row.discharge)}</td></tr>"
-                # tabla_html += f"<tr><th align='left'>Transportista</th><td>{str(row.transportista)}</td></tr>"
-                # tabla_html += f"<tr><th align='left'>B/L</th><td>{str(row.awb)}</td></tr>"
-                # tabla_html += f"<tr><th align='left'>H B/L</th><td>{str(row.hawb)}</td></tr>"
-                # tabla_html += f"<tr><th align='left'>Posicion</th><td>{str(row.posicion)}</td></tr>"
-                # tabla_html += f"<tr><th align='left'>Notificante</th><td>{str(row.consignatario)}</td></tr>"
-                # Detalles de los contenedores
+
+                fecha_formateada = fecha_actual.strftime(
+                    f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y')
+
+                resultado['asunto'] = (
+
+                    f'AVISO DE DESCONSOLIDACION - Ref.: {row.refproveedor} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador}'
+
+                )
+
+                texto += formatear_linea("Fecha", fecha_formateada.upper())
+
+                texto += "<br>"
+
+                texto += formatear_linea("Att.", "DEPARTAMENTO DE OPERACIONES")
+
+                texto += formatear_linea("Cliente", str(row.cliente))
+
+                texto += formatear_linea("Dirección", row.direccion_cliente or "")
+
+                texto += formatear_linea("Teléfono", row.telefono_cliente or "")
+
+                texto += formatear_linea("Vapor", row.vapor or "")
+
+                texto += formatear_linea("Viaje", row.viaje or "")
+
+                if isinstance(row.eta, datetime.datetime):
+                    texto += formatear_linea("Llegada", row.eta.strftime("%d/%m/%Y"))
+
+                texto += formatear_linea("Posición", row.posicion or "")
+
+                texto += formatear_linea("Seguimiento", row.numero)
+
+                texto += formatear_linea("Embarcador", row.embarcador)
+
+                texto += formatear_linea("Consignatario", row.consignatario)
+
+                texto += formatear_linea("Orden cliente", "")
+
+                texto += formatear_linea("Referencia proveedor", row.refproveedor)
+
+                texto += formatear_linea("Origen", row.origen_text)
+
+                texto += formatear_linea("Destino", row.destino_text)
+
+                # Datos de contenedores
+
                 cantidad_cntr = ""
+
                 contenedores = ""
+
                 precintos = ""
+
                 movimiento = ""
+
                 mercaderias = ""
+
                 bultos = 0
+
                 peso = 0
+
                 volumen = 0
-                cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto',
-                                                                             'bultos', 'peso', 'envase',
-                                                                             'movimiento','volumen').annotate(total=Count('id'))
+
+                cant_cntr = Envases.objects.filter(numero=row.numero).values(
+
+                    'tipo', 'nrocontenedor', 'precinto', 'bultos',
+
+                    'peso', 'envase', 'movimiento', 'volumen'
+
+                ).annotate(total=Count('id'))
+
                 if cant_cntr.count() > 0:
+
                     for cn in cant_cntr:
+
                         cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - '
+
                         contenedores += f' {cn["nrocontenedor"]} - '
-                        if cn['precinto'] is not None and len(cn['precinto']) > 0:
+
+                        if cn['precinto']:
                             precintos += f'{cn["precinto"]} - '
+
                         bultos += cn['bultos']
-                        if cn['peso'] is not None:
+
+                        if cn['peso']:
                             peso += cn['peso']
-                        if cn['volumen'] is not None:
+
+                        if cn['volumen']:
                             volumen += cn['volumen']
-                        movimiento += cn['movimiento'] + ' - '
-                        mercaderias += cn['envase'] + ' - '
-                tabla_html += f"<tr><th align='left'>Contenedores</th><td>{cantidad_cntr[:-3]}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Nro.Contenedor/es</th><td>{contenedores[:-3]}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Precintos/sellos</th><td>{precintos[:-3]}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Bultos</th><td>{bultos}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Peso</th><td>{peso} KGS</td></tr>"
-                tabla_html += f"<tr><th align='left'>CBM</th><td>{volumen} M³</td></tr>"
-                tabla_html += f"<tr><th align='left'>Mercaderia</th><td>{mercaderias[:-3]}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Entrega en gate</th><td></td></tr>"
-                tabla_html += f"<tr><th align='left'>Deposito</th><td>{str(row.deposito)}</td></tr>"
-                # tabla_html += f"<tr><th align='left'>Movimiento</th><td>{movimiento[:-3]}</td></tr>"
-                tabla_html += "</table><br><br>"
-                texto += tabla_html
 
-                texto += '<b>ATENCION!</b><br><br>'
-                texto += 'DETALLE DE DESCONSOLIDACION<br><br>'
-                texto += '<b>OCEANLINK,</b><br>'
-                texto += str(request.user.first_name) + ' ' + str(request.user.last_name) + ' <br>'
-                texto += 'DEPARTAMENTO DE ' + str(tipos_operativa[row.modo]) + ', <br>'
-                texto += 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103 <br>'
-                texto += 'OPERACIONES <br>'
-                texto += 'EMAIL: <br>'
-                texto += 'TEL: +5982 2605 2332 <br>'
-                texto += '</table>'
+                        movimiento += f'{cn["movimiento"]} - '
+
+                        mercaderias += f'{cn["envase"]} - '
+
+                texto += formatear_linea("Contenedores", cantidad_cntr.strip(' -'))
+
+                texto += formatear_linea("Nro. Contenedor/es", contenedores.strip(' -'))
+
+                texto += formatear_linea("Precintos/sellos", precintos.strip(' -'))
+
+                texto += formatear_linea("Bultos", str(bultos))
+
+                texto += formatear_linea("Peso", f"{peso} KGS")
+
+                texto += formatear_linea("CBM", f"{volumen} M³")
+
+                texto += formatear_linea("Mercadería", mercaderias.strip(' -'))
+
+                texto += formatear_linea("Entrega en gate", "")
+
+                texto += formatear_linea("Depósito", str(row.deposito))
+
+                texto += "<br>"
+
+                texto += "<b>ATENCION!</b><br><br>"
+
+                texto += "DETALLE DE DESCONSOLIDACION<br><br>"
             elif title == 'Cargo release':
-                fecha_actual = datetime.datetime.now()
-                resultado['asunto'] = 'CARGO RELEASE - Seg.: ' + str(row.numero) +'- HB/l: ' + str(row.hawb) + ' - Shipper: ' + str(row.embarcador) + ' - CNEE: ' + str(row.consignatario)
-                # # TEXTO DE CUERPO DEL MENSAJE
-                fecha_formateada = fecha_actual.strftime(f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y')
 
-                texto='<p> SEG: '+ str(row.numero) + '<br>'
-                texto+='HBL: '+ str(row.hawb) + '<br>'
-                texto+='Date: '+ fecha_formateada.capitalize().upper() + '<br>'
-                texto+='PLEASE NOTE THAT WE REALEASED DOCS TO CONSIGNEE. <br>'
-                texto+='THANK YOU VERY MUCH FOR YOUR ASSISTANCE.<br>'
-                texto+='BEST REGARDS,<br>'
-                texto+='OCEANLINK<br></p>'
+                fecha_actual = datetime.datetime.now()
+
+                fecha_formateada = fecha_actual.strftime(
+                    f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y')
+
+                resultado['asunto'] = (
+
+                    f'CARGO RELEASE - Seg.: {row.numero} - HB/l: {row.hawb} - Shipper: {row.embarcador} - CNEE: {row.consignatario}'
+
+                )
+
+                texto = ""
+
+                texto += formatear_linea("SEG", row.numero)
+
+                texto += formatear_linea("HBL", row.hawb)
+
+                texto += formatear_linea("DATE", fecha_formateada.upper())
+
+                texto += "<br>"
+
+                texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
+
+                texto += "PLEASE NOTE THAT WE RELEASED DOCS TO CONSIGNEE.\n"
+
+                texto += "THANK YOU VERY MUCH FOR YOUR ASSISTANCE.\n\n"
+
+                texto += "BEST REGARDS,\n"
+
+                texto += "OCEANLINK\n"
+
+                texto += "</pre>"
             elif title == 'Release documentacion':
-                try:
-                    resultado['asunto'] = 'RELEASE DOCUMENTACION - FCR.: ' + str(
-                        row.hawb or '') + ' - SEGUIMIENTO' + str(
-                        row.numero or '')
 
-                    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # Revisa si este ajuste de idioma causa problemas
+                resultado['asunto'] = (
 
-                    fecha_actual = datetime.datetime.now()
+                    f'RELEASE DOCUMENTACION - FCR.: {row.hawb or ""} - SEGUIMIENTO {row.numero or ""}'
 
-                    fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+                )
 
-                    texto = fecha_formateada + '<br><br>'
+                locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 
-                    texto += '<p>Estimados, </p><br>'
+                fecha_actual = datetime.datetime.now()
 
-                    texto += '<p>Informamos a Uds. que se encuentra a vuestra disposición para ser retirada en nuestras oficinas la documentación correspondiente a la libreación </p>'
+                if str(row.vapor).isdigit():
+                    vapor = Vapores.objects.get(codigo=row.vapor).nombre
+                else:
+                    vapor = row.vapor
 
-                    texto += '<p>del siguiente embarque: </p><br>'
+                fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
 
-                    texto += f'<p>FCR: {row.hawb or ""} </p>'
+                texto = formatear_linea("Fecha", fecha_formateada)
 
-                    texto += f'<p>BUQUE: {row.vapor or ""} </p>'
+                texto += "<br>"
 
-                    texto += '<p>Favor presentar para dicha liberación de los FCR correspondientes a este embarque. </p>'
+                texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
 
-                    texto += '<p>Nuestro horario para transferencias es de lunes a viernes de 08.30 a 12.00 y de 13.00 a 16.30 hrs. </p>'
+                texto += "Estimados,\n\n"
 
-                    texto += '<p>Saludos, </p><br>'
-                    texto += '<p>OCEANLINK </p><br>'
+                texto += "Informamos a Uds. que se encuentra a vuestra disposición para ser retirada en nuestras oficinas\n"
 
-                except Exception as e:
-                    return None, {"resultado": "error", "mensaje": f"Error en 'Relese documentación': {e}"}
+                texto += "la documentación correspondiente a la liberación del siguiente embarque:\n\n"
+
+                texto += f"{'FCR:':<20} {row.hawb or ''}\n"
+
+                texto += f"{'BUQUE:':<20} {vapor or ''}\n\n"
+
+                texto += "Favor presentar para dicha liberación los FCR correspondientes a este embarque.\n"
+
+                texto += "Nuestro horario para transferencias es de lunes a viernes de 08:30 a 12:00 y de 13:00 a 16:30 hrs.\n\n"
+
+                texto += "</pre>"
             elif title == 'Liberacion':
-                resultado['asunto'] = 'LIBERACIÓN: ' + str(row.awb) + ' - seguimiento: ' + str(
-                    row.numero)
+
+                resultado['asunto'] = f'LIBERACIÓN: {row.awb} - seguimiento: {row.numero}'
+
                 locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
                 fecha_actual = datetime.datetime.now()
+
                 fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
 
-                texto = fecha_formateada + "<br><br>"
-                texto += f"<p>ESTIMADOS, SOLICITAMOS LA LIBERACIÓN DEL SIGUIENTE BL:{row.awb}</p><br>"
-                texto += f"<p>ADJUNTAMOS:</p>"
-                texto += f"<p>*BL {row.awb} ENDOSADO</p>"
-                texto += f"<p>*ARRIVAL NOTICE ENDOSADO</p>"
-                texto += f"<p>*CONTRATO DE RESPONSABILIDAD</p>"
-                texto += f"<p>*COMPROBANTE DE PAGO</p><br>"
-                texto += f"<p>SALUDOS,</p><br>"
-                texto += f"<p>OCEANLINK</p><br>"
+                texto = ""
+
+                texto += formatear_linea("Fecha", fecha_formateada)
+
+                texto += "<br>"
+
+                texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
+
+                texto += f"ESTIMADOS,\n\n"
+
+                texto += f"SOLICITAMOS LA LIBERACIÓN DEL SIGUIENTE BL: {row.awb}\n\n"
+
+                texto += "ADJUNTAMOS:\n"
+
+                texto += f" * BL {row.awb} ENDOSADO\n"
+
+                texto += " * ARRIVAL NOTICE ENDOSADO\n"
+
+                texto += " * CONTRATO DE RESPONSABILIDAD\n"
+
+                texto += " * COMPROBANTE DE PAGO\n\n"
+
+                texto += "SALUDOS,\n\n"
+
+                texto += "OCEANLINK\n"
+
+                texto += "</pre>"
             elif title == 'Notificacion cambio de linea':
-                resultado['asunto'] = 'NOTIFICACIÓN CAMBIO DE LÍNEA / NVOCC / CÍA AEREA '
+
+                resultado['asunto'] = 'NOTIFICACIÓN CAMBIO DE LÍNEA / NVOCC / CÍA AEREA'
+
+                locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
+                fecha_actual = datetime.datetime.now()
+
+                fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+
+                texto = ""
+
+                texto += formatear_linea("Fecha", fecha_formateada)
+
+                texto += "<br>"
+
+                texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
+
+                texto += f"SEG: {row.numero}\n\n"
+
+                texto += "CONFIRMO CAMBIO DE LÍNEA / NVOCC / CÍA AEREA DE ESTE SEGUIMIENTO\n\n"
+
+                texto += "ANTERIOR:\n"
+
+                texto += f"ACTUAL: {row.transportista}\n\n"
+
+                texto += "OCEANLINK\n"
+
+                texto += "</pre>"
+            elif title == 'Orden de facturacion':
+                resultado['asunto'] = f'ORDEN DE FACTURACION: - seguimiento: {row.numero}'
+
                 locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
                 fecha_actual = datetime.datetime.now()
                 fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
 
-                texto = fecha_formateada + "<br><br>"
-                texto += f"<p>SEG: {row.numero}</p><br>"
-                texto += f"<p>CONFIRMO CAMBIO DE LÍNEA / NVOCC / CÍA AEREA DE ESTE SEGUIMIENTO</p><br>"
-                texto += f"<p>ANTERIOR: </p><br>"
-                texto += f"<p>ACTUAL: {row.transportista}</p><br><br>"
-                texto += f"<p>OCEANLINK</p><br>"
+                if isinstance(row.eta, datetime.datetime):
+                    llegada = row.eta.strftime("%d/%m/%Y")
+                else:
+                    llegada = ''
+
+                texto = ""
+                texto += formatear_linea("Fecha", fecha_formateada)
+                texto += "<br>"
+
+                texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
+                texto += f"ORDEN DE FACTURACIÓN - SEGUIMIENTO: {row.numero}\n\n"
+                texto += f"{'Posición:':<15} {row.posicion}\n"
+                texto += f"{'Master:':<15} {row.awb}\n"
+                texto += f"{'ETA:':<15} {llegada}\n"
+                texto += f"{'Cliente:':<15} {row.cliente}\n\n"
+                texto += "OCEANLINK\n"
+                texto += "</pre>"
+
+            #volver a hacer
             elif title == 'Shipping instruction':
                 tabla_html = "<table style='width:40%'>"
                 # Definir los campos y sus respectivos valores
@@ -669,25 +788,8 @@ def get_data_email(request):
                           'amendments as needed and prevent additional fees from the steamship line. <br><br>')
 
                 texto+='OCEANLINK'
-            elif title == 'Orden de facturacion':
 
-                resultado['asunto'] = 'ORDEN DE FACTURACION: - seguimiento: ' + str(
-                    row.numero)
-
-                locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-                fecha_actual = datetime.datetime.now()
-                fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
-                if isinstance(row.eta, datetime.datetime):
-                    llegada = str(row.eta.strftime("%d/%m/%Y"))
-                else:
-                    llegada = ''
-                texto = fecha_formateada + "<br><br>"
-                texto += f"<p>ORDEN DE FACTURACIÓN SEGUIMIENTO: {row.numero}</p><br>"
-                texto += f"<p>POSICIÓN: {row.posicion}</p><br>"
-                texto += f"<p>MASTER: {row.awb}</p><br>"
-                texto += f"<p>ETA {llegada} </p><br>"
-                texto += f"<p>CLIENTE: {row.cliente}</p><br>"
-                texto += 'OCEANLINK'
+            #volver a hacer
             elif title == 'Instruccion de embarque':
                 embarcador = Clientes.objects.get(codigo=row.embarcador_codigo)
                 if row.modo !='IMPORT AEREO' and row.modo !='EXPORT AEREO':
