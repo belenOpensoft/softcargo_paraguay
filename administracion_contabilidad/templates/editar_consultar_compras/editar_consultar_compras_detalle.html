@@ -1,0 +1,222 @@
+<!-- Modal Proveedores Gastos - jQuery UI -->
+<style>
+  #modalFacturaDetalle {
+    max-width: 80vw;
+    max-height: 90vh;
+    overflow: hidden;
+    font-size: 0.85rem;
+  }
+
+  #modalFacturaDetalle .form-control {
+    font-size: 12px;
+    padding: 2px 5px;
+    height: 20px;
+  }
+
+  #modalFacturaDetalle select {
+    font-size: 0.85rem;
+    height: 30px;
+  }
+
+  #modalFacturaDetalle label {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+  }
+
+  #modalFacturaDetalle .table {
+    font-size: 0.8rem;
+  }
+
+  #modalFacturaDetalle .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  #modalFacturaDetalle .col-md-1,
+  #modalFacturaDetalle .col-md-2,
+  #modalFacturaDetalle .col-md-3,
+  #modalFacturaDetalle .col-md-4,
+  #modalFacturaDetalle .col-md-6 {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+
+  #modalFacturaDetalle h6 {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  #modalFacturaDetalle .btn-sm {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+
+  #modalFacturaDetalle .table-sm th,
+  #modalFacturaDetalle .table-sm td {
+    padding: 4px;
+    vertical-align: middle;
+  }
+
+  #modalFacturaDetalle input.bg-warning {
+    background-color: #fff3cd !important;
+  }
+
+    #modalFacturaDetalle table {
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 4px;
+  }
+</style>
+
+<div id="modalFacturaDetalle" title="Detalle de Factura del Proveedor" style="display: none; overflow-y:auto;">
+  <form method="post" id="formFacturaDetalle">
+    {% csrf_token %}
+    <div class="container-fluid">
+
+      <!-- Primera Fila: Prefijo, Serie, Numero, Tipo, Moneda -->
+      <div class="row mb-2">
+        <div class="col-md-2">
+          {{ compras_detalle.prefijo.label_tag }}
+          {{ compras_detalle.prefijo }}
+        </div>
+        <div class="col-md-2">
+          {{ compras_detalle.serie.label_tag }}
+          {{ compras_detalle.serie }}
+        </div>
+        <div class="col-md-3">
+          {{ compras_detalle.numero.label_tag }}
+          {{ compras_detalle.numero }}
+        </div>
+        <div class="col-md-2">
+          {{ compras_detalle.tipo.label_tag }}
+          {{ compras_detalle.tipo }}
+        </div>
+        <div class="col-md-3">
+          {{ compras_detalle.moneda.label_tag }}
+          {{ compras_detalle.moneda }}
+        </div>
+      </div>
+
+      <!-- Segunda Fila: Fechas, Paridad, Arbitraje, Proveedor -->
+      <div class="row mb-2">
+        <div class="col-md-2">
+          {{ compras_detalle.fecha.label_tag }}
+          {{ compras_detalle.fecha }}
+        </div>
+        <div class="col-md-2">
+          {{ compras_detalle.fecha_ingreso.label_tag }}
+          {{ compras_detalle.fecha_ingreso }}
+        </div>
+        <div class="col-md-2">
+          {{ compras_detalle.fecha_vencimiento.label_tag }}
+          {{ compras_detalle.fecha_vencimiento }}
+        </div>
+        <div class="col-md-2">
+          {{ compras_detalle.paridad.label_tag }}
+          {{ compras_detalle.paridad }}
+        </div>
+        <div class="col-md-2">
+          {{ compras_detalle.arbitraje.label_tag }}
+          {{ compras_detalle.arbitraje }}
+        </div>
+        <div class="col-md-2">
+          {{ compras_detalle.proveedor.label_tag }}
+          {{ compras_detalle.proveedor }}
+        </div>
+      </div>
+
+      <!-- Fila: Detalle, Total, Imputable -->
+      <div class="row mb-2">
+        <div class="col-md-6">
+          {{ compras_detalle.detalle.label_tag }}
+          {{ compras_detalle.detalle }}
+        </div>
+        <div class="col-md-3">
+          {{ compras_detalle.total.label_tag }}
+          {{ compras_detalle.total }}
+        </div>
+        <div class="col-md-3">
+          {{ compras_detalle.imputable.label_tag }}
+          {{ compras_detalle.imputable }}
+        </div>
+      </div>
+
+      <!-- Tabla de Items -->
+      <div class="table-responsive mb-3">
+        <h6 class="mt-3">Gastos (Items)</h6>
+        <table class="table table-bordered table-sm" id="tabla_items_compra">
+          <thead class="thead-light">
+            <tr>
+              <th>Concepto</th>
+              <th>Nombre</th>
+              <th>Precio</th>
+              <th>IVA</th>
+              <th>Embarque</th>
+              <th>Posición</th>
+            </tr>
+          </thead>
+          <tbody id="tablaItems"></tbody>
+        </table>
+      </div>
+
+      <!-- Tabla de Imputaciones y Recibos -->
+      <div class="row">
+        <div class="col-md-8" style="padding:0px;">
+          <h6>Documentos Imputados</h6>
+          <table class="table table-bordered table-sm">
+            <thead class="thead-light">
+              <tr>
+                <th class="oculto">Autogenerado</th>
+                <th>Documento</th>
+                <th>Imputado</th>
+              </tr>
+            </thead>
+            <tbody id="tablaImputaciones"></tbody>
+          </table>
+        </div>
+        <div class="col-md-4">
+          <h6>Recibo con el que se pagó</h6>
+          <table class="table table-bordered table-sm" id="tabla_pago_factura">
+            <thead class="thead-light">
+              <tr>
+                <th class="oculto">nro</th>
+                <th>Nº Recibo</th>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th>Tipo</th>
+              </tr>
+            </thead>
+            <tbody id="tablaRecibos"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Botones de Imputación -->
+      <div class="d-flex justify-content-start gap-2 my-3">
+        <button type="button" id="eliminarImputaciones" class="btn btn-danger btn-sm">Eliminar imputaciones</button>
+        <button type="button" id="realizarImputaciones" class="btn btn-success btn-sm">Realizar imputaciones</button>
+      </div>
+
+      <!-- Tabla Movimiento de Cheques -->
+      <div class="table-responsive mb-3">
+        <h6>Movimiento de Cheques Emitidos / Entregados</h6>
+        <table class="table table-bordered table-sm">
+          <thead class="thead-light">
+            <tr>
+              <th>Emisión</th>
+              <th>Detalle</th>
+              <th>Nº</th>
+              <th>Total</th>
+              <th>Vencimiento</th>
+              <th>Cuenta</th>
+            </tr>
+          </thead>
+          <tbody id="tablaCheques"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </form>
+</div>
+

@@ -73,3 +73,23 @@
         color: #333;
         background-color: red
     }
+
+        /* Achicar barra de título del modal */
+.ui-dialog .ui-dialog-titlebar {
+    padding: 4px 10px !important;
+    font-size: 13px !important;
+    min-height: unset !important;
+    height: auto !important;
+    line-height: 1.2;
+}
+
+/* Achicar el texto del título */
+.ui-dialog .ui-dialog-title {
+    font-size: 13px !important;
+}
+
+/* Opcional: reducir tamaño de botones del modal */
+.ui-dialog .ui-dialog-buttonpane .ui-button {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+}

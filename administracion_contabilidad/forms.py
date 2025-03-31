@@ -1145,7 +1145,7 @@ class EditarConsultarCompras(forms.Form):
     proveedor = forms.CharField(required=False, max_length=100, label="Proveedor")
     documento = forms.CharField(required=False, max_length=100, label="Documento")
     posicion = forms.CharField(required=False, max_length=100, label="Posición")
-
+    proveedor_codigo = forms.CharField(widget=forms.HiddenInput(), required=False)
     TIPO_CHOICES = [
         ('FACTURA', 'Factura'),
         ('CONTADO', 'Contado'),
@@ -1171,3 +1171,120 @@ class EditarConsultarCompras(forms.Form):
             if not isinstance(widget, (forms.CheckboxInput, forms.RadioSelect)):
                 existing_classes = widget.attrs.get('class', '')
                 widget.attrs['class'] = f'{existing_classes} form-control'.strip()
+
+class ComprasDetalle(forms.Form):
+    prefijo = forms.CharField(
+        label="Prefijo",
+        max_length=10,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'readonly': True
+        })
+    )
+    serie = forms.CharField(
+        label="Serie",
+        max_length=10,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'readonly': True
+        })
+    )
+    numero = forms.CharField(
+        label="Número",
+        max_length=20,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'readonly': True
+        })
+    )
+
+    tipo = forms.CharField(
+        label="Tipo",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'readonly': True
+        })
+    )
+
+    moneda = forms.ModelChoiceField(
+        queryset=Monedas.objects.all(),
+        label="Moneda",
+        widget=forms.Select(attrs={
+            'class': 'form-control form-control-sm',
+            'disabled': True  # Select usa disabled en lugar de readonly
+        })
+    )
+
+    fecha = forms.DateField(
+        label="Fecha",
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control form-control-sm bg-warning'
+        })
+    )
+    fecha_ingreso = forms.DateField(
+        label="Fecha Ingreso",
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control form-control-sm bg-warning'
+        })
+    )
+    fecha_vencimiento = forms.DateField(
+        label="Vencimiento",
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control form-control-sm bg-warning'
+        })
+    )
+
+    paridad = forms.FloatField(
+        label="Paridad",
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'step': '0.0001',
+            'class': 'form-control form-control-sm bg-warning'
+        })
+    )
+    arbitraje = forms.FloatField(
+        label="Arbitraje",
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'step': '0.0001',
+            'class': 'form-control form-control-sm bg-warning',
+        })
+    )
+
+    proveedor = forms.CharField(
+        label="Proveedor",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'id':'id_proveedor_detalle',
+            'readonly': True
+        })
+    )
+    detalle = forms.CharField(
+        label="Detalle",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm bg-warning'
+        })
+    )
+
+    total = forms.FloatField(
+        label="Total",
+        widget=forms.NumberInput(attrs={
+            'step': '0.01',
+            'class': 'form-control form-control-sm',
+            'readonly': True
+        })
+    )
+    imputable = forms.CharField(
+        label="Imputable",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'readonly': True
+        })
+    )
+
+
+
+

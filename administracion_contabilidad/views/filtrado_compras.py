@@ -2,21 +2,27 @@ from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from datetime import datetime
 from impomarit.models import VEmbarqueaereo as Vim
+from impomarit.models import VEmbarqueaereoDirecto as VimD
 from impomarit.models import Reservas as Mim
 from impomarit.models import Cargaaerea as Cim
 from impaerea.models import VEmbarqueaereo as Via
+from impaerea.models import VEmbarqueaereoDirecto as ViaD
 from impaerea.models import ImportReservas as Mia
 from impaerea.models import ImportCargaaerea as Cia
 from impterrestre.models import VEmbarqueaereo as Vit
+from impterrestre.models import VEmbarqueaereoDirecto as VitD
 from impterrestre.models import ImpterraReservas as Mit
 from impterrestre.models import ImpterraCargaaerea as Cit
 from expmarit.models import VEmbarqueaereo as Vem
+from expmarit.models import VEmbarqueaereoDirecto as VemD
 from expmarit.models import ExpmaritReservas as Mem
 from expmarit.models import ExpmaritCargaaerea as Cem
 from expaerea.models import VEmbarqueaereo as Vea
+from expaerea.models import VEmbarqueaereoDirecto as VeaD
 from expaerea.models import ExportReservas as Mea
 from expaerea.models import ExportCargaaerea as Cea
 from expterrestre.models import VEmbarqueaereo as Vet
+from expterrestre.models import VEmbarqueaereoDirecto as VetD
 from expterrestre.models import ExpterraReservas as Met
 from expterrestre.models import ExpterraCargaaerea as Cet
 from mantenimientos.models import Clientes
@@ -139,7 +145,11 @@ def buscar_embarques(request):
         '4': Vem, '5': Vea, '6': Vet
     }
     modelo = modelos.get(departamento)
-
+    modelos_directos = {
+        '1': VimD, '2': VitD, '3': ViaD,
+        '4': VemD, '5': VeaD, '6': VetD
+    }
+    modelo_directo = modelos_directos.get(departamento)
     if not modelo:
         return JsonResponse({'error': 'Departamento inválido'}, status=400)
 
@@ -171,21 +181,27 @@ def buscar_embarques(request):
     if embarque:
         filtros['numero__icontains'] = embarque
 
-    # Filtrar por tipo de embarque
-    if tipo_embarque == "consolidado":
-        filtros['consolidado'] = 1
-    elif tipo_embarque == "directo":
-        filtros['consolidado'] = 0
+    # Si pidió solo directos: buscar códigos en tabla de directos y usar solo esos en la tabla principal
+    embarques_directos_set = set()
+    if tipo_embarque == "directo":
+        directos_codigos = modelo_directo.objects.filter(**filtros).values_list('numero', flat=True)
+        embarques_directos_set = set(directos_codigos)
+        filtros['numero__in'] = list(embarques_directos_set)
 
-    # Obtener resultados filtrados
+    # Buscar embarques en modelo principal
     embarques = modelo.objects.filter(**filtros)
 
-    # Convertir a JSON
+    # Si no pidió solo directos, detectar los directos para cada uno
+    if tipo_embarque != "directo":
+        codigos_directos = modelo_directo.objects.filter(**filtros).values_list('numero', flat=True)
+        embarques_directos_set = set(codigos_directos)
+
+    # Armar la respuesta
     data = [
         {
             'embarque': e.numero,
-            'tipo': 'CONSOLIDADO' if e.consolidado == 1 else 'DIRECTO',
-            'fecha': e.fechaingreso.strftime("%Y-%m-%d"),
+            'tipo': 'DIRECTO' if e.numero in embarques_directos_set else 'COMÚN',
+            'fecha': e.fechaingreso.strftime("%Y-%m-%d") if e.fechaingreso else '',
             'posicion': e.posicion,
             'conocimiento': e.hawb,
             'transportista': e.transportista,
@@ -193,7 +209,6 @@ def buscar_embarques(request):
             'tarifa': 0,  # Ajustar si se necesita
             'status': e.status,
             'cliente': e.consignatario,
-
         }
         for e in embarques
     ]

@@ -258,7 +258,8 @@ def procesar_factura_proveedor(request):
                         'mes': fecha_obj.month,
                         'fechacheque': fecha_obj,
                         'paridad': paridad,
-                        'posicion': item_data.get('posicion')
+                        'posicion': item_data.get('posicion'),
+                        'nroserv': item_data.get('id'),
                     }
                     monto_original_asiento = {
                         'detalle': detalle_asiento,
@@ -284,7 +285,8 @@ def procesar_factura_proveedor(request):
                         'mes': fecha_obj.month,
                         'fechacheque': fecha_obj,
                         'paridad': paridad,
-                        'posicion': item_data.get('posicion')
+                        'posicion': item_data.get('posicion'),
+                        'nroserv': item_data.get('id'),
                     }
 
                     crear_asiento(iva_total_asiento)
@@ -314,7 +316,9 @@ def procesar_factura_proveedor(request):
                         'mes': fecha_obj.month,
                         'fechacheque': fecha_obj,
                         'paridad': paridad,
-                        'posicion': item_data.get('posicion')
+                        'posicion': item_data.get('posicion'),
+                        'nroserv': item_data.get('id'),
+
                     }
                     crear_asiento(asiento_vector)
 
@@ -377,6 +381,7 @@ def crear_asiento(asiento):
         lista.cambio = asiento['cambio']
         lista.moneda = asiento['moneda']
         lista.posicion = asiento['posicion']
+        lista.nroserv = asiento['nroserv']
         lista.save()
 
     except Exception as e:
