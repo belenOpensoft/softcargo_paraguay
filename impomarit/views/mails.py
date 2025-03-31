@@ -545,79 +545,57 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
     elif title == 'Aviso de embarque':
 
-        resultado['asunto'] = 'AVISO DE EMBARQUE / Ref: ' + str(row.seguimiento) + ' ' \
-         \
-                                                                              '- HB/l: ' + str(
-
-            row.hawb) + ' - Shipper: ' + str(row.embarcador) + ' - Consig: ' \
-         \
-                                                               '' + str(row.consignatario) + '; Vapor: ' + str(
-
-            vapor)
+        resultado[
+            'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.seguimiento} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}'
 
         fecha_actual = datetime.now()
 
         fecha_formateada = fecha_actual.strftime(
-
             f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
 
-        texto = fecha_formateada.capitalize() + '<br><br>'
+        texto = formatear_linea("Fecha", fecha_formateada.capitalize())
 
-        texto += 'Sres.: <br>'
+        texto += "<br>"
 
-        texto += str(row.consignatario) + '<br>'
+        texto += formatear_linea("Sres.", str(row.consignatario))
 
-        texto += '<b>DEPARTAMENTO DE COMERCIO EXTERIOR </b><br><br>'
+        texto += formatear_linea("Depto.", "COMERCIO EXTERIOR")
 
-        if isinstance(seguimiento.etd, datetime):
+        texto += "<br>"
 
-            salida = str(seguimiento.etd.strftime("%d/%m/%Y"))
+        salida = seguimiento.etd.strftime("%d/%m/%Y") if isinstance(seguimiento.etd, datetime) else ""
 
-        else:
+        llegada = seguimiento.eta.strftime("%d/%m/%Y") if isinstance(seguimiento.eta, datetime) else ""
 
-            salida = ''
-
-        if isinstance(seguimiento.eta, datetime):
-
-            llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
-
-        else:
-
-            llegada = ''
-
-        # Campos con valores formateados
-
-        ref = str(row.seguimiento) + "/" + str(row.numero)
+        ref = f"{row.seguimiento}/{row.numero}"
 
         texto += formatear_linea("Referencia", ref)
 
-        texto += formatear_linea("Posición", str(row.posicion) if row.posicion else "")
+        texto += formatear_linea("Posición", row.posicion or "")
 
-        #texto += formatear_linea("Proveedor", str(row.cliente) if row.cliente else "")
+        texto += formatear_linea("Consignatario", row.consignatario or "")
 
-        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario else "")
+        texto += formatear_linea("Orden Cliente", embarque.ordencliente or "")
 
-        texto += formatear_linea("Orden Cliente", str(embarque.ordencliente) if embarque.ordencliente else "")
+        texto += formatear_linea("Ref. Proveedor", embarque.refproveedor or "")
 
-        texto += formatear_linea("Ref. Proveedor", str(embarque.refproveedor) if embarque.refproveedor else "")
+        texto += formatear_linea("Términos de Compra", row.terminos or "")
 
-        texto += formatear_linea("Términos de Compra", str(row.terminos) if row.terminos else "")
+        texto += formatear_linea("Vapor", vapor or "")
 
-        texto += formatear_linea("Vapor", str(vapor) if vapor else "")
+        texto += "<br>"
 
-        texto += '<br>'
+        texto += formatear_linea("Origen", row.origen or "")
 
-        texto += formatear_linea("Origen", str(row.origen) if row.origen else "")
-
-        texto += formatear_linea("Destino", str(row.destino) if row.destino else "")
+        texto += formatear_linea("Destino", row.destino or "")
 
         texto += formatear_linea("Salida", salida)
 
         texto += formatear_linea("Llegada", llegada)
 
-        texto += '<br>'
+        texto += "<br>"
 
-        texto += formatear_linea("Agente", str(row.agente) if row.agente else "")
+        texto += formatear_linea("Agente", row.agente or "")
 
         # Datos de contenedores
 
@@ -635,15 +613,21 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         volumen = 0
 
-        cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto', 'bultos', 'peso',
-                                                                     'unidad', 'volumen').annotate(total=Count('id'))
+        cant_cntr = Envases.objects.filter(numero=row.numero).values(
+
+            'tipo', 'nrocontenedor', 'precinto', 'bultos', 'peso', 'unidad', 'volumen'
+
+        ).annotate(total=Count('id'))
+
         carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre')
 
-        if cant_cntr.count() > 0:
+        if cant_cntr.exists():
 
             for cn in cant_cntr:
-                cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - {cn["unidad"]} - '
-                contenedores += f' {cn["nrocontenedor"]} - '
+
+                cantidad_cntr += f'{cn["total"]} x {cn["tipo"]} - {cn["unidad"]} - '
+
+                contenedores += f'{cn["nrocontenedor"]} - '
 
                 if cn['precinto']:
                     precintos += f'{cn["precinto"]} - '
@@ -654,56 +638,66 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
                 volumen += cn['volumen'] if cn['volumen'] else 0
 
-            if carga.count() > 0:
-                for c in carga:
-                    mercaderias+= c['producto__nombre'] + ' - '
+        if carga.exists():
 
-        texto += formatear_linea("Contenedores", cantidad_cntr[:-3])
+            for c in carga:
+                mercaderias += c['producto__nombre'] + ' - '
 
-        texto += formatear_linea("Nro. Contenedor/es", contenedores[:-3])
+        texto += formatear_linea("Contenedores", cantidad_cntr.rstrip(' -'))
 
-        texto += formatear_linea("Precintos/Sellos", precintos[:-3])
+        texto += formatear_linea("Nro. Contenedor/es", contenedores.rstrip(' -'))
 
-        texto += formatear_linea("House", str(row.hawb) if row.hawb else "")
+        texto += formatear_linea("Precintos/Sellos", precintos.rstrip(' -'))
+
+        texto += formatear_linea("House", row.hawb or "")
 
         if master_boolean == 'true':
-            texto += formatear_linea("AWB", str(row.awb) if row.awb else "")
+            texto += formatear_linea("AWB", row.awb or "")
+
         if transportista_boolean == 'true':
-            texto += formatear_linea("Transportista", str(row.transportista) if row.transportista else "")
+            texto += formatear_linea("Transportista", row.transportista or "")
 
         texto += formatear_linea("Peso", f"{peso} KGS")
 
         texto += formatear_linea("Bultos", str(bultos))
 
-        texto += formatear_linea("CBM", f"{volumen} M³")
-
-        texto += '<br>'
-
-        texto += formatear_linea("Mercadería", mercaderias[:-3])
-
-        texto += formatear_linea("Depósito", str(seguimiento.deposito) if seguimiento.deposito else "")
-
-        texto += formatear_linea("Doc. Originales", 'SI' if seguimiento.originales and seguimiento.originales == True else 'NO')
-
-        # Agregar información en 6 columnas
+        texto += formatear_linea("CBM", f"{volumen:.3f} M³")
 
         texto += "<br>"
 
-        texto += "<table style='width:100%; text-align:center;'>"
+        texto += formatear_linea("Mercadería", mercaderias.rstrip(' -'))
 
-        texto += "<tr><th>Origen</th><th>Destino</th><th>Vapor/Vuelo</th><th>Viaje</th><th>Salida</th><th>Llegada</th></tr>"
+        texto += formatear_linea("Depósito", seguimiento.deposito or "")
 
-        texto += f"<tr><td>{row.origen}</td><td>{row.destino}</td><td>{vapor}</td><td>{row.viaje}</td><td>{salida}</td><td>{llegada}</td></tr>"
+        texto += formatear_linea("Doc. Originales", "SI" if seguimiento.originales else "NO")
 
-        texto += "</table>"
+        texto += "<br>"
 
-        texto += '<br>'
+        # Reemplazar la tabla por líneas formateadas
 
-        # Agregar mensaje final
+        texto += formatear_linea("Origen", row.origen or "")
 
-        texto += 'Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar. <br>' \
-         \
-                 'Agradeciendo vuestra preferencia, le saludamos muy atentamente.<br><br>'
+        texto += formatear_linea("Destino", row.destino or "")
+
+        texto += formatear_linea("Vapor/Vuelo", vapor or "")
+
+        texto += formatear_linea("Viaje", row.viaje or "")
+
+        texto += formatear_linea("Salida", salida)
+
+        texto += formatear_linea("Llegada", llegada)
+
+        texto += "<br>"
+
+        # Mensaje final
+
+        texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
+
+        texto += "Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar.\n"
+
+        texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
+
+        texto += "</pre>"
 
     elif title == 'Orden de facturacion':
 
@@ -907,7 +901,7 @@ def formatear_linea_old(titulo, valor, ancho_fijo=30):
     return f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{linea}: {valor}</p>"
 
 
-def formatear_linea(titulo, valor, ancho_total=50):
+def formatear_linea_old_last(titulo, valor, ancho_total=50):
     linea = f"{titulo}"
     puntos = '.' * (30 - len(titulo))
     linea += puntos
@@ -922,6 +916,14 @@ def formatear_linea(titulo, valor, ancho_total=50):
     return texto
 
 
+def formatear_linea(titulo, valor, ancho_total=70, ancho_col_izq=30):
+    # Asegurarse que título + puntos tenga ancho exacto
+    puntos = '.' * (ancho_col_izq - len(titulo))
+    col_izq = titulo + puntos
+
+    # Calcular espacios a la izquierda del valor para alinearlo a la derecha
+    espacios = ' ' * (ancho_total - len(col_izq) - len(str(valor)))
+    return f"<pre style='font-family: Courier New, monospace; font-size: 13px;'>{col_izq}{espacios}{valor}</pre>"
 
 
 
