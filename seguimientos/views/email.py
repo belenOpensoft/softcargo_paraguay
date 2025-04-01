@@ -34,6 +34,7 @@ def get_data_email(request):
             transportista = request.POST['transportista']
             master = request.POST['master']
             gastos_boolean = request.POST['gastos']
+            directo_boolean = request.POST['directo']
             row_number = request.POST['row_number']
             row = VGrillaSeguimientos.objects.get(numero=row_number)
 
@@ -654,237 +655,190 @@ def get_data_email(request):
                 texto += "OCEANLINK\n"
                 texto += "</pre>"
 
-            #volver a hacer
+            #agregar opcion directo
             elif title == 'Shipping instruction':
-                tabla_html = "<table style='width:40%'>"
-                # Definir los campos y sus respectivos valores
-                resultado['asunto'] = 'LCC SHIPPING INSTRUCTION: Ref: ' + str(row.numero) + ' ' \
-                                           ' - Shipper: ' + str(row.embarcador) + ' - Consig: ' \
-                                      '' + str(row.consignatario)
-                fecha_actual = datetime.datetime.now()
-                fecha_formateada = fecha_actual.strftime(
-                    f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y')
-                texto += 'Date: '+fecha_formateada.capitalize()+' <br>'
-                texto += 'To: '+str(row.agente)+' <br><br>'
-
-                cons = Clientes.objects.get(codigo=row.consignatario_codigo)
-                if cons:
-                    direccion = cons.direccion
-                    pais_c = cons.pais
-                    tel = cons.telefono
-                    rut = cons.ruc
-                else:
-                    direccion = None
-                    pais_c = None
-                    tel = None
-                    rut = None
-
                 embarcador = Clientes.objects.get(codigo=row.embarcador_codigo)
-                if embarcador:
-                    pais = embarcador.pais
-                    ciudad = embarcador.ciudad
-                    contacto = embarcador.contactos
-                else:
-                    pais = None
-                    ciudad = None
-                    contacto = None
+                if row.modo != 'IMPORT AEREO' and row.modo != 'EXPORT AEREO':
+                    row3 = Envases.objects.filter(numero=row.numero)
 
+                direccion = embarcador.direccion if embarcador else ''
+                empresa = embarcador.empresa if embarcador else ''
+                ciudad = embarcador.ciudad if embarcador else ''
+                pais = embarcador.pais if embarcador else ''
+                email = embarcador.emailim if embarcador else ''
+                contactos = embarcador.contactos if embarcador else ''
 
-                texto += str(row.embarcador)+',<br>'
-                texto += str(ciudad)+','+str(pais)+'<br>'
-                texto += 'Contactos: '+str(contacto)+'<br><br>'
-
-                texto+='<p> Dear colleagues: </p>'
-                texto+='<p> Please find bellow coordination details for a shipment to '+row.destino_text+'</p><br>'
-                texto+='<p>CARGO DETAILS</p><br><br>'
-
-
-                if isinstance(row.etd,datetime.datetime):
-                    salida = str(row.etd.strftime("%d/%m/%Y"))
-                else:
-                    salida = ''
-                if isinstance(row.eta,datetime.datetime):
-                    llegada = str(row.eta.strftime("%d/%m/%Y"))
-                else:
-                    llegada = ''
-
-                carga = Cargaaerea.objects.get(numero=row.numero)
-                if carga:
-                    producto = carga.producto
-                    bultos = carga.bultos
-                    peso=carga.bruto
-                    volumen=carga.cbm
-                else:
-                    producto = None
-                    bultos = None
-                    peso = None
-                    volumen = None
-
-                campos = [
-                    ("Internal Reference", row.numero),
-                    ("Delivery date", llegada if llegada is not None else ""),
-                    ("Port of Loading", str(row.loading) if row.loading is not None else ""),
-                    ("Port of Discharge", str(row.discharge) if row.discharge is not None else ""),
-                    ("Payment Condition", str(row.pago) if row.pago is not None else ""),
-                    ("Incoterm", str(row.terminos) if row.terminos is not None else ""),
-                    ("Commodity", str(producto.nombre) if producto.nombre is not None else ""),
-                    ("Pieces", str(bultos) if bultos is not None else ""),
-                    ("Weight", peso if peso is not None else ""),
-                    ("Volume", str(volumen) if volumen is not None else ""),
-                ]
-                # Agregar campos a la tabla
-
-                for campo, valor in campos:
-                    tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
-
-                tabla_html += "</table><br><br>"
-                texto += tabla_html
-                texto += '<p>HBL INFO <br><br>'
-                texto += 'Please note HS Code is MANDATORY on HBL body.</p> <br>'
-                texto += str(row.embarcador) + ',<br>'
-                texto += str(ciudad) + ',' + str(pais) + '<br>'
-                texto += 'Contactos: ' + str(contacto) + '<br><br><br>'
-
-                campos2 = [
-                    ("Consignee", row.consignatario),
-                    ("Address", direccion if direccion is not None else ""),
-                    ("Country", pais if pais is not None else ""),
-                    ("Ph", tel if tel is not None else ""),
-                    ("RUT", rut if rut is not None else ""),
-                ]
-                # Agregar campos a la tabla
-                tabla_html = "<table style='width:40%'>"
-                for campo, valor in campos2:
-                    tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
-
-                tabla_html += "</table><br><br>"
-                texto += tabla_html
-
-                texto += '<p>MBL INFO <br><br>'
-                texto += 'Please consign MBL EXACTLY as shown bellow. <br>'
-                texto += 'Please note HS Code is MANDATORY on MBL body.</p> <br>'
-                campos3 = [
-                    ("Shipper", row.embarcador),
-                ]
-                # Agregar campos a la tabla
-                tabla_html = "<table style='width:40%'>"
-                for campo, valor in campos3:
-                    tabla_html += f"<tr><th>{campo}</th><td>{valor}</td></tr>"
-
-                tabla_html += "</table><br><br>"
-                texto += tabla_html
-
-                texto += '<p>MBL/HBL information must include: <br><br>'
-                texto += ('  - Container number, seal(s) number(s), quantity of pieces, kind od units (packages, pieces, crates, tec), <br>'
-                          ' weight, volume (LCL), port of loading, port of discharge, and description of goods, HS tariff Code/NCM number, <br>'
-                          '(first four digits are mandatory), <br>')
-                texto+=('  -Information on both documents must match. Any discrepancies between MBL/HBL are likely to incur fines and shipment blocked <br>'
-                        'by Uruguayan Customs. <br> ')
-                texto+='  -Telex Release / Express Release / Seawaybill wil generate extra issuing charges at destination depending on Shipping Line. <br>'
-                texto+='  -Consignee on MBL/HBL must include detailed information: <br>'
-                texto+=('  -Full name, address, phone number, contact person or e-mail address, Tax ID (RUT) or passport number if consignee <br>'
-                        'is an individual. <br>')
-                texto += ('  -Pre-alert notice must be sent at least 5 days before vessel arrival. This will allow sufficient time for eventual br>'
-                          'amendments as needed and prevent additional fees from the steamship line. <br><br>')
-
-                texto+='OCEANLINK'
-
-            #volver a hacer
-            elif title == 'Instruccion de embarque':
-                embarcador = Clientes.objects.get(codigo=row.embarcador_codigo)
-                if row.modo !='IMPORT AEREO' and row.modo !='EXPORT AEREO':
-                    row3=Envases.objects.filter(numero=row.numero)
-
-                if embarcador:
-                    direccion = embarcador.direccion
-                    empresa = embarcador.empresa
-                    ciudad = embarcador.ciudad
-                    pais = embarcador.pais
-                else:
-                    direccion=''
-                    empresa =''
-                    ciudad = ''
-                    pais = ''
-
-                if row.consignatario_codigo is not None:
-                    consignatario = Clientes.objects.get(codigo=row.consignatario_codigo)
-                else:
-                    consignatario = None
-                if row.cliente is not None:
-                    cliente = Clientes.objects.get(codigo=row.cliente_codigo)
-                else:
-                    cliente = None
-
-                if row.agente_codigo:
-                    agente = Clientes.objects.get(codigo=row.agente_codigo)
-                else:
-                    agente = None
+                consignatario = Clientes.objects.get(
+                    codigo=row.consignatario_codigo) if row.consignatario_codigo else None
+                cliente = Clientes.objects.get(codigo=row.cliente_codigo) if row.cliente_codigo else None
+                agente = Clientes.objects.get(codigo=row.agente_codigo) if row.agente_codigo else None
 
                 mercaderia = Cargaaerea.objects.filter(numero=row.numero)
-                #moneda = Monedas.objects.get(codigo=row.moneda)
-                moneda = row.moneda
+                moneda = Monedas.objects.get(codigo=row.moneda)
+                moneda_nombre = moneda.nombre if moneda else 'N/A'
 
-                resultado['asunto'] = 'INSTRUCCIÓN DE EMBARQUE - Ref.: ' + str(row.numero) + ' - Shipper: ' + str(
-                    embarcador.empresa) + ' - Consignee: ' + str(consignatario.empresa)
+                resultado[
+                    'asunto'] = f"SHIPPING INSTRUCTION - Ref.: {row.numero} - Shipper: {empresa} - Consignee: {consignatario.empresa if consignatario else ''}"
+
+                locale.setlocale(locale.LC_TIME, 'en_US.UTF-8')
+                fecha_actual = datetime.datetime.now()
+                fecha_formateada = fecha_actual.strftime('%A, %B %d, %Y').upper()
+                llegada = row.eta.strftime("%d/%m/%Y") if isinstance(row.eta, datetime.datetime) else ''
+                nombre = str(request.user.first_name) + ' ' + str(request.user.last_name)
+                texto = ''
+                texto += formatear_linea("Date", fecha_formateada)
+                texto += formatear_linea("To", agente.empresa if agente else "")
+                texto += formatear_linea("Department", row.modo)
+                texto += formatear_linea("Sent by", nombre)
+
+                texto += "<br><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Dear colleagues:</p><br>"
+                texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please contact the following company to coordinate the referenced shipment:</p><br>"
+
+                texto += formatear_linea("Shipper", empresa)
+                texto += formatear_linea("Address", direccion)
+                texto += formatear_linea("City", ciudad)
+                texto += formatear_linea("Country", pais)
+                texto += formatear_linea("E-mail", email)
+                texto += formatear_linea("Contacts", contactos)
+
+                texto += "<br>"
+                if consignatario:
+                    texto += formatear_linea("Consignee", consignatario.empresa)
+                    texto += formatear_linea("Address", consignatario.direccion)
+                    texto += formatear_linea("Country", consignatario.pais)
+                    texto += formatear_linea("Tax ID", consignatario.ruc)
+                    texto += formatear_linea("Phone", consignatario.telefono)
+
+                texto += "<br>"
+                texto += formatear_linea("Internal Reference", f"{row.numero}/{row.embarque}")
+                texto += formatear_linea("Position", row.posicion)
+                texto += formatear_linea("Estimated delivery date", llegada)
+                texto += formatear_linea("Port of loading", row.loading)
+                texto += formatear_linea("Port of discharge", row.discharge)
+
+                texto += "<br>"
+                for m in mercaderia:
+                    vol = m.cbm if m.cbm is not None else 0
+                    pes = m.bruto if m.bruto is not None else 0
+                    calculado = vol * 166.67
+                    toneladas = round(float(m.bruto) / 1000, 2) if m.bruto else 0
+                    calculado2 = str(vol) + ' AS VOL' if toneladas < vol else pes
+                    calculado = pes if calculado < pes else str(calculado) + ' AS VOL'
+                    aplicable = calculado2 if row.modo not in ['IMPORT AEREO', 'EXPORT AEREO'] else calculado
+
+                    texto += formatear_linea("Commodity", m.producto)
+                    texto += formatear_linea("Pieces", m.bultos)
+                    texto += formatear_linea("Weight", str(m.bruto) + ' KGS')
+                    texto += formatear_linea("Chargable weight", aplicable)
+                    texto += formatear_linea("Volume", str(m.cbm) + ' CBM')
+
+                texto += formatear_linea("Payment Condition", row.pago)
+                texto += formatear_linea("Terms of purchase", row.terminos)
+                if transportista == 'true':
+                    texto += formatear_linea("Carrier", row.transportista)
+                texto += formatear_linea("Transport contract", row.contratotra)
+                texto += formatear_linea("Mode of shipment", row.modo)
+                texto += formatear_linea("Currency", moneda_nombre)
+                texto += "<br>"
+
+            #agregar opcion directo
+            elif title == 'Instruccion de embarque':
+                embarcador = Clientes.objects.get(codigo=row.embarcador_codigo)
+                if row.modo != 'IMPORT AEREO' and row.modo != 'EXPORT AEREO':
+                    row3 = Envases.objects.filter(numero=row.numero)
+
+                direccion = embarcador.direccion if embarcador else ''
+                empresa = embarcador.empresa if embarcador else ''
+                ciudad = embarcador.ciudad if embarcador else ''
+                pais = embarcador.pais if embarcador else ''
+                email = embarcador.emailim if embarcador else ''
+                contactos = embarcador.contactos if embarcador else ''
+
+                consignatario = Clientes.objects.get(
+                    codigo=row.consignatario_codigo) if row.consignatario_codigo else None
+                cliente = Clientes.objects.get(codigo=row.cliente_codigo) if row.cliente_codigo else None
+                agente = Clientes.objects.get(codigo=row.agente_codigo) if row.agente_codigo else None
+
+                mercaderia = Cargaaerea.objects.filter(numero=row.numero)
+                moneda = Monedas.objects.get(codigo=row.moneda)
+                if moneda is not None:
+                    moneda_nombre=moneda.nombre
+                else:
+                    moneda_nombre = 'S/I'
+
+                resultado[
+                    'asunto'] = f"INSTRUCCIÓN DE EMBARQUE - Ref.: {row.numero} - Shipper: {empresa} - Consignee: {consignatario.empresa if consignatario else ''}"
 
                 locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
                 fecha_actual = datetime.datetime.now()
                 fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
-                if isinstance(row.eta, datetime.datetime):
-                    llegada = str(row.eta.strftime("%d/%m/%Y"))
-                else:
-                    llegada = ''
+                llegada = row.eta.strftime("%d/%m/%Y") if isinstance(row.eta, datetime.datetime) else ''
+                nombre = str(request.user.first_name)+' '+str( request.user.last_name)
+                texto = ''
+                texto += formatear_linea("Fecha", fecha_formateada)
+                texto += formatear_linea("A", agente.empresa if agente else "")
+                texto += formatear_linea("Departamento", row.modo)
+                texto += formatear_linea("Envíado", nombre)
 
-                tabla_html = "<table style='width:40%'>"
-                tabla_html += f"<tr><th align='left'>Fecha: </th><td>{fecha_formateada}</td></tr>"
-                tabla_html += f"<tr><th align='left'>A: </th><td>{str(agente.empresa) if agente is not None else ''}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Departamento: </th><td>MARITIMO</td></tr>"
-                tabla_html += f"<tr><th align='left'>Envíado: </th><td>...</td></tr>"
-                tabla_html += "</table><br>"
-                tabla_html += "<p>Estimados Seres.:</p><br>"
-                tabla_html += "<p>Por favor, contactar a la siguiente compañía para coordinar la operación referenciada:</p><br>"
-                tabla_html += "<table style='width:40%'>"
-                tabla_html += f"<tr><th align='left'>Proveedor: </th><td>{str(empresa)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Dirección: </th><td>{str(direccion)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Ciudad: </th><td>{str(ciudad)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>País: </th><td>{str(pais)}</td></tr><br><br>"
-                tabla_html += f"<tr><th align='left'>Consignatario: </th><td>{str(consignatario.empresa)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Dirección: </th><td>{str(consignatario.direccion)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>País: </th><td>{str(consignatario.pais)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>RUC: </th><td>{str(consignatario.ruc)}</td></tr><br><br>"
-                tabla_html += f"<tr><th align='left'>Referencia interna: </th><td>{row.numero}/{row.numero}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Posición: </th><td>{str(row.posicion)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Recepcion estimada de mercaderia </th><td>{str(llegada)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Puerto de carga: </th><td>{str(row.loading)}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Puerto de descarga: </th><td>{str(row.discharge)}</td></tr>"
-                tabla_html += "</table><br>"
+                texto += "<br><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Estimados Sres.:</p><br>"
+                texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor, contactar a la siguiente compañía para coordinar la operación referenciada:</p><br>"
 
+                texto += formatear_linea("Proveedor", empresa)
+                texto += formatear_linea("Dirección", direccion)
+                texto += formatear_linea("Ciudad", ciudad)
+                texto += formatear_linea("País", pais)
+                texto += formatear_linea("E-mail", email)
+                texto += formatear_linea("Contactos", contactos)
+
+                texto += "<br>"
+                if consignatario:
+                    texto += formatear_linea("Consignatario", consignatario.empresa)
+                    texto += formatear_linea("Dirección", consignatario.direccion)
+                    texto += formatear_linea("País", consignatario.pais)
+                    texto += formatear_linea("RUC", consignatario.ruc)
+                    texto += formatear_linea("Teléfono", consignatario.telefono)
+
+                texto += "<br>"
+                texto += formatear_linea("Referencia interna", f"{row.numero}/{row.embarque}")
+                texto += formatear_linea("Posición", row.posicion)
+                texto += formatear_linea("Recepción estimada de mercadería", llegada)
+                texto += formatear_linea("Puerto de carga", row.loading)
+                texto += formatear_linea("Puerto de descarga", row.discharge)
+
+
+                texto += "<br>"
                 for m in mercaderia:
-                    tabla_html += "<table style='width:40%'>"
-                    tabla_html += f"<tr><th align='left'>Mercaderia: </th><td>{m.producto}</td></tr>"
-                    tabla_html += f"<tr><th align='left'>Bultos: </th><td>{m.bultos}</td></tr>"
-                    tabla_html += f"<tr><th align='left'>Kilos: </th><td>{m.bruto}</td></tr>"
-                    tabla_html += f"<tr><th align='left'>Volúmen: </th><td>{m.cbm}</td></tr>"
-                envase_text = ''
-                if row.modo != 'IMPORT AEREO' and row.modo != 'EXPORT AEREO':
-                    if row3:
-                        for e in row3:
-                            cantidad = e.cantidad if e.cantidad is not None else 0
-                            tipo = e.tipo if e.tipo is not None else 'S/I'
-                            unidad = e.unidad if e.unidad is not None else 'S/I'
-                            nrocontenedor = e.nrocontenedor if e.nrocontenedor is not None else 'S/I'
-                            envase_text += str(cantidad) + 'x' + str(unidad) + ' ' + str(tipo) + ': ' + str(nrocontenedor)
-                            if len(row3) > 1:
-                                envase_text += '<br>'
+                    vol = m.cbm if m.cbm is not None else 0
+                    pes = m.bruto if m.bruto is not None else 0
+                    calculado = vol * 166.67
+                    toneladas = round(float(m.bruto) / 1000, 2) if m.bruto else 0
+                    if toneladas < vol:
+                        calculado2=str(vol) + ' AS VOL'
+                    else:
+                        calculado2=pes
 
-                condicion_pago = "Collect" if row.pago == "C" else "Prepaid" if row.pago == "P" else ""
-                tabla_html += f"<tr><th align='left'>Condiciones de pago: </th><td>{condicion_pago}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Términos de compra: </th><td>{row.terminos}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Envase: </th><td>{envase_text}</td></tr>"
-                tabla_html += f"<tr><th align='left'>Modo de Embarque: </th><td>MARITIMO</td></tr>"
-                tabla_html += f"<tr><th align='left'>Moneda: </th><td>{moneda}</td></tr>"
-                tabla_html += "</table><br>"
-                texto = tabla_html
+                    if calculado < pes:
+                        calculado= pes
+                    else:
+                        calculado = str(calculado)+' AS VOL'
+
+                    aplicable = calculado2 if row.modo !='IMPORT AEREO' and row.modo!='EXPORT AEREO' else calculado
+                    texto += formatear_linea("Mercadería", m.producto)
+                    texto += formatear_linea("Bultos", m.bultos)
+                    texto += formatear_linea("Peso", str(m.bruto) + ' KGS')
+                    texto += formatear_linea("Aplicable", aplicable)
+                    texto += formatear_linea("Volumen", str(m.cbm)+ ' CBM')
+
+                #condicion_pago = "Collect" if row.pago == "C" else "Prepaid" if row.pago == "P" else ""
+                texto += formatear_linea("Condiciones de pago", row.pago)
+                texto += formatear_linea("Términos de compra", row.terminos)
+                if transportista == 'true':
+                    texto += formatear_linea("Transportista", row.transportista)
+                texto += formatear_linea("Contrato transport.", row.contratotra)
+                texto += formatear_linea("Modo de Embarque", row.modo)
+                texto += formatear_linea("Moneda", moneda_nombre)
+                texto += "<br>"
+
 
             texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>SALUDOS,</p>"
             texto += "<b><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OCEANLINK,</p></b>"

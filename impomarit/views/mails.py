@@ -41,6 +41,8 @@ def get_data_email_op(request):
             transportista = request.POST['transportista']
             master = request.POST['master']
             gastos_boolean = request.POST['gastos']
+            directo_boolean = request.POST['directo']
+
             #9155
             embarque=Embarqueaereo.objects.get(numero=row_number)
             row = VEmbarqueaereo.objects.get(numero=row_number)
@@ -64,7 +66,7 @@ def get_data_email_op(request):
 
             texto = ''
             texto += f'<br>'
-            texto, resultado = get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque,transportista,master,gastos_boolean,vapor)
+            texto, resultado = get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque,transportista,master,gastos_boolean,vapor,directo_boolean)
             texto += "<b><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OCEANLINK,</p></b>"
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>DEPARTAMENTO DE IMPORTACIÓN MARITIMA,</p>"
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{request.user.first_name} {request.user.last_name}</p>"
@@ -83,7 +85,7 @@ def get_data_email_op(request):
     return HttpResponse(data_json, mimetype)
 
 
-def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque,transportista_boolean,master_boolean,gastos_boolean,vapor):
+def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque,transportista_boolean,master_boolean,gastos_boolean,vapor,directo_boolean):
     if row2 is not None:
         merca = []
         for m in row2:
@@ -954,7 +956,7 @@ def image_to_base64(image_path):
         return base64_data
 
 
-def formatear_linea_old(titulo, valor, ancho_total=70, ancho_col_izq=30):
+def formatear_linea(titulo, valor, ancho_total=100, ancho_col_izq=60):
     # Asegurarse que título + puntos tenga ancho exacto
     puntos = '.' * (ancho_col_izq - len(titulo))
     col_izq = titulo + puntos
@@ -964,7 +966,7 @@ def formatear_linea_old(titulo, valor, ancho_total=70, ancho_col_izq=30):
     return f"<pre style='font-family: Courier New, monospace; font-size: 13px;'>{col_izq}{espacios}{valor}</pre>"
 
 
-def formatear_linea(titulo, valor, ancho_total=70, ancho_col_izq=30):
+def formatear_linea_corta(titulo, valor, ancho_total=70, ancho_col_izq=30):
     import textwrap
 
     puntos = '.' * (ancho_col_izq - len(titulo))

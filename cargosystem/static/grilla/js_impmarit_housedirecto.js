@@ -414,6 +414,7 @@ $(document).ready(function () {
                 let transportista=false;
                 let master=false;
                 let gastos = false;
+                let directo = false;
                 if(title=='Notificación de llegada de carga'){
                     if(confirm('¿Desea informar Máster?')){
                         master=true;
@@ -430,8 +431,16 @@ $(document).ready(function () {
                         master=true;
                     }
                 }
+                if(title=='Instruccion de embarque'){
+                    if(confirm('¿Desea informar Transportista?')){
+                        transportista=true;
+                    }
+                    if(confirm('¿Desea una instrucción para Directo?')){
+                        directo=true;
+                    }
+                }
                 if (row.length === 1) {
-                    get_data_email(row,title,numero,id,transportista,master,gastos);
+                    get_data_email(row,title,numero,id,transportista,master,gastos,directo);
                     //$("#id_to").val(row[0][50]);
                     $("#emails_modal").dialog({
                         autoOpen: true,

@@ -749,6 +749,7 @@ $(document).ready(function () {
         let transportista=false;
         let master=false;
         let gastos = false;
+        let directo = false;
         if(title=='Notificacion llegada de carga'){
             if(confirm('¿Desea informar Máster?')){
                 master=true;
@@ -765,8 +766,18 @@ $(document).ready(function () {
                 master=true;
             }
         }
+
+        if(title=='Instruccion de embarque'){
+            if(confirm('¿Desea informar Transportista?')){
+                transportista=true;
+            }
+            if(confirm('¿Desea una instrucción para Directo?')){
+                directo=true;
+            }
+        }
+
         if (row.length === 1) {
-            get_data_email(row,title,row_number,transportista,master,gastos);
+            get_data_email(row,title,row_number,transportista,master,gastos,directo);
             $("#emails_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
@@ -2977,7 +2988,7 @@ function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
 
 
 }
-function get_data_email(row,title,row_number,transportista,master,gastos) {
+function get_data_email(row,title,row_number,transportista,master,gastos,directo) {
     let miurl = "/get_data_email/";
     var toData = {
         'title': title,
@@ -2985,7 +2996,8 @@ function get_data_email(row,title,row_number,transportista,master,gastos) {
         'csrfmiddlewaretoken': csrf_token,
         'transportista':transportista,
         'master':master,
-        'gastos':gastos
+        'gastos':gastos,
+        'directo':directo,
     };
     $.ajax({
         type: "POST",
