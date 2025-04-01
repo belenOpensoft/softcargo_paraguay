@@ -772,6 +772,7 @@ def clonar_seguimiento(request):
         clonado.awb = None
         clonado.hawb = None
         clonado.volumen = None
+        clonado.loadingdate=None
 
         # Revisar las opciones seleccionadas antes de clonar
         clonar_envases = clonar_embarques = clonar_gastos = clonar_rutas = False

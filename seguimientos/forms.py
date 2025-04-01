@@ -137,7 +137,8 @@ class seguimientoForm(BSModalModelForm):
                   'unidadvolumen',
                   'tipobonifcli',
                   'editado',
-                  'observaciones'
+                  'observaciones',
+                  'contratotra',
 
                   ]  # Agrega los campos que deseas actualizar
         labels = {
@@ -148,6 +149,7 @@ class seguimientoForm(BSModalModelForm):
             'pago': 'Pago flete',
             'diasalmacenaje': 'Dias de almacenaje',
             'demora': 'Dias de demora',
+            'contratotra': 'Contrato transport.',
         }
         widgets = {
             # 'cliente': autocomplete.ModelSelect2(url='cliente_autocomplete')

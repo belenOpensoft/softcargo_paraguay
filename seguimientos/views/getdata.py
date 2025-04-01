@@ -167,7 +167,7 @@ def get_data_seguimiento(request, id):
             'booking', 'trackid', 'proyecto', 'proyecto_codigo', 'trafico',
             'trafico_codigo', 'actividad', 'actividad_codigo', 'diasalmacenaje',
             'demora', 'modo', 'id', 'origen_text', 'destino_text',
-            'refproveedor', 'refcliente', 'loadingdate', 'fecha', 'vencimiento','terminos','volumen','trafico'
+            'refproveedor', 'refcliente', 'loadingdate', 'fecha', 'vencimiento','terminos','volumen','trafico','contratotra'
         )
 
         if data:

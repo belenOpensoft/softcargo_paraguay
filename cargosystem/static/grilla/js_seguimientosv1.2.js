@@ -2552,6 +2552,9 @@ function get_datos_seguimiento(id, modo = '') {
             if (datos['trafico'] !== null) {
                 $("#id_trafico_seg").val(datos['trafico'])
             }
+            if (datos['contratotra'] !== null) {
+                $("#id_contratotra").val(datos['contratotra'])
+            }
             return datos;
         },
         error: function (xhr, status, error) {

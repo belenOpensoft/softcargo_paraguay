@@ -655,7 +655,7 @@ def get_data_email(request):
                 texto += "OCEANLINK\n"
                 texto += "</pre>"
 
-            #agregar opcion directo
+            # falta el completo
             elif title == 'Shipping instruction':
                 embarcador = Clientes.objects.get(codigo=row.embarcador_codigo)
                 if row.modo != 'IMPORT AEREO' and row.modo != 'EXPORT AEREO':
@@ -741,7 +741,7 @@ def get_data_email(request):
                 texto += formatear_linea("Currency", moneda_nombre)
                 texto += "<br>"
 
-            #agregar opcion directo
+            # falta el completo
             elif title == 'Instruccion de embarque':
                 embarcador = Clientes.objects.get(codigo=row.embarcador_codigo)
                 if row.modo != 'IMPORT AEREO' and row.modo != 'EXPORT AEREO':
