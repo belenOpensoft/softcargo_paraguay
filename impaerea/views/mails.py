@@ -45,6 +45,7 @@ def get_data_email_op(request):
             master_boolean = request.POST['master']
             gastos_boolean = request.POST['gastos']
             directo_boolean = request.POST['directo']
+            armador = request.POST['armador']
 
             #9155
             embarque=ImportEmbarqueaereo.objects.get(numero=row_number)
@@ -69,7 +70,7 @@ def get_data_email_op(request):
 
             texto = ''
             texto += f'<br>'
-            texto, resultado = get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista,master_boolean,gastos_boolean,directo_boolean,request)
+            texto, resultado = get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista,master_boolean,gastos_boolean,directo_boolean,request,armador)
             texto += "<b><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OCEANLINK,</p></b>"
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>DEPARTAMENTO DE IMPORTACIÓN MARITIMA,</p>"
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{request.user.first_name} {request.user.last_name}</p>"
@@ -89,7 +90,7 @@ def get_data_email_op(request):
     return HttpResponse(data_json, mimetype)
 
 
-def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista_boolean,master_boolean,gastos_boolean,directo_boolean,request):
+def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista_boolean,master_boolean,gastos_boolean,directo_boolean,request,armador):
     # merca = Productos.objects.get(codigo=row2.producto.codigo)
     if row2 is not None:
         merca = []
@@ -599,13 +600,14 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += "</tr>"
 
         # Fila de valores
+        #valor_vuelo = str(row.transportista) if armador !='true' else str(row.armador)
         texto += "<tr>"
         texto += f"<td style='padding: 2px 10px;'>{conex.origen or ''}</td>"
         texto += f"<td style='padding: 2px 10px;'>{conex.destino or ''}</td>"
-        texto += f"<td style='padding: 2px 10px;'>{str(conex.vuelo) or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{row.transportista}</td>"
         texto += f"<td style='padding: 2px 10px;'>{str(conex.viaje) or ''}</td>"
-        texto += f"<td style='padding: 2px 10px;'>{conex.salida.strftime("%d/%m/%Y") if isinstance(conex.salida, datetime) else ""}</td>"
-        texto += f"<td style='padding: 2px 10px;'>{conex.llegada.strftime("%d/%m/%Y") if isinstance(conex.llegada, datetime) else ""}</td>"
+        texto += f'<td style="padding: 2px 10px;">{conex.salida.strftime("%d/%m/%Y") if isinstance(conex.salida, datetime) else ""}</td>'
+        texto += f'<td style="padding: 2px 10px;">{conex.llegada.strftime("%d/%m/%Y") if isinstance(conex.llegada, datetime) else ""}</td>'
         texto += "</tr>"
         texto += "</table><br>"
 

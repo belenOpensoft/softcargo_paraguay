@@ -8,6 +8,8 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.datetime_safe import datetime
 from datetime import datetime
+
+from mantenimientos.models import Vapores
 from seguimientos.forms import NotasForm, seguimientoForm, cronologiaForm, envasesForm, embarquesForm, gastosForm, \
     pdfForm, archivosForm, rutasForm, emailsForm, clonarForm
 from seguimientos.models import VGrillaSeguimientos as Seguimiento, Seguimiento as SeguimientoReal, Envases, Cargaaerea, \
@@ -233,7 +235,16 @@ def get_data(registros_filtrados):
             registro_json.append('' if registro.moneda is None else str(registro.moneda))
             registro_json.append('' if registro.vendedor is None else str(registro.vendedor))
             registro_json.append('' if registro.deposito is None else str(registro.deposito))
-            registro_json.append('' if registro.vapor is None else str(registro.vapor))
+            try:
+                if registro.modo in ['IMPORT MARITIMO', 'EXPORT MARITIMO']:
+                    nombre_vapor = Vapores.objects.get(codigo=registro.vapor).nombre
+                else:
+                    nombre_vapor = registro.vapor
+            except:
+                nombre_vapor = registro.vapor
+
+            registro_json.append('' if nombre_vapor is None else str(nombre_vapor))
+
             registro_json.append('' if registro.viaje is None else str(registro.viaje))
             registro_json.append('' if registro.awb is None else str(registro.awb))
             registro_json.append('' if registro.hawb is None else str(registro.hawb))

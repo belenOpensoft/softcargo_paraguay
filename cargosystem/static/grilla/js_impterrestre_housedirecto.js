@@ -430,6 +430,14 @@ if (!$('#id_awbhijo').val()) {
                 directo=true;
             }
         }
+                        if(title=='Shipping instruction'){
+            if(confirm('¿Desea informar Transportista?')){
+                transportista=true;
+            }
+            if(confirm('¿Desea una instrucción para Directo?')){
+                directo=true;
+            }
+        }
                 if (row.length === 1) {
                     get_data_email(row,title,numero,id,transportista,master,gastos,directo);
                     //$("#id_to").val(row[0][50]);

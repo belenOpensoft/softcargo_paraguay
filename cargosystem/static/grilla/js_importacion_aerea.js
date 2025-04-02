@@ -179,7 +179,7 @@ $(document).ready(function () {
         "language": {
             url: "/static/datatables/es_ES.json"
         },
-                initComplete: function () {
+        initComplete: function () {
             let api = this.api();
 
             // Cargar estado guardado
@@ -4285,6 +4285,7 @@ $('.email').click(function () {
         let master=false;
         let gastos = false;
         let directo = false;
+        let armador = false;
         if(title=='Notificación de llegada de carga'){
             if(confirm('¿Desea informar Máster?')){
                 master=true;
@@ -4300,6 +4301,9 @@ $('.email').click(function () {
             if(confirm('¿Desea informar Máster?')){
                 master=true;
             }
+            if(confirm('¿Desea mostrar el Transportista o el Armador? Aceptar: Armador. Cancelar: Transportista. ')){
+                armador=true;
+            }
         }
         if(title=='Instruccion de embarque'){
             if(confirm('¿Desea informar Transportista?')){
@@ -4309,9 +4313,17 @@ $('.email').click(function () {
                 directo=true;
             }
         }
+        if(title=='Shipping instruction'){
+            if(confirm('¿Desea informar Transportista?')){
+                transportista=true;
+            }
+            if(confirm('¿Desea una instrucción para Directo?')){
+                directo=true;
+            }
+        }
 
         if (row.length === 1) {
-            get_data_email(row,title,numero,id,transportista,master,gastos,directo);
+            get_data_email(row,title,numero,id,transportista,master,gastos,directo,armador);
             //$("#id_to").val(row[0][50]);
             $("#emails_modal").dialog({
                 autoOpen: true,
@@ -4372,7 +4384,7 @@ $('.email').click(function () {
             alert('Debe seleccionar al menos un registro');
         }
     });
-function get_data_email(row,title,numero,id,transportista,master,gastos,directo) {
+function get_data_email(row,title,numero,id,transportista,master,gastos,directo,armador) {
     let miurl = "/importacion_aerea/get_data_email/";
     var toData = {
         'title': title,
@@ -4383,6 +4395,7 @@ function get_data_email(row,title,numero,id,transportista,master,gastos,directo)
         'master':master,
         'gastos':gastos,
         'directo':directo,
+        'armador':armador,
     };
     $.ajax({
         type: "POST",

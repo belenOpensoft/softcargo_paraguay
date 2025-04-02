@@ -276,6 +276,7 @@ $(document).ready(function () {
             $("#tabla_seguimiento tr").removeClass("shown");
             if (row.child.isShown()) {
             } else {
+            console.log(row.data());
                 row.child(format(row.data()), 'addinfowrapper').show();
                 tr.addClass('shown');
             }
@@ -768,6 +769,15 @@ $(document).ready(function () {
         }
 
         if(title=='Instruccion de embarque'){
+            if(confirm('¿Desea informar Transportista?')){
+                transportista=true;
+            }
+            if(confirm('¿Desea una instrucción para Directo?')){
+                directo=true;
+            }
+        }
+
+                if(title=='Shipping instruction'){
             if(confirm('¿Desea informar Transportista?')){
                 transportista=true;
             }
