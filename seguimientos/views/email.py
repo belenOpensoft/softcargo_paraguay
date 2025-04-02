@@ -113,7 +113,7 @@ def get_data_email(request):
 
                 texto += formatear_linea("Posición", row.posicion or "")
 
-                texto += formatear_linea("Proveedor", row.cliente or "")
+                texto += formatear_linea("Proveedor", row.embarcador or "")
 
                 texto += formatear_linea("Consignatario", row.consignatario or "")
 
@@ -123,15 +123,16 @@ def get_data_email(request):
 
                 texto += formatear_linea("Términos Compra", row.terminos or "")
 
-                if str(row.vapor).isdigit():
+                if row.modo=='IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO':
+                    if str(row.vapor).isdigit():
+                        vapor = Vapores.objects.get(codigo=row.vapor).nombre
 
-                    vapor = Vapores.objects.get(codigo=row.vapor).nombre
-
+                    else:
+                        vapor = row.vapor
                 else:
+                    vapor=row.vapor
 
-                    vapor = row.vapor
-
-                texto += formatear_linea("Vapor", vapor or "")
+                texto += formatear_linea("Vuelo", vapor or "") if row.modo=='IMPORT AEREO' or row.modo == 'EXPORT AEREO' else formatear_linea("Vapor", vapor or "")
 
                 texto += "<br>"
 
@@ -181,7 +182,7 @@ def get_data_email(request):
                             precintos += f'{cn["precinto"]} - '
 
                         bultos += cn['bultos']
-
+                        tipo= cn["tipo"]
                         peso += cn['peso'] or 0
 
                         volumen += cn['volumen'] or 0
@@ -197,17 +198,22 @@ def get_data_email(request):
 
                 texto += formatear_linea("Precintos/Sellos", precintos[:-3])
 
-                texto += formatear_linea("House", row.hawb or "")
+                texto += formatear_linea("HMBL", row.hawb or "") if row.modo  == 'IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO' else formatear_linea("HAWB", row.hawb or "")
 
                 if master == 'true':
-                    texto += formatear_linea("Master", row.awb or "")
+                    if row.modo in ['IMPORT MARITIMO', 'EXPORT MARITIMO']:
+                        texto += formatear_linea("MBL", row.awb or "")
+                    elif row.modo in ['IMPORT AEREO', 'EXPORT AEREO']:
+                        texto += formatear_linea("AWB", row.hawb or "")
+                    else:
+                        texto += formatear_linea("CRT", row.hawb or "")
 
                 if transportista == 'true':
                     texto += formatear_linea("Transportista", row.transportista or "")
 
                 texto += formatear_linea("Peso", f"{peso} KGS")
 
-                texto += formatear_linea("Bultos", str(bultos))
+                texto += formatear_linea("Bultos", str(bultos)+' '+str(tipo))
 
                 texto += formatear_linea("CBM", f"{volumen} M³")
 
@@ -220,28 +226,37 @@ def get_data_email(request):
                 texto += formatear_linea("Doc. Originales", 'SI' if row.originales else 'NO')
 
                 texto += "<br>"
+                texto += "<table style='border: none; font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: 100%;'>"
 
-                texto += formatear_linea("Origen", row.origen_text or "")
+                # Fila de títulos (encabezados)
+                texto += "<tr>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Origen</th>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Destino</th>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Vapor/Vuelo</th>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Viaje</th>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Salida</th>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Llegada</th>"
+                texto += "</tr>"
 
-                texto += formatear_linea("Destino", row.destino_text or "")
+                # Fila de valores
+                texto += "<tr>"
+                texto += f"<td style='padding: 2px 10px;'>{row.origen_text or ''}</td>"
+                texto += f"<td style='padding: 2px 10px;'>{row.destino_text or ''}</td>"
+                texto += f"<td style='padding: 2px 10px;'>{str(row.vapor) or ''}</td>"
+                texto += f"<td style='padding: 2px 10px;'>{str(row.viaje) or ''}</td>"
+                texto += f"<td style='padding: 2px 10px;'>{salida}</td>"
+                texto += f"<td style='padding: 2px 10px;'>{llegada}</td>"
+                texto += "</tr>"
 
-                texto += formatear_linea("Vapor/Vuelo", str(row.vapor) or "")
-
-                texto += formatear_linea("Viaje", str(row.viaje) or "")
-
-                texto += formatear_linea("Salida", salida)
-
-                texto += formatear_linea("Llegada", llegada)
-
-                texto += "<br>"
+                texto += "</table><br>"
 
                 texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
 
-                texto += "Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar.\n"
-
+                texto += "Los buques y las llegadas al puerto de Montevideo son siempre a CONFIRMAR, ya que puede haber trasbordos y/o alteraciones en las fechas estimadas de llegada\n"
+                texto+="sin previo aviso, por lo cual le sugerimos consultarnos por la fecha de arribo que aparece en este aviso.\n"
                 texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
-
                 texto += "</pre>"
+
             elif title == 'Notificacion llegada de carga':
 
                 consigna = Clientes.objects.get(codigo=row.consignatario_codigo)
@@ -858,6 +873,7 @@ def get_data_email(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
 
 
 def image_to_base64(image_path):

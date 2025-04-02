@@ -553,6 +553,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("Posición", row.posicion or "")
 
+        texto += formatear_linea("Proveedor", row.embarcador or "")
         texto += formatear_linea("Consignatario", row.consignatario or "")
 
         texto += formatear_linea("Orden Cliente", embarque.ordencliente or "")
@@ -613,9 +614,8 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                     precintos += f'{cn["precinto"]} - '
 
                 bultos += cn['bultos']
-
+                tipo = cn["tipo"]
                 peso += cn['peso'] if cn['peso'] else 0
-
                 volumen += cn['volumen'] if cn['volumen'] else 0
 
         if carga.exists():
@@ -629,17 +629,17 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("Precintos/Sellos", precintos.rstrip(' -'))
 
-        texto += formatear_linea("House", row.hawb or "")
+        texto += formatear_linea("HBL", row.hawb or "")
 
         if master_boolean == 'true':
-            texto += formatear_linea("AWB", row.awb or "")
+            texto += formatear_linea("MBL", row.awb or "")
 
         if transportista_boolean == 'true':
             texto += formatear_linea("Transportista", row.transportista or "")
 
         texto += formatear_linea("Peso", f"{peso} KGS")
 
-        texto += formatear_linea("Bultos", str(bultos))
+        texto += formatear_linea("Bultos", str(bultos) + ' ' + str(tipo))
 
         texto += formatear_linea("CBM", f"{volumen:.3f} M³")
 
@@ -652,32 +652,39 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("Doc. Originales", "SI" if seguimiento.originales else "NO")
 
         texto += "<br>"
+        texto += "<table style='border: none; font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: 100%;'>"
 
-        # Reemplazar la tabla por líneas formateadas
+        # Fila de títulos (encabezados)
+        texto += "<tr>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Origen</th>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Destino</th>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Vapor/Vuelo</th>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Viaje</th>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Salida</th>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Llegada</th>"
+        texto += "</tr>"
 
-        texto += formatear_linea("Origen", row.origen or "")
+        # Fila de valores
+        texto += "<tr>"
+        texto += f"<td style='padding: 2px 10px;'>{row.origen or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{row.destino or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{str(row.vapor) or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{str(row.viaje) or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{salida}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{llegada}</td>"
+        texto += "</tr>"
 
-        texto += formatear_linea("Destino", row.destino or "")
-
-        texto += formatear_linea("Vapor/Vuelo", vapor or "")
-
-        texto += formatear_linea("Viaje", row.viaje or "")
-
-        texto += formatear_linea("Salida", salida)
-
-        texto += formatear_linea("Llegada", llegada)
-
-        texto += "<br>"
+        texto += "</table><br>"
 
         # Mensaje final
 
         texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
 
-        texto += "Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar.\n"
-
+        texto += "Los buques y las llegadas al puerto de Montevideo son siempre a CONFIRMAR, ya que puede haber trasbordos y/o alteraciones en las fechas estimadas de llegada\n"
+        texto += "sin previo aviso, por lo cual le sugerimos consultarnos por la fecha de arribo que aparece en este aviso.\n"
         texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
-
         texto += "</pre>"
+
     elif title == 'Orden de facturacion':
 
         resultado['asunto'] = 'ORDEN DE FACTURACION: - seguimiento: ' + str(
@@ -964,7 +971,7 @@ def formatear_linea(titulo, valor, ancho_total=110, ancho_col_izq=25):
     """
     puntos = '.' * (ancho_col_izq - len(titulo))
     col_izq = f"{titulo} {puntos} :"
-    return f"<pre style='font-family: Courier New, monospace; font-size: 13px; line-height: 1.1;'>{col_izq} {valor}</pre>"
+    return f"<div style='font-family: Courier New, monospace; font-size: 12px; line-height: 1;'>{col_izq} {valor}</div>"
 
 
 def formatear_caratula(titulo, valor):

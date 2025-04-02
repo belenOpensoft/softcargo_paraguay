@@ -513,6 +513,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += formatear_linea("Ref. Proveedor", embarque.refproveedor or "")
 
         texto += formatear_linea("Términos de Compra", row.terminos or "")
+        texto += formatear_linea("HAWB", row.hawb or "")
 
         if master_boolean == 'true':
             texto += formatear_linea("AWB", row.awb or "")
@@ -586,28 +587,36 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += formatear_linea("Doc. Originales", "SI" if seguimiento.originales else "NO")
 
         texto += "<br>"
+        texto += "<table style='border: none; font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: 100%;'>"
+        # Fila de títulos (encabezados)
+        texto += "<tr>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Origen</th>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Destino</th>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Vuelo</th>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Viaje</th>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Salida</th>"
+        texto += "<th style='padding: 2px 10px; text-align: left;'>Llegada</th>"
+        texto += "</tr>"
 
-        texto += formatear_linea("Origen", row.origen or "")
-
-        texto += formatear_linea("Destino", row.destino or "")
-
-        texto += formatear_linea("Vuelo", row.transportista or "")
-
-        texto += formatear_linea("Salida", salida)
-
-        texto += formatear_linea("Llegada", llegada)
-
-        texto += "<br>"
+        # Fila de valores
+        texto += "<tr>"
+        texto += f"<td style='padding: 2px 10px;'>{conex.origen or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{conex.destino or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{str(conex.vuelo) or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{str(conex.viaje) or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{conex.salida.strftime("%d/%m/%Y") if isinstance(conex.salida, datetime) else ""}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{conex.llegada.strftime("%d/%m/%Y") if isinstance(conex.llegada, datetime) else ""}</td>"
+        texto += "</tr>"
+        texto += "</table><br>"
 
         texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
 
-        texto += "Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar.\n"
-
+        texto += "Los vuelos y las llegadas al aeropuerto de Montevideo son siempre a CONFIRMAR, ya que puede haber trasbordos y/o alteraciones en las fechas estimadas de llegada\n"
+        texto += "sin previo aviso, por lo cual le sugerimos consultarnos por la fecha de arribo que aparece en este aviso.\n"
         texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
-
         texto += "</pre>"
-
         return texto, resultado
+
     elif title == 'Orden de facturacion':
 
         resultado['asunto'] = 'ORDEN DE FACTURACION: - seguimiento: ' + str(
