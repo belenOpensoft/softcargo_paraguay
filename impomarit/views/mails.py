@@ -955,40 +955,20 @@ def image_to_base64(image_path):
         return base64_data
 
 
-def formatear_linea(titulo, valor, ancho_total=100, ancho_col_izq=60):
-    # Asegurarse que título + puntos tenga ancho exacto
+
+def formatear_linea(titulo, valor, ancho_total=110, ancho_col_izq=25):
+    """
+    Formatea una línea con estilo tipo factura o instrucción de embarque,
+    usando puntos y dos columnas al estilo:
+    Título ......... : Valor
+    """
     puntos = '.' * (ancho_col_izq - len(titulo))
-    col_izq = titulo + puntos
-
-    # Calcular espacios a la izquierda del valor para alinearlo a la derecha
-    espacios = ' ' * (ancho_total - len(col_izq) - len(str(valor)))
-    return f"<pre style='font-family: Courier New, monospace; font-size: 13px;'>{col_izq}{espacios}{valor}</pre>"
+    col_izq = f"{titulo} {puntos} :"
+    return f"<pre style='font-family: Courier New, monospace; font-size: 13px; line-height: 1.1;'>{col_izq} {valor}</pre>"
 
 
-def formatear_linea_corta(titulo, valor, ancho_total=70, ancho_col_izq=30):
-    import textwrap
-
-    puntos = '.' * (ancho_col_izq - len(titulo))
-    col_izq = titulo + puntos
-
-    valor = str(valor).strip()
-
-    ancho_valor = ancho_total - len(col_izq)
-
-    # Si el valor está vacío, mostrar solo el título
-    if not valor:
-        return f"<pre style='font-family: Courier New, monospace; font-size: 13px;'>{col_izq}</pre>"
-
-    # Cortar el valor largo en líneas
-    lineas_valor = textwrap.wrap(valor, width=ancho_valor)
-
-    primera = f"<pre style='font-family: Courier New, monospace; font-size: 13px;'>{col_izq}{lineas_valor[0]:>{ancho_valor}}</pre>"
-
-    resto = ""
-    for linea in lineas_valor[1:]:
-        resto += f"<pre style='font-family: Courier New, monospace; font-size: 13px;'>{' ' * len(col_izq)}{linea:>{ancho_valor}}</pre>"
-
-    return primera + resto
+def formatear_caratula(titulo, valor):
+    return f"<div style='font-family: Courier New, monospace; font-size: 12px; line-height: 1;'>{titulo}: {valor}</div>"
 
 
 
