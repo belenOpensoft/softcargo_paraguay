@@ -45,7 +45,7 @@ def get_data_email_op(request):
             master_boolean = request.POST['master']
             gastos_boolean = request.POST['gastos']
             directo_boolean = request.POST['directo']
-            armador = request.POST['armador']
+            #armador = request.POST['armador']
 
             #9155
             embarque=ImportEmbarqueaereo.objects.get(numero=row_number)
@@ -70,7 +70,7 @@ def get_data_email_op(request):
 
             texto = ''
             texto += f'<br>'
-            texto, resultado = get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista,master_boolean,gastos_boolean,directo_boolean,request,armador)
+            texto, resultado = get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista,master_boolean,gastos_boolean,directo_boolean,request)
             texto += "<b><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OCEANLINK,</p></b>"
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>DEPARTAMENTO DE IMPORTACIÓN MARITIMA,</p>"
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{request.user.first_name} {request.user.last_name}</p>"
@@ -90,7 +90,7 @@ def get_data_email_op(request):
     return HttpResponse(data_json, mimetype)
 
 
-def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista_boolean,master_boolean,gastos_boolean,directo_boolean,request,armador):
+def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista_boolean,master_boolean,gastos_boolean,directo_boolean,request):
     # merca = Productos.objects.get(codigo=row2.producto.codigo)
     if row2 is not None:
         merca = []
@@ -618,7 +618,125 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
         texto += "</pre>"
         return texto, resultado
+    elif title == 'Aviso de desconsolidacion':
 
+        fecha_actual = datetime.now()
+
+        fecha_formateada = fecha_actual.strftime(
+            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
+
+        resultado['asunto'] = (
+
+            f'AVISO DE DESCONSOLIDACION - Ref.: {seguimiento.refproveedor} - CS: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador}'
+
+        )
+        try:
+            consigna=Clientes.objects.get(codigo=row.consignatario_id)
+            telefono=consigna.telefono
+        except Clientes.DoesNotExist:
+            direccion=telefono='S/I'
+
+
+        texto += formatear_linea("Fecha", fecha_formateada.upper())
+
+        texto += "<br>"
+
+        texto += formatear_linea("Att.", "DEPARTAMENTO DE OPERACIONES")
+
+        texto += formatear_linea("Consignatario", str(row.consignatario))
+
+        texto += formatear_linea("Dirección", row.direccion_consignatario or "")
+
+        texto += formatear_linea("Teléfono", telefono or "")
+
+
+       # texto += formatear_linea("Vapor", row.vapor or "")  # cambiar esto
+
+        texto += formatear_linea("Viaje", conex.viaje or "")
+
+        if isinstance(conex.llegada, datetime):
+            texto += formatear_linea("Llegada", conex.llegada.strftime("%d/%m/%Y"))
+
+        texto += formatear_linea("Posición", row.posicion or "")
+
+        texto += formatear_linea("Seguimiento", row.seguimiento)
+
+        texto += formatear_linea("Embarcador", row.embarcador)
+
+        #texto += formatear_linea("Consignatario", row.consignatario)
+
+        texto += formatear_linea("Orden cliente", seguimiento.refcliente)
+
+        texto += formatear_linea("Referencia proveedor", seguimiento.refproveedor)
+
+        texto += formatear_linea("Origen", row.origen)
+
+        texto += formatear_linea("Destino", row.destino)
+
+        # Datos de contenedores
+
+        cantidad_cntr = ""
+
+        contenedores = ""
+
+        precintos = ""
+
+        movimiento = ""
+
+        mercaderias = ""
+
+        bultos = 0
+
+        peso = 0
+
+        volumen = 0
+
+        cant_cntr = ImportCargaaerea.objects.filter(numero=row.numero).values(
+
+            'bruto', 'medidas', 'bultos','producto__nombre').annotate(total=Count('id'))
+
+        if cant_cntr.count() > 0:
+
+            for cn in cant_cntr:
+                bultos += cn['bultos']
+                if cn['bruto']:
+                    peso += cn['bruto']
+
+                if cn['medidas'] is not None:
+
+                    medidas = cn['medidas'].split('*')
+
+                else:
+
+                    medidas = None
+
+                if medidas and len(medidas) == 3 and all(m.isdigit() for m in medidas):
+
+                    volumen += float(medidas[0]) * float(medidas[1]) * float(medidas[2])
+
+                else:
+                    volumen+=0
+
+                mercaderias += f'{cn["producto__nombre"]} - '
+
+
+        texto += formatear_linea("Bultos", str(bultos))
+
+        texto += formatear_linea("Peso", f"{peso:.2f} KGS")
+
+        texto += formatear_linea("CBM", f"{volumen:.2f} M³")
+
+        texto += formatear_linea("Mercadería", mercaderias.strip(' -'))
+
+        texto += formatear_linea("Depósito", str(seguimiento.deposito))
+        texto += formatear_linea("WR", str(embarque.wreceipt))
+
+        texto += "<br>"
+
+        texto += "<b>ATENCION!</b><br><br>"
+
+        texto += "DETALLE DE DESCONSOLIDACION<br><br>"
+        return texto,resultado
     elif title == 'Orden de facturacion':
 
         resultado['asunto'] = 'ORDEN DE FACTURACION: - seguimiento: ' + str(

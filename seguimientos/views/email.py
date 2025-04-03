@@ -410,7 +410,17 @@ def get_data_email(request):
 
                 texto += formatear_linea("Teléfono", row.telefono_cliente or "")
 
-                texto += formatear_linea("Vapor", row.vapor or "")
+                if row.modo == 'IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO':
+                    if row.vapor is not None and row.vapor.isdigit():
+                        vapor = Vapores.objects.get(codigo=row.vapor).nombre
+                    elif row.vapor is not None:
+                        vapor = row.vapor
+                    else:
+                        vapor = 'S/I'
+                else:
+                    vapor = row.vapor
+
+                texto += formatear_linea("Vapor", vapor or "") #cambiar esto
 
                 texto += formatear_linea("Viaje", row.viaje or "")
 
@@ -425,7 +435,7 @@ def get_data_email(request):
 
                 texto += formatear_linea("Consignatario", row.consignatario)
 
-                texto += formatear_linea("Orden cliente", "")
+                texto += formatear_linea("Orden cliente", row.refcliente)
 
                 texto += formatear_linea("Referencia proveedor", row.refproveedor)
 
@@ -499,6 +509,7 @@ def get_data_email(request):
                 texto += formatear_linea("Entrega en gate", "")
 
                 texto += formatear_linea("Depósito", str(row.deposito))
+                texto += formatear_linea("WR", str(row.wreceipt))
 
                 texto += "<br>"
 

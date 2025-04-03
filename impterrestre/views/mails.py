@@ -12,7 +12,7 @@ from impomarit.views.mails import formatear_linea
 from impterrestre.models import VEmbarqueaereo, ImpterraCargaaerea, ImpterraEnvases, ImpterraServiceaereo, VGastosHouse, \
     ImpterraEmbarqueaereo, ImpterraReservas, ImpterraConexaerea
 from mantenimientos.views.bancos import is_ajax
-from mantenimientos.models import Productos, Clientes, Servicios, Monedas
+from mantenimientos.models import Productos, Clientes, Servicios, Monedas, Vapores
 from seguimientos.models import VGrillaSeguimientos
 
 DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
@@ -777,6 +777,128 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         resultado['asunto'] = f'SEGUIMIENTO {row.numero} // TRASPASO A OPERACIONES'
 
+        return texto, resultado
+    elif title == 'Aviso de desconsolidacion':
+
+        fecha_actual = datetime.now()
+        conex = ImpterraConexaerea.objects.filter(numero=embarque.numero).order_by('-id').last()
+
+        fecha_formateada = fecha_actual.strftime(
+            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
+        try:
+            consigna=Clientes.objects.get(codigo=row.consignatario_id)
+            telefono=consigna.telefono
+        except Clientes.DoesNotExist:
+            telefono='S/I'
+
+        resultado['asunto'] = (
+
+            f'AVISO DE DESCONSOLIDACION - Ref.: {seguimiento.refproveedor} - CS: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador}'
+
+        )
+
+        texto += formatear_linea("Fecha", fecha_formateada.upper())
+
+        texto += "<br>"
+
+        texto += formatear_linea("Att.", "DEPARTAMENTO DE OPERACIONES")
+
+        texto += formatear_linea("Cliente", str(row.consignatario))
+
+        texto += formatear_linea("Dirección", row.direccion_consignatario or "")
+
+        texto += formatear_linea("Teléfono", telefono or "")
+
+        texto += formatear_linea("Viaje", conex.viaje or "")
+
+        if isinstance(conex.llegada, datetime):
+            texto += formatear_linea("Llegada", conex.llegada.strftime("%d/%m/%Y"))
+
+        texto += formatear_linea("Posición", row.posicion or "")
+
+        texto += formatear_linea("Seguimiento", row.seguimiento)
+
+        texto += formatear_linea("Embarcador", row.embarcador)
+
+        texto += formatear_linea("Orden cliente", seguimiento.refcliente)
+
+        texto += formatear_linea("Referencia proveedor", seguimiento.refproveedor)
+
+        texto += formatear_linea("Origen", row.origen)
+
+        texto += formatear_linea("Destino", row.destino)
+
+        # Datos de contenedores
+
+        cantidad_cntr = ""
+
+        contenedores = ""
+
+        precintos = ""
+
+        movimiento = ""
+
+        mercaderias = ""
+
+        bultos = 0
+
+        peso = 0
+
+        volumen = 0
+
+        cant_cntr = ImpterraEnvases.objects.filter(numero=row.numero).values(
+
+            'tipo', 'nrocontenedor', 'precinto', 'bultos',
+
+            'peso', 'envase', 'movimiento', 'volumen'
+
+        ).annotate(total=Count('id'))
+
+        if cant_cntr.count() > 0:
+
+            for cn in cant_cntr:
+
+                cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - '
+
+                contenedores += f' {cn["nrocontenedor"]} - '
+
+                if cn['precinto']:
+                    precintos += f'{cn["precinto"]} - '
+
+                bultos += cn['bultos']
+
+                if cn['peso']:
+                    peso += cn['peso']
+
+                if cn['volumen']:
+                    volumen += cn['volumen']
+
+                movimiento += f'{cn["movimiento"]} - '
+
+                mercaderias += f'{cn["envase"]} - '
+
+        texto += formatear_linea("Contenedores", cantidad_cntr.strip(' -'))
+
+        texto += formatear_linea("Nro. Contenedor/es", contenedores.strip(' -'))
+
+        texto += formatear_linea("Precintos/sellos", precintos.strip(' -'))
+
+        texto += formatear_linea("Bultos", str(bultos))
+
+        texto += formatear_linea("Peso", f"{peso} KGS")
+
+        texto += formatear_linea("CBM", f"{volumen} M³")
+
+        texto += formatear_linea("Mercadería", mercaderias.strip(' -'))
+
+        texto += formatear_linea("Depósito", str(seguimiento.deposito))
+        texto += formatear_linea("WR", str(seguimiento.wreceipt))
+
+        texto += "<br>"
+
+        texto += "<b>ATENCION!</b><br><br>"
+
+        texto += "DETALLE DE DESCONSOLIDACION<br><br>"
         return texto, resultado
 
 def image_to_base64(image_path):

@@ -161,6 +161,7 @@ def add_house_importado(request):
                     reserva.status=house_data.get('estado')
                     reserva.refproveedor = house_data.get('refproveedor')
                     reserva.ordencliente = house_data.get('refcliente')
+                    reserva.terminos = house_data.get('terminos')
                     reserva.fechaingreso=datetime.now()
 
                     reserva.save()
@@ -249,7 +250,8 @@ def source_seguimientos_importado(request):
                     "fechaembarque":registro.etd,
                     "fecharetiro":registro.eta,
                     "refproveedor": registro.refproveedor,
-                    "refcliente": registro.refcliente
+                    "refcliente": registro.refcliente,
+                    "terminos": registro.terminos,
                 })
 
             return JsonResponse({"data": resultado}, safe=False)

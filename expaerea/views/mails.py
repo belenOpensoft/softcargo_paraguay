@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.http import HttpResponse
 import base64
 from django.views.decorators.csrf import csrf_exempt
@@ -487,6 +488,126 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += "</pre>"
 
         return texto, resultado
+    elif title == 'Aviso de desconsolidacion':
+
+        fecha_actual = datetime.now()
+
+        fecha_formateada = fecha_actual.strftime(
+            f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
+
+        resultado['asunto'] = (
+
+            f'AVISO DE DESCONSOLIDACION - Ref.: {seguimiento.refproveedor} - CS: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador}'
+
+        )
+        try:
+            consigna=Clientes.objects.get(codigo=row.consignatario_id)
+            telefono=consigna.telefono
+        except Clientes.DoesNotExist:
+            telefono='S/I'
+
+
+        texto += formatear_linea("Fecha", fecha_formateada.upper())
+
+        texto += "<br>"
+
+        texto += formatear_linea("Att.", "DEPARTAMENTO DE OPERACIONES")
+
+        texto += formatear_linea("Consignatario", str(row.consignatario))
+
+        texto += formatear_linea("Dirección", row.direccion_consignatario or "")
+
+        texto += formatear_linea("Teléfono", telefono or "")
+
+
+       # texto += formatear_linea("Vapor", row.vapor or "")  # cambiar esto
+
+        texto += formatear_linea("Viaje", conex.viaje or "")
+
+        if isinstance(conex.llegada, datetime):
+            texto += formatear_linea("Llegada", conex.llegada.strftime("%d/%m/%Y"))
+
+        texto += formatear_linea("Posición", row.posicion or "")
+
+        texto += formatear_linea("Seguimiento", row.seguimiento)
+
+        texto += formatear_linea("Embarcador", row.embarcador)
+
+        #texto += formatear_linea("Consignatario", row.consignatario)
+
+        texto += formatear_linea("Orden cliente", seguimiento.refcliente)
+
+        texto += formatear_linea("Referencia proveedor", seguimiento.refproveedor)
+
+        texto += formatear_linea("Origen", row.origen)
+
+        texto += formatear_linea("Destino", row.destino)
+
+        # Datos de contenedores
+
+        cantidad_cntr = ""
+
+        contenedores = ""
+
+        precintos = ""
+
+        movimiento = ""
+
+        mercaderias = ""
+
+        bultos = 0
+
+        peso = 0
+
+        volumen = 0
+
+        cant_cntr = ExportCargaaerea.objects.filter(numero=row.numero).values(
+
+            'bruto', 'nrocontenedor', 'medidas', 'bultos','producto__nombre').annotate(total=Count('id'))
+
+        if cant_cntr.count() > 0:
+
+            for cn in cant_cntr:
+                contenedores += f' {cn["nrocontenedor"]} - '
+                bultos += cn['bultos']
+                if cn['bruto']:
+                    peso += cn['bruto']
+
+                if cn['medidas'] is not None:
+
+                    medidas = cn['medidas'].split('*')
+
+                else:
+
+                    medidas = None
+
+                if medidas and len(medidas) == 3 and all(m.isdigit() for m in medidas):
+
+                    volumen += float(medidas[0]) * float(medidas[1]) * float(medidas[2])
+
+                else:
+                    volumen+=0
+
+                mercaderias += f'{cn["producto__nombre"]} - '
+
+        texto += formatear_linea("Nro. Contenedor/es", contenedores.strip(' -'))
+
+        texto += formatear_linea("Bultos", str(bultos))
+
+        texto += formatear_linea("Peso", f"{peso:.2f} KGS")
+
+        texto += formatear_linea("CBM", f"{volumen:.2f} M³")
+
+        texto += formatear_linea("Mercadería", mercaderias.strip(' -'))
+
+        texto += formatear_linea("Depósito", str(seguimiento.deposito))
+        texto += formatear_linea("WR", str(embarque.wreceipt))
+
+        texto += "<br>"
+
+        texto += "<b>ATENCION!</b><br><br>"
+
+        texto += "DETALLE DE DESCONSOLIDACION<br><br>"
 
     return texto,resultado
 
