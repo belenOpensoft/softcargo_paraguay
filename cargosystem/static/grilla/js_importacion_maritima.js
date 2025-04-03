@@ -1390,6 +1390,7 @@ var expandedRow;
                         localStorage.removeItem('fecha_editada_master');
                         localStorage.removeItem('id_master_editar');
                         localStorage.removeItem('num_house_gasto');
+                        localStorage.removeItem('id_house_gasto');
                     }
                 });
 
@@ -4989,8 +4990,9 @@ function pdf_btn_h_click(){
 let selectedRowN = localStorage.getItem('num_house_gasto');
         $("#pdf_add_input").html('');
         $('#pdf_add_input').summernote('destroy');
-        get_datos_pdf();
+
         if (selectedRowN!=null) {
+        get_datos_pdf();
             $("#pdf_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {

@@ -1438,6 +1438,7 @@ function aplicable_volumen(volumen){
                         localStorage.removeItem('fecha_editada_master');
                         localStorage.removeItem('id_master_editar');
                         localStorage.removeItem('num_house_gasto');
+                        localStorage.removeItem('id_house_gasto');
                     }
                 });
 
@@ -4943,8 +4944,9 @@ function pdf_btn_h_click(){
 let selectedRowN = localStorage.getItem('num_house_gasto');
         $("#pdf_add_input").html('');
         $('#pdf_add_input').summernote('destroy');
-        get_datos_pdf();
+
         if (selectedRowN!=null) {
+        get_datos_pdf();
             $("#pdf_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
@@ -5576,7 +5578,7 @@ function validarCoincidenciaAcumulados() {
 
     if (difPeso > 0.01) {
         alert("⚠️ Los valores ingresados en el máster no coinciden con los acumulados de los hijos.\n\n" +
-              `Peso máster: ${kilosMadre} / Acumulado: ${pesoAcumulado}\n` );
+              `Peso máster: ${kilosMadre.toFixed(2)} / Acumulado: ${pesoAcumulado.toFixed(2)}\n` );
         return false;
     }
 

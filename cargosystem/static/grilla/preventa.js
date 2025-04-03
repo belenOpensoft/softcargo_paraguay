@@ -1,6 +1,9 @@
 //facturar
 function facturar(){
     let selectedRowN = localStorage.getItem('num_house_gasto');
+    if(selectedRowN==null){
+    alert('Seleccione una fila.');
+    }
     const wHeight = $(window).height();
     const wWidth = $(window).width();
     $('#destinatario').val('');
