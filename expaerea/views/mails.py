@@ -497,7 +497,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
         resultado['asunto'] = (
 
-            f'AVISO DE DESCONSOLIDACION - Ref.: {seguimiento.refproveedor} - CS: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador}'
+            f'AVISO DE DESCONSOLIDACION - Ref.: {row.seguimiento} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador}'
 
         )
         try:

@@ -293,8 +293,10 @@ def is_ajax(request):
 
 
 #traer datos houses tabla
-def source_embarque_aereo(request, master):
+def source_embarque_aereo(request):
+
     if is_ajax(request):
+        master = request.POST.get("master")
         start = int(request.POST.get('start', 0))  # Usa 0 como valor predeterminado si 'start' no está presente
         length = int(request.POST.get('length', 10))  # Usa 10 como valor predeterminado si 'length' no está presente
         draw = int(request.POST.get('draw', 1))

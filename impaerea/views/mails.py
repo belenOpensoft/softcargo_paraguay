@@ -45,7 +45,7 @@ def get_data_email_op(request):
             master_boolean = request.POST['master']
             gastos_boolean = request.POST['gastos']
             directo_boolean = request.POST['directo']
-            #armador = request.POST['armador']
+            armador = request.POST['armador']
 
             #9155
             embarque=ImportEmbarqueaereo.objects.get(numero=row_number)
@@ -70,7 +70,7 @@ def get_data_email_op(request):
 
             texto = ''
             texto += f'<br>'
-            texto, resultado = get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista,master_boolean,gastos_boolean,directo_boolean,request)
+            texto, resultado = get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista,master_boolean,gastos_boolean,directo_boolean,request,armador)
             texto += "<b><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OCEANLINK,</p></b>"
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>DEPARTAMENTO DE IMPORTACIÓN MARITIMA,</p>"
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{request.user.first_name} {request.user.last_name}</p>"
@@ -90,7 +90,7 @@ def get_data_email_op(request):
     return HttpResponse(data_json, mimetype)
 
 
-def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista_boolean,master_boolean,gastos_boolean,directo_boolean,request):
+def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista_boolean,master_boolean,gastos_boolean,directo_boolean,request,armador):
     # merca = Productos.objects.get(codigo=row2.producto.codigo)
     if row2 is not None:
         merca = []
@@ -605,7 +605,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += f"<td style='padding: 2px 10px;'>{conex.origen or ''}</td>"
         texto += f"<td style='padding: 2px 10px;'>{conex.destino or ''}</td>"
         texto += f"<td style='padding: 2px 10px;'>{row.transportista}</td>"
-        texto += f"<td style='padding: 2px 10px;'>{str(conex.viaje) or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{str(conex.ciavuelo)+str(conex.vuelo)}</td>"
         texto += f'<td style="padding: 2px 10px;">{conex.salida.strftime("%d/%m/%Y") if isinstance(conex.salida, datetime) else ""}</td>'
         texto += f'<td style="padding: 2px 10px;">{conex.llegada.strftime("%d/%m/%Y") if isinstance(conex.llegada, datetime) else ""}</td>'
         texto += "</tr>"
@@ -627,7 +627,8 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
         resultado['asunto'] = (
 
-            f'AVISO DE DESCONSOLIDACION - Ref.: {seguimiento.refproveedor} - CS: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador}'
+            f'AVISO DE DESCONSOLIDACION - Ref.: {row.seguimiento} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador}'
+
 
         )
         try:
@@ -873,7 +874,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += formatear_linea("Phone", consignatario.telefono)
 
         texto += "<br>"
-        texto += formatear_linea("Internal Reference", f"{seguimiento.refproveedor}/{row.numero}")
+        texto += formatear_linea("Internal Reference", f"{seguimiento.numero}/{row.numero}")
         texto += formatear_linea("Position", row.posicion)
         texto += formatear_linea("Estimated delivery date", llegada)
         texto += formatear_linea("Airport of origin", embarque.origen)
@@ -965,7 +966,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += formatear_linea("Teléfono", consignatario.telefono)
 
         texto += "<br>"
-        texto += formatear_linea("Referencia interna", f"{seguimiento.refproveedor}/{row.numero}")
+        texto += formatear_linea("Referencia interna", f"{seguimiento.numero}/{row.numero}")
         texto += formatear_linea("Posición", row.posicion)
         texto += formatear_linea("Recepción estimada de mercadería", llegada)
         texto += formatear_linea("Aeropuerto de origen", embarque.origen)

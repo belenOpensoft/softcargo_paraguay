@@ -394,7 +394,7 @@ def get_data_email(request):
 
                 resultado['asunto'] = (
 
-                    f'AVISO DE DESCONSOLIDACION - Ref.: {row.refproveedor} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador}'
+                    f'AVISO DE DESCONSOLIDACION - Ref.: {row.numero} - CS: {row.embarque} - HB/l: {row.hawb} - Ship: {row.embarcador}'
 
                 )
 

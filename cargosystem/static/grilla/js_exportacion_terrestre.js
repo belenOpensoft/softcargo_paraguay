@@ -1210,14 +1210,18 @@ var expandedRow;
             var selectedRowId = rowData[4];
 
             $.ajax({
-                url: '/exportacion_terrestre/source_embarque_aereo/' + selectedRowId + '/',
-                type: 'GET',
+                url: '/exportacion_terrestre/source_embarque_aereo/',
+                type: 'POST',
+                data: {
+                    master: selectedRowId
+                },
+                headers: {
+                    'X-CSRFToken': csrf_token
+                },
                 success: function (response) {
-               // console.log(data);
                     row.child(format(response.data)).show();
                     tr.addClass('shown');
                     expandedRow = row;
-
                 },
                 error: function (xhr, status, error) {
                     console.error('Error al cargar los detalles:', error);
@@ -2600,11 +2604,14 @@ table_add_im = $('#table_add_im').DataTable({
     "serverSide": true,
     "pageLength": 100,
     "ajax": {
-        "url": `/exportacion_terrestre/source_embarque_aereo/${master}/`,
+        "url": `/exportacion_terrestre/source_embarque_aereo/`,
         "type": 'POST',
         "headers": {
             "X-CSRFToken": csrftoken
         },
+                "data": function (d) {
+        d.master = master;  // acá mandás el valor como POST
+    },
         "dataSrc": function (json) {
          $('#table_add_im th').css({'width':'auto'});
          $('#table_add_im_wrapper .dataTables_scrollBody').css({
@@ -3019,11 +3026,14 @@ table_edit_im = $('#table_edit_im').DataTable({
     "serverSide": true,
     "pageLength": 100,
     "ajax": {
-        "url": `/exportacion_terrestre/source_embarque_aereo/${master}/`,
+        "url": `/exportacion_terrestre/source_embarque_aereo/`,
         "type": 'POST',
         "headers": {
             "X-CSRFToken": csrftoken
         },
+                "data": function (d) {
+        d.master = master;  // acá mandás el valor como POST
+    },
         "dataSrc": function (json) {
          $('#table_edit_im th').css({'width':'auto'});
          $('#table_edit_im_wrapper .dataTables_scrollBody').css({
