@@ -954,6 +954,25 @@ $(document).ready(function () {
             }
         }
     });
+    $("#id_cia").autocomplete({
+        source: '/autocomplete_clientes/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                 $('#id_cia').val(ui.item['value']);
+                 $('#id_cia').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                $('#id_cia').val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+                $('#id_cia').css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
     $("#consignatario_addh_e").autocomplete({
         source: '/autocomplete_clientes/',
         minLength: 2,

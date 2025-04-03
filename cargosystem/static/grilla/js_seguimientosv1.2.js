@@ -456,8 +456,6 @@ $(document).ready(function () {
     });
     $('#ingresar_ruta').click(function (event) {
     event.preventDefault();
-
-
         if (confirm("¿Confirma guardar datos?")) {
             var form = $('#rutas_form');
             if (form[0].checkValidity()) {
@@ -501,7 +499,6 @@ $(document).ready(function () {
             alert("Error: " + campo.validationMessage);
         }
         }
-
     });
     $('#ingresar_gasto').click(function (event) {
     event.preventDefault();
@@ -1339,6 +1336,7 @@ $(document).ready(function () {
     });
     $('#rutas_btn').click(function () {
         row = table.rows('.table-secondary').data();
+
         if (row.length === 1) {
         get_datos_rutas();
             $('#rutas_form').trigger("reset");
@@ -1404,9 +1402,59 @@ $(document).ready(function () {
                         },
                     }],
                 beforeClose: function (event, ui) {
+                    const $ciaInput = $("#id_cia");
 
+                    // Solo destruimos si estaba inicializado
+                    if ($ciaInput.data("autocomplete-initialized")) {
+                        $ciaInput.autocomplete("destroy");
+                        $ciaInput.removeData("autocomplete-initialized");
+                    }
                 }
-            })
+
+            });
+            if (row[0][2] != 'IMPORT AEREO' && row[0][2] != 'EXPORT AEREO') {
+                const $ciaInput = $("#id_cia");
+
+                // Verificamos si ya fue inicializado antes
+                if (!$ciaInput.data("autocomplete-initialized")) {
+                    $ciaInput.autocomplete({
+                        source: '/autocomplete_clientes/',
+                        minLength: 2,
+                        select: function (event, ui) {
+                            $(this).attr('data-id', ui.item['id']);
+                        },
+                        change: function (event, ui) {
+                            if (ui.item) {
+                                $(this).css({
+                                    "border-color": "#3D9A37",
+                                    'box-shadow': '0 0 0 0.1rem #3D9A37'
+                                });
+                                $('#id_cia').val(ui.item['value']);
+                                $('#id_cia').css({
+                                    "border-color": "#3D9A37",
+                                    'box-shadow': '0 0 0 0.1rem #3D9A37'
+                                });
+                            } else {
+                                $(this).val('');
+                                $('#id_cia').val('');
+                                $(this).css({
+                                    "border-color": "",
+                                    'box-shadow': ''
+                                });
+                                $('#id_cia').css({
+                                    "border-color": "",
+                                    'box-shadow': ''
+                                });
+                            }
+                        }
+                    });
+
+                    // Marcamos que ya fue inicializado
+                    $ciaInput.data("autocomplete-initialized", true);
+                }
+            }
+
+
         } else {
             alert('Debe seleccionar al menos un registro');
         }

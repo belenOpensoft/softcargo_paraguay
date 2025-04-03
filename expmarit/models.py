@@ -204,7 +204,7 @@ class ExpmaritConexaerea(models.Model):
     vapor = models.CharField(db_column='Vapor', max_length=30, blank=True, null=True)  # Field name made lowercase.
     salida = models.DateTimeField(blank=True, null=True)
     llegada = models.DateTimeField(blank=True, null=True)
-    cia = models.CharField(max_length=3, blank=True, null=True)
+    cia = models.CharField(max_length=50, blank=True, null=True)
     viaje = models.CharField(db_column='Viaje', max_length=10, blank=True, null=True)  # Field name made lowercase.
     modo = models.CharField(max_length=15,choices=choice_modo)
     horaorigen = models.CharField(db_column='HoraOrigen', max_length=8, blank=True, null=True)  # Field name made lowercase.
