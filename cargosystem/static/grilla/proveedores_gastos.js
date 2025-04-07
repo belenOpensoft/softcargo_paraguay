@@ -818,7 +818,7 @@ function guardar_factura(){
             moneda: moneda,
             saldo_nota_cred: localStorage.getItem('saldo_nota_credito_compra') || null,
             clienteData: JSON.stringify(clienteData),
-            facturas_imputadas: JSON.stringify(localStorage.getItem('facturas_impucompra') || "[]"),
+            facturas_imputadas:localStorage.getItem('facturas_impucompra') || "[]",
             items: JSON.stringify(items),
             total:$('#id_total').val(),
             iva:$('#id_iva').val(),

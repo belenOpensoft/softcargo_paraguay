@@ -181,7 +181,12 @@
 
 </div>
 {% include 'editar_consultar_compras/editar_consultar_compras_detalle.html' %}
+{% include 'editar_consultar_compras/editar_consultar_compras_detalle_pago.html' %}
 {% include 'embarque.html' %}
+{% include 'impucompra_nota.html' %}
 
 <script src="{% static 'grilla/editar_consultar_compras.js' %}"></script>
+    <script>
+       var csrf_token = '{{ csrf_token }}';
+    </script>
 {% endblock contenido %}

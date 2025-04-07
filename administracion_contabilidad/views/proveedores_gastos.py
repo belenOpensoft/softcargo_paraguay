@@ -177,11 +177,15 @@ def procesar_factura_proveedor(request):
                 for fac in facturas_imputadas:
 
                     impuc=Impucompras()
-                    impuc.autogen=str(autogenerado)+str(randint(1,10))
+                    impuc.autogen=str(autogenerado)
                     impuc.cliente=codigo_cliente
                     impuc.monto=fac.get('monto_imputado')
                     impuc.autofac=fac.get('autogenerado')
                     impuc.save()
+
+                    fac=Movims.objects.filter(mautogen=fac.get('autogenerado'),mtipo=40).first()
+                    fac.msaldo=fac.msaldo - float(fac.get('monto_imputado'))
+                    fac.save()
 
             detalle_asiento = detalle1 + '-' + serie + '-' + str(prefijo) + '-' + str(numero) + '-' + cliente.empresa
 
@@ -522,7 +526,8 @@ def cargar_pendientes_imputacion(request):
             return JsonResponse({'error': 'Debe proporcionar un nrocliente'}, status=400)
 
         registros = VistaProveedoresygastos.objects.filter(
-            nrocliente=nrocliente
+            nrocliente=nrocliente,
+            tipo='FACTURA'
         ).exclude(saldo=0)
 
         data = []

@@ -77,6 +77,7 @@
       <!-- Primera Fila: Prefijo, Serie, Numero, Tipo, Moneda -->
       <div class="row mb-2">
         <div class="col-md-2">
+          <input type="hidden" name="" id="autogen_detalle_compra">
           {{ compras_detalle.prefijo.label_tag }}
           {{ compras_detalle.prefijo }}
         </div>
@@ -121,6 +122,7 @@
           {{ compras_detalle.arbitraje }}
         </div>
         <div class="col-md-2">
+          <input type="hidden" id="nro_prov">
           {{ compras_detalle.proveedor.label_tag }}
           {{ compras_detalle.proveedor }}
         </div>
@@ -180,7 +182,7 @@
           <table class="table table-bordered table-sm" id="tabla_pago_factura">
             <thead class="thead-light">
               <tr>
-                <th class="oculto">nro</th>
+                <th class="oculto">autogenerado</th>
                 <th>Nº Recibo</th>
                 <th>Fecha</th>
                 <th>Monto</th>
@@ -195,10 +197,10 @@
       <!-- Botones de Imputación -->
       <div class="d-flex justify-content-start gap-2 my-3">
         <button type="button" id="eliminarImputaciones" class="btn btn-danger btn-sm">Eliminar imputaciones</button>
-        <button type="button" id="realizarImputaciones" class="btn btn-success btn-sm">Realizar imputaciones</button>
+        <button type="button" id="realizarImputaciones" onclick="abrir_impucompra()" class="btn btn-success btn-sm">Realizar imputaciones</button>
       </div>
 
-      <!-- Tabla Movimiento de Cheques -->
+      <!-- Tabla Movimiento de Cheques
       <div class="table-responsive mb-3">
         <h6>Movimiento de Cheques Emitidos / Entregados</h6>
         <table class="table table-bordered table-sm">
@@ -215,7 +217,7 @@
           <tbody id="tablaCheques"></tbody>
         </table>
       </div>
-
+      -->
     </div>
   </form>
 </div>

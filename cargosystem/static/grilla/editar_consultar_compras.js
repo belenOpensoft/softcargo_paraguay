@@ -15,7 +15,7 @@
     // Escuchar cambios
     omitirFechas.addEventListener("change", toggleFechas);
 
-$('#id_proveedor').autocomplete({
+  $('#id_proveedor').autocomplete({
     source: function(request, response) {
         $.ajax({
             url: "/admin_cont/buscar_proveedor",
@@ -40,7 +40,39 @@ $('#id_proveedor').autocomplete({
         $('#id_proveedor_codigo').val(codigo);
     }
 });
-
+  $('#id_proveedor').on('input', function () {
+      const valor = $(this).val().trim();
+      if (valor === '') {
+        $('#id_proveedor_codigo').val('');
+      }
+    });
+  $("#impucompra_nota").dialog({
+        autoOpen: false,
+        resizable: false,
+        draggable: true,
+        width: "auto",
+        height: "auto",
+        maxWidth: $(window).width() * 0.90,
+        minWidth: 600,
+        maxHeight: $(window).height() * 0.90,
+        modal: true,
+        position: { my: "center", at: "center", of: window },
+        open: function () {
+            resetModal("#impucompra_nota");
+            $(this).dialog("option", "width", "auto");
+            $(this).dialog("option", "height", "auto");
+            $(this).dialog("option", "position", { my: "center", at: "center", of: window });
+        },
+         buttons: [
+        {
+            class: "btn btn-dark btn-sm",
+            text: "Cerrar",
+            click: function() {
+                $(this).dialog("close");
+            }
+        }
+    ],
+    });
   $('#consultaComprasForm').on('submit', function (e) {
     e.preventDefault();
 
@@ -84,8 +116,10 @@ $('#id_proveedor').autocomplete({
     const autogenerado = $(this).find('td:nth-child(5)').text().trim();
     const numero = $(this).find('td:nth-child(6)').text().trim();
     const nrocliente = $(this).find('td:nth-child(7)').text().trim();
+    $('#autogen_detalle_compra').val(autogenerado);
     buscar_gastos(autogenerado);
     buscar_ordenes(nrocliente,numero);
+    cargarImputacionesCompra(autogenerado);
     // Mostrar el modal con jQuery UI
     $("#modalFacturaDetalle").dialog({
       modal: true,
@@ -120,7 +154,78 @@ $('#id_proveedor').autocomplete({
       }
     ],
     });
+    //verificarEstadoImputaciones();
   });
+  $("#tabla-impucompra tbody").on("click", "tr", function () {
+    actualizarMonto();
+});
+  $("#btn-imputar").on("click", function () {
+    let montoDisponible = parseFloat($("#monto-imputar").val()) || 0;
+    let saldoRestante = montoDisponible;
+
+    const imputacionesActuales = [];
+
+    $("#tabla-impucompra tbody tr.table-secondary").each(function () {
+        const idFactura = $(this).find("td:nth-child(1)").text().trim(); // Autogenerado
+        let saldoFactura = parseFloat($(this).find("td:nth-child(6)").text().replace(",", ".")) || 0;
+        let montoImputado = 0;
+
+        if (saldoRestante > 0 && saldoFactura > 0) {
+            if (saldoRestante >= saldoFactura) {
+                montoImputado = saldoFactura;
+                saldoRestante -= saldoFactura;
+                saldoFactura = 0;
+            } else {
+                montoImputado = saldoRestante;
+                saldoFactura -= saldoRestante;
+                saldoRestante = 0;
+            }
+
+            // Mostrar el monto imputado en la tabla
+            const celdaImputado = $(this).find("td:nth-child(7)");
+            celdaImputado.text(montoImputado.toFixed(2));
+            celdaImputado.css("background-color", "#fcec3f"); // amarillo
+
+            // Actualizar el saldo visualmente
+            $(this).find("td:nth-child(6)").text(saldoFactura.toFixed(2));
+
+            // Guardar en array para debug/log
+            imputacionesActuales.push({
+                autofac: idFactura,
+                monto_imputado: montoImputado.toFixed(2)
+            });
+
+            // Desmarcar la fila imputada
+            $(this).removeClass("table-secondary");
+        }
+    });
+
+    // Actualizar input y botón
+    $("#monto-imputar").val(saldoRestante.toFixed(2));
+    $("#btn-imputar").prop("disabled", saldoRestante === 0);
+
+    // Lógica adicional si la necesitás
+    actualizarImputado(); // si tenés esta función, mantenela
+
+    let nro = $('#nro_prov').val();
+    let autogen_compra=$('#autogen_detalle_compra').val();
+    guardarImputacionesCompra(autogen_compra,nro,imputacionesActuales);
+});
+  $("#eliminarImputaciones").on("click", function () {
+    const autogen_compra = $('#autogen_detalle_compra').val();
+    const filaSeleccionada = $("#tablaImputaciones tr.table-secondary");
+
+    if (filaSeleccionada.length > 0) {
+        const autogeneradoFactura = filaSeleccionada.find("td:nth-child(1)").text().trim();
+        console.log('autogencompra'+autogen_compra);
+        console.log('autofac'+autogeneradoFactura);
+        eliminarImputacionCompra(autogen_compra,autogeneradoFactura);
+    }else{
+        alert('Seleccione una fila.');
+        return;
+        }
+
+});
 
   //seccion para modal de embarque
   // Detectar doble clic en la celda de la columna "Embarque"
@@ -345,6 +450,30 @@ $('#id_proveedor').autocomplete({
 
     actualizarPestañas();
 
+    $(document).on('dblclick', '#tablaRecibos tr', function () {
+    var autogenerado = $(this).find('td.oculto').first().text().trim();
+    $('#formComprasDetallePago input[name="autogenerado"]').val(autogenerado);
+    $('#modalComprasDetallePago').dialog({
+      modal: true,
+      width: 'auto',
+      height: 'auto',
+      resizable: false,
+      position: { my: "center", at: "center", of: window },
+      buttons: [
+        {
+          text: "Salir",
+          class: "btn btn-dark",
+          click: function () {
+            $(this).dialog("close");
+          }
+        }
+      ]
+    });
+    cargarDatosComprasDetallePago(autogenerado);
+  });
+
+
+
   });
 
 function rellenar_tabla() {
@@ -439,6 +568,7 @@ function buscar_ordenes(cliente,numero){
                     $.each(response.resultados, function(i, orden) {
                         let row = `
                             <tr>
+                                <td class="oculto">${orden.autogenerado}</td>
                                 <td>${orden.nro_documento}</td>
                                 <td>${orden.fecha}</td>
                                 <td>${orden.monto}</td>
@@ -467,17 +597,18 @@ function buscar_gastos(autogenerado){
           const data = response.data;
           $('#id_prefijo').val(data.prefijo);
           $('#id_serie').val(data.serie);
-          $('#id_numero').val(data.numero);
+          $('#numero_detalle_compra').val(data.numero);
           $('#id_tipo').val(data.tipo);
-          $('#id_moneda').val(data.moneda);
-          $('#id_fecha').val(data.fecha);
+          $('#id_moneda_detalle_compra').val(data.moneda);
+          $('#id_fecha_detalle_compra').val(data.fecha);
           $('#id_fecha_ingreso').val(data.fecha_ingreso);
           $('#id_fecha_vencimiento').val(data.fecha_vencimiento);
           $('#id_proveedor_detalle').val(data.proveedor);
-          $('#id_detalle').val(data.detalle);
+          $('#nro_prov').val(data.nroproveedor);
+          $('#id_detalle_detalle_compra').val(data.detalle);
 
-        $('#id_paridad').val(parseFloat(data.paridad || 0).toFixed(2));
-        $('#id_arbitraje').val(parseFloat(data.arbitraje || 0).toFixed(2));
+        $('#id_paridad_detalle_compra').val(parseFloat(data.paridad || 0).toFixed(2));
+        $('#id_arbitraje_detalle_compra').val(parseFloat(data.arbitraje || 0).toFixed(2));
         $('#id_total').val(parseFloat(data.total || 0).toFixed(2));
         $('#id_imputable').val(parseFloat(data.imputable || 0).toFixed(2));
 
@@ -532,4 +663,314 @@ function limpiarModalEmbarque() {
 
     // Limpiar la tabla de embarques (dentro de #tabla-embarque-container)
     $("#tabla-embarque-container table tbody").empty();
+}
+function cargarDatosComprasDetallePago(autogenerado) {
+    $.ajax({
+      url: '/admin_cont/obtener_detalle_pago/',  // Ajustalo según tu ruta
+      type: 'GET',
+      data: {
+        autogenerado: autogenerado
+      },
+      success: function(response) {
+        // Cargar los campos del formulario con los datos recibidos
+        $('#formComprasDetallePago input[name="numero"]').val(response.numero);
+        $('#formComprasDetallePago select[name="moneda"]').val(response.moneda);
+        $('#formComprasDetallePago input[name="fecha"]').val(response.fecha);
+        $('#formComprasDetallePago input[name="arbitraje"]').val(response.arbitraje);
+        $('#formComprasDetallePago input[name="importe"]').val(response.importe);
+        $('#formComprasDetallePago input[name="por_imputar"]').val(response.por_imputar);
+        $('#formComprasDetallePago input[name="paridad"]').val(response.paridad);
+        $('#formComprasDetallePago input[name="proveedor"]').val(response.proveedor);
+        $('#formComprasDetallePago input[name="detalle"]').val(response.detalle);
+        $('#formComprasDetallePago input[name="autogenerado"]').val(autogenerado);
+
+        $('#tablaChequesMovimiento').empty();
+        if (response.cheques && response.cheques.length > 0) {
+          response.cheques.forEach(function (cheque) {
+            const fila = `
+              <tr>
+                <td>${cheque.fecha}</td>
+                <td>${cheque.banco}</td>
+                <td>${cheque.numero}</td>
+                <td>${cheque.moneda}</td>
+                <td>${cheque.monto}</td>
+                <td>${cheque.vencimiento}</td>
+              </tr>
+            `;
+            $('#tablaChequesMovimiento').append(fila);
+          });
+        }else{
+             $('#tablaChequesMovimiento').append('<tr><td colspan="5" class="text-center">No hay resultados.</td></tr>');
+        }
+
+        cargarDocumentosImputadosDesdeDetalle(response.detalle);
+      },
+      error: function() {
+        alert('Error al cargar los datos del pago.');
+      }
+    });
+  }
+function cargarDocumentosImputadosDesdeDetalle(detalleStr) {
+  if (!detalleStr) return;
+
+  const boletas = detalleStr.split(';').map(b => b.trim()).filter(b => b !== '');
+
+  if (boletas.length === 0) return;
+
+  const datos = {
+    boletas: boletas
+  };
+
+$.ajax({
+  url: '/admin_cont/obtener_imputados_orden_compra/',
+  type: 'POST',
+  data: JSON.stringify(datos),
+  contentType: 'application/json',
+  headers: {
+    'X-CSRFToken': csrf_token
+  },
+  success: function (response) {
+    const tbody = $('#tablaDocumentosImputados');
+    tbody.empty(); // Limpiar contenido anterior
+    if(response.boletas.length==0){
+        tbody.append('<tr><td colspan="5" class="text-center">No hay resultados.</td></tr>');
+    return;
+    }
+    response.boletas.forEach(function (b) {
+      const fila = `
+        <tr>
+          <td>${b.documento}</td>
+          <td>${b.imputado}</td>
+          <td>${b.moneda}</td>
+          <td>${b.detalle}</td>
+        </tr>`;
+      tbody.append(fila);
+    });
+    //agregar la comprobacion de si no hay nada
+  },
+  error: function () {
+    alert('Error al cargar las boletas imputadas.');
+  }
+});
+}
+function cargarImputacionesCompra(autogen) {
+    fetch('/admin_cont/obtener_imputados_compra/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrf_token
+        },
+        body: JSON.stringify({ autogen: autogen })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const tbody = document.getElementById('tablaImputaciones');
+        tbody.innerHTML = '';  // Limpiar tabla antes de cargar
+
+        if (data.documentos && data.documentos.length > 0) {
+            data.documentos.forEach(doc => {
+                const fila = document.createElement('tr');
+
+                fila.innerHTML = `
+                    <td class="oculto">${doc.autogenerado}</td>
+                    <td>${doc.documento}</td>
+                    <td>${doc.imputado}</td>
+                `;
+
+                tbody.appendChild(fila);
+            });
+        } else {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `<td colspan="3" class="text-center">No se encontraron imputaciones.</td>`;
+            tbody.appendChild(fila);
+        }
+    })
+    .catch(error => {
+        console.error('Error al cargar imputaciones:', error);
+    });
+}
+function abrir_impucompra(){
+    let nro = $('#nro_prov').val();
+    $("#impucompra_nota").dialog('open');
+    const filas = document.querySelectorAll('#tablaImputaciones tr');
+    let total= $('#id_total').val();
+    let sumaImputado = 0;
+
+    filas.forEach(fila => {
+        const celdaImputado = fila.cells[2];
+        if (celdaImputado) {
+            const valor = parseFloat(celdaImputado.textContent.replace(',', '.'));
+            if (!isNaN(valor)) {
+                sumaImputado += valor;
+            }
+        }
+    });
+    let monto = parseFloat(total)-sumaImputado;
+    $('#monto-imputar').val(monto);
+    //localStorage.removeItem('facturas_impucompra');
+    cargar_facturas_imputacion(nro);
+}
+function verificarEstadoImputaciones() {
+    const filas = document.querySelectorAll('#tablaImputaciones tr');
+    const totalElemento = document.getElementById('id_total');
+    const btnRealizar = document.getElementById('realizarImputaciones');
+    const btnEliminar = document.getElementById('eliminarImputaciones');
+
+    let sumaImputado = 0;
+
+    filas.forEach(fila => {
+        const celdaImputado = fila.cells[2];
+        if (celdaImputado) {
+            const valor = parseFloat(celdaImputado.textContent.replace(',', '.'));
+            if (!isNaN(valor)) {
+                sumaImputado += valor;
+            }
+        }
+    });
+
+    const totalEsperado = parseFloat(totalElemento.value.replace(',', '.'));
+
+    if (filas.length > 0) {
+        btnEliminar.disabled = false;
+    } else {
+        btnEliminar.disabled = true;
+    }
+
+    if (Math.abs(sumaImputado - totalEsperado) < 0.01) {
+        btnRealizar.disabled = false;
+    } else {
+        btnRealizar.disabled = true;
+    }
+}
+function cargar_facturas_imputacion(nrocliente) {
+    $.ajax({
+        url: "/admin_cont/cargar_pendientes_imputacion/",
+        type: "GET",
+        data: { nrocliente: nrocliente },
+        success: function (response) {
+            let tbody = $("#tabla-impucompra tbody");
+            tbody.empty();
+
+            if(response.data.length==0){
+              $('#tabla-impucompra tbody').html('<tr><td colspan="8" class="text-center text-muted">No hay facturas disponibles para este proveedor.</td></tr>');
+
+            }
+
+            response.data.forEach(item => {
+                let fila = `
+                    <tr data-id="${item.autogenerado}">
+                        <td style="display: none;">${item.autogenerado}</td>
+                        <td>${item.vto}</td>
+                        <td>${item.emision}</td>
+                        <td>${item.num_completo}</td>
+                        <td>${item.total.toFixed(2)}</td>
+                        <td>${item.saldo.toFixed(2)}</td>
+                        <td>${item.imputado.toFixed(2)}</td>
+                        <td>${item.tipo_cambio.toFixed(2)}</td>
+                        <td>${item.detalle}</td>
+                    </tr>
+                `;
+                tbody.append(fila);
+            });
+        },
+        error: function (xhr) {
+            alert("Error al cargar las facturas: " + xhr.responseJSON.error);
+        }
+    });
+}
+function resetModal(modalId) {
+    const modal = $(modalId);
+
+    // Reinicia el formulario
+    modal.find("form").each(function () {
+        this.reset();
+    });
+
+    // Limpia tablas
+    modal.find("table").each(function () {
+        if ($.fn.DataTable.isDataTable(this)) {
+            $(this).DataTable().clear().draw();
+        } else {
+            $(this).find("tbody").empty();
+        }
+    });
+}
+function actualizarMonto() {
+        let total = 0;
+        $("#tabla-impucompra tbody tr.table-secondary").each(function () {
+            let monto = parseFloat($(this).find("td:nth-child(6)").text().replace(",", ".")) || 0;
+            total += monto;
+        });
+
+        $("#se-imputaran").val(total.toFixed(2));
+        console.log(total);
+        $("#btn-imputar").prop("disabled", total === 0);
+    }
+function actualizarImputado() {
+        let totalImputado = 0;
+
+        // Recorre solo las filas que tienen un imputado mayor a 0
+        $("#tabla-impucompra tbody tr").each(function () {
+            let celdaImputado = $(this).find("td:nth-child(7)");
+            let monto = parseFloat(celdaImputado.text().replace(",", ".")) || 0;
+
+            if (monto > 0) {
+                totalImputado += monto;
+                celdaImputado.css("background-color", "#fcec3f"); // Mantener el color amarillo
+            }
+        });
+
+        // Actualiza el input `#se-imputaran` con el total imputado
+        $("#se-imputaran").val(totalImputado.toFixed(2));
+    }
+function guardarImputacionesCompra(autogen, cliente, facturasImputadas) {
+  fetch('/admin_cont/procesar_imputaciones_compra/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrf_token
+    },
+    body: JSON.stringify({
+      accion: 'guardar',
+      autogen: autogen,
+      cliente: cliente,
+      facturas: facturasImputadas
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert("Imputaciones guardadas correctamente");
+    } else {
+      alert("Error al guardar imputaciones:", data.error);
+    }
+  })
+  .catch(error => {
+    console.error("Error en la solicitud:", error);
+  });
+}
+function eliminarImputacionCompra(autogen, autofac) {
+  fetch('/admin_cont/procesar_imputaciones_compra/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrf_token
+    },
+    body: JSON.stringify({
+      accion: 'eliminar',
+      autogen: autogen,
+      autofac: autofac
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert("Imputación eliminada correctamente");
+    } else {
+      alert("Error al eliminar imputación:", data.error);
+    }
+  })
+  .catch(error => {
+    console.error("Error en la solicitud:", error);
+  });
 }

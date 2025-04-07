@@ -1194,7 +1194,8 @@ class ComprasDetalle(forms.Form):
         max_length=20,
         widget=forms.TextInput(attrs={
             'class': 'form-control form-control-sm',
-            'readonly': True
+            'readonly': True,
+            'id':'numero_detalle_compra'
         })
     )
 
@@ -1211,7 +1212,8 @@ class ComprasDetalle(forms.Form):
         label="Moneda",
         widget=forms.Select(attrs={
             'class': 'form-control form-control-sm',
-            'disabled': True  # Select usa disabled en lugar de readonly
+            'disabled': True,  # Select usa disabled en lugar de readonly
+            'id': 'id_moneda_detalle_compra'
         })
     )
 
@@ -1219,7 +1221,8 @@ class ComprasDetalle(forms.Form):
         label="Fecha",
         widget=forms.DateInput(attrs={
             'type': 'date',
-            'class': 'form-control form-control-sm bg-warning'
+            'class': 'form-control form-control-sm bg-warning',
+            'id': 'id_fecha_detalle_compra'
         })
     )
     fecha_ingreso = forms.DateField(
@@ -1242,7 +1245,9 @@ class ComprasDetalle(forms.Form):
         required=False,
         widget=forms.NumberInput(attrs={
             'step': '0.0001',
-            'class': 'form-control form-control-sm bg-warning'
+            'class': 'form-control form-control-sm bg-warning',
+            'id': 'id_paridad_detalle_compra'
+
         })
     )
     arbitraje = forms.FloatField(
@@ -1251,6 +1256,8 @@ class ComprasDetalle(forms.Form):
         widget=forms.NumberInput(attrs={
             'step': '0.0001',
             'class': 'form-control form-control-sm bg-warning',
+            'id': 'id_arbitraje_detalle_compra'
+
         })
     )
 
@@ -1265,7 +1272,9 @@ class ComprasDetalle(forms.Form):
     detalle = forms.CharField(
         label="Detalle",
         widget=forms.TextInput(attrs={
-            'class': 'form-control form-control-sm bg-warning'
+            'class': 'form-control form-control-sm bg-warning',
+            'id': 'id_detalle_detalle_compra'
+
         })
     )
 
@@ -1284,6 +1293,86 @@ class ComprasDetalle(forms.Form):
             'readonly': True
         })
     )
+
+class ComprasDetallePago(forms.Form):
+    numero = forms.CharField(
+        label="Nro",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'readonly': True
+        })
+    )
+
+    moneda = forms.ModelChoiceField(
+        label="Moneda",
+        queryset=Monedas.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'disabled': True  # los selects usan disabled, no readonly
+        })
+    )
+
+    fecha = forms.DateField(
+        label="Fecha",
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control',
+            'readonly': True
+        })
+    )
+
+    arbitraje = forms.FloatField(
+        label="Arbitraje",
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'readonly': True
+        })
+    )
+
+    importe = forms.FloatField(
+        label="Importe",
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'readonly': True
+        })
+    )
+
+    por_imputar = forms.FloatField(
+        label="Por Imputar",
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'readonly': True
+        })
+    )
+
+    paridad = forms.FloatField(
+        label="Paridad",
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'readonly': True
+        })
+    )
+
+    proveedor = forms.CharField(
+        label="Proveedor",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'readonly': True
+        })
+    )
+
+    detalle = forms.CharField(
+        label="Detalle",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'readonly': True
+        })
+    )
+
+    autogenerado = forms.CharField(widget=forms.HiddenInput())
+
 
 
 
