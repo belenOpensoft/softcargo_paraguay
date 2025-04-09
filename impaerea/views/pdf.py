@@ -122,7 +122,7 @@ def get_datos_caratula(request):
 
             texto = '<div style="margin: 0 auto; font-family: Courier New, Courier, monospace; font-size: 12px;">'
             texto += '<h2 style="text-align: left;">OCEANLINK LTDA.</h2>'
-            texto += '<b><p style="font-size:20px;text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
+            texto += '<b><p style="font-size:17px;text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
             texto += f'Seguimiento: {seguimiento.numero}<br>'
             texto += f'Posicion:  {Vembarque.posicion}<br>'
             texto += f'Incoterms: {seguimiento.terminos}</p></b>'
