@@ -7,6 +7,7 @@ from django.forms import ModelChoiceField
 
 from administracion_contabilidad.models import Cuentas
 from mantenimientos.models import Paises, Clientes, Vapores, Vendedores, Servicios, Ciudades, Empresa
+from mantenimientos.views.validador import email_o_si
 
 choice_SINO = (('SI','Si'),('NO','No'))
 choice_SN = (('S','Si'),('N','No'))
@@ -239,13 +240,13 @@ class add_cliente_form(forms.Form):
     razonsocial = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Razón Social",
                                   max_length=100, required=True)
     ruc = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="RUT", max_length=20,
-                          required=True)
+                          required=False)
 
     # Campos opcionales
     prefijoguia = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Prefijo Guia",
                                   required=False)
     direccion = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Dirección",
-                                max_length=50, required=False)
+                                max_length=150, required=False)
     localidad = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Localidad",
                                 max_length=100, required=False)
     cpostal = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), label="Código Postal",
@@ -284,20 +285,20 @@ class add_cliente_form(forms.Form):
                                required=False)
 
     # **Pestaña Emails**
-    emailad = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
-                               label="Email Administrativo", required=False)
-    emailem = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
-                               label="Email Exportación Marítima", required=False)
-    emailea = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
-                               label="Email Exportación Aérea", required=False)
-    emailet = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
-                               label="Email Exportación Terrestre", required=False)
-    emailim = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
-                               label="Email Importación Marítima", required=False)
-    emailia = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
-                               label="Email Importación Aérea", required=False)
-    emailit = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}),
-                               label="Email Importación Terrestre", required=False)
+    emailad = forms.CharField(label="Email Administrativo", required=False, validators=[email_o_si],
+                              widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emailem = forms.CharField(label="Email Exportación Marítima", required=False, validators=[email_o_si],
+                              widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emailea = forms.CharField(label="Email Exportación Aérea", required=False, validators=[email_o_si],
+                              widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emailet = forms.CharField(label="Email Exportación Terrestre", required=False, validators=[email_o_si],
+                              widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emailim = forms.CharField(label="Email Importación Marítima", required=False, validators=[email_o_si],
+                              widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emailia = forms.CharField(label="Email Importación Aérea", required=False, validators=[email_o_si],
+                              widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emailit = forms.CharField(label="Email Importación Terrestre", required=False, validators=[email_o_si],
+                              widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     # **Pestaña Datos Contables**
     plazo = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}),

@@ -301,7 +301,7 @@ $.ajax({
                     errorMessages += `${field}: ${errorList.join(", ")}\n`;
                 });
 
-                console.log("Errores en el formulario:\n" + errorMessages);
+                alert("Errores en el formulario:\n" + errorMessages);
             } else {
                 alert(response.message);
             }
