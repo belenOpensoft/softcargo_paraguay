@@ -2,7 +2,7 @@ from django.urls import path
 
 from administracion_contabilidad.views.editar_consultar_compras import editar_consultar_compras, obtener_detalle_compra, \
     buscar_ordenes_por_boleta, obtener_detalle_pago, obtener_imputados_orden_compra, obtener_imputados_compra, \
-    procesar_imputaciones_compra
+    procesar_imputaciones_compra, actualizar_campos_movims, anular_compra, obtener_datos_embarque_por_posicion
 from administracion_contabilidad.views.editar_consultar_pagos import editar_consultar_pagos
 from administracion_contabilidad.views.cobranza import cobranza_view, source_cobranza, source_cobranza_imputacion, \
     source_facturas_pendientes, guardar_impuventa, guardar_anticipo, cargar_arbitraje
@@ -92,6 +92,9 @@ urlpatterns = [
     path('obtener_imputados_orden_compra/', obtener_imputados_orden_compra, name='obtener_imputados_orden_compra'),
     path('obtener_imputados_compra/', obtener_imputados_compra, name='obtener_imputados_compra'),
     path('procesar_imputaciones_compra/', procesar_imputaciones_compra, name='procesar_imputaciones_compra'),
+    path('modificar_compra/', actualizar_campos_movims, name='modificar_compra'),
+    path('anular_compra/', anular_compra, name='anular_compra'),
+    path('detalle_conocimiento/', obtener_datos_embarque_por_posicion, name='detalle_conocimiento'),
 
     #editar y consultar compras#
 

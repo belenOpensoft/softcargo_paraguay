@@ -2,18 +2,27 @@ import json
 import re
 
 from django.shortcuts import render
-from administracion_contabilidad.forms import EditarConsultarCompras, ComprasDetalle, ComprasDetallePago
+from administracion_contabilidad.forms import EditarConsultarCompras, ComprasDetalle, ComprasDetallePago, \
+    DetalleEmbarqueForm
 from administracion_contabilidad.models import VistaProveedoresygastos, VItemsCompra, Ordenes, Movims, Boleta, Asientos, \
     Cheques, Chequeorden, Impucompras
 from django.http import JsonResponse
 
-from mantenimientos.models import Monedas
+from expaerea.models import VEmbarqueaereo as ExportConexaerea, ExportCargaaerea, ExportEmbarqueaereo, ExportServiceaereo
+from expterrestre.models import VEmbarqueaereo as ExpterraEmbarqueaereo, ExpterraCargaaerea, ExpterraServiceaereo, ExpterraEnvases
+from impaerea.models import VEmbarqueaereo as ImportEmbarqueaereo, ImportConexaerea, ImportCargaaerea,ImportServiceaereo
+from impomarit.models import VEmbarqueaereo as Embarqueaereo, Cargaaerea, Serviceaereo, Envases
+from expmarit.models import VEmbarqueaereo as ExpmaritEmbarqueaereo, ExpmaritCargaaerea, ExpmaritServiceaereo, ExpmaritEnvases
+from impterrestre.models import VEmbarqueaereo as ImpterraEmbarqueaereo, ImpterraCargaaerea, ImpterraServiceaereo, ImpterraEnvases
+from mantenimientos.models import Monedas,Servicios
+from seguimientos.models import VGrillaSeguimientos
 
 
 def editar_consultar_compras(request):
     form = EditarConsultarCompras(request.GET or None)
     form_compras_detalle = ComprasDetalle(request.GET or None)
     form_compras_detalle_pago = ComprasDetallePago(request.GET or None)
+    form_compras_detalle_conocimiento = DetalleEmbarqueForm(request.GET or None)
     resultados = VistaProveedoresygastos.objects.none()  # Valor por defecto
 
     if form.is_valid():
@@ -70,7 +79,8 @@ def editar_consultar_compras(request):
     return render(request, 'editar_consultar_compras/editar_consultar_compras.html', {
         'form': form,
         'compras_detalle':form_compras_detalle,
-        'compras_detalle_pago':form_compras_detalle_pago
+        'compras_detalle_pago':form_compras_detalle_pago,
+        'compras_detalle_conocimiento':form_compras_detalle_conocimiento
     })
 
 def obtener_detalle_compra(request):
@@ -275,9 +285,12 @@ def obtener_imputados_orden_compra(request):
 
 def obtener_imputados_compra(request):
     try:
-        body = json.loads(request.body)
-        autogen = body.get('autogen')
+        body_unicode = request.body.decode('utf-8')  # decodifica bytes
+        data = json.loads(body_unicode)  # convierte a dict
+        autogen = data.get('autogen')
         resultados = []
+        autofacs=None
+        movims=None
         if not autogen:
             return JsonResponse({'error': 'Falta el campo autogen'}, status=400)
 
@@ -376,3 +389,235 @@ def procesar_imputaciones_compra(request):
             return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+def actualizar_campos_movims(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            autogen = data.get("autogen")
+            tipo = data.get("tipo")
+
+            if not autogen or not tipo:
+                return JsonResponse({"success": False, "error": "Faltan parámetros clave."})
+
+            factura = Movims.objects.filter(mautogen=autogen, mnombremov=tipo).first()
+
+            if not factura:
+                return JsonResponse({"success": False, "error": "Factura no encontrada."})
+
+            # Asignación individual de campos
+            if 'detalle' in data:
+                factura.mdetalle = data['detalle']
+
+            if 'fecha' in data:
+                factura.mfechamov = (data['fecha'])
+
+            if 'paridad' in data:
+                factura.mparidad = float(data['paridad'])
+
+            if 'arbitraje' in data:
+                factura.marbitraje = float(data['arbitraje'])
+
+            factura.save()
+            return JsonResponse({"success": True})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return JsonResponse({"success": False, "error": "Método no permitido"}, status=405)
+
+def anular_compra(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            autogen = data.get('autogen')
+
+            if not autogen:
+                return JsonResponse({'success': False, 'error': 'Autogenerado no proporcionado'})
+
+            # Eliminar en orden lógico
+            impus = Impucompras.objects.filter(autogen=autogen)
+            movims = Movims.objects.filter(mautogen=autogen)
+            asientos = Asientos.objects.filter(autogenerado=autogen)
+
+            impus_deleted = impus.count()
+            movims_deleted = movims.count()
+            asientos_deleted = asientos.count()
+
+            impus.delete()
+            movims.delete()
+            asientos.delete()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Factura anulada correctamente',
+                'eliminados': {
+                    'Impucompras': impus_deleted,
+                    'Movims': movims_deleted,
+                    'Asientos': asientos_deleted
+                }
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+def obtener_datos_embarque_por_posicion(request):
+    if request.method == 'GET':
+        posicion = request.GET.get('posicion')
+
+        if not  posicion:
+            return JsonResponse({'success': False, 'error': 'Posiciones no proporcionadas.'})
+
+        resultados = []
+
+
+        tipo_operativa = posicion[:2].upper()
+        embarque = None
+        envases = None
+        gastos_raw = None
+        gastos=[]
+        cargas =None
+
+        try:
+            if tipo_operativa == 'IM':
+                embarque = Embarqueaereo.objects.filter(posicion=posicion).first()
+                cargas = list(Cargaaerea.objects.filter(numero=embarque.numero).values(
+                'producto__nombre', 'bultos', 'bruto'
+            ))
+                gastos_raw = list(Serviceaereo.objects.filter(numero=embarque.numero).values(
+                'servicio', 'moneda', 'precio','costo'
+            ))
+                envases = list(Envases.objects.filter(numero=embarque.numero).values(
+                    'unidad', 'tipo', 'movimiento', 'terminos', 'cantidad', 'precio', 'costo', 'nrocontenedor'
+                ))
+            elif tipo_operativa == 'EM':
+                embarque = ExpmaritEmbarqueaereo.objects.filter(posicion=posicion).first()
+                cargas = list(ExpmaritCargaaerea.objects.filter(numero=embarque.numero).values(
+                'producto__nombre', 'bultos', 'bruto'
+            ))
+                gastos_raw=list(ExpmaritServiceaereo.objects.filter(numero=embarque.numero).values(
+                'servicio', 'moneda', 'precio','costo'
+            ))
+                envases = list(ExpmaritEnvases.objects.filter(numero=embarque.numero).values(
+                    'unidad', 'tipo', 'movimiento', 'terminos', 'cantidad', 'precio', 'costo', 'nrocontenedor'
+                ))
+            elif tipo_operativa == 'IA':
+                embarque = ImportEmbarqueaereo.objects.filter(posicion=posicion).first()
+                cargas = list(ImportCargaaerea.objects.filter(numero=embarque.numero).values(
+                'producto__nombre', 'bultos', 'bruto'
+            ))
+                gastos_raw = list(ImportServiceaereo.objects.filter(numero=embarque.numero).values(
+                'servicio', 'moneda', 'precio','costo'
+            ))
+            elif tipo_operativa == 'EA':
+                embarque = ExportEmbarqueaereo.objects.filter(posicion=posicion).first()
+                cargas = list(ExportCargaaerea.objects.filter(numero=embarque.numero).values(
+                'producto__nombre', 'bultos', 'bruto'
+            ))
+                gastos_raw = list(ExportServiceaereo.objects.filter(numero=embarque.numero).values(
+                'servicio', 'moneda', 'precio','costo'
+            ))
+            elif tipo_operativa == 'IT':
+                embarque = ImpterraEmbarqueaereo.objects.filter(posicion=posicion).first()
+                cargas = list(ImpterraCargaaerea.objects.filter(numero=embarque.numero).values(
+                'producto__nombre', 'bultos', 'bruto'
+            ))
+                gastos_raw = list(ImpterraServiceaereo.objects.filter(numero=embarque.numero).values(
+                'servicio', 'moneda', 'precio','costo'
+            ))
+                envases = list(ImpterraEnvases.objects.filter(numero=embarque.numero).values(
+                    'unidad', 'tipo', 'movimiento', 'terminos', 'cantidad', 'precio', 'costo', 'nrocontenedor'
+                ))
+            elif tipo_operativa == 'ET':
+                embarque = ExpterraEmbarqueaereo.objects.filter(posicion=posicion).first()
+                cargas =list(ExpterraCargaaerea.objects.filter(numero=embarque.numero).values(
+                'producto__nombre', 'bultos', 'bruto'
+            ))
+                gastos_raw = list(ExpterraServiceaereo.objects.filter(numero=embarque.numero).values(
+                'servicio', 'moneda', 'precio','costo'
+            ))
+                envases = list(ExpterraEnvases.objects.filter(numero=embarque.numero).values(
+                    'unidad', 'tipo', 'movimiento', 'terminos', 'cantidad', 'precio', 'costo', 'nrocontenedor'
+                ))
+            else:
+                resultados.append({
+                    'posicion': posicion,
+                    'success': False,
+                    'error': 'Posición errónea o tipo no reconocido.'
+                })
+
+            if not embarque:
+                resultados.append({
+                    'posicion': posicion,
+                    'success': False,
+                    'error': 'No se encontró un embarque para esta posición.'
+                })
+
+            if embarque.seguimiento:
+                seguimiento = VGrillaSeguimientos.objects.get(numero=embarque.seguimiento)
+            else:
+                seguimiento=None
+
+            conex=None
+            if tipo_operativa == 'IA':
+                conex = ImportConexaerea.objects.filter(numero=embarque.numero).first()
+            elif tipo_operativa == 'EA':
+                conex = ExportConexaerea.objects.filter(numero=embarque.numero).first()
+
+            vuelo = conex.vuelo if conex else 'S/I'
+
+            datos = {
+                'cliente': seguimiento.cliente if seguimiento else 'S/I',
+                'embarcador': embarque.embarcador if embarque.embarcador else '',
+                'consignatario': embarque.consignatario if embarque.consignatario else '',
+                'agente': embarque.agente if embarque.agente else '',
+                'transportista': embarque.transportista if embarque.transportista else '',
+                'vapor_vuelo': embarque.vapor if tipo_operativa in ['IM','EM'] else vuelo,
+                'etd_eta':seguimiento.eta.strftime("%Y-%m-%d"),
+                'embarque': embarque.fecha_embarque.strftime("%Y-%m-%d"),
+                'posicion': embarque.posicion,
+                'mbl': embarque.awb,
+                'hbl': embarque.hawb,
+                'origen': embarque.origen,
+                'destino': embarque.destino,
+            }
+
+            # Procesar gastos con nombres de servicio y moneda
+            for g in gastos_raw:
+                try:
+                    servicio_nombre = Servicios.objects.get(codigo=g['servicio']).nombre if g['servicio'] else 'S/I'
+                except Servicios.DoesNotExist:
+                    servicio_nombre = 'S/I'
+                try:
+                    moneda_nombre = Monedas.objects.get(codigo=g['moneda']).nombre if g['moneda'] else 'S/I'
+                except Monedas.DoesNotExist:
+                    moneda_nombre = 'S/I'
+
+                gastos.append({
+                    'servicio': servicio_nombre,
+                    'moneda': moneda_nombre,
+                    'precio': g['precio'],
+                    'costo': g['costo']
+                })
+
+            resultados.append({
+                'success': True,
+                'posicion': posicion,
+                'formulario': datos,
+                'servicios': gastos,
+                'productos': cargas,
+                'envases': envases
+            })
+
+        except Exception as e:
+            resultados.append({
+                'posicion': posicion,
+                'success': False,
+                'error': str(e)
+            })
+
+        return JsonResponse({'resultados': resultados})
+
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+

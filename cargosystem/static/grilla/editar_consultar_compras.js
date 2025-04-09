@@ -131,8 +131,8 @@
         style: "width:90px;",
         class: "btn btn-danger",
         click: function () {
-          console.log("Acción: Anular factura");
-          // Agregá tu lógica de anulación aquí
+        let autogen=$('#autogen_detalle_compra').val();
+        anularFactura(autogen);
         }
       },
       {
@@ -140,8 +140,7 @@
         style: "width:90px;",
         class: "btn btn-warning",
         click: function () {
-          console.log("Acción: Modificar factura");
-          // Agregá tu lógica de modificación aquí
+          guardarCambiosFormulario();
         }
       },
       {
@@ -226,7 +225,13 @@
         }
 
 });
-
+    $("#tabla_items_compra tbody").on("dblclick", "td:nth-child(6)", function () {
+    filaSeleccionada = $(this).closest("tr");
+    let embarqueValor = $(this).text().trim();
+    if (embarqueValor!=='NO IMPUTABLE'){
+       cargarDatosEmbarque(embarqueValor);
+    }
+});
   //seccion para modal de embarque
   // Detectar doble clic en la celda de la columna "Embarque"
   $("#tabla_items_compra tbody").on("dblclick", "td:nth-child(5)", function () {
@@ -753,7 +758,7 @@ $.ajax({
   }
 });
 }
-function cargarImputacionesCompra(autogen) {
+function cargarImputacionesCompra_old(autogen) {
     fetch('/admin_cont/obtener_imputados_compra/', {
         method: 'POST',
         headers: {
@@ -789,6 +794,41 @@ function cargarImputacionesCompra(autogen) {
         console.error('Error al cargar imputaciones:', error);
     });
 }
+function cargarImputacionesCompra(autogen) {
+    $.ajax({
+        url: '/admin_cont/obtener_imputados_compra/',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ autogen: autogen }),
+        headers: {
+            'X-CSRFToken': csrf_token  // Asegurate que esta variable exista
+        },
+        success: function (data) {
+            const tbody = document.getElementById('tablaImputaciones');
+            tbody.innerHTML = '';  // Limpiar tabla
+
+            if (data.documentos && data.documentos.length > 0) {
+                data.documentos.forEach(function (doc) {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td class="oculto">${doc.autogenerado}</td>
+                        <td>${doc.documento}</td>
+                        <td>${doc.imputado}</td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            } else {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `<td colspan="3" class="text-center">No se encontraron imputaciones.</td>`;
+                tbody.appendChild(fila);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error al cargar imputaciones:', error);
+        }
+    });
+}
+
 function abrir_impucompra(){
     let nro = $('#nro_prov').val();
     $("#impucompra_nota").dialog('open');
@@ -941,6 +981,8 @@ function guardarImputacionesCompra(autogen, cliente, facturasImputadas) {
   .then(data => {
     if (data.success) {
       alert("Imputaciones guardadas correctamente");
+      cargarImputacionesCompra(autogen);
+      $("#impucompra_nota").dialog('close');
     } else {
       alert("Error al guardar imputaciones:", data.error);
     }
@@ -966,6 +1008,7 @@ function eliminarImputacionCompra(autogen, autofac) {
   .then(data => {
     if (data.success) {
       alert("Imputación eliminada correctamente");
+      cargarImputacionesCompra(autogen);
     } else {
       alert("Error al eliminar imputación:", data.error);
     }
@@ -974,3 +1017,194 @@ function eliminarImputacionCompra(autogen, autofac) {
     console.error("Error en la solicitud:", error);
   });
 }
+function guardarCambiosFormulario() {
+    const camposModificados = document.querySelectorAll(".bg-warning");
+    const datos = {};
+
+    // Obtener autogenerado y tipo (de inputs ocultos o lo que uses)
+    const autogen = document.getElementById("autogen_detalle_compra").value;
+    const tipo = document.getElementById("id_tipo").value;
+
+    // Validación mínima
+    if (!autogen || !tipo) {
+        console.error("Faltan autogenerado o tipo.");
+        return;
+    }
+
+    datos["autogen"] = autogen;
+    datos["tipo"] = tipo;
+
+    camposModificados.forEach(campo => {
+        const name = campo.name;
+        const value = campo.value;
+        if (name) {
+            datos[name] = value;
+        }
+    });
+
+    fetch("/admin_cont/modificar_compra/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrf_token  // si usás CSRF
+        },
+        body: JSON.stringify(datos)
+    })
+    .then(res => res.json())
+    .then(response => {
+        if (response.success) {
+            alert("Cambios guardados correctamente.");
+            $("#modalFacturaDetalle").dialog('close');
+        } else {
+            alert("Error al guardar: " + response.error);
+        }
+    })
+    .catch(err => {
+        console.error("Error al guardar cambios:", err);
+    });
+}
+function anularFactura(autogen) {
+    if (!autogen) {
+        alert("No se ha proporcionado el autogenerado.");
+        return;
+    }
+
+    if (!confirm("¿Estás seguro de que deseas anular esta factura? Esta acción no se puede deshacer.")) {
+        return;
+    }
+
+    fetch('/admin_cont/anular_compra/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": csrf_token
+        },
+        body: JSON.stringify({ autogen: autogen })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Factura anulada correctamente.");
+            console.log("Eliminados:", data.eliminados);
+        } else {
+            alert("Error al anular: " + data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Error en la solicitud:", err);
+        alert("Error al conectar con el servidor.");
+    });
+}
+function cargarDatosEmbarque(posicion) {
+    $.ajax({
+        url: '/admin_cont/detalle_conocimiento/',
+        method: 'GET',
+        data: { posicion: posicion },
+        traditional: true,
+        success: function (response) {
+            if (response.resultados) {
+                const datos = response.resultados[0];
+
+                if (datos.success) {
+                    const form = datos.formulario;
+
+                    $("#id_cliente").val(form.cliente);
+                    $("#id_embarcador").val(form.embarcador);
+                    $("#id_consignatario").val(form.consignatario);
+                    $("#id_agente").val(form.agente);
+                    $("#id_transportista").val(form.transportista);
+                    $("#id_vapor_vuelo").val(form.vapor_vuelo);
+                    $("#id_etd_eta").val(form.etd_eta);
+                    $("#id_embarque").val(form.embarque);
+                    $("#id_posicion").val(form.posicion);
+                    $("#id_mbl").val(form.mbl);
+                    $("#id_hbl").val(form.hbl);
+                    $("#id_origen").val(form.origen);
+                    $("#id_destino").val(form.destino);
+
+                    // Servicios
+                    let htmlServicios = '';
+                    if (datos.servicios.length > 0) {
+                        datos.servicios.forEach(serv => {
+                            htmlServicios += `
+                                <tr>
+                                    <td>${serv.servicio}</td>
+                                    <td>${serv.moneda}</td>
+                                    <td>${serv.precio}</td>
+                                    <td>${serv.costo}</td>
+                                </tr>`;
+                        });
+                    } else {
+                        htmlServicios = `<tr><td colspan="4" class="text-center">No hay datos disponibles</td></tr>`;
+                    }
+                    console.log(htmlServicios);
+                    $("#tablaServicios").html(htmlServicios);
+
+                    // Productos
+                    let htmlProductos = '';
+                    if (datos.productos.length > 0) {
+                        datos.productos.forEach(prod => {
+                            htmlProductos += `
+                                <tr>
+                                    <td>${prod.producto__nombre}</td>
+                                    <td>${prod.bultos}</td>
+                                    <td>${prod.bruto}</td>
+                                </tr>`;
+                        });
+                    } else {
+                        htmlProductos = `<tr><td colspan="3" class="text-center">No hay datos disponibles</td></tr>`;
+                    }
+                    $("#tablaProductos").html(htmlProductos);
+
+                    // Envases
+                    let htmlEnvases = '';
+                    if (datos.envases && datos.envases.length > 0) {
+                        datos.envases.forEach(env => {
+                            htmlEnvases += `
+                                <tr>
+                                    <td>${env.unidad}</td>
+                                    <td>${env.tipo}</td>
+                                    <td>${env.movimiento}</td>
+                                    <td>${env.termino}</td>
+                                    <td>${env.cantidad}</td>
+                                    <td>${env.precio}</td>
+                                    <td>${env.costo}</td>
+                                    <td>${env.nrocontenedor}</td>
+                                </tr>`;
+                        });
+                    } else {
+                        htmlEnvases = `<tr><td colspan="8" class="text-center">No hay datos disponibles</td></tr>`;
+                    }
+                    $("#tablaEnvases").html(htmlEnvases);
+
+                    // Mostrar modal
+                    $("#modalDetalleEmbarque").dialog({
+                        autoOpen: true,
+                        modal: true,
+                        width: 'auto',
+                        position: { my: "top", at: "center", of: window },
+                        title: 'Conocimiento: ' + posicion,
+                        buttons: [
+                            {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                click: function () {
+                                    $(this).dialog("close");
+                                }
+                            }
+                        ]
+                    });
+
+                } else {
+                    alert("Error: " + datos.error);
+                }
+            }
+        },
+        error: function () {
+            alert("Error al consultar los datos del embarque.");
+        }
+    });
+}
+
+
+

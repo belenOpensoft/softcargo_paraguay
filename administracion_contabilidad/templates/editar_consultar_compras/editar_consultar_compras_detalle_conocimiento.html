@@ -1,0 +1,178 @@
+<!-- Modal Conocimiento - jQuery UI -->
+<style>
+  #modalDetalleEmbarque {
+    max-width: 60vw;
+    max-height: 90vh;
+    overflow: hidden;
+    font-size: 0.85rem;
+  }
+
+  #modalDetalleEmbarque .form-control {
+    font-size: 12px;
+    padding: 2px 5px;
+    height: 20px;
+  }
+
+  #modalDetalleEmbarque select {
+    font-size: 0.85rem;
+    height: 30px;
+  }
+
+  #modalDetalleEmbarque label {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+  }
+
+  #modalDetalleEmbarque .table {
+    font-size: 0.8rem;
+  }
+
+  #modalDetalleEmbarque .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  #modalDetalleEmbarque .col-md-1,
+  #modalDetalleEmbarque .col-md-2,
+  #modalDetalleEmbarque .col-md-3,
+  #modalDetalleEmbarque .col-md-4,
+  #modalDetalleEmbarque .col-md-6 {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+
+  #modalDetalleEmbarque h6 {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  #modalDetalleEmbarque .btn-sm {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+
+  #modalDetalleEmbarque .table-sm th,
+  #modalDetalleEmbarque .table-sm td {
+    padding: 4px;
+    vertical-align: middle;
+  }
+
+  #modalDetalleEmbarque input.bg-warning {
+    background-color: #fff3cd !important;
+  }
+
+#modalDetalleEmbarque .tabla-scroll {
+  max-height: 150px;
+  overflow-y: auto;
+  border-radius: 4px;
+}
+#modalDetalleEmbarque table{
+font-size:12px;
+}
+#modalDetalleEmbarque .tabla-scroll thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa; /* color claro */
+  z-index: 1;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  text-align: center;
+}
+
+</style>
+<div id="modalDetalleEmbarque" title="Conocimiento: #NUMERO" style="display: none;">
+  <form method="post" id="formDetalleEmbarque">
+    {% csrf_token %}
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-md-4">{{ compras_detalle_conocimiento.cliente.label_tag }}{{ compras_detalle_conocimiento.cliente }}</div>
+        <div class="col-md-4">{{ compras_detalle_conocimiento.embarcador.label_tag }}{{ compras_detalle_conocimiento.embarcador }}</div>
+        <div class="col-md-4">{{ compras_detalle_conocimiento.consignatario.label_tag }}{{ compras_detalle_conocimiento.consignatario }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-3">{{ compras_detalle_conocimiento.agente.label_tag }}{{ compras_detalle_conocimiento.agente }}</div>
+        <div class="col-md-3">{{ compras_detalle_conocimiento.transportista.label_tag }}{{ compras_detalle_conocimiento.transportista }}</div>
+        <div class="col-md-3">{{ compras_detalle_conocimiento.vapor_vuelo.label_tag }}{{ compras_detalle_conocimiento.vapor_vuelo }}</div>
+        <div class="col-md-3">{{ compras_detalle_conocimiento.etd_eta.label_tag }}{{ compras_detalle_conocimiento.etd_eta }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-3">{{ compras_detalle_conocimiento.embarque.label_tag }}{{ compras_detalle_conocimiento.embarque }}</div>
+        <div class="col-md-3">{{ compras_detalle_conocimiento.posicion.label_tag }}{{ compras_detalle_conocimiento.posicion }}</div>
+        <div class="col-md-3">{{ compras_detalle_conocimiento.mbl.label_tag }}{{ compras_detalle_conocimiento.mbl }}</div>
+        <div class="col-md-3">{{ compras_detalle_conocimiento.hbl.label_tag }}{{ compras_detalle_conocimiento.hbl }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-4">{{ compras_detalle_conocimiento.origen.label_tag }}{{ compras_detalle_conocimiento.origen }}</div>
+        <div class="col-md-4">{{ compras_detalle_conocimiento.destino.label_tag }}{{ compras_detalle_conocimiento.destino }}</div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <!-- Tabla: Servicios de Embarque -->
+          <div class="table-responsive">
+            <h6>Servicios de Embarque</h6>
+            <div class="tabla-scroll">
+            <table class="table table-bordered table-sm">
+              <thead>
+                <tr>
+                  <th>Servicio</th>
+                  <th>Moneda</th>
+                  <th>Precio</th>
+                  <th>Costo</th>
+                </tr>
+              </thead>
+              <tbody id="tablaServicios"></tbody>
+            </table>
+
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <!-- Tabla: Detalle Productos -->
+          <div class="table-responsive">
+            <h6>Detalle de Productos que Integran el Embarque</h6>
+            <div class="tabla-scroll">
+            <table class="table table-bordered table-sm">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Bultos</th>
+                  <th>Bruto</th>
+                  <th>CBM</th>
+                </tr>
+              </thead>
+              <tbody id="tablaProductos"></tbody>
+            </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+      <!-- Tabla: Tipos de Envase -->
+      <div class="table-responsive mb-3">
+        <h6>Detalle de Tipos de Envase, Precios y Costos</h6>
+        <div class="tabla-scroll">
+        <table class="table table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>Unidad</th>
+              <th>Tipo</th>
+              <th>Mov</th>
+              <th>Término</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+              <th>Costo</th>
+              <th>N° Contenedor</th>
+            </tr>
+          </thead>
+          <tbody id="tablaEnvases"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

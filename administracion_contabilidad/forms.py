@@ -1373,7 +1373,20 @@ class ComprasDetallePago(forms.Form):
 
     autogenerado = forms.CharField(widget=forms.HiddenInput())
 
-
+class DetalleEmbarqueForm(forms.Form):
+    cliente = forms.CharField(label="Cliente", widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    embarcador = forms.CharField(label="Embarcador", widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    consignatario = forms.CharField(label="Consignatario", widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    agente = forms.CharField(label="Agente", widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    transportista = forms.CharField(label="Transportista", widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    vapor_vuelo = forms.CharField(label="Vapor/Vuelo", widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    etd_eta = forms.DateField(label="ETD/ETA", widget=forms.DateInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    embarque = forms.DateField(label="Fecha Embarque", widget=forms.DateInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    posicion = forms.CharField(label="Posición", widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    mbl = forms.CharField(label="MBL", widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    hbl = forms.CharField(label="HBL", widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    origen = forms.CharField(label="Origen", widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
+    destino = forms.CharField(label="Destino", widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}))
 
 
 
