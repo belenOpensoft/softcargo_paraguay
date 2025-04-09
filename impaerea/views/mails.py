@@ -55,9 +55,9 @@ def get_data_email_op(request):
             #master=ImportReservas.objects.filter(awb=embarque.awb)
             email_cliente = Clientes.objects.get(codigo=embarque.consignatario).emailia if embarque.consignatario is not None else 'S/I'
             email_agente = Clientes.objects.get(codigo=embarque.agente).emailia if embarque.agente is not None else 'S/I'
-            conex = ImportConexaerea.objects.filter(numero=embarque.numero).order_by('-id').last()
+            conex = ImportConexaerea.objects.filter(numero=embarque.numero)
             if conex:
-                vapor = conex.vuelo if conex.vuelo else 'S/I'
+                vapor = conex[0].vuelo if conex[0].vuelo else 'S/I'
             else:
                 vapor = 'S/I'
             try:
@@ -333,14 +333,16 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += formatear_linea("Teléfono", consigna.telefono if consigna else "")
 
         texto += "<br>"
+        salida = seg.etd.strftime("%d/%m/%Y") if isinstance(row.etd, datetime) else ''
 
-        texto += formatear_linea("Salida", conex.salida if conex else "")
+        llegada = seg.eta.strftime("%d/%m/%Y") if isinstance(row.eta, datetime) else ''
 
-        texto += formatear_linea("Llegada", conex.llegada if conex else "")
+        texto += formatear_linea("Salida", salida )
 
-        texto += formatear_linea("Origen", conex.origen if conex else "")
+        texto += formatear_linea("Llegada", llegada )
 
-        texto += formatear_linea("Destino", conex.destino if conex else "")
+        texto += formatear_linea("Origen", row.origen)
+        texto += formatear_linea("Destino", row.destino )
 
         texto += formatear_linea("HAWB", embarque.hawb)
 
@@ -352,6 +354,15 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += formatear_linea("Posición", embarque.posicion)
 
         texto += formatear_linea("Seguimiento", row.seguimiento)
+
+        if conex:
+            for i, ruta in enumerate(conex):
+                if ruta.llegada:
+                    fecha = ruta.llegada.strftime("%d/%m")
+                else:
+                    fecha = '??/??'
+                tramo = f"({ruta.origen}/{ruta.destino})   {ruta.cia}{ruta.viaje}/{fecha}"
+                texto += formatear_linea("Vuelo", tramo)
 
         texto += formatear_linea("Embarcador", row.embarcador)
 
@@ -393,7 +404,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
         if gastos_boolean == 'true' and gastos:
 
-            texto += formatear_linea("Detalle", "Gastos en Dólares U.S.A")
+            texto += '<p style="font-family: Courier New, monospace; font-size: 12px; line-height: 1;"> Detalle de gastos en Dólares U.S.A </p>'
 
             total_gastos = 0
 
@@ -522,7 +533,14 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         if transportista_boolean == 'true':
             texto += formatear_linea("Transportista", row.transportista or "")
 
-        texto += "<br>"
+        if conex:
+            for i, ruta in enumerate(conex):
+                if ruta.llegada:
+                    fecha = ruta.llegada.strftime("%d/%m")
+                else:
+                    fecha = '??/??'
+                tramo = f"({ruta.origen}/{ruta.destino})   {ruta.cia}{ruta.viaje}/{fecha}"
+                texto += formatear_linea("Vuelo", tramo)
 
         texto += formatear_linea("Origen", row.origen or "")
 
@@ -573,11 +591,11 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
         texto += formatear_linea("House", row.hawb or "")
 
-        texto += formatear_linea("Peso", f"{peso} KGS")
+        texto += formatear_linea("Peso", f"{peso} KGS",1)
 
-        texto += formatear_linea("Bultos", str(bultos))
+        texto += formatear_linea("Bultos", str(bultos),1)
 
-        texto += formatear_linea("CBM", f"{volumen:.3f} M³")
+        texto += formatear_linea("CBM", f"{volumen:.3f} M³",1)
 
         texto += "<br>"
 
@@ -586,6 +604,44 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += formatear_linea("Depósito", seguimiento.deposito or "")
 
         texto += formatear_linea("Doc. Originales", "SI" if seguimiento.originales else "NO")
+
+        if gastos_boolean == 'true':
+
+            if gastos:
+
+                texto += '<p style="font-family: Courier New, monospace; font-size: 12px; line-height: 1;"> Detalle de gastos en Dólares U.S.A </p>'
+
+                total_gastos = 0
+
+                total_iva = 0
+
+                for g in gastos:
+
+                    servicio = Servicios.objects.get(codigo=g.servicio)
+
+                    total_gastos += float(g.precio) if g.precio != 0 else float(g.costo)
+
+                    iva = True if servicio.tasa == 'B' else False
+
+                    if iva:
+                        total_iva += float(g.precio) * 0.22 if g.precio != 0 else float(g.costo) * 0.22
+
+                    if g.precio != 0:
+                        texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}", 1)
+                    elif g.costo != 0:
+                        texto += formatear_linea(servicio.nombre, f"{g.costo:.2f}", 1)
+                    else:
+                        texto += formatear_linea("Problema con los gastos cargados", 0)
+
+                texto += "<br>"
+
+                texto += formatear_linea("TOTAL DE GASTOS", f"{total_gastos:.2f}", 1)
+
+                texto += formatear_linea("I.V.A", f"{total_iva:.2f}", 1)
+
+                texto += formatear_linea("TOTAL A PAGAR", f"{total_gastos + total_iva:.2f}", 1)
+
+                texto += "<br>"
 
         texto += "<br>"
         texto += "<table style='border: none; font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: 100%;'>"
@@ -602,12 +658,12 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         # Fila de valores
         #valor_vuelo = str(row.transportista) if armador !='true' else str(row.armador)
         texto += "<tr>"
-        texto += f"<td style='padding: 2px 10px;'>{conex.origen or ''}</td>"
-        texto += f"<td style='padding: 2px 10px;'>{conex.destino or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{row.origen or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{row.destino or ''}</td>"
         texto += f"<td style='padding: 2px 10px;'>{row.transportista}</td>"
-        texto += f"<td style='padding: 2px 10px;'>{str(conex.ciavuelo)+str(conex.vuelo)}</td>"
-        texto += f'<td style="padding: 2px 10px;">{conex.salida.strftime("%d/%m/%Y") if isinstance(conex.salida, datetime) else ""}</td>'
-        texto += f'<td style="padding: 2px 10px;">{conex.llegada.strftime("%d/%m/%Y") if isinstance(conex.llegada, datetime) else ""}</td>'
+        texto += f"<td style='padding: 2px 10px;'>{str(conex[0].ciavuelo)+str(conex[0].vuelo)}</td>"
+        texto += f'<td style="padding: 2px 10px;">{salida}</td>'
+        texto += f'<td style="padding: 2px 10px;">{llegada}</td>'
         texto += "</tr>"
         texto += "</table><br>"
 
@@ -652,11 +708,13 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
 
        # texto += formatear_linea("Vapor", row.vapor or "")  # cambiar esto
+        salida = seguimiento.etd.strftime("%d/%m/%Y") if isinstance(seguimiento.etd, datetime) else ""
 
-        texto += formatear_linea("Viaje", conex.viaje or "")
+        llegada = seguimiento.eta.strftime("%d/%m/%Y") if isinstance(seguimiento.eta, datetime) else ""
 
-        if isinstance(conex.llegada, datetime):
-            texto += formatear_linea("Llegada", conex.llegada.strftime("%d/%m/%Y"))
+        texto += formatear_linea("Viaje", conex[0].viaje or "")
+
+        texto += formatear_linea("Llegada", llegada)
 
         texto += formatear_linea("Posición", row.posicion or "")
 
@@ -1003,6 +1061,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += formatear_linea("Moneda", moneda.nombre if moneda is not None else 'S/I')
         texto += "<br>"
         return texto,resultado
+
 
 
 def image_to_base64(image_path):

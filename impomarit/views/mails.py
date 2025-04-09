@@ -394,7 +394,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
             if gastos:
 
-                texto += formatear_linea("Detalle", "Gastos en Dólares U.S.A")
+                texto += '<p style="font-family: Courier New, monospace; font-size: 12px; line-height: 1;"> Detalle de gastos en Dólares U.S.A </p>'
 
                 total_gastos = 0
 
@@ -412,15 +412,15 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                         total_iva += float(g.precio) * 0.22
 
                     if g.precio != 0:
-                        texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}")
+                        texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}",  1)
 
                 texto += "<br>"
 
-                texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
+                texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}",1)
 
-                texto += formatear_linea("I.V.A", f"${total_iva:.2f}")
+                texto += formatear_linea("I.V.A", f"${total_iva:.2f}",1)
 
-                texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
+                texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}",1)
 
                 texto += "<br>"
 
@@ -637,11 +637,11 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         if transportista_boolean == 'true':
             texto += formatear_linea("Transportista", row.transportista or "")
 
-        texto += formatear_linea("Peso", f"{peso} KGS")
+        texto += formatear_linea("Peso", f"{peso} KGS",1)
 
-        texto += formatear_linea("Bultos", str(bultos) + ' ' + str(tipo))
+        texto += formatear_linea("Bultos", str(bultos) + ' ' + str(tipo),1)
 
-        texto += formatear_linea("CBM", f"{volumen:.3f} M³")
+        texto += formatear_linea("CBM", f"{volumen:.3f} M³",1)
 
         texto += "<br>"
 
@@ -652,6 +652,43 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("Doc. Originales", "SI" if seguimiento.originales else "NO")
 
         texto += "<br>"
+        if gastos_boolean == 'true':
+
+            if gastos:
+
+                texto += '<p style="font-family: Courier New, monospace; font-size: 12px; line-height: 1;"> Detalle de gastos en Dólares U.S.A </p>'
+
+                total_gastos = 0
+
+                total_iva = 0
+
+                for g in gastos:
+
+                    servicio = Servicios.objects.get(codigo=g.servicio)
+
+                    total_gastos += float(g.precio) if g.precio != 0 else float(g.costo)
+
+                    iva = True if servicio.tasa == 'B' else False
+
+                    if iva:
+                        total_iva += float(g.precio) * 0.22 if g.precio != 0 else float(g.costo) * 0.22
+
+                    if g.precio != 0:
+                        texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}", 1)
+                    elif g.costo != 0:
+                        texto += formatear_linea(servicio.nombre, f"{g.costo:.2f}", 1)
+                    else:
+                        texto += formatear_linea("Problema con los gastos cargados", 0)
+
+                texto += "<br>"
+
+                texto += formatear_linea("TOTAL DE GASTOS", f"{total_gastos:.2f}", 1)
+
+                texto += formatear_linea("I.V.A", f"{total_iva:.2f}", 1)
+
+                texto += formatear_linea("TOTAL A PAGAR", f"{total_gastos + total_iva:.2f}", 1)
+
+                texto += "<br>"
         texto += "<table style='border: none; font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: 100%;'>"
 
         # Fila de títulos (encabezados)
@@ -725,7 +762,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("Vapor", vapor or "")  # cambiar esto
 
-        texto += formatear_linea("Viaje", conex.viaje or "")
 
         if isinstance(conex.llegada, datetime):
             texto += formatear_linea("Llegada", conex.llegada.strftime("%d/%m/%Y"))
@@ -754,7 +790,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         movimiento = ""
 
-        mercaderias = ""
+        mercaderias = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre')
 
         bultos = 0
 
@@ -791,7 +827,10 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
                 movimiento += f'{cn["movimiento"]} - '
 
-                mercaderias += f'{cn["envase"]} - '
+        mercaderia = ''
+        if mercaderias:
+            for m in mercaderias:
+                mercaderia += str(m['producto__nombre']) + '-'
 
         texto += formatear_linea("Contenedores", cantidad_cntr.strip(' -'))
 
@@ -805,7 +844,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("CBM", f"{volumen} M³")
 
-        texto += formatear_linea("Mercadería", mercaderias.strip(' -'))
+        texto += formatear_linea("Mercadería", mercaderia)
 
         texto += formatear_linea("Depósito", str(seguimiento.deposito))
         texto += formatear_linea("WR", str(seguimiento.wreceipt))
@@ -1093,7 +1132,7 @@ def image_to_base64(image_path):
 
 
 
-def formatear_linea(titulo, valor, ancho_total=110, ancho_col_izq=25):
+def formatear_linea_old(titulo, valor, ancho_total=110, ancho_col_izq=25):
     """
     Formatea una línea con estilo tipo factura o instrucción de embarque,
     usando puntos y dos columnas al estilo:
@@ -1102,6 +1141,27 @@ def formatear_linea(titulo, valor, ancho_total=110, ancho_col_izq=25):
     puntos = '.' * (ancho_col_izq - len(titulo))
     col_izq = f"{titulo} {puntos} :"
     return f"<div style='font-family: Courier New, monospace; font-size: 12px; line-height: 1;'>{col_izq} {valor}</div>"
+
+def formatear_linea(titulo, valor, alinear_derecha=None, ancho_total=110, ancho_col_izq=25):
+    """
+    Formatea una línea con estilo tipo factura o instrucción de embarque,
+    usando puntos y dos columnas al estilo:
+    Título ......... : Valor
+    Si alinear_derecha es True o no es None, alinea el valor a la derecha dentro del contenedor.
+    """
+    puntos = '.' * max(ancho_col_izq - len(titulo), 0)
+    col_izq = f"{titulo} {puntos} :"
+
+    return f"""
+        <div style='font-family: Courier New, monospace; font-size: 12px; line-height: 1; display: flex; justify-content: space-between; max-width: 50ch;'>
+            <span>{col_izq}</span>
+            <span>{valor}</span>
+        </div>
+    """ if alinear_derecha else f"""
+        <div style='font-family: Courier New, monospace; font-size: 12px; line-height: 1;'>
+            {col_izq} {valor}
+        </div>
+    """
 
 
 def formatear_caratula(titulo, valor):

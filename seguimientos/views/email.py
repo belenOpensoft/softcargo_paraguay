@@ -84,9 +84,16 @@ def get_data_email(request):
 
                 resultado['asunto'] = f'SEGUIMIENTO {row.numero} // TRASPASO A OPERACIONES'
             elif title == 'Aviso de embarque':
+                if row.modo=='IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO':
+                    if str(row.vapor).isdigit():
+                        vapor = Vapores.objects.get(codigo=row.vapor).nombre
 
+                    else:
+                        vapor = row.vapor
+                else:
+                    vapor='S/I'
                 resultado[
-                    'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.numero} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Vapor: {row.vapor}'
+                    'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.numero} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}'
 
                 fecha_actual = datetime.datetime.now()
 
@@ -123,14 +130,7 @@ def get_data_email(request):
 
                 texto += formatear_linea("Términos Compra", row.terminos or "")
 
-                if row.modo=='IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO':
-                    if str(row.vapor).isdigit():
-                        vapor = Vapores.objects.get(codigo=row.vapor).nombre
 
-                    else:
-                        vapor = row.vapor
-                else:
-                    vapor=row.vapor
 
                 texto += formatear_linea("Vuelo", vapor or "") if row.modo=='IMPORT AEREO' or row.modo == 'EXPORT AEREO' else formatear_linea("Vapor", vapor or "")
 
@@ -163,6 +163,7 @@ def get_data_email(request):
                 peso = 0
 
                 volumen = 0
+                gastos = Serviceaereo.objects.filter(numero=row.numero)
 
                 cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto',
                                                                              'bultos', 'peso', 'unidad',
@@ -198,7 +199,7 @@ def get_data_email(request):
 
                 texto += formatear_linea("Precintos/Sellos", precintos[:-3])
 
-                texto += formatear_linea("HMBL", row.hawb or "") if row.modo  == 'IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO' else formatear_linea("HAWB", row.hawb or "")
+                texto += formatear_linea("HBL", row.hawb or "") if row.modo  == 'IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO' else formatear_linea("HAWB", row.hawb or "")
 
                 if master == 'true':
                     if row.modo in ['IMPORT MARITIMO', 'EXPORT MARITIMO']:
@@ -210,6 +211,16 @@ def get_data_email(request):
 
                 if transportista == 'true':
                     texto += formatear_linea("Transportista", row.transportista or "")
+                conex = Conexaerea.objects.filter(numero=row.numero)
+
+                if conex:
+                    for i, ruta in enumerate(conex):
+                        if ruta.llegada:
+                            fecha = ruta.llegada.strftime("%d/%m")
+                        else:
+                            fecha = '??/??'
+                        tramo = f"({ruta.origen}/{ruta.destino})   {ruta.cia}{ruta.viaje}/{fecha}"
+                        texto += formatear_linea("Vuelo", tramo)
 
                 texto += formatear_linea("Peso", f"{peso} KGS")
 
@@ -226,6 +237,45 @@ def get_data_email(request):
                 texto += formatear_linea("Doc. Originales", 'SI' if row.originales else 'NO')
 
                 texto += "<br>"
+                if gastos_boolean == 'true':
+
+                    if gastos:
+
+                        texto += '<p style="font-family: Courier New, monospace; font-size: 12px; line-height: 1;"> Detalle de gastos en Dólares U.S.A </p>'
+
+                        total_gastos = 0
+
+                        total_iva = 0
+
+                        for g in gastos:
+
+                            servicio = Servicios.objects.get(codigo=g.servicio)
+
+                            total_gastos += float(g.precio) if g.precio !=0 else float(g.costo)
+
+                            iva = True if servicio.tasa == 'B' else False
+
+                            if iva:
+                                total_iva += float(g.precio) * 0.22 if g.precio !=0 else float(g.costo) * 0.22
+
+                            if g.precio != 0:
+                                texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}",1)
+                            elif g.costo !=0:
+                                texto += formatear_linea(servicio.nombre, f"{g.costo:.2f}",1)
+                            else:
+                                texto += formatear_linea("Problema con los gastos cargados",0)
+
+
+                        texto += "<br>"
+
+                        texto += formatear_linea("TOTAL DE GASTOS", f"{total_gastos:.2f}",1)
+
+                        texto += formatear_linea("I.V.A", f"{total_iva:.2f}",1)
+
+                        texto += formatear_linea("TOTAL A PAGAR", f"{total_gastos + total_iva:.2f}",1)
+
+                        texto += "<br>"
+
                 texto += "<table style='border: none; font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: 100%;'>"
 
                 # Fila de títulos (encabezados)
@@ -239,10 +289,11 @@ def get_data_email(request):
                 texto += "</tr>"
 
                 # Fila de valores
+
                 texto += "<tr>"
                 texto += f"<td style='padding: 2px 10px;'>{row.origen_text or ''}</td>"
                 texto += f"<td style='padding: 2px 10px;'>{row.destino_text or ''}</td>"
-                texto += f"<td style='padding: 2px 10px;'>{str(row.vapor) or ''}</td>"
+                texto += f"<td style='padding: 2px 10px;'>{str(vapor) }</td>"
                 texto += f"<td style='padding: 2px 10px;'>{str(row.viaje) or ''}</td>"
                 texto += f"<td style='padding: 2px 10px;'>{salida}</td>"
                 texto += f"<td style='padding: 2px 10px;'>{llegada}</td>"
@@ -256,19 +307,25 @@ def get_data_email(request):
                 texto+="sin previo aviso, por lo cual le sugerimos consultarnos por la fecha de arribo que aparece en este aviso.\n"
                 texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
                 texto += "</pre>"
-
             elif title == 'Notificacion llegada de carga':
 
                 consigna = Clientes.objects.get(codigo=row.consignatario_codigo)
 
-                conex = Conexaerea.objects.filter(numero=row.numero).order_by('-id').last()
+                conex = Conexaerea.objects.filter(numero=row.numero)
 
                 carga = Cargaaerea.objects.filter(numero=row.numero)
 
                 gastos = Serviceaereo.objects.filter(numero=row.numero)
 
-                vapor = conex.vapor if conex and conex.vapor else 'S/I'
-
+                if row.modo in ['IMPORT AEREO','EXPORT AEREO']:
+                    vapor = conex[0].vapor if conex and conex[0].vapor else 'S/I'
+                else:
+                    if row.vapor is not None and row.vapor.isdigit():
+                        vapor = Vapores.objects.get(codigo=row.vapor).nombre
+                    elif row.vapor is not None:
+                        vapor = row.vapor
+                    else:
+                        vapor = 'S/I'
                 resultado[
                     'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {row.embarque} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vapor/vuelo: {vapor}'
 
@@ -293,14 +350,17 @@ def get_data_email(request):
                 texto += formatear_linea("Teléfono", consigna.telefono if consigna else "")
 
                 texto += "<br>"
+                salida = row.etd.strftime("%d/%m/%Y") if isinstance(row.etd, datetime.datetime) else ''
 
-                texto += formatear_linea("Salida", conex.salida if conex else "")
+                llegada = row.eta.strftime("%d/%m/%Y") if isinstance(row.eta, datetime.datetime) else ''
 
-                texto += formatear_linea("Llegada", conex.llegada if conex else "")
+                texto += formatear_linea("Salida", salida )
 
-                texto += formatear_linea("Origen", conex.origen if conex else "")
+                texto += formatear_linea("Llegada",llegada)
 
-                texto += formatear_linea("Destino", conex.destino if conex else "")
+                texto += formatear_linea("Origen", row.origen if conex else "")
+
+                texto += formatear_linea("Destino", row.destino if conex else "")
 
                 texto += formatear_linea("HAWB", row.hawb)
 
@@ -312,6 +372,16 @@ def get_data_email(request):
                 texto += formatear_linea("Posición", row.posicion)
 
                 texto += formatear_linea("Seguimiento", row.numero)
+
+                if row.modo in ['IMPORT AEREO', 'EXPORT AEREO']:
+                    if conex:
+                        for i, ruta in enumerate(conex):
+                            if ruta.llegada:
+                                fecha = ruta.llegada.strftime("%d/%m")
+                            else:
+                                fecha = '??/??'
+                            tramo = f"({ruta.origen}/{ruta.destino})   {ruta.cia}{ruta.viaje}/{fecha}"
+                            texto += formatear_linea("Vuelo", tramo)
 
                 texto += formatear_linea("Embarcador", row.embarcador)
 
@@ -326,11 +396,11 @@ def get_data_email(request):
 
                         texto += formatear_linea("Mercadería", c.producto.nombre)
 
-                        texto += formatear_linea("Bultos", str(c.bultos))
+                        texto += formatear_linea("Bultos", str(c.bultos),1)
 
-                        texto += formatear_linea("Peso", str(c.bruto))
+                        texto += formatear_linea("Peso", str(c.bruto),1)
 
-                        texto += formatear_linea("Aplicable", str(aplicable))
+                        texto += formatear_linea("Aplicable", str(aplicable),1)
 
                     texto += "<br>"
 
@@ -338,7 +408,7 @@ def get_data_email(request):
 
                     if gastos:
 
-                        texto += formatear_linea("Detalle", "Gastos en Dólares U.S.A")
+                        texto += '<p style="font-family: Courier New, monospace; font-size: 12px; line-height: 1;"> Detalle de gastos en Dólares U.S.A </p>'
 
                         total_gastos = 0
 
@@ -348,23 +418,28 @@ def get_data_email(request):
 
                             servicio = Servicios.objects.get(codigo=g.servicio)
 
-                            total_gastos += float(g.precio)
+                            total_gastos += float(g.precio) if g.precio !=0 else float(g.costo)
 
                             iva = True if servicio.tasa == 'B' else False
 
                             if iva:
-                                total_iva += float(g.precio) * 0.22
+                                total_iva += float(g.precio) * 0.22 if g.precio !=0 else float(g.costo) * 0.22
 
                             if g.precio != 0:
-                                texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}")
+                                texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}",1)
+                            elif g.costo !=0:
+                                texto += formatear_linea(servicio.nombre, f"{g.costo:.2f}",1)
+                            else:
+                                texto += formatear_linea("Problema con los gastos cargados",0)
+
 
                         texto += "<br>"
 
-                        texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
+                        texto += formatear_linea("TOTAL DE GASTOS", f"{total_gastos:.2f}",1)
 
-                        texto += formatear_linea("I.V.A", f"${total_iva:.2f}")
+                        texto += formatear_linea("I.V.A", f"{total_iva:.2f}",1)
 
-                        texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
+                        texto += formatear_linea("TOTAL A PAGAR", f"{total_gastos + total_iva:.2f}",1)
 
                         texto += "<br>"
 
@@ -385,6 +460,7 @@ def get_data_email(request):
                 texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
 
                 texto += "</pre>"
+
             elif title == 'Aviso de desconsolidacion':
 
                 fecha_actual = datetime.datetime.now()
@@ -401,14 +477,14 @@ def get_data_email(request):
                 texto += formatear_linea("Fecha", fecha_formateada.upper())
 
                 texto += "<br>"
-
-                texto += formatear_linea("Att.", "DEPARTAMENTO DE OPERACIONES")
-
                 texto += formatear_linea("Cliente", str(row.cliente))
 
                 texto += formatear_linea("Dirección", row.direccion_cliente or "")
 
                 texto += formatear_linea("Teléfono", row.telefono_cliente or "")
+
+                texto += formatear_linea("Att.", "DEPARTAMENTO DE OPERACIONES")
+
 
                 if row.modo == 'IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO':
                     if row.vapor is not None and row.vapor.isdigit():
@@ -421,12 +497,14 @@ def get_data_email(request):
                     vapor = row.vapor
 
                 texto += formatear_linea("Vapor", vapor or "") #cambiar esto
-
-                texto += formatear_linea("Viaje", row.viaje or "")
+                texto += formatear_linea("HBL",
+                                         row.hawb or "") if row.modo == 'IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO' else formatear_linea(
+                    "HAWB", row.hawb or "")
 
                 if isinstance(row.eta, datetime.datetime):
                     texto += formatear_linea("Llegada", row.eta.strftime("%d/%m/%Y"))
 
+                texto += formatear_linea("Referencia", row.numero or "")
                 texto += formatear_linea("Posición", row.posicion or "")
 
                 texto += formatear_linea("Seguimiento", row.numero)
@@ -434,78 +512,77 @@ def get_data_email(request):
                 texto += formatear_linea("Embarcador", row.embarcador)
 
                 texto += formatear_linea("Consignatario", row.consignatario)
+                texto += formatear_linea("Origen", row.origen)
+                texto += formatear_linea("Destino", row.destino)
 
                 texto += formatear_linea("Orden cliente", row.refcliente)
 
                 texto += formatear_linea("Referencia proveedor", row.refproveedor)
 
-                texto += formatear_linea("Origen", row.origen_text)
+                if row.modo not in ['IMPORT AEREO','EXPORT AEREO']:
+                    # Datos de contenedores
+                    cantidad_cntr = ""
+                    contenedores = ""
+                    precintos = ""
+                    movimiento = ""
+                    mercaderias = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre')
+                    bultos = 0
+                    peso = 0
+                    volumen = 0
+                    cant_cntr = Envases.objects.filter(numero=row.numero).values(
+                        'tipo', 'nrocontenedor', 'precinto', 'bultos',
+                        'peso', 'envase', 'movimiento', 'volumen'
+                    ).annotate(total=Count('id'))
+                    if cant_cntr.count() > 0:
+                        for cn in cant_cntr:
+                            cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - '
+                            contenedores += f' {cn["nrocontenedor"]} - '
+                            if cn['precinto']:
+                                precintos += f'{cn["precinto"]} - '
+                            bultos += cn['bultos']
+                            if cn['peso']:
+                                peso += cn['peso']
+                            if cn['volumen']:
+                                volumen += cn['volumen']
+                            movimiento += f'{cn["movimiento"]} - '
 
-                texto += formatear_linea("Destino", row.destino_text)
+                    mercaderia = ''
+                    if mercaderias:
+                        for m in mercaderias:
+                            mercaderia += str(m['producto__nombre'])+'-'
 
-                # Datos de contenedores
+                    texto += formatear_linea("Contenedores", cantidad_cntr.strip(' -'))
+                    texto += formatear_linea("Nro. Contenedor/es", contenedores.strip(' -'))
+                    texto += formatear_linea("Precintos/sellos", precintos.strip(' -'))
+                    texto += formatear_linea("Bultos", str(bultos))
+                    texto += formatear_linea("Peso", f"{peso} KGS")
+                    texto += formatear_linea("CBM", f"{volumen} M³")
+                    texto += formatear_linea("Mercadería", mercaderia)
+                else:
+                    contenedores = ""
+                    mercaderia = ""
+                    bultos = 0
+                    peso = 0
+                    volumen = 0
+                    cant_cntr = Cargaaerea.objects.filter(numero=row.numero).values(
+                        'producto__nombre', 'nrocontenedor', 'bultos',
+                        'bruto', 'cbm'
+                    ).annotate(total=Count('id'))
+                    if cant_cntr.count() > 0:
+                        for cn in cant_cntr:
+                            contenedores += f' {cn["nrocontenedor"]} - '
+                            bultos += cn['bultos']
+                            if cn['bruto']:
+                                peso += cn['bruto']
+                            if cn['cbm']:
+                                volumen += cn['cbm']
+                            mercaderia += f'{cn["producto__nombre"]} - '
 
-                cantidad_cntr = ""
-
-                contenedores = ""
-
-                precintos = ""
-
-                movimiento = ""
-
-                mercaderias = ""
-
-                bultos = 0
-
-                peso = 0
-
-                volumen = 0
-
-                cant_cntr = Envases.objects.filter(numero=row.numero).values(
-
-                    'tipo', 'nrocontenedor', 'precinto', 'bultos',
-
-                    'peso', 'envase', 'movimiento', 'volumen'
-
-                ).annotate(total=Count('id'))
-
-                if cant_cntr.count() > 0:
-
-                    for cn in cant_cntr:
-
-                        cantidad_cntr += f' {cn["total"]} x {cn["tipo"]} - '
-
-                        contenedores += f' {cn["nrocontenedor"]} - '
-
-                        if cn['precinto']:
-                            precintos += f'{cn["precinto"]} - '
-
-                        bultos += cn['bultos']
-
-                        if cn['peso']:
-                            peso += cn['peso']
-
-                        if cn['volumen']:
-                            volumen += cn['volumen']
-
-                        movimiento += f'{cn["movimiento"]} - '
-
-                        mercaderias += f'{cn["envase"]} - '
-
-                texto += formatear_linea("Contenedores", cantidad_cntr.strip(' -'))
-
-                texto += formatear_linea("Nro. Contenedor/es", contenedores.strip(' -'))
-
-                texto += formatear_linea("Precintos/sellos", precintos.strip(' -'))
-
-                texto += formatear_linea("Bultos", str(bultos))
-
-                texto += formatear_linea("Peso", f"{peso} KGS")
-
-                texto += formatear_linea("CBM", f"{volumen} M³")
-
-                texto += formatear_linea("Mercadería", mercaderias.strip(' -'))
-
+                    texto += formatear_linea("Nro. Contenedor/es", contenedores.strip(' -'))
+                    texto += formatear_linea("Bultos", str(bultos))
+                    texto += formatear_linea("Peso", f"{peso} KGS")
+                    texto += formatear_linea("CBM", f"{volumen} M³")
+                    texto += formatear_linea("Mercadería", mercaderia)
                 texto += formatear_linea("Entrega en gate", "")
 
                 texto += formatear_linea("Depósito", str(row.deposito))
@@ -884,8 +961,6 @@ def get_data_email(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
-
-
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:

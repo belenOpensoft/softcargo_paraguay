@@ -688,11 +688,11 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("House", row.hawb or "")
 
-        texto += formatear_linea("Peso", f"{peso} KGS")
+        texto += formatear_linea("Peso", f"{peso} KGS",1)
 
-        texto += formatear_linea("Bultos", str(bultos))
+        texto += formatear_linea("Bultos", str(bultos),1)
 
-        texto += formatear_linea("CBM", f"{volumen:.3f} M³")
+        texto += formatear_linea("CBM", f"{volumen:.3f} M³",1)
 
         texto += "<br>"
 
@@ -703,6 +703,44 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("Doc. Originales", "SI" if seguimiento.originales else "NO")
 
         texto += "<br>"
+
+        if gastos_boolean == 'true':
+
+            if gastos:
+
+                texto += '<p style="font-family: Courier New, monospace; font-size: 12px; line-height: 1;"> Detalle de gastos en Dólares U.S.A </p>'
+
+                total_gastos = 0
+
+                total_iva = 0
+
+                for g in gastos:
+
+                    servicio = Servicios.objects.get(codigo=g.servicio)
+
+                    total_gastos += float(g.precio) if g.precio != 0 else float(g.costo)
+
+                    iva = True if servicio.tasa == 'B' else False
+
+                    if iva:
+                        total_iva += float(g.precio) * 0.22 if g.precio != 0 else float(g.costo) * 0.22
+
+                    if g.precio != 0:
+                        texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}", 1)
+                    elif g.costo != 0:
+                        texto += formatear_linea(servicio.nombre, f"{g.costo:.2f}", 1)
+                    else:
+                        texto += formatear_linea("Problema con los gastos cargados", 0)
+
+                texto += "<br>"
+
+                texto += formatear_linea("TOTAL DE GASTOS", f"{total_gastos:.2f}", 1)
+
+                texto += formatear_linea("I.V.A", f"{total_iva:.2f}", 1)
+
+                texto += formatear_linea("TOTAL A PAGAR", f"{total_gastos + total_iva:.2f}", 1)
+
+                texto += "<br>"
 
         # Reemplazo de tabla por líneas alineadas
 
