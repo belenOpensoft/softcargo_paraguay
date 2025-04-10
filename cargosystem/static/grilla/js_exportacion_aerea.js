@@ -631,8 +631,9 @@ $(document).ready(function () {
                  $('#transportista_ie').val(ui.item['id']);
                  $('#transportista_i').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
+            /*
                 $(this).val('');
-                $('#transportista_ie').val('');
+                $('#transportista_ie').val(''); */
                 $(this).css({"border-color": "", 'box-shadow': ''});
                 $('#transportista_ie').css({"border-color": "", 'box-shadow': ''});
             }
@@ -1486,14 +1487,15 @@ function aplicable_volumen(volumen){
         var formData = $(this).serialize();
         let radio;
         if ($('#volumen_radio_e').is(':checked')){
-            radio='volumen';
-        }else if ($('#peso_radio_e').is(':checked')){
-            radio='peso';
-        }else{
-            radio='manual';
+            radio = 'volumen';
+        } else if ($('#peso_radio_e').is(':checked')){
+            radio = 'peso';
+        } else {
+            radio = 'manual';
         }
 
-        formData+=radio;
+        formData += '&radio=' + encodeURIComponent(radio);
+
         $('#edit_master_form').attr('action', '/exportacion_aerea/edit_master/' + id_master + '/');
 
         $.ajax({
@@ -2996,6 +2998,7 @@ function fillFormWithData(data) {
     localStorage.setItem('master_editar',data.awd_e);
     localStorage.setItem('posicion_editar',data.posicion_e);
     $('#transportista_edit').val(!data.transportista_e || data.transportista_e === 0 ? '' : getNameById(data.transportista_e));
+
     $('#agente_edit').val(!data.agente_e || data.agente_e === 0 ? '' : getNameById(data.agente_e));
     $('#consignatario_edit').val(!data.consignatario_e || data.consignatario_e === 0 ? '' : getNameById(data.consignatario_e));
 
@@ -3011,6 +3014,7 @@ function fillFormWithData(data) {
     $('#edit_master_form [name="moneda_e"]').val(data.moneda_e);
     $('#edit_master_form [name="arbitraje_e"]').val(data.arbitraje_e);
     $('#edit_master_form [name="kilos_e"]').val(data.kilos_e);
+
     $('#edit_master_form [name="pagoflete_e"]').val(data.pagoflete_e);
     $('#edit_master_form [name="trafico_e"]').val(data.trafico_e);
     $('#edit_master_form [name="fecha_e"]').val(formatDateToYYYYMMDD(data.fecha_e));
@@ -3022,6 +3026,7 @@ function fillFormWithData(data) {
     $('#edit_master_form [name="posicion_e"]').val(data.posicion_e);
     $('#edit_master_form [name="operacion_e"]').val(data.operacion_e);
     $('#edit_master_form [name="awd_e"]').val(data.awd_e);
+    guia_master_edit(data.awd_e);
     if(data.radio=='volumen'){
     $('#volumen_radio_e').prop('checked', true);
     }else if(data.radio=='peso'){
@@ -3048,7 +3053,7 @@ function fillFormWithData(data) {
             }
         });
 
-    guia_master_edit();
+
 
 }
 
@@ -5119,7 +5124,7 @@ function guia_master() {
         });
     }
 }
-function guia_master_edit() {
+function guia_master_edit_old(master) {
     let transportista = $('#transportista_ie').val();
     if (transportista) {
         $.ajax({
@@ -5137,13 +5142,10 @@ function guia_master_edit() {
                         // Agregar cada opción al select
                         $('#id_awb_select_e').append('<option value="' + optionText + '">' + optionText + '</option>');
                     });
-
-                    // Seleccionar por defecto la última guía disponible
-                    if (data.length > 0) {
+                /*    if (data.length > 0) {
                         let lastOptionValue = data[data.length - 1].prefijo + '-' + data[data.length - 1].numero;
-                        $('#id_awb_select_e').val(lastOptionValue);
                     }
-
+                */
                 } else {
                     // Si no hay guías, agregar un mensaje indicando que no hay disponibles
                     $('#id_awb_select_e').append('<option value="sin guia">No hay guías disponibles</option>');
@@ -5155,8 +5157,54 @@ function guia_master_edit() {
                 console.error('Error al obtener las guías:', error);
             }
         });
+        $('#id_awb_select_e').val(master);
+    }
+
+
+}
+function guia_master_edit(master) {
+    let transportista = $('#transportista_ie').val();
+    if (transportista) {
+        $.ajax({
+            url: '/obtener-guias/' + transportista + '/',
+            method: 'GET',
+            success: function(data) {
+                $('#id_awb_select_e').empty();
+
+                // 👉 Agregar manualmente la guía actual (aunque no esté disponible)
+                if (master && master !== '') {
+                    $('#id_awb_select_e').append(
+                        $('<option>', {
+                            value: master,
+                            text: master + ' (asignada)',
+                            selected: true
+                        })
+                    );
+                }
+
+                // 👉 Agregar las guías disponibles
+                data.forEach(function(item) {
+                    let optionText = item.prefijo + '-' + item.numero;
+
+                    // Evitar duplicar si justo coincide con la asignada
+                    if (optionText !== master) {
+                        $('#id_awb_select_e').append(
+                            $('<option>', {
+                                value: optionText,
+                                text: optionText
+                            })
+                        );
+                    }
+                });
+            },
+            error: function(error) {
+                console.error('Error al obtener las guías:', error);
+            }
+        });
     }
 }
+
+
 
 //acumulables
 function acumulados(master, callback) {

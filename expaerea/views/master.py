@@ -5,10 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, Http404, HttpResponseRedirect
 from django.db import IntegrityError
 from expaerea.forms import add_form, edit_form
-from expaerea.models import ExportReservas
+from expaerea.models import ExportReservas, ExportEmbarqueaereo
+from expterrestre.models import ExpterraEmbarqueaereo
 from seguimientos.models import Seguimiento
 from mantenimientos.models import Clientes, Guias
-
+from django.db import transaction
 
 def consultar_seguimientos(request):
     if request.method == 'POST':
@@ -164,7 +165,7 @@ def get_name_by_id(request):
             return JsonResponse({'name': name})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
-def edit_master(request, id_master):
+def edit_master_old(request, id_master):
     if request is None:
         return JsonResponse({
             'success': False,
@@ -270,4 +271,125 @@ def edit_master(request, id_master):
                 'errors': {}
             })
 
+def edit_master(request, id_master):
+    if request is None:
+        return JsonResponse({
+            'success': False,
+            'message': "El objeto request es None",
+            'errors': {}
+        })
+
+    master = ExportReservas.objects.get(numero=id_master)
+
+    if request.method == 'POST':
+        form = edit_form(request.POST)
+        try:
+            if form.is_valid():
+                # Guardar valores originales
+                awb_original = master.awb
+                transportista_original = master.transportista
+
+                # Nuevos datos del formulario
+                transportista_nuevo = form.cleaned_data.get('transportista_ie', 0)
+                numero = str(form.cleaned_data.get('numero_guia', 0))
+                prefijo = str(form.cleaned_data.get('prefijo_guia', 0))
+                numero_old = str(form.cleaned_data.get('numero_old', 0))
+                prefijo_old = str(form.cleaned_data.get('prefijo_old', 0))
+
+                awb_nuevo = prefijo + '-' + numero
+                awb_anterior = prefijo_old + '-' + numero_old
+
+                # Asignación de datos
+                master.transportista = transportista_nuevo
+                master.agente = form.cleaned_data.get('agente_ie', 0)
+                master.consignatario = form.cleaned_data.get('consignatario_ie', 0)
+                master.aduana = form.cleaned_data.get('aduana_e', 'S/I')
+                master.moneda = form.cleaned_data.get('moneda_e', "")
+                master.tarifaawb = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
+                master.arbitraje = form.cleaned_data.get('arbitraje_e', 0) if form.cleaned_data.get('arbitraje_e') not in [None, ''] else 0
+                master.kilos = form.cleaned_data.get('kilos_e', 0) if form.cleaned_data.get('kilos_e') not in [None, ''] else 0
+                master.trafico = form.cleaned_data.get('trafico_e', 0) if form.cleaned_data.get('trafico_e') not in [None, ''] else 0
+                master.cotizacion = form.cleaned_data.get('cotizacion_e', 0) if form.cleaned_data.get('cotizacion_e') not in [None, ''] else 0
+                master.pagoflete = form.cleaned_data.get('pagoflete_e', "")
+                master.fecha = form.cleaned_data.get('fecha_e', None)
+                master.destino = form.cleaned_data.get('destino_e', "")
+                master.origen = form.cleaned_data.get('origen_e', "")
+                master.status = form.cleaned_data.get('status_e', "")
+                master.posicion = form.cleaned_data.get('posicion_e', "")
+                master.operacion = form.cleaned_data.get('operacion_e', "")
+                master.awb = awb_nuevo
+                master.volumen = form.cleaned_data.get('volumen', 0)
+                master.aplicable = form.cleaned_data.get('aplicable', 0)
+                master.notas = form.cleaned_data.get('radio', "")
+
+                # Si cambió la guía
+                if numero_old != numero or prefijo_old != prefijo:
+                    try:
+                        guia = Guias.objects.get(numero=numero, prefijo=prefijo)
+                        guia.estado = 1
+                        guia.save()
+                    except Guias.DoesNotExist:
+                        pass
+
+                    try:
+                        guia_old = Guias.objects.get(numero=numero_old, prefijo=prefijo_old)
+                        guia_old.estado = 0
+                        guia_old.save()
+                    except Guias.DoesNotExist:
+                        pass
+
+                # Si se cancela el master
+                if master.status == 'CANCELADO':
+                    try:
+                        guia = Guias.objects.get(numero=numero, prefijo=prefijo)
+                        guia.estado = 0
+                        guia.save()
+                    except Guias.DoesNotExist:
+                        pass
+
+                try:
+                    with transaction.atomic():
+                        master.save()
+
+                        # Si cambia transportista o awb, actualizar los houses
+                        if awb_nuevo != awb_original or transportista_nuevo != transportista_original:
+                            houses = ExportEmbarqueaereo.objects.filter(awb=awb_anterior)
+                            for house in houses:
+                                if awb_nuevo != awb_original:
+                                    house.awb = awb_nuevo
+                                if transportista_nuevo != transportista_original:
+                                    house.transportista = transportista_nuevo
+                                house.save()
+
+                    messages.success(request, 'Datos actualizados con éxito.')
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Datos actualizados con éxito.',
+                    })
+
+                except IntegrityError:
+                    messages.error(request, 'Error: No se pudo actualizar los datos.')
+                    return HttpResponseRedirect(request.path_info)
+
+                except Exception as e:
+                    messages.error(request, str(e))
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'Error: {str(e)}',
+                        'errors': {}
+                    })
+
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Formulario inválido.',
+                    'errors': form.errors
+                })
+        except Exception as e:
+            messages.error(request, str(e))
+            return JsonResponse({
+                'success': False,
+                'message': f'Error: {str(e)}',
+                'errors': {}
+            })
 

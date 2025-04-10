@@ -71,7 +71,7 @@ def get_data_email_op(request):
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>DEPARTAMENTO DE IMPORTACIÓN MARITIMA,</p>"
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{request.user.first_name} {request.user.last_name}</p>"
             texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OPERACIONES</p>"
-            texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>PH: 59829170501</p>"
+            texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>PH: +598 26052332</p>"
             resultado['email_cliente'] = email_cliente
             resultado['email_agente'] = email_agente
             resultado['resultado'] = 'exito'
@@ -336,6 +336,12 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         gastos = Serviceaereo.objects.filter(numero=embarque.numero)
 
+        cant_cntr = Envases.objects.filter(numero=row.numero).values(
+
+            'tipo', 'nrocontenedor', 'precinto', 'bultos', 'peso', 'unidad', 'volumen','movimiento'
+
+        ).annotate(total=Count('id'))
+
         texto = formatear_linea("Fecha", fecha_formateada)
 
         texto += "<br>"
@@ -349,19 +355,23 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("Teléfono", consigna.telefono if consigna else "")
 
         texto += "<br>"
+        salida = seguimiento.etd.strftime("%d/%m/%Y") if isinstance(seguimiento.etd, datetime) else ""
 
-        texto += formatear_linea("Salida", conex.salida if conex else "")
+        llegada = seguimiento.eta.strftime("%d/%m/%Y") if isinstance(seguimiento.eta, datetime) else ""
 
-        texto += formatear_linea("Llegada", conex.llegada if conex else "")
+        texto += formatear_linea("Salida", salida)
+
+        texto += formatear_linea("Llegada", llegada)
 
         texto += formatear_linea("Origen", conex.origen if conex else "")
 
         texto += formatear_linea("Destino", conex.destino if conex else "")
+        texto += formatear_linea("Vapor",vapor)
 
-        texto += formatear_linea("HAWB", embarque.hawb)
+        texto += formatear_linea("HBL", embarque.hawb)
 
         if master_boolean == 'true':
-            texto += formatear_linea("AWB", embarque.awb)
+            texto += formatear_linea("MBL", embarque.awb)
 
         texto += formatear_linea("Referencia", embarque.numero)
 
@@ -371,7 +381,33 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("Embarcador", row.embarcador)
 
-        texto += formatear_linea("Ref. Proveedor", row.embarcador)
+        texto += formatear_linea("Ref. Proveedor", seguimiento.refproveedor)
+
+        cantidad_cntr=contenedores=precintos=movimiento=''
+        peso=volumen=bultos=0
+        if cant_cntr.exists():
+
+            for cn in cant_cntr:
+
+                cantidad_cntr += f'{cn["total"]} x {cn["tipo"]} - {cn["unidad"]} - '
+
+                contenedores += f'{cn["nrocontenedor"]} - '
+
+                if cn['precinto']:
+                    precintos += f'{cn["precinto"]} - '
+
+                bultos += cn['bultos']
+                peso += cn['peso'] if cn['peso'] else 0
+                volumen += cn['volumen'] if cn['volumen'] else 0
+                movimiento=cn['movimiento']
+
+        texto += formatear_linea("Movimiento", movimiento)
+        texto += formatear_linea("Contenedores", cantidad_cntr.rstrip(' -'))
+
+        texto += formatear_linea("Nro. Contenedor/es", contenedores.rstrip(' -'))
+
+        texto += formatear_linea("Precintos/Sellos", precintos.rstrip(' -'))
+
 
         if carga:
 
@@ -606,7 +642,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
             for cn in cant_cntr:
 
-                cantidad_cntr += f'{cn["total"]} x {cn["tipo"]} - {cn["unidad"]} - '
+                cantidad_cntr += f'{cn["total"]} x {cn["unidad"]} - {cn["tipo"]} - '
 
                 contenedores += f'{cn["nrocontenedor"]} - '
 
@@ -637,11 +673,11 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         if transportista_boolean == 'true':
             texto += formatear_linea("Transportista", row.transportista or "")
 
-        texto += formatear_linea("Peso", f"{peso} KGS",1)
+        texto += formatear_linea("Peso", f"{peso} KGS",)
 
-        texto += formatear_linea("Bultos", str(bultos) + ' ' + str(tipo),1)
+        texto += formatear_linea("Bultos", str(bultos) + ' ' + str(tipo))
 
-        texto += formatear_linea("CBM", f"{volumen:.3f} M³",1)
+        texto += formatear_linea("CBM", f"{volumen:.3f} M³")
 
         texto += "<br>"
 
@@ -1121,8 +1157,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("Moneda", moneda.nombre if moneda is not None else 'S/I' )
         texto += "<br>"
     return texto, resultado
-
-
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:

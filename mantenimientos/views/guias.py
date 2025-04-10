@@ -258,3 +258,4 @@ def obtener_guias_transportista(request, transportista_id):
     guias_data = [{'id': guia.id, 'prefijo': guia.prefijo, 'numero': guia.numero} for guia in guias]
 
     return JsonResponse(guias_data, safe=False)
+

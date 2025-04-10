@@ -15,7 +15,8 @@ from administracion_contabilidad.views.facturacion import generar_numero, modifi
 from administracion_contabilidad.views.preventa import generar_autogenerado
 from mantenimientos.models import Clientes, Monedas
 from administracion_contabilidad.models import Asientos, VistaPagos, Dolar, Cheques, Impuordenes, Ordenes, Cuentas, \
-    Movims
+    Movims, Chequeorden
+
 
 @login_required(login_url='/login')
 def orden_pago_view(request):
@@ -684,18 +685,14 @@ def guardar_anticipo_orden(request):
                         moneda=cobranza[0]['nromoneda']
                         nrocliente=cobranza[0]['nrocliente']
                         tipo_cheque='CH'
-                        cheque = Cheques()
+                        cheque = Chequeorden()
                         cheque.cnumero=numero
                         cheque.cbanco=banco
                         cheque.cfecha=fecha_obj
                         cheque.cvto=fecha_vencimiento
                         cheque.cmonto=monto
-                        cheque.cautogenerado=autogenerado
-                        cheque.cdetalle=detalle
-                        cheque.ccliente=nrocliente
+                        cheque.corden=cobranza[0]['numero']
                         cheque.cmoneda=moneda
-                        cheque.ctipo=tipo_cheque
-                        cheque.cestado=2
                         cheque.save()
 
                 #asiento general

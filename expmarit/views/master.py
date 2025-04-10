@@ -5,10 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, Http404, HttpResponseRedirect
 from django.db import IntegrityError
 from expmarit.forms import add_form, edit_form
-from expmarit.models import ExpmaritReservas
+from expmarit.models import ExpmaritReservas, ExpmaritEmbarqueaereo
 from seguimientos.models import Seguimiento
 from mantenimientos.models import Clientes
-
+from django.db import transaction
 
 def consultar_seguimientos(request):
     if request.method == 'POST':
@@ -17,74 +17,7 @@ def consultar_seguimientos(request):
         data = list(seguimientos)
         return JsonResponse({'data': data})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
-# def add_importacion_maritima(request):
-#
-#     try:
-#         if request.method == 'POST':
-#             form = add_form(request.POST)
-#             if form.is_valid():
-#
-#                 reserva = Reservas()
-#                 try:
-#                     reserva.transportista = int(form.cleaned_data.get('transportista_i', 0))
-#                     reserva.agente = int(form.cleaned_data.get('agente_i', 0))
-#                     reserva.consignatario = int(form.cleaned_data.get('consignatario_i', 0))
-#                     reserva.armador = int(form.cleaned_data.get('armador_i', 0))
-#                 except ValueError:
-#                     return JsonResponse({
-#                         'success': False,
-#                         'message': 'Uno o más campos tienen un formato incorrecto.',
-#                         'errors': {}
-#                     })
-#
-#                 reserva.numero = reserva.get_number()
-#                 reserva.awb = form.cleaned_data['awb']
-#                 reserva.vapor = form.cleaned_data['vapor']
-#                 reserva.viaje = form.cleaned_data['viaje']
-#                 reserva.aduana = form.cleaned_data['aduana']
-#                 reserva.tarifa = form.cleaned_data['tarifa']
-#                 reserva.moneda = form.cleaned_data['moneda']
-#                 reserva.arbitraje = form.cleaned_data['arbitraje']
-#                 reserva.kilosmadre = form.cleaned_data['kilosmadre']
-#                 reserva.bultosmadre = form.cleaned_data['bultosmadre']
-#                 reserva.pagoflete = form.cleaned_data['pagoflete']
-#                 reserva.trafico = form.cleaned_data['trafico']
-#                 reserva.origen = form.cleaned_data['origen']
-#                 reserva.loading = form.cleaned_data['loading']
-#                 reserva.destino = form.cleaned_data['destino']
-#                 reserva.discharge = form.cleaned_data['discharge']
-#                 reserva.fecha = form.cleaned_data['fecha'].strftime("%Y-%m-%d")
-#                 reserva.cotizacion = form.cleaned_data['cotizacion']
-#                 reserva.status = form.cleaned_data['status']
-#                 reserva.operacion = form.cleaned_data['operacion']
-#                 reserva.fechaingreso = datetime.now()
-#                 reserva.posicion=generar_posicion()
-#                 reserva.save()
-#                 messages.success(request, 'Master agregado con éxito.')
-#                # return JsonResponse({'success': True, 'message': 'Master agregado con éxito.'})
-#                 return JsonResponse({'success': True, 'posicion': reserva.posicion})
-#
-#             else:
-#                 if 'awb' in form.errors:
-#                     return JsonResponse({
-#                         'success': False,
-#                         'code': 'DUPLICATE_AWB',
-#                         'message': 'Ya existe un registro con el Master digitado.',
-#                         'errors': form.errors.as_json()
-#                     })
-#                 return JsonResponse({
-#                     'success': False,
-#                     'message': 'Formulario inválido, intente nuevamente.',
-#                     'errors': form.errors.as_json()
-#                 })
-#
-#     except Exception as e:
-#         messages.error(request, str(e))
-#         return JsonResponse({
-#             'success': False,
-#             'message': f'Ocurrió un error: {str(e)}',
-#             'errors': {}
-#         })
+
 def add_importacion_maritima(request):
     try:
         if request.method == 'POST':
@@ -229,7 +162,7 @@ def get_name_by_id(request):
             return JsonResponse({'name': name})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
-def edit_master(request, id_master):
+def edit_master_old(request, id_master):
     if request is None:
         return JsonResponse({
             'success': False,
@@ -293,62 +226,97 @@ def edit_master(request, id_master):
                     'errors': {}
                 })
 
+def edit_master(request, id_master):
+    try:
+        if request is None:
+            return JsonResponse({
+                'success': False,
+                'message': "El objeto request es None",
+                'errors': {}
+            })
 
-# def edit_master(request, id_master):
-#     if request is None:
-#         return JsonResponse({
-#             'success': False,
-#             'message': "El objeto request es None",
-#             'errors': {}
-#         })
-#
-#     master = Reservas.objects.get(id=id_master)
-#     if request.method == 'POST':
-#         form = edit_form(request.POST)
-#         if form.is_valid():
-#             master.transportista = form.cleaned_data['transportista_ie']
-#             master.agente = form.cleaned_data['agente_ie']
-#             master.consignatario = form.cleaned_data['consignatario_ie']
-#             master.armador = form.cleaned_data['armador_ie']
-#             master.vapor = form.cleaned_data['vapor_e']
-#
-#             master.viaje = form.cleaned_data.get('viaje_e', 0) if form.cleaned_data.get('viaje_e') not in [None,''] else 0
-#             master.aduana = form.cleaned_data.get('aduana_e', 'S/I')
-#             master.moneda = form.cleaned_data['moneda_e']
-#             master.tarifa = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None,''] else 0
-#             master.arbitraje = form.cleaned_data.get('arbitraje_e', 0) if form.cleaned_data.get('arbitraje_e') not in [None, ''] else 0
-#             master.bultosmadre = form.cleaned_data.get('bultosmadre_e', 0) if form.cleaned_data.get('bultosmadre_e') not in [None, ''] else 0
-#             master.kilosmadre = form.cleaned_data.get('kilosmadre_e', 0) if form.cleaned_data.get('kilosmadre_e') not in [None, ''] else 0
-#             master.trafico = form.cleaned_data.get('trafico_e', 0) if form.cleaned_data.get('trafico_e') not in [None,''] else 0
-#             master.cotizacion = form.cleaned_data.get('cotizacion_e', 0) if form.cleaned_data.get('cotizacion_e') not in [None, ''] else 0
-#
-#             master.pagoflete = form.cleaned_data['pagoflete_e']
-#             master.fecha = form.cleaned_data['fecha_e']
-#             master.destino = form.cleaned_data['destino_e']
-#             master.origen = form.cleaned_data['origen_e']
-#             master.loading = form.cleaned_data['loading_e']
-#             master.discharge = form.cleaned_data['discharge_e']
-#             master.status = form.cleaned_data['status_e']
-#             master.posicion = form.cleaned_data['posicion_e']
-#             master.operacion = form.cleaned_data['operacion_e']
-#             master.awd = form.cleaned_data['awd_e']
-#
-#
-#             try:
-#                 master.save()
-#                 messages.success(request, 'Datos actualizados con éxito.')
-#                 return JsonResponse({
-#                     'success': True,
-#                     'message': 'Datos actualizados con éxito.',
-#                 })
-#             except IntegrityError:
-#                 messages.error(request, 'Error: No se pudo actualizar los datos.')
-#                 return HttpResponseRedirect(request.path_info)
-#
-#             except Exception as e:
-#                 messages.error(request, str(e))
-#                 return JsonResponse({
-#                     'success': False,
-#                     'message': f'Error: {str(e)}',
-#                     'errors': {}
-#                 })
+        master = ExpmaritReservas.objects.get(numero=id_master)
+
+        if request.method == 'POST':
+            form = edit_form(request.POST)
+            if form.is_valid():
+                # Guardar valores originales antes de la modificación
+                awb_original = master.awb
+                transportista_original = master.transportista
+                vapor_original = master.vapor
+
+                # Nuevos valores del formulario
+                awb_nuevo = form.cleaned_data.get('awd_e', "")
+                transportista_nuevo = form.cleaned_data.get('transportista_ie', 0)
+                vapor_nuevo = form.cleaned_data.get('vapor_e', "")
+
+                # Asignar valores al master
+                master.transportista = transportista_nuevo
+                master.agente = form.cleaned_data.get('agente_ie', 0)
+                master.consignatario = form.cleaned_data.get('consignatario_ie', 0)
+                master.armador = form.cleaned_data.get('armador_ie', 0)
+                master.vapor = vapor_nuevo
+
+                master.viaje = form.cleaned_data.get('viaje_e', 0) if form.cleaned_data.get('viaje_e') not in [None, ''] else 0
+                master.aduana = form.cleaned_data.get('aduana_e', 'S/I')
+                master.moneda = form.cleaned_data.get('moneda_e', "")
+                master.tarifaawb = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
+                master.arbitraje = form.cleaned_data.get('arbitraje_e', 0) if form.cleaned_data.get('arbitraje_e') not in [None, ''] else 0
+                master.trafico = form.cleaned_data.get('trafico_e', 0) if form.cleaned_data.get('trafico_e') not in [None, ''] else 0
+                master.cotizacion = form.cleaned_data.get('cotizacion_e', 0) if form.cleaned_data.get('cotizacion_e') not in [None, ''] else 0
+
+                master.pagoflete = form.cleaned_data.get('pagoflete_e', "")
+                master.fecha = form.cleaned_data.get('fecha_e', None)
+                master.destino = form.cleaned_data.get('destino_e', "")
+                master.origen = form.cleaned_data.get('origen_e', "")
+                master.loading = form.cleaned_data.get('loading_e', "")
+                master.discharge = form.cleaned_data.get('discharge_e', "")
+                master.status = form.cleaned_data.get('status_e', "")
+                master.posicion = form.cleaned_data.get('posicion_e', "")
+                master.operacion = form.cleaned_data.get('operacion_e', "")
+                master.awb = awb_nuevo
+
+                # Guardar cambios y actualizar los houses si corresponde
+                try:
+                    with transaction.atomic():
+                        master.save()
+
+                        if (
+                            awb_nuevo != awb_original or
+                            transportista_nuevo != transportista_original or
+                            vapor_nuevo != vapor_original
+                        ):
+                            houses = ExpmaritEmbarqueaereo.objects.filter(awb=awb_original)
+                            for house in houses:
+                                if awb_nuevo != awb_original:
+                                    house.awb = awb_nuevo
+                                if transportista_nuevo != transportista_original:
+                                    house.transportista = transportista_nuevo
+                                if vapor_nuevo != vapor_original:
+                                    house.vapor = vapor_nuevo
+                                house.save()
+
+                    messages.success(request, 'Datos actualizados con éxito.')
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Datos actualizados con éxito.',
+                    })
+
+                except IntegrityError:
+                    messages.error(request, 'Error: No se pudo actualizar los datos.')
+                    return HttpResponseRedirect(request.path_info)
+
+                except Exception as e:
+                    messages.error(request, str(e))
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'Error: {str(e)}',
+                        'errors': {}
+                    })
+    except Exception as e:
+        messages.error(request, str(e))
+        return JsonResponse({
+            'success': False,
+            'message': f'Error: {str(e)}',
+            'errors': {}
+        })
