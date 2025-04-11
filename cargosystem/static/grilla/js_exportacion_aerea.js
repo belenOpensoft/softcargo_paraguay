@@ -1043,7 +1043,7 @@ $(document).ready(function () {
             if (ui.item) {
                 $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
             } else {
-                $(this).val('');
+                //$(this).val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
             }
         }
