@@ -175,7 +175,7 @@ def get_data_email(request):
 
                     for cn in cant_cntr:
 
-                        cantidad_cntr += f'{cn["total"]} x {cn["tipo"]} - {cn["unidad"]} - '
+                        cantidad_cntr += f'{cn["total"]} x {cn["unidad"]} - {cn["tipo"]} - '
 
                         contenedores += f'{cn["nrocontenedor"]} - '
 
@@ -402,7 +402,7 @@ def get_data_email(request):
 
                         for cn in cant_cntr:
 
-                            cantidad_cntr += f'{cn["total"]} x {cn["tipo"]} - {cn["unidad"]} - '
+                            cantidad_cntr += f'{cn["total"]} x {cn["unidad"]} - {cn["tipo"]} - '
 
                             contenedores += f'{cn["nrocontenedor"]} - '
 

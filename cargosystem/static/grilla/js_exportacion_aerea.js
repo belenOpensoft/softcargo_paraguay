@@ -892,8 +892,6 @@ $(document).ready(function () {
                  $('#cliente_ih_e').val(ui.item['id']);
                  $('#cliente_ih_e').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
-                $(this).val('');
-                $('#cliente_ih_e').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
                 $('#cliente_ih_e').css({"border-color": "", 'box-shadow': ''});
             }
@@ -5232,7 +5230,7 @@ function acumulados(master, callback) {
                 });
 
                 // Llamada al callback con los resultados
-                callback({ 'volumen': volumen, 'peso': peso, 'cantidad': cant, 'bultos': bultos });
+                callback({ 'volumen': volumen.toFixed(2), 'peso': peso.toFixed(2), 'cantidad': cant, 'bultos': bultos });
 
             } else {
                 console.log("No se encontraron datos.");

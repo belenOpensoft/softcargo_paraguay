@@ -7,7 +7,9 @@ from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from expmarit.models import ExpmaritConexaerea, ExpmaritEmbarqueaereo, VEmbarqueaereo
 from mantenimientos.models import Vapores
-from seguimientos.models import Seguimiento
+from seguimientos.models import Seguimiento, Conexaerea
+from django.db import transaction
+
 
 """ TABLA PUERTO """
 columns_table = {
@@ -100,7 +102,7 @@ def is_ajax(request):
         messages.error(request,e)
 
 
-def guardar_ruta(request):
+def guardar_ruta_old(request):
     resultado = {}
     try:
         numero = request.POST['numero']
@@ -143,7 +145,7 @@ def guardar_ruta(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
-def actualizar_fechas(etd, eta, numero,viaje,vapor):
+def actualizar_fechas_old(etd, eta, numero,viaje,vapor):
     try:
         etd = datetime.strptime(etd, "%Y-%m-%d")
         eta = datetime.strptime(eta, "%Y-%m-%d")
@@ -163,6 +165,191 @@ def actualizar_fechas(etd, eta, numero,viaje,vapor):
     except Exception as e:
         resultado['resultado'] = f'Ocurrió un error: {str(e)}'
     return JsonResponse(resultado)
+
+def guardar_ruta(request):
+    resultado = {}
+    try:
+        numero = request.POST['numero']
+        data = simplejson.loads(request.POST['data'])
+
+        if len(data[0]['value']) > 0:
+            registro = ExpmaritConexaerea.objects.get(id=data[0]['value'])
+            salida_original = registro.salida
+            llegada_original = registro.llegada
+            editando = True
+        else:
+            registro = ExpmaritConexaerea()
+            salida_original = None
+            llegada_original = None
+            editando = False
+
+        campos = vars(registro)
+        for x in data:
+            k = x['name']
+            v = x['value']
+            for name in campos:
+                if name == k:
+                    setattr(registro, name, v if v else None)
+                    break
+
+        registro.numero = numero
+        registro.save()
+
+        resultado['numero'] = str(registro.numero)
+
+        if editando:
+            eta = next(item['value'] for item in data if item['name'] == 'llegada')
+            etd = next(item['value'] for item in data if item['name'] == 'salida')
+            vapor = next(item['value'] for item in data if item['name'] == 'vapor')
+            viaje = next(item['value'] for item in data if item['name'] == 'viaje')
+
+            r = actualizar_fechas(etd, eta, numero, viaje, vapor, salida_original, llegada_original)
+
+            if r.get('resultado') != 'ok':
+                resultado['resultado'] = r
+            else:
+                resultado['resultado'] = 'exito'
+        else:
+            resultado['resultado'] = 'exito'
+
+    except IntegrityError:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+
+    return JsonResponse(resultado)
+
+def actualizar_fechas_2(etd, eta, numero, viaje, vapor, salida_original, llegada_original):
+    resultado = {}
+
+    try:
+        embarque = ExpmaritEmbarqueaereo.objects.get(numero=numero)
+        awb = embarque.awb
+
+        # Actualizar seguimiento del embarque actual
+        seguimiento = Seguimiento.objects.get(numero=embarque.seguimiento)
+        if etd:
+            seguimiento.etd = etd
+        if eta:
+            seguimiento.eta = eta
+        if viaje:
+            seguimiento.viaje = viaje
+        if vapor:
+            seguimiento.vapor = vapor
+        seguimiento.save()
+
+        # Buscar otros embarques con el mismo AWB
+        embarques_iguales = ExpmaritEmbarqueaereo.objects.filter(awb=awb).exclude(numero=numero)
+
+        for e in embarques_iguales:
+            rutas = ExpmaritConexaerea.objects.filter(numero=e.numero)
+            for ruta in rutas:
+                if ruta.salida == salida_original and ruta.llegada == llegada_original:
+                    if etd:
+                        ruta.salida = etd
+                    if eta:
+                        ruta.llegada = eta
+                    ruta.save()
+
+                    try:
+                        seg = Seguimiento.objects.get(numero=e.seguimiento)
+                        if etd:
+                            seg.etd = etd
+                        if eta:
+                            seg.eta = eta
+                        seg.save()
+                    except Seguimiento.DoesNotExist:
+                        continue
+                    break  # solo actualizamos una ruta coincidente por embarque
+
+        resultado['resultado'] = 'ok'
+
+    except Exception as e:
+        resultado['resultado'] = f'Ocurrió un error: {str(e)}'
+
+    return resultado
+
+
+def actualizar_fechas(etd, eta, numero, viaje, vapor, salida_original, llegada_original):
+    resultado = {}
+
+    try:
+        with transaction.atomic():
+            embarque = ExpmaritEmbarqueaereo.objects.get(numero=numero)
+            awb = embarque.awb
+
+            # Actualizar seguimiento del embarque actual
+            seguimiento = Seguimiento.objects.get(numero=embarque.seguimiento)
+            if etd:
+                seguimiento.etd = etd
+            if eta:
+                seguimiento.eta = eta
+            if viaje:
+                seguimiento.viaje = viaje
+            if vapor:
+                seguimiento.vapor = vapor
+            seguimiento.save()
+
+            # Actualizar la ruta del seguimiento actual si coincide
+            try:
+                ruta_actual = Conexaerea.objects.get(
+                    numero=seguimiento.numero,
+                    salida=salida_original,
+                    llegada=llegada_original
+                )
+                if etd:
+                    ruta_actual.salida = etd
+                if eta:
+                    ruta_actual.llegada = eta
+                ruta_actual.save()
+            except Conexaerea.DoesNotExist:
+                pass
+
+            # Buscar y actualizar otros embarques con el mismo AWB
+            embarques_iguales = ExpmaritEmbarqueaereo.objects.filter(awb=awb).exclude(numero=numero)
+
+            for e in embarques_iguales:
+                rutas = ExpmaritConexaerea.objects.filter(numero=e.numero)
+                for ruta in rutas:
+                    if ruta.salida == salida_original and ruta.llegada == llegada_original:
+                        if etd:
+                            ruta.salida = etd
+                        if eta:
+                            ruta.llegada = eta
+                        ruta.save()
+
+                        try:
+                            seg = Seguimiento.objects.get(numero=e.seguimiento)
+                            if etd:
+                                seg.etd = etd
+                            if eta:
+                                seg.eta = eta
+                            seg.save()
+
+                            # También actualizar ruta del seguimiento si coincide
+                            ruta_seg = Conexaerea.objects.filter(
+                                numero=seg.numero,
+                                salida=salida_original,
+                                llegada=llegada_original
+                            ).first()
+                            if ruta_seg:
+                                if etd:
+                                    ruta_seg.salida = etd
+                                if eta:
+                                    ruta_seg.llegada = eta
+                                ruta_seg.save()
+
+                        except Seguimiento.DoesNotExist:
+                            continue
+
+                        break  # solo una ruta por embarque
+
+        resultado['resultado'] = 'ok'
+
+    except Exception as e:
+        resultado['resultado'] = f'Ocurrió un error: {str(e)}'
+
+    return resultado
 
 
 def add_ruta_importado(request):

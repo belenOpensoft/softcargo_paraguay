@@ -636,8 +636,7 @@ $('#tabla_expoterrestre tfoot th').each(function(index) {
                  $('#transportista_ie').val(ui.item['id']);
                  $('#transportista_i').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
-                $(this).val('');
-                $('#transportista_ie').val('');
+
                 $(this).css({"border-color": "", 'box-shadow': ''});
                 $('#transportista_ie').css({"border-color": "", 'box-shadow': ''});
             }
@@ -871,8 +870,6 @@ $('#tabla_expoterrestre tfoot th').each(function(index) {
                  $('#cliente_ih_e').val(ui.item['id']);
                  $('#cliente_ih_e').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
             } else {
-                $(this).val('');
-                $('#cliente_ih_e').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
                 $('#cliente_ih_e').css({"border-color": "", 'box-shadow': ''});
             }
@@ -5026,7 +5023,7 @@ function acumulados(master, callback) {
                 });
 
                 // Llamada al callback con los resultados
-                callback({ 'volumen': volumen, 'peso': peso, 'cantidad': cant, 'bultos': bultos });
+                callback({ 'volumen': volumen.toFixed(2), 'peso': peso.toFixed(2), 'cantidad': cant, 'bultos': bultos });
 
             } else {
                 console.log("No se encontraron datos.");

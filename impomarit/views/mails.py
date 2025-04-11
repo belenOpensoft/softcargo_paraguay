@@ -741,7 +741,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += "<tr>"
         texto += f"<td style='padding: 2px 10px;'>{row.origen or ''}</td>"
         texto += f"<td style='padding: 2px 10px;'>{row.destino or ''}</td>"
-        texto += f"<td style='padding: 2px 10px;'>{str(row.vapor) or ''}</td>"
+        texto += f"<td style='padding: 2px 10px;'>{str(vapor) or ''}</td>"
         texto += f"<td style='padding: 2px 10px;'>{str(row.viaje) or ''}</td>"
         texto += f"<td style='padding: 2px 10px;'>{salida}</td>"
         texto += f"<td style='padding: 2px 10px;'>{llegada}</td>"

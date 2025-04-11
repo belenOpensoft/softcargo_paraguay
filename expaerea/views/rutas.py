@@ -3,11 +3,11 @@ from datetime import datetime
 
 import simplejson
 from django.contrib import messages
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import HttpResponse, JsonResponse
 from expaerea.models import ExportConexaerea, ExportEmbarqueaereo, VEmbarqueaereo, ExportConexreserva, Master, \
     ExportReservas
-from seguimientos.models import Seguimiento
+from seguimientos.models import Seguimiento, Conexaerea
 
 """ TABLA PUERTO """
 columns_table = {
@@ -100,7 +100,7 @@ def is_ajax(request):
         messages.error(request,e)
 
 
-def guardar_ruta(request):
+def guardar_ruta_old(request):
     resultado = {}
     try:
         numero = request.POST['numero']
@@ -146,7 +146,7 @@ def guardar_ruta(request):
     return HttpResponse(data_json, mimetype)
 
 
-def actualizar_fechas(etd, eta, numero,viaje):
+def actualizar_fechas_old(etd, eta, numero,viaje):
     try:
         etd = datetime.strptime(etd, "%Y-%m-%d")
         eta = datetime.strptime(eta, "%Y-%m-%d")
@@ -165,6 +165,155 @@ def actualizar_fechas(etd, eta, numero,viaje):
         resultado['resultado'] = f'Ocurrió un error: {str(e)}'
     return JsonResponse(resultado)
 
+def guardar_ruta(request):
+    resultado = {}
+    try:
+        numero = request.POST['numero']
+        data = simplejson.loads(request.POST['data'])
+
+        if len(data[0]['value']) > 0:
+            registro = ExportConexaerea.objects.get(id=data[0]['value'])
+            salida_original = registro.salida
+            llegada_original = registro.llegada
+        else:
+            registro = ExportConexaerea()
+            salida_original = None
+            llegada_original = None
+
+        campos = [f.name for f in ExportConexaerea._meta.fields]
+        for x in data:
+            k = x['name']
+            v = x['value']
+            if k in campos:
+                setattr(registro, k, v if v else None)
+
+        registro.numero = numero
+        registro.save()
+
+        # Extraer valores del formulario
+        if len(data[0]['value']) > 0:
+            etd = next((item['value'] for item in data if item['name'] == 'salida'), None)
+            eta = next((item['value'] for item in data if item['name'] == 'llegada'), None)
+            viaje = next((item['value'] for item in data if item['name'] == 'viaje'), None)
+            vapor = next((item['value'] for item in data if item['name'] == 'vapor'), None)
+            cia = next((item['value'] for item in data if item['name'] == 'ciavuelo'), None)
+
+            r=actualizar_fechas(etd, eta, numero, viaje, vapor, salida_original, llegada_original,cia)
+
+            if r.get('resultado') != 'ok':
+                resultado['resultado'] = r
+            else:
+                resultado['resultado'] = 'exito'
+        else:
+            resultado['resultado'] = 'exito'
+
+    except IntegrityError:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+
+    return HttpResponse(json.dumps(resultado), content_type="application/json")
+
+def actualizar_fechas(etd, eta, numero, viaje, vapor, salida_original, llegada_original,cia):
+    resultado = {}
+
+    try:
+        with transaction.atomic():
+            embarque = ExportEmbarqueaereo.objects.get(numero=numero)
+            awb = embarque.awb
+
+            # Actualizar seguimiento del embarque actual
+            seguimiento = Seguimiento.objects.get(numero=embarque.seguimiento)
+            if etd:
+                seguimiento.etd = etd
+            if eta:
+                seguimiento.eta = eta
+            if viaje:
+                seguimiento.viaje = viaje
+            if vapor:
+                seguimiento.vapor = vapor
+            seguimiento.save()
+
+            # Actualizar ruta del seguimiento actual si coincide
+            try:
+                ruta_actual = Conexaerea.objects.get(
+                    numero=seguimiento.numero,
+                    salida=salida_original,
+                    llegada=llegada_original
+                )
+                if etd:
+                    ruta_actual.salida = etd
+                if eta:
+                    ruta_actual.llegada = eta
+                if viaje:
+                    ruta_actual.viaje = viaje
+                if vapor:
+                    ruta_actual.vapor = vapor
+                if cia:
+                    ruta_actual.cia = cia
+                ruta_actual.save()
+
+            except Conexaerea.DoesNotExist:
+                pass
+
+            # Buscar otros embarques con el mismo AWB y actualizar rutas
+            embarques_iguales = ExportEmbarqueaereo.objects.filter(awb=awb).exclude(numero=numero)
+
+            for e in embarques_iguales:
+                rutas = ExportConexaerea.objects.filter(numero=e.numero)
+                for ruta in rutas:
+                    if ruta.salida == salida_original and ruta.llegada == llegada_original:
+                        if etd:
+                            ruta.salida = etd
+                        if eta:
+                            ruta.llegada = eta
+                        if viaje:
+                            ruta.viaje = viaje
+                        if vapor:
+                            ruta.vuelo = vapor
+                        if cia:
+                            ruta.ciavuelo = cia
+                        ruta.save()
+
+                        try:
+                            seg = Seguimiento.objects.get(numero=e.seguimiento)
+                            if etd:
+                                seg.etd = etd
+                            if eta:
+                                seg.eta = eta
+                            seg.save()
+
+                            # Actualizar ruta del seguimiento si coincide
+                            ruta_seg = Conexaerea.objects.filter(
+                                numero=seg.numero,
+                                salida=salida_original,
+                                llegada=llegada_original
+                            ).first()
+
+                            if ruta_seg:
+                                if etd:
+                                    ruta_seg.salida = etd
+                                if eta:
+                                    ruta_seg.llegada = eta
+                                if viaje:
+                                    ruta_seg.viaje = viaje
+                                if vapor:
+                                    ruta_seg.vapor = vapor
+                                if cia:
+                                    ruta_seg.cia = cia
+                                ruta_seg.save()
+
+                        except Seguimiento.DoesNotExist:
+                            continue
+
+                        break  # Solo una ruta por embarque
+
+        resultado['resultado'] = 'ok'
+
+    except Exception as e:
+        resultado['resultado'] = f'Ocurrió un error: {str(e)}'
+
+    return resultado
 
 def add_ruta_importado(request):
     resultado = {}
