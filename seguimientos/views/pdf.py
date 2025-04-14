@@ -258,12 +258,14 @@ def get_datos_caratula(request):
             if not aereo:
                 envases = Envases.objects.filter(numero=id)
                 for registro in envases:
+                    peso = f"{registro.peso:.3f}" if registro.peso else "0.000"
+                    volumen = f"{registro.volumen:.3f}" if registro.volumen else "0.000"
+
                     texto += (
                         f"{registro.cantidad}x{registro.unidad.upper() if registro.unidad else ''} "
                         f"{registro.tipo.upper() if registro.tipo else ''} "
                         f"CNTR: {registro.nrocontenedor or ''} SEAL: {registro.precinto or ''} "
-                        f"WT: {registro.peso:.3f if registro.peso else '0.000'} "
-                        f"VOL: {registro.volumen:.3f if registro.volumen else '0.000'}<br>"
+                        f"WT: {peso} VOL: {volumen}<br>"
                     )
 
             # Detalle de mercadería

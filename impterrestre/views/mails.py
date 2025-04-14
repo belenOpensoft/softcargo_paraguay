@@ -7,6 +7,7 @@ from django.db.models import Count
 from django.http import HttpResponse
 import base64
 from django.views.decorators.csrf import csrf_exempt
+from reportlab.lib.validators import isNumber
 
 from impomarit.views.mails import formatear_linea
 from impterrestre.models import VEmbarqueaereo, ImpterraCargaaerea, ImpterraEnvases, ImpterraServiceaereo, VGastosHouse, \
@@ -716,21 +717,37 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
                 for g in gastos:
 
-                    servicio = Servicios.objects.get(codigo=g.servicio)
+                    codigo = g.servicio.split(" - ")[0]
+                    codigo = int(codigo) if isNumber(codigo) else None
+                    if codigo is None:
+                        raise TypeError('No se encontró el código del servicio')
+                    servicio = Servicios.objects.get(codigo=codigo)
 
-                    total_gastos += float(g.precio) if g.precio != 0 else float(g.costo)
+                    if servicio is not None:
 
-                    iva = True if servicio.tasa == 'B' else False
+                        if g.precio != 0 and g.precio is not None:
+                            total_gastos += float(g.precio)
+                        elif g.costo is not None and g.costo != 0:
+                            total_gastos += float(g.costo)
+                        else:
+                            total_gastos += 0
 
-                    if iva:
-                        total_iva += float(g.precio) * 0.22 if g.precio != 0 else float(g.costo) * 0.22
+                        iva = True if servicio.tasa == 'B' else False
 
-                    if g.precio != 0:
-                        texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}", 1)
-                    elif g.costo != 0:
-                        texto += formatear_linea(servicio.nombre, f"{g.costo:.2f}", 1)
-                    else:
-                        texto += formatear_linea("Problema con los gastos cargados", 0)
+                        if iva:
+                            if g.precio is not None:
+                                total_iva += float(g.precio) * 0.22
+                            elif g.costo is not None:
+                                total_iva += float(g.costo) * 0.22
+                            else:
+                                total_iva += 0
+
+                        if g.precio is not None:
+                            texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}", 1)
+                        elif g.costo is not None:
+                            texto += formatear_linea(servicio.nombre, f"{g.costo:.2f}", 1)
+                        else:
+                            texto += formatear_linea("Problema con los gastos cargados", 0)
 
                 texto += "<br>"
 

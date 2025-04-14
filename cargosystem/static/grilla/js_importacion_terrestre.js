@@ -4539,6 +4539,9 @@ $('.email').click(function () {
                     if(confirm('¿Desea informar Máster?')){
                         master=true;
                     }
+                if(confirm('¿Desea informar Gastos?')){
+                    gastos=true;
+                }
                 }
                         if(title=='Instruccion de embarque'){
             if(confirm('¿Desea informar Transportista?')){

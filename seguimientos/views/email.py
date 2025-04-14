@@ -7,6 +7,8 @@ from django.db.models import Sum, Count
 from django.http import HttpResponse
 import base64
 
+from reportlab.lib.validators import isNumber
+
 from cargosystem import settings
 from impomarit.views.mails import formatear_linea
 from mantenimientos.models import Clientes, Servicios, Vapores, Monedas
@@ -161,6 +163,7 @@ def get_data_email(request):
                 bultos = 0
 
                 peso = 0
+                tipo = ''
 
                 volumen = 0
                 gastos = Serviceaereo.objects.filter(numero=row.numero)
@@ -250,30 +253,45 @@ def get_data_email(request):
 
                         for g in gastos:
 
-                            servicio = Servicios.objects.get(codigo=g.servicio)
+                            #codigo = g.servicio.split(" - ")[0]
+                            codigo = int(g.servicio) if isNumber(g.servicio) else None
+                            if codigo is None:
+                                raise TypeError('No se encontró el código del servicio')
+                            servicio = Servicios.objects.get(codigo=codigo)
 
-                            total_gastos += float(g.precio) if g.precio !=0 else float(g.costo)
+                            if servicio is not None:
 
-                            iva = True if servicio.tasa == 'B' else False
+                                if g.precio != 0 and g.precio is not None:
+                                    total_gastos += float(g.precio)
+                                elif g.costo is not None and g.costo != 0:
+                                    total_gastos += float(g.costo)
+                                else:
+                                    total_gastos += 0
 
-                            if iva:
-                                total_iva += float(g.precio) * 0.22 if g.precio !=0 else float(g.costo) * 0.22
+                                iva = True if servicio.tasa == 'B' else False
 
-                            if g.precio != 0:
-                                texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}",1)
-                            elif g.costo !=0:
-                                texto += formatear_linea(servicio.nombre, f"{g.costo:.2f}",1)
-                            else:
-                                texto += formatear_linea("Problema con los gastos cargados",0)
+                                if iva:
+                                    if g.precio is not None:
+                                        total_iva += float(g.precio) * 0.22
+                                    elif g.costo is not None:
+                                        total_iva += float(g.costo) * 0.22
+                                    else:
+                                        total_iva += 0
 
+                                if g.precio is not None:
+                                    texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}", 1)
+                                elif g.costo is not None:
+                                    texto += formatear_linea(servicio.nombre, f"{g.costo:.2f}", 1)
+                                else:
+                                    texto += formatear_linea("Problema con los gastos cargados", 0)
 
                         texto += "<br>"
 
-                        texto += formatear_linea("TOTAL DE GASTOS", f"{total_gastos:.2f}",1)
+                        texto += formatear_linea("TOTAL DE GASTOS", f"{total_gastos:.2f}", 1)
 
-                        texto += formatear_linea("I.V.A", f"{total_iva:.2f}",1)
+                        texto += formatear_linea("I.V.A", f"{total_iva:.2f}", 1)
 
-                        texto += formatear_linea("TOTAL A PAGAR", f"{total_gastos + total_iva:.2f}",1)
+                        texto += formatear_linea("TOTAL A PAGAR", f"{total_gastos + total_iva:.2f}", 1)
 
                         texto += "<br>"
 
@@ -791,6 +809,75 @@ def get_data_email(request):
                 texto += f"{'Cliente:':<15} {row.cliente}\n\n"
                 texto += "OCEANLINK\n"
                 texto += "</pre>"
+            elif title == 'Novedades sobre la carga':
+
+                fecha_actual = datetime.datetime.now()
+
+                resultado['asunto'] = 'NOVEDADES SOBRE LA CARGA - Ref.: ' + str(row.numero) + \
+ \
+                                      '/ CS: ' + str(row.embarque) if row.embarque else '' + '- Shipper: ' + str(row.embarcador) + \
+ \
+                                      '; Consignee: ' + str(row.consignatario)
+
+                fecha_formateada = fecha_actual.strftime(
+
+                    f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y'
+
+                )
+
+                texto += fecha_formateada.capitalize().upper() + '<br><br>'
+
+                # Mercaderías
+
+                mercaderia = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre','bultos','bruto','cbm')
+                if mercaderia.exists():
+                    for m in mercaderia:
+                        texto += formatear_linea(f"Mercadería", str(m['producto__nombre']) if m['producto__nombre'] is not None else "S/I")
+                        texto += formatear_linea(f"Bultos", m['bultos'] if m['bultos'] is not None else "S/I")
+                        texto += formatear_linea(f"Peso", m['bruto'] if m['bruto'] is not None else "S/I")
+                        texto += formatear_linea(f"CBM", round(float(m['cbm']),2) if m['cbm'] is not None else "S/I")
+
+                if row.modo not in ['IMPORT AEREO','EXPORT AEREO']:
+                    envases=Envases.objects.filter(numero=row.numero).values('nrocontenedor','precinto')
+                    if envases.exists():
+                        for e in envases:
+                            texto += formatear_linea(f"Nro. Contenedor",
+                                                     str(e['nrocontenedor']) if e['nrocontenedor'] is not None else "S/I")
+                            texto += formatear_linea(f"Precinto", str(e['precinto']) if e['precinto'] is not None else "S/I")
+
+                # Datos generales
+
+                texto += formatear_linea("Embarque", str(row.embarque) if row.embarque is not None else "S/I")
+
+                texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
+
+                texto += formatear_linea("Salida", row.etd.strftime('%Y-%m-%d'))
+
+                texto += formatear_linea("Llegada", row.eta.strftime('%Y-%m-%d'))
+
+                texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
+
+                texto += formatear_linea("Destino", str(row.destino) if row.destino is not None else "S/I")
+
+                if row.modo=='IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO':
+                    if str(row.vapor).isdigit():
+                        vapor = Vapores.objects.get(codigo=row.vapor).nombre
+
+                    else:
+                        vapor = row.vapor
+                else:
+                    vapor='S/I'
+
+                texto += formatear_linea("Vapor", str(vapor)) if row.modo in ['IMPORT MARITIMO','EXPORT MARITIMO'] else formatear_linea("Vuelo", str(vapor))
+
+                texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I") if row.modo in ['IMPORT MARITIMO','EXPORT MARITIMO'] else formatear_linea("HAWB", str(row.hawb) if row.hawb is not None else "S/I")
+
+                texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
+
+                texto += formatear_linea("Consignatario",
+                                         str(row.consignatario) if row.consignatario is not None else "S/I")
+
+                texto += "<br>"
 
             # falta el completo
             elif title == 'Shipping instruction':
@@ -995,6 +1082,7 @@ def get_data_email(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:

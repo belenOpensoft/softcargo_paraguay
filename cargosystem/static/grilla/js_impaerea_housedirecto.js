@@ -424,6 +424,9 @@ if (!$('#id_awbhijo').val()) {
                     if(confirm('¿Desea informar Máster?')){
                         master=true;
                     }
+                    if(confirm('¿Desea informar Gastos?')){
+                        gastos=true;
+                    }
                 }
                 if(title=='Instruccion de embarque'){
                     if(confirm('¿Desea informar Transportista?')){
