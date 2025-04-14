@@ -10503,6 +10503,33 @@ class VistaProveedoresygastos(models.Model):
         managed = False  # Indicates that this model represents a database view
         db_table = 'vista_proveedoresypagos'
 
+class VistaVentas(models.Model):
+    autogenerado = models.CharField(primary_key=True, max_length=50)
+    numero = models.CharField(max_length=50, null=True, blank=True)
+    prefijo = models.CharField(max_length=50, null=True, blank=True)
+    serie = models.CharField(max_length=50, null=True, blank=True)
+    num_completo = models.CharField(max_length=50, null=True, blank=True)
+    nrocliente = models.CharField(max_length=50, null=True, blank=True)
+    cliente = models.CharField(max_length=50, null=True, blank=True)
+    detalle = models.TextField(null=True, blank=True)
+    tipo = models.CharField(max_length=50, null=True, blank=True)
+    monto = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    saldo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    tipo_cambio = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    paridad = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    iva = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    fecha = models.DateTimeField(null=True, blank=True)
+    fecha_vencimiento = models.DateTimeField(null=True, blank=True)
+    fecha_ingreso = models.DateTimeField(null=True, blank=True)
+    moneda = models.CharField(max_length=50, null=True, blank=True)
+    posicion = models.CharField(max_length=50, null=True, blank=True)
+    nombre_moneda = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        managed = False  # Indicates that this model represents a database view
+        db_table = 'vista_ventas'
+
 class VistaPagos(models.Model):
     autogenerado = models.CharField(primary_key=True, max_length=50)
     nrocliente = models.IntegerField()
@@ -10600,3 +10627,15 @@ class VItemsCompra(models.Model):
     class Meta:
         managed = False  # Indicates that this model represents a database view
         db_table = 'VItemsCompra'
+class VItemsVenta(models.Model):
+    concepto = models.CharField(primary_key=True, max_length=50)
+    nombre = models.CharField(max_length=50, null=True, blank=True)
+    precio = models.CharField(max_length=50, null=True, blank=True)
+    iva = models.CharField(max_length=50, null=True, blank=True)
+    posicion = models.CharField(max_length=50, null=True, blank=True)
+    autogenerado = models.CharField(max_length=50, null=True, blank=True)
+    imputar = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        managed = False  # Indicates that this model represents a database view
+        db_table = 'VItemsVenta'

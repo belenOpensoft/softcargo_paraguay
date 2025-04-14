@@ -118,7 +118,7 @@
     const nrocliente = $(this).find('td:nth-child(7)').text().trim();
     $('#autogen_detalle_compra').val(autogenerado);
     buscar_gastos(autogenerado);
-    buscar_ordenes(nrocliente,numero);
+    buscar_ordenes(nrocliente,numero,autogenerado);
     cargarImputacionesCompra(autogenerado);
     // Mostrar el modal con jQuery UI
     $("#modalFacturaDetalle").dialog({
@@ -549,9 +549,9 @@ function actualizarPestañas() {
         tabHouse.style.display = "none"; // Ocultar House
     }
 }
-function buscar_ordenes(cliente,numero){
+function buscar_ordenes(cliente,numero,autogenerado){
 
-        if (!cliente || !numero) {
+        if (!cliente || !numero || !autogenerado) {
             alert('Faltan datos');
             return;
         }
@@ -561,7 +561,8 @@ function buscar_ordenes(cliente,numero){
             type: 'GET',
             data: {
                 cliente: cliente,
-                numero: numero
+                numero: numero,
+                autogenerado: autogenerado
             },
             success: function(response) {
                 let tbody = $('#tabla_pago_factura tbody');

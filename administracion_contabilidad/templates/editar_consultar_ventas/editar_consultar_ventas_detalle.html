@@ -69,7 +69,7 @@
   }
 </style>
 
-<div id="modalFacturaDetalle" title="Detalle de Factura del Proveedor" style="display: none; overflow-y:auto;">
+<div id="modalFacturaDetalle" title="Detalle de Factura para el Cliente" style="display: none; overflow-y:auto;">
   <form method="post" id="formFacturaDetalle">
     {% csrf_token %}
     <div class="container-fluid">
@@ -77,77 +77,85 @@
       <!-- Primera Fila: Prefijo, Serie, Numero, Tipo, Moneda -->
       <div class="row mb-2">
         <div class="col-md-2">
-          <input type="hidden" name="" id="autogen_detalle_compra">
-          {{ compras_detalle.prefijo.label_tag }}
-          {{ compras_detalle.prefijo }}
+          <input type="hidden" name="" id="autogen_detalle_venta">
+          {{ ventas_detalle.prefijo.label_tag }}
+          {{ ventas_detalle.prefijo }}
         </div>
         <div class="col-md-2">
-          {{ compras_detalle.serie.label_tag }}
-          {{ compras_detalle.serie }}
-        </div>
-        <div class="col-md-3">
-          {{ compras_detalle.numero.label_tag }}
-          {{ compras_detalle.numero }}
+          {{ ventas_detalle.serie.label_tag }}
+          {{ ventas_detalle.serie }}
         </div>
         <div class="col-md-2">
-          {{ compras_detalle.tipo.label_tag }}
-          {{ compras_detalle.tipo }}
+          {{ ventas_detalle.numero.label_tag }}
+          {{ ventas_detalle.numero }}
+        </div>
+        <div class="col-md-2">
+          {{ ventas_detalle.tipo.label_tag }}
+          {{ ventas_detalle.tipo }}
         </div>
         <div class="col-md-3">
-          {{ compras_detalle.moneda.label_tag }}
-          {{ compras_detalle.moneda }}
+          {{ ventas_detalle.moneda.label_tag }}
+          {{ ventas_detalle.moneda }}
+        </div>
+        <div class="col-md-1">
+          {{ ventas_detalle.cae.label_tag }}
+          {{ ventas_detalle.cae }}
         </div>
       </div>
 
       <!-- Segunda Fila: Fechas, Paridad, Arbitraje, Proveedor -->
       <div class="row mb-2">
         <div class="col-md-2">
-          {{ compras_detalle.fecha.label_tag }}
-          {{ compras_detalle.fecha }}
+          {{ ventas_detalle.fecha.label_tag }}
+          {{ ventas_detalle.fecha }}
         </div>
         <div class="col-md-2">
-          {{ compras_detalle.fecha_ingreso.label_tag }}
-          {{ compras_detalle.fecha_ingreso }}
+          {{ ventas_detalle.fecha_ingreso.label_tag }}
+          {{ ventas_detalle.fecha_ingreso }}
         </div>
         <div class="col-md-2">
-          {{ compras_detalle.fecha_vencimiento.label_tag }}
-          {{ compras_detalle.fecha_vencimiento }}
+          {{ ventas_detalle.fecha_vencimiento.label_tag }}
+          {{ ventas_detalle.fecha_vencimiento }}
         </div>
         <div class="col-md-2">
-          {{ compras_detalle.paridad.label_tag }}
-          {{ compras_detalle.paridad }}
+          {{ ventas_detalle.paridad.label_tag }}
+          {{ ventas_detalle.paridad }}
         </div>
         <div class="col-md-2">
-          {{ compras_detalle.arbitraje.label_tag }}
-          {{ compras_detalle.arbitraje }}
+          {{ ventas_detalle.arbitraje.label_tag }}
+          {{ ventas_detalle.arbitraje }}
         </div>
         <div class="col-md-2">
-          <input type="hidden" id="nro_prov">
-          {{ compras_detalle.proveedor.label_tag }}
-          {{ compras_detalle.proveedor }}
+          <input type="hidden" id="nro_cli">
+          {{ ventas_detalle.cliente.label_tag }}
+          {{ ventas_detalle.cliente }}
         </div>
       </div>
 
       <!-- Fila: Detalle, Total, Imputable -->
       <div class="row mb-2">
-        <div class="col-md-6">
-          {{ compras_detalle.detalle.label_tag }}
-          {{ compras_detalle.detalle }}
+        <div class="col-md-4">
+          {{ ventas_detalle.detalle.label_tag }}
+          {{ ventas_detalle.detalle }}
         </div>
-        <div class="col-md-3">
-          {{ compras_detalle.total.label_tag }}
-          {{ compras_detalle.total }}
+        <div class="col-md-2">
+          {{ ventas_detalle.total.label_tag }}
+          {{ ventas_detalle.total }}
         </div>
-        <div class="col-md-3">
-          {{ compras_detalle.imputable.label_tag }}
-          {{ compras_detalle.imputable }}
+        <div class="col-md-2">
+          {{ ventas_detalle.posicion.label_tag }}
+          {{ ventas_detalle.posicion }}
+        </div>
+        <div class="col-md-4">
+          {{ ventas_detalle.observaciones.label_tag }}
+          {{ ventas_detalle.observaciones }}
         </div>
       </div>
 
       <!-- Tabla de Items -->
       <div class="table-responsive mb-3">
         <h6 class="mt-3">Gastos (Items)</h6>
-        <table class="table table-bordered table-sm" id="tabla_items_compra">
+        <table class="table table-bordered table-sm" id="tabla_items_venta">
           <thead class="thead-light">
             <tr>
               <th>Concepto</th>
@@ -170,19 +178,6 @@
       <!-- Tabla de Imputaciones y Recibos -->
       <div class="row">
         <div class="col-md-8" style="padding:0px;">
-          <h6>Documentos Imputados</h6>
-          <table class="table table-bordered table-sm">
-            <thead class="thead-light">
-              <tr>
-                <th class="oculto">Autogenerado</th>
-                <th>Documento</th>
-                <th>Imputado</th>
-              </tr>
-            </thead>
-            <tbody id="tablaImputaciones"></tbody>
-          </table>
-        </div>
-        <div class="col-md-4">
           <h6>Recibo con el que se pagó</h6>
           <table class="table table-bordered table-sm" id="tabla_pago_factura">
             <thead class="thead-light">
@@ -199,30 +194,6 @@
         </div>
       </div>
 
-      <!-- Botones de Imputación -->
-      <div class="d-flex justify-content-start gap-2 my-3">
-        <button type="button" id="eliminarImputaciones" class="btn btn-danger btn-sm">Eliminar imputaciones</button>
-        <button type="button" id="realizarImputaciones" onclick="abrir_impucompra()" class="btn btn-success btn-sm">Realizar imputaciones</button>
-      </div>
-
-      <!-- Tabla Movimiento de Cheques
-      <div class="table-responsive mb-3">
-        <h6>Movimiento de Cheques Emitidos / Entregados</h6>
-        <table class="table table-bordered table-sm">
-          <thead class="thead-light">
-            <tr>
-              <th>Emisión</th>
-              <th>Detalle</th>
-              <th>Nº</th>
-              <th>Total</th>
-              <th>Vencimiento</th>
-              <th>Cuenta</th>
-            </tr>
-          </thead>
-          <tbody id="tablaCheques"></tbody>
-        </table>
-      </div>
-      -->
     </div>
   </form>
 </div>

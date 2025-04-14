@@ -150,7 +150,7 @@ def obtener_detalle_compra(request):
         return JsonResponse({'error': 'No se encontró el registro'}, status=404)
 
 
-def buscar_ordenes_por_boleta(request):
+def buscar_ordenes_por_boleta_old(request):
     numero = request.GET.get('numero')
     cliente = request.GET.get('cliente')
 
@@ -167,7 +167,6 @@ def buscar_ordenes_por_boleta(request):
             mcliente=cliente,
             mtipo=45
         )
-
         # Buscar en Movims (mtipo=25)
         movims = Movims.objects.filter(
             mdetalle__regex=regex,
@@ -195,6 +194,68 @@ def buscar_ordenes_por_boleta(request):
                 'monto': m.mtotal,
                 'tipo': 'COBRO',
             })
+
+        return JsonResponse({'resultados': data})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+def buscar_ordenes_por_boleta(request):
+    numero = request.GET.get('numero')
+    cliente = request.GET.get('cliente')
+    autogenerado = request.GET.get('autogenerado')
+
+    if not numero or not cliente:
+        return JsonResponse({'error': 'Faltan parámetros'}, status=400)
+
+    try:
+        regex = r'(^|;)\s*{}(\s*;|$)'.format(re.escape(numero))
+
+        ordenes = Movims.objects.filter(
+            mdetalle__regex=regex,
+            mcliente=cliente,
+            mtipo=45
+        )
+        movims = Movims.objects.filter(
+            mdetalle__regex=regex,
+            mcliente=cliente,
+            mtipo=25
+        )
+        notas = Impucompras.objects.filter(
+            autofac=autogenerado
+        )
+
+        data = []
+
+        for o in ordenes:
+            data.append({
+                'autogenerado': o.mautogen,
+                'nro_documento': o.mboleta,
+                'fecha': o.mfechamov.strftime('%Y-%m-%d') if o.mfechamov else '',
+                'monto': o.mtotal,
+                'tipo': 'ORDEN PAGO',
+            })
+
+        for m in movims:
+            data.append({
+                'autogenerado': m.mautogen,
+                'nro_documento': m.mboleta if hasattr(m, 'mboleta') else '',
+                'fecha': m.mfechamov.strftime('%Y-%m-%d') if m.mfechamov else '',
+                'monto': m.mtotal,
+                'tipo': 'COBRO',
+            })
+
+        # Si hay notas, buscar los movims relacionados por autogen
+        if notas.exists():
+            for nota in notas:
+                movims_relacionados = Movims.objects.filter(mautogen=nota.autogen)
+                for mv in movims_relacionados:
+                    data.append({
+                        'autogenerado': mv.mautogen,
+                        'nro_documento': mv.mboleta if hasattr(mv, 'mboleta') else '',
+                        'fecha': mv.mfechamov.strftime('%Y-%m-%d') if mv.mfechamov else '',
+                        'monto': mv.mtotal,
+                        'tipo': 'NOTA',
+                    })
 
         return JsonResponse({'resultados': data})
 
@@ -234,7 +295,7 @@ def obtener_detalle_pago(request):
             'fecha': pago.mfechamov.strftime('%Y-%m-%d'),
             'arbitraje': pago.marbitraje,
             'importe': pago.mtotal,
-            'por_imputar': 0,
+            'por_imputar': pago.msaldo,
             'paridad': pago.mparidad,
             'proveedor': pago.mnombre,
             'detalle': pago.mdetalle,
@@ -267,6 +328,7 @@ def obtener_imputados_orden_compra(request):
         boletas_data = []
         for nro in boletas_nros:
             try:
+                nro=int(nro)
                 boleta = Movims.objects.filter(mboleta=nro,mtipo__in=(40,41)).first()
                 num_completo=str(boleta.mnombremov)+'-'+str(boleta.mserie)+str(boleta.mprefijo)+str(boleta.mboleta)
                 boletas_data.append({

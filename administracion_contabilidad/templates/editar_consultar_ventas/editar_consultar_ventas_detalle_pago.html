@@ -1,0 +1,170 @@
+<style>
+  #modalVentasDetallePago {
+    max-width: 80vw;
+    max-height: 90vh;
+    overflow: hidden;
+    font-size: 0.85rem;
+  }
+
+  #modalVentasDetallePago .form-control {
+    font-size: 12px;
+    padding: 2px 5px;
+    height: 20px;
+  }
+
+  #modalVentasDetallePago select {
+    font-size: 0.85rem;
+    height: 30px;
+  }
+
+  #modalVentasDetallePago label {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+  }
+
+  #modalVentasDetallePago .table {
+    font-size: 0.8rem;
+  }
+
+  #modalVentasDetallePago .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  #modalVentasDetallePago .col-md-1,
+  #modalVentasDetallePago .col-md-2,
+  #modalVentasDetallePago .col-md-3,
+  #modalVentasDetallePago .col-md-4,
+  #modalVentasDetallePago .col-md-6 {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+
+  #modalVentasDetallePago h6 {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  #modalVentasDetallePago .btn-sm {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+
+  #modalVentasDetallePago .table-sm th,
+  #modalVentasDetallePago .table-sm td {
+    padding: 4px;
+    vertical-align: middle;
+  }
+
+  #modalVentasDetallePago input.bg-warning {
+    background-color: #fff3cd !important;
+  }
+
+  #modalVentasDetallePago table {
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 4px;
+  }
+</style>
+
+<div id="modalVentasDetallePago" title="Detalle de Pago" style="display: none; overflow-y:auto;">
+  <form method="post" id="formVentasDetallePago">
+    {% csrf_token %}
+    <div class="container-fluid">
+
+      <!-- Fila: Nro, Moneda, Fecha -->
+      <div class="row mb-2">
+        <div class="col-md-4">
+          {{ ventas_detalle_pago.numero.label_tag }}
+          {{ ventas_detalle_pago.numero }}
+        </div>
+        <div class="col-md-4">
+          {{ ventas_detalle_pago.moneda.label_tag }}
+          {{ ventas_detalle_pago.moneda }}
+        </div>
+        <div class="col-md-4">
+          {{ ventas_detalle_pago.fecha.label_tag }}
+          {{ ventas_detalle_pago.fecha }}
+        </div>
+      </div>
+
+      <!-- Fila: Arbitraje, Importe, Por Imputar, Paridad -->
+      <div class="row mb-2">
+        <div class="col-md-3">
+          {{ ventas_detalle_pago.arbitraje.label_tag }}
+          {{ ventas_detalle_pago.arbitraje }}
+        </div>
+        <div class="col-md-3">
+          {{ ventas_detalle_pago.importe.label_tag }}
+          {{ ventas_detalle_pago.importe }}
+        </div>
+        <div class="col-md-3">
+          {{ ventas_detalle_pago.por_imputar.label_tag }}
+          {{ ventas_detalle_pago.por_imputar }}
+        </div>
+        <div class="col-md-3">
+          {{ ventas_detalle_pago.paridad.label_tag }}
+          {{ ventas_detalle_pago.paridad }}
+        </div>
+      </div>
+
+      <!-- Fila: Proveedor, Detalle, campo hidden -->
+      <div class="row mb-2">
+        <div class="col-md-6">
+          {{ ventas_detalle_pago.cliente.label_tag }}
+          {{ ventas_detalle_pago.cliente }}
+        </div>
+        <div class="col-md-6">
+          {{ ventas_detalle_pago.detalle.label_tag }}
+          {{ ventas_detalle_pago.detalle }}
+        </div>
+        {{ ventas_detalle_pago.autogenerado }}
+      </div>
+     <div class="row mb-2" >
+            <div class="col-md-8" style="padding:0px;">
+              {{ ventas_detalle_pago.efectivo_recibido.label_tag }}
+              {{ ventas_detalle_pago.efectivo_recibido }}
+            </div>
+            <div class="col-md-4">
+              {{ ventas_detalle_pago.status.label_tag }}
+              {{ ventas_detalle_pago.status }}
+            </div>
+          </div>
+      <!-- Tabla Movimiento de Cheques -->
+      <h6 class="mt-3">Movimiento de cheques emitidos o entregados de terceros</h6>
+      <div class="table-responsive mb-3" style="max-height: 200px; overflow-y: auto;">
+        <table class="table table-bordered table-sm">
+          <thead class="thead-light">
+            <tr>
+              <th>Emisión</th>
+              <th>Banco</th>
+              <th>Número</th>
+              <th>Moneda</th>
+              <th>Total</th>
+              <th>Vencimiento</th>
+            </tr>
+          </thead>
+          <tbody id="tablaChequesMovimiento"></tbody>
+        </table>
+      </div>
+
+      <!-- Tabla Documentos Imputados -->
+      <h6>Documentos imputados</h6>
+      <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+        <table class="table table-bordered table-sm">
+          <thead class="thead-light">
+            <tr>
+              <th>Documento</th>
+              <th>Imputado</th>
+              <th>Moneda</th>
+              <th>Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="tablaDocumentosImputados"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </form>
+</div>

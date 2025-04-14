@@ -309,12 +309,12 @@ def procesar_factura(request):
             movimiento_num = modificar_numero(asiento)
 
             if int(tipo) == 23:
-                detalle1 = 'e-VTA/CRED'
-                nombre_mov = 'CONTADO'
-            elif int(tipo) == 24:
                 detalle1 = 'e-NOT/CRED'
+                nombre_mov = 'NOTACONTCRE'
+            elif int(tipo) == 24:
+                detalle1 = 'e-VTA/CRED'
                 tipo_asiento = 'V'
-                nombre_mov = 'CONTADO'
+                nombre_mov = 'BOLETA'
             elif int(tipo) == 11:
                 detalle1 = 'DEV/CTDO'
                 nombre_mov = 'DEVOLUCION'
@@ -322,6 +322,10 @@ def procesar_factura(request):
                 detalle1 = 'NOT/CRED'
                 tipo_asiento = 'V'
                 nombre_mov = 'NOTA CRED.'
+            elif int(tipo) == 22:
+                detalle1 = 'NOT/DEB'
+                tipo_asiento = 'V'
+                nombre_mov = 'NOTA DEB.'
             elif int(tipo) == 20:
                 detalle1 = 'VTA/CRED'
                 tipo_asiento = 'V'
