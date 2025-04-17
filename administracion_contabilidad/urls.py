@@ -1,7 +1,8 @@
 from django.urls import path
 
 from administracion_contabilidad.views.editar_consultar_ventas import editar_consultar_ventas, obtener_detalle_venta, \
-    buscar_ordenes_por_boleta_ventas, obtener_detalle_pago_ventas, obtener_imputados_orden_venta
+    buscar_ordenes_por_boleta_ventas, obtener_detalle_pago_ventas, obtener_imputados_orden_venta, \
+    modificar_embarque_imputado
 from administracion_contabilidad.views.editar_consultar_compras import editar_consultar_compras, obtener_detalle_compra, \
     buscar_ordenes_por_boleta, obtener_detalle_pago, obtener_imputados_orden_compra, obtener_imputados_compra, \
     procesar_imputaciones_compra, actualizar_campos_movims, anular_compra, obtener_datos_embarque_por_posicion
@@ -108,6 +109,7 @@ urlpatterns = [
     path('buscar_ordenes_por_boleta_ventas/', buscar_ordenes_por_boleta_ventas, name='buscar_ordenes_por_boleta_ventas'),
     path('obtener_detalle_pago_ventas/', obtener_detalle_pago_ventas, name='obtener_detalle_pago_ventas'),
     path('obtener_imputados_orden_venta/', obtener_imputados_orden_venta, name='obtener_imputados_orden_venta'),
+    path('modificar_embarque_imputado/', modificar_embarque_imputado, name='modificar_embarque_imputado'),
 
     #editar y consultar ventas#
 

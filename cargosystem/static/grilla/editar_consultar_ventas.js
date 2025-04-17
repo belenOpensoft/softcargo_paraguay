@@ -168,89 +168,115 @@
         $("#modal-embarque").dialog("open");
     }
 });
-  $("#modal-embarque").dialog({
+      // Inicialización del modal de embarque
+    $("#modal-embarque").dialog({
         autoOpen: false,
+        modal: true,
         width: "auto",
         height: "auto",
         maxWidth: $(window).width() * 0.90,
         minWidth: 600,
         maxHeight: $(window).height() * 0.90,
-        modal: true,
         position: { my: "center top", at: "center top+20", of: window },
-        create: function () {
-            var $buttons = $(this).parent().find(".ui-dialog-buttonpane button");
-            $buttons.eq(0).addClass("btn btn-warning");
-            $buttons.eq(1).addClass("btn btn-success");
-            $buttons.eq(2).addClass("btn btn-dark");
-        },
-        buttons: {
-            "Armar": function () {
-                // Lógica para guardar los cambios
-                let precio = parseFloat($("#seleccionado-precio").val()) || 0;
-                let cliente = $("#seleccionado-cliente").val();
-                let lugar = $("#seleccionado-lugar").val();
-                let embarque = $("#seleccionado-embarque").text();
-                let total = parseFloat(localStorage.getItem('precio_item_imputar')) || 0;
+        buttons: [
+            {
+    text: "Armar",
+    class: "btn btn-warning",
+    click: function () {
+        if (!selectedRow) {
+            alert("Debe seleccionar un embarque.");
+            return;
+        }
 
-                if (precio>total){
-                alert('El monto ingresado: ' +precio+', es mayor al original: '+total);
-                return;
-                }
+        const embarque = selectedRow.cells[0].textContent.trim();
+        const tipo = selectedRow.cells[1].textContent.trim();
+        const posicion = selectedRow.cells[3].textContent.trim();
+        const cliente = selectedRow.cells[9].textContent.trim();
+        const lugar = $("#seleccionado-lugar").val();  // ya cargado en doble click
 
-                let nuevaFila = `
-                    <tr>
-                        <td>${posicion}</td>
-                        <td>${precio}</td>
-                        <td><button class="btn btn-danger btn-sm eliminar-fila">Eliminar</button></td>
-                        <td style="display:none;">${cliente}</td>
-                        <td style="display:none;">${lugar}</td>
-                        <td style="display:none;">${embarque}</td>
-                    </tr>
-                `;
-                $("#guardado-tabla tbody").append(nuevaFila);
+        const precio = parseFloat($("#seleccionado-precio").val()) || 0;
+        const total = parseFloat(localStorage.getItem('precio_item_imputar')) || 0;
 
-                // Agregar evento para eliminar fila al botón generado dinámicamente
-                $(".eliminar-fila").off("click").on("click", function () {
-                    $(this).closest("tr").remove();
-                });
+        if (precio > total) {
+            alert('El monto ingresado: ' + precio + ', es mayor al original: ' + total);
+            return;
+        }
 
-                // Limpiar los valores seleccionados después de agregar la fila
-                $("#seleccionado-posicion").text("");
-                $("#seleccionado-embarque").text("");
-                $("#seleccionado-precio").val("");
-                $("#seleccionado-tipo").val("");
-                //$(this).dialog("close");
-            },
-            "Guardar y Cerrar": function () {
-                let total= localStorage.getItem('precio_item_imputar');
-                let total_tabla = 0;
-                let filas = document.querySelectorAll("#guardado-tabla tbody tr");
-                if(filas.length==0){
-                alert('No se ha armado nada.');
-                return;
-                }
-                filas.forEach(fila => {
-                    let montoCelda = fila.querySelector("td:nth-child(2)");
+        // Limpiar tabla de armado si ya existía
+        $("#guardado-tabla tbody").empty();
 
-                    if (montoCelda) {
-                        let monto = parseFloat(montoCelda.textContent.trim().replace(',', '.')) || 0;
-                        total_tabla += monto;
+        // Crear la nueva fila
+        const nuevaFila = `
+            <tr>
+                <td>${posicion}</td>
+                <td>${precio}</td>
+                <td><button class="btn btn-danger btn-sm eliminar-fila">Eliminar</button></td>
+                <td style="display:none;">${cliente}</td>
+                <td style="display:none;">${lugar}</td>
+                <td style="display:none;">${embarque}</td>
+            </tr>
+        `;
+
+        $("#guardado-tabla tbody").append(nuevaFila);
+
+        // Marcar como embarque armado
+        embarqueSeleccionado = embarque;
+        embarqueArmado = true;
+
+        // Habilitar botón guardar si está deshabilitado
+        $("#btnGuardarEmbarque").prop("disabled", false);
+
+        // Activar botón eliminar
+        $(".eliminar-fila").off("click").on("click", function () {
+            $(this).closest("tr").remove();
+            embarqueArmado = false;
+            embarqueSeleccionado = null;
+            $("#btnGuardarEmbarque").prop("disabled", true);
+        });
+
+        // Limpiar campos seleccionados
+        $("#seleccionado-posicion").text("");
+        $("#seleccionado-embarque").text("");
+        $("#seleccionado-precio").val("");
+        $("#seleccionado-tipo").val("");
+    }
+},
+
+            {
+                text: "Seleccionar datos y modificar",
+                class: "btn btn-primary",
+                click: function() {
+                     if (!embarqueArmado || !embarqueSeleccionado) {
+                        alert("Debe armar el embarque antes de guardar.");
+                        return;
                     }
-                });
-                if(total!=total_tabla){
-                alert('Los montos armados: '+ total_tabla+', difieren del ingresado: '+total);
-                return;
-                }
 
-                //guardar_impucompra();
-                rellenar_tabla();
-                $(this).dialog("close");
+                    const posicion = selectedRow.cells[3].textContent.trim();  // o donde corresponda
+
+                    $.ajax({
+                        url: "/admin_cont/get_datos_embarque/",
+                        method: "POST",
+                        headers: { 'X-CSRFToken': csrf_token },
+                        data: { posicion: posicion },
+                        success: function (response) {
+                        let autogenerado = $('#autogen_detalle_venta').val();
+                        modificar_embarque_imputado(autogenerado,response);
+                        },
+                        error: function () {
+                            alert("Error al cargar los datos del embarque.");
+                        }
+                    });
+                }
             },
-            "Cancelar": function () {
-                $(this).dialog("close");
+            {
+                text: "Salir",
+                class: "btn btn-dark",
+                click: function() {
+                    $(this).dialog("close");
+                }
             }
-        },
-        beforeClose: function(event, ui) {
+        ],
+                beforeClose: function(event, ui) {
         limpiarModalEmbarque();
     }
     }).prev('.ui-dialog-titlebar').remove();
@@ -500,7 +526,7 @@ function cargarDatosComprasDetallePago(autogenerado) {
         $('#formVentasDetallePago input[name="importe"]').val(response.importe);
         $('#formVentasDetallePago input[name="por_imputar"]').val(response.por_imputar);
         $('#formVentasDetallePago input[name="paridad"]').val(response.paridad);
-        $('#formVentasDetallePago input[name="proveedor"]').val(response.proveedor);
+        $('#formVentasDetallePago input[name="cliente"]').val(response.cliente);
         $('#formVentasDetallePago input[name="detalle"]').val(response.detalle);
         $('#formVentasDetallePago input[name="autogenerado"]').val(autogenerado);
         $('#formVentasDetallePago input[name="efectivo_recibido"]').val(response.efectivo_recibido);
@@ -773,5 +799,33 @@ function cargarDatosEmbarque(posicion) {
         error: function () {
             alert("Error al consultar los datos del embarque.");
         }
+    });
+}
+function modificar_embarque_imputado(autogenerado, datos) {
+    fetch('/admin_cont/modificar_embarque_imputado/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrf_token
+        },
+        body: JSON.stringify({
+            autogenerado: autogenerado,
+            datos: datos
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Respuesta del servidor:", data);
+        if(data.success){
+        alert('Embarque modificado correctamente');
+        $("#modal-embarque").dialog('close');
+        $("#modalFacturaDetalle").dialog('close');
+        limpiarModalEmbarque();
+        }else{
+        alert('Ocurrió un error');
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
     });
 }

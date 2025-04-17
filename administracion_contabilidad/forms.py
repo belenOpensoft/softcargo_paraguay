@@ -1589,7 +1589,7 @@ class VentasDetalle(forms.Form):
         label="Cliente",
         widget=forms.TextInput(attrs={
             'class': 'form-control form-control-sm',
-            'id':'id_proveedor_detalle',
+            'id':'id_cliente_detalle',
             'readonly': True
         })
     )

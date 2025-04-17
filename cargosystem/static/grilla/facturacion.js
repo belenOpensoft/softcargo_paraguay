@@ -1976,6 +1976,7 @@ function procesar_complementarios(){
             aplicable: $('#id_aplicable').val(),
             volumen: $('#id_volumen').val(),
             transportista: $('#id_transportista').val(),
+            posicion: $('#id_posicion').val(),
             vuelo_vapor: $('#id_vuelo_vapor').val(),
             mawb: $('#id_mawb').val(),
             hawb: $('#id_hawb').val(),

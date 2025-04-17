@@ -1,13 +1,14 @@
 import json
 import re
 
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render
 
 from administracion_contabilidad.forms import EditarConsultarVentas, VentasDetalle, VentasDetallePago, \
     DetalleEmbarqueForm
 from administracion_contabilidad.models import VistaVentas, VItemsVenta, Movims, Impucompras, Impuvtas, Cheques, \
-    Asientos
+    Asientos, Boleta, Cuentas
 from mantenimientos.models import Monedas
 
 
@@ -52,8 +53,6 @@ def editar_consultar_ventas(request):
             resultados = resultados.exclude(saldo=0)  # saldo != 0
         elif cd['estado'] == 'cerradas':
             resultados = resultados.filter(saldo=0)
-
-
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         datos = [
@@ -110,8 +109,8 @@ def obtener_detalle_venta(request):
             'detalle': detalle.detalle,
             'total': detalle.total,
             'posicion': detalle.posicion,
-            'observaciones': 'sin dato',
-            'cae': 'sin dato',
+            'observaciones': detalle.detalle,
+            'cae': detalle.cae,
             'items': [
                 {
                     'concepto': item.concepto,
@@ -218,11 +217,17 @@ def obtener_detalle_pago_ventas(request):
             'proveedor': pago.mnombre,
             'detalle': pago.mdetalle,
             'efectivo_recibido': 'sin datos',
-            'status': 'sin datos',
             'cheques': []  # Lista de cheques encontrados
         }
 
         asiento = Asientos.objects.filter(autogenerado=autogenerado,imputacion=2).values('detalle').first()
+        asiento_g = Asientos.objects.filter(autogenerado=autogenerado,imputacion=1).values('cuenta','monto').first()
+        if asiento_g:
+            if asiento_g['cuenta']:
+                cuenta_obj = Cuentas.objects.filter(xcodigo=asiento_g['cuenta']).first()
+                nombre_cuenta = cuenta_obj.xnombre if cuenta_obj else 'S/I'
+                monto = asiento_g['monto'] if asiento_g['monto'] else 0
+                data['efectivo_recibido'] = f"{nombre_cuenta} - {monto}"
         if asiento:
             detalle = asiento['detalle']
             cheques = Cheques.objects.filter(cdetalle=detalle)
@@ -267,7 +272,65 @@ def obtener_imputados_orden_venta(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
-"""
+@transaction.atomic
+def modificar_embarque_imputado(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
+    try:
+        data = json.loads(request.body)
 
-{% include 'impucompra_nota.html' %} """
+        autogenerado = data.get("autogenerado")
+        datos = data.get("datos")
+
+        if not autogenerado:
+            return JsonResponse({'success': False, 'error': 'Falta el campo autogenerado'}, status=400)
+        if not datos:
+            return JsonResponse({'success': False, 'error': 'Falta el campo datos'}, status=400)
+
+        with transaction.atomic():
+            boletas = Boleta.objects.select_for_update().filter(autogenerado=autogenerado)
+            movimiento = Movims.objects.select_for_update().filter(mautogen=autogenerado).first()
+            asientos = Asientos.objects.select_for_update().filter(autogenerado=autogenerado)
+
+            for boleta in boletas:
+                boleta.llegasale = datos.get('fecha_llegada_salida') or None
+                boleta.agente = datos.get('agente')
+                boleta.consignatario = datos.get('consignatario')
+                boleta.carrier = datos.get('transportista')
+                boleta.commodity = datos.get('commodity')
+                boleta.seguimiento = datos.get('seguimiento')
+                boleta.refer = datos.get('referencia')
+                boleta.aplicable = float(datos.get('aplicable') or 0)
+                boleta.volumen = float(datos.get('volumen') or 0)
+                boleta.bultos = int(datos.get('bultos') or 0)
+                boleta.kilos = float(datos.get('kilos') or 0)
+                boleta.posicion = datos.get('posicion')
+                boleta.destino = datos.get('destino')
+                boleta.origen = datos.get('origen')
+                boleta.terminos = datos.get('incoterms')
+                boleta.master = datos.get('mawb')
+                boleta.house = datos.get('hawb')
+                boleta.vuelo = datos.get('vuelo_vapor')
+                boleta.shipper = datos.get('shipper')
+                boleta.pagoflete = 'C' if datos.get('pago', '') == 'COLLECT' else 'P' if datos.get(
+                        'pago', '') == 'PREPAID' else ''
+                boleta.detalle = datos.get('detalle')
+                boleta.wr = datos.get('wr')
+                boleta.save()
+
+            if movimiento:
+                movimiento.mposicion = datos.get('posicion')
+                movimiento.save()
+
+            for asiento in asientos:
+                asiento.posicion = datos.get('posicion')
+                asiento.save()
+
+        return JsonResponse({'success': True, 'mensaje': 'Datos recibidos correctamente'})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+

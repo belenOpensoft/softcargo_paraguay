@@ -10525,6 +10525,7 @@ class VistaVentas(models.Model):
     moneda = models.CharField(max_length=50, null=True, blank=True)
     posicion = models.CharField(max_length=50, null=True, blank=True)
     nombre_moneda = models.CharField(max_length=50, null=True, blank=True)
+    cae = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         managed = False  # Indicates that this model represents a database view
