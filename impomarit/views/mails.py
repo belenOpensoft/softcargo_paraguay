@@ -394,7 +394,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
                 for cn in cant_cntr:
 
-                    cantidad_cntr += f'{cn["total"]} x {cn["tipo"]} - {cn["unidad"]} - '
+                    cantidad_cntr += f'{cn["total"]} x {cn["unidad"]} - {cn["tipo"]} - '
 
                     contenedores += f'{cn["nrocontenedor"]} - '
 

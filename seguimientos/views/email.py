@@ -385,7 +385,7 @@ def get_data_email(request):
                 texto += formatear_linea("HAWB", row.hawb) if row.modo in ['IMPORT AEREO','EXPORT AEREO'] else  formatear_linea("HBL", row.hawb)
 
                 if master == 'true':
-                    texto += formatear_linea("AWB", row.awb) if row.modo in ['IMPORT AEREO','EXPORT AEREO'] else formatear_linea("AWB", row.awb)
+                    texto += formatear_linea("AWB", row.awb) if row.modo in ['IMPORT AEREO','EXPORT AEREO'] else formatear_linea("MBL", row.awb)
 
                 texto += formatear_linea("Referencia", row.embarque)
 
