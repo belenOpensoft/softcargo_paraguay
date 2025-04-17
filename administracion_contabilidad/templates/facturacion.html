@@ -185,6 +185,9 @@
                                     <th>Precio</th>
                                     <th>IVA</th>
                                     <th>Cuenta</th>
+                                    <th>Embarque</th>
+                                    <th>Posición</th>
+                                    <th>Socio Comercial</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -222,6 +225,8 @@
 
 {% include 'preventa_modal.html' %}
 {% include 'arbitraje.html' %}
+{% include 'complementarios_facturacion.html' %}
+{% include 'embarque.html' %}
 {% endblock table_datatable %}
 {% block script_datatable %}
 <script src="{% static 'js/jquery-ui.min_last.js' %}"></script>

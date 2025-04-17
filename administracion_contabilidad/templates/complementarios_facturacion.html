@@ -1,0 +1,132 @@
+<style>
+  #modalRegistroCarga {
+    max-width: 80vw;
+    max-height: 90vh;
+    overflow: hidden;
+    font-size: 0.85rem;
+  }
+
+  #modalRegistroCarga .form-control {
+    font-size: 12px;
+    padding: 2px 5px;
+    height: 20px;
+  }
+
+  #modalRegistroCarga select {
+    font-size: 0.85rem;
+    height: 30px;
+  }
+
+  #modalRegistroCarga label {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+  }
+
+  #modalRegistroCarga .table {
+    font-size: 0.8rem;
+  }
+
+  #modalRegistroCarga .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  #modalRegistroCarga .col-md-1,
+  #modalRegistroCarga .col-md-2,
+  #modalRegistroCarga .col-md-3,
+  #modalRegistroCarga .col-md-4,
+  #modalRegistroCarga .col-md-6 {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+
+  #modalRegistroCarga h6 {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  #modalRegistroCarga .btn-sm {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+
+  #modalRegistroCarga .table-sm th,
+  #modalRegistroCarga .table-sm td {
+    padding: 4px;
+    vertical-align: middle;
+  }
+
+  #modalRegistroCarga input.bg-warning {
+    background-color: #fff3cd !important;
+  }
+
+    #modalRegistroCarga table {
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 4px;
+  }
+</style>
+
+<div id="modalRegistroCarga" title="Información complementaria" style="display: none;">
+  <form id="formRegistroCarga">
+    <div class="container-fluid">
+<div class="row">
+        <!-- Formulario principal -->
+        <div class="col-md-9">
+          <!-- Fila 1 -->
+          <div class="row">
+            <div class="col-md-2">{{ complemento.referencia.label_tag }}{{ complemento.referencia }}</div>
+            <div class="col-md-2">{{ complemento.seguimiento.label_tag }}{{ complemento.seguimiento }}</div>
+            <div class="col-md-2">{{ complemento.peso.label_tag }}{{ complemento.peso }}</div>
+            <div class="col-md-2">{{ complemento.aplicable.label_tag }}{{ complemento.aplicable }}</div>
+            <div class="col-md-2">{{ complemento.volumen.label_tag }}{{ complemento.volumen }}</div>
+            <div class="col-md-2">{{ complemento.bultos.label_tag }}{{ complemento.bultos }}</div>
+          </div>
+
+          <!-- Fila 2 -->
+          <div class="row">
+            <div class="col-md-3">{{ complemento.transportista.label_tag }}{{ complemento.transportista }}</div>
+            <div class="col-md-3">{{ complemento.vuelo_vapor.label_tag }}{{ complemento.vuelo_vapor }}</div>
+            <div class="col-md-2">{{ complemento.mawb.label_tag }}{{ complemento.mawb }}</div>
+            <div class="col-md-2">{{ complemento.hawb.label_tag }}{{ complemento.hawb }}</div>
+            <div class="col-md-2">{{ complemento.posicion.label_tag }}{{ complemento.posicion }}</div>
+          </div>
+
+          <!-- Fila 3 -->
+          <div class="row">
+            <div class="col-md-3">{{ complemento.origen.label_tag }}{{ complemento.origen }}</div>
+            <div class="col-md-3">{{ complemento.destino.label_tag }}{{ complemento.destino }}</div>
+            <div class="col-md-3">{{ complemento.fecha_llegada_salida.label_tag }}{{ complemento.fecha_llegada_salida }}</div>
+            <div class="col-md-3">{{ complemento.consignatario.label_tag }}{{ complemento.consignatario }}</div>
+          </div>
+
+          <!-- Fila 4 -->
+         <div class="row">
+            <div class="col-md-2">{{ complemento.commodity.label_tag }}{{ complemento.commodity }}</div>
+            <div class="col-md-2">{{ complemento.wr.label_tag }}{{ complemento.wr }}</div>
+            <div class="col-md-2">{{ complemento.shipper.label_tag }}{{ complemento.shipper }}</div>
+            <div class="col-md-2">{{ complemento.incoterms.label_tag }}{{ complemento.incoterms }}</div>
+            <div class="col-md-2">{{ complemento.pago.label_tag }}{{ complemento.pago }}</div>
+            <div class="col-md-2">{{ complemento.agente.label_tag }}{{ complemento.agente }}</div>
+          </div>
+
+          <!-- Observaciones -->
+          <div class="form-group">
+            {{ complemento.observaciones.label_tag }}
+            {{ complemento.observaciones }}
+          </div>
+        </div>
+
+        <!-- Lateral: Servicio -->
+        <div class="col-md-3">
+          <div class="border p-3 rounded bg-light h-100">
+            <label><strong>Servicio</strong></label>
+            <div>{{ complemento.servicio }}</div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+  </form>
+</div>

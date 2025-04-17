@@ -452,7 +452,7 @@ def procesar_imputaciones_compra(request):
 
     return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
-def actualizar_campos_movims(request):
+def actualizar_campos_movims_old(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -481,6 +481,56 @@ def actualizar_campos_movims(request):
                 factura.marbitraje = float(data['arbitraje'])
 
             factura.save()
+            return JsonResponse({"success": True})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return JsonResponse({"success": False, "error": "Método no permitido"}, status=405)
+
+
+def actualizar_campos_movims(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            autogen = data.get("autogen")
+            tipo = data.get("tipo")
+
+            if not autogen or not tipo:
+                return JsonResponse({"success": False, "error": "Faltan parámetros clave."})
+
+            factura = Movims.objects.filter(mautogen=autogen, mnombremov=tipo).first()
+
+            if not factura:
+                return JsonResponse({"success": False, "error": "Factura no encontrada."})
+
+            # Asignación individual de campos
+            if 'detalle' in data:
+                factura.mdetalle = data['detalle']
+
+            if 'fecha' in data:
+                factura.mfechamov = data['fecha']
+
+            if 'paridad' in data:
+                factura.mparidad = float(data['paridad'])
+
+            if 'arbitraje' in data:
+                factura.marbitraje = float(data['arbitraje'])
+
+            factura.save()
+
+            if 'posiciones' in data:
+                for item in data['posiciones']:
+                    nroserv = item.get('nroserv')
+                    nueva_posicion = item.get('nueva_posicion')
+
+                    if nroserv and nueva_posicion is not None:
+                        asientos = Asientos.objects.filter(autogenerado=autogen, nroserv=nroserv)
+                        for asiento in asientos:
+                            if asiento.posicion != nueva_posicion:
+                                asiento.posicion = nueva_posicion
+                                asiento.save()
+
             return JsonResponse({"success": True})
 
         except Exception as e:

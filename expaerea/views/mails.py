@@ -569,7 +569,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             for cn in cant_cntr:
                 contenedores += f' {cn["nrocontenedor"]} - '
-                bultos += cn['bultos']
+                bultos += cn['bultos'] if cn['bultos'] else 0
                 if cn['bruto']:
                     peso += cn['bruto']
 

@@ -216,6 +216,69 @@ class Factura(forms.Form):
         self.fields['paridad'].initial = self.paridad_valor
 
 
+class RegistroCargaForm(forms.Form):
+    referencia = forms.CharField(label="Referencia", max_length=100)
+    seguimiento = forms.CharField(label="Seguimiento", max_length=100)
+    peso = forms.DecimalField(label="Peso", max_digits=10, decimal_places=2)
+    aplicable = forms.CharField(label="Aplicable", max_length=100)
+    volumen = forms.DecimalField(label="Volumen", max_digits=10, decimal_places=2)
+    bultos = forms.DecimalField(label="Bultos", max_digits=10, decimal_places=2)
+    posicion = forms.CharField(label="Posicion")
+
+    transportista = forms.CharField(label="Transportista", max_length=100)
+    vuelo_vapor = forms.CharField(label="Vuelo/Vapor", max_length=100)
+    mawb = forms.CharField(label="MAWB/MBL/MCRT", max_length=100)
+    hawb = forms.CharField(label="HAWB/HBL/HCRT", max_length=100)
+
+    origen = forms.CharField(label="Origen", max_length=100)
+    destino = forms.CharField(label="Destino", max_length=100)
+    fecha_llegada_salida = forms.DateField(
+        label="Fecha Llegada/Salida",
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+    consignatario = forms.CharField(label="Consignatario", max_length=100)
+
+    commodity = forms.CharField(label="Commodity", max_length=100)
+    wr = forms.CharField(label="WR", max_length=100)
+    shipper = forms.CharField(label="Shipper", max_length=100)
+    incoterms = forms.CharField(label="Incoterms", max_length=100)
+    pago = forms.CharField(label="Pago", max_length=100)
+    agente = forms.CharField(label="Agente", max_length=100)
+
+    observaciones = forms.CharField(
+        label="Observaciones",
+        widget=forms.Textarea(attrs={'rows': 4})
+    )
+
+    servicio = forms.ChoiceField(
+        label="Servicio",
+        choices=[
+            ("aereo", "Aéreo"),
+            ("terrestre", "Terrestre"),
+            ("maritimo", "Marítimo"),
+            ("courier", "Courier"),
+            ("servicios", "Servicios"),
+            ("mudanza", "Mudanza"),
+            ("almacenaje", "Almacenaje"),
+            ("general", "General"),
+        ],
+        widget=forms.RadioSelect
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            widget = field.widget
+            if field_name == 'observaciones':
+                widget.attrs['class'] = widget.attrs.get('class', '') + ' form-control bg-warning'
+                widget.attrs.pop('readonly', None)
+            elif isinstance(widget, (forms.TextInput, forms.Textarea, forms.NumberInput, forms.DateInput)):
+                widget.attrs['readonly'] = 'readonly'
+                widget.attrs['class'] = 'form-control'
+            elif isinstance(widget, forms.RadioSelect):
+                widget.attrs['disabled'] = True
+
+
 class ProveedoresGastos(forms.Form):
     CHOICE_TIPO = (
         (40, 'Factura'),
@@ -1648,13 +1711,6 @@ class VentasDetallePago(forms.Form):
     )
     efectivo_recibido = forms.CharField(
         label="Movimiento de efectivo recibido",
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'readonly': True
-        })
-    )
-    status = forms.CharField(
-        label="Status",
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'readonly': True

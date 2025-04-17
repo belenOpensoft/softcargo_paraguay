@@ -10,7 +10,8 @@ from administracion_contabilidad.views.cobranza import cobranza_view, source_cob
     source_facturas_pendientes, guardar_impuventa, guardar_anticipo, cargar_arbitraje
 from administracion_contabilidad.views.facturacion import facturacion_view, buscar_clientes, buscar_cliente, \
     buscar_item_v, buscar_items_v, procesar_factura, source_facturacion, source_infofactura, \
-    cargar_preventa_infofactura, source_infofactura_cliente, cargar_preventa_infofactura_multiple, guardar_arbitraje
+    cargar_preventa_infofactura, source_infofactura_cliente, cargar_preventa_infofactura_multiple, guardar_arbitraje, \
+    get_datos_embarque
 from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
 from administracion_contabilidad.views.proveedores_gastos import proveedores_gastos_view, buscar_proveedor, \
@@ -38,6 +39,7 @@ urlpatterns = [
     path('obtener_imputables/', obtener_imputables, name='obtener_imputables'),
     path('guardar_arbitraje/', guardar_arbitraje, name='guardar_arbitraje'),
     path('editar_consultar_pagos/', editar_consultar_pagos, name='editar_consultar_pagos'),
+    path('get_datos_embarque/', get_datos_embarque, name='get_datos_embarque'),
 
     # preventa
     path('get_datos_pdf_preventa/', get_datos_caratula, name='get_datos_pdf_preventa'),

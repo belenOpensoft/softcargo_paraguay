@@ -585,7 +585,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
                 if cn['precinto']:
                     precintos += f'{cn["precinto"]} - '
 
-                bultos += cn['bultos']
+                bultos += cn['bultos'] if cn['bultos'] else 0
 
                 if cn['peso']:
                     peso += cn['peso']

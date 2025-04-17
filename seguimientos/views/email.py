@@ -185,7 +185,7 @@ def get_data_email(request):
                         if cn['precinto']:
                             precintos += f'{cn["precinto"]} - '
 
-                        bultos += cn['bultos']
+                        bultos += cn['bultos'] if cn['bultos'] else 0
                         tipo= cn["tipo"]
                         peso += cn['peso'] or 0
 
@@ -427,7 +427,7 @@ def get_data_email(request):
                             if cn['precinto']:
                                 precintos += f'{cn["precinto"]} - '
 
-                            bultos += cn['bultos']
+                            bultos += cn['bultos'] if cn['bultos'] else 0
                             peso += cn['peso'] if cn['peso'] else 0
                             volumen += cn['volumen'] if cn['volumen'] else 0
                             movimiento= cn['movimiento']
@@ -591,7 +591,7 @@ def get_data_email(request):
                             contenedores += f' {cn["nrocontenedor"]} - '
                             if cn['precinto']:
                                 precintos += f'{cn["precinto"]} - '
-                            bultos += cn['bultos']
+                            bultos += cn['bultos'] if cn['bultos'] else 0
                             if cn['peso']:
                                 peso += cn['peso']
                             if cn['volumen']:
@@ -623,7 +623,7 @@ def get_data_email(request):
                     if cant_cntr.count() > 0:
                         for cn in cant_cntr:
                             contenedores += f' {cn["nrocontenedor"]} - '
-                            bultos += cn['bultos']
+                            bultos += cn['bultos'] if cn['bultos'] else 0
                             if cn['bruto']:
                                 peso += cn['bruto']
                             if cn['cbm']:

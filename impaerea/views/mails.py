@@ -335,9 +335,9 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             texto += formatear_linea("Teléfono", consigna.telefono if consigna else "")
 
             texto += "<br>"
-            salida = seg.etd.strftime("%d/%m/%Y") if isinstance(row.etd, datetime) else ''
+            salida = seg.etd.strftime("%d/%m/%Y") if isinstance(seg.etd, datetime) else ''
 
-            llegada = seg.eta.strftime("%d/%m/%Y") if isinstance(row.eta, datetime) else ''
+            llegada = seg.eta.strftime("%d/%m/%Y") if isinstance(seg.eta, datetime) else ''
 
             texto += formatear_linea("Salida", salida )
 
@@ -363,7 +363,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                         fecha = ruta.llegada.strftime("%d/%m")
                     else:
                         fecha = '??/??'
-                    tramo = f"({ruta.origen}/{ruta.destino})   {ruta.cia}{ruta.viaje}/{fecha}"
+                    tramo = f"({ruta.origen}/{ruta.destino})   {ruta.ciavuelo}{ruta.viaje}/{fecha}"
                     texto += formatear_linea("Vuelo", tramo)
 
             texto += formatear_linea("Embarcador", row.embarcador)
@@ -391,14 +391,14 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                     else:
 
                         ap1 = 0
-
-                    aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
+                    bruto = float(c.bruto) if c.bruto else 0
+                    aplicable = round(ap1, 2) if ap1 > bruto else bruto
 
                     texto += formatear_linea("Mercadería", c.producto.nombre)
 
                     texto += formatear_linea("Bultos", str(c.bultos))
 
-                    texto += formatear_linea("Peso", str(c.bruto))
+                    texto += formatear_linea("Peso", bruto)
 
                     texto += formatear_linea("Aplicable", str(aplicable))
 
@@ -583,7 +583,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                         if len(medidas) == 3 and all(m.isdigit() for m in medidas):
                             volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
 
-                    bultos += cn['bultos']
+                    bultos += cn['bultos'] if cn['bultos'] else 0
 
                     peso += cn['bruto'] if cn['bruto'] else 0
 
@@ -775,7 +775,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             if cant_cntr.count() > 0:
 
                 for cn in cant_cntr:
-                    bultos += cn['bultos']
+                    bultos += cn['bultos'] if cn['bultos'] else 0
                     if cn['bruto']:
                         peso += cn['bruto']
 

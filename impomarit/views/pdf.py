@@ -192,7 +192,11 @@ def get_datos_caratula(request):
                         f"{registro.cantidad}x{registro.unidad.upper() if registro.unidad else ''} "
                         f"{registro.tipo.upper() if registro.tipo else ''} "
                         f"CTER: {registro.nrocontenedor or ''} SEAL: {registro.precinto or ''} "
-                        f"WT: {registro.peso:.3f} VOL: {registro.volumen:.3f}<br>"
+                        f"WT: {registro.peso:.3f}" if registro.peso is not None else "WT: S/I"
+                    )
+                    texto += " "
+                    texto += (
+                        f"VOL: {registro.volumen:.3f}<br>" if registro.volumen is not None else "VOL: S/I<br>"
                     )
 
             # Detalle de la mercadería

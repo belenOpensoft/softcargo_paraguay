@@ -7,6 +7,7 @@ let iva=0;
 var buscar = '';
 var que_buscar = '';
 
+
     const valorInicial = $('#id_tipo').find('option:selected').text();
     $('#tipoSeleccionado').text(valorInicial);
 
@@ -85,7 +86,10 @@ var que_buscar = '';
                     $('#id_precio input').data({
                         iva: servicio.iva,
                         cuenta: servicio.cuenta,
-                        codigo: servicio.item
+                        codigo: servicio.item,
+                        embarque: servicio.embarque,
+                        gasto: servicio.gasto,
+                        imputar: servicio.imputar,
                     });
                     $('#id_descripcion_item input').val(servicio.nombre);
                 },
@@ -131,6 +135,9 @@ var que_buscar = '';
             const iva = $('#id_precio input').data('iva') || "";   // puede estar vacío en un nuevo item
             const cuenta = $('#id_precio input').data('cuenta') || "";
             const codigo = $('#id_precio input').data('codigo') || "";
+            const imputar = $('#id_precio input').data('imputar') || "";
+
+            let texto = (imputar === 'S') ? 'PENDIENTE' : 'NO IMPUTABLE';
 
             if ($("#itemTable tr.editing").length > 0) {
                 var $editingRow = $("#itemTable tr.editing");
@@ -144,7 +151,7 @@ var que_buscar = '';
                 $editingRow.find("td").eq(3).text(precio.toFixed(2));
                 $editingRow.find("td").eq(4).text(iva);
                 $editingRow.find("td").eq(5).text(cuenta);
-
+                $editingRow.find("td").eq(6).text(texto);
                 $editingRow.removeClass("editing");
             }else {
                 itemCounter++;
@@ -157,6 +164,9 @@ var que_buscar = '';
                         <td>${precio.toFixed(2)}</td>
                         <td>${iva}</td>
                         <td>${cuenta}</td>
+                        <td>${texto}</td>
+                        <td>S/I</td>
+                        <td>S/I</td>
                     </tr>`;
                 $('#itemTable tbody').append(row);
                 $('#itemTable').show();
@@ -272,7 +282,7 @@ var que_buscar = '';
             $(this).removeClass("is-invalid"); // Se quita el rojo si se vacía
         }
     });
-    table = $('#tabla_facturas').DataTable({
+    let table_fac = $('#tabla_facturas').DataTable({
     "dom": 'Btlipr',
     "scrollX": true,
     "bAutoWidth": false,
@@ -341,6 +351,281 @@ var que_buscar = '';
     },
     "rowCallback": function (row, data) {}
 });
+
+//seccion para modal de embarque
+
+    let table = document.querySelector("#tabla-embarque-container tbody");
+    let selectedRow = null;
+
+    table.addEventListener("click", function (event) {
+        let row = event.target.closest("tr");
+        if (!row) return;
+
+        if (selectedRow) {
+            selectedRow.classList.remove("table-secondary");
+        }
+
+        row.classList.add("table-secondary");
+        selectedRow = row;
+    });
+    //rellenar seleccionados
+    table.addEventListener("dblclick", function (event) {
+        let row = event.target.closest("tr");
+        if (!row) return;
+
+        let embarque = row.cells[0].textContent.trim();
+        let tipo = row.cells[1].textContent.trim();
+        posicion = row.cells[3].textContent.trim();
+        cliente = row.cells[9].textContent.trim();
+
+        let selectedRadio = $('input[name="imputar"]:checked').attr('id');
+        let impucompra_tipo;
+        if(selectedRadio=='imputar-masters'){
+            impucompra_tipo='M';
+        }else{
+            impucompra_tipo='H';
+        }
+
+        document.querySelector("#seleccionado-embarque").textContent = embarque;
+        document.querySelector("#seleccionado-tipo").textContent = tipo === "CONSOLIDADO" ? "C" : "D";
+        document.querySelector("#seleccionado-posicion").textContent = posicion;
+        $("#seleccionado-cliente").val(cliente);
+        $("#seleccionado-precio").val(localStorage.getItem('precio_item_imputar'));
+        $("#seleccionado-lugar").val(impucompra_tipo);
+
+    });
+    //buscadores
+    document.querySelectorAll(".buscador").forEach(button => {
+        button.addEventListener("click", function () {
+            let selectedRadio = $('input[name="imputar"]:checked').attr('id');
+            let impucompra_tipo;
+            if(selectedRadio=='imputar-masters'){
+                impucompra_tipo='master';
+            }else{
+                impucompra_tipo='house';
+            }
+            let departamento = document.getElementById("departamento").value;
+            if(departamento==''){
+                alert('Seleccione una Operativa');
+                return;
+            }
+            let fechaDesde = document.getElementById("fecha-desde")?.value || "";
+            let fechaHasta = document.getElementById("fecha-hasta")?.value || "";
+            let posicion = document.getElementById("posicion-input")?.value || "";
+            let tipoEmbarque = document.querySelector('input[name="tipo-embarque"]:checked')?.value || "todos";
+            let conocimiento = document.getElementById("contenedor-input")?.value || "";
+            let transportista = document.getElementById("transportista-input")?.value || "";
+            let agente = document.getElementById("agente-input")?.value || "";
+            let status = document.getElementById("status-input")?.value || "";
+            let contenedor = document.getElementById("contenedor-input")?.value || "";
+            let vapor = document.getElementById("vapor-input")?.value || "";
+            let seguimiento = document.getElementById("seguimiento-input")?.value || "";
+            let master = document.getElementById("master-input")?.value || "";
+            let house = document.getElementById("house-input")?.value || "";
+            let embarque = document.getElementById("embarque-input-buscar")?.value || "";
+
+            let params = new URLSearchParams({
+                departamento: departamento,
+                fecha_desde: fechaDesde,
+                fecha_hasta: fechaHasta,
+                posicion: posicion,
+                tipo_embarque: tipoEmbarque,
+                conocimiento: conocimiento,
+                transportista: transportista,
+                agente: agente,
+                status: status,
+                contenedor: contenedor,
+                vapor: vapor,
+                seguimiento: seguimiento,
+                master: master,
+                house: house,
+                embarque:embarque,
+                cual:impucompra_tipo
+            });
+
+            fetch(`/admin_cont/buscar_embarques/?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    let tbody = document.querySelector("#tabla-embarque-container tbody");
+                    tbody.innerHTML = "";  // Limpiar la tabla antes de cargar nuevos datos
+
+                    data.resultados.forEach(item => {
+                        let row = `<tr>
+                            <td>${item.embarque}</td>
+                            <td>${item.tipo}</td>
+                            <td>${item.fecha}</td>
+                            <td>${item.posicion}</td>
+                            <td>${item.conocimiento}</td>
+                            <td>${item.transportista}</td>
+                            <td>${item.agente}</td>
+                            <td>${item.tarifa}</td>
+                            <td>${item.status}</td>
+                            <td>${item.cliente}</td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                })
+                .catch(error => console.error("Error al buscar embarques:", error));
+     });
+     });
+    let embarqueSeleccionado = null;
+    let embarqueArmado = false;
+
+    // Inicialización del modal de embarque
+    $("#modal-embarque").dialog({
+        autoOpen: false,
+        modal: true,
+        width: "auto",
+        height: "auto",
+        maxWidth: $(window).width() * 0.90,
+        minWidth: 600,
+        maxHeight: $(window).height() * 0.90,
+        position: { my: "center top", at: "center top+20", of: window },
+        buttons: [
+            {
+    text: "Armar",
+    class: "btn btn-warning",
+    click: function () {
+        if (!selectedRow) {
+            alert("Debe seleccionar un embarque.");
+            return;
+        }
+
+        const embarque = selectedRow.cells[0].textContent.trim();
+        const tipo = selectedRow.cells[1].textContent.trim();
+        const posicion = selectedRow.cells[3].textContent.trim();
+        const cliente = selectedRow.cells[9].textContent.trim();
+        const lugar = $("#seleccionado-lugar").val();  // ya cargado en doble click
+
+        const precio = parseFloat($("#seleccionado-precio").val()) || 0;
+        const total = parseFloat(localStorage.getItem('precio_item_imputar')) || 0;
+
+        if (precio > total) {
+            alert('El monto ingresado: ' + precio + ', es mayor al original: ' + total);
+            return;
+        }
+
+        // Limpiar tabla de armado si ya existía
+        $("#guardado-tabla tbody").empty();
+
+        // Crear la nueva fila
+        const nuevaFila = `
+            <tr>
+                <td>${posicion}</td>
+                <td>${precio}</td>
+                <td><button class="btn btn-danger btn-sm eliminar-fila">Eliminar</button></td>
+                <td style="display:none;">${cliente}</td>
+                <td style="display:none;">${lugar}</td>
+                <td style="display:none;">${embarque}</td>
+            </tr>
+        `;
+
+        $("#guardado-tabla tbody").append(nuevaFila);
+
+        // Marcar como embarque armado
+        embarqueSeleccionado = embarque;
+        embarqueArmado = true;
+
+        // Habilitar botón guardar si está deshabilitado
+        $("#btnGuardarEmbarque").prop("disabled", false);
+
+        // Activar botón eliminar
+        $(".eliminar-fila").off("click").on("click", function () {
+            $(this).closest("tr").remove();
+            embarqueArmado = false;
+            embarqueSeleccionado = null;
+            $("#btnGuardarEmbarque").prop("disabled", true);
+        });
+
+        // Limpiar campos seleccionados
+        $("#seleccionado-posicion").text("");
+        $("#seleccionado-embarque").text("");
+        $("#seleccionado-precio").val("");
+        $("#seleccionado-tipo").val("");
+    }
+},
+
+            {
+                text: "Seleccionar datos",
+                class: "btn btn-primary",
+                click: function() {
+                     if (!embarqueArmado || !embarqueSeleccionado) {
+                        alert("Debe armar el embarque antes de guardar.");
+                        return;
+                    }
+
+                    const posicion = selectedRow.cells[3].textContent.trim();  // o donde corresponda
+
+                    $.ajax({
+                        url: "/admin_cont/get_datos_embarque/",
+                        method: "POST",
+                        headers: { 'X-CSRFToken': csrf_token },
+                        data: { posicion: posicion },
+                        success: function (response) {
+                            // Llenar modal de carga
+                            Object.keys(response).forEach(key => {
+                                const campo = $("#modalRegistroCarga [name='" + key + "']");
+                                if (campo.length) {
+                                    campo.val(response[key]);
+                                }
+                            });
+
+                            $("#modalRegistroCarga").dialog("open");
+                        },
+                        error: function () {
+                            alert("Error al cargar los datos del embarque.");
+                        }
+                    });
+                }
+            },
+            {
+                text: "Salir",
+                class: "btn btn-dark",
+                click: function() {
+                    $(this).dialog("close");
+                }
+            }
+        ],
+                beforeClose: function(event, ui) {
+        limpiarModalEmbarque();
+    }
+    }).prev('.ui-dialog-titlebar').remove();
+
+    $("#modalRegistroCarga").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 'auto',
+        position: {
+        my: "center top",
+        at: "center top+20",
+        of: window
+        },
+        buttons: [
+            {
+                text: "Procesar",
+                class: "btn btn-primary",
+                click: function() {
+                    procesar_complementarios();
+                }
+            },
+
+            {
+                text: "Salir",
+                class: "btn btn-dark",
+                click: function() {
+                    $(this).dialog("close");}}
+        ]
+    });
+
+    $("#modal-embarque").tabs();
+
+    let radioMasters = document.getElementById("imputar-masters");
+    let radioHouses = document.getElementById("imputar-houses");
+
+    radioMasters.addEventListener("change", actualizarPestañas);
+    radioHouses.addEventListener("change", actualizarPestañas);
+
+    actualizarPestañas();
 
 });
 
@@ -656,6 +941,23 @@ function limpiarCampos() {
     $('#id_descripcion_item input').val('');
     $('#id_precio input').val('');
 }
+function actualizarPestañas() {
+    let radioMasters = document.getElementById("imputar-masters");
+    let radioHouses = document.getElementById("imputar-houses");
+    let tabMaster = document.querySelector('a[href="#master"]').parentElement;
+    let tabHouse = document.querySelector('a[href="#house"]').parentElement;
+
+    // Mostrar todas las pestañas antes de aplicar restricciones
+    tabMaster.style.display = "block";
+    tabHouse.style.display = "block";
+
+    if (radioMasters.checked) {
+        tabMaster.style.display = "none"; // Ocultar Master
+        tabHouse.style.display = "none"; // Ocultar Master
+    } else if (radioHouses.checked) {
+        tabHouse.style.display = "none"; // Ocultar House
+    }
+}
 
 function actualizarTotal() {
 let precio = 0;
@@ -878,6 +1180,28 @@ modo='SINMODO';
             }
         }
     });
+}
+function limpiarModalEmbarque() {
+    // Limpiar todos los inputs (texto, número, fecha) y selects dentro del modal
+    $("#modal-embarque").find("input[type='text'], input[type='number'], input[type='date'], textarea").val("");
+    $("#modal-embarque").find("select").prop("selectedIndex", 0);
+
+    // Desmarcar todos los radio buttons
+    $("#modal-embarque").find("input[type='radio']").prop("checked", false);
+
+    // Limpiar los spans y campos ocultos de la sección de "Seleccionado"
+    $("#seleccionado-embarque").text("");
+    $("#seleccionado-tipo").text("");
+    $("#seleccionado-posicion").text("");
+    $("#seleccionado-precio").val("0.00");
+    $("#seleccionado-cliente").val("");
+    $("#seleccionado-lugar").val("");
+
+    // Limpiar la tabla de información lateral
+    $("#guardado-tabla tbody").empty();
+
+    // Limpiar la tabla de embarques (dentro de #tabla-embarque-container)
+    $("#tabla-embarque-container table tbody").empty();
 }
 
 //multiples preventas
@@ -1465,10 +1789,80 @@ $('#abrir_arbi').on('click', function (event) {
         }
     });
 });
+function rellenar_tabla() {
+    if (!filaSeleccionada || filaSeleccionada.length === 0) {
+        alert("No se ha seleccionado ninguna fila para actualizar.");
+        return;
+    }
 
+    let guardadoFilas = document.querySelectorAll("#guardado-tabla tbody tr");
+
+    if (guardadoFilas.length === 0) {
+        alert("No hay registros en la tabla guardado-tabla.");
+        return;
+    }
+
+    if (guardadoFilas.length === 1) {
+        let fila = guardadoFilas[0];
+        let posicion = fila.querySelector("td:nth-child(1)")?.textContent.trim() || "";
+        let precio = fila.querySelector("td:nth-child(2)")?.textContent.trim() || "";
+        let embarque = fila.querySelector("td:nth-child(6)")?.textContent.trim() || "";
+        let lugar = fila.querySelector("td:nth-child(5)")?.textContent.trim() || "";
+        let cliente = fila.querySelector("td:nth-child(4)")?.textContent.trim() || "";
+        let embarqueFinal = embarque + lugar;
+
+        filaSeleccionada.find("td").eq(7).text(posicion);
+        filaSeleccionada.find("td").eq(8).text(cliente);
+        filaSeleccionada.find("td").eq(6).text(embarqueFinal);
+
+    } else {
+        let filaBase = filaSeleccionada.clone();
+
+        filaSeleccionada.remove();
+
+        guardadoFilas.forEach(fila => {
+            let posicion = fila.querySelector("td:nth-child(1)")?.textContent.trim() || "";
+            let precio = fila.querySelector("td:nth-child(2)")?.textContent.trim() || "";
+            let embarque = fila.querySelector("td:nth-child(6)")?.textContent.trim() || "";
+            let lugar = fila.querySelector("td:nth-child(5)")?.textContent.trim() || "";
+            let cliente = fila.querySelector("td:nth-child(4)")?.textContent.trim() || "";
+            let embarqueFinal = embarque + lugar;
+
+            let nuevaFila = filaBase.clone();
+            nuevaFila.find("td").eq(7).text(posicion);
+            nuevaFila.find("td").eq(8).text(cliente);
+            nuevaFila.find("td").eq(6).text(embarqueFinal);
+            nuevaFila.find("td").eq(3).text(precio);
+
+            $("#itemTable tbody").append(nuevaFila);
+        });
+    }
+
+    // Cerramos el modal
+    $("#modal-embarque").dialog("close");
+    console.log("Tabla actualizada con registros del guardado-tabla.");
+}
 
 function procesar_fatura(){
         if (confirm('¿Está seguro de que desea facturar?')) {
+
+            let pendienteEncontrado = false;
+
+            $('#itemTable tbody tr').each(function() {
+                const estado = $(this).find('td:nth-child(7)').text().trim();
+                if (estado.toUpperCase() === 'PENDIENTE') {
+                    pendienteEncontrado = true;
+                    return false; // cortar el .each
+                }
+            });
+
+            if (pendienteEncontrado) {
+            let total= $('#id_total').val();
+            localStorage.setItem("precio_item_imputar", total);
+                $("#modal-embarque").dialog("open");
+                return; // cortar la función, no continuar con el procesamiento
+            }
+
             let tipoFac = $('#id_tipo').val();
             let serie = $('#id_serie').val();
             let prefijo = $('#id_prefijo').val();
@@ -1491,14 +1885,15 @@ function procesar_fatura(){
             let items = [];
             $('#itemTable tbody tr').each(function() {
                 const itemData = {
-                    id: $(this).find('td').eq(0).text(),
-                    descripcion: $(this).find('td').eq(1).text(),
-                    precio: $(this).find('td').eq(2).text(),
-                    iva: $(this).find('td').eq(3).text(),
-                    cuenta: $(this).find('td').eq(4).text(),
+                    id: $(this).find('td').eq(0).text().trim(),           // Id (oculto)
+                    descripcion: $(this).find('td').eq(2).text().trim(),  // Descripción
+                    precio: $(this).find('td').eq(3).text().trim(),       // Precio
+                    iva: $(this).find('td').eq(4).text().trim(),          // IVA
+                    cuenta: $(this).find('td').eq(5).text().trim()        // Cuenta
                 };
                 items.push(itemData);
             });
+
 
             let preventa = JSON.parse(localStorage.getItem('preventa')) || [];
             let data=[];
@@ -1552,11 +1947,16 @@ function procesar_fatura(){
                 data: data,
                 headers: { 'X-CSRFToken': csrf_token },
                 success: function(data) {
+                if (data.success){
                     $('#facturaM').dialog('close');
                     $('#facturaForm').trigger('reset');
                     total=0;
                     iva=0;
                     neto=0;
+                }else{
+                alert('ocurrió un error');
+                }
+
                     //window.location.reload();
                 },
                 error: function(xhr) {
@@ -1565,4 +1965,141 @@ function procesar_fatura(){
                 }
             });
         }
+}
+
+function procesar_complementarios(){
+
+        let formCarga = {
+            referencia: $('#id_referencia').val(),
+            seguimiento: $('#id_seguimiento').val(),
+            peso: $('#id_peso').val(),
+            aplicable: $('#id_aplicable').val(),
+            volumen: $('#id_volumen').val(),
+            transportista: $('#id_transportista').val(),
+            vuelo_vapor: $('#id_vuelo_vapor').val(),
+            mawb: $('#id_mawb').val(),
+            hawb: $('#id_hawb').val(),
+            origen: $('#id_origen').val(),
+            destino: $('#id_destino').val(),
+            fecha_llegada_salida: $('#id_fecha_llegada_salida').val(),
+            consignatario: $('#id_consignatario').val(),
+            commodity: $('#id_commodity').val(),
+            wr: $('#id_wr').val(),
+            shipper: $('#id_shipper').val(),
+            incoterms: $('#id_incoterms').val(),
+            pago: $('#id_pago').val(),
+            agente: $('#id_agente').val(),
+            observaciones: $('#id_observaciones').val(),
+            servicio: $("input[name='servicio']:checked").val()
+        };
+
+        procesar_factura_finalizada(formCarga);
+
+}
+
+function procesar_factura_finalizada(datos_complementarios){
+    let tipoFac = $('#id_tipo').val();
+    let serie = $('#id_serie').val();
+    let prefijo = $('#id_prefijo').val();
+    let numero = $('#id_numero').val();
+    let cliente = $('#cliente').val();
+    let fecha = $('#id_fecha').val();
+    let paridad = $('#id_paridad').val();
+    let arbitraje = $('#id_arbitraje').val();
+    let imputar = $('#id_imputar').val();
+    let moneda = $('#id_moneda select').val();
+    let clienteData = {
+        codigo: $('#clienteTable tbody tr td').eq(0).text(),
+        empresa: $('#clienteTable tbody tr td').eq(1).text(),
+        rut: $('#clienteTable tbody tr td').eq(2).text(),
+        direccion: $('#clienteTable tbody tr td').eq(3).text(),
+        localidad: $('#clienteTable tbody tr td').eq(4).text(),
+        telefono: $('#clienteTable tbody tr td').eq(5).text()
+    };
+
+    let items = [];
+    $('#itemTable tbody tr').each(function() {
+        const itemData = {
+            id: $(this).find('td').eq(0).text().trim(),           // Id (oculto)
+            descripcion: $(this).find('td').eq(2).text().trim(),  // Descripción
+            precio: $(this).find('td').eq(3).text().trim(),       // Precio
+            iva: $(this).find('td').eq(4).text().trim(),          // IVA
+            cuenta: $(this).find('td').eq(5).text().trim()        // Cuenta
+        };
+        items.push(itemData);
+    });
+
+
+    let preventa = JSON.parse(localStorage.getItem('preventa')) || [];
+    let data=[];
+    if (preventa!=null){
+        //es preventa
+        data={
+            csrfmiddlewaretoken: csrf_token,
+            fecha: fecha,
+            tipoFac: tipoFac,
+            serie: serie,
+            prefijo: prefijo,
+            numero: numero,
+            cliente: cliente,
+            arbitraje: arbitraje,
+            paridad: paridad,
+            imputar: imputar,
+            moneda: moneda,
+            clienteData: JSON.stringify(clienteData),
+            items: JSON.stringify(items),
+            total:total,
+            iva:iva,
+            neto:neto,
+            preventa:JSON.stringify(preventa),
+        }
+    }else{
+        data={
+            csrfmiddlewaretoken: csrf_token,
+            fecha: fecha,
+            tipoFac: tipoFac,
+            serie: serie,
+            prefijo: prefijo,
+            numero: numero,
+            cliente: cliente,
+            arbitraje: arbitraje,
+            paridad: paridad,
+            imputar: imputar,
+            moneda: moneda,
+            clienteData: JSON.stringify(clienteData),
+            items: JSON.stringify(items),
+            total:total,
+            iva:iva,
+            neto:neto,
+            preventa:0,
+        }
+    }
+    data["registroCarga"] = JSON.stringify(datos_complementarios);
+    $.ajax({
+        url: "/admin_cont/procesar_factura/",
+        dataType: 'json',
+        type: 'POST',
+        data: data,
+        headers: { 'X-CSRFToken': csrf_token },
+        success: function(data) {
+        if(data.success){
+            $('#facturaM').dialog('close');
+            $('#modalRegistroCarga').dialog('close');
+            $('#modal-embarque').dialog('close');
+            limpiarModalEmbarque();
+            $('#facturaForm').trigger('reset');
+            $('#formRegistroCarga').trigger('reset');
+            total=0;
+            iva=0;
+            neto=0;
+            }else{
+                alert('ocurrió un error');
+                }
+            //window.location.reload();
+        },
+        error: function(xhr) {
+            console.error('Error al facturar:', xhr);
+            alert('Error al procesar la factura');
+        }
+    });
 }

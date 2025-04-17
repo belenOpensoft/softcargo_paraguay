@@ -401,7 +401,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                     if cn['precinto']:
                         precintos += f'{cn["precinto"]} - '
 
-                    bultos += cn['bultos']
+                    bultos += cn['bultos'] if cn['bultos'] else 0
                     peso += cn['peso'] if cn['peso'] else 0
                     volumen += cn['volumen'] if cn['volumen'] else 0
                     movimiento=cn['movimiento']
@@ -418,8 +418,8 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
                 for c in carga:
                     ap1 = float(c.cbm) if c.cbm is not None else 0
-
-                    aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
+                    bruto = float(c.bruto) if c.bruto else 0
+                    aplicable = round(ap1, 2) if ap1 >bruto else bruto
 
                     texto += formatear_linea("Mercadería", c.producto.nombre)
 
@@ -654,7 +654,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                     if cn['precinto']:
                         precintos += f'{cn["precinto"]} - '
 
-                    bultos += cn['bultos']
+                    bultos += cn['bultos'] if cn['bultos'] else 0
                     tipo = cn["tipo"]
                     peso += cn['peso'] if cn['peso'] else 0
                     volumen += cn['volumen'] if cn['volumen'] else 0
@@ -873,7 +873,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                     if cn['precinto']:
                         precintos += f'{cn["precinto"]} - '
 
-                    bultos += cn['bultos']
+                    bultos += cn['bultos'] if cn['bultos'] else 0
 
                     if cn['peso']:
                         peso += cn['peso']

@@ -5,21 +5,24 @@ from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
+from reportlab.lib.validators import isNumber
+
 from administracion_contabilidad.views.facturacion_electronica import Uruware
-from expaerea.models import ExportEmbarqueaereo
-from expmarit.models import ExpmaritEmbarqueaereo
-from expterrestre.models import ExpterraEmbarqueaereo
-from impaerea.models import ImportEmbarqueaereo
-from impterrestre.models import ImpterraEmbarqueaereo
-from mantenimientos.models import Clientes, Servicios, Monedas
-from administracion_contabilidad.forms import Factura
+from expaerea.models import ExportEmbarqueaereo, ExportCargaaerea, VEmbarqueaereo as EA, ExportReservas
+from expmarit.models import ExpmaritEmbarqueaereo, ExpmaritCargaaerea, VEmbarqueaereo as EM, ExpmaritReservas
+from expterrestre.models import ExpterraEmbarqueaereo, ExpterraCargaaerea, VEmbarqueaereo as ET, ExpterraReservas
+from impaerea.models import ImportEmbarqueaereo, ImportCargaaerea, VEmbarqueaereo as IA, ImportConexaerea, \
+    ImportReservas
+from impterrestre.models import ImpterraEmbarqueaereo, ImpterraCargaaerea, VEmbarqueaereo as IT, ImpterraReservas
+from mantenimientos.models import Clientes, Servicios, Monedas, Vapores
+from administracion_contabilidad.forms import Factura, RegistroCargaForm
 from administracion_contabilidad.models import Boleta, Asientos, Movims, Infofactura, \
     VistaGastosPreventa, Dolar, Factudif, VPreventas
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from datetime import datetime
 from django.db import transaction
 from django.db.models import F
-from impomarit.models import VGastosHouse, Envases, Cargaaerea, Embarqueaereo
+from impomarit.models import VGastosHouse, Envases, Cargaaerea, Embarqueaereo, VEmbarqueaereo as IM, Reservas
 from decimal import Decimal
 from administracion_contabilidad.forms import pdfForm
 
@@ -166,7 +169,7 @@ def get_order(request, columns):
 def facturacion_view(request):
     if request.user.has_perms(["administracion_contabilidad.view_boleta", ]):
         form = Factura(request.POST or None)
-        return render(request, 'facturacion.html', {'form': form,'form_pdf': pdfForm(),})
+        return render(request, 'facturacion.html', {'form': form,'form_pdf': pdfForm(),'complemento':RegistroCargaForm()})
     else:
         messages.error(request, 'No tiene permisos para realizar esta accion.')
         return HttpResponseRedirect('/')
@@ -219,13 +222,18 @@ def buscar_items_v(request):
         servicio = Servicios.objects.filter(id=servicio_id, tipogasto='V').first()
 
         if servicio:
-            iva_texto = "Exento" if servicio.tasa == "X" else "Basico" if servicio.tasa == "B" else "Desconocido"
+            iva_texto = "Exento" if servicio.tasa == "X" else "Básico" if servicio.tasa == "B" else "Desconocido"
+            embarque_texto = "Pendiente" if servicio.imputar == "S" else "No imputar" if servicio.imputar == "N" else "Desconocido"
 
             data = {
                 'item': servicio.codigo,
                 'nombre': servicio.nombre,
                 'iva': iva_texto,
                 'cuenta': servicio.contable,
+                'embarque': embarque_texto,
+                'comp': servicio.activa,
+                'gasto': servicio.modo,
+                'imputar': servicio.imputar
             }
             return JsonResponse(data)
 
@@ -242,6 +250,303 @@ def generar_autogenerado(tipo, hora, fecha, numero):
 
 @transaction.atomic
 def procesar_factura(request):
+    try:
+        if request.method == 'POST':
+
+            lista = Boleta.objects.last()
+            numero = int(lista.numero) + 1
+            hora = datetime.now().strftime('%H%M%S%f')
+            fecha = request.POST.get('fecha')
+            tipo = request.POST.get('tipoFac', 0)
+
+            preventa = json.loads(request.POST.get('preventa'))
+            registro_carga_raw = request.POST.get('registroCarga')
+            registro_carga = json.loads(registro_carga_raw) if registro_carga_raw else {}
+
+            if preventa:
+                autogenerado=preventa.get('autogenerado')
+                master=preventa.get('master')
+                house=preventa.get('house')
+                posicion=preventa.get('posicion')
+                kilos=preventa.get('kilos')
+                bultos=preventa.get('bultos')
+                terminos=preventa.get('incoterms')
+                pagoflete=preventa.get('pago')
+                origen=preventa.get('origen')
+                destino=preventa.get('destino')
+                seguimiento=preventa.get('seguimiento')
+                referencia = None
+                aplicable = None
+                volumen = shipper=agente=detalle=None
+                transportista = llegasale=consignatario = commodity= None
+                vuelo = master=house=origen=destino=wr=None
+
+                reg=Factudif.objects.filter(znumero=autogenerado)
+                for r in reg:
+                    r.zfacturado='S'
+                    r.save()
+
+            else:
+                autogenerado = generar_autogenerado(tipo, hora, fecha, numero)
+                if registro_carga:
+                    kilos = float(registro_carga.get('peso') or 0)
+                    volumen = float(registro_carga.get('volumen') or 0)
+                    bultos = int(registro_carga.get('bultos') or 0)
+                    aplicable = float(registro_carga.get('aplicable')or 0)
+
+                    seguimiento = registro_carga.get('seguimiento', '')
+                    referencia = registro_carga.get('referencia', '')
+                    transportista = registro_carga.get('transportista', '')
+                    vuelo = registro_carga.get('vuelo_vapor', '')
+                    master = registro_carga.get('mawb', '')
+                    house = registro_carga.get('hawb', '')
+                    origen = registro_carga.get('origen', '')
+                    destino = registro_carga.get('destino', '')
+                    llegasale = registro_carga.get('fecha_llegada_salida', None)
+                    consignatario = registro_carga.get('consignatario', '')
+                    commodity = registro_carga.get('commodity', '')
+                    wr = registro_carga.get('wr', '')
+                    shipper = registro_carga.get('shipper', '')
+                    terminos = registro_carga.get('incoterms', '')
+                    pagoflete = 'C' if registro_carga.get('pago', '') == 'COLLECT' else 'PREPAID' if registro_carga.get(
+                        'pago', '') else ''
+                    agente = registro_carga.get('agente', '')
+                    posicion = registro_carga.get('posicion', '')
+                    detalle = registro_carga.get('observaciones', '')
+                else:
+                    kilos = None
+                    volumen = None
+                    bultos = None
+                    aplicable = None
+
+                    seguimiento = None
+                    referencia = None
+                    transportista = None
+                    vuelo = None
+                    master = None
+                    house = None
+                    origen = None
+                    destino = None
+                    llegasale = None
+                    consignatario = None
+                    commodity = None
+                    wr = None
+                    shipper = None
+                    terminos = None
+                    pagoflete = None
+                    agente = None
+                    posicion = None
+                    detalle = None
+
+            serie = request.POST.get('serie', "")
+            prefijo = request.POST.get('prefijo', 0)
+            moneda = request.POST.get('moneda', "")
+            arbitraje = request.POST.get('arbitraje', 0)
+            paridad = request.POST.get('paridad', 0)
+            cliente_data = json.loads(request.POST.get('clienteData'))
+            codigo_cliente = cliente_data['codigo']
+            cliente = Clientes.objects.get(codigo=codigo_cliente)
+            fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
+
+            precio_total = request.POST.get('total', 0)
+            neto = request.POST.get('neto', 0)
+            iva = request.POST.get('iva', 0)
+
+            items_data = json.loads(request.POST.get('items'))
+
+            tipo_mov = tipo
+            tipo_asiento = 'V'
+            detalle1 = 'S/I'
+            detalle_mov = ""  #si viene de la preventa, sino vacio
+            nombre_mov = ""
+            asiento = generar_numero()
+            movimiento_num = modificar_numero(asiento)
+
+            if int(tipo) == 23:
+                detalle1 = 'e-NOT/CRED'
+                nombre_mov = 'NOTACONTCRE'
+            elif int(tipo) == 24:
+                detalle1 = 'e-VTA/CRED'
+                tipo_asiento = 'V'
+                nombre_mov = 'BOLETA'
+            elif int(tipo) == 11:
+                detalle1 = 'DEV/CTDO'
+                nombre_mov = 'DEVOLUCION'
+            elif int(tipo) == 21:
+                detalle1 = 'NOT/CRED'
+                tipo_asiento = 'V'
+                nombre_mov = 'NOTA CRED.'
+            elif int(tipo) == 22:
+                detalle1 = 'NOT/DEB'
+                tipo_asiento = 'V'
+                nombre_mov = 'NOTA DEB.'
+            elif int(tipo) == 20:
+                detalle1 = 'VTA/CRED'
+                tipo_asiento = 'V'
+                nombre_mov = 'FACTURA'
+
+           # detalle_asiento = detalle1 + serie + str(prefijo) + str(numero) + cliente.empresa
+            detalle_asiento = detalle1 + '-' + serie + '-' + str(prefijo) + '-' + str(numero) + '-' + cliente.empresa
+
+
+            movimiento = {
+                'tipo': tipo_mov,
+                'fecha': fecha_obj,
+                'boleta': numero,
+                'monto': neto,
+                'iva': iva,
+                'total': precio_total,
+                'saldo': precio_total,
+                'moneda': moneda,
+                'detalle': detalle_mov,
+                'cliente': cliente.codigo,
+                'nombre': cliente.empresa,
+                'nombremov': nombre_mov,
+                'cambio': arbitraje,
+                'autogenerado': autogenerado,
+                'serie': serie,
+                'prefijo': prefijo,
+                'posicion': posicion,
+                'anio': fecha_obj.year,
+                'mes': fecha_obj.month,
+                'monedaoriginal': moneda,
+                'montooriginal': precio_total,
+                'arbitraje': arbitraje,
+            }
+            asiento_general = {
+                'detalle': detalle_asiento,
+                'asiento': asiento,
+                'monto': precio_total,
+                'moneda': moneda,
+                'cambio': arbitraje,
+                'conciliado': 'N',
+                'clearing': fecha_obj,
+                'fecha': fecha_obj,
+                'imputacion': 1,
+                'tipo': tipo_asiento,
+                'cuenta': cliente.ctavta,
+                'documento': str(numero),
+                'vencimiento': fecha_obj,
+                'pasado': 0,
+                'autogenerado': autogenerado,
+                'cliente': cliente.codigo,
+                'banco': 'S/I',
+                'centro': 'S/I',
+                'mov': movimiento_num,
+                'anio': fecha_obj.year,
+                'mes': fecha_obj.month,
+                'fechacheque': fecha_obj,
+                'paridad': paridad,
+                'posicion': 'S/I'
+            }
+            crear_movimiento(movimiento)
+            crear_asiento(asiento_general)
+
+            for item_data in items_data:
+                aux = int(movimiento_num) + 1
+                precio = float(item_data.get('precio'))
+                coniva = 0
+                totaliva = 0
+                if item_data.get('iva') == 'Basico':
+                    coniva = precio * 1.22
+                    totaliva = precio * 0.22
+                else:
+                    coniva = precio
+                    totaliva = 0
+
+                boleta = Boleta()
+                numero = numero
+                boleta.autogenerado = autogenerado
+                boleta.tipo = tipo
+                boleta.fecha = fecha
+                boleta.vto = fecha
+                boleta.tipofactura = serie
+                boleta.serie = serie
+                boleta.prefijo = prefijo
+                boleta.numero = numero
+                boleta.nrocliente = cliente.codigo
+                boleta.cliente = cliente.empresa
+                boleta.direccion = cliente.direccion
+                boleta.direccion2 = cliente.direccion2
+                boleta.localidad = cliente.localidad
+                boleta.ciudad = cliente.ciudad
+                boleta.pais = cliente.pais
+                boleta.telefax = cliente.telefono
+                boleta.ruc = cliente.ruc
+                boleta.condiciones = 'S/I'
+                boleta.corporativo = 'S/I'
+                boleta.moneda = moneda
+                boleta.cambio = arbitraje
+                boleta.paridad = paridad
+                boleta.tipocliente = 'RESPONSABLE INSCRIPTO'
+                boleta.nroservicio = item_data.get('id')
+                boleta.concepto = item_data.get('descripcion')
+                boleta.precio = item_data.get('precio')
+                boleta.iva = item_data.get('iva')
+                boleta.cuenta = item_data.get('cuenta')
+                boleta.monto = item_data.get('precio')
+                boleta.totiva = totaliva
+                boleta.total = coniva
+                boleta.master=master
+                boleta.house=house
+                boleta.posicion=posicion
+                boleta.kilos=kilos
+                boleta.bultos=bultos
+                boleta.terminos=terminos
+                boleta.pagoflete=pagoflete
+                boleta.origen=origen
+                boleta.destino=destino
+                boleta.seguimiento=seguimiento
+                boleta.refer=referencia
+                boleta.aplicable=aplicable
+                boleta.vuelo=vuelo
+                boleta.volumen=volumen
+                boleta.detalle=detalle
+                boleta.commodity=commodity
+                boleta.consignatario=consignatario
+                boleta.agente=agente
+                boleta.llegasale=llegasale
+                boleta.carrier=transportista
+                boleta.wr=wr
+                boleta.save()
+
+                asiento_vector = {
+                    'detalle': detalle_asiento,
+                    'monto': item_data.get('precio'),
+                    'moneda': moneda,
+                    'cambio': arbitraje,
+                    'asiento': asiento,
+                    'conciliado': 'N',
+                    'clearing': fecha_obj,
+                    'fecha': fecha_obj,
+                    'imputacion': 2,
+                    'tipo': tipo_asiento,
+                    'cuenta': item_data.get('cuenta'),
+                    'documento': str(numero),
+                    'vencimiento': fecha_obj,
+                    'pasado': 0,
+                    'autogenerado': autogenerado,
+                    'cliente': cliente.codigo,
+                    'banco': 'S/I',
+                    'centro': 'S/I',
+                    'mov': aux,
+                    'anio': fecha_obj.year,
+                    'mes': fecha_obj.month,
+                    'fechacheque': fecha_obj,
+                    'paridad': paridad,
+                    'nroserv':item_data.get('id'),
+                    'posicion':posicion
+                }
+                crear_asiento(asiento_vector)
+                movimiento_num = aux
+
+            return JsonResponse({'success':True})
+    except Exception as e:
+        return JsonResponse({'status': 'Error: ' + str(e)})
+
+
+@transaction.atomic
+def procesar_factura_old(request):
     try:
         if request.method == 'POST':
 
@@ -467,7 +772,8 @@ def procesar_factura(request):
                     'anio': fecha_obj.year,
                     'mes': fecha_obj.month,
                     'fechacheque': fecha_obj,
-                    'paridad': paridad
+                    'paridad': paridad,
+                    'nroserv':item_data.get('id')
                 }
                 crear_asiento(asiento_vector)
                 movimiento_num = aux
@@ -475,256 +781,7 @@ def procesar_factura(request):
             return JsonResponse({'status': 'Factura procesada correctamente N° ' + str(numero)})
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
-# @transaction.atomic
-# def procesar_factura(request):
-#     try:
-#         if request.method == 'POST':
-#             lista = Boleta.objects.last()
-#             numero = int(lista.numero) + 1
-#             hora = datetime.now().strftime('%H%M%S%f')
-#             fecha = request.POST.get('fecha')
-#             tipo = request.POST.get('tipoFac', 0)
-#
-#             preventa = json.loads(request.POST.get('preventa'))
-#             if preventa!=0:
-#                 autogenerado=preventa.get('autogenerado')
-#                 master=preventa.get('master')
-#                 house=preventa.get('house')
-#                 posicion=preventa.get('posicion')
-#                 kilos=preventa.get('kilos')
-#                 bultos=preventa.get('bultos')
-#                 terminos=preventa.get('incoterms')
-#                 pagoflete=preventa.get('pago')
-#                 origen=preventa.get('origen')
-#                 destino=preventa.get('destino')
-#                 seguimiento=preventa.get('seguimiento')
-#             else:
-#                 autogenerado=generar_autogenerado(tipo, hora, fecha, numero)
-#                 master=None
-#                 house=None
-#                 posicion=None
-#                 kilos=None
-#                 bultos=None
-#                 terminos=None
-#                 pagoflete=None
-#                 origen=None
-#                 destino=None
-#                 seguimiento=None
-#
-#
-#             serie = request.POST.get('serie', "")
-#             prefijo = request.POST.get('prefijo', 0)
-#             moneda = request.POST.get('moneda', "")
-#             arbitraje = request.POST.get('arbitraje', 0)
-#             paridad = request.POST.get('paridad', 0)
-#             cliente_data = json.loads(request.POST.get('clienteData'))
-#             codigo_cliente = cliente_data['codigo']
-#             cliente = Clientes.objects.get(codigo=codigo_cliente)
-#             fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
-#
-#             precio_total = request.POST.get('total', 0)
-#             neto = request.POST.get('neto', 0)
-#             iva = request.POST.get('iva', 0)
-#
-#             if moneda == 2:  # dolar
-#                 total_convertido = precio_total * arbitraje
-#                 neto_convertido = neto * arbitraje
-#             elif moneda not in [1, 2]:
-#                 aux = precio_total * paridad
-#                 total_convertido = aux * arbitraje
-#                 aux1 = neto * paridad
-#                 neto_convertido = aux1 * arbitraje
-#             else:
-#                 total_convertido = 0
-#                 neto_convertido = 0
-#
-#             items_data = json.loads(request.POST.get('items'))
-#
-#             tipo_mov = tipo
-#             tipo_asiento = 'V'
-#             detalle1 = 'S/I'
-#             detalle_mov = "detallemov"  #si viene de la preventa, sino vacio
-#             nombre_mov = ""
-#             asiento = generar_numero()
-#             movimiento_num = modificar_numero(asiento)
-#
-#             if int(tipo) == 23:
-#                 detalle1 = 'e-VTA/CRED'
-#                 nombre_mov = 'CONTADO'
-#             elif int(tipo) == 24:
-#                 detalle1 = 'e-NOT/CRED'
-#                 tipo_asiento = 'V'
-#                 nombre_mov = 'CONTADO'
-#             elif int(tipo) == 11:
-#                 detalle1 = 'DEV/CTDO'
-#                 nombre_mov = 'DEVOLUCION'
-#             elif int(tipo) == 21:
-#                 detalle1 = 'NOT/CRED'
-#                 tipo_asiento = 'V'
-#                 nombre_mov = 'NOTA CRED.'
-#             elif int(tipo) == 20:
-#                 detalle1 = 'VTA/CRED'
-#                 tipo_asiento = 'V'
-#                 nombre_mov = 'FACTURA'
-#
-#             detalle_asiento = detalle1 + serie + str(prefijo) + str(numero) + cliente.empresa
-#
-#             movimiento = {
-#                 'tipo': tipo_mov,
-#                 'fecha': fecha_obj,
-#                 'boleta': numero,
-#                 'monto': neto_convertido,
-#                 'iva': iva,
-#                 'total': total_convertido,
-#                 'saldo': total_convertido,
-#                 'moneda': moneda,
-#                 'detalle': detalle_mov,
-#                 'cliente': cliente.codigo,
-#                 'nombre': cliente.empresa,
-#                 'nombremov': nombre_mov,
-#                 'cambio': arbitraje,
-#                 'autogenerado': autogenerado,
-#                 'serie': serie,
-#                 'prefijo': prefijo,
-#                 'posicion': posicion,
-#                 'anio': fecha_obj.year,
-#                 'mes': fecha_obj.month,
-#                 'monedaoriginal': moneda,
-#                 'montooriginal': total_convertido,
-#                 'arbitraje': arbitraje
-#             }
-#             asiento_general = {
-#                 'detalle': detalle_asiento,
-#                 'asiento': asiento,
-#                 'monto': total_convertido,
-#                 'moneda': moneda,
-#                 'cambio': arbitraje,
-#                 'conciliado': 'N',
-#                 'clearing': fecha_obj,
-#                 'fecha': fecha_obj,
-#                 'imputacion': None,
-#                 'tipo': tipo_asiento,
-#                 'cuenta': 0,
-#                 'documento': str(numero),
-#                 'vencimiento': fecha_obj,
-#                 'pasado': 0,
-#                 'autogenerado': autogenerado,
-#                 'cliente': cliente.codigo,
-#                 'banco': 'S/I',
-#                 'centro': 'S/I',
-#                 'mov': movimiento_num,
-#                 'anio': fecha_obj.year,
-#                 'mes': fecha_obj.month,
-#                 'fechacheque': fecha_obj,
-#                 'paridad': paridad
-#             }
-#             crear_movimiento(movimiento)
-#             crear_asiento(asiento_general)
-#
-#             for item_data in items_data:
-#                 aux = int(movimiento_num) + 1
-#                 precio = float(item_data.get('precio'))
-#                 coniva = 0
-#                 totaliva = 0
-#                 if item_data.get('iva') == 'Basico':
-#                     coniva = precio * 1.22
-#                     totaliva = precio * 0.22
-#                 else:
-#                     coniva = precio
-#                     totaliva = 0
-#
-#                 if moneda == 2:  # dolar
-#                     precio_c=precio*arbitraje
-#                     iva_total_c = totaliva * arbitraje
-#                     total_coniva_c = coniva * arbitraje
-#                 elif moneda not in [1, 2]:
-#                     aux = totaliva * paridad
-#                     iva_total_c = aux * arbitraje
-#                     aux1 = coniva * paridad
-#                     total_coniva_c = aux1 * arbitraje
-#                     aux2 = precio * paridad
-#                     precio_c = aux2 * arbitraje
-#                 else:
-#                     iva_total_c = 0
-#                     total_coniva_c = 0
-#                     precio_c=0
-#
-#                 boleta = Boleta()
-#                 numero = numero
-#                 boleta.autogenerado = autogenerado
-#                 boleta.tipo = tipo
-#                 boleta.fecha = fecha
-#                 boleta.vto = fecha
-#                 boleta.tipofactura = serie
-#                 boleta.serie = serie
-#                 boleta.prefijo = prefijo
-#                 boleta.numero = numero
-#                 boleta.nrocliente = cliente.codigo
-#                 boleta.cliente = cliente.empresa
-#                 boleta.direccion = cliente.direccion
-#                 boleta.direccion2 = cliente.direccion2
-#                 boleta.localidad = cliente.localidad
-#                 boleta.ciudad = cliente.ciudad
-#                 boleta.pais = cliente.pais
-#                 boleta.telefax = cliente.telefono
-#                 boleta.ruc = cliente.ruc
-#                 boleta.condiciones = 'S/I'
-#                 boleta.corporativo = 'S/I'
-#                 boleta.moneda = moneda
-#                 boleta.cambio = arbitraje
-#                 boleta.paridad = paridad
-#                 boleta.tipocliente = 'RESPONSABLE INSCRIPTO'
-#                 boleta.item = item_data.get('id')
-#                 boleta.descripcion = item_data.get('descripcion')
-#                 boleta.precio = item_data.get('precio')
-#                 boleta.iva = item_data.get('iva')
-#                 boleta.cuenta = item_data.get('cuenta')
-#                 boleta.monto = item_data.get('precio')
-#                 boleta.totiva = iva_total_c
-#                 boleta.total = total_coniva_c
-#                 boleta.master=master
-#                 boleta.house=house
-#                 boleta.posicion=posicion
-#                 boleta.kilos=kilos
-#                 boleta.bultos=bultos
-#                 boleta.terminos=terminos
-#                 boleta.pagoflete=pagoflete
-#                 boleta.origen=origen
-#                 boleta.destino=destino
-#                 boleta.seguimiento=seguimiento
-#                 boleta.save()
-#
-#                 asiento_vector = {
-#                     'detalle': detalle_asiento,
-#                     'monto': precio_c,
-#                     'moneda': moneda,
-#                     'cambio': arbitraje,
-#                     'asiento': asiento,
-#                     'conciliado': 'N',
-#                     'clearing': fecha_obj,
-#                     'fecha': fecha_obj,
-#                     'imputacion': None,
-#                     'tipo': tipo_asiento,
-#                     'cuenta': item_data.get('cuenta'),
-#                     'documento': str(numero),
-#                     'vencimiento': fecha_obj,
-#                     'pasado': 0,
-#                     'autogenerado': autogenerado,
-#                     'cliente': cliente.codigo,
-#                     'banco': 'S/I',
-#                     'centro': 'S/I',
-#                     'mov': aux,
-#                     'anio': fecha_obj.year,
-#                     'mes': fecha_obj.month,
-#                     'fechacheque': fecha_obj,
-#                     'paridad': paridad
-#                 }
-#                 crear_asiento(asiento_vector)
-#                 movimiento_num = aux
-#
-#             return JsonResponse({'status': 'Factura procesada correctamente N° ' + str(numero)})
-#     except Exception as e:
-#         return JsonResponse({'status': 'Error: ' + str(e)})
+
 
 def generar_numero():
     # Obtener la fecha y hora actual
@@ -777,6 +834,8 @@ def crear_asiento(asiento):
         lista.detalle = asiento['detalle']
         lista.cambio = asiento['cambio']
         lista.moneda = asiento['moneda']
+        lista.nroserv = asiento['nroserv']
+        lista.posicion = asiento['posicion']
         lista.save()
 
     except Exception as e:
@@ -1292,6 +1351,121 @@ data = {
             }
 """
 
+
+def get_datos_embarque(request):
+    posicion = request.POST.get("posicion")
+    if not posicion or len(posicion) < 2:
+        return JsonResponse({'success': False, 'error': 'Posición inválida'}, status=400)
+
+    prefijo = posicion[:2]
+    embarque = None
+    embarqueReal = None
+    reserva = None
+    vuelo_vapor = None
+    carga = None
+
+    try:
+        if prefijo == 'IM':
+            embarque = IM.objects.filter(posicion=posicion).first()
+            if not embarque:
+                raise ValueError("Embarque no encontrado")
+            reserva = Reservas.objects.filter(awb=embarque.awb).first()
+            embarqueReal = Embarqueaereo.objects.filter(posicion=posicion).first()
+            carga = Cargaaerea.objects.filter(numero=embarque.numero).values('producto__nombre','bultos').first()
+            if embarque.vapor and isNumber(embarque.vapor):
+                vuelo = Vapores.objects.filter(codigo=embarque.vapor).first()
+                vuelo_vapor = vuelo.nombre if vuelo else None
+
+        elif prefijo == 'IA':
+            embarque = IA.objects.filter(posicion=posicion).first()
+            if not embarque:
+                raise ValueError("Embarque no encontrado")
+            reserva = ImportReservas.objects.filter(awb=embarque.awb).first()
+            embarqueReal = ImportEmbarqueaereo.objects.filter(posicion=posicion).first()
+            carga = ImportCargaaerea.objects.filter(numero=embarque.numero).values('producto__nombre','bultos').first()
+            conex = ImportConexaerea.objects.filter(numero=embarque.numero).values('ciavuelo', 'viaje').first()
+            if conex:
+                vuelo_vapor = str(conex['ciavuelo']) + str(conex['viaje'])
+
+        elif prefijo == 'IT':
+            embarque = IT.objects.filter(posicion=posicion).first()
+            if not embarque:
+                raise ValueError("Embarque no encontrado")
+            reserva = ImpterraReservas.objects.filter(awb=embarque.awb).first()
+            embarqueReal = ImpterraEmbarqueaereo.objects.filter(posicion=posicion).first()
+            carga = ImpterraCargaaerea.objects.filter(numero=embarque.numero).values('producto__nombre','bultos').first()
+            conex = ImportConexaerea.objects.filter(numero=embarque.numero).values('ciavuelo', 'viaje').first()
+            if conex:
+                vuelo_vapor = str(conex['ciavuelo']) + str(conex['viaje'])
+
+        elif prefijo == 'EM':
+            embarque = EM.objects.filter(posicion=posicion).first()
+            if not embarque:
+                raise ValueError("Embarque no encontrado")
+            reserva = ExpmaritReservas.objects.filter(awb=embarque.awb).first()
+            embarqueReal = ExpmaritEmbarqueaereo.objects.filter(posicion=posicion).first()
+            carga = ExpmaritCargaaerea.objects.filter(numero=embarque.numero).values('producto__nombre','bultos').first()
+            if embarque.vapor and isNumber(embarque.vapor):
+                vuelo = Vapores.objects.filter(codigo=embarque.vapor).first()
+                vuelo_vapor = vuelo.nombre if vuelo else None
+
+        elif prefijo == 'EA':
+            embarque = EA.objects.filter(posicion=posicion).first()
+            if not embarque:
+                raise ValueError("Embarque no encontrado")
+            reserva = ExportReservas.objects.filter(awb=embarque.awb).first()
+            embarqueReal = ExportEmbarqueaereo.objects.filter(posicion=posicion).first()
+            carga = ExportCargaaerea.objects.filter(numero=embarque.numero).values('producto__nombre','bultos').first()
+            conex = ImportConexaerea.objects.filter(numero=embarque.numero).values('ciavuelo', 'viaje').first()
+            if conex:
+                vuelo_vapor = str(conex['ciavuelo']) + str(conex['viaje'])
+
+        elif prefijo == 'ET':
+            embarque = ET.objects.filter(posicion=posicion).first()
+            if not embarque:
+                raise ValueError("Embarque no encontrado")
+            reserva = ExpterraReservas.objects.filter(awb=embarque.awb).first()
+            embarqueReal = ExpterraEmbarqueaereo.objects.filter(posicion=posicion).first()
+            carga = ExpterraCargaaerea.objects.filter(numero=embarque.numero).values('producto__nombre','bultos').first()
+            conex = ImportConexaerea.objects.filter(numero=embarque.numero).values('ciavuelo', 'viaje').first()
+            if conex:
+                vuelo_vapor = str(conex['ciavuelo']) + str(conex['viaje'])
+
+        else:
+            return JsonResponse({'success': False, 'error': 'Prefijo de posición no reconocido'}, status=400)
+
+        peso = reserva.kilos if prefijo in ['EA','EM','ET'] else reserva.kilosmadre
+        aplicable = reserva.aplicable if prefijo not in ['IT','ET','IM','EM'] else None
+        volumen = reserva.volumen if prefijo not in ['IM','EM'] else None
+
+        return JsonResponse({
+            "referencia": embarque.numero,
+            "seguimiento": embarque.seguimiento,
+            "peso": peso,
+            "aplicable": aplicable,
+            "volumen": volumen,
+            "transportista": embarque.transportista,
+            "vuelo_vapor": vuelo_vapor,
+            "mawb": embarque.awb,
+            "hawb": embarque.hawb,
+            "origen": embarque.origen,
+            "destino": embarque.destino,
+            "fecha_llegada_salida": embarque.fecha_embarque.strftime("%Y-%m-%d") if embarque.fecha_embarque else "",
+            "consignatario": embarque.consignatario,
+            "commodity": carga['producto__nombre'] if carga else "S/I",
+            "bultos": carga['bultos'] if carga else "S/I",
+            "wr": embarqueReal.wreceipt if embarqueReal else "",
+            "shipper": embarque.embarcador,
+            "incoterms": embarqueReal.terminos if embarqueReal else "",
+            "pago": 'COLLECT' if embarque.pago_flete == 'C' else 'PREPAID' if embarque.pago_flete else 'S/I',
+            "agente": embarque.agente,
+            "posicion": embarque.posicion,
+            "observaciones": 'S/I',
+            "servicio": None
+        })
+
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
 
