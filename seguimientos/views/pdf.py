@@ -201,7 +201,7 @@ def get_datos_caratula(request):
 
             texto += formatear_caratula("Transportista", row.transportista or "")
             texto += formatear_caratula("Orden cliente", row.refcliente or "S/O")
-            texto += '<br><hr style="border: none; border-top: 0.5px solid #000; margin: 2px 0;"><br>'
+            texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             # Embarcador
             emb = MantenimientosClientes.objects.filter(codigo=row.embarcador_codigo).first()
@@ -250,7 +250,7 @@ def get_datos_caratula(request):
             agente_ciudad_nombre = MantenimientosCiudades.objects.filter(codedi=agente_ciudad.ciudad).first().nombre if agente_ciudad else "S/I"
             texto += f"<b>Agente:</b> {row.agente or ''} - {agente_ciudad_nombre}<br>"
             texto += f"<b>Deposito:</b> {row.deposito or ''}<br><br>"
-            texto += '<hr style="border: none; border-top: 0.5px solid #000; margin: 2px 0;"><br>'
+            texto += '<span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             # Detalle del embarque
             texto += "<b>Detalle del embarque:</b><br>"
@@ -276,7 +276,7 @@ def get_datos_caratula(request):
                 texto += '<br>'
                 texto += formatear_caratula("Peso", e.bruto)
                 texto += formatear_caratula("Volumen", e.cbm)
-                texto += '<br><hr style="border: none; border-top: 0.5px solid #000; margin: 2px 0;"><br>'
+                texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             texto += formatear_caratula("Forma de pago", row.pago)
             texto += formatear_caratula("Vendedor", row.vendedor)

@@ -163,7 +163,7 @@ def get_datos_caratula(request):
             texto += formatear_caratula("Vapor", nombre_vapor)
             texto += formatear_caratula("Transportista", Vembarque.transportista)
             texto += formatear_caratula("Orden cliente", seguimiento.refcliente)
-            texto += '<br><hr style="border: none; border-top: 0.5px solid #000; margin: 2px 0;"><br>'
+            texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             texto += f"<b>Embarcador: {Vembarque.embarcador}</b><br>"
             texto += "<b>Datos del embarcador:</b><br>"
@@ -184,7 +184,7 @@ def get_datos_caratula(request):
 
             texto += f"<b>Agente:</b> {Vembarque.agente}<br>"
             texto += f"<b>Deposito:</b> {seguimiento.deposito}<br><br>"
-            texto += '<hr style="border: none; border-top: 0.5px solid #000; margin: 2px 0;"><br>'
+            texto += '<span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             # Detalle del embarque - envases
             envase = ExpmaritEnvases.objects.filter(numero=id)
@@ -209,7 +209,7 @@ def get_datos_caratula(request):
                 texto += '<br>'
                 texto += formatear_caratula("Peso", e.bruto)
                 texto += formatear_caratula("Volumen", e.cbm)
-                texto += '<br><hr style="border: none; border-top: 0.5px solid #000; margin: 2px 0;"><br>'
+                texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             texto += formatear_caratula("Forma de pago", seguimiento.pago)
             texto += formatear_caratula("Vendedor", seguimiento.vendedor)
