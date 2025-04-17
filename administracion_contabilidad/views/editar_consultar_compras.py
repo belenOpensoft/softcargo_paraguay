@@ -330,6 +330,9 @@ def obtener_imputados_orden_compra(request):
             try:
                 nro=int(nro)
                 boleta = Movims.objects.filter(mboleta=nro,mtipo__in=(40,41)).first()
+                if boleta is None:
+                    return JsonResponse({'boletas': boletas_data})
+
                 num_completo=str(boleta.mnombremov)+'-'+str(boleta.mserie)+str(boleta.mprefijo)+str(boleta.mboleta)
                 boletas_data.append({
                     'documento':num_completo ,

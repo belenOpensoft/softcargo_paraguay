@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 
+from mantenimientos.models import Productos
 from seguimientos.models import Cargaaerea, VCargaaerea, VGrillaSeguimientos, Seguimiento
 
 """ TABLA PUERTO """
@@ -132,9 +133,91 @@ def get_sugerencias_envases(request, numero):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
-
 @login_required(login_url='/login/')
 def guardar_embarques(request):
+    resultado = {}
+    try:
+        numero = request.POST['numero']
+        data = simplejson.loads(request.POST['data'])
+        seg = Seguimiento.objects.get(numero=numero)
+        registro = Cargaaerea()
+        campos = vars(registro)
+
+        for x in data:
+            k = x['name']
+            v = x['value']
+
+            # Tratamiento especial para cod_producto
+            if k == 'cod_producto' and v:
+                try:
+                    producto = Productos.objects.get(codigo=v)
+                    setattr(registro, 'producto', producto)
+                except Productos.DoesNotExist:
+                    resultado['resultado'] = 'El producto con ese código no existe.'
+                    data_json = json.dumps(resultado)
+                    return HttpResponse(data_json, content_type="application/json")
+                continue  # Evita que se reescriba más abajo
+
+            # Evita sobrescribir el campo producto si viene duplicado
+            if k == 'producto':
+                continue
+
+            for name in campos:
+                if name == k:
+                    if v is not None and len(v) > 0:
+                        setattr(registro, name, v)
+                    else:
+                        setattr(registro, name, None)
+                    break
+
+        registro.numero = numero
+        registro.save()
+
+        # ACTUALIZO DATOS EN SEGUIMIENTO
+        volumen = 0
+        montoflete = 0
+        aplicable = 0
+        data_extra = simplejson.loads(request.POST['data_extra'])
+        registros = Cargaaerea.objects.filter(numero=numero)
+
+        for x in registros:
+            if x.cbm is not None:
+                volumen += x.cbm
+
+            if data_extra[1]['value'] == '1':
+                montoflete += redondear_a_05_o_0(float(x.bruto)) * float(data_extra[3]['value'])
+                aplicable += float(x.bruto)
+            elif data_extra[1]['value'] == '2':
+                try:
+                    params = x.medidas.split('*')
+                    value = float(params[0]) * float(params[1]) * float(params[2])
+                    ap = redondear_a_05_o_0(value * 166.67)
+                    aplicable += ap
+                    montoflete += ap * float(data_extra[3]['value'])
+                except:
+                    aplicable += 0
+
+        seg.volumen = volumen
+        seg.muestroflete = montoflete
+        seg.aplicable = redondear_a_05_o_0(aplicable)
+        seg.tomopeso = data_extra[1]['value']
+        seg.tarifaprofit = data_extra[8]['value']
+        seg.tarifacompra = data_extra[5]['value']
+        seg.tarifaventa = data_extra[3]['value']
+        seg.save()
+
+        resultado['resultado'] = 'exito'
+        resultado['numero'] = str(registro.numero)
+
+    except IntegrityError:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+
+    return HttpResponse(json.dumps(resultado), content_type="application/json")
+
+@login_required(login_url='/login/')
+def guardar_embarques_old(request):
     resultado = {}
     try:
         numero = request.POST['numero']

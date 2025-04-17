@@ -23,8 +23,9 @@
                         <table class="table table-borderless table-sm">
                             <tbody>
                             <tr>
+
                                 <td style="text-align: right;">{{ form_embarques.producto.label }}</td>
-                                <td>{{ form_embarques.id }}{{ form_embarques.producto }}</td>
+                                <td>{{ form_embarques.id }}{{ form_embarques.producto }}<input type="hidden" name="cod_producto" id="cod_producto"></td>
                                 <!-- COLUMNA DOS -->
                                 <td style="text-align: right;">{{ form_embarques.bultos.label }}</td>
                                 <td>{{ form_embarques.bultos }}</td>

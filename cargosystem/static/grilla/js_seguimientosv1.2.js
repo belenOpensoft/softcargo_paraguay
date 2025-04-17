@@ -1650,6 +1650,7 @@ $(document).ready(function () {
         var data = table_embarques.row(this).data();
         $("#id_embarque_id").val(data[0]);
         $("#id_producto").val(data[1]);
+        $("#cod_producto").val(data[9]);
         $("#id_bultos_embarque").val(data[2]);
         $("#id_tipo_embarque").val(data[3]);
         $("#id_bruto_embarque").val(data[4]);
@@ -2197,7 +2198,51 @@ $(document).ready(function () {
         }
     });
     // FIN AUTOCOMPLETES
+    //productos para el embarque
+    $("#id_producto").autocomplete({
+    source: function (request, response) {
+        $.getJSON('/autocomplete_productos/', { term: request.term }, response);
+    },
+    minLength: 2,
+    select: function (event, ui) {
+        $(this).attr('data-id', ui.item['id']);  // Guarda el ID si es un item de la lista
+        $('#cod_producto').val(ui.item['id']);
+    },
+    change: function (event, ui) {
+        var input = $(this);
+        var valorIngresado = input.val();
 
+        if (ui.item) {
+            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+        } else {
+            if (valorIngresado.trim() !== '') {
+                $.ajax({
+                    url: '/agregar_producto/',
+                    method: 'POST',
+                    data: {
+                        nombre: valorIngresado,
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            input.attr('data-id', data.id);
+                            $('#cod_producto').val(data.id);
+                            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                        } else {
+                            alert("No se pudo guardar el vapor.");
+                        }
+                    },
+                    error: function () {
+                        alert("Error en la comunicación con el servidor.");
+                    }
+                });
+            } else {
+                input.val('');
+                input.css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    }
+});
 });
 
 function format(d) {

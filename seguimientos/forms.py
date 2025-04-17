@@ -381,7 +381,6 @@ class embarquesForm(BSModalModelForm):
         model = Cargaaerea
         fields = [
             'id',
-            'producto',
             'bultos',
             'bruto',
             'medidas',
@@ -449,7 +448,10 @@ class embarquesForm(BSModalModelForm):
         widget=forms.RadioSelect(attrs={'style':'width:50px;'}),
     )
     tarifafija = forms.BooleanField(label="Tarifa fija")
-
+    producto = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'autocomplete': 'off'
+    }))
 
 class gastosForm(BSModalModelForm):
     class Meta:
