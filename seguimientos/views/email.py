@@ -444,14 +444,14 @@ def get_data_email(request):
 
                     for c in carga:
                         ap1 = float(c.cbm) if c.cbm is not None else 0 * 166.67
-
-                        aplicable = round(ap1, 2) if ap1 > float(c.bruto) else float(c.bruto)
+                        bruto=float(c.bruto or 0)
+                        aplicable = round(ap1, 2) if ap1 > bruto else bruto
 
                         texto += formatear_linea("Mercadería", c.producto.nombre)
 
-                        texto += formatear_linea("Bultos", str(c.bultos))
+                        texto += formatear_linea("Bultos", str(c.bultos) if c.bultos else 0)
 
-                        texto += formatear_linea("Peso", str(c.bruto))
+                        texto += formatear_linea("Peso", bruto)
 
                         texto += formatear_linea("Aplicable", str(aplicable))
 
@@ -879,7 +879,6 @@ def get_data_email(request):
 
                 texto += "<br>"
 
-            # falta el completo
             elif title == 'Shipping instruction':
                 embarcador = Clientes.objects.get(codigo=row.embarcador_codigo)
                 if row.modo != 'IMPORT AEREO' and row.modo != 'EXPORT AEREO':
@@ -896,6 +895,7 @@ def get_data_email(request):
                     codigo=row.consignatario_codigo) if row.consignatario_codigo else None
                 cliente = Clientes.objects.get(codigo=row.cliente_codigo) if row.cliente_codigo else None
                 agente = Clientes.objects.get(codigo=row.agente_codigo) if row.agente_codigo else None
+                ocean = Clientes.objects.get(codigo=835)
 
                 mercaderia = Cargaaerea.objects.filter(numero=row.numero)
                 moneda = Monedas.objects.get(codigo=row.moneda)
@@ -909,25 +909,53 @@ def get_data_email(request):
                 fecha_formateada = fecha_actual.strftime('%A, %B %d, %Y').upper()
                 llegada = row.eta.strftime("%d/%m/%Y") if isinstance(row.eta, datetime.datetime) else ''
                 nombre = str(request.user.first_name) + ' ' + str(request.user.last_name)
+
+                if 'MARITIMO' in row.modo:
+                    modo = 'SEAFREIGHT'
+                    master='MBL'
+                    house = 'HBL'
+                elif 'AEREO' in row.modo:
+                    modo = 'AIRFREIGHT'
+                    master = 'AWB'
+                    house = 'HAWB'
+                elif 'TERRESTRE' in row.modo:
+                    modo = 'ROADFREIGHT'
+                    master = 'MCRT'
+                    house = 'HCRT'
+                else:
+                    modo = 'UNKNOWN'
+                    master = 'UNKNOWN'
+                    house = 'UNKNOWN'
+
                 texto = ''
                 texto += formatear_linea("Date", fecha_formateada)
                 texto += formatear_linea("To", agente.empresa if agente else "")
-                texto += formatear_linea("Department", row.modo)
+                texto += formatear_linea("Department", modo)
                 texto += formatear_linea("Sent by", nombre)
 
-                texto += "<br><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Dear colleagues:</p><br>"
-                texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please contact the following company to coordinate the referenced shipment:</p><br>"
+                texto += "<br><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Dear colleagues:</p>"
+                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please contact the following company to coordinate a shipment to {row.origen} as per our instructions below:</p>"
+                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please ack this message and let us know status of cargo asap.</p><br>"
+                if directo_boolean == 'true':
+                    texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please add HS code on {master} an {house}</p><br>"
+                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Find attach packing list details</p><br>"
+                if directo_boolean=='true':
+                    texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{master} - {row.pago} - Please confirm you courier costs to see if we instructed original or telex release.</p>"
+                    texto_ocean=str(ocean.empresa)+' '+str(ocean.direccion)+' '+'CP 11000 '+str(ocean.ruc)+' '+str(ocean.telefono)
+                    texto += formatear_linea("Shipper", empresa)
+                    texto += formatear_linea("Consignee", texto_ocean)
 
-                texto += formatear_linea("Shipper", empresa)
+                texto +='</br>'
+                texto += formatear_linea("Shipper name", empresa)
                 texto += formatear_linea("Address", direccion)
                 texto += formatear_linea("City", ciudad)
                 texto += formatear_linea("Country", pais)
                 texto += formatear_linea("E-mail", email)
-                texto += formatear_linea("Contacts", contactos)
+                texto += formatear_linea("Contact", contactos)
 
                 texto += "<br>"
                 if consignatario:
-                    texto += formatear_linea("Consignee", consignatario.empresa)
+                    texto += formatear_linea("Consignee name", consignatario.empresa)
                     texto += formatear_linea("Address", consignatario.direccion)
                     texto += formatear_linea("Country", consignatario.pais)
                     texto += formatear_linea("Tax ID", consignatario.ruc)
@@ -935,7 +963,6 @@ def get_data_email(request):
 
                 texto += "<br>"
                 texto += formatear_linea("Internal Reference", f"{row.numero}/{row.embarque}")
-                texto += formatear_linea("Position", row.posicion)
                 texto += formatear_linea("Estimated delivery date", llegada)
                 texto += formatear_linea("Port of loading", row.loading)
                 texto += formatear_linea("Port of discharge", row.discharge)
@@ -957,15 +984,14 @@ def get_data_email(request):
                     texto += formatear_linea("Volume", str(m.cbm) + ' CBM')
 
                 texto += formatear_linea("Payment Condition", row.pago)
-                texto += formatear_linea("Terms of purchase", row.terminos)
+                texto += formatear_linea("Buying terms", row.terminos)
                 if transportista == 'true':
                     texto += formatear_linea("Carrier", row.transportista)
                 texto += formatear_linea("Transport contract", row.contratotra)
-                texto += formatear_linea("Mode of shipment", row.modo)
+                texto += formatear_linea("Shipment mode", modo)
                 texto += formatear_linea("Currency", moneda_nombre)
                 texto += "<br>"
 
-            # falta el completo
             elif title == 'Instruccion de embarque':
                 embarcador = Clientes.objects.get(codigo=row.embarcador_codigo)
                 if row.modo != 'IMPORT AEREO' and row.modo != 'EXPORT AEREO':
@@ -982,6 +1008,7 @@ def get_data_email(request):
                     codigo=row.consignatario_codigo) if row.consignatario_codigo else None
                 cliente = Clientes.objects.get(codigo=row.cliente_codigo) if row.cliente_codigo else None
                 agente = Clientes.objects.get(codigo=row.agente_codigo) if row.agente_codigo else None
+                ocean = Clientes.objects.get(codigo=835)
 
                 mercaderia = Cargaaerea.objects.filter(numero=row.numero)
                 moneda = Monedas.objects.get(codigo=row.moneda)
@@ -999,13 +1026,41 @@ def get_data_email(request):
                 llegada = row.eta.strftime("%d/%m/%Y") if isinstance(row.eta, datetime.datetime) else ''
                 nombre = str(request.user.first_name)+' '+str( request.user.last_name)
                 texto = ''
+                if 'MARITIMO' in row.modo:
+                    modo = 'MARITIMO'
+                    master = 'MBL'
+                    house = 'HBL'
+                elif 'AEREO' in row.modo:
+                    modo = 'AEREO'
+                    master = 'AWB'
+                    house = 'HAWB'
+                elif 'TERRESTRE' in row.modo:
+                    modo = 'TERRESTRE'
+                    master = 'MCRT'
+                    house = 'HCRT'
+                else:
+                    modo = 'UNKNOWN'
+                    master = 'UNKNOWN'
+                    house = 'UNKNOWN'
                 texto += formatear_linea("Fecha", fecha_formateada)
                 texto += formatear_linea("A", agente.empresa if agente else "")
-                texto += formatear_linea("Departamento", row.modo)
+                texto += formatear_linea("Departamento", modo)
                 texto += formatear_linea("Envíado", nombre)
 
                 texto += "<br><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Estimados Sres.:</p><br>"
-                texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor, contactar a la siguiente compañía para coordinar la operación referenciada:</p><br>"
+                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor, contactar a la siguiente compañía para coordinar un embarque a {row.origen} según nuestras instrucciones a continuación:</p>"
+                texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor confirmar este mensaje e informarnos el estado de la carga a la brevedad.</p><br>"
+                if directo_boolean == 'true':
+                    texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Favor incluir el código HS en {master} y {house}</p>"
+                texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Adjuntamos detalle de packing list.</p>"
+                if directo_boolean == 'true':
+                    texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{master} - {row.pago} - Favor confirmar los costos de courier para definir si se instruye original o liberación vía télex</p>"
+                    ocean = Clientes.objects.get(codigo=835)
+                    texto_ocean = str(ocean.empresa) + ' ' + str(ocean.direccion) + ' CP 11000 ' + str(
+                        ocean.ruc) + ' ' + str(ocean.telefono)
+                    texto += formatear_linea("Shipper", empresa)
+                    texto += formatear_linea("Consignatario", texto_ocean)
+                texto += "<br>"
 
                 texto += formatear_linea("Proveedor", empresa)
                 texto += formatear_linea("Dirección", direccion)
@@ -1059,7 +1114,7 @@ def get_data_email(request):
                 if transportista == 'true':
                     texto += formatear_linea("Transportista", row.transportista)
                 texto += formatear_linea("Contrato transport.", row.contratotra)
-                texto += formatear_linea("Modo de Embarque", row.modo)
+                texto += formatear_linea("Modo de Embarque", modo)
                 texto += formatear_linea("Moneda", moneda_nombre)
                 texto += "<br>"
 
@@ -1082,6 +1137,7 @@ def get_data_email(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
 
 
 def image_to_base64(image_path):

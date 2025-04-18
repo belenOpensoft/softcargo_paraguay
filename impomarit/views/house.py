@@ -587,11 +587,18 @@ def eliminar_house(request):
     resultado = {}
     try:
         id = request.POST['id']
+        embarque=Embarqueaereo.objects.filter(numero=id).first()
         Embarqueaereo.objects.get(numero=id).delete()
         Carga.objects.filter(numero=id).delete()
         Conex.objects.filter(numero=id).delete()
         Serviceaereo.objects.filter(numero=id).delete()
         Env.objects.filter(numero=id).delete()
+        if embarque:
+            seguimiento = Seguimiento.objects.filter(numero=embarque.seguimiento).first()
+            if seguimiento:
+                seguimiento.embarque=None
+                seguimiento.posicion=None
+                seguimiento.save()
 
         resultado['resultado'] = 'exito'
     except IntegrityError as e:

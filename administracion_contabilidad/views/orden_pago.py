@@ -21,12 +21,12 @@ from administracion_contabilidad.models import Asientos, VistaPagos, Dolar, Cheq
 @login_required(login_url='/login')
 def orden_pago_view(request):
     #if request.user.has_perms(["administracion_contabilidad.view_vistapagos", ]):
-    if request.user.has_perms(["administracion_contabilidad.view_forzarerror", ]):
-        form = OrdenPago(initial={'fecha':datetime.now().strftime('%Y-%m-%d')})
-        return render(request, 'orden_pago.html', {'form': form})
-    else:
-        messages.error(request,'Funcionalidad en construcción.')
-        return HttpResponseRedirect('/')
+    #if request.user.has_perms(["administracion_contabilidad.view_forzarerror", ]):
+    form = OrdenPago(initial={'fecha':datetime.now().strftime('%Y-%m-%d')})
+    return render(request, 'orden_pago.html', {'form': form})
+    #else:
+     #   messages.error(request,'Funcionalidad en construcción.')
+      #  return HttpResponseRedirect('/')
 
 param_busqueda = {
     0: 'autogenerado__icontains',
