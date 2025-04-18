@@ -293,6 +293,7 @@ def source_gastos_importado(request):
                 "secomparte": registro.secomparte,
                 "moneda": registro.moneda,
                 "precio": registro.precio,
+                "costo": registro.costo,
                 "arbitraje": registro.arbitraje,
                 "tipogasto": registro.tipogasto,
                 "pinformar": registro.pinformar,

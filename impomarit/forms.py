@@ -1009,6 +1009,7 @@ class gastosFormHouse(BSModalModelForm):
     servicio = forms.ChoiceField(choices=list(), widget=forms.Select(
         attrs={'class': 'form-control', 'autocomplete': 'off', 'id': 'id_servicio_h'}), label='Servicio')
     precio = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'required': True, 'id': 'id_precio_h'}), max_digits=12, decimal_places=4, label='Precio')
+    costo = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'required': True, 'id': 'id_costo_h'}), max_digits=12, decimal_places=4, label='Costo')
     arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'id': 'id_arbitraje_h'}), max_digits=12, decimal_places=4, label='Arbitraje', initial='0')
     pinformar = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'id': 'id_pinformar_h'}), max_digits=12, decimal_places=4, label='Informar', initial='0')
     moneda = forms.ChoiceField(widget=forms.Select(attrs={'autocomplete': 'off', 'required': True,  'id': 'id_moneda_h'}), label='Moneda', choices=(), initial='2')

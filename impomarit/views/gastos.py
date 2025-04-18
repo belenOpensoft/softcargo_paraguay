@@ -295,6 +295,7 @@ def add_gasto_house(request):
         secomparte = form_data.get('secomparte')
         moneda = form_data.get('moneda')
         precio = form_data.get('precio')
+        costo = form_data.get('costo')
         arbitraje = form_data.get('arbitraje', 0)  # valor opcional
         tipogasto = form_data.get('tipogasto')
         pinformar = form_data.get('pinformar', 0)  # valor opcional
@@ -319,6 +320,7 @@ def add_gasto_house(request):
         registro.secomparte = secomparte
         registro.moneda = moneda
         registro.precio = precio if precio else 0
+        registro.costo = costo if costo else 0
         registro.arbitraje = arbitraje
         registro.tipogasto = tipogasto
         registro.pinformar = pinformar
@@ -362,6 +364,7 @@ def add_gasto_importado(request):
                     registro.secomparte = gasto_data.get('secomparte')
                     registro.moneda = gasto_data.get('moneda')
                     registro.precio = gasto_data.get('precio')
+                    registro.costo = gasto_data.get('costo')
                     registro.arbitraje = gasto_data.get('arbitraje')
                     registro.tipogasto = gasto_data.get('tipogasto')
                     registro.pinformar = gasto_data.get('pinformar')

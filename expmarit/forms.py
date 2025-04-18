@@ -984,6 +984,8 @@ class gastosFormHouse(BSModalModelForm):
                                    label='Reembolsable')
     secomparte = forms.CharField(widget=forms.Select(choices=CHOICES_SC, attrs={'id': 'id_secomparte_h'}),
                                  label='Se comparte')
+    costo = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'required': True, 'id': 'id_costo_h'}), max_digits=12, decimal_places=4, label='Costo')
+
     empresa = forms.CharField(widget=forms.Select(choices=CHOICES_E, attrs={'id': 'id_empresa_h'}), label='Empresa')
     modo = forms.CharField(widget=forms.Select(choices=CHOICES_M, attrs={'id': 'id_modo_h'}))
     servicio = forms.ChoiceField(choices=list(), widget=forms.Select(

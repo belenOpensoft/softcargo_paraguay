@@ -1863,6 +1863,7 @@ var expandedRow;
     $('#tabla_gastos_house tbody').off('dblclick').on('dblclick', 'tr', function () {
         var data = table_gastos.row(this).data();
         $("#id_gasto_id_house").val(data[0]);
+        $("#id_costo_h").val(data[4]);
         $("#id_precio_h").val(data[3]);
         $("#id_detalle_h").val(data[5]);
         if(data[6] === 'Collect'){
@@ -4039,8 +4040,8 @@ function gastos_btn_h_click(){
                 },
                 modal: true,
                 title: "Gastos para el House N°: " + selectedRowN,
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
+                height: wHeight * 0.70 ,
+                width: wWidth * 0.70,
                 class: 'modal fade',
                 buttons: [
                     {
@@ -5260,8 +5261,20 @@ function cargar_gastos_factura(callback){
                 "title": "Tipo"
             },
             {
-                "data": 3,    // Cantidad - `data[3]`
-                "title": "Cantidad"
+                "data": null,
+                "title": "Cantidad",
+                "render": function(data, type, row) {
+                    let precio = parseFloat(row[3]) || 0;
+                    let costo = parseFloat(row[4]) || 0;
+
+                    if (precio !== 0) {
+                        return precio.toFixed(2);
+                    } else if (costo !== 0) {
+                        return costo.toFixed(2);
+                    } else {
+                        return "0.00"; // o "S/I" si preferís
+                    }
+                }
             },
             {
                 "data": null, // Facturar a.. - Valor de relleno "S/I"

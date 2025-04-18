@@ -13,6 +13,7 @@
     border-radius: 3px;
     }
 </style>
+
 <div id="gastos_modal_house"  style="display: none;">
 
  <form id="gastos_form_house">
@@ -38,9 +39,9 @@
                   <!-- COLUMNA DOS -->
                   <td style="text-align: right;">{{ form_gastos_house.precio.label }}</td>
                  <td>{{ form_gastos_house.precio }}</td>
-                  <!-- COLUMNA TRES -->
-                 <td style="text-align: right;">{{ form_gastos_house.arbitraje.label }}</td>
-                 <td>{{ form_gastos_house.arbitraje }}</td>
+                   <td style="text-align: right;">{{ form_gastos_house.costo.label }}</td>
+                 <td>{{ form_gastos_house.costo }}</td>
+
                  <td style="text-align: right;">EGRESOS:</td>
                  <td><input type="number" class="form-control" step="any" style="background-color: #DAD085;text-align: right;" id="gastos_egresos"></td>
 
@@ -76,7 +77,9 @@
 
                  <td style="text-align: right;">{{ form_gastos_house.empresa.label }}</td>
                  <td>{{ form_gastos_house.empresa }}</td>
-
+                  <!-- COLUMNA TRES -->
+                 <td style="text-align: right;">{{ form_gastos_house.arbitraje.label }}</td>
+                 <td>{{ form_gastos_house.arbitraje }}</td>
              </tr>
              <tr>
                  <td style="text-align: right;">{{ form_gastos_house.detalle.label }}</td>

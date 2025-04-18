@@ -937,6 +937,8 @@ class gastosFormHouse(BSModalModelForm):
     modo = forms.CharField(widget=forms.Select(choices=CHOICES_M, attrs={'id': 'id_modo_h'}))
     servicio = forms.ChoiceField(choices=list(), widget=forms.Select(
         attrs={'class': 'form-control', 'autocomplete': 'off', 'required': True, 'id': 'id_servicio_h'}), label='Servicio', required=True)
+    costo = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'required': True, 'id': 'id_costo_h'}), max_digits=12, decimal_places=4, label='Costo')
+
     precio = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'required': True, 'id': 'id_precio_h'}), max_digits=12, decimal_places=4, required=True, label='Precio')
     pinformar = forms.DecimalField(widget=forms.NumberInput(
         attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4,
