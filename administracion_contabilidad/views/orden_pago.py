@@ -15,7 +15,7 @@ from administracion_contabilidad.views.facturacion import generar_numero, modifi
 from administracion_contabilidad.views.preventa import generar_autogenerado
 from mantenimientos.models import Clientes, Monedas
 from administracion_contabilidad.models import Asientos, VistaPagos, Dolar, Cheques, Impuordenes, Ordenes, Cuentas, \
-    Movims, Chequeorden
+    Movims, Chequeorden, VistaOrdenesPago
 
 
 @login_required(login_url='/login')
@@ -29,33 +29,34 @@ def orden_pago_view(request):
       #  return HttpResponseRedirect('/')
 
 param_busqueda = {
-    0: 'autogenerado__icontains',
-    1: 'fecha__icontains',
-    2: 'cliente__icontains',
-    3: 'documento__icontains',
-    4: 'total__icontains',
-    5: 'monto__icontains',
-    6: 'iva__icontains',
-    7: 'moneda__icontains',
+    1: 'autogenerado__icontains',
+    2: 'fecha__icontains',
+    3: 'num_completo__icontains',
+    4: 'cliente__icontains',
+    5: 'posicion__icontains',
+    6: 'monto__icontains',
+    7: 'iva__icontains',
+    8: 'total__icontains',
 }
 
 columns_table = {
-    0: 'autogenerado',
-    1: 'fecha',
-    2: 'cliente',
-    3: 'documento',
-    4: 'total',
-    5: 'monto',
-    6: 'iva',
-    7: 'moneda',
+    0:'vacia',
+    1: 'autogenerado',
+    2: 'fecha',
+    3: 'num_completo',
+    4: 'cliente',
+    5: 'posicion',
+    6: 'monto',
+    7: 'iva',
+    8: 'total',
 }
 
 def source_ordenes(request):
     try:
         args = {}
-        for i in range(10):  # Cambia el rango según el número de columnas reales
+        for i in range(10):  # Ajustar si tenés más o menos columnas
             key = f'columns[{i}][search][value]'
-            args[str(i)] = request.GET.get(key, '')  # Usa un valor predeterminado si la clave no existe
+            args[str(i)] = request.GET.get(key, '')
 
         filtro = get_argumentos_busqueda(**args)
         start = int(request.GET.get('start', 0))
@@ -69,44 +70,42 @@ def source_ordenes(request):
 
         end = start + length
 
-        # Consulta a la base de datos
         if filtro:
-            registros = VistaPagos.objects.filter(**filtro,tipo_factura='O/PAGO').order_by(*order)
+            registros = VistaOrdenesPago.objects.filter(**filtro).order_by(*order)
         else:
-            registros = VistaPagos.objects.all().order_by(*order)
+            registros = VistaOrdenesPago.objects.all().order_by(*order)
 
-        finales=[]
-
-        for r in registros:
-
-            try:
-                moneda_nombre = Monedas.objects.get(codigo=r.moneda).nombre if r.moneda in [1, 2, 3, 4, 5,
-                                                                                            6] else ''
-            except Monedas.DoesNotExist:
-                moneda_nombre = ''
-
-            finales.append({
-                'autogenerado': r.autogenerado,
-                'fecha': r.fecha.strftime('%Y-%m-%d') if r.fecha else '',
-                'cliente': r.cliente,
-                'documento': r.documento,
-                'total': r.total,
-                'monto': r.monto,
-                'iva': r.iva,
-                'moneda': moneda_nombre,
-            })
-
-        # Preparación de la respuesta
         resultado = {
-            'data': finales[start:end],
+            'data': get_data(registros[start:end]),
             'length': length,
             'draw': request.GET.get('draw', '1'),
-            'recordsTotal': VistaPagos.objects.count(),
-            'recordsFiltered': len(finales),
+            'recordsTotal': Movims.objects.filter(mtipo=45).count(),
+            'recordsFiltered': registros.count(),
         }
+
         return JsonResponse(resultado)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+def get_data(registros_filtrados):
+    try:
+        data = []
+        for registro in registros_filtrados:
+            registro_json = []
+            registro_json.append(str('v'))
+            registro_json.append('' if registro.autogenerado is None else str(registro.autogenerado))
+            registro_json.append('' if registro.fecha is None else registro.fecha.strftime('%Y-%m-%d'))
+            registro_json.append('' if registro.num_completo is None else str(registro.num_completo))
+            registro_json.append('' if registro.cliente is None else str(registro.cliente))
+            registro_json.append('' if registro.posicion is None else str(registro.posicion))
+            registro_json.append('' if registro.monto is None else str(registro.monto))
+            registro_json.append('' if registro.iva is None else str(registro.iva))
+            registro_json.append('' if registro.total is None else str(registro.total))
+            data.append(registro_json)
+        return data
+    except Exception as e:
+        raise TypeError(e)
 
 def get_order(request, columns):
     try:

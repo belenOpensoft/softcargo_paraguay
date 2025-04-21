@@ -19,25 +19,26 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 param_busqueda = {
-    0: 'autogenerado__icontains',
-    1: 'fecha__icontains',
-    2: 'numero__icontains',
-    3: 'detalle__icontains',
+    1: 'autogenerado__icontains',
+    2: 'fecha__icontains',
+    3: 'numero__icontains',
     4: 'cliente__icontains',
-    5: 'monto__icontains',
-    6: 'iva__icontains',
-    7: 'total__icontains',
+    5: 'posicion__icontains',
+    6: 'monto__icontains',
+    7: 'iva__icontains',
+    8: 'total__icontains',
 }
 
 columns_table = {
-    0: 'autogenerado',
-    1: 'fecha',
-    2: 'numero',
-    3: 'detalle',
+    0:'vacia',
+    1: 'autogenerado',
+    2: 'fecha',
+    3: 'numero',
     4: 'cliente',
-    5: 'monto',
-    6: 'iva',
-    7: 'total',
+    5: 'posicion',
+    6: 'monto',
+    7: 'iva',
+    8: 'total',
 }
 
 @login_required(login_url='/login')
@@ -101,11 +102,11 @@ def source_cobranza(request):
 
         end = start + length
 
-        # Consulta a la base de datos
+        order = get_order(request, columns_table)
         if filtro:
-            registros = ListaCobranzas.objects.filter(**filtro).order_by()
+            registros = ListaCobranzas.objects.filter(**filtro).order_by(*order)
         else:
-            registros = ListaCobranzas.objects.all().order_by()
+            registros = ListaCobranzas.objects.all().order_by(*order)
 
         # Preparación de la respuesta
         resultado = {
@@ -119,20 +120,46 @@ def source_cobranza(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+def get_order(request, columns):
+    try:
+        result = []
+        order_column = request.GET['order[0][column]']
+        order_dir = request.GET['order[0][dir]']
+        order = columns[int(order_column)]
+        if order_dir == 'desc':
+            order = '-' + columns[int(order_column)]
+        result.append(order)
+        i = 1
+        while i > 0:
+            try:
+                order_column = request.GET['order[' + str(i) + '][column]']
+                order_dir = request.GET['order[' + str(i) + '][dir]']
+                order = columns[int(order_column)]
+                if order_dir == 'desc':
+                    order = '-' + columns[int(order_column)]
+                result.append(order)
+                i += 1
+            except Exception as e:
+                i = 0
+        result.append('fecha')
+        return result
+    except Exception as e:
+        raise TypeError(e)
 
 def get_data(registros_filtrados):
     try:
         data = []
         for registro in registros_filtrados:
             registro_json = []
+            registro_json.append(str('v'))
             registro_json.append('' if registro.autogenerado is None else str(registro.autogenerado))
             registro_json.append('' if registro.fecha is None else registro.fecha.strftime('%Y-%m-%d'))
             registro_json.append('' if registro.numero is None else str(registro.numero))
-            registro_json.append('' if registro.detalle is None else str(registro.detalle))
             registro_json.append('' if registro.cliente is None else str(registro.cliente))
-            registro_json.append('' if registro.monto is None else str(registro.monto))
-            registro_json.append('' if registro.iva is None else str(registro.iva))
-            registro_json.append('' if registro.total is None else str(registro.total))
+            registro_json.append('' if registro.posicion is None else str(registro.posicion))
+            registro_json.append(f"{float(registro.monto):.2f}" if registro.monto is not None else '')
+            registro_json.append(f"{float(registro.iva):.2f}" if registro.iva is not None else '')
+            registro_json.append(f"{float(registro.total):.2f}" if registro.total is not None else '')
             data.append(registro_json)
         return data
     except Exception as e:

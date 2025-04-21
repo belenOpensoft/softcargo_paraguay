@@ -12,24 +12,23 @@ from mantenimientos.models import Clientes, Servicios
 from administracion_contabilidad.forms import ProveedoresGastos
 from django.http import JsonResponse
 param_busqueda = {
-    0: 'autogenerado__icontains',
-    1: 'fecha__icontains',
-    2: 'cliente__icontains',
-    3: 'numero__icontains',
-    4: 'detalle__icontains',
-    5: 'tipo__icontains',
+    1: 'autogenerado__icontains',
+    2: 'fecha__icontains',
+    3: 'num_completo__icontains',
+    4: 'cliente__icontains',
+    5: 'posicion__icontains',
     6: 'monto__icontains',
     7: 'iva__icontains',
     8: 'total__icontains',
 }
 
 columns_table = {
-    0: 'autogenerado',
-    1: 'fecha',
-    2: 'cliente',
-    3: 'numero',
-    4: 'detalle',
-    5: 'tipo',
+    0:'vacia',
+    1: 'autogenerado',
+    2: 'fecha',
+    3: 'num_completo',
+    4: 'cliente',
+    5: 'posicion',
     6: 'monto',
     7: 'iva',
     8: 'total',
@@ -484,6 +483,7 @@ def get_order(request, columns):
                 i += 1
             except Exception as e:
                 i = 0
+        result.append('fecha')
         return result
     except Exception as e:
         raise TypeError(e)
@@ -493,12 +493,12 @@ def get_data(registros_filtrados):
         data = []
         for registro in registros_filtrados:
             registro_json = []
+            registro_json.append(str('v'))
             registro_json.append('' if registro.autogenerado is None else str(registro.autogenerado))
             registro_json.append('' if registro.fecha is None else registro.fecha.strftime('%Y-%m-%d'))
+            registro_json.append('' if registro.num_completo is None else str(registro.num_completo))
             registro_json.append('' if registro.cliente is None else str(registro.cliente))
-            registro_json.append('' if registro.numero is None else str(registro.numero))
-            registro_json.append('' if registro.detalle is None else str(registro.detalle))
-            registro_json.append('' if registro.tipo is None else str(registro.tipo))
+            registro_json.append('' if registro.posicion is None else str(registro.posicion))
             registro_json.append('' if registro.monto is None else str(registro.monto))
             registro_json.append('' if registro.iva is None else str(registro.iva))
             registro_json.append('' if registro.total is None else str(registro.total))

@@ -17,7 +17,7 @@ from impterrestre.models import ImpterraEmbarqueaereo, ImpterraCargaaerea, VEmba
 from mantenimientos.models import Clientes, Servicios, Monedas, Vapores
 from administracion_contabilidad.forms import Factura, RegistroCargaForm
 from administracion_contabilidad.models import Boleta, Asientos, Movims, Infofactura, \
-    VistaGastosPreventa, Dolar, Factudif, VPreventas
+    VistaGastosPreventa, Dolar, Factudif, VPreventas, VistaVentas
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from datetime import datetime
 from django.db import transaction
@@ -29,34 +29,24 @@ from administracion_contabilidad.forms import pdfForm
 param_busqueda = {
     1: 'autogenerado__icontains',
     2: 'fecha__icontains',
-    3: 'serie__icontains',
-    4: 'prefijo__icontains',
-    5: 'numero__icontains',
-    6: 'cliente__icontains',
-    7: 'master__icontains',
-    8: 'house__icontains',
-    9: 'concepto__icontains',
-    10: 'monto__icontains',
-    11: 'iva__icontains',
-    12: 'totiva__icontains',
-    13: 'total__icontains',
+    3: 'num_completo__icontains',
+    4: 'cliente__icontains',
+    5: 'posicion__icontains',
+    6: 'monto__icontains',
+    7: 'iva__icontains',
+    8: 'total__icontains',
 }
 
 columns_table = {
     0:'vacia',
     1: 'autogenerado',
     2: 'fecha',
-    3: 'serie',
-    4: 'prefijo',
-    5: 'numero',
-    6: 'cliente',
-    7: 'master',
-    8: 'house',
-    9: 'concepto',
-    10: 'monto',
-    11: 'iva',
-    12: 'totiva',
-    13: 'total',
+    3: 'num_completo',
+    4: 'cliente',
+    5: 'posicion',
+    6: 'monto',
+    7: 'iva',
+    8: 'total',
 }
 
 
@@ -70,11 +60,6 @@ def source_facturacion(request):
         '6': request.GET['columns[6][search][value]'],
         '7': request.GET['columns[7][search][value]'],
         '8': request.GET['columns[8][search][value]'],
-        '9': request.GET['columns[9][search][value]'],
-        '10': request.GET['columns[10][search][value]'],
-        '11': request.GET['columns[11][search][value]'],
-        '12': request.GET['columns[12][search][value]'],
-        '13': request.GET['columns[13][search][value]'],  # Nueva columna agregada
     }
 
     filtro = get_argumentos_busqueda(**args)
@@ -87,9 +72,9 @@ def source_facturacion(request):
     end = start + length
     order = get_order(request, columns_table)
     if filtro:
-        registros = Boleta.objects.filter(**filtro).order_by(*order)
+        registros = VistaVentas.objects.filter(**filtro).order_by(*order)
     else:
-        registros = Boleta.objects.all().order_by(*order)
+        registros = VistaVentas.objects.all().order_by(*order)
     resultado = {}
     data = get_data(registros[start:end])
     resultado['data'] = data
@@ -107,22 +92,16 @@ def get_data(registros_filtrados):
         data = []
         for registro in registros_filtrados:
             registro_json = []
-            registro_json.append(str(registro.id))
+            registro_json.append(str('v'))
             registro_json.append('' if registro.autogenerado is None else str(registro.autogenerado))
             registro_json.append('' if registro.fecha is None else registro.fecha.strftime('%Y-%m-%d'))
-            registro_json.append('' if registro.prefijo is None else str(registro.prefijo))
-            registro_json.append('' if registro.serie is None else str(registro.serie))
-            registro_json.append('' if registro.numero is None else str(registro.numero))
+            registro_json.append('' if registro.num_completo is None else str(registro.num_completo))
             registro_json.append('' if registro.cliente is None else str(registro.cliente))
-            registro_json.append('' if registro.master is None else str(registro.master))
-            registro_json.append('' if registro.house is None else str(registro.house))
-            registro_json.append('' if registro.concepto is None else str(registro.concepto))
+            registro_json.append('' if registro.posicion is None else str(registro.posicion))
             registro_json.append('' if registro.monto is None else str(registro.monto))
             registro_json.append('' if registro.iva is None else str(registro.iva))
-            registro_json.append('' if registro.totiva is None else str(registro.totiva))
             registro_json.append('' if registro.total is None else str(registro.total))
             data.append(registro_json)
-            print(json.dumps(data, indent=4))
         return data
     except Exception as e:
         raise TypeError(e)
@@ -160,7 +139,7 @@ def get_order(request, columns):
                 i += 1
             except Exception as e:
                 i = 0
-        result.append('id')
+        result.append('fecha')
         return result
     except Exception as e:
         raise TypeError(e)

@@ -87,24 +87,32 @@ $(document).ready(function() {
     },
     "columnDefs": [
         {
-            "targets": [0],  // Ocultamos ambas columnas en una sola configuración
-            "visible": true,
-            "searchable": false ,
+            "targets": 0,  // Columna 0 (se mantiene pero oculta su contenido)
             "className": "invisible-column",
-             "render": function(data, type, row) {
-            return "";  // Devuelve una celda vacía
-        }
+            "searchable": false,
+            "visible":true,
         },
-        ],
-     "columns": [
-        { "data": null },
-        { "data": "fecha" },
-        { "data": "cliente" },
-        { "data": "documento" },
-        { "data": "total" },
-        { "data": "monto" },
-        { "data": "iva" },
-        { "data": "moneda" }
+        {
+            "targets": 1,  // Oculta completamente la columna 1
+            "visible": false,
+            "searchable": false
+        },
+        {
+            "targets": 2,  // Asignamos la columna de fecha
+            "type": "date-iso", // Indica que esta columna es de tipo fecha
+            "orderable": true // Habilita el ordenamiento
+        }
+    ],
+    "columns": [
+        { "visible": true }, // Columna 0
+        { "visible": false }, // Columna 1
+        { "orderable": true }, // Columna 2 (Ordenable)
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
+        { "orderable": true },
     ],
 
     "language": {

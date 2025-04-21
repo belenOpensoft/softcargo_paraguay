@@ -10465,6 +10465,7 @@ class ListaCobranzas(models.Model):
     autogenerado = models.CharField(primary_key=True, max_length=50)
     numero = models.CharField(max_length=50, null=True, blank=True)
     nrocliente = models.CharField(max_length=50, null=True, blank=True)
+    posicion = models.CharField(max_length=50, null=True, blank=True)
     detalle = models.TextField(null=True, blank=True)
     fecha = models.DateTimeField()
     cliente = models.CharField(max_length=50, null=True, blank=True)
@@ -10530,6 +10531,22 @@ class VistaVentas(models.Model):
     class Meta:
         managed = False  # Indicates that this model represents a database view
         db_table = 'vista_ventas'
+
+
+class VistaOrdenesPago(models.Model):
+    autogenerado = models.CharField(primary_key=True, max_length=50)
+    num_completo = models.CharField(max_length=50, null=True, blank=True)
+    nrocliente = models.CharField(max_length=50, null=True, blank=True)
+    cliente = models.CharField(max_length=50, null=True, blank=True)
+    monto = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    iva = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    fecha = models.DateTimeField(null=True, blank=True)
+    posicion = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        managed = False  # Indicates that this model represents a database view
+        db_table = 'vista_ordenes_pago'
 
 class VistaPagos(models.Model):
     autogenerado = models.CharField(primary_key=True, max_length=50)
