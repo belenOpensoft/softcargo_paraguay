@@ -13,7 +13,30 @@
     display: none;
   }
 </style>
+<style>
+  .tabla-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    display: block;
+  }
 
+  .tabla-scroll table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+  }
+
+  .tabla-scroll thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #f8f9fa; /* Asegura fondo para que no se mezcle con el contenido */
+  }
+
+  .tabla-scroll th {
+    background-color: #f8f9fa;
+  }
+</style>
 <style>
   /* Reduce tamaño de fuente general */
   #consultaCompras input,

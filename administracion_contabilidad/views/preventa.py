@@ -1,4 +1,5 @@
 import io
+import random
 from datetime import datetime
 
 import xlsxwriter
@@ -28,25 +29,18 @@ from expmarit.models import VEmbarqueaereo as Vexpmarit
 from expaerea.models import VEmbarqueaereo as Vexpaerea
 from expterrestre.models import VEmbarqueaereo as Vexpterrestre
 
+def generar_autogenerado(fecha_noseusa=None):
+    fecha = datetime.now()
 
+    # Formato con microsegundos: yyyyMMddHHmmssffffff
+    fecha_str = fecha.strftime('%Y%m%d%H%M%S%f')
 
-def generar_autogenerado(fecha):
-    fecha = fecha.replace('-', '').replace(':', '').replace('T', '')
-    qsy = 999
-    aux = Infofactura.objects.last()
+    qsy = str(random.randint(100, 999))  # Aleatorio de 3 dígitos
 
-    try:
-        numero = str(int(str(aux.autogenerado).zfill(9)[-9:]) + 1).zfill(9)
-        # numero = int(aux.autogenerado[-9:]) + 1
-    except AttributeError:
-        numero = 1
-    except TypeError:
-        numero = 1
-
-    autogenerado = f"{fecha}{qsy}{numero}"
-    print(autogenerado)
+    autogenerado = f"{fecha_str}{qsy}"
 
     return autogenerado
+
 
 
 def guardar_infofactura(request):

@@ -271,6 +271,11 @@ def guardar_impuventa(request):
                         impuventa.fechaimpu = fecha
                         impuventa.save()
 
+                        movimiento_fac=Movims.objects.filter(mautogen=boleta.autogenerado).first()
+                        if movimiento_fac:
+                            movimiento_fac.msaldo=float(movimiento_fac.msaldo)-float(item['imputado'])
+                            movimiento_fac.save()
+
             try:
                 cliente_data = Clientes.objects.get(codigo=cobranza[0]['nrocliente'])
             except Exception as _:
@@ -618,6 +623,7 @@ def crear_asiento(asiento):
         lista.tipo = asiento['tipo']
         lista.documento = asiento['documento']
         lista.vto = asiento['vencimiento']
+        lista.modo = asiento['modo']
         lista.pasado = asiento['pasado']
         lista.autogenerado = asiento['autogenerado']
         lista.cliente = asiento['cliente']

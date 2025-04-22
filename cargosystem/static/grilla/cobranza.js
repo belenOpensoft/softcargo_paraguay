@@ -1114,7 +1114,8 @@ $.ajax({
         success: function(response) {
             if (response.status === 'exito') {
                 $('#dialog-form').dialog('close');
-
+                $('#paymentModal').dialog('close');
+                table.ajax.reload();
                 // Opcional: recargar una tabla o actualizar la UI
             } else {
                 alert(response.status);

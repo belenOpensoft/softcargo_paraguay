@@ -1,0 +1,152 @@
+{% extends 'base_table_v2.html' %}
+{% load static %}
+{% block contenido %}
+<title>Consultar Cobranzas</title>
+
+<style>
+  input.bg-warning {
+    background-color: #fff3cd !important;
+  }
+  .tabla-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    display: block;
+  }
+  .oculto {
+    display: none;
+  }
+  #consultaCobranzas input,
+  #consultaCobranzas select,
+  #consultaCobranzas label,
+  #consultaCobranzas legend {
+    font-size: 0.85rem;
+  }
+  #consultaCobranzas .form-control {
+    height: calc(1.5em + 0.5rem + 2px);
+    padding: 0.25rem 0.5rem;
+  }
+  #consultaCobranzas .btn {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+  }
+  #consultaCobranzas .table {
+    font-size: 0.85rem;
+  }
+</style>
+<style>
+  .tabla-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    display: block;
+  }
+
+  .tabla-scroll table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+  }
+
+  .tabla-scroll thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #f8f9fa; /* Asegura fondo para que no se mezcle con el contenido */
+  }
+
+  .tabla-scroll th {
+    background-color: #f8f9fa;
+  }
+</style>
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/administracion/administracion.css' %}">
+
+<div id="consultaCobranzas" class="border rounded p-3 bg-light" style="max-width: 80vw; overflow: hidden; font-size: 14px;">
+  <form method="get" id="consultaCobranzasForm" action="{% url 'editar_consultar_cobranzas' %}">
+    {% csrf_token %}
+
+    <div class="d-grid" style="grid-template-columns: 3fr 1fr; gap: 15px; align-items: start;">
+      <!-- 📌 Contenedor principal del formulario -->
+      <div class="p-2">
+
+        <!-- Fechas -->
+        <div class="d-grid mb-2" style="grid-template-columns: 1fr 2fr 2fr; gap: 10px; align-items: end;">
+          <div class="form-check">
+            {{ form.omitir_fechas }}
+            <label class="form-check-label" for="{{ form.omitir_fechas.id_for_label }}">
+              {{ form.omitir_fechas.label }}
+            </label>
+          </div>
+          <div>
+            {{ form.fecha_desde.label_tag }}
+            {{ form.fecha_desde }}
+          </div>
+          <div>
+            {{ form.fecha_hasta.label_tag }}
+            {{ form.fecha_hasta }}
+          </div>
+        </div>
+
+        <!-- Moneda y Monto -->
+        <div class="d-grid mb-2" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            {{ form.monedas.label_tag }}
+            {{ form.monedas }}
+          </div>
+          <div>
+            {{ form.monto.label_tag }}
+            {{ form.monto }}
+          </div>
+        </div>
+
+        <!-- Cliente -->
+        <div class="mb-2">
+        {{ form.cliente_codigo }}
+          {{ form.cliente.label_tag }}
+          {{ form.cliente }}
+        </div>
+
+        <!-- 📌 Tabla de resultados -->
+        <div class="tabla-scroll mt-4 border rounded">
+          <table class="table table-sm mb-0" id="tabla_consultar_cobranzas">
+            <thead class="thead-light">
+              <tr>
+                <th>Recibo</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Monto</th>
+                <th class="oculto">Autogenerado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cobro in resultados %}
+                <tr>
+                  <td>{{ cobro.recibo }}</td>
+                  <td>{{ cobro.fecha }}</td>
+                  <td>{{ cobro.cliente }}</td>
+                  <td>{{ cobro.monto }}</td>
+                  <td class="oculto">{{ cobro.autogenerado }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center">No hay resultados.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 📌 Lado derecho: solo el botón Buscar -->
+      <div class="mt-4 border p-3 rounded bg-light w-30 d-flex align-items-start justify-content-center">
+        <button type="submit" class="btn btn-primary btn-sm w-100">Buscar</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% include 'editar_consultar_cobranzas/editar_consultar_cobranzas_detalle.html' %}
+{% include 'impucompra_nota.html' %}
+<script src="{% static 'grilla/editar_consultar_cobranzas.js' %}"></script>
+<script>
+   var csrf_token = '{{ csrf_token }}';
+</script>
+{% endblock contenido %}
