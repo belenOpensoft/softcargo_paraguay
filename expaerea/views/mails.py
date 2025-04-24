@@ -289,9 +289,10 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
         return texto, resultado
     elif title == 'Notificación de llegada de carga':
+        refcliente = seguimiento.refcliente if seguimiento.refcliente else "S/I"
 
         resultado[
-            'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {embarque.numero} - CS: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vuelo: {vapor}'
+            'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {embarque.numero} - CS: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vuelo: {vapor}; Ord. Cliente: {refcliente}'
 
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 

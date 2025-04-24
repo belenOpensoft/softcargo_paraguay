@@ -1,114 +1,76 @@
-$('#proveedores').autocomplete({
+document.addEventListener("DOMContentLoaded", function () {
+   $("#impucompra_nota").dialog({
+        autoOpen: false,
+        resizable: false,
+        draggable: true,
+        width: "auto",
+        height: "auto",
+        maxWidth: $(window).width() * 0.90,
+        minWidth: 600,
+        maxHeight: $(window).height() * 0.90,
+        modal: true,
+        position: { my: "center", at: "center", of: window },
+        open: function () {
+            resetModal("#impucompra_nota");
+            $(this).dialog("option", "width", "auto");
+            $(this).dialog("option", "height", "auto");
+            $(this).dialog("option", "position", { my: "center", at: "center", of: window });
+        },
+         buttons: [
+        {
+            class: "btn btn-dark btn-sm",
+            text: "Cerrar",
+            click: function() {
+                $(this).dialog("close");
+            }
+        }
+    ],
+    });
+    const omitirFechas = document.getElementById("id_omitir_fechas");
+    const fechaDesde = document.getElementById("id_fecha_desde");
+    const fechaHasta = document.getElementById("id_fecha_hasta");
+
+    function toggleFechas() {
+      const disabled = omitirFechas.checked;
+      fechaDesde.disabled = disabled;
+      fechaHasta.disabled = disabled;
+    }
+
+    // Ejecutar al cargar
+    toggleFechas();
+
+    // Escuchar cambios
+    omitirFechas.addEventListener("change", toggleFechas);
+
+
+    $('#id_proveedor').autocomplete({
     source: function(request, response) {
         $.ajax({
-            url: "/buscar_proveedor/",
+            url: "/admin_cont/buscar_proveedor",
             dataType: 'json',
-            type: 'GET',
             data: { term: request.term },
             success: function(data) {
                 response(data.map(proveedor => ({
                     label: proveedor.text,
                     value: proveedor.text,
-                    id: proveedor.id
+                    codigo: proveedor.codigo
                 })));
             },
             error: xhr => console.error('Error al buscar proveedores:', xhr)
         });
     },
     minLength: 2,
-});
-
-function abrir_modalFiltro() {
-    $('#filtroM').find('form').trigger('reset');
-
-    $("#filtroM").dialog({
-        autoOpen: true,
-        modal: true,
-        width: $(window).width() * 0.60,
-        height: $(window).height() * 0.80,
-        position: { my: "top", at: "top+20", of: window },
-        buttons: [{
-            text: "Salir",
-            class: "btn btn-dark",
-            style: "width:100px",
-            click: function () {
-                $(this).dialog("close");
-            },
-        }],
-    }).prev('.ui-dialog-titlebar').remove();
-}
-$('#abrir_arbi').on('click', function (event) {
-    $("#arbitraje_modal").dialog({
-        autoOpen: true,
-        modal: true,
-        title: "Cargar un arbitraje para el día de hoy",
-        height: 300,
-        width: 500,
-        position: { my: "top", at: "top+20", of: window },
-        buttons: [
-            {
-                text: "Guardar",
-                class: "btn btn-primary",
-                style: "width:100px",
-                click: function () {
-                    let arbDolar = $('#valor_arbitraje').val();
-                    let parDolar = $('#valor_paridad').val();
-                    let tipoMoneda = $('#moneda_select').val();
-                    let pizDolar = $('#valor_pizarra').val();
-                    let fecha = $('#fecha_arbi').val();
-
-                    $.ajax({
-                        url: "/admin_cont/guardar_arbitraje/",
-                        dataType: 'json',
-                        type: 'POST',
-                        headers: { 'X-CSRFToken': csrf_token },
-                        data: {
-                            arbDolar: arbDolar,
-                            parDolar: parDolar,
-                            tipoMoneda: tipoMoneda,
-                            pizDolar: pizDolar,
-                            fecha:fecha
-                        },
-                        success: function(data) {
-                            if(data['status'].length == 0){
-                                alert("Valores guardados correctamente");
-                                $("#arbitraje_modal").dialog("close");
-                            }else{
-                                alert(data['status']);
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            alert("Error al guardar los datos: " + error);
-                        }
-                    });
-                },
-            },
-            {
-                text: "Salir",
-                class: "btn btn-dark",
-                style: "width:100px",
-                click: function () {
-                    $(this).dialog("close");
-                },
-            },
-        ],
+    select: function(event, ui) {
+        const codigo = ui.item.codigo;
+        const nombre = ui.item.value;
+        $('#id_proveedor').val(nombre);
+        $('#id_proveedor_codigo').val(codigo);
+    }
     });
-        const hoy = new Date().toISOString().split('T')[0];
-    // Establecer el valor predeterminado del campo de fecha
-    document.getElementById('fecha_arbi').value = hoy;
-        $.ajax({
-        url: "/admin_cont/cargar_arbitraje/",
-        type: "GET",
-        dataType: "json",
-        success: function (data) {
-            // Cargar los valores en los campos
-            $('#valor_arbitraje').val(data.arbitraje);
-            $('#valor_pizarra').val(data.pizarra);
-            $('#valor_paridad').val(data.paridad);
-            $('#moneda_select').val(data.moneda);
-        },
-        error: function (xhr, status, error) {
-            alert("Error al cargar los datos iniciales: " + error);
-        }
+    $('#id_proveedor').on('input', function () {
+      const valor = $(this).val().trim();
+      if (valor === '') {
+        $('#id_proveedor_codigo').val('');
+      }
     });
 });

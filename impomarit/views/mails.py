@@ -323,9 +323,10 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
             return texto, resultado
         elif title == 'Notificación de llegada de carga':
+            refcliente = seguimiento.refcliente if seguimiento.refcliente else "S/I"
 
             resultado[
-                'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {embarque.numero} - CS: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}'
+                'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {embarque.numero} - CS: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}; Ord. Cliente: {refcliente}'
 
             # Fecha formateada
 
@@ -524,8 +525,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
             texto += "Saludos,\n\n"
 
-            texto += "OCEANLINK\n"
-
             texto += "</pre>"
 
             return texto, resultado
@@ -567,9 +566,10 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
             texto += "</pre>"
         elif title == 'Aviso de embarque':
+            refcliente = seguimiento.refcliente if seguimiento.refcliente else "S/I"
 
             resultado[
-                'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.seguimiento} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}'
+                'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.seguimiento} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}; Ord. Cliente: {refcliente}'
 
             fecha_actual = datetime.now()
 
@@ -890,7 +890,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                 for m in mercaderias:
                     mercaderia += str(m['producto__nombre']) + '-'
 
-            texto += formatear_linea("Contenedores", cantidad_cntr.strip(' -'))
+            #texto += formatear_linea("Contenedores", cantidad_cntr.strip(' -'))
 
             texto += formatear_linea("Nro. Contenedor/es", contenedores.strip(' -'))
 
@@ -1244,7 +1244,7 @@ def formatear_linea(titulo, valor, alinear_derecha=None, ancho_total=110, ancho_
 
 
 def formatear_caratula(titulo, valor):
-    return f"<div style='font-family: Courier New, monospace; font-size: 10px; line-height: 1;'>{titulo}: {valor}</div>"
+    return f"<div style='font-family: Courier New, monospace; font-size: 11px; line-height: 1;'>{titulo}: {valor}</div>"
 
 
 

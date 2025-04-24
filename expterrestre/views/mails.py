@@ -295,12 +295,13 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         return texto, resultado
     elif title == 'Notificación de llegada de carga':
+        refcliente = seguimiento.refcliente if seguimiento.refcliente else "S/I"
 
         resultado['asunto'] = (
 
             f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {embarque.numero} - CS: {row.seguimiento} - '
 
-            f'HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}'
+            f'HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Ord. Cliente: {refcliente}'
 
         )
 

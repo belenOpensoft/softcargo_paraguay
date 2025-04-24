@@ -100,15 +100,6 @@
       height: 600,
     buttons: [
       {
-        text: "Anular",
-        style: "width:90px;",
-        class: "btn btn-danger",
-        click: function () {
-        let autogen=$('#autogen_detalle_compra').val();
-        anularFactura(autogen);
-        }
-      },
-      {
         text: "Modificar",
         style: "width:90px;",
         class: "btn btn-warning",

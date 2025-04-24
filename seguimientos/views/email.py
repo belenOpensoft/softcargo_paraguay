@@ -94,8 +94,10 @@ def get_data_email(request):
                         vapor = row.vapor
                 else:
                     vapor='S/I'
+
+                refcliente = row.refcliente if row.refcliente else "S/I"
                 resultado[
-                    'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.numero} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}'
+                    'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.numero} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}; Ord. Cliente: {refcliente}'
 
                 fecha_actual = datetime.datetime.now()
 
@@ -345,8 +347,11 @@ def get_data_email(request):
                         vapor = row.vapor
                     else:
                         vapor = 'S/I'
+
+                refcliente = row.refcliente if row.refcliente else "S/I"
+
                 resultado[
-                    'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {row.embarque} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vapor/vuelo: {vapor}'
+                    'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {row.embarque} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vapor/vuelo: {vapor}; Ord. Cliente: {refcliente}'
 
                 # Fecha formateada
 
@@ -645,6 +650,7 @@ def get_data_email(request):
                 texto += "<b>ATENCION!</b><br><br>"
 
                 texto += "DETALLE DE DESCONSOLIDACION<br><br>"
+
             elif title == 'Cargo release':
 
                 fecha_actual = datetime.datetime.now()
@@ -1137,8 +1143,6 @@ def get_data_email(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
-
-
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:

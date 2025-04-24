@@ -1,4 +1,4 @@
- document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
    $("#impucompra_nota").dialog({
         autoOpen: false,
         resizable: false,
@@ -128,8 +128,8 @@ $(document).on('dblclick', '#tabla_consultar_cobranzas tbody tr', function () {
         style: "width:90px;",
         class: "btn btn-danger",
         click: function () {
-        let autogen=$('#autogen_detalle_compra').val();
-            anularFactura(autogen);
+        let autogen=$('#autogen_detalle_cobranza').val();
+            anularCobranza(autogen);
         }
       },
       {
@@ -524,5 +524,37 @@ function guardarCambiosCobranza() {
     })
     .catch(err => {
         console.error("Error al guardar cambios:", err);
+    });
+}
+function anularCobranza(autogen) {
+    if (!autogen) {
+        alert("No se ha proporcionado el autogenerado.");
+        return;
+    }
+
+    if (!confirm("¿Estás seguro de que deseas anular esta cobranza? Esta acción no se puede deshacer.")) {
+        return;
+    }
+
+    fetch('/admin_cont/anular_cobranza/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": csrf_token
+        },
+        body: JSON.stringify({ autogen: autogen })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Cobranza anulada correctamente.");
+            console.log("Eliminados:", data.eliminados);
+        } else {
+            alert("Error al anular: " + data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Error en la solicitud:", err);
+        alert("Error al conectar con el servidor.");
     });
 }

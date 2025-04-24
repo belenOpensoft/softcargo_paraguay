@@ -302,12 +302,13 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             return texto, resultado
         elif title == 'Notificación de llegada de carga':
+            refcliente = seguimiento.refcliente if seguimiento.refcliente else "S/I"
 
             resultado['asunto'] = (
 
                 f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {embarque.numero} - CS: {row.seguimiento} - '
     
-                f'HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vuelo: {vapor}'
+                f'HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vuelo: {vapor}; Ord. Cliente: {refcliente}'
 
             )
 
@@ -492,9 +493,10 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += "</pre>"
         elif title == 'Aviso de embarque':
+            refcliente = seguimiento.refcliente if seguimiento.refcliente else "S/I"
 
             resultado[
-                'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.seguimiento} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}'
+                'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.seguimiento} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Ord. Cliente: {refcliente}'
 
             fecha_actual = datetime.now()
 

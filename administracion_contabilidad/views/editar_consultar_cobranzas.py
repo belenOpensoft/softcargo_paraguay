@@ -287,3 +287,50 @@ def actualizar_campos_movims_cobranza(request):
             return JsonResponse({"success": False, "error": str(e)})
 
     return JsonResponse({"success": False, "error": "Método no permitido"}, status=405)
+
+def anular_cobranza(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            autogen = data.get('autogen')
+
+            if not autogen:
+                return JsonResponse({'success': False, 'error': 'Autogenerado no proporcionado'})
+
+            # Eliminar en orden lógico
+            impus = Impuvtas.objects.filter(autogen=autogen)
+            movims = Movims.objects.filter(mautogen=autogen)
+            asientos = Asientos.objects.filter(autogenerado=autogen)
+
+            if impus:
+                for impu in impus:
+                    autofac = impu.autofac  # obtenemos el autofac de la fila
+                    if autofac:
+                        # Buscamos la factura correspondiente en Movims
+                        factura = Movims.objects.filter(mautogen=autofac).first()
+
+                        if factura:
+                            factura.msaldo=float(factura.msaldo)+float(impu.monto)
+                            factura.save()
+
+            impus_deleted = impus.count()
+            movims_deleted = movims.count()
+            asientos_deleted = asientos.count()
+
+            impus.delete()
+            movims.delete()
+            asientos.delete()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Cobranza anulada correctamente',
+                'eliminados': {
+                    'Impucompras': impus_deleted,
+                    'Movims': movims_deleted,
+                    'Asientos': asientos_deleted
+                }
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)

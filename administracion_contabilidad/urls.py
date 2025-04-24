@@ -2,7 +2,7 @@ from django.urls import path
 
 from administracion_contabilidad.views.editar_consultar_cobranzas import editar_consultar_cobranzas, \
     obtener_detalle_cobranza, cargar_pendientes_imputacion_cobranza, procesar_imputaciones_cobranza, \
-    actualizar_campos_movims_cobranza
+    actualizar_campos_movims_cobranza, anular_cobranza
 from administracion_contabilidad.views.editar_consultar_ventas import editar_consultar_ventas, obtener_detalle_venta, \
     buscar_ordenes_por_boleta_ventas, obtener_detalle_pago_ventas, obtener_imputados_orden_venta, \
     modificar_embarque_imputado
@@ -122,6 +122,7 @@ urlpatterns = [
     path('cargar_pendientes_imputacion_cobranza/', cargar_pendientes_imputacion_cobranza, name='cargar_pendientes_imputacion_cobranza'),
     path('procesar_imputaciones_cobranza/', procesar_imputaciones_cobranza, name='procesar_imputaciones_cobranza'),
     path('actualizar_cobranza/', actualizar_campos_movims_cobranza, name='actualizar_cobranza'),
+    path('anular_cobranza/', anular_cobranza, name='anular_cobranza'),
 
     #editar y conusltar cobranzas#
 ]

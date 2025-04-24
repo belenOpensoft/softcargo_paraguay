@@ -1,72 +1,75 @@
 <style>
-    .table-th th{
-    text-align:end;
-    }
-    #table_edit_im th{
-    width:auto !important;
-    }
-    table_edit_im{
-    height:fit-content !important;
-    }
-    #table_edit_im tr:hover::after {
-    content: 'Doble click para editar';
-    color: #f9edbe;
-    position: absolute;
-    right: 10px;
-    background-color: #333;
-    padding: 5px;
-    font-size: 12px;
-    border-radius: 3px;
-    }
-
-</style>
-<style>
+    /* Contenido de inputs, selects y textareas más grande (14px) */
     #edit_master_modal input,
     #edit_master_modal select,
     #edit_master_modal textarea {
-        font-size: 12px !important;
+        font-size: 15px !important;
         padding: 2px 4px !important;
         height: auto !important;
     }
 
+    /* Labels, th y td un poco más chicos (12px) */
     #edit_master_modal label,
     #edit_master_modal th,
     #edit_master_modal td {
-        font-size: 14px !important;
+        font-size: 12px !important;
         padding: 4px 6px !important;
     }
 
+    /* Opcional: estilo base de tabla */
     #edit_master_modal table {
         font-size: 12px;
     }
 
+    /* Botones dentro del modal */
     #edit_master_modal .btn {
         font-size: 12px;
         padding: 4px 8px;
     }
 
+    /* Escalado general del modal si querés achicarlo visualmente */
     #edit_master_modal {
-        zoom: 0.95; /* Alternativamente podés usar scale o font-size base */
+        zoom: 0.95;
     }
-        /* Achicar barra de título del modal */
-.ui-dialog .ui-dialog-titlebar {
-    padding: 4px 10px !important;
-    font-size: 13px !important;
-    min-height: unset !important;
-    height: auto !important;
-    line-height: 1.2;
-}
 
-/* Achicar el texto del título */
-.ui-dialog .ui-dialog-title {
-    font-size: 13px !important;
-}
+    /* Estilo reducido para el título del modal (jQuery UI) */
+    .ui-dialog .ui-dialog-titlebar {
+        padding: 4px 10px !important;
+        font-size: 13px !important;
+        min-height: unset !important;
+        height: auto !important;
+        line-height: 1.2;
+    }
 
-/* Opcional: reducir tamaño de botones del modal */
-.ui-dialog .ui-dialog-buttonpane .ui-button {
-    font-size: 12px !important;
-    padding: 4px 8px !important;
-}
+    .ui-dialog .ui-dialog-title {
+        font-size: 13px !important;
+    }
+
+    .ui-dialog .ui-dialog-buttonpane .ui-button {
+        font-size: 12px !important;
+        padding: 4px 8px !important;
+    }
+
+    /* Si querés conservar los estilos hover o tooltips en filas */
+    #table_edit_im tr:hover::after {
+        content: 'Doble click para editar';
+        color: #f9edbe;
+        position: absolute;
+        right: 10px;
+        background-color: #333;
+        padding: 5px;
+        font-size: 12px;
+        border-radius: 3px;
+    }
+
+    /* Corregir ancho y altura de tabla */
+    #table_edit_im th {
+        width: auto !important;
+    }
+
+    #table_edit_im {
+        height: fit-content !important;
+    }
 </style>
 <div id="edit_master_modal" style="display: none;" tabindex="-1">
 <form id="edit_master_form" method="POST" style="width:fit-content;" >
