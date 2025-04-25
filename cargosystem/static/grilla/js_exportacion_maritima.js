@@ -1232,6 +1232,14 @@ $('#tabla_expomarit tfoot th').each(function(index) {
 
                     }
                 });
+            if ($('#table_add_im tbody tr').length === 0) {
+            $('#segment_response').hide();
+        } else {
+            $('#segment_response').show();
+        }
+
+        // Recalcular altura del modal
+        $("#add_master_modal").dialog("option", "height", 'auto');
         });
     $('#add_master_form').submit(function(e){
 

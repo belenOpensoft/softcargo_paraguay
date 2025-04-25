@@ -477,6 +477,23 @@ $(document).ready(function () {
         }
     }
 });
+    $("#deposito_master_add").autocomplete({
+        source: '/autocomplete_depositos/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                 $('#deposito_master_nro_add').val(ui.item['id']);
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                 $('#deposito_master_nro_add').val(ui.item['id']);
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
     //productos para el embarque
     $("#id_producto").autocomplete({
     source: function (request, response) {
@@ -890,7 +907,23 @@ $(document).ready(function () {
             }
         }
     });
-
+    $("#deposito_master").autocomplete({
+        source: '/autocomplete_depositos/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                 $('#deposito_master_nro').val(ui.item['id']);
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                $(this).val('');
+                 $('#deposito_master_nro').val(ui.item['id']);
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
     //rutas
 
 
@@ -1144,6 +1177,7 @@ $(document).ready(function () {
         }
     });
 
+
     //autocomplete factura
     $("#destinatario").autocomplete({
         source: '/autocomplete_clientes/',
@@ -1257,6 +1291,16 @@ $(document).ready(function () {
 
                     }
                 });
+        if ($('#table_add_im tbody tr').length === 0) {
+            $('#segment_response').hide();
+        } else {
+            $('#segment_response').show();
+        }
+
+        // Recalcular altura del modal
+        $("#add_master_modal").dialog("option", "height", 'auto');
+
+
         });
     $('#add_master_form').submit(function(e){
 
@@ -1486,6 +1530,7 @@ var expandedRow;
                 $('#destino_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#loading_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
                 $('#discharge_edit').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
+                $('#deposito_master').css({"border-color": "", 'box-shadow': '', 'font-size': ''});
         }
     });
     //evento al modificar fecha del master
@@ -3007,6 +3052,8 @@ function fillFormWithData(data) {
     $('#edit_master_form [name="posicion_e"]').val(data.posicion_e);
     $('#edit_master_form [name="operacion_e"]').val(data.operacion_e);
     $('#edit_master_form [name="awd_e"]').val(data.awd_e);
+    $('#edit_master_form [name="deposito"]').val(data.deposito_nombre);
+    $('#edit_master_form [name="deposito_nro"]').val(data.deposito_nro);
 
         acumulados(data.awd_e, function(result) {
             // Asegúrate de que estos elementos están disponibles en el DOM

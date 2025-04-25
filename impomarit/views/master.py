@@ -7,7 +7,7 @@ from django.db import IntegrityError
 from impomarit.forms import add_form, edit_form
 from impomarit.models import Reservas, Embarqueaereo
 from seguimientos.models import Seguimiento
-from mantenimientos.models import Clientes
+from mantenimientos.models import Clientes, Depositos
 from django.db import transaction
 
 def consultar_seguimientos(request):
@@ -61,7 +61,7 @@ def add_importacion_maritima(request):
                 reserva.operacion = form.cleaned_data.get('operacion', "")  # Si vacío, asignar ""
                 reserva.fechaingreso = datetime.now()
                 reserva.posicion = generar_posicion()
-
+                reserva.deposito = form.cleaned_data.get('deposito_nro', "")
                 # Guardar el registro
                 reserva.save()
 
@@ -118,6 +118,14 @@ def master_detail(request):
         if master_id:
             try:
                 master = Reservas.objects.get(id=master_id)
+                if master.deposito:
+                    deposito = Depositos.objects.filter(codigo=master.deposito).first()
+                    if deposito:
+                        nombre=deposito.empresa
+                    else:
+                        nombre=None
+                else:
+                    nombre =None
                 # Convierte el objeto en un diccionario
                 data = {
                     'id': master.id,
@@ -145,6 +153,8 @@ def master_detail(request):
                     'posicion_e': master.posicion,
                     'operacion_e': master.operacion,
                     'awd_e': master.awb,
+                    'deposito_nombre': nombre,
+                    'deposito_nro': master.deposito,
                 }
                 return JsonResponse(data)
             except Reservas.DoesNotExist:
@@ -279,6 +289,7 @@ def edit_master(request, id_master):
                 master.status = form.cleaned_data.get('status_e', "")
                 master.posicion = form.cleaned_data.get('posicion_e', "")
                 master.operacion = form.cleaned_data.get('operacion_e', "")
+                master.deposito = form.cleaned_data.get('deposito_nro', "")
                 master.awb = awb_nuevo
 
                 try:

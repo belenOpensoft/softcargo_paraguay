@@ -162,6 +162,9 @@ class add_form(BSModalModelForm):
     discharge = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'discharge_add'}),
         required=False)
+    deposito = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'deposito_master_add'}),
+        required=False,label="Deposito")
     status = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=False,label="Estado",choices=choice_status)
     operacion = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Operacion",choices=choice_op)
     pagoflete = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("C","Collect"),("P","Prepaid")))
@@ -205,7 +208,9 @@ class add_form(BSModalModelForm):
         }),
         required=False
     )
-
+    deposito_nro = forms.CharField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
+               'id': 'deposito_master_nro_add', 'name': 'deposito_master_nro_add'}), required=False)
     def __init__(self, *args, **kwargs):
        # lista_clientes = Clientes.objects.none()
         super().__init__(*args, **kwargs)
@@ -258,13 +263,20 @@ class edit_form(BSModalModelForm):
         required=False,  # No obligatorio
         label="Arbitraje", initial=0
     )
-    kilosmadre_e = forms.CharField(
-        widget=forms.TextInput(
-            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
-        max_length=20,
-        required=False,  # Obligatorio
-        label="Kilos", initial=0
+
+    kilosmadre_e = forms.DecimalField(
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'autocomplete': 'off',
+            'type': 'number'
+        }),
+        required=False,
+        label="Kilos",
+        initial=0,
+        decimal_places=2,
+        max_digits=10,
     )
+
     bultosmadre_e = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
@@ -309,7 +321,7 @@ class edit_form(BSModalModelForm):
     vapor_e = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'vapor_edit'}),
         required=False,label="Vapor")
-    viaje_e = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': False,'max_length': 20},),max_length=20,required=True,label="Viaje")
+    viaje_e = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': False,'max_length': 20},),max_length=20,required=False,label="Viaje")
     moneda_e = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': False,"class":'form-control'}),
                      required=True, label="Moneda", choices=((1,'USD'),(2,'EURO'),(3,'PESOS')), initial='')
     fecha_e = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': False,"onkeypress":"return tabular(event,this)","class":"form-control mb-3",}),label="Llegada",required=True)
@@ -326,7 +338,9 @@ class edit_form(BSModalModelForm):
     discharge_e = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'discharge_edit'}),
         required=False,label="Discharge")
-
+    deposito = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'deposito_master'}),
+        required=False,label="Deposito")
     status_e = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Estado",choices=choice_status)
     operacion_e = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Operacion",choices=choice_op)
     pagoflete_e = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("C","Collect"),("P","Prepaid")))
@@ -370,6 +384,9 @@ class edit_form(BSModalModelForm):
         }),
         required=False
     )
+    deposito_nro = forms.CharField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
+               'id': 'deposito_master_nro', 'name': 'deposito_master_nro'}), required=False)
 
     def __init__(self, *args, **kwargs):
        # lista_clientes = Clientes.objects.none()
@@ -782,9 +799,7 @@ class edit_house(BSModalModelForm):
     embarcador_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'embarcador_ih_e', 'name': 'embarcador_ih'}), required=False)
-    deposito_i = forms.CharField(widget=forms.HiddenInput(
-        attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
-               'id': 'deposito_ih_e', 'name': 'deposito_ih'}), required=False)
+
 
 class gastosForm(BSModalModelForm):
     class Meta:

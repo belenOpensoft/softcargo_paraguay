@@ -1144,6 +1144,7 @@ def get_data_email(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:
         image_data = image_file.read()
