@@ -304,10 +304,10 @@ class cronologiaForm(BSModalModelForm):
             # 'hawb': 'House',
         }
         widgets = {
-            'fecha': forms.DateInput(attrs={'type': 'date','id':'id_fecha_crono'}),
-            'etd': forms.DateInput(attrs={'type': 'date'}),
-            'eta': forms.DateInput(attrs={'type': 'date'}),
-            'originales': forms.Select(attrs={'type': 'date'})
+            'fecha': forms.DateInput(attrs={'type': 'date', 'id': 'id_fecha_crono', 'tabindex': 1}),
+            'etd': forms.DateInput(attrs={'type': 'date', 'tabindex': 2}),
+            'eta': forms.DateInput(attrs={'type': 'date', 'tabindex': 3}),
+            'originales': forms.Select(attrs={'tabindex': 4}),
         }
 
 
