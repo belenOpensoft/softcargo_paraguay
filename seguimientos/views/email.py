@@ -174,7 +174,7 @@ def get_data_email(request):
                                                                              'bultos', 'peso', 'unidad',
                                                                              'volumen').annotate(total=Count('id'))
 
-                carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre')
+                carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre','tipo')
 
                 if cant_cntr.count() > 0:
 
@@ -188,7 +188,7 @@ def get_data_email(request):
                             precintos += f'{cn["precinto"]} - '
 
                         bultos += cn['bultos'] if cn['bultos'] else 0
-                        tipo= cn["tipo"]
+
                         peso += cn['peso'] or 0
 
                         volumen += cn['volumen'] or 0
@@ -197,6 +197,7 @@ def get_data_email(request):
 
                     for c in carga:
                         mercaderias += c['producto__nombre'] + ' - '
+                        tipo = c["tipo"]
 
                 texto += formatear_linea("Contenedores", cantidad_cntr[:-3])
 
@@ -940,16 +941,17 @@ def get_data_email(request):
                 texto += formatear_linea("Sent by", nombre)
 
                 texto += "<br><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Dear colleagues:</p>"
-                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please contact the following company to coordinate a shipment to {row.origen} as per our instructions below:</p>"
+                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please contact the following company to coordinate the following shipment as per our instructions below:</p>"
                 texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please ack this message and let us know status of cargo asap.</p><br>"
                 if directo_boolean == 'true':
                     texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please add HS code on {master} an {house}</p><br>"
-                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Find attach packing list details</p><br>"
                 if directo_boolean=='true':
-                    texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{master} - {row.pago} - Please confirm you courier costs to see if we instructed original or telex release.</p>"
+                    texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{master}</p>"
                     texto_ocean=str(ocean.empresa)+' '+str(ocean.direccion)+' '+'CP 11000 '+str(ocean.ruc)+' '+str(ocean.telefono)
-                    texto += formatear_linea("Shipper", empresa)
+                    texto += formatear_linea("Shipper", agente.empresa)
                     texto += formatear_linea("Consignee", texto_ocean)
+
+                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{house if directo_boolean=='true' else master}</p>"
 
                 texto +='</br>'
                 texto += formatear_linea("Shipper name", empresa)
@@ -1054,20 +1056,19 @@ def get_data_email(request):
                 texto += formatear_linea("Envíado", nombre)
 
                 texto += "<br><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Estimados Sres.:</p><br>"
-                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor, contactar a la siguiente compañía para coordinar un embarque a {row.origen} según nuestras instrucciones a continuación:</p>"
+                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor, contactar a la siguiente compañía para coordinar el siguiente embarque según nuestras instrucciones a continuación:</p>"
                 texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor confirmar este mensaje e informarnos el estado de la carga a la brevedad.</p><br>"
                 if directo_boolean == 'true':
                     texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Favor incluir el código HS en {master} y {house}</p>"
-                texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Adjuntamos detalle de packing list.</p>"
                 if directo_boolean == 'true':
-                    texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{master} - {row.pago} - Favor confirmar los costos de courier para definir si se instruye original o liberación vía télex</p>"
+                    texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{master}</p>"
                     ocean = Clientes.objects.get(codigo=835)
                     texto_ocean = str(ocean.empresa) + ' ' + str(ocean.direccion) + ' CP 11000 ' + str(
                         ocean.ruc) + ' ' + str(ocean.telefono)
-                    texto += formatear_linea("Shipper", empresa)
+                    texto += formatear_linea("Shipper", agente.empresa)
                     texto += formatear_linea("Consignatario", texto_ocean)
                 texto += "<br>"
-
+                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{house if directo_boolean=='true' else master}</p>"
                 texto += formatear_linea("Proveedor", empresa)
                 texto += formatear_linea("Dirección", direccion)
                 texto += formatear_linea("Ciudad", ciudad)
@@ -1143,6 +1144,7 @@ def get_data_email(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
 
 
 def image_to_base64(image_path):

@@ -4325,7 +4325,7 @@ $('.email').click(function () {
             if(confirm('¿Desea informar Transportista?')){
                 transportista=true;
             }
-            if(confirm('¿Desea una instrucción para Directo?')){
+            if(confirm('¿Desea una instrucción Completa o Directa? Directa=Cancelar, Completa=Aceptar')){
                 directo=true;
             }
         }
@@ -4333,7 +4333,7 @@ $('.email').click(function () {
             if(confirm('¿Desea informar Transportista?')){
                 transportista=true;
             }
-            if(confirm('¿Desea una instrucción para Directo?')){
+            if(confirm('¿Desea una instrucción Completa o Directa? Directa=Cancelar, Completa=Aceptar')){
                 directo=true;
             }
         }

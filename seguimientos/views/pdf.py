@@ -247,7 +247,13 @@ def get_datos_caratula(request):
 
             # Agente
             agente_ciudad = MantenimientosClientes.objects.filter(codigo=row.agente_codigo).first()
-            agente_ciudad_nombre = MantenimientosCiudades.objects.filter(codedi=agente_ciudad.ciudad).first().nombre if agente_ciudad else "S/I"
+
+            if agente_ciudad:
+                ciudad = MantenimientosCiudades.objects.filter(codedi=agente_ciudad.ciudad).first()
+                agente_ciudad_nombre = ciudad.nombre if ciudad else "S/I"
+            else:
+                agente_ciudad_nombre = "S/I"
+
             texto += f"<b>Agente:</b> {row.agente or ''} - {agente_ciudad_nombre}<br>"
             texto += f"<b>Deposito:</b> {row.deposito or ''}<br><br>"
             texto += '<span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'

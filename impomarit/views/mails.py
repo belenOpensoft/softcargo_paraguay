@@ -643,7 +643,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
             ).annotate(total=Count('id'))
 
-            carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre')
+            carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre','tipo')
 
             if cant_cntr.exists():
 
@@ -657,7 +657,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                         precintos += f'{cn["precinto"]} - '
 
                     bultos += cn['bultos'] if cn['bultos'] else 0
-                    tipo = cn["tipo"]
+
                     peso += cn['peso'] if cn['peso'] else 0
                     volumen += cn['volumen'] if cn['volumen'] else 0
 
@@ -665,6 +665,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
                 for c in carga:
                     mercaderias += c['producto__nombre'] + ' - '
+                    tipo = c["tipo"]
 
             texto += formatear_linea("Contenedores", cantidad_cntr.rstrip(' -'))
 
@@ -960,6 +961,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             consignee = Clientes.objects.get(codigo=embarque.consignatario)
 
             client = Clientes.objects.get(codigo=embarque.cliente)
+            agente = Clientes.objects.get(codigo=embarque.agente)
 
             cargo_items = Cargaaerea.objects.filter(numero=row.numero)
 
@@ -1011,25 +1013,26 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
             texto += formatear_linea("Date", formatted_date)
 
-            texto += formatear_linea("To", client.empresa)
+            texto += formatear_linea("To", agente.empresa)
 
             texto += formatear_linea("Department", "SEAFREIGHT")
 
             texto += formatear_linea("Sent by", full_name)
 
             texto += "<br><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Dear colleagues:</p>"
-            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please contact the following company to coordinate a shipment to {row.origen} as per our instructions below:</p>"
+            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please contact the following company to coordinate the following shipment as per our instructions below:</p>"
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please ack this message and let us know status of cargo asap.</p><br>"
             if directo_boolean == 'true':
                 texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please add HS code on MBL an HBL</p><br>"
-            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Find attach packing list details</p><br>"
             if directo_boolean == 'true':
-                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>MBL - {pago} - Please confirm you courier costs to see if we instructed original or telex release.</p>"
+                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>MBL -</p>"
                 texto_ocean = str(ocean.empresa) + ' ' + str(ocean.direccion) + ' ' + 'CP 11000 ' + str(
                     ocean.ruc) + ' ' + str(ocean.telefono)
-                texto += formatear_linea("Shipper", company)
+                texto += formatear_linea("Shipper", agente.empresa)
                 texto += formatear_linea("Consignee", texto_ocean)
             texto+='</br>'
+            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{'HBL' if directo_boolean == 'true' else 'MBL'}</p>"
+
             texto += formatear_linea("Shipper name", company)
 
             texto += formatear_linea("Address", address)
@@ -1107,6 +1110,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             #embarcador = Clientes.objects.get(codigo=embarque.embarcador)
             consignatario = Clientes.objects.get(codigo=embarque.consignatario)
             cliente = Clientes.objects.get(codigo=embarque.cliente)
+            agente = Clientes.objects.get(codigo=embarque.agente)
             mercaderia = Cargaaerea.objects.filter(numero=row.numero)
             moneda = Monedas.objects.get(codigo=embarque.moneda)
             ocean = Clientes.objects.get(codigo=835)
@@ -1135,24 +1139,25 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
             texto = ''
             texto += formatear_linea("Fecha", fecha_formateada)
-            texto += formatear_linea("A", cliente.empresa)
+            texto += formatear_linea("A", agente.empresa)
             texto += formatear_linea("Departamento", "MARITIMO")
             texto += formatear_linea("Envíado", nombre)
 
             texto += "<br><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Estimados Sres.:</p><br>"
-            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor, contactar a la siguiente compañía para coordinar un embarque a {row.origen} según nuestras instrucciones a continuación:</p>"
+            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor, contactar a la siguiente compañía para coordinar el siguiente embarque según nuestras instrucciones a continuación:</p>"
             texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor confirmar este mensaje e informarnos el estado de la carga a la brevedad.</p><br>"
             if directo_boolean == 'true':
                 texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Favor incluir el código HS en MBL y HBL</p>"
-            texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Adjuntamos detalle de packing list.</p>"
             if directo_boolean == 'true':
-                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>MBL - {pago} - Favor confirmar los costos de courier para definir si se instruye original o liberación vía télex</p>"
+                texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>MBL -</p>"
                 ocean = Clientes.objects.get(codigo=835)
                 texto_ocean = str(ocean.empresa) + ' ' + str(ocean.direccion) + ' CP 11000 ' + str(
                     ocean.ruc) + ' ' + str(ocean.telefono)
-                texto += formatear_linea("Shipper", empresa)
+                texto += formatear_linea("Shipper", agente.empresa)
                 texto += formatear_linea("Consignatario", texto_ocean)
             texto += "<br>"
+            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{'MBL' if directo_boolean == 'true' else 'HBL'}</p>"
+
             texto += formatear_linea("Proveedor", empresa)
             texto += formatear_linea("Dirección", direccion)
             texto += formatear_linea("Ciudad", ciudad)
