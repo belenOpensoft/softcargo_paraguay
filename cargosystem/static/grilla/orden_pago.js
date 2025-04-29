@@ -779,17 +779,15 @@ let acumulado=$('#acumulado').val();
 const table = $('#imputacionTablePagos').DataTable();
 
 let documentos = '';
-
 table.rows().nodes().each(function (node) {
-    let imputado = parseFloat(table.cell(node, 6).data()) || 0;
+    let imputado = parseFloat(table.cell(node, 9).data()) || 0;
 
-    if (imputado !== 0) {
-        let nroDocumento = table.cell(node, 3).data();
+    if (imputado != 0) {
+        let nroDocumento = table.cell(node, 2).data();
         documentos += nroDocumento + ';';
     }
 });
 
-documentos = documentos.slice(0, -1);
 
 $('#observations').val(documentos);
 acumulado = parseFloat(acumulado || 0).toFixed(2); // Convertir a número y aplicar toFixed
@@ -1113,8 +1111,8 @@ $.ajax({
             if (response.status === 'exito') {
                 $('#dialog-form').dialog('close');
                 $('#dialog-form').dialog('close');
-                //$('#dialog-form').dialog('destroy').remove();
-                // Opcional: recargar una tabla o actualizar la UI
+                $('#paymentModal').dialog('close');
+
             } else {
                 alert(response.status);
             }

@@ -9,7 +9,8 @@ from administracion_contabilidad.views.editar_consultar_ventas import editar_con
 from administracion_contabilidad.views.editar_consultar_compras import editar_consultar_compras, obtener_detalle_compra, \
     buscar_ordenes_por_boleta, obtener_detalle_pago, obtener_imputados_orden_compra, obtener_imputados_compra, \
     procesar_imputaciones_compra, actualizar_campos_movims, anular_compra, obtener_datos_embarque_por_posicion
-from administracion_contabilidad.views.editar_consultar_pagos import editar_consultar_pagos
+from administracion_contabilidad.views.editar_consultar_pagos import editar_consultar_pagos, obtener_detalle_pago_orden, \
+    cargar_pendientes_imputacion_pago, procesar_imputaciones_pagos, actualizar_campos_movims_pago, anular_pago
 from administracion_contabilidad.views.cobranza import cobranza_view, source_cobranza, source_cobranza_imputacion, \
     source_facturas_pendientes, guardar_impuventa, guardar_anticipo, cargar_arbitraje
 from administracion_contabilidad.views.facturacion import facturacion_view, buscar_clientes, buscar_cliente, \
@@ -42,7 +43,6 @@ urlpatterns = [
     path('procesar_factura/', procesar_factura, name='procesar_factura'),
     path('obtener_imputables/', obtener_imputables, name='obtener_imputables'),
     path('guardar_arbitraje/', guardar_arbitraje, name='guardar_arbitraje'),
-    path('editar_consultar_pagos/', editar_consultar_pagos, name='editar_consultar_pagos'),
     path('get_datos_embarque/', get_datos_embarque, name='get_datos_embarque'),
 
     # preventa
@@ -125,4 +125,13 @@ urlpatterns = [
     path('anular_cobranza/', anular_cobranza, name='anular_cobranza'),
 
     #editar y conusltar cobranzas#
+
+    #editar y consultar pagos
+    path('editar_consultar_pagos/', editar_consultar_pagos, name='editar_consultar_pagos'),
+    path('detalle_pago/', obtener_detalle_pago_orden, name='detalle_pago'),
+    path('cargar_pendientes_imputacion_pago/', cargar_pendientes_imputacion_pago,name='cargar_pendientes_imputacion_pago'),
+    path('procesar_imputaciones_pago/', procesar_imputaciones_pagos, name='procesar_imputaciones_pago'),
+    path('actualizar_pago/', actualizar_campos_movims_pago, name='actualizar_pago'),
+    path('anular_pago/', anular_pago, name='anular_pago'),
+    #editar y consultar pagos
 ]

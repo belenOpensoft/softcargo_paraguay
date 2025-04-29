@@ -104,7 +104,7 @@ def obtener_detalle_cobranza(request):
                 if asiento.monto:
                     diferencia += f"{nombre} {asiento.monto:.2f} "
             elif asiento.modo == 'CHEQUE':
-                cheques = Cheques.objects.filter(corden=detalle.mboleta)
+                cheques = Cheques.objects.filter(cautogenerado=detalle.mautogen)
                 for cheque in cheques:
                     data['cheques'].append({
                         'fecha': cheque.cfecha.strftime('%Y-%m-%d') if cheque.cfecha else '',
@@ -116,20 +116,19 @@ def obtener_detalle_cobranza(request):
                     })
 
         # Procesar documentos imputados desde el campo detalle
-        if detalle.mdetalle:
-            boletas_raw = detalle.mdetalle.split(';')
-            boletas_nros = [int(b.strip()) for b in boletas_raw if b.strip().isdigit()]
-            if boletas_nros:
-                for nro in boletas_nros:
-                    imputado = Boleta.objects.filter(numero=nro,nrocliente=detalle.mcliente).first()
-                    if imputado:
-                        num_completo = f"{imputado.tipo}-{imputado.serie}{imputado.prefijo}{imputado.numero}"
+        if detalle.mautogen:
+            imputados = Impuvtas.objects.filter(autogen=detalle.mautogen)
+            if imputados:
+                for impu in imputados:
+                    boleta = Movims.objects.filter(mautogen=impu.autofac).first()
+                    if boleta:
+                        num_completo = f"{boleta.mtipo}-{boleta.mserie}{boleta.mprefijo}{boleta.mboleta}"
                         data['imputados'].append({
-                            'autogenerado':imputado.autogenerado,
+                            'autogenerado': boleta.mautogen,
                             'documento': num_completo,
-                            'imputado': imputado.total,
-                            'referencia': imputado.seguimiento,
-                            'posicion': imputado.posicion,
+                            'imputado': impu.monto,
+                            'referencia': None,
+                            'posicion': boleta.mposicion,
                         })
 
         data['transferencia'] = transferencia.strip()
@@ -174,7 +173,6 @@ def cargar_pendientes_imputacion_cobranza(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-#probar si agrega y elimina imputaciones correctamente
 def procesar_imputaciones_cobranza(request):
     if request.method == 'POST':
         try:

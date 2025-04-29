@@ -1701,10 +1701,11 @@ class EditarConsultarPagos(forms.Form):
     omitir_fechas = forms.BooleanField(required=False, label="Omitir fechas")
     fecha_desde = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
     fecha_hasta = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
-    cliente_codigo = forms.CharField(widget=forms.HiddenInput(), required=False)
+    proveedor_codigo = forms.CharField(widget=forms.HiddenInput(), required=False)
     monedas = forms.ModelChoiceField(queryset=Monedas.objects.all(), required=False, label="Moneda")
     monto = forms.DecimalField(required=False, max_digits=12, decimal_places=2, label="Monto")
     proveedor = forms.CharField(required=False, max_length=100, label="Proveedor")
+    documento = forms.CharField(required=False, max_length=100, label="Documento")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1713,6 +1714,7 @@ class EditarConsultarPagos(forms.Form):
             if not isinstance(widget, (forms.CheckboxInput, forms.RadioSelect)):
                 existing_classes = widget.attrs.get('class', '')
                 widget.attrs['class'] = f'{existing_classes} form-control'.strip()
+
 class PagosDetalle(forms.Form):
     numero = forms.CharField(
         label="Número",

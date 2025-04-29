@@ -305,6 +305,12 @@ def guardar_impuorden(request):
                         impuordenes.cliente = cobranza[0]['nrocliente']
                         impuordenes.monto = monto
                         impuordenes.save()
+
+                        movimiento_fac=Movims.objects.filter(mautogen=boleta[0].autogenerado).first()
+                        if movimiento_fac:
+                            movimiento_fac.msaldo=float(movimiento_fac.msaldo)-float(item['imputado'])
+                            movimiento_fac.save()
+
                     elif boleta.count() > 1:
                         raise TypeError('Error: mas de una boleta encontrada.')
                     else:
@@ -485,6 +491,7 @@ def crear_asiento(asiento):
         lista.detalle = asiento['detalle']
         lista.cambio = asiento['cambio']
         lista.moneda = asiento['moneda']
+        lista.modo = asiento['modo']
         lista.save()
 
     except Exception as e:

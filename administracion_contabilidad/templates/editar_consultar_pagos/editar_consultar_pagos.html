@@ -98,12 +98,18 @@
           </div>
         </div>
 
-        <!-- Cliente -->
-        <div class="mb-2">
-        {{ form.proveedor_codigo }}
-          {{ form.proveedor.label_tag }}
-          {{ form.proveedor }}
+                <!-- Cliente -->
+        <div class="d-grid mb-2" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            {{ form.proveedor.label_tag }}
+            {{ form.proveedor }}
+          </div>
+          <div>
+            {{ form.documento.label_tag }}
+            {{ form.documento }}
+          </div>
         </div>
+
 
         <!-- 📌 Tabla de resultados -->
         <div class="tabla-scroll mt-4 border rounded">
