@@ -833,6 +833,11 @@ def get_data_email(request):
                 )
 
                 texto += fecha_formateada.capitalize().upper() + '<br><br>'
+                texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
+
+                texto += formatear_linea("Consignatario",
+                                         str(row.consignatario) if row.consignatario is not None else "S/I")
+
 
                 # Mercaderías
 
@@ -879,10 +884,6 @@ def get_data_email(request):
 
                 texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I") if row.modo in ['IMPORT MARITIMO','EXPORT MARITIMO'] else formatear_linea("HAWB", str(row.hawb) if row.hawb is not None else "S/I")
 
-                texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
-
-                texto += formatear_linea("Consignatario",
-                                         str(row.consignatario) if row.consignatario is not None else "S/I")
 
                 texto += "<br>"
 

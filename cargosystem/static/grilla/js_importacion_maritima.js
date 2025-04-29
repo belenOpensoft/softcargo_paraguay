@@ -44,8 +44,9 @@ var awbRegex = "";
 
 
 let table_add_im;
-
+let table_edit_im;
 $(document).ready(function () {
+
 
      $('input.autocomplete').on('keydown', function(event) {
         var keyCode = event.keyCode || event.which;
@@ -250,6 +251,14 @@ $(document).ready(function () {
         table.draw();
     }
 
+
+
+    $('#buscadorEmailsHouse4').on('keyup', function () {
+        let valor = $(this).val().toLowerCase();
+        $("#listaEmailsHouse4 tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+        });
+    });
 
     //autocompletes add master form
     $("#transportista_add").autocomplete({
@@ -5598,5 +5607,31 @@ function validarCoincidenciaAcumulados() {
     }
 
     return true;
+}
+
+//mails
+function abrir_modal_mails(e){
+    e.preventDefault();
+
+    let row = table_edit_im.rows('.table-secondary').data();
+    if (row.length !== 1) {
+        alert('Debe seleccionar un embarque primero.');
+        return;
+    }
+
+    $("#modalSeleccionEmailHouse4").dialog({
+        autoOpen: true,
+        modal: true,
+        width: 400,
+        height: 400,
+        resizable: false,
+        draggable: false,
+        title: 'Seleccione el tipo de aviso House',
+        open: function (event, ui) {
+            $(this).parent().css('overflow', 'hidden');
+            $('#buscadorEmailsHouse4').val('');
+            $("#listaEmailsHouse4 tr").show();
+        }
+    });
 }
 

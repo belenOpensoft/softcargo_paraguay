@@ -152,6 +152,9 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         )
 
         texto += fecha_formateada.capitalize().upper() + '<br><br>'
+        texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador else "S/I")
+
+        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario else "S/I")
 
         texto += '<b>Detalle de mercadería:</b><br>'
 
@@ -202,9 +205,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("H B/L", str(row.hawb) if row.hawb else "S/I")
 
-        texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador else "S/I")
-
-        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario else "S/I")
 
         return texto, resultado
     elif title == 'Routing Order':

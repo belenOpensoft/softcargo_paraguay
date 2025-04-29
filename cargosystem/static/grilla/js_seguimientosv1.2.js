@@ -909,6 +909,37 @@ $(document).ready(function () {
         }
     });
 
+    $('#buscadorEmails').on('keyup', function () {
+        let valor = $(this).val().toLowerCase();
+        $("#listaEmails tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+        });
+    });
+    $('#btnAbrirModalEmail').click(function (e) {
+        e.preventDefault();
+
+        let row = table.rows('.table-secondary').data();  // Obtenemos la fila seleccionada
+        if (row.length !== 1) {
+            alert('Debe seleccionar un seguimiento primero.');
+            return; // No sigue, no abre el modal
+        }
+
+        $("#modalSeleccionEmail").dialog({
+            autoOpen: true,
+            modal: true,
+            width: 400,
+            height: 400,
+            resizable: false,
+            draggable: false,
+            title: 'Seleccione el tipo de aviso',
+            open: function (event, ui) {
+                $(this).parent().css('overflow', 'hidden'); // Quita scroll del modal
+            $('#buscadorEmails').val('');
+            $("#listaEmails tr").show();
+            }
+        });
+    });
+
     $('#archivos_btn').click(function () {
         $("#tabla_archivos").dataTable().fnDestroy();
        row = table.rows('.table-secondary').data();

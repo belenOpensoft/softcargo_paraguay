@@ -400,6 +400,8 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y'
         )
         texto += fecha_formateada.capitalize().upper() + '<br><br>'
+        texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
+        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario is not None else "S/I")
 
         cont = 1
         for m in merca:
@@ -428,8 +430,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("Destino", str(row.destino) if row.destino is not None else "S/I")
         texto += formatear_linea("Viaje", str(viaje))
         texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I")
-        texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
-        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario is not None else "S/I")
 
         return texto, resultado
     elif title == 'Routing Order':

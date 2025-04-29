@@ -10,6 +10,12 @@ $(document).ready(function () {
 //        console.log('Error:', error);
 //    }
 //});
+$('#buscadorEmailsHouse10').on('keyup', function () {
+    let valor = $(this).val().toLowerCase();
+    $("#listaEmailsHouse10 tr").filter(function () {
+        $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+    });
+});
     //buscadores
     $('#tabla_house_directo tfoot th').each(function(index) {
         let title = $('#tabla_house_directo th').eq(index).text();
@@ -669,6 +675,32 @@ function guardar_importado_house_directo(data, seguimientos) {
         error: function (xhr, status, error) {
             console.error('Error al guardar el house:', error);
             alert('Ocurrió un error al intentar guardar el house.');
+        }
+    });
+}
+
+
+function abrir_modal_mails_d(e){
+    e.preventDefault();
+
+    let row = table.rows('.table-secondary').data();
+    if (row.length !== 1) {
+        alert('Debe seleccionar un embarque primero.');
+        return;
+    }
+
+    $("#modalSeleccionEmailHouse10").dialog({
+        autoOpen: true,
+        modal: true,
+        width: 400,
+        height: 400,
+        resizable: false,
+        draggable: false,
+        title: 'Seleccione el tipo de aviso House',
+        open: function (event, ui) {
+            $(this).parent().css('overflow', 'hidden');
+            $('#buscadorEmailsHouse10').val('');
+            $("#listaEmailsHouse10 tr").show();
         }
     });
 }

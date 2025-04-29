@@ -153,6 +153,9 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
 
         texto += fecha_formateada.capitalize().upper() + '<br><br>'
+        texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador else "S/I")
+
+        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario else "S/I")
 
         cont = 1
 
@@ -186,9 +189,6 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
         texto += formatear_linea("H B/L", str(row.hawb) if row.hawb else "S/I")
 
-        texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador else "S/I")
-
-        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario else "S/I")
 
         texto += "<br>"
 

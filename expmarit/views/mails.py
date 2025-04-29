@@ -173,6 +173,9 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
         )
 
         texto += fecha_formateada.capitalize().upper() + '<br><br>'
+        texto += formatear_linea("Embarcador", row.embarcador if row.embarcador else "S/I")
+
+        texto += formatear_linea("Consignatario", row.consignatario if row.consignatario else "S/I")
 
         # Mercadería
 
@@ -225,9 +228,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
 
         texto += formatear_linea("H B/L", row.hawb if row.hawb else "S/I")
 
-        texto += formatear_linea("Embarcador", row.embarcador if row.embarcador else "S/I")
-
-        texto += formatear_linea("Consignatario", row.consignatario if row.consignatario else "S/I")
 
         # Despedida
 

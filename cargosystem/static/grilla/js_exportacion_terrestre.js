@@ -56,6 +56,12 @@ $(document).ready(function () {
             }
         }
     });
+    $('#buscadorEmailsHouse12').on('keyup', function () {
+        let valor = $(this).val().toLowerCase();
+        $("#listaEmailsHouse12 tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+        });
+    });
     setTimeout(function(){
         $('.navbar-collapse').collapse('hide');
     }, 5000);
@@ -5424,4 +5430,30 @@ function validarCoincidenciaAcumulados() {
     }
 
     return true;
+}
+
+//mails
+function abrir_modal_mails(e){
+    e.preventDefault();
+
+    let row = table_edit_im.rows('.table-secondary').data();
+    if (row.length !== 1) {
+        alert('Debe seleccionar un embarque primero.');
+        return;
+    }
+
+    $("#modalSeleccionEmailHouse12").dialog({
+        autoOpen: true,
+        modal: true,
+        width: 400,
+        height: 400,
+        resizable: false,
+        draggable: false,
+        title: 'Seleccione el tipo de aviso House',
+        open: function (event, ui) {
+            $(this).parent().css('overflow', 'hidden');
+            $('#buscadorEmailsHouse12').val('');
+            $("#listaEmailsHouse12 tr").show();
+        }
+    });
 }

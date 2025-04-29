@@ -30,27 +30,13 @@
                         </svg>
                     </a>
                 </li>
-                <li class="nav-item active dropdown">
-                    <a class="nav-link text-white dropdown-toggle" href="#" id="navbarScrollingDropdown3" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false" title="Mensajes para el house">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-envelope-check" viewBox="0 0 16 16">
-                      <path d="M2 2a2 2 0 0 0-2 2v8.01A2 2 0 0 0 2 14h5.5a.5.5 0 0 0 0-1H2a1 1 0 0 1-.966-.741l5.64-3.471L8 9.583l7-4.2V8.5a.5.5 0 0 0 1 0V4a2 2 0 0 0-2-2zm3.708 6.208L1 11.105V5.383zM1 4.217V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v.217l-7 4.2z"/>
-                      <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
-                    </svg>
+                <li class="nav-item active">
+                    <a class="nav-link text-white" href="#" onclick="abrir_modal_mails(event)" role="button" title="Mensajes para el house">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-envelope-check" viewBox="0 0 16 16">
+                            <path d="M2 2a2 2 0 0 0-2 2v8.01A2 2 0 0 0 2 14h5.5a.5.5 0 0 0 0-1H2a1 1 0 0 1-.966-.741l5.64-3.471L8 9.583l7-4.2V8.5a.5.5 0 0 0 1 0V4a2 2 0 0 0-2-2zm3.708 6.208L1 11.105V5.383zM1 4.217V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v.217l-7 4.2z"/>
+                            <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                        </svg>
                     </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
-                        <li><a class="dropdown-item email" href="#" data-id="TOP" data-tt="Routing Order">Routing Order</a></li>
-                        <li><a class="dropdown-item email" href="#" data-id="AEM" data-tt="Novedades sobre la carga">Novedades sobre la carga</a></li>
-                        <li><a class="dropdown-item email" href="#" data-id="NLC" data-tt="Notificación de transbordo de carga">Notificación de transbordo de carga</a></li>
-                        <li><a class="dropdown-item email" href="#" data-id="NLC" data-tt="Notificación de llegada de carga">Notificación de llegada de carga</a></li>
-                        <li><a class="dropdown-item email" href="#" data-id="DES" data-to="1" data-tt="Aviso de desconsolidacion">Aviso de desconsolidacion</a></li>
-                        <!--<li><a class="dropdown-item email" href="#" data-id="NLC" data-tt="Instruccion de embarque">Instrucción de embarque</a></li>
-                        <li><a class="dropdown-item email" href="#" data-id="NLC" data-tt="Shipping instruction">Shipping Instruction</a></li>-->
-                        <li><a class="dropdown-item email" href="#" data-id="NLC" data-tt="Orden de facturacion">Orden de facturación</a></li>
-                        <li><a class="dropdown-item email" href="#"  data-id="TOP" data-to="0" data-tt="Traspaso a operaciones">Traspaso a operaciones</a></li>
-
-
-                    </ul>
                 </li>
                   <li class="nav-item">
                     <a class="nav-link text-white" onclick="embarques_btn_h_click()" id="embarques_btn_house" href="#" title="Embarque para el house">
@@ -106,3 +92,22 @@
         </div>
     </div>
 </nav>
+
+
+<!-- Modal de selección de aviso -->
+<div id="modalSeleccionEmailHouse7" style="display:none;overflow:hidden;" title="Seleccionar aviso House">
+    <input type="text" id="buscadorEmailsHouse7" class="form-control mb-2" placeholder="Buscar aviso..." style="width: 100%;">
+    <div style="max-height: 300px; overflow-y: auto;">
+        <table class="table table-hover table-striped table-sm" style="margin:0;">
+            <tbody id="listaEmailsHouse7">
+                <tr class="email" data-id="DES" data-to="1" data-tt="Aviso de desconsolidacion"><td>Aviso de desconsolidacion</td></tr>
+                <tr class="email" data-id="NLC" data-tt="Notificación de llegada de carga"><td>Notificación de llegada de carga</td></tr>
+                <tr class="email" data-id="NLC" data-tt="Notificación de transbordo de carga"><td>Notificación de transbordo de carga</td></tr>
+                <tr class="email" data-id="AEM" data-tt="Novedades sobre la carga"><td>Novedades sobre la carga</td></tr>
+                <tr class="email" data-id="NLC" data-tt="Orden de facturacion"><td>Orden de facturación</td></tr>
+                <tr class="email" data-id="TOP" data-tt="Routing Order"><td>Routing Order</td></tr>
+                <tr class="email" data-id="TOP" data-to="0" data-tt="Traspaso a operaciones"><td>Traspaso a operaciones</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>

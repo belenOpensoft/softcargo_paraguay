@@ -1,3 +1,4 @@
+
 $(document).ready(function () {
   let contador = 0;
 //  $.ajax({
@@ -47,7 +48,7 @@ $(document).ready(function () {
         "order": [[1, "desc"]],
         "processing": true,
         "serverSide": true,
-        "pageLength": 100,
+        "pageLength": 10,
         "ajax": {
             "url": "/importacion_maritima/source_embarque_consolidado/",
             'type': 'GET',
@@ -59,8 +60,8 @@ $(document).ready(function () {
                 });
 
                 return $.extend({}, d, {
-                    "buscar": buscar,
-                    "que_buscar": que_buscar
+                    //"buscar": buscar,
+                    //"que_buscar": que_buscar
                 });
             }
         },
@@ -398,6 +399,13 @@ $(document).ready(function () {
             });
         });
     //mails
+
+        $('#buscadorEmailsHouse3').on('keyup', function () {
+    let valor = $(this).val().toLowerCase();
+    $("#listaEmailsHouse3 tr").filter(function () {
+        $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+    });
+});
         $('.email2').click(function () {
                 let id = localStorage.getItem('id_house_gasto');
                 let numero = localStorage.getItem('num_house_gasto');
@@ -501,6 +509,8 @@ $(document).ready(function () {
                     alert('Debe seleccionar al menos un registro');
                 }
             });
+
+
 })
 function generar_posicion(){
     return $.ajax({
@@ -667,6 +677,30 @@ function guardar_importado_house_directo(data, seguimientos) {
         error: function (xhr, status, error) {
             console.error('Error al guardar el house:', error);
             alert('Ocurrió un error al intentar guardar el house.');
+        }
+    });
+}
+function abrir_modal_mails_d(e){
+    e.preventDefault();
+
+    let row = table.rows('.table-secondary').data();
+    if (row.length !== 1) {
+        alert('Debe seleccionar un embarque primero.');
+        return;
+    }
+
+    $("#modalSeleccionEmailHouse3").dialog({
+        autoOpen: true,
+        modal: true,
+        width: 400,
+        height: 400,
+        resizable: false,
+        draggable: false,
+        title: 'Seleccione el tipo de aviso House',
+        open: function (event, ui) {
+            $(this).parent().css('overflow', 'hidden');
+            $('#buscadorEmailsHouse3').val('');
+            $("#listaEmailsHouse3 tr").show();
         }
     });
 }

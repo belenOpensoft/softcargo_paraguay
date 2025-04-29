@@ -45,7 +45,12 @@ var awbRegex = "";
 let table_add_im;
 
 $(document).ready(function () {
-
+    $('#buscadorEmailsHouse9').on('keyup', function () {
+        let valor = $(this).val().toLowerCase();
+        $("#listaEmailsHouse9 tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+        });
+    });
      $('input.autocomplete').on('keydown', function(event) {
         var keyCode = event.keyCode || event.which;
 
@@ -5451,4 +5456,30 @@ function validarCoincidenciaAcumulados() {
     }
 
     return true;
+}
+
+//mails
+function abrir_modal_mails(e){
+    e.preventDefault();
+
+    let row = table_edit_im.rows('.table-secondary').data();
+    if (row.length !== 1) {
+        alert('Debe seleccionar un embarque primero.');
+        return;
+    }
+
+    $("#modalSeleccionEmailHouse9").dialog({
+        autoOpen: true,
+        modal: true,
+        width: 400,
+        height: 400,
+        resizable: false,
+        draggable: false,
+        title: 'Seleccione el tipo de aviso House',
+        open: function (event, ui) {
+            $(this).parent().css('overflow', 'hidden');
+            $('#buscadorEmailsHouse9').val('');
+            $("#listaEmailsHouse9 tr").show();
+        }
+    });
 }
