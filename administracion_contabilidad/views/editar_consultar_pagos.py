@@ -1,6 +1,7 @@
 import json
 
 from django.contrib import messages
+from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from administracion_contabilidad.forms import EditarConsultarPagos, PagosDetalle
@@ -171,87 +172,88 @@ def cargar_pendientes_imputacion_pago(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+
 def procesar_imputaciones_pagos(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            with transaction.atomic():
+                data = json.loads(request.body)
 
-            accion = data.get('accion')  # 'guardar' o 'eliminar'
+                accion = data.get('accion')  # 'guardar' o 'eliminar'
 
-            if accion == 'guardar':
-                try:
-                    facturas = data.get('facturas', [])
+                if accion == 'guardar':
+                    try:
+                        facturas = data.get('facturas', [])
+                        autogen = data.get('autogen')
+                        cliente = data.get('cliente')
+                        saldo_nuevo = data.get('saldo')
+                        orden = data.get('orden')
+
+                        if not autogen or not isinstance(facturas, list):
+                            return JsonResponse({'success': False, 'error': 'Datos incompletos'})
+
+                        for fac in facturas:
+                            impuordenes = Impuordenes()
+                            impuordenes.autofac = fac.get('autofac')
+                            impuordenes.orden = orden
+                            impuordenes.cliente = cliente
+                            impuordenes.monto = fac.get('monto_imputado')
+                            impuordenes.save()
+
+                            factura = Movims.objects.filter(mautogen=fac.get('autofac')).first()
+                            if factura:
+                                saldo = float(factura.msaldo) - float(fac.get('monto_imputado'))
+                                factura.msaldo= saldo
+                                factura.save()
+
+                            pago=Movims.objects.filter(mautogen=autogen).first()
+                            if pago:
+                                pago.msaldo=saldo_nuevo if saldo_nuevo else 0
+                                pago.mdetalle=str(pago.mdetalle)+str(factura.mboleta)+';'
+                                pago.save()
+
+                        return JsonResponse({'success': True, 'message': 'Imputaciones guardadas correctamente'})
+                    except Exception as e:
+                        return JsonResponse({'success': False, 'error': e})
+
+                elif accion == 'eliminar':
                     autogen = data.get('autogen')
-                    cliente = data.get('cliente')
-                    saldo_nuevo = data.get('saldo')
                     orden = data.get('orden')
+                    autofac = data.get('autofac')
 
-                    if not autogen or not isinstance(facturas, list):
-                        return JsonResponse({'success': False, 'error': 'Datos incompletos'})
+                    if not autogen or not orden:
+                        return JsonResponse({'success': False, 'error': 'Faltan parámetros para eliminar'})
 
-                    for fac in facturas:
-                        impuordenes = Impuordenes()
-                        impuordenes.autofac = fac.get('autofac')
-                        impuordenes.orden = orden
-                        impuordenes.cliente = cliente
-                        impuordenes.monto = fac.get('monto_imputado')
-                        impuordenes.save()
+                    eliminado = Impuordenes.objects.filter(orden=orden, autofac=autofac).first()
+                    monto = eliminado.monto
+                    eliminado.delete()
+                    factura = Movims.objects.filter(mautogen=autofac).first()
+                    factura.msaldo=float(factura.msaldo)+float(monto)
+                    factura.save()
+                    orden = Movims.objects.filter(mautogen=autogen).first()
+                    if orden:
+                        orden.msaldo = float(orden.msaldo)+float(monto)
+                        nro_bole = factura.mboleta if factura else None
 
-                        factura = Movims.objects.filter(mautogen=fac.get('autofac')).first()
-                        if factura:
-                            saldo = float(factura.msaldo) - float(fac.get('monto_imputado'))
-                            factura.msaldo= saldo
-                            factura.save()
+                        if nro_bole:
+                            lista_boletas = orden.mdetalle.split(';')
+                            lista_boletas = [b for b in lista_boletas if b.strip() and b.strip() != str(nro_bole)]
+                            orden.mdetalle = ';'.join(lista_boletas) + (';' if lista_boletas else '')
 
-                        pago=Movims.objects.filter(mautogen=autogen).first()
-                        if pago:
-                            pago.msaldo=saldo_nuevo
-                            pago.mdetalle=str(pago.mdetalle)+str(factura.mboleta)+';'
-                            pago.save()
+                        orden.save()
 
-                    return JsonResponse({'success': True, 'message': 'Imputaciones guardadas correctamente'})
-                except Exception as e:
-                    return JsonResponse({'success': False, 'error': e})
+                    if eliminado:
+                        return JsonResponse({'success': True, 'message': 'Imputación eliminada'})
+                    else:
+                        return JsonResponse({'success': False, 'error': 'No se encontró la imputación'})
 
-            elif accion == 'eliminar':
-                autogen = data.get('autogen')
-                orden = data.get('orden')
-                autofac = data.get('autofac')
-
-                if not autogen or not orden:
-                    return JsonResponse({'success': False, 'error': 'Faltan parámetros para eliminar'})
-
-                eliminado = Impuordenes.objects.filter(orden=orden, autofac=autofac).first()
-                monto = eliminado.monto
-                eliminado.delete()
-                factura = Movims.objects.filter(mautogen=autofac).first()
-                factura.msaldo=float(factura.msaldo)+float(monto)
-                factura.save()
-                orden = Movims.objects.filter(mautogen=autogen).first()
-                if orden:
-                    orden.msaldo = float(orden.msaldo)+float(monto)
-                    nro_bole = factura.mboleta if factura else None
-
-                    if nro_bole:
-                        lista_boletas = orden.mdetalle.split(';')
-                        lista_boletas = [b for b in lista_boletas if b.strip() and b.strip() != str(nro_bole)]
-                        orden.mdetalle = ';'.join(lista_boletas) + (';' if lista_boletas else '')
-
-                    orden.save()
-
-                if eliminado:
-                    return JsonResponse({'success': True, 'message': 'Imputación eliminada'})
                 else:
-                    return JsonResponse({'success': False, 'error': 'No se encontró la imputación'})
-
-            else:
-                return JsonResponse({'success': False, 'error': 'Acción no válida'})
+                    return JsonResponse({'success': False, 'error': 'Acción no válida'})
 
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
-
 
 def actualizar_campos_movims_pago(request):
     if request.method == 'POST':
@@ -284,61 +286,63 @@ def actualizar_campos_movims_pago(request):
 
     return JsonResponse({"success": False, "error": "Método no permitido"}, status=405)
 
+
 def anular_pago(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            autogen = data.get('autogen')
-            orden = data.get('orden')
+            with transaction.atomic():
+                data = json.loads(request.body)
+                autogen = data.get('autogen')
+                orden = data.get('orden')
 
-            if not autogen:
-                return JsonResponse({'success': False, 'error': 'Autogenerado no proporcionado'})
+                if not autogen:
+                    return JsonResponse({'success': False, 'error': 'Autogenerado no proporcionado'})
 
-            # Eliminar en orden lógico
-            impus = Impuordenes.objects.filter(orden=orden)
-            movims = Movims.objects.filter(mautogen=autogen)
-            asientos = Asientos.objects.filter(autogenerado=autogen)
-            orden = Ordenes.objects.filter(mautogenmovims=autogen)
-            cheque = Chequeorden.objects.filter(corden=orden)
+                # Eliminar en orden lógico
+                impus = Impuordenes.objects.filter(orden=orden)
+                movims = Movims.objects.filter(mautogen=autogen)
+                asientos = Asientos.objects.filter(autogenerado=autogen)
+                orden_pago = Ordenes.objects.filter(mautogenmovims=autogen)
+                cheque = Chequeorden.objects.filter(corden=orden)
 
-            if impus:
-                for impu in impus:
-                    autofac = impu.autofac  # obtenemos el autofac de la fila
-                    if autofac:
-                        # Buscamos la factura correspondiente en Movims
-                        factura = Movims.objects.filter(mautogen=autofac).first()
+                if impus:
+                    for impu in impus:
+                        autofac = impu.autofac  # obtenemos el autofac de la fila
+                        if autofac:
+                            # Buscamos la factura correspondiente en Movims
+                            factura = Movims.objects.filter(mautogen=autofac).first()
 
-                        if factura:
-                            factura.msaldo=float(factura.msaldo)+float(impu.monto)
-                            factura.save()
+                            if factura:
+                                factura.msaldo=float(factura.msaldo)+float(impu.monto)
+                                factura.save()
 
-            impus_deleted = impus.count()
-            movims_deleted = movims.count()
-            asientos_deleted = asientos.count()
+                impus_deleted = impus.count()
+                movims_deleted = movims.count()
+                asientos_deleted = asientos.count()
 
-            if cheque.exists():
-                for c in cheque:
-                    chequera=Chequeras.objects.filter(cheque=c.numero).first()
-                    if chequera:
-                        chequera.estado=0
-                        chequera.save()
+                if cheque.exists():
+                    for c in cheque:
+                        chequera=Chequeras.objects.filter(cheque=c.numero).first()
+                        if chequera:
+                            chequera.estado=0
+                            chequera.save()
 
-                cheque.delete()
+                    cheque.delete()
 
-            impus.delete()
-            movims.delete()
-            asientos.delete()
-            orden.delete()
+                impus.delete()
+                movims.delete()
+                asientos.delete()
+                orden_pago.delete()
 
-            return JsonResponse({
-                'success': True,
-                'message': 'Cobranza anulada correctamente',
-                'eliminados': {
-                    'Impucompras': impus_deleted,
-                    'Movims': movims_deleted,
-                    'Asientos': asientos_deleted
-                }
-            })
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Cobranza anulada correctamente',
+                    'eliminados': {
+                        'Impucompras': impus_deleted,
+                        'Movims': movims_deleted,
+                        'Asientos': asientos_deleted
+                    }
+                })
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
 

@@ -101,259 +101,260 @@ def buscar_items_c(request):
 
     return JsonResponse({'error': 'Servicio no encontrado'}, status=404)
 
-@transaction.atomic
+
 def procesar_factura_proveedor(request):
     try:
-        if request.method == 'POST':
+        with transaction.atomic():
+            if request.method == 'POST':
 
-            hora = datetime.now().strftime('%H%M%S%f')
-            fecha = request.POST.get('fecha')
-            tipo = request.POST.get('tipoFac', 0)
-            numero = request.POST.get('numero', 0)
+                hora = datetime.now().strftime('%H%M%S%f')
+                fecha = request.POST.get('fecha')
+                tipo = request.POST.get('tipoFac', 0)
+                numero = request.POST.get('numero', 0)
 
-            autogenerado=generar_autogenerado(tipo, hora, fecha, numero)
-            master=None
-            house=None
-            posicion=None
-            kilos=None
-            bultos=None
-            terminos=None
-            pagoflete=None
-            origen=None
-            destino=None
-            seguimiento=None
+                autogenerado=generar_autogenerado(tipo, hora, fecha, numero)
+                master=None
+                house=None
+                posicion=None
+                kilos=None
+                bultos=None
+                terminos=None
+                pagoflete=None
+                origen=None
+                destino=None
+                seguimiento=None
 
-            serie = request.POST.get('serie', "")
-            prefijo = request.POST.get('prefijo', 0)
-            moneda = request.POST.get('moneda', "")
-            arbitraje = request.POST.get('arbitraje', 0)
-            paridad = request.POST.get('paridad', 0)
-            cliente_data = json.loads(request.POST.get('clienteData'))
-            facturas_json = request.POST.get('facturas_imputadas')
-            if facturas_json:
-                facturas_imputadas = json.loads(facturas_json)
-            else:
-                facturas_imputadas = []
+                serie = request.POST.get('serie', "")
+                prefijo = request.POST.get('prefijo', 0)
+                moneda = request.POST.get('moneda', "")
+                arbitraje = request.POST.get('arbitraje', 0)
+                paridad = request.POST.get('paridad', 0)
+                cliente_data = json.loads(request.POST.get('clienteData'))
+                facturas_json = request.POST.get('facturas_imputadas')
+                if facturas_json:
+                    facturas_imputadas = json.loads(facturas_json)
+                else:
+                    facturas_imputadas = []
 
-            saldo_nota_cred = request.POST.get('saldo_nota_cred', 0)
-            codigo_cliente = cliente_data['codigo']
-            cliente = Clientes.objects.get(codigo=codigo_cliente)
-            fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
+                saldo_nota_cred = request.POST.get('saldo_nota_cred', 0)
+                codigo_cliente = cliente_data['codigo']
+                cliente = Clientes.objects.get(codigo=codigo_cliente)
+                fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
 
-            precio_total = request.POST.get('total', 0)
-            neto = request.POST.get('neto', 0)
-            iva = request.POST.get('iva', 0)
+                precio_total = request.POST.get('total', 0)
+                neto = request.POST.get('neto', 0)
+                iva = request.POST.get('iva', 0)
 
-            items_data = json.loads(request.POST.get('items'))
+                items_data = json.loads(request.POST.get('items'))
 
-            tipo_mov = tipo
-            tipo_asiento = 'V'
-            detalle1 = 'S/I'
-            detalle_mov = ""
-            nombre_mov = ""
-            asiento = generar_numero()
-            movimiento_num = modificar_numero(asiento)
-
-
-            if int(tipo) == 10:
-                detalle1 = 'VTA/CRED'
+                tipo_mov = tipo
                 tipo_asiento = 'V'
-                nombre_mov = 'CONTADO'
-            elif int(tipo) == 11:
-                detalle1 = 'DEV/CTDO'
-                tipo_asiento='V'
-                nombre_mov = 'DEVOLUCION'
-            elif int(tipo) == 41:
-                detalle1 = 'NOT/CRED'
-                tipo_asiento = 'P'
-                nombre_mov = 'NOTA CRED.'
-            elif int(tipo) == 40:
-                detalle1 = 'CPRA/CRED'
-                tipo_asiento = 'P'
-                nombre_mov = 'FACTURA'
-
-            if int(tipo)==41 and facturas_imputadas:
-                for fac in facturas_imputadas:
-
-                    impuc=Impucompras()
-                    impuc.autogen=str(autogenerado)
-                    impuc.cliente=codigo_cliente
-                    impuc.monto=fac.get('monto_imputado')
-                    impuc.autofac=fac.get('autogenerado')
-                    impuc.save()
-
-                    fac=Movims.objects.filter(mautogen=fac.get('autogenerado'),mtipo=40).first()
-                    fac.msaldo=fac.msaldo - float(fac.get('monto_imputado'))
-                    fac.save()
-
-            detalle_asiento = detalle1 + '-' + serie + '-' + str(prefijo) + '-' + str(numero) + '-' + cliente.empresa
+                detalle1 = 'S/I'
+                detalle_mov = ""
+                nombre_mov = ""
+                asiento = generar_numero()
+                movimiento_num = modificar_numero(asiento)
 
 
-            asiento_general = {
-                'detalle': detalle_asiento,
-                'asiento': asiento,
-                'monto': precio_total,
-                'moneda': moneda,
-                'cambio': arbitraje,
-                'conciliado': 'N',
-                'clearing': fecha_obj,
-                'fecha': fecha_obj,
-                'imputacion': 2,
-                'tipo': tipo_asiento,
-                'cuenta': cliente.ctacomp,
-                'documento': str(numero),
-                'vencimiento': fecha_obj,
-                'pasado': 0,
-                'autogenerado': autogenerado,
-                'cliente': cliente.codigo,
-                'banco': 'S/I',
-                'centro': 'S/I',
-                'mov': movimiento_num,
-                'anio': fecha_obj.year,
-                'mes': fecha_obj.month,
-                'fechacheque': fecha_obj,
-                'paridad': paridad,
-                'posicion':'S/I'
-            }
+                if int(tipo) == 10:
+                    detalle1 = 'VTA/CRED'
+                    tipo_asiento = 'V'
+                    nombre_mov = 'CONTADO'
+                elif int(tipo) == 11:
+                    detalle1 = 'DEV/CTDO'
+                    tipo_asiento='V'
+                    nombre_mov = 'DEVOLUCION'
+                elif int(tipo) == 41:
+                    detalle1 = 'NOT/CRED'
+                    tipo_asiento = 'P'
+                    nombre_mov = 'NOTA CRED.'
+                elif int(tipo) == 40:
+                    detalle1 = 'CPRA/CRED'
+                    tipo_asiento = 'P'
+                    nombre_mov = 'FACTURA'
 
-            crear_asiento(asiento_general)
+                if int(tipo)==41 and facturas_imputadas:
+                    for fac in facturas_imputadas:
 
-            coniva = 0
-            totaliva = 0
+                        impuc=Impucompras()
+                        impuc.autogen=str(autogenerado)
+                        impuc.cliente=codigo_cliente
+                        impuc.monto=fac.get('monto_imputado')
+                        impuc.autofac=fac.get('autogenerado')
+                        impuc.save()
+
+                        fac=Movims.objects.filter(mautogen=fac.get('autogenerado'),mtipo=40).first()
+                        fac.msaldo=fac.msaldo - float(fac.get('monto_imputado'))
+                        fac.save()
+
+                detalle_asiento = detalle1 + '-' + serie + '-' + str(prefijo) + '-' + str(numero) + '-' + cliente.empresa
 
 
-            for item_data in items_data:
-                #aux = int(movimiento_num) + 1
+                asiento_general = {
+                    'detalle': detalle_asiento,
+                    'asiento': asiento,
+                    'monto': precio_total,
+                    'moneda': moneda,
+                    'cambio': arbitraje,
+                    'conciliado': 'N',
+                    'clearing': fecha_obj,
+                    'fecha': fecha_obj,
+                    'imputacion': 2,
+                    'tipo': tipo_asiento,
+                    'cuenta': cliente.ctacomp,
+                    'documento': str(numero),
+                    'vencimiento': fecha_obj,
+                    'pasado': 0,
+                    'autogenerado': autogenerado,
+                    'cliente': cliente.codigo,
+                    'banco': 'S/I',
+                    'centro': 'S/I',
+                    'mov': movimiento_num,
+                    'anio': fecha_obj.year,
+                    'mes': fecha_obj.month,
+                    'fechacheque': fecha_obj,
+                    'paridad': paridad,
+                    'posicion':'S/I'
+                }
 
-                precio = float(item_data.get('precio'))
-                key = False
-                if item_data.get('iva') == 'Basico':
-                    coniva = precio * 1.22
-                    totaliva = precio * 0.22
-                    key = True
-                else:
-                    coniva = precio
-                    totaliva = 0
+                crear_asiento(asiento_general)
+
+                coniva = 0
+                totaliva = 0
+
+
+                for item_data in items_data:
+                    #aux = int(movimiento_num) + 1
+
+                    precio = float(item_data.get('precio'))
                     key = False
+                    if item_data.get('iva') == 'Basico':
+                        coniva = precio * 1.22
+                        totaliva = precio * 0.22
+                        key = True
+                    else:
+                        coniva = precio
+                        totaliva = 0
+                        key = False
 
-                if key==True:
-                    iva_total_asiento = {
-                        'detalle': detalle_asiento,
-                        'monto': totaliva,
-                        'moneda': moneda,
-                        'cambio': arbitraje,
-                        'asiento': asiento,
-                        'conciliado': 'N',
-                        'clearing': fecha_obj,
-                        'fecha': fecha_obj,
-                        'imputacion': 1,
-                        'tipo': tipo_asiento,
-                        'cuenta': item_data.get('cuenta'),
-                        'documento': str(numero),
-                        'vencimiento': fecha_obj,
-                        'pasado': 0,
-                        'autogenerado': autogenerado,
-                        'cliente': cliente.codigo,
-                        'banco': 'S/I',
-                        'centro': 'S/I',
-                        'mov': movimiento_num,
-                        'anio': fecha_obj.year,
-                        'mes': fecha_obj.month,
-                        'fechacheque': fecha_obj,
-                        'paridad': paridad,
-                        'posicion': item_data.get('posicion'),
-                        'nroserv': item_data.get('id'),
-                    }
-                    monto_original_asiento = {
-                        'detalle': detalle_asiento,
-                        'monto': precio,
-                        'moneda': moneda,
-                        'cambio': arbitraje,
-                        'asiento': asiento,
-                        'conciliado': 'N',
-                        'clearing': fecha_obj,
-                        'fecha': fecha_obj,
-                        'imputacion': 1,
-                        'tipo': tipo_asiento,
-                        'cuenta': item_data.get('cuenta'),
-                        'documento': str(numero),
-                        'vencimiento': fecha_obj,
-                        'pasado': 0,
-                        'autogenerado': autogenerado,
-                        'cliente': cliente.codigo,
-                        'banco': 'S/I',
-                        'centro': 'S/I',
-                        'mov': movimiento_num,
-                        'anio': fecha_obj.year,
-                        'mes': fecha_obj.month,
-                        'fechacheque': fecha_obj,
-                        'paridad': paridad,
-                        'posicion': item_data.get('posicion'),
-                        'nroserv': item_data.get('id'),
-                    }
+                    if key==True:
+                        iva_total_asiento = {
+                            'detalle': detalle_asiento,
+                            'monto': totaliva,
+                            'moneda': moneda,
+                            'cambio': arbitraje,
+                            'asiento': asiento,
+                            'conciliado': 'N',
+                            'clearing': fecha_obj,
+                            'fecha': fecha_obj,
+                            'imputacion': 1,
+                            'tipo': tipo_asiento,
+                            'cuenta': item_data.get('cuenta'),
+                            'documento': str(numero),
+                            'vencimiento': fecha_obj,
+                            'pasado': 0,
+                            'autogenerado': autogenerado,
+                            'cliente': cliente.codigo,
+                            'banco': 'S/I',
+                            'centro': 'S/I',
+                            'mov': movimiento_num,
+                            'anio': fecha_obj.year,
+                            'mes': fecha_obj.month,
+                            'fechacheque': fecha_obj,
+                            'paridad': paridad,
+                            'posicion': item_data.get('posicion'),
+                            'nroserv': item_data.get('id'),
+                        }
+                        monto_original_asiento = {
+                            'detalle': detalle_asiento,
+                            'monto': precio,
+                            'moneda': moneda,
+                            'cambio': arbitraje,
+                            'asiento': asiento,
+                            'conciliado': 'N',
+                            'clearing': fecha_obj,
+                            'fecha': fecha_obj,
+                            'imputacion': 1,
+                            'tipo': tipo_asiento,
+                            'cuenta': item_data.get('cuenta'),
+                            'documento': str(numero),
+                            'vencimiento': fecha_obj,
+                            'pasado': 0,
+                            'autogenerado': autogenerado,
+                            'cliente': cliente.codigo,
+                            'banco': 'S/I',
+                            'centro': 'S/I',
+                            'mov': movimiento_num,
+                            'anio': fecha_obj.year,
+                            'mes': fecha_obj.month,
+                            'fechacheque': fecha_obj,
+                            'paridad': paridad,
+                            'posicion': item_data.get('posicion'),
+                            'nroserv': item_data.get('id'),
+                        }
 
-                    crear_asiento(iva_total_asiento)
-                    crear_asiento(monto_original_asiento)
-                else:
-                    asiento_vector = {
-                        'detalle': detalle_asiento,
-                        'monto': precio,
-                        'moneda': moneda,
-                        'cambio': arbitraje,
-                        'asiento': asiento,
-                        'conciliado': 'N',
-                        'clearing': fecha_obj,
-                        'fecha': fecha_obj,
-                        'imputacion': 1,
-                        'tipo': tipo_asiento,
-                        'cuenta': item_data.get('cuenta'),
-                        'documento': str(numero),
-                        'vencimiento': fecha_obj,
-                        'pasado': 0,
-                        'autogenerado': autogenerado,
-                        'cliente': cliente.codigo,
-                        'banco': 'S/I',
-                        'centro': 'S/I',
-                        'mov': movimiento_num,
-                        'anio': fecha_obj.year,
-                        'mes': fecha_obj.month,
-                        'fechacheque': fecha_obj,
-                        'paridad': paridad,
-                        'posicion': item_data.get('posicion'),
-                        'nroserv': item_data.get('id'),
+                        crear_asiento(iva_total_asiento)
+                        crear_asiento(monto_original_asiento)
+                    else:
+                        asiento_vector = {
+                            'detalle': detalle_asiento,
+                            'monto': precio,
+                            'moneda': moneda,
+                            'cambio': arbitraje,
+                            'asiento': asiento,
+                            'conciliado': 'N',
+                            'clearing': fecha_obj,
+                            'fecha': fecha_obj,
+                            'imputacion': 1,
+                            'tipo': tipo_asiento,
+                            'cuenta': item_data.get('cuenta'),
+                            'documento': str(numero),
+                            'vencimiento': fecha_obj,
+                            'pasado': 0,
+                            'autogenerado': autogenerado,
+                            'cliente': cliente.codigo,
+                            'banco': 'S/I',
+                            'centro': 'S/I',
+                            'mov': movimiento_num,
+                            'anio': fecha_obj.year,
+                            'mes': fecha_obj.month,
+                            'fechacheque': fecha_obj,
+                            'paridad': paridad,
+                            'posicion': item_data.get('posicion'),
+                            'nroserv': item_data.get('id'),
 
-                    }
-                    crear_asiento(asiento_vector)
+                        }
+                        crear_asiento(asiento_vector)
 
-                #movimiento_num = aux
+                    #movimiento_num = aux
 
-            movimiento = {
-                'tipo': tipo_mov,
-                'fecha': fecha_obj,
-                'boleta': numero,
-                'monto': precio_total,
-                'iva': totaliva,
-                'total': precio_total,
-                'saldo': precio_total if int(tipo) !=41 else saldo_nota_cred,
-                'moneda': moneda,
-                'detalle': detalle_mov,
-                'cliente': cliente.codigo,
-                'nombre': cliente.empresa,
-                'nombremov': nombre_mov,
-                'cambio': arbitraje,
-                'autogenerado': autogenerado,
-                'serie': serie,
-                'prefijo': prefijo,
-                'posicion': posicion,
-                'anio': fecha_obj.year,
-                'mes': fecha_obj.month,
-                'monedaoriginal': moneda,
-                'montooriginal': precio_total,
-                'arbitraje': arbitraje
-            }
-            crear_movimiento(movimiento)
+                movimiento = {
+                    'tipo': tipo_mov,
+                    'fecha': fecha_obj,
+                    'boleta': numero,
+                    'monto': precio_total,
+                    'iva': totaliva,
+                    'total': precio_total,
+                    'saldo': precio_total if int(tipo) !=41 else saldo_nota_cred,
+                    'moneda': moneda,
+                    'detalle': detalle_mov,
+                    'cliente': cliente.codigo,
+                    'nombre': cliente.empresa,
+                    'nombremov': nombre_mov,
+                    'cambio': arbitraje,
+                    'autogenerado': autogenerado,
+                    'serie': serie,
+                    'prefijo': prefijo,
+                    'posicion': posicion,
+                    'anio': fecha_obj.year,
+                    'mes': fecha_obj.month,
+                    'monedaoriginal': moneda,
+                    'montooriginal': precio_total,
+                    'arbitraje': arbitraje
+                }
+                crear_movimiento(movimiento)
 
-            return JsonResponse({'status': 'Factura procesada correctamente N° ' + str(numero)})
+                return JsonResponse({'status': 'Factura procesada correctamente N° ' + str(numero)})
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
 
@@ -388,7 +389,7 @@ def crear_asiento(asiento):
         lista.save()
 
     except Exception as e:
-        return JsonResponse({'status': 'Error: ' + str(e)})
+        raise
 
 def crear_movimiento(movimiento):
     try:
@@ -421,7 +422,7 @@ def crear_movimiento(movimiento):
         lista.save()
 
     except Exception as e:
-        return JsonResponse({'status': 'Error:' + str(e)})
+        raise
 
 def source_proveedoresygastos(request):
     try:

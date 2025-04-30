@@ -272,7 +272,7 @@ def obtener_imputados_orden_venta(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
-@transaction.atomic
+
 def modificar_embarque_imputado(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)

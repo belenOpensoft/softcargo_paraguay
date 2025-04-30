@@ -1151,8 +1151,8 @@ medios_pago.forEach((item) => {
 
 cobranza.push({
         nrocliente:$('#cliente_cobranza_hidden').val(),
-        serie:$('#id_serie').val(),
-        prefijo:$('#id_prefijo').val(),
+        serie:null,
+        prefijo:null,
         numero:$('#id_numero').val(),
         total:$('#id_importe').val(),
         nromoneda:$('#id_moneda').val(),
@@ -1176,7 +1176,7 @@ let nuevaFila = {
 
 vector.asiento.push(nuevaFila);
 }
-
+//no sale esto en la consola
 console.log('anticipo '+vector);
 
 
@@ -1188,7 +1188,7 @@ $.ajax({
         contentType: 'application/json',
         success: function(response) {
             if (response.status === 'exito') {
-                alert("Datos guardados correctamente");
+                console.log("Datos guardados correctamente");
                 // Opcional: recargar una tabla o actualizar la UI
             } else {
                 alert("ghfghfgh: " + response.status);
@@ -1259,8 +1259,8 @@ medios_pago.forEach((item) => {
 
 cobranza.push({
         nrocliente:$('#cliente_cobranza_hidden').val(),
-        serie:$('#id_serie').val(),
-        prefijo:$('#id_prefijo').val(),
+        serie:null,
+        prefijo:null,
         numero:$('#id_numero').val(),
         total:$('#id_importe').val(),
         nromoneda:$('#id_moneda').val(),
@@ -1290,7 +1290,7 @@ console.log('cobranza '+cobranza);
 
 
 $.ajax({
-        url: '/admin_cont/guardar_anticipo/', // Cambia esto a la URL correcta
+        url: '/admin_cont/guardar_anticipo_orden/', // Cambia esto a la URL correcta
         method: 'POST',
         headers: { 'X-CSRFToken': csrf_token }, // Asegúrate de tener el CSRF token
         data: JSON.stringify({ 'vector':vector }),
