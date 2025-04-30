@@ -7,7 +7,7 @@ from django.db.models import Sum, Count
 from django.http import HttpResponse
 import base64
 
-from reportlab.lib.validators import isNumber
+from reportlab.lib.validators import isNumber, isInstanceOf
 
 from cargosystem import settings
 from impomarit.views.mails import formatear_linea
@@ -170,56 +170,74 @@ def get_data_email(request):
                 volumen = 0
                 gastos = Serviceaereo.objects.filter(numero=row.numero)
 
-                cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto',
-                                                                             'bultos', 'peso', 'unidad',
-                                                                             'volumen').annotate(total=Count('id'))
+                if row.modo not in ['IMPORT AEREO','EXPORT AEREO']:
 
-                carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre','tipo')
+                    cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto',
+                                                                                 'bultos', 'peso', 'unidad',
+                                                                                 'volumen').annotate(total=Count('id'))
 
-                if cant_cntr.count() > 0:
+                    carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre','tipo')
 
-                    for cn in cant_cntr:
+                    if cant_cntr.count() > 0:
 
-                        cantidad_cntr += f'{cn["total"]} x {cn["unidad"]} - {cn["tipo"]} - '
+                        for cn in cant_cntr:
 
-                        contenedores += f'{cn["nrocontenedor"]} - '
+                            cantidad_cntr += f'{cn["total"]} x {cn["unidad"]} - {cn["tipo"]} - '
 
-                        if cn['precinto']:
-                            precintos += f'{cn["precinto"]} - '
+                            contenedores += f'{cn["nrocontenedor"]} - '
 
-                        bultos += cn['bultos'] if cn['bultos'] else 0
+                            if cn['precinto']:
+                                precintos += f'{cn["precinto"]} - '
 
-                        peso += cn['peso'] or 0
+                            bultos += cn['bultos'] if cn['bultos'] else 0
 
-                        volumen += cn['volumen'] or 0
+                            peso += cn['peso'] or 0
 
-                if carga.count() > 0:
+                            volumen += cn['volumen'] or 0
 
-                    for c in carga:
-                        mercaderias += c['producto__nombre'] + ' - '
-                        tipo = c["tipo"]
+                    if carga.count() > 0:
 
-                texto += formatear_linea("Contenedores", cantidad_cntr[:-3])
+                        for c in carga:
+                            mercaderias += c['producto__nombre'] + ' - '
+                            tipo = c["tipo"]
 
-                texto += formatear_linea("Nro. Contenedor/es", contenedores[:-3])
+                    texto += formatear_linea("Contenedores", cantidad_cntr[:-3])
 
-                texto += formatear_linea("Precintos/Sellos", precintos[:-3])
+                    texto += formatear_linea("Nro. Contenedor/es", contenedores[:-3])
 
-                texto += formatear_linea("HBL", row.hawb or "") if row.modo  == 'IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO' else formatear_linea("HAWB", row.hawb or "")
+                    texto += formatear_linea("Precintos/Sellos", precintos[:-3])
+                else:
+                    carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre', 'tipo','bultos','bruto','cbm')
+
+                    if carga.count() > 0:
+
+                        for c in carga:
+                            mercaderias += c['producto__nombre'] + ' - '
+                            tipo = c["tipo"]
+                            bultos += c['bultos'] if c['bultos'] else 0
+                            peso += c['bruto'] or 0
+                            volumen += c['cbm'] or 0
+
+                if row.modo and row.modo.strip().upper() in ['IMPORT MARITIMO', 'EXPORT MARITIMO']:
+                    texto += formatear_linea("HBL", row.hawb or "")
+                else:
+                    texto += formatear_linea("HAWB", row.hawb or "")
 
                 if master == 'true':
                     if row.modo in ['IMPORT MARITIMO', 'EXPORT MARITIMO']:
                         texto += formatear_linea("MBL", row.awb or "")
                     elif row.modo in ['IMPORT AEREO', 'EXPORT AEREO']:
-                        texto += formatear_linea("AWB", row.hawb or "")
+                        texto += formatear_linea("AWB", row.awb or "")
                     else:
-                        texto += formatear_linea("CRT", row.hawb or "")
+                        texto += formatear_linea("CRT", row.awb or "")
 
                 if transportista == 'true':
                     texto += formatear_linea("Transportista", row.transportista or "")
 
+                conex = Conexaerea.objects.filter(numero=row.numero)
+
                 if row.modo in ['IMPORT AEREO','EXPORT AEREO']:
-                    conex = Conexaerea.objects.filter(numero=row.numero)
+
                     if conex:
                         for i, ruta in enumerate(conex):
                             if ruta.llegada:
@@ -298,30 +316,33 @@ def get_data_email(request):
 
                         texto += "<br>"
 
-                texto += "<table style='border: none; font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: 100%;'>"
+                if conex:
+                    texto += "<table style='border: none; font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: 100%;'>"
 
-                # Fila de títulos (encabezados)
-                texto += "<tr>"
-                texto += "<th style='padding: 2px 10px; text-align: left;'>Origen</th>"
-                texto += "<th style='padding: 2px 10px; text-align: left;'>Destino</th>"
-                texto += "<th style='padding: 2px 10px; text-align: left;'>Vapor/Vuelo</th>"
-                texto += "<th style='padding: 2px 10px; text-align: left;'>Viaje</th>"
-                texto += "<th style='padding: 2px 10px; text-align: left;'>Salida</th>"
-                texto += "<th style='padding: 2px 10px; text-align: left;'>Llegada</th>"
-                texto += "</tr>"
+                    # Fila de títulos (encabezados)
+                    texto += "<tr>"
+                    texto += "<th style='padding: 2px 10px; text-align: left;'>Origen</th>"
+                    texto += "<th style='padding: 2px 10px; text-align: left;'>Destino</th>"
+                    texto += "<th style='padding: 2px 10px; text-align: left;'>Vapor/Vuelo</th>"
+                    texto += "<th style='padding: 2px 10px; text-align: left;'>Viaje</th>"
+                    texto += "<th style='padding: 2px 10px; text-align: left;'>Salida</th>"
+                    texto += "<th style='padding: 2px 10px; text-align: left;'>Llegada</th>"
+                    texto += "</tr>"
 
-                # Fila de valores
+                    # Fila de valores
+                    for c in conex:
+                        salida = c.salida.strftime('%Y-%m-%d') if c.salida else 'S/i'
+                        llegada = c.llegada.strftime('%Y-%m-%d') if c.llegada else 'S/i'
+                        texto += "<tr>"
+                        texto += f"<td style='padding: 2px 10px;'>{c.origen or ''}</td>"
+                        texto += f"<td style='padding: 2px 10px;'>{c.destino or ''}</td>"
+                        texto += f"<td style='padding: 2px 10px;'>{c.vapor if row.modo in ['EXPORT AEREO','IMPORT AEREO'] else vapor }</td>"
+                        texto += f"<td style='padding: 2px 10px;'>{c.viaje or ''}</td>"
+                        texto += f"<td style='padding: 2px 10px;'>{salida}</td>"
+                        texto += f"<td style='padding: 2px 10px;'>{llegada}</td>"
+                        texto += "</tr>"
 
-                texto += "<tr>"
-                texto += f"<td style='padding: 2px 10px;'>{row.origen_text or ''}</td>"
-                texto += f"<td style='padding: 2px 10px;'>{row.destino_text or ''}</td>"
-                texto += f"<td style='padding: 2px 10px;'>{str(vapor) }</td>"
-                texto += f"<td style='padding: 2px 10px;'>{str(row.viaje) or ''}</td>"
-                texto += f"<td style='padding: 2px 10px;'>{salida}</td>"
-                texto += f"<td style='padding: 2px 10px;'>{llegada}</td>"
-                texto += "</tr>"
-
-                texto += "</table><br>"
+                    texto += "</table><br>"
 
                 texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
 
@@ -1145,8 +1166,6 @@ def get_data_email(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
-
-
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:

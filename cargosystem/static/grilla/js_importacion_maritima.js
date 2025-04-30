@@ -4795,6 +4795,8 @@ $('.email').click(function () {
                         style: "width:100px",
                         click: function () {
                             $(this).dialog("close");
+                            $('#modalSeleccionEmail').dialog("close");
+
                         },
                     },],
                 beforeClose: function (event, ui) {

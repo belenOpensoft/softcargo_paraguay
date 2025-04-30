@@ -834,6 +834,7 @@ $(document).ready(function () {
                         style: "width:100px",
                         click: function () {
                             $(this).dialog("close");
+                            $('#modalSeleccionEmail').dialog("close");
                         },
                     },],
                 beforeClose: function (event, ui) {
@@ -3152,9 +3153,9 @@ function get_data_email(row,title,row_number,transportista,master,gastos,directo
 
                 let asunto = resultado['asunto'].toLowerCase();
                 if (asunto.includes("traspaso a operaciones") || asunto.includes("orden de facturacion")) {
-                    $("#id_to").val("");  // No colocar nada en id_to
+                    $("#id_to").val("");
                 }else if(asunto.includes("instrucción de embarque") || asunto.includes("shipping instruction")){
-                $("#id_to").val(resultado['email_agente']);
+                    $("#id_to").val(resultado['email_agente']);
                 } else {
                     $("#id_to").val(resultado['email_cliente']);
                 }

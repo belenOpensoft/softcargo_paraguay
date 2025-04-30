@@ -493,6 +493,8 @@ if (!$('#id_awbhijo').val()) {
                                 style: "width:100px",
                                 click: function () {
                                     $(this).dialog("close");
+                            $('#modalSeleccionEmail').dialog("close");
+
                                 },
                             },],
                         beforeClose: function (event, ui) {
