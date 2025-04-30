@@ -702,7 +702,8 @@ class edit_house(BSModalModelForm):
     cliente = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control input-sobrepasar', 'id': 'cliente_addh_e', 'required': False}), required=False)
     house = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'house_addh_e', 'required': True}), required=True)
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'house_addh_e', 'required': False}),
+        required=False)
     embarcador = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control input-sobrepasar', 'id': 'embarcador_addh_e', 'required': False}), required=False)
     vendedor = forms.CharField(widget=forms.TextInput(

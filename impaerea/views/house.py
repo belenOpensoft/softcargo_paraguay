@@ -90,8 +90,6 @@ def add_house_impmarit(request):
             'message': f'Ocurrió un error: {str(e)}',
             'errors': {}
         })
-
-
 def generar_posicion(request):
     fecha_actual = datetime.now()
     anio_actual = fecha_actual.year
@@ -116,7 +114,6 @@ def generar_posicion(request):
 
     # Devolver la posición generada como JSON
     return JsonResponse({'posicion': nueva_posicion})
-
 #importados#
 def add_house_importado(request):
     try:
@@ -196,7 +193,6 @@ def add_house_importado(request):
             'message': f'Ocurrió un error: {str(e)}',
             'errors': {}
         })
-
 def actualizar_seguimiento(request,awb,hawb,embarque,consolidado,seguimiento,posicion):
 
     seg = Seguimiento.objects.get(numero=seguimiento)
@@ -206,7 +202,6 @@ def actualizar_seguimiento(request,awb,hawb,embarque,consolidado,seguimiento,pos
     seg.consolidado=consolidado
     seg.posicion=posicion
     seg.save()
-
 def source_seguimientos_importado(request):
 
         try:
@@ -258,7 +253,6 @@ def source_seguimientos_importado(request):
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
-
 def source_gastos_importado(request):
     try:
         data = json.loads(request.body)
@@ -294,7 +288,6 @@ def source_gastos_importado(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
 def source_envases_importado(request):
     try:
         data = json.loads(request.body)
@@ -336,7 +329,6 @@ def source_envases_importado(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
 def source_rutas_importado(request):
     try:
         data = json.loads(request.body)
@@ -371,7 +363,6 @@ def source_rutas_importado(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
 def source_embarque_importado(request):
     try:
         data = json.loads(request.body)
@@ -406,7 +397,6 @@ def source_embarque_importado(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
 def source_archivos_importado(request):
     try:
         data = json.loads(request.body)
@@ -432,9 +422,6 @@ def source_archivos_importado(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
-###
-
 def house_detail(request):
     if request.method == 'GET':
         numero = request.GET.get('id', None)
@@ -475,7 +462,6 @@ def house_detail(request):
             return JsonResponse({'error': 'No ID provided'}, status=400)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 def get_name_by_id_vendedores(request):
     if request.method == 'GET':
         client_id = request.GET.get('id')
@@ -487,7 +473,6 @@ def get_name_by_id_vendedores(request):
             return JsonResponse({'name': name})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
-
 def edit_house_function(request, numero):
     if request is None:
         return JsonResponse({
@@ -495,7 +480,6 @@ def edit_house_function(request, numero):
             'message': "El objeto request es None",
             'errors': {}
         })
-
     house = ImportEmbarqueaereo.objects.get(numero=numero)
     if request.method == 'POST':
         form = edit_house(request.POST)
@@ -510,7 +494,6 @@ def edit_house_function(request, numero):
             house.ageventas = int(form.cleaned_data.get('agventas_i', 0)) if form.cleaned_data.get('agventas_i') else 0
             house.embarcador = int(form.cleaned_data.get('embarcador_i', 0)) if form.cleaned_data.get('embarcador_i') else 0
 
-            #house.consolidado = request.POST.get('consolidado', 0)
             house.moneda = form.cleaned_data.get('moneda', 0)
             house.arbitraje = form.cleaned_data.get('arbitraje', 0) if form.cleaned_data.get('arbitraje') not in [None, ''] else 0
             house.pagoflete = form.cleaned_data.get('pago', 0)
@@ -539,7 +522,6 @@ def edit_house_function(request, numero):
             except IntegrityError:
                 messages.error(request, 'Error: No se pudo actualizar los datos.')
                 return HttpResponseRedirect(request.path_info)
-
             except Exception as e:
                 messages.error(request, str(e))
                 return JsonResponse({
@@ -553,8 +535,6 @@ def edit_house_function(request, numero):
                 'message': 'Formulario inválido, por favor revise los campos.',
                 'errors': form.errors.as_json()
             })
-
-
 
 def eliminar_house(request):
     resultado = {}
@@ -579,7 +559,6 @@ def eliminar_house(request):
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
-
 def source_embarque_id(request):
     try:
         if request.method == 'POST':
@@ -601,7 +580,6 @@ def source_embarque_id(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
 def source_seguimiento_id(request):
     try:
         if request.method == 'POST':
