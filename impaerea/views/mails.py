@@ -361,8 +361,8 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             if conex:
                 for i, ruta in enumerate(conex):
-                    if ruta.llegada:
-                        fecha = ruta.llegada.strftime("%d/%m")
+                    if ruta.salida:
+                        fecha = ruta.salida.strftime("%d-%m")
                     else:
                         fecha = '??/??'
                     tramo = f"({ruta.origen}/{ruta.destino})   {ruta.ciavuelo}{ruta.viaje}/{fecha}"
@@ -540,8 +540,8 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             if conex:
                 for i, ruta in enumerate(conex):
-                    if ruta.llegada:
-                        fecha = ruta.llegada.strftime("%d/%m")
+                    if ruta.salida:
+                        fecha = ruta.salida.strftime("%d-%m")
                     else:
                         fecha = '??/??'
                     tramo = f"({ruta.origen}/{ruta.destino})   {ruta.ciavuelo}{ruta.viaje}/{fecha}"
@@ -596,11 +596,11 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += formatear_linea("House", row.hawb or "")
 
-            texto += formatear_linea("Peso", f"{peso} KGS",1)
+            texto += formatear_linea("Peso", f"{peso} KGS",)
 
-            texto += formatear_linea("Bultos", str(bultos),1)
+            texto += formatear_linea("Bultos", str(bultos),)
 
-            texto += formatear_linea("CBM", f"{volumen:.3f} M³",1)
+            texto += formatear_linea("CBM", f"{volumen:.3f} M³",)
 
             texto += "<br>"
 

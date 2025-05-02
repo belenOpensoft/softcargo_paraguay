@@ -168,21 +168,23 @@ def get_data_email(request):
                 tipo = ''
 
                 volumen = 0
+                cant=0
                 gastos = Serviceaereo.objects.filter(numero=row.numero)
 
                 if row.modo not in ['IMPORT AEREO','EXPORT AEREO']:
 
                     cant_cntr = Envases.objects.filter(numero=row.numero).values('tipo', 'nrocontenedor', 'precinto',
                                                                                  'bultos', 'peso', 'unidad',
-                                                                                 'volumen').annotate(total=Count('id'))
+                                                                                 'volumen','cantidad').annotate(total=Count('id'))
 
                     carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre','tipo')
 
                     if cant_cntr.count() > 0:
 
                         for cn in cant_cntr:
-
-                            cantidad_cntr += f'{cn["total"]} x {cn["unidad"]} - {cn["tipo"]} - '
+                            cant+=cn['cantidad'] if cn['cantidad'] else 0
+                            cant = int(cant or 0)
+                            cantidad_cntr += f'{cant} x {cn["unidad"]} - {cn["tipo"]} - ' if cant !=0 else f'{cn["unidad"]} - {cn["tipo"]} - '
 
                             contenedores += f'{cn["nrocontenedor"]} - '
 
@@ -240,8 +242,8 @@ def get_data_email(request):
 
                     if conex:
                         for i, ruta in enumerate(conex):
-                            if ruta.llegada:
-                                fecha = ruta.llegada.strftime("%d/%m")
+                            if ruta.salida:
+                                fecha = ruta.salida.strftime("%d-%m")
                             else:
                                 fecha = '??/??'
                             tramo = f"({ruta.origen}/{ruta.destino})  {ruta.cia}{ruta.viaje}/{fecha}" if transportista == 'true' else f"({ruta.origen}/{ruta.destino}) {ruta.viaje}/{fecha}"
@@ -316,6 +318,7 @@ def get_data_email(request):
 
                         texto += "<br>"
 
+
                 if conex:
                     texto += "<table style='border: none; font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: 100%;'>"
 
@@ -331,8 +334,8 @@ def get_data_email(request):
 
                     # Fila de valores
                     for c in conex:
-                        salida = c.salida.strftime('%Y-%m-%d') if c.salida else 'S/i'
-                        llegada = c.llegada.strftime('%Y-%m-%d') if c.llegada else 'S/i'
+                        salida = c.salida.strftime('%d/%m/%Y') if c.salida else 'S/i'
+                        llegada = c.llegada.strftime('%d/%m/%Y') if c.llegada else 'S/i'
                         texto += "<tr>"
                         texto += f"<td style='padding: 2px 10px;'>{c.origen or ''}</td>"
                         texto += f"<td style='padding: 2px 10px;'>{c.destino or ''}</td>"
@@ -350,6 +353,7 @@ def get_data_email(request):
                 texto+="sin previo aviso, por lo cual le sugerimos consultarnos por la fecha de arribo que aparece en este aviso.\n"
                 texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
                 texto += "</pre>"
+
             elif title == 'Notificacion llegada de carga':
 
                 consigna = Clientes.objects.get(codigo=row.consignatario_codigo)
@@ -423,8 +427,8 @@ def get_data_email(request):
                 if row.modo in ['IMPORT AEREO', 'EXPORT AEREO']:
                     if conex:
                         for i, ruta in enumerate(conex):
-                            if ruta.llegada:
-                                fecha = ruta.llegada.strftime("%d/%m")
+                            if ruta.salida:
+                                fecha = ruta.salida.strftime("%d-%m")
                             else:
                                 fecha = '??/??'
                             tramo = f"({ruta.origen}/{ruta.destino})  {ruta.cia}{ruta.viaje}/{fecha}"
