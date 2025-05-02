@@ -350,9 +350,17 @@ def generar_entrega_documentacion_pdf(request):
         y = check_page_space(c, y, 13 * mm)
         c.drawString(x_centro, y - 13 * mm, titulo)
 
+        modo = 'S/I'
+        if data.get('modo')=='IM':
+            modo = 'IMPORTACION MARITIMA'
+        elif data.get('modo') == 'IA':
+            modo = 'IMPORTACION AEREA'
+        elif data.get('modo')=='IT':
+            modo = 'IMPORTACION TERRESTRE'
+
         c.setFont("Courier", 10)
         y = check_page_space(c, y, 22 * mm)
-        c.drawString(20 * mm, y - 22 * mm, f"Estamos adjuntando documentación de {data.get('modo')}, embarcado por vuestra firma.")
+        c.drawString(20 * mm, y - 22 * mm, f"Estamos adjuntando documentación de {modo}, embarcado por vuestra firma.")
         y -= 35 * mm
         c.setFont("Courier", 9)
 
@@ -365,7 +373,7 @@ def generar_entrega_documentacion_pdf(request):
 
         linea("Referencia", data.get("orden", "S/I"), bold=True)
         linea("Posicion", data.get("posicion", "S/I"), bold=True)
-        linea("Modo", data.get("modo", "S/I"), bold=True)
+        linea("Modo", modo, bold=True)
         linea("Fecha", datetime.now().strftime("%d/%m/%Y"), bold=True)
 
         y = check_page_space(c, y, 5 * mm)
