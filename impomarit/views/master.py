@@ -61,7 +61,7 @@ def add_importacion_maritima(request):
                 reserva.operacion = form.cleaned_data.get('operacion', "")  # Si vacío, asignar ""
                 reserva.fechaingreso = datetime.now()
                 reserva.posicion = generar_posicion()
-                reserva.deposito = form.cleaned_data.get('deposito_nro', "")
+                reserva.deposito = form.cleaned_data.get('deposito_nro') or None
                 # Guardar el registro
                 reserva.save()
 

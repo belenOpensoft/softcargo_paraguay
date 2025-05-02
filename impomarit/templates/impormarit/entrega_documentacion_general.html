@@ -39,6 +39,12 @@
       </div>
     </form>
   </div>
+  {% if messages %}
+  {% for message in messages %}
+      {{ message }}
+  {% endfor %}
+{% endif %}
+
 </div>
 
 
@@ -146,7 +152,7 @@
   </form>
 </div>
 
-<div id="entregaDocsData" data-resultados="{{ resultados|length|default:0 }}"></div>
+<div id="entregaDocsData" data-resultados="{{ resultados|length|default:0 }}" data-busqueda="{{ busqueda_realizada|yesno:'1,0' }}"></div>
 {{ cliente_data|json_script:"cliente-data" }}
 {{ despachante_data|json_script:"despachante-data" }}
 

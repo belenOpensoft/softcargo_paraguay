@@ -1280,7 +1280,6 @@ class GenerarDocumentoForm(forms.Form):
     )
 
 
-from django import forms
 
 class EntregaDocumentacionForm(forms.Form):
     # Datos generales

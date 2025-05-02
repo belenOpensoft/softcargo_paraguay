@@ -5,16 +5,9 @@ const hayResultados = parseInt(document.getElementById('entregaDocsData').datase
 const clienteEntrega = JSON.parse(document.getElementById('cliente-data').textContent);
 const despachanteEntrega = JSON.parse(document.getElementById('despachante-data').textContent);
 
+const seRealizoBusqueda = dataDiv.dataset.busqueda === "1";
 
-  function cargarDatosEntrega(tipo) {
-    const datos = tipo === 'cliente' ? clienteEntrega : despachanteEntrega;
-    $('#id_nombre_entrega').val(datos.nombre);
-    $('#id_direccion_entrega').val(datos.direccion);
-    $('#id_ciudad_entrega').val(datos.ciudad);
-    $('#id_telefono_entrega').val(datos.telefono);
-  }
-
-  if (hayResultados > 0) {
+    if (hayResultados > 0) {
     $("#modalEntregaDocumentacion").dialog({
       modal: true,
       width: "60%",
@@ -36,11 +29,17 @@ const despachanteEntrega = JSON.parse(document.getElementById('despachante-data'
         }
       ],
     });
-  } else {
-    alert("No se encontraron resultados.");
-  }
-      // Inicial
+
     cargarDatosEntrega($('input[name="entregar_a"]:checked').val());
+  }
+
+  function cargarDatosEntrega(tipo) {
+    const datos = tipo === 'cliente' ? clienteEntrega : despachanteEntrega;
+    $('#id_nombre_entrega').val(datos.nombre);
+    $('#id_direccion_entrega').val(datos.direccion);
+    $('#id_ciudad_entrega').val(datos.ciudad);
+    $('#id_telefono_entrega').val(datos.telefono);
+  }
 
     // Al cambiar la opción
     $('input[name="entregar_a"]').change(function () {
