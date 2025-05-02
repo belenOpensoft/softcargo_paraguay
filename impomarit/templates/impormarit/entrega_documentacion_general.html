@@ -1,0 +1,158 @@
+{% extends 'base_table_v2.html' %}
+{% load static %}
+{% block contenido %}
+<title>Generar Documento</title>
+
+<style>
+  .tabla-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    display: block;
+  }
+  .oculto {
+    display: none;
+  }
+</style>
+
+<div style="display: flex; flex-direction: column; align-items: center; min-height: 60vh;">
+  <h5 class="mb-3 text-center">Imprimir entrega de documentación</h5>
+
+  <div id="generarDocumento" class="border rounded p-3 bg-light" style="width: 100%; max-width: 400px; font-size: 0.85rem;">
+    <form method="get" id="generarDocumentoForm" action="{% url 'entrega_documentacion_general' %}">
+      {% csrf_token %}
+
+      <!-- Campo Seguimiento -->
+      <div class="mb-2">
+        {{ form.seguimiento.label_tag }}
+        {{ form.seguimiento }}
+      </div>
+
+      <!-- Campo Operativa -->
+      <div class="mb-3">
+        {{ form.operativa.label_tag }}
+        {{ form.operativa }}
+      </div>
+
+      <!-- Botón -->
+      <div>
+        <button type="submit" class="btn btn-primary btn-sm w-100">Buscar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+<!-- MODAL: Entrega de Documentación -->
+<div id="modalEntregaDocumentacion" title="Entrega de Documentación" style="display: none; overflow-y:auto;">
+  <form id="formEntregaDocumentacion" method="post">
+    {% csrf_token %}
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Columna Izquierda -->
+        <div class="col-md-6">
+          <h6>Datos Generales</h6>
+          <div class="row">
+            <div class="col-md-6">
+              {{ form_modal.embarcador.label_tag }}
+              {{ form_modal.embarcador }}
+            </div>
+            <div class="col-md-6">
+              {{ form_modal.cliente.label_tag }}
+              {{ form_modal.cliente }}
+            </div>
+            <div class="col-md-6">
+              {{ form_modal.orden.label_tag }}
+              {{ form_modal.orden }}
+            </div>
+            <div class="col-md-6">
+              {{ form_modal.rut.label_tag }}
+              {{ form_modal.rut }}
+            </div>
+            <div class="col-md-6">
+              {{ form_modal.modo.label_tag }}
+              {{ form_modal.modo }}
+            </div>
+            <div class="col-md-6">
+              {{ form_modal.mbl_awb.label_tag }}
+              {{ form_modal.mbl_awb }}
+            </div>
+            <div class="col-md-6">
+              {{ form_modal.origen.label_tag }}
+              {{ form_modal.origen }}
+            </div>
+            <div class="col-md-6">
+              {{ form_modal.destino.label_tag }}
+              {{ form_modal.destino }}
+            </div>
+            <div class="col-md-6">
+              {{ form_modal.posicion.label_tag }}
+              {{ form_modal.posicion }}
+            </div>
+          </div>
+
+          <hr>
+          <h6>¿Entreguese a?</h6>
+          {% for radio in form_modal.entregar_a %}
+            <div class="form-check form-check-inline">
+              {{ radio.tag }} {{ radio.choice_label }}
+            </div>
+          {% endfor %}
+
+          <div class="row mt-2">
+            <div class="col-md-6">
+              {{ form_modal.nombre_entrega.label_tag }}
+              {{ form_modal.nombre_entrega }}
+            </div>
+            <div class="col-md-6">
+              {{ form_modal.direccion_entrega.label_tag }}
+              {{ form_modal.direccion_entrega }}
+            </div>
+            <div class="col-md-6">
+              {{ form_modal.ciudad_entrega.label_tag }}
+              {{ form_modal.ciudad_entrega }}
+            </div>
+            <div class="col-md-6">
+              {{ form_modal.telefono_entrega.label_tag }}
+              {{ form_modal.telefono_entrega }}
+            </div>
+          </div>
+
+          <hr>
+          <div class="form-check">
+            {{ form_modal.imprimir_comentarios }} {{ form_modal.imprimir_comentarios.label_tag }}
+          </div>
+          <div>
+            {{ form_modal.comentarios.label_tag }}
+            {{ form_modal.comentarios }}
+          </div>
+        </div>
+
+        <!-- Columna Derecha -->
+        <div class="col-md-6">
+          <h6>Documentos Adjuntos</h6>
+          <div class="row">
+            {% for campo in form_modal.documentos_adjuntos %}
+              <div class="col-md-6">
+                <div class="form-check">
+                  {{ campo }} {{ campo.label_tag }}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div id="entregaDocsData" data-resultados="{{ resultados|length|default:0 }}"></div>
+{{ cliente_data|json_script:"cliente-data" }}
+{{ despachante_data|json_script:"despachante-data" }}
+
+
+<script src="{% static 'grilla/entrega_documentacion.js' %}"></script>
+    <script>
+       var csrf_token = '{{ csrf_token }}';
+    </script>
+{% endblock contenido %}

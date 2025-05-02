@@ -1255,3 +1255,93 @@ class embarquesFormHouse(BSModalModelForm):
         widget=forms.RadioSelect(attrs={'style':'width:50px;'}),
     )
     tarifafija = forms.BooleanField(label="Tarifa fija")
+
+class GenerarDocumentoForm(forms.Form):
+    OPERATIVAS = [
+        ('IM', 'Importación Marítima'),
+        ('IA', 'Importación Aérea'),
+        ('IT', 'Importación Terrestre'),
+    ]
+
+    seguimiento = forms.CharField(
+        label='Seguimiento',
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Número de seguimiento'
+        })
+    )
+
+    operativa = forms.ChoiceField(
+        label='Operativa',
+        required=False,
+        choices=[('', '---------')] + OPERATIVAS,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+
+from django import forms
+
+class EntregaDocumentacionForm(forms.Form):
+    # Datos generales
+    embarcador = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    cliente = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    orden = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    rut = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    modo = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    mbl_awb = forms.CharField(label="MBL / AWB", required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    origen = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    destino = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    posicion = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    # Entregar a
+    entregar_a = forms.ChoiceField(
+        choices=[('cliente', 'Cliente'), ('despachante', 'Despachante')],
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
+    )
+    nombre_entrega = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    direccion_entrega = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    ciudad_entrega = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    telefono_entrega = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    # Comentarios
+    imprimir_comentarios = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+    comentarios = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2})
+    )
+
+    # Documentos adjuntos
+    documentos_adjuntos = forms.MultipleChoiceField(
+        required=False,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        choices=[
+            ('cert_origen', 'Certificado de origen'),
+            ('dec_embarque', 'Declaración de embarque'),
+            ('cert_seguro', 'Certificado de seguro'),
+            ('factura_comercial', 'Factura comercial'),
+            ('nuestras_facturas', 'Nuestras facturas'),
+            ('cumplido', 'Cumplido aduanero'),
+            ('factura_seguro', 'Factura del seguro'),
+            ('crt', 'CRT'),
+            ('micdta', 'MIC/DTA'),
+            ('papeleta', 'Papeleta'),
+            ('documentaria', 'Documentaria'),
+            ('parte_recepcion', 'Parte de recepción'),
+            ('factura_transporte', 'Factura de transporte'),
+            ('otros', 'Otros documentos'),
+            ('original_conocimiento', 'Original conocimiento'),
+            ('lista_empaque', 'Lista de empaque'),
+            ('cert_flete', 'Certificación de flete'),
+            ('copia_conocimiento', 'Copia de conocimiento'),
+            ('carta_temp', 'Carta temperatura'),
+            ('orden_deposito', 'Orden a depósito'),
+            ('cert_gastos', 'Certificación de gastos'),
+            ('libre_deuda', 'Libre deuda'),
+            ('eur1', 'EUR 1'),
+            ('cert_calidad', 'Certificado de calidad'),
+            ('transferencia', 'Transferencia'),
+            ('cert_peligrosa', 'Certificado carga peligrosa')
+        ]
+    )
+

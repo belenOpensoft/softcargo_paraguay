@@ -3,6 +3,7 @@ from django.urls import path
 from impomarit.views.calendar import calendario, eventos_calendario, generar_reporte_excel
 from impomarit.views.embarques import source_embarques, eliminar_embarque, guardar_embarques, add_embarque_importado, \
     get_sugerencias_envases
+from impomarit.views.entrega_documentacion import entrega_documentacion_general, generar_entrega_documentacion_pdf
 from impomarit.views.envases import source_envases, eliminar_envase, guardar_envases, add_envase_importado
 from impomarit.views.gastos import add_gasto_master, source_gastos, eliminar_gasto_master, source_gastos_house, \
     eliminar_gasto_house, add_gasto_house, add_gasto_importado
@@ -87,6 +88,8 @@ urlpatterns = [
     path('get_name_by_id_vendedor/', get_name_by_id_vendedores, name='get_name_by_id_vendedor'),
     path('source_seguimientos_modo/<str:modo>/', source_seguimientos_modo, name="source_seguimientos_modo"),
     path('envio_notificacion_seguimiento/', envio_notificacion_seguimiento, name="envio_notificacion_seguimiento"),
+    path('entrega_documentacion_general/', entrega_documentacion_general, name="entrega_documentacion_general"),
+    path('generar_entrega_documentacion_pdf/', generar_entrega_documentacion_pdf, name="generar_entrega_documentacion_pdf"),
 
 ]
 
