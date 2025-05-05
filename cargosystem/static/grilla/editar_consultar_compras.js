@@ -75,6 +75,7 @@
     });
   $('#consultaComprasForm').on('submit', function (e) {
     e.preventDefault();
+        $('#spinnerCarga').show();
 
     $.ajax({
       url: $(this).attr('action') || window.location.href,
@@ -102,6 +103,8 @@
             </tr>`;
           tbody.append(row);
         });
+        $('#spinnerCarga').hide();
+
       },
       error: function () {
         alert('Hubo un error al consultar los datos.');

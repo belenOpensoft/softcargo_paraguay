@@ -76,6 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   $('#consultaCobranzasForm').on('submit', function (e) {
     e.preventDefault();
+        $('#spinnerCarga').show();
 
     $.ajax({
       url: $(this).attr('action') || window.location.href,
@@ -103,6 +104,8 @@ document.addEventListener("DOMContentLoaded", function () {
             </tr>`;
           tbody.append(row);
         });
+        $('#spinnerCarga').hide();
+
       },
       error: function () {
         alert('Hubo un error al consultar los datos.');

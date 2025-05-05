@@ -1,0 +1,102 @@
+<style>
+  #modalEditarAsiento {
+    max-width: 80vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    font-size: 0.85rem;
+  }
+
+  #modalEditarAsiento .form-control {
+    font-size: 12px;
+    padding: 2px 5px;
+    height: 20px;
+  }
+
+  #modalEditarAsiento select {
+    font-size: 0.85rem;
+    height: 30px;
+  }
+
+  #modalEditarAsiento label {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+  }
+
+  #modalEditarAsiento .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  #modalEditarAsiento .col-md-1,
+  #modalEditarAsiento .col-md-2,
+  #modalEditarAsiento .col-md-3,
+  #modalEditarAsiento .col-md-4,
+  #modalEditarAsiento .col-md-6 {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+
+  #modalEditarAsiento h6 {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+</style>
+
+<div id="modalEditarAsiento" title="Editar Asiento" style="display: none;">
+  <form method="post" id="formEditarAsiento">
+    {% csrf_token %}
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-md-4">
+          {{ detalle.cuenta.label_tag }}
+          {{ detalle.cuenta }}
+          {{ detalle.asiento }}
+        </div>
+        <div class="col-md-2">
+          {{ detalle.moneda.label_tag }}
+          {{ detalle.moneda }}
+        </div>
+        <div class="col-md-3">
+          {{ detalle.arbitraje.label_tag }}
+          {{ detalle.arbitraje }}
+        </div>
+        <div class="col-md-3">
+          {{ detalle.paridad.label_tag }}
+          {{ detalle.paridad }}
+        </div>
+      </div>
+
+      <div class="row mb-2">
+        <div class="col-md-6" style="padding:0;">
+          {{ detalle.detalle.label_tag }}
+          {{ detalle.detalle }}
+        </div>
+        <div class="col-md-4">
+          {{ detalle.posicion.label_tag }}
+          {{ detalle.posicion }}
+        </div>
+        <div class="col-md-2">
+          {{ detalle.fecha.label_tag }}
+          {{ detalle.fecha }}
+          {{ detalle.id }}
+        </div>
+      </div>
+
+      <div class="row mb-2">
+        <div class="col-md-4">
+          {{ detalle.monto.label_tag }}
+          {{ detalle.monto }}
+        </div>
+        <div class="col-md-4">
+          <label>{{ detalle.tipo.label }}</label><br>
+          {% for radio in detalle.tipo %}
+            <div class="form-check form-check-inline">
+              {{ radio.tag }} <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

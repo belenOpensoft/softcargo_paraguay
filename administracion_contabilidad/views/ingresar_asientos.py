@@ -18,12 +18,13 @@ def guardar_asientos(request):
         try:
             data = json.loads(request.body)
             asientos = data.get("asientos", [])
+            numero=generar_numero()
 
             for asiento in asientos:
                 a = Asientos()
                 a.id = a.get_id()
                 a.fecha = datetime.now().strftime('%Y-%m-%d')
-                a.asiento = generar_numero()
+                a.asiento = numero
                 a.cuenta = asiento.get("cuenta").split(" - ")[0].strip() if asiento.get("cuenta") else None
                 a.imputacion = 1 if asiento.get("debe") else 2
                 a.tipo = 'D'

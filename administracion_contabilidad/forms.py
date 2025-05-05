@@ -1874,3 +1874,126 @@ class IngresarAsiento(forms.Form):
             'id': 'posicion'
         })
     )
+
+
+class FiltroAsientosForm(forms.Form):
+    omitir_fechas = forms.BooleanField(required=False, label="Omitir fechas")
+    fecha_desde = forms.DateField(required=False, label="Desde", widget=forms.DateInput(attrs={'type': 'date'}))
+    fecha_hasta = forms.DateField(required=False, label="Hasta", widget=forms.DateInput(attrs={'type': 'date'}))
+    cuenta = forms.ModelChoiceField(queryset=Cuentas.objects.all(), required=False, label="Cuenta")
+    detalle = forms.CharField(required=False, label="Detalle", widget=forms.TextInput(attrs={'style': 'text-transform: uppercase;'}))
+    asiento = forms.CharField(required=False, label="Asiento")
+
+    def __init__(self, *args, **kwargs):
+        super(FiltroAsientosForm, self).__init__(*args, **kwargs)
+        for campo in self.fields.values():
+            if not isinstance(campo.widget, forms.CheckboxInput):  # evitar checkboxes
+                clases = campo.widget.attrs.get('class', '')
+                campo.widget.attrs['class'] = f'{clases} form-control form-control-sm'.strip()
+
+class EditarAsientoForm(forms.Form):
+
+
+    moneda = forms.ModelChoiceField(
+        label="Moneda",
+        queryset=Monedas.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control form-control-sm',
+            'id': 'detalle_moneda'
+        })
+    )
+
+    arbitraje = forms.DecimalField(
+        label="Arbitraje",
+        required=False,
+        decimal_places=4,
+        widget=forms.NumberInput(attrs={
+            'step': '0.0001',
+            'class': 'form-control form-control-sm',
+            'id': 'detalle_arbitraje'
+        })
+    )
+
+    paridad = forms.DecimalField(
+        label="Paridad",
+        required=False,
+        decimal_places=4,
+        widget=forms.NumberInput(attrs={
+            'step': '0.0001',
+            'class': 'form-control form-control-sm',
+            'id': 'detalle_paridad'
+        })
+    )
+
+    detalle = forms.CharField(
+        label="Detalle",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'id': 'detalle_detalle'
+        })
+    )
+
+    tipo = forms.ChoiceField(
+        label="Tipo",
+        choices=[('debe', 'Debe'), ('haber', 'Haber')],
+        widget=forms.RadioSelect(attrs={
+            'class': 'form-check-input','readonly':True
+        })
+    )
+
+    monto = forms.DecimalField(
+        label="Monto",
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={
+            'step': '0.01',
+            'class': 'form-control form-control-sm',
+            'id': 'detalle_monto'
+        })
+    )
+
+    posicion = forms.CharField(
+        label="Posición",
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'id': 'detalle_posicion'
+        })
+    )
+    asiento = forms.CharField(
+        label="Posición",
+        required=False,
+        widget=forms.HiddenInput(attrs={
+            'class': 'form-control form-control-sm',
+            'id': 'detalle_asiento'
+        })
+    )
+    id = forms.CharField(
+        label="Posición",
+        required=False,
+        widget=forms.HiddenInput(attrs={
+            'class': 'form-control form-control-sm',
+            'id': 'detalle_id'
+        })
+    )
+    cuenta = forms.ChoiceField(
+        label="Cuenta",
+        choices=[],
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-control form-control-sm',
+            'id': 'detalle_cuenta'
+        })
+    )
+    fecha = forms.DateField(
+        required=True,
+        label="Fecha",
+        widget=forms.DateInput(attrs={
+            'type': 'date', 'class': 'form-control','id':'detalle_fecha'
+        }),
+    )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['cuenta'].choices = [
+            (cuenta.xcodigo, cuenta.xnombre) for cuenta in Cuentas.objects.all()
+        ]

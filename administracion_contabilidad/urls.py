@@ -20,6 +20,8 @@ from administracion_contabilidad.views.facturacion import facturacion_view, busc
 from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
 from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos
+from administracion_contabilidad.views.modificar_asientos import filtro_asientos, guardar_asiento_editado, \
+    eliminar_asiento
 from administracion_contabilidad.views.proveedores_gastos import proveedores_gastos_view, buscar_proveedor, \
     buscar_proveedores, buscar_item_c, buscar_items_c, procesar_factura_proveedor, source_proveedoresygastos, \
     cargar_pendientes_imputacion
@@ -141,8 +143,13 @@ urlpatterns = [
     #ingresar asientos
     path('ingresar_asientos/', ingresar_asiento, name='ingresar_asientos'),
     path('guardar_asientos/', guardar_asientos, name='guardar_asientos'),
-
     #ingresar asientos
+
+    #modificra asientos
+    path('modificar_asientos/', filtro_asientos, name='modificar_asientos'),
+    path('guardar_asiento_editado/', guardar_asiento_editado, name='guardar_asiento_editado'),
+    path('eliminar_asiento/', eliminar_asiento, name='eliminar_asiento'),
+    #modificra asientos
 
     #contabilidad
 ]
