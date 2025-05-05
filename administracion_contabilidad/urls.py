@@ -19,6 +19,7 @@ from administracion_contabilidad.views.facturacion import facturacion_view, busc
     get_datos_embarque
 from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
+from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos
 from administracion_contabilidad.views.proveedores_gastos import proveedores_gastos_view, buscar_proveedor, \
     buscar_proveedores, buscar_item_c, buscar_items_c, procesar_factura_proveedor, source_proveedoresygastos, \
     cargar_pendientes_imputacion
@@ -134,4 +135,14 @@ urlpatterns = [
     path('actualizar_pago/', actualizar_campos_movims_pago, name='actualizar_pago'),
     path('anular_pago/', anular_pago, name='anular_pago'),
     #editar y consultar pagos
+
+    #contabilidad
+
+    #ingresar asientos
+    path('ingresar_asientos/', ingresar_asiento, name='ingresar_asientos'),
+    path('guardar_asientos/', guardar_asientos, name='guardar_asientos'),
+
+    #ingresar asientos
+
+    #contabilidad
 ]

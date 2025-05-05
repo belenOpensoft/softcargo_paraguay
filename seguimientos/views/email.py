@@ -182,7 +182,7 @@ def get_data_email(request):
                     if cant_cntr.count() > 0:
 
                         for cn in cant_cntr:
-                            cant+=cn['cantidad'] if cn['cantidad'] else 0
+                            cant=cn['cantidad'] if cn['cantidad'] else 0
                             cant = int(cant or 0)
                             cantidad_cntr += f'{cant} x {cn["unidad"]} - {cn["tipo"]} - ' if cant !=0 else f'{cn["unidad"]} - {cn["tipo"]} - '
 

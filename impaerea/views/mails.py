@@ -681,7 +681,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             texto += "<tr>"
             texto += f"<td style='padding: 2px 10px;'>{row.origen or ''}</td>"
             texto += f"<td style='padding: 2px 10px;'>{row.destino or ''}</td>"
-            texto += f"<td style='padding: 2px 10px;'>{row.transportista}</td>"
+            texto += f"<td style='padding: 2px 10px;'>{conex[0].ciavuelo}</td>"
             texto += f"<td style='padding: 2px 10px;'>{str(conex[0].ciavuelo)+str(conex[0].vuelo)}</td>"
             texto += f'<td style="padding: 2px 10px;">{salida}</td>'
             texto += f'<td style="padding: 2px 10px;">{llegada}</td>'

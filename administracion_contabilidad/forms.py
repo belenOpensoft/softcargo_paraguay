@@ -1795,3 +1795,82 @@ class PagosDetalle(forms.Form):
             'id': 'detalle_detalle_pago'
         })
     )
+
+class IngresarAsiento(forms.Form):
+    fecha = forms.DateField(
+        label="Fecha",
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control form-control-sm',
+            'id': 'fecha_movimiento'
+        })
+    )
+    asiento = forms.CharField(
+        label="Asiento",
+        widget=forms.HiddenInput(attrs={
+            'class': 'form-control form-control-sm',
+            'id': 'asiento'
+        })
+    )
+    cuenta = forms.ModelChoiceField(
+        label="Cuenta",
+        queryset=Cuentas.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control form-control-sm',
+            'id': 'cuenta'
+        })
+    )
+    moneda = forms.ModelChoiceField(
+        label="Moneda",
+        queryset=Monedas.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control form-control-sm',
+            'id': 'moneda'
+        })
+    )
+    monto = forms.FloatField(
+        label="Monto",
+        widget=forms.NumberInput(attrs={
+            'step': '0.01',
+            'class': 'form-control form-control-sm',
+            'id': 'monto'
+        })
+    )
+    tipo_movimiento = forms.ChoiceField(
+        label="Tipo",
+        choices=[('debe', 'Debe'), ('haber', 'Haber')],
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input', 'id': 'tipo_movimiento'})
+    )
+    detalle = forms.CharField(
+        label="Detalle",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'id': 'detalle'
+        })
+    )
+    arbitraje = forms.FloatField(
+        label="Arbitraje",
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'step': '0.0001',
+            'class': 'form-control form-control-sm',
+            'id': 'arbitraje'
+        })
+    )
+    paridad = forms.FloatField(
+        label="Paridad",
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'step': '0.0001',
+            'class': 'form-control form-control-sm',
+            'id': 'paridad'
+        })
+    )
+    posicion = forms.CharField(
+        label="Posición",
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'id': 'posicion'
+        })
+    )
