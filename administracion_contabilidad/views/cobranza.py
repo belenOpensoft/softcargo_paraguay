@@ -339,7 +339,7 @@ def guardar_impuventa(request):
                             cheque.cdetalle=detalle
                             cheque.ccliente=nrocliente
                             cheque.cmoneda=moneda
-                            cheque.cestado=2
+                            cheque.cestado=0
                             cheque.ctipo=tipo_cheque
                             cheque.save()
 

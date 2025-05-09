@@ -1519,6 +1519,14 @@ class Ordenes(models.Model):
         managed = False
         db_table = 'dataset_ordenes'
 
+    def get_next_mboleta(self):
+        current = Ordenes.objects.aggregate(maximo=models.Max('mboleta'))['maximo'] or 0
+        next_mboleta = current + 1
+
+        while Ordenes.objects.filter(mboleta=next_mboleta).exists():
+            next_mboleta += 1
+
+        return next_mboleta
 
 class Plan(models.Model):
     numero = models.SmallIntegerField()

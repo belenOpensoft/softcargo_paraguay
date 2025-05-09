@@ -1997,3 +1997,81 @@ class EditarAsientoForm(forms.Form):
         self.fields['cuenta'].choices = [
             (cuenta.xcodigo, cuenta.xnombre) for cuenta in Cuentas.objects.all()
         ]
+
+class MovimientoBancarioForm(forms.Form):
+    banco = forms.ModelChoiceField(
+        label="Banco",
+        queryset=Cuentas.objects.filter(xcodigo__range=(11120, 11125)),
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    tipo_movimiento = forms.ChoiceField(
+        label="Tipo",
+        choices=[
+            ('depositar', 'Depositar'),
+            ('cheque_comun', 'Cheque Común'),
+            ('cheque_diferido', 'Cheque Diferido'),
+            ('ingresos', 'Ingresos'),
+            ('egresos', 'Egresos'),
+            ('transferencia', 'Transferencia'),
+        ],
+        initial='depositar',
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
+    )
+
+    fecha = forms.DateField(
+        label="Fecha",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
+    )
+
+    vto_cheque = forms.DateField(
+        label="Vencimiento del Cheque",
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
+    )
+
+    nro_documento = forms.CharField(
+        label="Nro Documento",
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    moneda = forms.ModelChoiceField(
+        label="Moneda",
+        queryset=Monedas.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    arbitraje = forms.DecimalField(
+        label="Arbitraje",
+        required=False,
+        decimal_places=4,
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'step': '0.0001'})
+    )
+    paridad = forms.DecimalField(
+        label="Paridad",
+        required=False,
+        decimal_places=4,
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'step': '0.0001'})
+    )
+    detalle = forms.CharField(
+        label="Detalle",
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    cuenta = forms.ModelChoiceField(
+        label="Contra Cuenta",
+        queryset=Cuentas.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    monto = forms.DecimalField(
+        label="Monto",
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'step': '0.01'})
+    )
+
+    detalle_cuenta = forms.CharField(
+        label="Detalle de Movimiento",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm'})
+    )

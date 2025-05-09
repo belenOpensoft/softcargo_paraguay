@@ -42,7 +42,7 @@ def editar_consultar_pagos(request):
             {
                 'documento': r.num_completo,
                 'fecha': r.fecha.strftime('%d/%m/%Y') if r.fecha else '',
-                'proveedor': r.cliente,
+                'proveedor': r.cliente if r.cliente else 'S/I',
                 'importe': float(r.total),
                 'autogenerado': r.autogenerado,
                 'numero': r.num_completo,

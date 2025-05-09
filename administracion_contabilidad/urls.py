@@ -22,6 +22,9 @@ from administracion_contabilidad.views.imprimir_preventa import get_datos_caratu
 from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos
 from administracion_contabilidad.views.modificar_asientos import filtro_asientos, guardar_asiento_editado, \
     eliminar_asiento
+from administracion_contabilidad.views.movimientos_bancarios import movimientos_bancarios, cheques_disponibles_clientes, \
+    guardar_movimiento_bancario, cheques_disponibles_listado, cheques_disponibles_listado_diferidos, \
+    generar_orden_pago_pdf, generar_comprobante_deposito_pdf
 from administracion_contabilidad.views.proveedores_gastos import proveedores_gastos_view, buscar_proveedor, \
     buscar_proveedores, buscar_item_c, buscar_items_c, procesar_factura_proveedor, source_proveedoresygastos, \
     cargar_pendientes_imputacion
@@ -150,6 +153,17 @@ urlpatterns = [
     path('guardar_asiento_editado/', guardar_asiento_editado, name='guardar_asiento_editado'),
     path('eliminar_asiento/', eliminar_asiento, name='eliminar_asiento'),
     #modificra asientos
+
+    #movimientos bancarios
+    path('movimientos_bancarios/', movimientos_bancarios, name='movimientos_bancarios'),
+    path('cheques_disponibles_clientes/', cheques_disponibles_clientes, name='cheques_disponibles'),
+    path('guardar_movimiento_bancario/', guardar_movimiento_bancario, name='guardar_movimiento_bancario'),
+    path('cheques_disponibles_listado/', cheques_disponibles_listado, name='cheques_disponibles_listado'),
+    path('cheques_disponibles_listado_diferidos/', cheques_disponibles_listado_diferidos, name='cheques_disponibles_listado_diferidos'),
+    path('generar_orden_pago_pdf/', generar_orden_pago_pdf, name='generar_orden_pago_pdf'),
+    path('generar_comprobante_deposito_pdf/', generar_comprobante_deposito_pdf, name='generar_comprobante_deposito_pdf'),
+
+    #movimientos bancarios
 
     #contabilidad
 ]
