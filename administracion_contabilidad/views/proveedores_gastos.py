@@ -214,7 +214,9 @@ def procesar_factura_proveedor(request):
                     'mes': fecha_obj.month,
                     'fechacheque': fecha_obj,
                     'paridad': paridad,
-                    'posicion':'S/I'
+                    'posicion':'S/I',
+                    'nroserv': 0,
+
                 }
 
                 crear_asiento(asiento_general)
@@ -355,6 +357,7 @@ def procesar_factura_proveedor(request):
                 crear_movimiento(movimiento)
 
                 return JsonResponse({'status': 'Factura procesada correctamente N° ' + str(numero)})
+            return None
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
 

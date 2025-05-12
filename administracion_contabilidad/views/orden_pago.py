@@ -1,4 +1,5 @@
 import json
+import os
 from collections import defaultdict
 from datetime import datetime
 from django.contrib import messages
@@ -6,13 +7,18 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.template.defaultfilters import length
+from num2words import num2words
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas
 
 from administracion_contabilidad.forms import OrdenPago
 from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero
 from administracion_contabilidad.views.preventa import generar_autogenerado
+from cargosystem import settings
 from mantenimientos.models import Clientes, Monedas
 from administracion_contabilidad.models import Asientos, VistaPagos, Dolar, Cheques, Impuordenes, Ordenes, Cuentas, \
     Movims, Chequeorden, VistaOrdenesPago, Chequeras
@@ -269,7 +275,7 @@ def obtener_imputables(request):
 
     return JsonResponse(response_data, safe=False)
 
-def guardar_impuorden(request):
+def guardar_impuorden_old(request):
     try:
         with transaction.atomic():
             if request.method == 'POST':
@@ -459,6 +465,7 @@ def guardar_impuorden(request):
                 return JsonResponse({'status': 'exito'})
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
+
 
 def crear_asiento(asiento):
     try:
@@ -756,5 +763,695 @@ def guardar_anticipo_orden(request):
                     crear_movimiento(movimiento_vec)
 
                 return JsonResponse({'status': 'exito'})
+            return None
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
+
+def guardar_impuorden(request):
+    try:
+        with transaction.atomic():
+            if request.method == 'POST':
+                body_unicode = request.body.decode('utf-8')
+                body_data = json.loads(body_unicode)
+                vector = body_data.get('vector', {})
+                imputaciones = vector.get('imputaciones', [])
+                asientos = vector.get('asiento', [])
+                movimiento = vector.get('movimiento', [])
+                cobranza = vector.get('cobranza', [])
+
+                verificar_num = int(cobranza[0]['numero'])
+                verif = Movims.objects.filter(mboleta=verificar_num, mnombremov='O/PAGO')
+                if verif.exists():
+                    return HttpResponse(
+                        json.dumps({'status': 'Error: El número ingresado para la orden de pago, ya existe.'}),
+                        content_type='application/json',
+                        status=200
+                    )
+                autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))
+                fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                facturas_list = []
+                if vector and imputaciones:
+                    for item in imputaciones:
+
+                        boleta = VistaPagos.objects.filter(documento=item['nroboleta'],tipo_factura=item['source'])
+                        movim = Movims.objects.filter(mautogen=boleta[0].autogenerado).first()
+                        asiento_boleta = Asientos.objects.filter(autogenerado=boleta[0].autogenerado).exclude(posicion__isnull=True).first()
+                        posicion = asiento_boleta.posicion if asiento_boleta and asiento_boleta.posicion else 'S/I'
+
+                        if boleta.count() == 1:
+
+
+                            facturas_list.append({
+                                "documento": item['nroboleta'],
+                                "importe": item['imputado'],
+                                "detalle_fac": movim.mdetalle if movim.mdetalle else "S/I",
+                                "cambio": movim.marbitraje if movim.marbitraje else 0,
+                                "posicion": posicion
+                            })
+
+                            monto = float(item['imputado']) #if boleta.tipo == 20 else -float(item['imputado']) if boleta.tipo == 21  else 0
+                            impuordenes = Impuordenes()
+                            impuordenes.autofac = boleta[0].autogenerado
+                            impuordenes.numero = item['nroboleta']
+                            impuordenes.prefijo = boleta[0].prefijo
+                            impuordenes.serie = boleta[0].serie
+                            impuordenes.orden = cobranza[0]['numero']
+                            impuordenes.cliente = cobranza[0]['nrocliente']
+                            impuordenes.monto = monto
+                            impuordenes.save()
+
+                            movimiento_fac=Movims.objects.filter(mautogen=boleta[0].autogenerado).first()
+                            if movimiento_fac:
+                                movimiento_fac.msaldo=float(movimiento_fac.msaldo)-float(item['imputado'])
+                                movimiento_fac.save()
+
+                        elif boleta.count() > 1:
+                            raise TypeError('Error: mas de una boleta encontrada.')
+                        else:
+                            raise TypeError('Error: boleta no encontrada.')
+
+                try:
+                    cliente_data = Clientes.objects.get(codigo=cobranza[0]['nrocliente'])
+                except Exception as _:
+                    cliente_data = None
+
+                orden = Ordenes()
+                orden.mmonto=cobranza[0]['total']
+                orden.mboleta=cobranza[0]['numero']
+                orden.mfechamov=fecha
+                orden.mmoneda=cobranza[0]['nromoneda']
+                orden.mdetalle=movimiento[0]['boletas']
+                orden.mcliente=cobranza[0]['nrocliente']
+                orden.mactiva='N' if cobranza[0]['definitivo'] == True else 'S'
+                orden.mcaja=11112 if cobranza[0]['nromoneda'] !=1 else 11111
+                orden.mautogenmovims=autogenerado_impuventa if cobranza[0]['definitivo'] == True else None
+                if cliente_data:
+                    orden.mnombre=cliente_data.empresa
+                else:
+                    orden.mnombre=''
+                orden.save()
+
+                if cobranza[0]['definitivo'] == True:
+                    if cliente_data:
+                        for asiento in asientos:
+                            fechaj = datetime.now().strftime("%Y-%m-%d")
+                            fecha_obj = datetime.strptime(fechaj, '%Y-%m-%d')
+                            nroasiento = generar_numero()
+                            movimiento_num = modificar_numero(nroasiento)
+
+                            detalle_asiento = 'O/PAGO' +'-'+ str(cobranza[0]['numero']) +'-'+ cliente_data.empresa
+                            asiento_vector_1 = {
+                                'detalle': detalle_asiento,
+                                'monto': asiento['total_pago'],
+                                'moneda': cobranza[0]['nromoneda'],
+                                'cambio': cobranza[0]['arbitraje'],
+                                'asiento': nroasiento,
+                                'conciliado': 'N',
+                                'clearing': fecha_obj,
+                                'fecha': fecha_obj,
+                                'imputacion': 2,
+                                'modo': asiento['modo'],
+                                'tipo': 'G',
+                                'cuenta': asiento['cuenta'],
+                                'documento': cobranza[0]['numero'],
+                                'vencimiento': fecha_obj,
+                                'pasado': 1,
+                                'autogenerado': autogenerado_impuventa,
+                                'cliente': cliente_data.codigo,
+                                'banco': asiento['banco'] if asiento['modo'] != 'CHEQUE' else " - ".join(map(str, Cuentas.objects.filter(xcodigo=asiento['cuenta']).values_list('xcodigo', 'xnombre').first() or ('', ''))),
+                                'centro': 'ADM',
+                                'mov': int(movimiento_num) + 1,
+                                'anio': fecha_obj.year,
+                                'mes': fecha_obj.month,
+                                'fechacheque': fecha_obj,
+                                'paridad': cobranza[0]['paridad'],
+                                'posicion': None
+
+                            }  # haber
+                            crear_asiento(asiento_vector_1)
+                            if asiento.get('modo') == 'CHEQUE':
+                                numero=asiento['nro_mediopago']
+                                banco=asiento['banco']
+                                fecha_vencimiento=asiento['vencimiento']
+                                monto=asiento['total_pago']
+                                chequera=Chequeras.ojects.filter(cheque=numero).first()
+                                if chequera:
+                                    chequera.estado=1
+                                    chequera.save()
+                                    cheque = Chequeorden()
+                                    cheque.cnumero=numero
+                                    cheque.cbanco=banco
+                                    cheque.cfecha=fecha_obj
+                                    cheque.cvto=fecha_vencimiento
+                                    cheque.corden=cobranza[0]['numero']
+                                    cheque.cmonto=monto
+                                    cheque.save()
+
+                            elif asiento.get('modo') == 'CHEQUE TERCEROS':
+                                cheque=Cheques.objects.get(id=asiento['cuenta'])
+                                cheque.cestado=2
+                                cheque.save()
+
+                        #asiento general
+                        asiento_vector_2 = {  # deber
+                            'detalle': detalle_asiento,
+                            'monto': cobranza[0]['total'],
+                            'moneda': cobranza[0]['nromoneda'],
+                            'cambio': cobranza[0]['arbitraje'],
+                            'asiento': nroasiento,
+                            'conciliado': 'N',
+                            'clearing': fecha_obj,
+                            'fecha': fecha_obj,
+                            'imputacion': 1,
+                            'modo': None,
+                            'tipo': 'G',
+                            'cuenta': cliente_data.ctavta,
+                            'documento': cobranza[0]['numero'],
+                            'vencimiento': fecha_obj,
+                            'pasado': 1,
+                            'autogenerado': autogenerado_impuventa,
+                            'cliente': cliente_data.codigo,
+                            'banco': 'S/I',
+                            'centro': 'S/I',
+                            'mov': movimiento_num,
+                            'anio': fecha_obj.year,
+                            'mes': fecha_obj.month,
+                            'fechacheque': fecha_obj,
+                            'paridad': cobranza[0]['paridad'],
+                            'posicion': None
+                        }  # deber general
+                        crear_asiento(asiento_vector_2)
+                        #crear el movimiento
+                        movimiento_vec = {
+                            'tipo': 45,
+                            'fecha': fecha_obj,
+                            'boleta': cobranza[0]['numero'],
+                            'monto': 0,
+                            'paridad': cobranza[0]['paridad'],
+                            'iva': boleta[0].iva if boleta and boleta.exists() else 0,
+                            'total': cobranza[0]['total'],
+                            'saldo': movimiento[0]['saldo'],
+                            'moneda': cobranza[0]['nromoneda'],
+                            'detalle': movimiento[0]['boletas'],
+                            'cliente': cliente_data.codigo,
+                            'nombre': cliente_data.empresa,
+                            'nombremov': 'O/PAGO',
+                            'cambio': cobranza[0]['arbitraje'],
+                            'autogenerado': autogenerado_impuventa,
+                            'serie': None,
+                            'prefijo': None,
+                            'posicion':None,
+                            'anio': fecha_obj.year,
+                            'mes': fecha_obj.month,
+                            'monedaoriginal': cobranza[0]['nromoneda'],
+                            'montooriginal': cobranza[0]['total'],
+                            'arbitraje': cobranza[0]['arbitraje'],
+
+                        }
+                        crear_movimiento(movimiento_vec)
+
+                #return JsonResponse({'status': 'exito'})
+                pdf_data = {
+                    "nro": cobranza[0]['numero'],
+                    "fecha_pago": fecha_obj.strftime("%Y-%m-%d"),
+                    "vto": fecha_obj.strftime("%Y-%m-%d"),  # o el vencimiento real si lo tenés
+                    "detalle": movimiento[0]['boletas'],
+                    "cambio_general": cobranza[0]['arbitraje'],
+                    "monto_total": str(cobranza[0]['total']),
+                    "moneda": "MONEDA NACIONAL" if cobranza[0]['nromoneda'] == 1 else "DÓLARES",
+                    "proveedor_nombre": cliente_data.empresa if cliente_data else "",
+                    "proveedor_direccion": cliente_data.direccion if cliente_data else "",
+                    "proveedor_telefono": cliente_data.telefono if cliente_data else "",
+
+                    "facturas": json.dumps(facturas_list),
+
+                    "forma_pago": json.dumps([
+                        {
+                            "modo": i.get("modo", "S/I"),
+                            "numero": i.get("nro_mediopago", ""),
+                            'banco': asiento['banco'] if asiento['modo'] != 'CHEQUE' else " - ".join(map(str,Cuentas.objects.filter(xcodigo= asiento['cuenta']).values_list('xcodigo','xnombre').first() or ( '', ''))),
+                            "monto_total": i.get("total_pago", "0"),
+                            "vencimiento_cheque": i.get("vencimiento", None)
+                        }
+                        for i in asientos
+                    ])
+                }
+
+                return generar_orden_pago_pdf(pdf_data, request)
+            return None
+    except Exception as e:
+        return HttpResponse(
+            json.dumps({'status': 'Error: ' + str(e)}),
+            content_type='application/json',
+            status=200
+        )
+
+def generar_orden_pago_pdf_sin_prov(pdf_data, request):
+    try:
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="orden_pago.pdf"; filename*=UTF-8\'\'orden_pago.pdf'
+
+        c = canvas.Canvas(response, pagesize=A4)
+        width, height = A4
+        y = height - 30 * mm
+
+        # Logo
+        logo_path = os.path.join(settings.PACKAGE_ROOT, 'static', 'images', 'oceanlink.png')
+        c.drawImage(logo_path, 20 * mm, y, width=40 * mm, preserveAspectRatio=True, mask='auto')
+        y -= 5 * mm
+
+        fecha_pago_str = pdf_data.get("fecha_pago")
+        vto_str = pdf_data.get("vto")
+        try:
+            fecha_pago = datetime.strptime(fecha_pago_str, "%Y-%m-%d").strftime('%Y/%m/%d')
+            vto = datetime.strptime(vto_str, "%Y-%m-%d").strftime('%Y/%m/%d')
+        except (ValueError, TypeError):
+            fecha_pago = fecha_pago_str
+            vto = fecha_pago_str
+
+        # Datos principales
+        c.setFont("Courier", 12)
+        y -= 5 * mm
+        c.drawString(20 * mm, y, f"Orden de pago .....: {pdf_data.get('nro', '011877')}")
+        y -= 6 * mm
+        c.drawString(20 * mm, y, f"Fecha de pago .....: {fecha_pago}")
+        y -= 6 * mm
+        nombre = str(request.user.first_name) + ' ' + str(request.user.last_name)
+        c.drawString(20 * mm, y, f"Solicitada por ....: {nombre}")
+
+        # Moneda y monto
+        c.setFont("Courier-Bold", 10)
+        y -= 10 * mm
+        c.drawString(20 * mm, y, f"Moneda ............: {pdf_data.get('moneda')}")
+        y -= 6 * mm
+        c.drawString(20 * mm, y, f"Monto a pagar .....: {pdf_data.get('monto_total')}")
+
+        # Cuentas imputadas
+        y -= 12 * mm
+        c.setFont("Courier-Bold", 10)
+        titulo = "Cuentas imputadas en el pago:"
+        c.drawString(20 * mm, y, titulo)
+        c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(titulo, "Courier-Bold", 10), y - 1.5 * mm)
+
+        y -= 8 * mm
+        c.setFont("Courier", 10)
+        encabezado = "Cuenta                           Monto        Detalle"
+        c.drawString(20 * mm, y, encabezado)
+        c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(encabezado, "Courier", 10), y - 1.5 * mm)
+
+        y -= 6 * mm
+        try:
+            detalle_items = json.loads(pdf_data.get('facturas', '[]'))
+            for item in detalle_items:
+                cuenta_p = item.get('cuenta', '')[:30].ljust(30)
+                monto_p = f"{float(item.get('importe', 0)):>10.2f}"
+                detalle_p = item.get('detalle_fac', '')[:25]
+                c.drawString(20 * mm, y, f"{cuenta_p} {monto_p}    {detalle_p}")
+                y -= 6 * mm
+        except Exception as e:
+            c.drawString(20 * mm, y, f"[Error al procesar filas: {str(e)}]")
+            y -= 6 * mm
+
+        y -= 6 * mm
+        c.setFont("Courier-Bold", 10)
+        titulo_fp = "Detalle"
+        c.drawString(20 * mm, y, titulo_fp)
+        c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(titulo_fp, "Courier-Bold", 10), y - 1.5 * mm)
+        y -= 6 * mm
+        c.setFont("Courier", 10)
+        c.drawString(20 * mm, y, pdf_data.get('detalle', '')[:80])
+
+        # Forma de pago
+        y -= 12 * mm
+        c.setFont("Courier-Bold", 10)
+        titulo_fp = "Forma de pago:"
+        c.drawString(20 * mm, y, titulo_fp)
+        c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(titulo_fp, "Courier-Bold", 10), y - 1.5 * mm)
+
+        y -= 6 * mm
+        c.setFont("Courier", 10)
+        c.drawString(20 * mm, y, "Tipo")
+        c.drawString(40 * mm, y, "Número")
+        c.drawString(70 * mm, y, "Banco")
+        c.drawString(140 * mm, y, "Importe")
+        c.drawString(170 * mm, y, "Vto.")
+        c.line(20 * mm, y - 1.5 * mm, 200 * mm, y - 1.5 * mm)
+
+        forma_pago = json.loads(pdf_data.get('forma_pago', '[]'))
+        for f in forma_pago:
+            y -= 6 * mm
+            tipo = f.get("modo", "S/I")
+            numero = str(f.get("numero", ""))
+            banco = f.get("banco", "")[:25]
+            importe = str(f.get("monto_total", "0"))
+            vto_fp = f.get("vencimiento_cheque", " ")
+
+            c.drawString(20 * mm, y, str(tipo or ""))
+            c.drawString(40 * mm, y, str(numero or ""))
+            c.drawString(70 * mm, y, str(banco or ""))
+            c.drawRightString(155 * mm, y, str(importe or "0.00"))
+            c.drawString(170 * mm, y, str(vto_fp or ""))
+
+        # Monto en letras
+        y -= 10 * mm
+        monto = pdf_data.get('monto_total', '0')
+        leyenda_monto = monto_a_letras(monto,pdf_data.get('moneda'))
+        c.drawString(20 * mm, y, leyenda_monto)
+
+        # Firmas
+        y -= 30 * mm
+        c.drawString(40 * mm, y, "______________________")
+        c.drawString(130 * mm, y, "______________________")
+        y -= 6 * mm
+        c.drawString(50 * mm, y, "Autorizado")
+        c.drawString(140 * mm, y, "Recibido")
+
+        c.showPage()
+        c.save()
+        return response
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+def generar_orden_pago_pdf(data,request):
+    try:
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="orden_pago.pdf"; filename*=UTF-8\'\'orden_pago.pdf'
+
+        c = canvas.Canvas(response, pagesize=A4)
+        width, height = A4
+        y = height - 30 * mm
+
+        # Logo
+        logo_path = os.path.join(settings.PACKAGE_ROOT, 'static', 'images', 'oceanlink.png')
+        c.drawImage(logo_path, 20 * mm, y, width=40 * mm, preserveAspectRatio=True, mask='auto')
+        y -= 5 * mm
+
+        detalle = data.get('detalle', '')[:35]
+        fecha_pago_str = data.get("fecha_pago")
+        vto_str = data.get("vto")
+        try:
+            fecha_pago = datetime.strptime(fecha_pago_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
+            vto = datetime.strptime(vto_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
+            fecha_pago = fecha_pago.strftime('%Y/%m/%d')
+            vto = vto.strftime('%Y/%m/%d')
+        except (ValueError, TypeError):
+            fecha_pago = fecha_pago_str
+            vto = fecha_pago_str
+
+            # Datos principales
+        c.setFont("Courier", 12)
+        y -= 5 * mm
+        c.drawString(20 * mm, y, f"Orden de pago .....: {data.get('nro', '011877')}")
+        y -= 6 * mm
+        c.drawString(20 * mm, y, f"Fecha de pago .....: {fecha_pago}")
+        y -= 6 * mm
+        nombre = str(request.user.first_name) + ' ' + str(request.user.last_name)
+        c.drawString(20 * mm, y, f"Solicitada por ....: {nombre}")
+
+        c.setFont("Courier", 10)
+        y -= 10 * mm
+        c.drawString(20 * mm, y, f"Proveedor .........: {data.get('proveedor_nombre', '')}")
+        y -= 6 * mm  # bajar una línea
+        c.drawString(20 * mm, y, f"                    {data.get('proveedor_direccion', '')}")
+        y -= 6 * mm  # bajar una línea
+        c.drawString(20 * mm, y, f"                    {data.get('proveedor_telefono', '')}")
+
+        # Moneda y monto
+        c.setFont("Courier-Bold", 10)
+        y -= 10 * mm
+        c.drawString(20 * mm, y, f"Moneda ............: {data.get('moneda')}")
+        y -= 6 * mm
+        c.drawString(20 * mm, y, f"Tipo de cambio ....: {data.get('cambio_general')}")
+        y -= 6 * mm
+        c.drawString(20 * mm, y, f"Monto a pagar .....: {data.get('monto_total')}")
+
+        # Cuentas imputadas
+        y -= 12 * mm
+        c.setFont("Courier", 11)
+        titulo = "Facturas imputadas en el pago:"
+        c.drawString(20 * mm, y, titulo)
+
+        y -= 8 * mm
+        c.setFont("Courier", 10)
+        encabezado = "Numero    Vencimiento    Importe    Detalle                  T.C.    Posicion    "
+        c.drawString(20 * mm, y, encabezado)
+        c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(encabezado, "Courier", 10), y - 1.5 * mm)
+
+        y -= 6 * mm
+
+        """
+                banco = data.get('banco', '')[:30].ljust(30)
+        monto_valor = float(data.get('monto_total') or 0)
+        monto = f"{monto_valor:>10.2f}"
+        """
+
+        try:
+            facturas_items = json.loads(data.get('facturas', '[]'))
+            for item in facturas_items:
+                documento_fac = item.get('documento', '')
+                cambio_fac = item.get('cambio', '')
+                posicion_fac = item.get('posicion', '')
+                monto_p = f"{float(item.get('importe', 0)):>10.2f}"
+                detalle_p = item.get('detalle_fac', '')[:25]
+                c.drawString(20 * mm, y, f"{documento_fac}    {fecha_pago}    {monto_p}    {detalle_p}                    {cambio_fac}    {posicion_fac}")
+                y -= 6 * mm
+        except Exception as e:
+            c.drawString(20 * mm, y, f"[Error al procesar filas: {str(e)}]")
+            y -= 6 * mm
+
+        # Forma de pago
+
+        forma_pago = json.loads(data.get('forma_pago', '[]'))
+
+        # Titulos
+        y -= 12 * mm
+        c.setFont("Courier", 11)
+        titulo_fp = "Forma de pago:"
+        c.drawString(20 * mm, y, titulo_fp)
+
+        # Encabezado
+        y -= 6 * mm
+        c.setFont("Courier", 10)
+        c.drawString(20 * mm, y, "Tipo")
+        c.drawString(40 * mm, y, "Número")
+        c.drawString(70 * mm, y, "Banco")
+        c.drawString(140 * mm, y, "Importe")
+        c.drawString(170 * mm, y, "Vto.")
+        c.line(20 * mm, y - 1.5 * mm, 200 * mm, y - 1.5 * mm)
+
+        for f in forma_pago:
+            # Valores
+            y -= 6 * mm
+            tipo = f.get("modo")
+            numero = f.get("numero", "")
+            banco = f.get("banco", "")[:25]
+            importe = f.get("monto_total", "0")
+            vto = f.get("vencimiento_cheque", None)
+            if vto:
+                vto = datetime.strptime(vto_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
+                vto = vto.strftime('%Y/%m/%d')
+
+            c.drawString(20 * mm, y, str(tipo))
+            c.drawString(40 * mm, y, str(numero))
+            c.drawString(70 * mm, y, str(banco))
+            c.drawRightString(155 * mm, y, str(importe))
+            c.drawString(170 * mm, y, str(vto or ""))
+
+        y -= 12 * mm
+        c.setFont("Courier", 10)
+        titulo_fp = "Detalle"
+        c.drawString(20 * mm, y, titulo_fp)
+        y -= 6 * mm
+        c.setFont("Courier", 10)
+        c.drawString(20 * mm, y, detalle)
+
+        # Texto en letras
+        y -= 10 * mm
+        monto = data.get('monto_total', '0')
+        leyenda_monto = monto_a_letras(monto,data.get('moneda'))
+        c.drawString(20 * mm, y, leyenda_monto)
+
+        # Firmas
+        y -= 30 * mm
+        c.drawString(40 * mm, y, "______________________")
+        c.drawString(130 * mm, y, "______________________")
+        y -= 6 * mm
+        c.drawString(50 * mm, y, "Autorizado")
+        c.drawString(140 * mm, y, "Recibido")
+
+        c.showPage()
+        c.save()
+        return response
+    except Exception as e:
+        return JsonResponse({'error':str(e)})
+
+def monto_a_letras(monto,moneda):
+    try:
+        monto = float(str(monto).replace(",", ""))  # Asegura formato numérico
+        enteros = int(monto)
+        decimales = int(round((monto - enteros) * 100))
+        letras = num2words(enteros, lang='es').upper()
+        return f"SON {moneda} {letras} CON {decimales:02d}/100."
+    except:
+        return f"SON {moneda} S/I"
+
+def reimprimir_op_old(request):
+    autogenerado = request.GET.get('autogenerado')
+    if not autogenerado:
+        return JsonResponse({'status': 'Error: falta el autogenerado'}, status=400)
+
+    try:
+        orden = Ordenes.objects.get(mautogenmovims=autogenerado)
+        cliente_data = Clientes.objects.filter(codigo=orden.mcliente).first()
+        asientos = Asientos.objects.filter(autogenerado=orden.mautogenmovims,imputacion=2)
+        imputaciones = Impuordenes.objects.filter(orden=orden.mboleta)
+        movimiento = Movims.objects.filter(mautogen=autogenerado).first()
+
+        if not movimiento:
+            return JsonResponse({'status': 'Error: no se encontró el movimiento para la orden'}, status=404)
+
+        facturas_list = []
+        for imp in imputaciones:
+            movimiento_fac = Movims.objects.filter(mautogen=imp.autofac).first()
+            asiento_fac = Asientos.objects.filter(autogenerado=imp.autofac).exclude(posicion__isnull=True).values('posicion').first()
+            facturas_list.append({
+                "documento": movimiento_fac.mboleta if movimiento_fac else 'S/I',
+                "importe": float(imp.monto),
+                "detalle_fac": movimiento_fac.mdetalle if movimiento_fac and movimiento_fac.mdetalle else "S/I",
+                "cambio": float(movimiento_fac.marbitraje) if movimiento_fac else 0,
+                "posicion": asiento_fac['posicion'] if asiento_fac else "S/I"
+            })
+
+        pdf_data = {
+            "nro": orden.mboleta,
+            "fecha_pago": orden.mfechamov.strftime("%Y-%m-%d"),
+            "vto": orden.mfechamov.strftime("%Y-%m-%d"),
+            "detalle": orden.mdetalle,
+            "cambio_general": float(movimiento.marbitraje) if hasattr(movimiento, 'marbitraje') else "",
+            "monto_total": str(orden.mmonto),
+            "moneda": "MONEDA NACIONAL" if orden.mmoneda == 1 else "DÓLARES",
+            "proveedor_nombre": cliente_data.empresa if cliente_data else "",
+            "proveedor_direccion": cliente_data.direccion if cliente_data else "",
+            "proveedor_telefono": cliente_data.telefono if cliente_data else "",
+            "facturas": json.dumps(facturas_list),
+            "forma_pago": json.dumps([
+                {
+                    "modo": i.modo,
+                    "numero": (
+                        Chequeorden.objects.filter(corden=orden.mboleta).first().cnumero
+                        if i.modo == 'CHEQUE' else 0
+                    ),
+                    "banco": i.banco,
+                    "monto_total": float(i.monto),
+                    "vencimiento_cheque": i.vto.strftime('%Y-%m-%d') if i.vto else None
+                }
+                for i in asientos
+            ])
+        }
+
+        return generar_orden_pago_pdf(pdf_data, request)
+
+    except Ordenes.DoesNotExist:
+        return JsonResponse({'status': 'Error: orden no encontrada'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'Error: ' + str(e)}, status=500)
+
+def reimprimir_op(request):
+    autogenerado = request.GET.get('autogenerado')
+    if not autogenerado:
+        return JsonResponse({'status': 'Error: falta el autogenerado'}, status=400)
+
+    try:
+        orden = Ordenes.objects.get(mautogenmovims=autogenerado)
+        if orden.mcliente is None:
+            cliente_data = False
+        else:
+            cliente_data = Clientes.objects.filter(codigo=orden.mcliente).first()
+        movimiento = Movims.objects.filter(mautogen=autogenerado).first()
+        asientos = Asientos.objects.filter(autogenerado=orden.mautogenmovims, imputacion=2)
+
+        if not movimiento:
+            return JsonResponse({'status': 'Error: no se encontró el movimiento para la orden'}, status=404)
+
+        # Común para ambas funciones
+        fecha_pago_str = orden.mfechamov.strftime("%Y-%m-%d")
+        vto_str = fecha_pago_str
+        moneda_str = "MONEDA NACIONAL" if orden.mmoneda == 1 else "DÓLARES"
+        cambio = float(movimiento.marbitraje) if hasattr(movimiento, 'marbitraje') else 0
+
+        forma_pago = json.dumps([
+            {
+                "modo": i.modo,
+                "numero": (
+                    Chequeorden.objects.filter(corden=orden.mboleta).first().cnumero
+                    if i.modo == 'CHEQUE' else 0
+                ),
+                "banco": i.banco,
+                "monto_total": float(i.monto),
+                "vencimiento_cheque": i.vto.strftime('%Y-%m-%d') if i.vto else None
+            }
+            for i in asientos
+        ])
+
+        if cliente_data:
+            # Estructura para generar_orden_pago_pdf (con proveedor y facturas imputadas)
+            imputaciones = Impuordenes.objects.filter(orden=orden.mboleta)
+            facturas_list = []
+            for imp in imputaciones:
+                movimiento_fac = Movims.objects.filter(mautogen=imp.autofac).first()
+                asiento_fac = Asientos.objects.filter(autogenerado=imp.autofac).exclude(posicion__isnull=True).values('posicion').first()
+                facturas_list.append({
+                    "documento": movimiento_fac.mboleta if movimiento_fac else 'S/I',
+                    "importe": float(imp.monto),
+                    "detalle_fac": movimiento_fac.mdetalle if movimiento_fac and movimiento_fac.mdetalle else "S/I",
+                    "cambio": float(movimiento_fac.marbitraje) if movimiento_fac else 0,
+                    "posicion": asiento_fac['posicion'] if asiento_fac else "S/I"
+                })
+
+            pdf_data = {
+                "nro": orden.mboleta,
+                "fecha_pago": fecha_pago_str,
+                "vto": vto_str,
+                "detalle": orden.mdetalle,
+                "cambio_general": cambio,
+                "monto_total": str(orden.mmonto),
+                "moneda": moneda_str,
+                "proveedor_nombre": cliente_data.empresa,
+                "proveedor_direccion": cliente_data.direccion,
+                "proveedor_telefono": cliente_data.telefono,
+                "facturas": json.dumps(facturas_list),
+                "forma_pago": forma_pago
+            }
+            return generar_orden_pago_pdf(pdf_data, request)
+
+        else:
+            # Estructura para generar_orden_pago_pdf_sin_prov (con cuentas imputadas)
+            cuentas_list = []
+            for i in asientos:
+                cuenta_obj = Cuentas.objects.filter(xcodigo=i.cuenta).values('xcodigo', 'xnombre').first()
+                cuentas_list.append({
+                    "posicion": i.posicion if i.posicion else "S/I",
+                    "importe": float(i.monto),
+                    "cuenta": f"{cuenta_obj['xcodigo']} - {cuenta_obj['xnombre']}" if cuenta_obj else "S/I",
+                    "detalle_fac": i.detalle[:40] if i.detalle else "S/I"
+                })
+
+            pdf_data = {
+                "nro": orden.mboleta,
+                "fecha_pago": fecha_pago_str,
+                "vto": vto_str,
+                "detalle": orden.mdetalle,
+                "monto_total": str(orden.mmonto),
+                "moneda": moneda_str,
+                "facturas": json.dumps(cuentas_list),  # ← en esta versión, se llama igual pero con otra estructura
+                "forma_pago": forma_pago
+            }
+            return generar_orden_pago_pdf_sin_prov(pdf_data, request)
+
+    except Ordenes.DoesNotExist:
+        return JsonResponse({'status': 'Error: orden no encontrada'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'Error: ' + str(e)}, status=500)
+

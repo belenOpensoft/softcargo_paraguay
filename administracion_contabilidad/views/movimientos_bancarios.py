@@ -113,6 +113,7 @@ def guardar_movimiento_bancario(request):
                         a.monto = asiento.get("monto") or None
                         a.detalle = general.get('detalle') or None
                         a.documento = general.get('documento') or None
+                        a.banco = general.get('banco') or None
                         a.save()
 
                         a = Asientos()
@@ -128,6 +129,7 @@ def guardar_movimiento_bancario(request):
                         a.monto = asiento.get("monto") or None
                         a.detalle = asiento.get("detalle") or None
                         a.documento = general.get("documento") or None
+                        a.banco = general.get('banco') or None
                         a.modo = modo_asiento
                         a.save()
 
@@ -158,6 +160,8 @@ def guardar_movimiento_bancario(request):
                     a.monto=general.get('acumulado') or None
                     a.detalle=general.get('detalle') or None
                     a.documento=general.get('documento') or None
+                    a.banco = general.get('banco') or None
+
                     a.save()
 
                     for asiento in asientos:
@@ -174,6 +178,7 @@ def guardar_movimiento_bancario(request):
                         a.detalle = asiento.get("detalle") or None
                         a.documento = general.get("documento") or None
                         a.modo=modo_asiento
+                        a.banco = general.get('banco') or None
                         a.autogenerado = autogenerado
                         a.save()
 
@@ -249,13 +254,13 @@ def crear_orden_pago(general,autogenerado_impuventa,tipo):
             'fecha': fecha_orden,
             'boleta': numero,
             'monto': general.get('acumulado'),
-            'paridad': general.get('paridad'),
+            'paridad': general.get('paridad',0),
             'total': general.get('acumulado'),
             'saldo': 0,
             'moneda': general.get('moneda'),
             'detalle': general.get('detalle'),
             'nombremov': 'O/PAGO',
-            'arbitraje': general.get('arbitraje'),
+            'arbitraje': general.get('arbitraje',0),
             'autogenerado': autogenerado_impuventa,
         }
         crear_movimiento(movimiento_vec)
@@ -389,7 +394,7 @@ def generar_orden_pago_pdf(request):
 
             # Valores
             y -= 6 * mm
-            tipo = "Crédito"
+            tipo = data.get('modo','')
             numero = data.get("numero", "")
             banco = data.get("banco", "")[:25]
             importe = data.get("monto_total", "0")
@@ -417,9 +422,9 @@ def generar_orden_pago_pdf(request):
             c.showPage()
             c.save()
             return response
+        return None
     except Exception as e:
         return JsonResponse({'error':str(e)})
-
 def monto_a_letras(monto):
     try:
         monto = float(str(monto).replace(",", ""))  # Asegura formato numérico
@@ -524,6 +529,7 @@ def generar_comprobante_deposito_pdf(request):
             c.showPage()
             c.save()
             return response
+        return None
     except Exception as e:
         return JsonResponse({'error': str(e)})
 

@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     });
-
+/*
     document.getElementById("btnGenerarPDF").addEventListener("click", function () {
      let documento= $('#id_nro_documento').val();
       let fecha= $('#id_fecha').val();
@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error(error);
       });
 });
-
+*/
     $("#modalChequesDisponibles").dialog({
         autoOpen: false,
         modal: true,
@@ -545,6 +545,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
       });
 
+      const tipo = document.querySelector('input[name="tipo_movimiento"]:checked')?.value;
+        let modo_asiento = "";
+
+        if (tipo === 'cheque_comun' || tipo === 'cheque_diferido') {
+          modo_asiento = 'CHEQUE';
+        } else if (tipo === 'depositar') {
+          modo_asiento = 'DEPOSITO';
+        } else if (tipo === 'transferencia') {
+          modo_asiento = 'TRANSFER';
+        } else if (tipo === 'egresos') {
+          modo_asiento = 'EGRESO';
+        } else if (tipo === 'ingresos') {
+          modo_asiento = 'INGRESO';
+        }
+
+
       const formData = new FormData();
 
       formData.append('data', JSON.stringify(data));
@@ -556,7 +572,7 @@ document.addEventListener('DOMContentLoaded', function () {
       formData.append('banco',banco);
       formData.append('detalle',detalle);
       formData.append('orden',op);
-      console.log(formData);
+      formData.append('modo',modo_asiento);
 
       fetch("/admin_cont/generar_orden_pago_pdf/", {
         method: "POST",

@@ -138,7 +138,7 @@ $(document).on('dblclick', '#tabla_consultar_cobranzas tbody tr', function () {
       {
         text: "Modificar",
         style: "width:90px;",
-        class: "btn btn-warning",
+        class: "btn btn-primary",
         click: function () {
           guardarCambiosCobranza();
         }

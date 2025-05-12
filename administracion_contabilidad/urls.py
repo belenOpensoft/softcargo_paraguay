@@ -29,7 +29,7 @@ from administracion_contabilidad.views.proveedores_gastos import proveedores_gas
     buscar_proveedores, buscar_item_c, buscar_items_c, procesar_factura_proveedor, source_proveedoresygastos, \
     cargar_pendientes_imputacion
 from administracion_contabilidad.views.orden_pago import orden_pago_view, obtener_imputables, \
-    obtener_cheques_disponibles, source_ordenes, guardar_impuorden, guardar_anticipo_orden
+    obtener_cheques_disponibles, source_ordenes, guardar_impuorden, guardar_anticipo_orden, reimprimir_op
 from administracion_contabilidad.views.preventa import guardar_infofactura, source_embarques_factura, \
     house_detail_factura, source_master_factura, get_name_by_id_productos, update_gasto_house, \
     check_if_reference_exists, eliminar_preventa, guardar_gasto_unificado, get_datos_ordenfactura, datos_xls
@@ -139,6 +139,7 @@ urlpatterns = [
     path('procesar_imputaciones_pago/', procesar_imputaciones_pagos, name='procesar_imputaciones_pago'),
     path('actualizar_pago/', actualizar_campos_movims_pago, name='actualizar_pago'),
     path('anular_pago/', anular_pago, name='anular_pago'),
+    path('reimprimir_op/', reimprimir_op, name='reimprimir_op'),
     #editar y consultar pagos
 
     #contabilidad

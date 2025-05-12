@@ -134,9 +134,8 @@ def get_data_email(request):
 
                 texto += formatear_linea("Términos Compra", row.terminos or "")
 
-
-
-                texto += formatear_linea("Vuelo", vapor or "") if row.modo=='IMPORT AEREO' or row.modo == 'EXPORT AEREO' else formatear_linea("Vapor", vapor or "")
+                if row.modo != 'IMPORT AEREO' and row.modo != 'EXPORT AEREO':
+                    texto += formatear_linea("Vapor", vapor or "")
 
                 texto += "<br>"
 
@@ -339,7 +338,7 @@ def get_data_email(request):
                         texto += "<tr>"
                         texto += f"<td style='padding: 2px 10px;'>{c.origen or ''}</td>"
                         texto += f"<td style='padding: 2px 10px;'>{c.destino or ''}</td>"
-                        texto += f"<td style='padding: 2px 10px;'>{c.vapor if row.modo in ['EXPORT AEREO','IMPORT AEREO'] else vapor }</td>"
+                        texto += f"<td style='padding: 2px 10px;'>{c.cia if row.modo in ['EXPORT AEREO','IMPORT AEREO'] else vapor }</td>"
                         texto += f"<td style='padding: 2px 10px;'>{c.viaje or ''}</td>"
                         texto += f"<td style='padding: 2px 10px;'>{salida}</td>"
                         texto += f"<td style='padding: 2px 10px;'>{llegada}</td>"
@@ -867,20 +866,29 @@ def get_data_email(request):
                 # Mercaderías
 
                 mercaderia = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre','bultos','bruto','cbm')
-                if mercaderia.exists():
-                    for m in mercaderia:
-                        texto += formatear_linea(f"Mercadería", str(m['producto__nombre']) if m['producto__nombre'] is not None else "S/I")
-                        texto += formatear_linea(f"Bultos", m['bultos'] if m['bultos'] is not None else "S/I")
-                        texto += formatear_linea(f"Peso", m['bruto'] if m['bruto'] is not None else "S/I")
-                        texto += formatear_linea(f"CBM", round(float(m['cbm']),2) if m['cbm'] is not None else "S/I")
+                # Mercaderías
+                # Bultos, peso y CBM
+                if mercaderia:
+                    bultos = [str(b['bultos']) if b['bultos'] else "S/I" for b in mercaderia]
+                    pesos = [str(b['bruto']) if b['bruto'] else "S/I" for b in mercaderia]
+                    cbms = [str(b['cbm']) if b['cbm'] else "S/I" for b in mercaderia]
+                    nombres_merc = [b['producto__nombre'] if b['producto__nombre'] else "S/I" for b in mercaderia]
+                    texto += formatear_linea("Mercadería", ", ".join(nombres_merc))
+                    texto += formatear_linea("Bultos", ", ".join(bultos))
+                    texto += formatear_linea("Peso", ", ".join(pesos))
+                    texto += formatear_linea("CBM", ", ".join(cbms))
+
+                # Contenedores y precintos
+
 
                 if row.modo not in ['IMPORT AEREO','EXPORT AEREO']:
                     envases=Envases.objects.filter(numero=row.numero).values('nrocontenedor','precinto')
-                    if envases.exists():
-                        for e in envases:
-                            texto += formatear_linea(f"Nro. Contenedor",
-                                                     str(e['nrocontenedor']) if e['nrocontenedor'] is not None else "S/I")
-                            texto += formatear_linea(f"Precinto", str(e['precinto']) if e['precinto'] is not None else "S/I")
+                    if envases:
+                        contenedores = [str(e['nrocontenedor']) if e['nrocontenedor'] else "S/I" for e in envases]
+                        precintos = [str(e['precinto']) if e['precinto'] else "S/I" for e in envases]
+
+                        texto += formatear_linea("Nro. Contenedores", ", ".join(contenedores))
+                        texto += formatear_linea("Precintos", ", ".join(precintos))
 
                 # Datos generales
 

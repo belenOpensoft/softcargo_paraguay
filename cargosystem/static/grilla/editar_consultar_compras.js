@@ -141,7 +141,7 @@
       {
         text: "Modificar",
         style: "width:90px;",
-        class: "btn btn-warning",
+        class: "btn btn-primary",
         click: function () {
           guardarCambiosFormulario();
         }

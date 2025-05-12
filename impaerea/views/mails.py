@@ -171,24 +171,33 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario is not None else "S/I")
 
             # Mercaderías
+            if merca:
+                nombres_merc = [m.nombre if m.nombre else "S/I" for m in merca]
+                texto += formatear_linea("Mercadería", ", ".join(nombres_merc))
 
-            cont = 1
+            # Bultos, peso y CBM
+            if row2:
+                bultos = [str(b.bultos) if b.bultos else "S/I" for b in row2]
+                pesos = [str(b.bruto) if b.bruto else "S/I" for b in row2]
+                cbms = []
+                for b in row2:
+                    if b.medidas:
+                        medidas = b.medidas.strip().lower().replace('x', '×').replace('×', 'x').split('x')
+                        if len(medidas) == 3 and all(m.replace('.', '', 1).isdigit() for m in medidas):
+                            try:
+                                largo, ancho, alto = map(float, medidas)
+                                volumen = round(largo * ancho * alto * float(b.bultos or 1))
+                                cbms.append(str(volumen))
+                            except Exception:
+                                cbms.append("S/I")
+                        else:
+                            cbms.append("S/I")
+                    else:
+                        cbms.append("S/I")
 
-            for m in merca:
-                texto += formatear_linea(f"Mercadería {cont}", str(m.nombre) if m.nombre is not None else "S/I")
-
-                cont += 1
-
-            # Bultos y pesos
-
-            cont = 1
-
-            for b in row2:
-                texto += formatear_linea(f"Bultos {cont}", b.bultos if b.bultos is not None else "S/I")
-
-                texto += formatear_linea(f"Peso {cont}", b.bruto if b.bruto is not None else "S/I")
-
-                cont += 1
+                texto += formatear_linea("Bultos", ", ".join(bultos))
+                texto += formatear_linea("Peso", ", ".join(pesos))
+                texto += formatear_linea("CBM", ", ".join(cbms))
 
             # Datos generales
 

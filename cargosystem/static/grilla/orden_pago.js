@@ -337,8 +337,6 @@ function abrir_forma_pago() {
 }
 
 //llamar cuando se seleccione un cliente
-
-
 function tabla_facturas_pendientes(cliente,moneda) {
     if ($.fn.DataTable.isDataTable('#imputacionTablePagos')) {
         $('#imputacionTablePagos tbody').off(); // Elimina todos los eventos previos en el tbody
@@ -1024,7 +1022,7 @@ for (let i = 0; i < seleccionadas.length; i++) {
 
 }
 
-function crear_impuventa_asiento_movimiento(){
+function crear_impuventa_asiento_movimiento() {
 
 if(!$('#id_cuenta_observaciones').val() && $('#difference').val()!=0){
 alert('Debe asignar la diferencia a una cuenta');
@@ -1099,7 +1097,7 @@ let nuevaFila = {
 vector.asiento.push(nuevaFila);
 }
 
-
+/*
 $.ajax({
         url: '/admin_cont/guardar_impuorden/', // Cambia esto a la URL correcta
         method: 'POST',
@@ -1120,7 +1118,71 @@ $.ajax({
         error: function(xhr) {
             alert("Error al guardar los datos: " + xhr.responseText);
         },
-    });
+    });*/
+
+$.ajax({
+    url: '/admin_cont/guardar_impuorden/',
+    method: 'POST',
+    headers: { 'X-CSRFToken': csrf_token },
+    data: JSON.stringify({ 'vector': vector }),
+    contentType: 'application/json',
+    xhrFields: {
+        responseType: 'blob'  // necesario para manejar PDF o JSON en blob
+    },
+    success: function(blob, status, xhr) {
+        const contentType = xhr.getResponseHeader("Content-Type") || "";
+
+        // Si no es PDF, lo tratamos como texto y vemos si es JSON con error
+        if (!contentType.includes("application/pdf")) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                try {
+                    const result = reader.result;
+                    const json = JSON.parse(result);
+                    // Mostramos error personalizado
+                    alert(json.status || json.error || "Error desconocido");
+                    console.error("Respuesta JSON:", json);
+                } catch (e) {
+                    alert("Respuesta no válida del servidor:\n" + reader.result);
+                    console.error("Error al parsear JSON:", reader.result);
+                }
+            };
+            reader.readAsText(blob);
+            return;
+        }
+
+        // Es un PDF, se descarga
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "orden_pago.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        $('#dialog-form').dialog('close');
+        $('#paymentModal').dialog('close');
+        $('#cobranzaForm').trigger('reset');
+        $('#paymentModal').find('input, select, textarea').val('');
+        $('#paymentModal').find('input:checkbox, input:radio').prop('checked', false);
+        $('#id_importe').prop('readonly', false);
+
+        $('#paymentModal').find('table').each(function() {
+            $(this).find('tbody').empty();
+        });
+        $('#dialog-form').find('table').each(function() {
+            $(this).find('tbody').empty();
+        });
+    },
+    error: function(xhr, status, errorThrown) {
+        // Esto solo se ejecuta si el servidor devuelve 4xx o 5xx
+        alert("Error HTTP: " + xhr.status + " - " + errorThrown);
+        console.error("Respuesta error:", xhr.responseText);
+    }
+});
+
+
 
 }
 

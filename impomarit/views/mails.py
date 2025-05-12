@@ -176,38 +176,27 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario is not None else "S/I")
 
             # Mercaderías
-
-            cont = 1
-
-            for m in merca:
-                texto += formatear_linea(f"Mercadería {cont}", str(m.nombre) if m.nombre is not None else "S/I")
-
-                cont += 1
+            if merca:
+                nombres_merc = [m.nombre if m.nombre else "S/I" for m in merca]
+                texto += formatear_linea("Mercadería", ", ".join(nombres_merc))
 
             # Bultos, peso y CBM
+            if row2:
+                bultos = [str(b.bultos) if b.bultos else "S/I" for b in row2]
+                pesos = [str(b.bruto) if b.bruto else "S/I" for b in row2]
+                cbms = [str(b.cbm) if b.cbm else "S/I" for b in row2]
 
-            cont = 1
-
-            for b in row2:
-                texto += formatear_linea(f"Bultos {cont}", b.bultos if b.bultos is not None else "S/I")
-
-                texto += formatear_linea(f"Peso {cont}", b.bruto if b.bruto is not None else "S/I")
-
-                texto += formatear_linea(f"CBM {cont}", b.cbm if b.cbm is not None else "S/I")
-
-                cont += 1
+                texto += formatear_linea("Bultos", ", ".join(bultos))
+                texto += formatear_linea("Peso", ", ".join(pesos))
+                texto += formatear_linea("CBM", ", ".join(cbms))
 
             # Contenedores y precintos
+            if row3:
+                contenedores = [str(e.nrocontenedor) if e.nrocontenedor else "S/I" for e in row3]
+                precintos = [str(e.precinto) if e.precinto else "S/I" for e in row3]
 
-            cont = 1
-
-            for e in row3:
-                texto += formatear_linea(f"Nro. Contenedor {cont}",
-                                         str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I")
-
-                texto += formatear_linea(f"Precintos {cont}", str(e.precinto) if e.precinto is not None else "S/I")
-
-                cont += 1
+                texto += formatear_linea("Nro. Contenedores", ", ".join(contenedores))
+                texto += formatear_linea("Precintos", ", ".join(precintos))
 
             # Datos generales
 

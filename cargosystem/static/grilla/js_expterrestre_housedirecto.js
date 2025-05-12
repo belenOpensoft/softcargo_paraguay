@@ -398,7 +398,7 @@ if (!$('#id_awbhijo').val()) {
                 let numero = localStorage.getItem('num_house_gasto');
 
                 let title = this.getAttribute('data-tt');
-                var row = $('#tabla_house_directo').DataTable().rows('.table-secondary').data();
+                let row = $('#tabla_house_directo').DataTable().rows('.table-secondary').data();
                 $("#id_to").val('');
                 $("#id_cc").val('');
                 $("#id_cco").val('');
@@ -498,8 +498,8 @@ if (confirm('¿Confirma eliminar seleccionado?')) {
 
       let id= localStorage.getItem('num_house_gasto');
         if (id) {
-            miurl = "/exportacion_terrestre/eliminar_house/";
-            var toData = {
+            let miurl = "/exportacion_terrestre/eliminar_house/";
+            let toData = {
                 'id': id,
                 'csrfmiddlewaretoken': csrf_token,
             };
@@ -508,7 +508,7 @@ if (confirm('¿Confirma eliminar seleccionado?')) {
                 url: miurl,
                 data: toData,
                 success: function (resultado) {
-                    aux = resultado['resultado'];
+                    let aux = resultado['resultado'];
                     if (aux === 'exito') {
                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                         alert('Eliminado correctamente');

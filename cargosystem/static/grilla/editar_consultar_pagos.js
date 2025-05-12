@@ -127,6 +127,14 @@ document.addEventListener("DOMContentLoaded", function () {
       height: 'auto',
     buttons: [
       {
+        text: "Imprimir",
+        style: "width:90px;",
+        class: "btn btn-warning",
+        click: function () {
+        imprimirPDF_op(autogenerado);
+        }
+      },
+      {
         text: "Anular",
         style: "width:90px;",
         class: "btn btn-danger",
@@ -138,7 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
       {
         text: "Modificar",
         style: "width:90px;",
-        class: "btn btn-warning",
+        class: "btn btn-primary",
         click: function () {
           guardarCambiosPago();
         }
@@ -565,3 +573,33 @@ function anularPago(autogen) {
         alert("Error al conectar con el servidor.");
     });
 }
+
+function imprimirPDF_op(autogen) {
+  const url = `/admin_cont/reimprimir_op/?autogenerado=${encodeURIComponent(autogen)}`;
+
+  fetch(url, {
+    method: "GET",
+    headers: {
+      "X-CSRFToken": csrf_token,
+    }
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("Error al generar el PDF");
+    return response.blob();
+  })
+  .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "reimpresion_orden_de_pago.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  })
+  .catch(error => {
+    alert("Hubo un error al generar el PDF");
+    console.error(error);
+  });
+}
+
