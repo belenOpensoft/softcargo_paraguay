@@ -1,17 +1,5 @@
 $(document).ready(function () {
-    $.ajax({
-            url: "/admin_cont/cargar_arbitraje/",
-            type: "GET",
-            dataType: "json",
-            success: function (data) {
-                // Cargar los valores en los campos
-                $('#arbitraje').val(data.arbitraje);
-                $('#paridad').val(data.paridad);
-            },
-            error: function (xhr, status, error) {
-                alert("Error al cargar los datos iniciales: " + error);
-            }
-        });
+    arbitraje_carga();
 
   $('table tbody').on('click', 'tr', function () {
     $('table tbody tr').removeClass('table-secondary');
@@ -58,6 +46,7 @@ $(document).ready(function () {
       document.getElementById("tablaMovimientos").insertAdjacentHTML("beforeend", nuevaFila);
       document.getElementById("formIngresarAsiento").reset();
 
+      arbitraje_carga();
       calcularTotales();
     });
     document.getElementById("btnClonar").addEventListener("click", function () {
@@ -114,10 +103,10 @@ $(document).ready(function () {
     document.getElementById("btnFinalizar").addEventListener("click", function () {
       const filas = document.querySelectorAll("#tablaMovimientos tr");
       const data = [];
+      const monedas = new Set();
 
       filas.forEach(fila => {
         const celdas = fila.querySelectorAll("td");
-        if (celdas.length < 7) return;
 
         const cuenta = celdas[0].textContent.trim();
         const detalle = celdas[1].textContent.trim();
@@ -126,7 +115,8 @@ $(document).ready(function () {
         const tipo_cambio = parseFloat(celdas[4].textContent.trim()) || 0;
         const paridad = parseFloat(celdas[5].textContent.trim()) || 0;
         const posicion = celdas[6].textContent.trim();
-
+        const moneda = celdas[7].textContent.trim();
+        monedas.add(moneda);
         data.push({
           cuenta,
           detalle,
@@ -134,15 +124,20 @@ $(document).ready(function () {
           haber,
           tipo_cambio,
           paridad,
-          posicion
+          posicion,
+          moneda
         });
       });
 
+      if (monedas.size > 1) {
+          alert("Error: no se pueden combinar monedas distintas en un mismo asiento.");
+          return;
+        }
       if (data.length === 0) {
         alert("No hay datos para enviar.");
         return;
       }
-
+/*
     fetch("/admin_cont/guardar_asientos/", {
       method: "POST",
       headers: {
@@ -165,6 +160,50 @@ $(document).ready(function () {
       console.error("Error en la petición:", error);
       alert("Ocurrió un error al enviar los datos.");
     });
+*/
+      fetch("/admin_cont/guardar_asientos/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrf_token
+        },
+        body: JSON.stringify({ asientos: data }),
+      })
+      .then(response => {
+        const contentType = response.headers.get("Content-Type") || "";
+        if (!contentType.includes("application/pdf")) {
+          // No es PDF: leer como texto y parsear como JSON
+          return response.text().then(text => {
+            try {
+              const json = JSON.parse(text);
+              throw new Error(json.error || json.status || "Error desconocido del servidor.");
+            } catch (e) {
+              throw new Error("Respuesta inválida del servidor: " + text);
+            }
+          });
+        }
+        return response.blob(); // Es PDF
+      })
+      .then(blob => {
+        // Crear y descargar el PDF
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "asiento_contable.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        // Resetear formulario y limpiar
+        $('#formIngresarAsiento').trigger('reset');
+        $('#tablaMovimientos').empty();
+        arbitraje_carga();
+
+      })
+      .catch(error => {
+        alert("Error: " + error.message);
+        console.error("Error en la petición:", error);
+      });
 
 
     });
@@ -187,4 +226,19 @@ function calcularTotales() {
   document.getElementById("totalDebe").value = totalDebe.toFixed(2);
   document.getElementById("totalHaber").value = totalHaber.toFixed(2);
   document.getElementById("saldo").value = (totalDebe - totalHaber).toFixed(2);
+}
+function arbitraje_carga(){
+  $.ajax({
+            url: "/admin_cont/cargar_arbitraje/",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                // Cargar los valores en los campos
+                $('#arbitraje').val(data.arbitraje);
+                $('#paridad').val(data.paridad);
+            },
+            error: function (xhr, status, error) {
+                alert("Error al cargar los datos iniciales: " + error);
+            }
+        });
 }

@@ -19,7 +19,7 @@ from administracion_contabilidad.views.facturacion import facturacion_view, busc
     get_datos_embarque
 from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
-from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos
+from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos, reimprimir_asiento
 from administracion_contabilidad.views.modificar_asientos import filtro_asientos, guardar_asiento_editado, \
     eliminar_asiento
 from administracion_contabilidad.views.movimientos_bancarios import movimientos_bancarios, cheques_disponibles_clientes, \
@@ -153,6 +153,7 @@ urlpatterns = [
     path('modificar_asientos/', filtro_asientos, name='modificar_asientos'),
     path('guardar_asiento_editado/', guardar_asiento_editado, name='guardar_asiento_editado'),
     path('eliminar_asiento/', eliminar_asiento, name='eliminar_asiento'),
+    path('reimprimir_asiento/', reimprimir_asiento, name='reimprimir_asiento'),
     #modificra asientos
 
     #movimientos bancarios

@@ -37,26 +37,25 @@
   .tabla-scroll {
     max-height: 300px;
     overflow-y: auto;
-    display: block;
+    overflow-x: auto;
   }
 
   .tabla-scroll table {
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
+    max-width: 90%;
   }
 
   .tabla-scroll thead {
     position: sticky;
     top: 0;
     z-index: 2;
-    background-color: #f8f9fa; /* Asegura fondo para que no se mezcle con el contenido */
+    background-color: #f8f9fa;
   }
 
   .tabla-scroll th {
     background-color: #f8f9fa;
   }
 </style>
+
 
 <link rel="stylesheet" type="text/css" href="{% static 'css/administracion/administracion.css' %}">
 <div id="filtroAsientos" class="border rounded p-3 bg-light" style="max-width: 80vw;">
@@ -100,7 +99,14 @@
         </div>
 
 
-        <div class="tabla-scroll mt-4 border rounded">
+      </div>
+
+      <div class="mt-4 border p-3 rounded bg-light w-30 d-flex align-items-start justify-content-center">
+        <button type="submit" class="btn btn-primary btn-sm w-100">Buscar</button>
+      </div>
+    </div>
+    <div>
+     <div class="tabla-scroll mt-4 border rounded">
           <table class="table table-sm mb-0" id="tabla_asientos">
             <thead class="thead-light">
               <tr>
@@ -124,19 +130,14 @@
             </tbody>
           </table>
         </div>
-        <div id="spinnerCarga" class="text-center my-3" style="display: none;">
+     <div id="spinnerCarga" class="text-center my-3" style="display: none;">
   <div class="spinner-border text-primary" role="status">
     <span class="sr-only">Cargando...</span>
   </div>
   <div>Cargando datos...</div>
 </div>
-
-      </div>
-
-      <div class="mt-4 border p-3 rounded bg-light w-30 d-flex align-items-start justify-content-center">
-        <button type="submit" class="btn btn-primary btn-sm w-100">Buscar</button>
-      </div>
     </div>
+
   </form>
 </div>
 {% include 'contabilidad/modificar_asientos_detalle.html' %}

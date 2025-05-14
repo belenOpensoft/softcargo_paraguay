@@ -78,6 +78,54 @@ $('#spinnerCarga').show();
     position: { my: "top", at: "top+70", of: window },
     buttons: [
       {
+        text: "Imprimir",
+        class: "btn btn-warning btn-sm",
+        click: function () {
+          const nro_asiento = $("#detalle_asiento").val();
+          if (!nro_asiento) {
+            alert("Debe especificar un número de asiento para imprimir.");
+            return;
+          }
+
+          fetch(`/admin_cont/reimprimir_asiento/?asiento=${encodeURIComponent(nro_asiento)}`, {
+            method: "GET",
+            headers: {
+              "X-CSRFToken": csrf_token
+            }
+          })
+          .then(response => {
+            const contentType = response.headers.get("Content-Type") || "";
+            if (!contentType.includes("application/pdf")) {
+              return response.text().then(text => {
+                try {
+                  const json = JSON.parse(text);
+                  throw new Error(json.error || json.status || "Error desconocido del servidor.");
+                } catch (e) {
+                  throw new Error("Respuesta inválida del servidor: " + text);
+                }
+              });
+            }
+            return response.blob();
+          })
+          .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "asiento_contable.pdf";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+          })
+          .catch(error => {
+            alert("Error: " + error.message);
+            console.error("Error en la petición:", error);
+          });
+
+          $(this).dialog("close");
+        }
+      },
+      {
         text: "Guardar modificación",
         class: "btn btn-success btn-sm",
         click: function () {
