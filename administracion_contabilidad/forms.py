@@ -2075,3 +2075,61 @@ class MovimientoBancarioForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control form-control-sm'})
     )
+
+class MovimientoCajaForm(forms.Form):
+    caja = forms.ModelChoiceField(
+        label="Caja",
+        queryset=Cuentas.objects.filter(xcodigo__range=(11100, 11110)),  # Ajustar según código de cajas
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    tipo_movimiento = forms.ChoiceField(
+        label="Tipo de Movimiento",
+        choices=[
+            ('ingreso', 'Ingreso de Caja'),
+            ('egreso', 'Egreso de Caja'),
+        ],
+        initial='ingreso',
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
+    )
+
+    fecha = forms.DateField(
+        label="Fecha",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
+    )
+
+    moneda = forms.ModelChoiceField(
+        label="Moneda",
+        queryset=Monedas.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    arbitraje = forms.DecimalField(
+        label="Arbitraje",
+        required=False,
+        decimal_places=4,
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'step': '0.0001'})
+    )
+
+    detalle = forms.CharField(
+        label="Detalle",
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    cuenta = forms.ModelChoiceField(
+        label="Cuenta",
+        queryset=Cuentas.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    monto = forms.DecimalField(
+        label="Monto",
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'step': '0.01'})
+    )
+
+    detalle_cuenta = forms.CharField(
+        label="Detalle de Movimiento",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm'})
+    )

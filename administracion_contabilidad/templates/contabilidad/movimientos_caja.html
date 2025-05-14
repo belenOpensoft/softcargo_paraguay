@@ -1,0 +1,149 @@
+{% extends 'base_table_v2.html' %}
+{% load static %}
+{% block contenido %}
+<title>Movimientos de Caja</title>
+<link rel="stylesheet" type="text/css" href="{% static 'css/administracion/administracion.css' %}">
+<style>
+  .oculto { display: none; }
+</style>
+<style>
+  #formMovCaja {
+    font-size: 0.85rem;
+  }
+
+  #formMovCaja label {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+  }
+
+  #formMovCaja .form-control,
+  #formMovCaja .btn,
+  #formMovCaja select {
+    font-size: 0.8rem !important;
+    height: 26px;
+    padding: 2px 6px;
+  }
+
+  #formMovCaja .btn-sm {
+    padding: 2px 8px;
+  }
+
+  #formMovCaja .table-sm th,
+  #formMovCaja .table-sm td {
+    padding: 4px;
+    font-size: 0.8rem;
+    vertical-align: middle;
+  }
+
+  #formMovCaja .input-group-append .btn {
+    padding: 2px 8px;
+  }
+
+  #formMovCaja .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  #formMovCaja .col-md-1,
+  #formMovCaja .col-md-2,
+  #formMovCaja .col-md-3,
+  #formMovCaja .col-md-4,
+  #formMovCaja .col-md-6,
+  #formMovCaja .col-md-9 {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+</style>
+
+<form method="post" id="formMovCaja" class="container-fluid mt-3">
+  {% csrf_token %}
+
+  <div class="border rounded p-3 bg-light">
+
+    <!-- Caja y Tipo de Movimiento -->
+    <div class="row mb-2">
+      <div class="col-md-4">
+        {{ form.caja.label_tag }}
+        {{ form.caja }}
+      </div>
+      <div class="col">
+        <label>{{ form.tipo_movimiento.label }}</label><br>
+        {% for radio in form.tipo_movimiento %}
+          <div class="form-check form-check-inline">
+            {{ radio.tag }}
+            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Fecha, Moneda, Arbitraje, Detalle -->
+    <div class="border rounded bg-white p-2 mb-3">
+      <div class="row mb-2">
+        <div class="col-md-3">{{ form.fecha.label_tag }} {{ form.fecha }}</div>
+        <div class="col-md-2">{{ form.moneda.label_tag }} {{ form.moneda }}</div>
+        <div class="col-md-2">{{ form.arbitraje.label_tag }} {{ form.arbitraje }}</div>
+        <div class="col-md-5">{{ form.detalle.label_tag }} {{ form.detalle }}</div>
+      </div>
+    </div>
+
+    <!-- Cuenta, Monto, Detalle Movimiento -->
+    <div class="border rounded bg-white p-2 mb-3">
+      <div class="row mb-2">
+        <div class="col-md-3">{{ form.cuenta.label_tag }} {{ form.cuenta }}</div>
+        <div class="col-md-2">{{ form.monto.label_tag }} {{ form.monto }}</div>
+        <div class="col-md-7">{{ form.detalle_cuenta.label_tag }} {{ form.detalle_cuenta }}</div>
+      </div>
+
+      <!-- Botones acción -->
+      <div class="row mb-2">
+        <div class="col" style="padding:0;padding-left:5px;">
+          <button type="button" id="btnGuardar" class="btn btn-success btn-sm">Guardar</button>
+          <button type="button" id="btnEliminar" class="btn btn-danger btn-sm">Eliminar</button>
+          <button type="button" id="btnClonar" class="btn btn-secondary btn-sm">Clonar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla resumen -->
+    <div class="row mb-2">
+      <div class="col">
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm">
+            <thead class="thead-light">
+              <tr>
+                <th>Cuenta</th>
+                <th>Total</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody id="tablaCaja">
+              <!-- filas -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acumulado -->
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <label>Acumulado</label>
+        <input type="text" class="form-control form-control-sm" id="acumulado" readonly>
+      </div>
+    </div>
+
+    <!-- Finalizar -->
+    <div class="row">
+      <div class="col-md-2">
+        <button type="button" id="btnFinalizar" class="btn btn-primary w-100">Finalizar</button>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script src="{% static 'grilla/movimientos_caja.js' %}"></script>
+<script>
+  var csrf_token = '{{ csrf_token }}';
+</script>
+{% endblock contenido %}
