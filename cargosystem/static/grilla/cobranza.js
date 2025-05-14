@@ -1325,14 +1325,14 @@ $('#abrir_arbi').on('click', function (event) {
         autoOpen: true,
         modal: true,
         title: "Cargar un arbitraje para el día de hoy",
-        height: 300,
-        width: 500,
+        height: 'auto',
+        width: 'auto',
         position: { my: "top", at: "top+20", of: window },
         buttons: [
             {
                 text: "Guardar",
-                class: "btn btn-primary",
-                style: "width:100px",
+                class: "btn btn-primary btn-sm",
+                style: "",
                 click: function () {
                     let arbDolar = $('#valor_arbitraje').val();
                     let parDolar = $('#valor_paridad').val();
@@ -1368,8 +1368,8 @@ $('#abrir_arbi').on('click', function (event) {
             },
             {
                 text: "Salir",
-                class: "btn btn-dark",
-                style: "width:100px",
+                class: "btn btn-dark btn-sm",
+                style: "",
                 click: function () {
                     $(this).dialog("close");
                 },
