@@ -34,6 +34,7 @@ from administracion_contabilidad.views.orden_pago import orden_pago_view, obtene
 from administracion_contabilidad.views.preventa import guardar_infofactura, source_embarques_factura, \
     house_detail_factura, source_master_factura, get_name_by_id_productos, update_gasto_house, \
     check_if_reference_exists, eliminar_preventa, guardar_gasto_unificado, get_datos_ordenfactura, datos_xls
+from login.views.login import verificar_arbitraje
 
 urlpatterns = [
     path('facturacion/', facturacion_view, name='facturacion'),
@@ -170,6 +171,7 @@ urlpatterns = [
 
     #movimientod de caja
     path('movimientos_caja/', movimientos_caja, name='movimientos_caja'),
+    path('verificar_arbitraje/', verificar_arbitraje, name='verificar_arbitraje'),
 
     #movimientod de caja
 

@@ -994,11 +994,11 @@ def guardar_arbitraje(request):
     if request.method == "POST":
         try:
             # Obtener datos del POST
-            arb_dolar = request.POST.get('arbDolar', '0')
-            par_dolar = request.POST.get('parDolar', '0')
-            tipo_moneda = request.POST.get('tipoMoneda', '0')
-            piz_dolar = request.POST.get('pizDolar', '0')
-            fecha_cliente = request.POST.get('fecha', '')
+            arb_dolar = request.POST.get('arbDolar', 0)
+            par_dolar = request.POST.get('parDolar', 0)
+            tipo_moneda = request.POST.get('tipoMoneda', 0)
+            piz_dolar = request.POST.get('pizDolar', 0)
+            fecha_cliente = request.POST.get('fecha', None)
 
             # Validar y formatear la fecha
             if fecha_cliente:

@@ -1,0 +1,101 @@
+{% extends 'base_table_v2.html' %}
+{% load static %}
+
+{% block contenido %}
+<div id="arbitraje_modal" class="form-group" style="display:none;">
+    <form id="arbitrajeForm">
+        <div class="container-fluid" style="font-size: 0.8rem;">
+            <div class="row mb-2">
+                <div class="form-group col-sm-6 mb-1">
+                    <label for="valor_pizarra" class="mb-1">Pizarra</label>
+                    <input type="number" id="valor_pizarra" class="form-control form-control-sm">
+                </div>
+                <div class="form-group col-sm-6 mb-1">
+                    <label for="valor_arbitraje" class="mb-1">Arbitraje</label>
+                    <input type="number" id="valor_arbitraje" class="form-control form-control-sm">
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="form-group col-sm-6 mb-1">
+                    <label for="valor_paridad" class="mb-1">Paridad</label>
+                    <input type="number" id="valor_paridad" class="form-control form-control-sm">
+                </div>
+                <div class="form-group col-sm-6 mb-1">
+                    <label for="moneda_select" class="mb-1">Moneda</label>
+                    <select id="moneda_select" class="form-control form-control-sm">
+                        <option value="1">MONEDA NACIONAL</option>
+                        <option value="2">DOLARES USA</option>
+                        <option value="3">EURO</option>
+                        <option value="4">LIBRA</option>
+                        <option value="5">ZAR</option>
+                        <option value="6">FRANCO SUIZO</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-6 mb-1">
+                    <label for="fecha_arbi" class="mb-1">Fecha</label>
+                    <input type="date" id="fecha_arbi" class="form-control form-control-sm">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+    <script>
+    $(document).ready(function () {
+        $("#arbitraje_modal").dialog({
+            modal: true,
+            title: "Debe cargar el arbitraje del día de hoy",
+            width: 400,
+            height: 'auto',
+            closeOnEscape: false,
+            open: function(event, ui) {
+                $(".ui-dialog-titlebar-close").hide();
+            },
+            buttons: [
+                {
+                    text: "Guardar",
+                    class: "btn btn-primary btn-sm",
+                    click: function () {
+                        let datos = {
+                            arbDolar: parseFloat($('#valor_arbitraje').val()) || 0,
+                            parDolar: parseFloat($('#valor_paridad').val()) || 0,
+                            tipoMoneda: $('#moneda_select').val(),
+                            pizDolar: parseFloat($('#valor_pizarra').val()) || 0,
+                            fecha: $('#fecha_arbi').val()
+                        };
+
+
+                        $.ajax({
+                            url: "/admin_cont/guardar_arbitraje/",
+                            method: "POST",
+                            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                            data: datos,
+                            success: function (response) {
+                                if (response.status === "Registro guardado correctamente.") {
+                                    window.location.href = cambiarModuloUrl;
+                                } else {
+                                    alert(response.status);
+                                }
+                            },
+
+                            error: function () {
+                                alert("Error al guardar el arbitraje.");
+                            }
+                        });
+                    }
+                }
+            ]
+        });
+         const hoy = new Date().toISOString().split('T')[0];
+         document.getElementById('fecha_arbi').value = hoy;
+    });
+    </script>
+
+<script>
+    const cambiarModuloUrl = "{% url 'vista_cambiar_modulo' 'administracion' %}";
+</script>
+{% endblock contenido %}

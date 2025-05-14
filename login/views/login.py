@@ -1,9 +1,13 @@
+from datetime import datetime
+
 import numpy as np
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+
+from administracion_contabilidad.models import Dolar
 from cargosystem import settings
 from login.forms import usuarioForm
 
@@ -73,9 +77,20 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect('/')
 
+def verificar_arbitraje(request):
+    return render(request, 'forzar_arbitraje.html', {
+        'hoy': datetime.today().strftime('%Y-%m-%d')
+    })
 
 def cambiar_modulo(request, modulo):
     request.session["rol"] = modulo
+    if modulo == 'administracion':
+        hoy = datetime.today().date()
+        arbitraje_existente = Dolar.objects.filter(ufecha__date=hoy).exists()
+
+        if not arbitraje_existente:
+            return redirect('/admin_cont/verificar_arbitraje/')
+
     if modulo == 'seguimientos':
         return  HttpResponseRedirect('/seguimientos')
     else:
