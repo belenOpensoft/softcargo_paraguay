@@ -165,9 +165,6 @@ class seguimientoForm(BSModalModelForm):
 
         # Asignación de tabindex en el orden que especificaste
 
-
-
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
@@ -188,6 +185,23 @@ class seguimientoForm(BSModalModelForm):
             if field_name == 'moneda':
                 monedas = [("", "---")] + list(Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
                 field.choices = monedas
+
+        campos_autocomplete = [
+            'cliente', 'despachante', 'embarcador', 'consignatario', 'notificar',
+            'agente', 'transportista', 'armador', 'agecompras', 'ageventas',
+            'origen', 'destino', 'vendedor', 'deposito', 'vapor',
+            'loading', 'discharge'
+        ]
+
+        for nombre in campos_autocomplete:
+            if nombre in self.fields:
+                clases_actuales = self.fields[nombre].widget.attrs.get('class', '')
+                nuevas_clases = f"{clases_actuales} autocomplete-validable"
+                self.fields[nombre].widget.attrs['class'] = nuevas_clases.strip()
+
+
+
+
 
     choice_op = (("", ""),
                  ("IMPORTACION", "IMPORTACION"),

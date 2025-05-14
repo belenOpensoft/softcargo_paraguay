@@ -1911,12 +1911,37 @@ $(document).ready(function () {
     });
 
     // AUTOCOMPLETES
+
+
+    $(".autocomplete-validable").on("blur", function () {
+        const inputVal = $(this).val().trim();
+        const expectedVal = $(this).attr('data-label') || '';
+
+        console.log(inputVal);
+        console.log(expectedVal);
+
+        // Si el valor fue modificado y no coincide con la selección, limpiar
+        if (inputVal !== expectedVal) {
+            $(this).val('');
+            $(this).attr('data-id', '');
+            $(this).attr('data-label', '');
+            $(this).css({
+                "border-color": "",
+                "box-shadow": ""
+            });
+        }
+    });
+
     $("#cliente_add").autocomplete({
         source: '/autocomplete_clientes/',
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
-
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -1932,6 +1957,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
 
         },
         change: function (event, ui) {
@@ -1948,6 +1978,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -1963,6 +1998,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -1978,6 +2018,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -1993,6 +2038,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -2008,6 +2058,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -2023,6 +2078,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -2038,6 +2098,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -2053,6 +2118,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -2068,6 +2138,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
             $('#loading_add').val(ui.item['id']);
         },
         change: function (event, ui) {
@@ -2084,6 +2159,11 @@ $(document).ready(function () {
         minLength: 0,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -2099,6 +2179,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
             $('#discharge_add').val(ui.item['id']);
         },
         change: function (event, ui) {
@@ -2115,6 +2200,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -2130,6 +2220,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -2145,6 +2240,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -2162,6 +2262,11 @@ $(document).ready(function () {
     minLength: 2,
     select: function (event, ui) {
         $(this).attr('data-id', ui.item['codigo']);  // Guarda el ID si es un item de la lista
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
     },
     change: function (event, ui) {
         var input = $(this);
@@ -2204,6 +2309,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -2219,6 +2329,11 @@ $(document).ready(function () {
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         },
         change: function (event, ui) {
             if (ui.item) {
@@ -2237,7 +2352,12 @@ $(document).ready(function () {
     },
     minLength: 2,
     select: function (event, ui) {
-        $(this).attr('data-id', ui.item['id']);  // Guarda el ID si es un item de la lista
+            $(this).attr('data-id', ui.item['id']);
+            $(this).attr('data-label', ui.item['label']);
+            $(this).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.1rem #3D9A37"
+            });
         $('#cod_producto').val(ui.item['id']);
     },
     change: function (event, ui) {
@@ -2488,7 +2608,7 @@ function get_datos_cronologia(id) {
         }
     });
 }
-function get_datos_seguimiento(id, modo = '') {
+function get_datos_seguimiento_old(id, modo = '') {
     $("#id_originales").val("S");
     $.ajax({
         url: '/get_data_seguimiento/' + id + '/',
@@ -2700,6 +2820,164 @@ function get_datos_seguimiento(id, modo = '') {
         }
     });
 }
+function get_datos_seguimiento(id, modo = '') {
+    $("#id_originales").val("S");
+    $.ajax({
+        url: '/get_data_seguimiento/' + id + '/',
+        type: 'GET',
+        async: false,
+        success: function (datos) {
+            if (datos['fecha'] !== null) {
+                $("#id_fecha").val(datos['fecha']);
+            }
+            if (datos['loadingdate'] !== null) {
+                $("#id_loadingdate").val(datos['loadingdate']);
+            }
+            if (datos['vencimiento'] !== null) {
+                $("#id_vencimiento").val(datos['vencimiento']);
+            }
+
+            if (datos['cliente']) {
+                $("#cliente_add").val(datos['cliente']);
+                $("#cliente_add").attr('data-id', datos['cliente_codigo']);
+                $("#cliente_add").attr('data-label', datos['cliente']);
+                $("#cliente_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['deposito']) {
+                $("#deposito_add").val(datos['deposito']);
+                $("#deposito_add").attr('data-id', datos['deposito_codigo']);
+                $("#deposito_add").attr('data-label', datos['deposito']);
+                $("#deposito_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['embarcador']) {
+                $("#embarcador_add").val(datos['embarcador']);
+                $("#embarcador_add").attr('data-id', datos['embarcador_codigo']);
+                $("#embarcador_add").attr('data-label', datos['embarcador']);
+                $("#embarcador_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['consignatario']) {
+                $("#consignatario_add").val(datos['consignatario']);
+                $("#consignatario_add").attr('data-id', datos['consignatario_codigo']);
+                $("#consignatario_add").attr('data-label', datos['consignatario']);
+                $("#consignatario_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['notificar']) {
+                $("#notificar_add").val(datos['notificar']);
+                $("#notificar_add").attr('data-id', datos['notificar_codigo']);
+                $("#notificar_add").attr('data-label', datos['notificar']);
+                $("#notificar_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['agente']) {
+                $("#agente_add").val(datos['agente']);
+                $("#agente_add").attr('data-id', datos['agente_codigo']);
+                $("#agente_add").attr('data-label', datos['agente']);
+                $("#agente_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['transportista']) {
+                $("#transportista_add").val(datos['transportista']);
+                $("#transportista_add").attr('data-id', datos['transportista_codigo']);
+                $("#transportista_add").attr('data-label', datos['transportista']);
+                $("#transportista_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['armador']) {
+                $("#armador_add").val(datos['armador']);
+                $("#armador_add").attr('data-id', datos['armador_codigo']);
+                $("#armador_add").attr('data-label', datos['armador']);
+                $("#armador_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['agecompras']) {
+                $("#agecompras_add").val(datos['agecompras']);
+                $("#agecompras_add").attr('data-id', datos['agecompras_codigo']);
+                $("#agecompras_add").attr('data-label', datos['agecompras']);
+                $("#agecompras_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['ageventas']) {
+                $("#ageventas_add").val(datos['ageventas']);
+                $("#ageventas_add").attr('data-id', datos['ageventas_codigo']);
+                $("#ageventas_add").attr('data-label', datos['ageventas']);
+                $("#ageventas_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['origen']) {
+                $("#origen_add").val(datos['origen_text']);
+                $("#origen_add").attr('data-id', datos['origen']);
+                $("#origen_add").attr('data-label', datos['origen_text']);
+                $("#origen_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['destino']) {
+                $("#destino_add").val(datos['destino_text']);
+                $("#destino_add").attr('data-id', datos['destino']);
+                $("#destino_add").attr('data-label', datos['destino_text']);
+                $("#destino_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['operacion']) {
+                $("#id_operacion_seg").val(datos['operacion']);
+                $("#id_operacion_seg").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['moneda']) {
+                $("#id_moneda").val(datos['moneda']);
+                $("#id_moneda").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['vendedor']) {
+                $("#vendedor_add").val(datos['vendedor']);
+                $("#vendedor_add").attr('data-id', datos['vendedor_codigo']);
+                $("#vendedor_add").attr('data-label', datos['vendedor']);
+                $("#vendedor_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['vapor']) {
+                $("#vapor_add").val(datos['vapor']);
+                $("#vapor_add").attr('data-id', datos['vapor_codigo']);
+                $("#vapor_add").attr('data-label', datos['vapor']);
+                $("#vapor_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['loading']) {
+                $("#loading_add").val(datos['loading']);
+                $("#loading_add").attr('data-id', datos['loading_codigo']);
+                $("#loading_add").attr('data-label', datos['loading']);
+                $("#loading_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+            if (datos['discharge']) {
+                $("#discharge_add").val(datos['discharge']);
+                $("#discharge_add").attr('data-id', datos['discharge_codigo']);
+                $("#discharge_add").attr('data-label', datos['discharge']);
+                $("#discharge_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            }
+
+            // CAMPOS NO MODIFICADOS (los que ya tenías antes)
+            if (datos['proyecto']) $("#proyecto_add").val(datos['proyecto']).attr('data-id', datos['proyecto_codigo']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            if (datos['actividad']) $("#actividad_add").val(datos['actividad']).attr('data-id', datos['actividad_codigo']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            if (datos['desposito']) $("#id_desposito").val(datos['desposito']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            if (datos['status']) $("#id_status").val(datos['status']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            if (datos['pago']) $("#id_pago").val(datos['pago']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            if (datos['awb']) $("#id_awb").val(datos['awb']);
+            if (datos['hawb']) $("#id_hawb").val(datos['hawb']);
+            if (datos['wreceipt']) $("#id_wreceipt").val(datos['wreceipt']);
+            if (datos['valor']) $("#id_valor").val(datos['valor']);
+            if (datos['notas']) $("#notas_seguimiento").val(datos['notas']);
+            if (datos['posicion']) $("#id_posicion").val(datos['posicion']);
+            if (datos['arbitraje']) $("#id_arbitraje").val(datos['arbitraje']);
+            if (datos['viaje']) $("#id_viaje").val(datos['viaje']);
+            if (datos['ubicacion']) $("#id_ubicacion").val(datos['ubicacion']);
+            if (datos['booking']) $("#id_booking").val(datos['booking']);
+            if (datos['trackid']) $("#id_trackid").val(datos['trackid']);
+            if (datos['diasalmacenaje']) $("#id_diasalmacenaje").val(datos['diasalmacenaje']);
+            if (datos['demora']) $("#id_demora").val(datos['demora']);
+            if (datos['id']) $("#id_id").val(datos['id']);
+            if (datos['modo']) $("#id_modo").val(datos['modo']);
+            if (datos['refcliente']) $("#id_refcliente").val(datos['refcliente']);
+            if (datos['refproveedor']) $("#id_refproveedor").val(datos['refproveedor']);
+            if (datos['terminos']) $("#terminos").val(datos['terminos']);
+            if (datos['volumen']) $("#id_volumen_seg").val(datos['volumen']);
+            if (datos['trafico']) $("#id_trafico_seg").val(datos['trafico']);
+            if (datos['contratotra']) $("#id_contratotra").val(datos['contratotra']);
+
+            return datos;
+        },
+        error: function (xhr, status, error) {
+            alert(error);
+        }
+    });
+}
+
 function eliminar_seguimiento(id) {
 miurl = "/eliminar_seguimiento/";
             var toData = {
@@ -2711,7 +2989,7 @@ miurl = "/eliminar_seguimiento/";
                 url: miurl,
                 data: toData,
                 success: function (resultado) {
-                    aux = resultado['resultado'];
+                    let aux = resultado['resultado'];
                     if (aux === 'exito') {
                         table.ajax.reload();
                     } else {
