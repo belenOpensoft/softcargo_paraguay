@@ -612,7 +612,7 @@ class Cobranza(forms.Form):
     )
 
     cuenta_efectivo = forms.ModelChoiceField(
-        queryset=Cuentas.objects.filter(xnivel1__contains="111"),
+        queryset=Cuentas.objects.filter(Q(xcodigo="11112") | Q(xcodigo="11111")),
         label="Cuenta",
         initial=2,
         widget=forms.Select(attrs={'class': 'form-control'}),
@@ -661,7 +661,7 @@ class Cobranza(forms.Form):
     )
 
     cuenta_otro = forms.ModelChoiceField(
-        queryset=Cuentas.objects.all(),
+        queryset=Cuentas.objects.filter(Q(xcodigo="11112") | Q(xcodigo="11111")),
         label="Cuenta",
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'},
@@ -885,7 +885,7 @@ class OrdenPago(forms.Form):
     )
 
     cuenta_efectivo = forms.ModelChoiceField(
-        queryset=Cuentas.objects.filter(xnivel1__contains="111"),
+        queryset=Cuentas.objects.filter(Q(xcodigo="11112") | Q(xcodigo="11111")),
         label="Cuenta",
         initial=2,
         widget=forms.Select(attrs={'class': 'form-control'}),
@@ -894,7 +894,7 @@ class OrdenPago(forms.Form):
     )
 
     cuenta_cheque = forms.ModelChoiceField(
-        queryset=Cuentas.objects.filter(Q(xcodigo="11113") | Q(xcodigo="11114")),
+        queryset=Cuentas.objects.filter(Q(xcodigo="11112") | Q(xcodigo="11111")),
         label="Cuenta",
         initial="11113",
         widget=forms.Select(attrs={'class': 'form-control'}),
@@ -928,7 +928,7 @@ class OrdenPago(forms.Form):
     )
 
     cuenta_otro = forms.ModelChoiceField(
-        queryset=Cuentas.objects.all(),
+        queryset=Cuentas.objects.filter(Q(xcodigo="11112") | Q(xcodigo="11111")),
         label="Cuenta",
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'},

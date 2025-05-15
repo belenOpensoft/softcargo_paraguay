@@ -12,7 +12,7 @@ from administracion_contabilidad.views.editar_consultar_compras import editar_co
 from administracion_contabilidad.views.editar_consultar_pagos import editar_consultar_pagos, obtener_detalle_pago_orden, \
     cargar_pendientes_imputacion_pago, procesar_imputaciones_pagos, actualizar_campos_movims_pago, anular_pago
 from administracion_contabilidad.views.cobranza import cobranza_view, source_cobranza, source_cobranza_imputacion, \
-    source_facturas_pendientes, guardar_impuventa, guardar_anticipo, cargar_arbitraje
+    source_facturas_pendientes, guardar_impuventa, guardar_anticipo, cargar_arbitraje, obtener_proximo_mboleta
 from administracion_contabilidad.views.facturacion import facturacion_view, buscar_clientes, buscar_cliente, \
     buscar_item_v, buscar_items_v, procesar_factura, source_facturacion, source_infofactura, \
     cargar_preventa_infofactura, source_infofactura_cliente, cargar_preventa_infofactura_multiple, guardar_arbitraje, \
@@ -28,9 +28,10 @@ from administracion_contabilidad.views.movimientos_bancarios import movimientos_
 from administracion_contabilidad.views.movimientos_caja import movimientos_caja
 from administracion_contabilidad.views.proveedores_gastos import proveedores_gastos_view, buscar_proveedor, \
     buscar_proveedores, buscar_item_c, buscar_items_c, procesar_factura_proveedor, source_proveedoresygastos, \
-    cargar_pendientes_imputacion
+    cargar_pendientes_imputacion, obtener_proximo_mboleta_compra
 from administracion_contabilidad.views.orden_pago import orden_pago_view, obtener_imputables, \
-    obtener_cheques_disponibles, source_ordenes, guardar_impuorden, guardar_anticipo_orden, reimprimir_op
+    obtener_cheques_disponibles, source_ordenes, guardar_impuorden, guardar_anticipo_orden, reimprimir_op, \
+    obtener_proximo_mboleta_op
 from administracion_contabilidad.views.preventa import guardar_infofactura, source_embarques_factura, \
     house_detail_factura, source_master_factura, get_name_by_id_productos, update_gasto_house, \
     check_if_reference_exists, eliminar_preventa, guardar_gasto_unificado, get_datos_ordenfactura, datos_xls
@@ -80,7 +81,7 @@ urlpatterns = [
     path('guardar_impuventa/', guardar_impuventa, name='guardar_impuventa'),
     path('guardar_anticipo/', guardar_anticipo, name='guardar_anticipo'),
     path('cargar_arbitraje/', cargar_arbitraje, name='cargar_arbitraje'),
-
+    path('proximo_mboleta/', obtener_proximo_mboleta, name='proximo_mboleta'),
     #cobranza
 
     #orden de pago
@@ -90,6 +91,7 @@ urlpatterns = [
     path('obtener_cheques_disponibles/', obtener_cheques_disponibles, name='obtener_cheques_disponibles'),
     path('guardar_impuorden/', guardar_impuorden, name='guardar_impuorden'),
     path('guardar_anticipo_orden/', guardar_anticipo_orden, name='guardar_anticipo'),
+    path('proximo_mboleta_op/', obtener_proximo_mboleta_op, name='proximo_mboleta_op'),
 
     #orden de pago
 
@@ -98,6 +100,7 @@ urlpatterns = [
     path('source_proveedoresygastos/', source_proveedoresygastos, name="source_proveedoresygastos"),
     path('buscar_embarques/', buscar_embarques, name='buscar_embarques'),
     path('cargar_pendientes_imputacion/', cargar_pendientes_imputacion, name='cargar_pendientes_imputacion'),
+    path('obtener_proximo_mboleta_compra/', obtener_proximo_mboleta_compra, name='obtener_proximo_mboleta_compra'),
     #proveedores
 
     #editar y consultar compras#

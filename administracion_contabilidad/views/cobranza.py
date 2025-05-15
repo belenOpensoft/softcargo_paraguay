@@ -44,7 +44,7 @@ columns_table = {
 @login_required(login_url='/login')
 def cobranza_view(request):
     if request.user.has_perms(["administracion_contabilidad.view_listacobranzas", ]):
-        form = Cobranza(initial={'fecha':datetime.now().strftime('%Y-%m-%d')})
+        form = Cobranza(initial={'fecha':datetime.now().strftime('%Y-%m-%d') })
         return render(request, 'cobranza.html', {'form': form})
     else:
         messages.error(request, 'No tiene permisos para realizar esta accion.')
@@ -58,7 +58,6 @@ def buscar_cliente(request):
         return JsonResponse(results, safe=False)
 
     return JsonResponse({'error': 'Solicitud inválida'}, status=400)
-
 
 def buscar_clientes(request):
     if request.method == "GET":
@@ -402,6 +401,7 @@ def guardar_impuventa(request):
                     crear_movimiento(movimiento_vec)
 
                 return JsonResponse({'status': 'exito'})
+            return None
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
 
@@ -671,3 +671,11 @@ def cargar_arbitraje(request):
     except Exception as e:
         # Manejar errores inesperados
         return JsonResponse({'error': str(e)}, status=500)
+
+def obtener_proximo_mboleta(request):
+    try:
+        ultima = Movims.objects.filter(mtipo=25).order_by('-id').first()
+        proximo = int(ultima.mboleta) + 1 if ultima and ultima.mboleta.isdigit() else 1
+        return JsonResponse({'proximo_mboleta': str(proximo)})
+    except Exception as e:
+        return JsonResponse({'error': f'Error al obtener mboleta: {str(e)}'}, status=500)

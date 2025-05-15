@@ -1,5 +1,104 @@
 $(document).ready(function() {
 
+    $('#id_cuenta_deposito').on('change', function () {
+    const cuentaSeleccionada = $(this).val();
+
+    switch (cuentaSeleccionada) {
+        case '11120':
+            $('#id_moneda_deposito').val('3');
+            break;
+        case '11121':
+            $('#id_moneda_deposito').val('1');
+            break;
+        case '11122':
+            $('#id_moneda_deposito').val('2');
+            break;
+        case '11123':
+            $('#id_moneda_deposito').val('1');
+            break;
+        case '11124':
+            $('#id_moneda_deposito').val('2');
+            break;
+        default:
+            $('#id_moneda_deposito').val('2');
+            break;
+    }
+});
+    $('#id_cuenta_transferencia').on('change', function () {
+    const cuentaSeleccionada = $(this).val();
+
+    switch (cuentaSeleccionada) {
+        case '11120':
+            $('#id_moneda_transferencia').val('3');
+            break;
+        case '11121':
+            $('#id_moneda_transferencia').val('1');
+            break;
+        case '11122':
+            $('#id_moneda_transferencia').val('2');
+            break;
+        case '11123':
+            $('#id_moneda_transferencia').val('1');
+            break;
+        case '11124':
+            $('#id_moneda_transferencia').val('2');
+            break;
+        default:
+            $('#id_moneda_transferencia').val('2');
+            break;
+    }
+});
+    $('#id_cuenta_cheque').on('change', function () {
+    const cuentaSeleccionada = $(this).val();
+
+    switch (cuentaSeleccionada) {
+        case '11113':
+            $('#id_moneda_cheque').val('1');
+            break;
+        case '11114':
+            $('#id_moneda_cheque').val('2');
+            break;
+        default:
+            $('#id_moneda_cheque').val('2');
+            break;
+    }
+});
+    $('#id_cuenta_efectivo').on('change', function () {
+    const cuentaSeleccionada = $(this).val();
+
+    switch (cuentaSeleccionada) {
+        case '11112':
+            $('#id_moneda_efectivo').val('2');
+            break;
+        case '11111':
+            $('#id_moneda_efectivo').val('1');
+            break;
+        default:
+            $('#id_moneda_efectivo').val('2');
+            break;
+    }
+});
+    $('#id_cuenta_otro').on('change', function () {
+    const cuentaSeleccionada = $(this).val();
+
+    switch (cuentaSeleccionada) {
+        case '11112':
+            $('#id_moneda_otro').val('2');
+            break;
+        case '11111':
+            $('#id_moneda_otro').val('1');
+            break;
+        default:
+            $('#id_moneda_otro').val('2');
+            break;
+    }
+});
+
+    $('#id_cuenta_deposito').trigger('change');
+    $('#id_cuenta_transferencia').trigger('change');
+    $('#id_cuenta_cheque').trigger('change');
+    $('#id_cuenta_efectivo').trigger('change');
+    $('#id_cuenta_otro').trigger('change');
 
     $("input[name='paymentType']").on("change", function () {
     $(".payment-section").addClass("d-none");
@@ -11,7 +110,7 @@ $(document).ready(function() {
         abrir_cheques();
     }
   });
-  $("#cashSection").removeClass("d-none");
+    $("#cashSection").removeClass("d-none");
     var buscar = '';
     var que_buscar = '';
     let contador = 0;
@@ -235,6 +334,7 @@ function abrir_cobranza() {
             alert("Error al cargar los datos iniciales: " + error);
         }
     });
+    traer_proximo_numero();
 }
 function resetModal(modalId) {
     const modal = $(modalId);
@@ -402,7 +502,18 @@ function abrir_forma_pago() {
       },
     ],beforeClose: function () {
         localStorage.removeItem('medios_pago');
-    }
+    },
+    open: function () {
+            // Obtener fecha de hoy en formato YYYY-MM-DD
+            const hoy = new Date().toISOString().split('T')[0];
+
+            // Asignar la fecha de hoy a todos los inputs tipo date
+            $('#paymentModal input[type="date"]').each(function () {
+                if (!$(this).val()) {
+                    $(this).val(hoy);
+                }
+            });
+        }
 
   });
 
@@ -492,6 +603,14 @@ function tabla_facturas_pendientes(cliente,moneda) {
             } else {
                 $('#deshacer').prop('disabled', true);  // Deshabilitar el botón
             }
+
+            let totalImporte = 0;
+            table.rows('.selected').nodes().each(function (node) {
+                let saldo = parseFloat(table.cell(node, 5).data()) || 0;
+                totalImporte += saldo;
+            });
+            $('#id_importe').val(totalImporte.toFixed(2));
+            $('#a_imputar').val(totalImporte.toFixed(2));
         });
     }
 
@@ -785,6 +904,7 @@ $('#deshacer').on('click', function () {
     calcular_acumulado();
     // Notificar al usuario que los cambios han sido revertidos
     verificarImputado(table); // Deshabilitar el botón
+    $('#id_importe').prop('readonly', false);
     alert('Cambios deshechos en las filas seleccionadas.');
 });
 
@@ -1313,6 +1433,20 @@ $.ajax({
 
 }
 
+function traer_proximo_numero(){
+     $.ajax({
+        url: "/admin_cont/proximo_mboleta/",
+        method: "GET",
+        success: function (data) {
+            if (data.proximo_mboleta) {
+                $('#id_numero').val(data.proximo_mboleta);  // Cambiá el ID si es otro
+            }
+        },
+        error: function (xhr) {
+            console.error("No se pudo obtener el número de boleta:", xhr.responseText);
+        }
+    });
+}
 
 $('#id_moneda').on('change', function () {
         const cliente = $('#cliente_cobranza_hidden').val();

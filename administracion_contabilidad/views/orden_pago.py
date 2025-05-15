@@ -251,12 +251,12 @@ def obtener_imputables(request):
             'autogenerado': r.autogenerado,
             'fecha': r.fecha,
             'documento': r.documento,
-            'total': r.total,
+            'total': round(float(r.total or 0),2),
             'monto': r.monto,
             'iva': r.iva,
             'tipo': r.tipo_factura,
             'moneda': moneda_nombre,
-            'saldo': r.saldo,
+            'saldo': round(float(r.saldo or 0),2),
             'imputado': 0
         })
 
@@ -794,7 +794,7 @@ def guardar_impuorden(request):
                 if vector and imputaciones:
                     for item in imputaciones:
 
-                        boleta = VistaPagos.objects.filter(documento=item['nroboleta'],tipo_factura=item['source'])
+                        boleta = VistaPagos.objects.filter(autogenerado=item['autogenerado'])
                         movim = Movims.objects.filter(mautogen=boleta[0].autogenerado).first()
                         asiento_boleta = Asientos.objects.filter(autogenerado=boleta[0].autogenerado).exclude(posicion__isnull=True).first()
                         posicion = asiento_boleta.posicion if asiento_boleta and asiento_boleta.posicion else 'S/I'
@@ -1455,3 +1455,10 @@ def reimprimir_op(request):
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)}, status=500)
 
+def obtener_proximo_mboleta_op(request):
+    try:
+        ultima = Movims.objects.filter(mtipo=45).order_by('-id').first()
+        proximo = int(ultima.mboleta) + 1 if ultima and ultima.mboleta.isdigit() else 1
+        return JsonResponse({'proximo_mboleta': str(proximo)})
+    except Exception as e:
+        return JsonResponse({'error': f'Error al obtener mboleta: {str(e)}'}, status=500)

@@ -235,6 +235,7 @@ var que_buscar = '';
 
    // Seleccionar/Deseleccionar fila
     $('#itemTable tbody').on('click', 'tr', function() {
+        $('#itemTable tbody tr').removeClass('table-active table-primary');
         $(this).toggleClass('table-active table-primary');
     });
 
@@ -617,10 +618,10 @@ var que_buscar = '';
     let radioMasters = document.getElementById("imputar-masters");
     let radioHouses = document.getElementById("imputar-houses");
 
-    radioMasters.addEventListener("change", actualizarPestañas);
-    radioHouses.addEventListener("change", actualizarPestañas);
+    radioMasters.addEventListener("change", actualizarPestanias);
+    radioHouses.addEventListener("change", actualizarPestanias);
 
-    actualizarPestañas();
+    actualizarPestanias();
 
 });
 
@@ -663,7 +664,11 @@ $("#facturaM").dialog({
         $(this).dialog("option", "position", { my: "center", at: "center", of: window });
     }
     }).prev('.ui-dialog-titlebar').remove();
+cargar_arbitraje();
+
 }
+
+
 
 $('#preventa').on('click', function() {
 $("#preventa_modal").dialog({
@@ -936,7 +941,7 @@ function limpiarCampos() {
     $('#id_descripcion_item input').val('');
     $('#id_precio input').val('');
 }
-function actualizarPestañas() {
+function actualizarPestanias() {
     let radioMasters = document.getElementById("imputar-masters");
     let radioHouses = document.getElementById("imputar-houses");
     let tabMaster = document.querySelector('a[href="#master"]').parentElement;
@@ -966,6 +971,13 @@ $('#itemTable tbody tr').each(function() {
     neto_fun += precio;
 });
 
+$(document).on('click', function (e) {
+        // Verificamos si el click fue fuera de la tabla
+        if (!$(e.target).closest('#itemTable').length) {
+            $('#itemTable tbody tr.table-primary').removeClass('table-primary');
+        }
+    });
+
 neto = neto_fun;
 
 // Actualiza el valor del neto en el campo correspondiente
@@ -976,9 +988,10 @@ $('#itemTable tbody tr').each(function() {
     precio = parseFloat($(this).data('precio')) || 0;
     iva = $(this).data('iva');
 
-    const precioFinal = iva === 'Basico' ? precio * 1.22 : precio;
+    const precioFinal = iva === 'Básico' ? precio * 1.22 : precio;
     total += precioFinal;
 });
+
 
 // Actualiza el valor del total en el campo correspondiente
 $('#id_total').val(total.toFixed(2)).prop('readonly', true);
@@ -2088,6 +2101,7 @@ function procesar_factura_finalizada(datos_complementarios){
             total=0;
             iva=0;
             neto=0;
+
             }else{
                 alert('ocurrió un error');
                 }
@@ -2096,6 +2110,22 @@ function procesar_factura_finalizada(datos_complementarios){
         error: function(xhr) {
             console.error('Error al facturar:', xhr);
             alert('Error al procesar la factura');
+        }
+    });
+}
+
+function cargar_arbitraje(){
+    $.ajax({
+        url: "/admin_cont/cargar_arbitraje/",
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
+            // Cargar los valores en los campos
+            $('#id_arbitraje').val(data.arbitraje);
+            $('#id_paridad').val(data.paridad);
+        },
+        error: function (xhr, status, error) {
+            alert("Error al cargar los datos iniciales: " + error);
         }
     });
 }

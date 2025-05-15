@@ -202,12 +202,13 @@
 
                     <!-- 📌 Importe y Cliente -->
                     <div class="d-grid mt-2" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
-                        <div>{{ form.importe.label_tag }} {{ form.importe }}</div>
                         <div>
                             <label for="cliente_cobranza">Buscar Proveedor</label>
                             <input type="text" id="cliente_cobranza" class="form-control form-control-sm" placeholder="Buscar proveedor">
                             <input type="hidden" id="cliente_cobranza_hidden">
                         </div>
+                        <div>{{ form.importe.label_tag }} {{ form.importe }}</div>
+
                     </div>
                 </div>
 
@@ -242,7 +243,7 @@
                 <table id="imputacionTablePagos" class="table table-striped table-sm mt-2">
                     <thead style="position: sticky; top: 0; background: white; z-index: 2;">
                         <tr>
-                            <th style="display:none;">Id</th>
+                            <th style="display:none;">autogen</th>
                             <th>Fecha</th>
                             <th>Documento</th>
                             <th>Total</th>
@@ -279,7 +280,6 @@
     <label><input type="radio" name="paymentType" id="trans" value="transfer"> Transferencia</label>
     <label><input type="radio" name="paymentType" id="deposito" value="deposit"> Depósito</label>
     <label><input type="radio" name="paymentType" id="otro" value="other"> Otro</label>
-    <label><input type="radio" name="paymentType" id="cheque_terceros" value="terceros"> Cheque de terceros</label>
   </div>
 
   <!-- 📌 Secciones dinámicas -->
@@ -455,36 +455,6 @@
   </div>
 </div>
 </div>
-</div>
-
-
-
-<div id="cheques_disponibles" title="Cheques disponibles" style="display: none;">
-<div class="d-flex align-items-center col-md-12">
-    <div class="col-md-3">
-        <label for="cliente">Buscar Cliente</label>
-        <input type="text" id="cliente_terciarizado_buscar" class="form-control" name="cliente" placeholder="Buscar cliente">
-        <input type="hidden" id="id_buscar_terciarizado">
-    </div>
-</div>
-<table id="tabla_cheques_disponibles" class="table table-striped mt-4" style="display:block; overflow-x:auto;">
-            <thead>
-                <tr>
-                    <th style="display:none;">Id</th>
-                    <th style="display:none;">moneda</th>
-                    <th>Vto</th>
-                    <th>Emisión</th>
-                    <th>Banco</th>
-                    <th>Número</th>
-                    <th>Cliente</th>
-                    <th>Total</th>
-                    <th>Bajar</th>
-                </tr>
-            </thead>
-            <tbody>
-
-            </tbody>
-        </table>
 </div>
 
 <script>

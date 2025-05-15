@@ -673,8 +673,16 @@ $(document).ready(function() {
             alert("Selecciona una fila para clonar.");
         }
     });
+    $(document).on('click', function (e) {
+            // Verificamos si el click fue fuera de la tabla
+            if (!$(e.target).closest('#itemTable').length) {
+                $('#itemTable tbody tr.table-primary').removeClass('table-primary');
+            }
+        });
 
     $('#itemTable tbody').on('click', 'tr', function() {
+        $('#itemTable tbody tr').removeClass('table-active table-primary');
+
         $(this).toggleClass('table-active table-primary');
     });
 
@@ -962,6 +970,7 @@ $.ajax({
             alert("Error al cargar los datos iniciales: " + error);
         }
     });
+traer_proximo_numero();
 }
 function resetModal(modalId) {
     const modal = $(modalId);
@@ -1042,7 +1051,7 @@ function actualizarTotal() {
         const iva = $(this).data('iva');
 
         // Calcular el precio final con IVA
-        const precioFinal = iva === 'Basico' ? precio * 1.22 : precio;
+        const precioFinal = iva === 'Básico' ? precio * 1.22 : precio;
         total += precioFinal;
 
     });
@@ -1132,6 +1141,20 @@ function actualizarFechas(origen, destino) {
     if (fechaSeleccionada) {
         $(destino).val(fechaSeleccionada);
     }
+}
+function traer_proximo_numero(){
+     $.ajax({
+        url: "/admin_cont/obtener_proximo_mboleta_compra/",
+        method: "GET",
+        success: function (data) {
+            if (data.proximo_mboleta) {
+                $('#id_numero').val(data.proximo_mboleta);  // Cambiá el ID si es otro
+            }
+        },
+        error: function (xhr) {
+            console.error("No se pudo obtener el número de boleta:", xhr.responseText);
+        }
+    });
 }
 
 function cargar_facturas_imputacion(nrocliente) {

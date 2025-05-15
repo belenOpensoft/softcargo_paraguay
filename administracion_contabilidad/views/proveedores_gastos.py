@@ -553,3 +553,11 @@ def cargar_pendientes_imputacion(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+def obtener_proximo_mboleta_compra(request):
+    try:
+        ultima = Movims.objects.filter(mtipo__in=[40, 41, 10, 11]).order_by('-id').first()
+        proximo = int(ultima.mboleta) + 1 if ultima and ultima.mboleta.isdigit() else 1
+        return JsonResponse({'proximo_mboleta': str(proximo)})
+    except Exception as e:
+        return JsonResponse({'error': f'Error al obtener mboleta: {str(e)}'}, status=500)
