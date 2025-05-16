@@ -9,7 +9,7 @@ from django.shortcuts import render
 from administracion_contabilidad.models import Movims, Asientos, VistaProveedoresygastos, Impucompras
 from administracion_contabilidad.views.facturacion import generar_autogenerado, generar_numero, modificar_numero
 from mantenimientos.models import Clientes, Servicios
-from administracion_contabilidad.forms import ProveedoresGastos
+from administracion_contabilidad.forms import ProveedoresGastos, ComprasDetalleTabla
 from django.http import JsonResponse
 param_busqueda = {
     1: 'autogenerado__icontains',
@@ -39,8 +39,9 @@ def proveedores_gastos_view(request):
 
     hoy = datetime.now().strftime('%Y-%m-%d')
     form = ProveedoresGastos(initial={'fecha_registro':hoy,'fecha_documento':hoy,'vencimiento':hoy})
+    detalle= ComprasDetalleTabla()
 
-    return render(request, 'proveedores_gastos.html', {'form': form})
+    return render(request, 'proveedores_gastos.html', {'form': form,'detalle':detalle})
 
 def buscar_proveedor(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
@@ -506,6 +507,8 @@ def get_data(registros_filtrados):
             registro_json.append('' if registro.monto is None else str(registro.monto))
             registro_json.append('' if registro.iva is None else str(registro.iva))
             registro_json.append('' if registro.total is None else str(registro.total))
+            registro_json.append('' if registro.nrocliente is None else str(registro.nrocliente))
+            registro_json.append('' if registro.numero is None else str(registro.numero))
             data.append(registro_json)
         return data
     except Exception as e:

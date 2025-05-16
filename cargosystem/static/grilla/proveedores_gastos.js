@@ -382,21 +382,23 @@ $(document).ready(function() {
             "searchable": false
         },
         {
-            "targets": 2,  // Asignamos la columna de fecha
-            "type": "date-iso", // Indica que esta columna es de tipo fecha
-            "orderable": true // Habilita el ordenamiento
+            "targets": 2,
+            "type": "date-iso",
+            "orderable": true
         }
     ],
-        "columns": [
-        { "visible": true }, // Columna 0
-        { "visible": false }, // Columna 1
-        { "orderable": true }, // Columna 2 (Ordenable)
+    "columns": [
+        { "visible": true },
+        { "visible": false },
         { "orderable": true },
         { "orderable": true },
         { "orderable": true },
         { "orderable": true },
         { "orderable": true },
         { "orderable": true },
+        { "orderable": true },
+        { "visible": false },
+        { "visible": false }
     ],
     "order": [[2, "desc"]],
     "processing": true,
@@ -439,7 +441,7 @@ $(document).ready(function() {
     });
 
     // Verificar el estado inicial de tercerizado
-        toggleProveedor2();
+    toggleProveedor2();
 
     // Detectar cambios en el campo tercerizado
     $('#id_tercerizado').change(function() {
@@ -772,6 +774,33 @@ $(document).ready(function() {
     $("#modal-embarque").dialog("close");
     console.log("Tabla actualizada con registros del guardado-tabla.");
 }
+
+    $("#tabla_proveedoresygastos tbody").on("dblclick", "tr", function () {
+        const row = $('#tabla_proveedoresygastos').DataTable().row(this).data();
+        const autogenerado = row[1];
+        const nrocliente = row[9];
+        const numero = row[10];
+
+
+        $("#autogen_detalle_compra").val(autogenerado);
+        buscar_gastos(autogenerado);
+        buscar_ordenes(nrocliente, numero, autogenerado);
+        cargarImputacionesCompra(autogenerado);
+
+        $("#modalDetalleCompra").dialog({
+          modal: true,
+          width: '80%',
+          height: 'auto',
+          position: { my: "center top", at: "center top+20", of: window },
+            autoOpen: true,
+        });
+    });
+
+
+    $("#tabla_proveedoresygastos tbody").on("click", "tr", function () {
+        $("#tabla_proveedoresygastos tbody tr").removeClass("table-secondary");
+        $(this).addClass("table-secondary");
+    });
 
 });
 function procesar_factura(){
@@ -1185,6 +1214,138 @@ function cargar_facturas_imputacion(nrocliente) {
         },
         error: function (xhr) {
             alert("Error al cargar las facturas: " + xhr.responseJSON.error);
+        }
+    });
+}
+
+function buscar_gastos(autogenerado){
+    $.ajax({
+      url: '/admin_cont/detalle_compra/',
+      method: 'GET',
+      data: {
+        autogenerado: autogenerado
+      },
+      success: function(response) {
+        if (response.success) {
+          const data = response.data;
+          $('#id_prefijo_detalle').val(data.prefijo);
+          $('#id_serie_detalle').val(data.serie);
+          $('#numero_detalle_compra').val(data.numero);
+          $('#id_tipo_detalle').val(data.tipo);
+          $('#id_moneda_detalle_compra').val(data.moneda);
+          $('#id_fecha_detalle_compra').val(data.fecha);
+          $('#id_fecha_ingreso').val(data.fecha_ingreso);
+          $('#id_fecha_vencimiento').val(data.fecha_vencimiento);
+          $('#id_proveedor_detalle').val(data.proveedor);
+          $('#nro_prov').val(data.nroproveedor);
+          $('#id_detalle_detalle_compra').val(data.detalle);
+
+        $('#id_paridad_detalle_compra').val(parseFloat(data.paridad || 0).toFixed(2));
+        $('#id_arbitraje_detalle_compra').val(parseFloat(data.arbitraje || 0).toFixed(2));
+        $('#id_total_detalle').val(parseFloat(data.total || 0).toFixed(2));
+        $('#id_imputable').val(parseFloat(data.imputable || 0).toFixed(2));
+
+            if (data.items && data.items.length > 0) {
+              $('#tablaItems').empty();
+
+              data.items.forEach(function(item) {
+                const fila = `
+                  <tr>
+                    <td>${item.concepto || ''}</td>
+                    <td>${item.nombre || ''}</td>
+                    <td class="text-right">${item.precio != null ? parseFloat(item.precio).toFixed(2) : ''}</td>
+                    <td class="text-right">${item.iva != null ? parseFloat(item.iva).toFixed(2) : ''}</td>
+                    <td>${item.embarque || ''}</td>
+                    <td>${item.posicion || ''}</td>
+                  </tr>
+                `;
+                $('#tablaItems').append(fila);
+              });
+            } else {
+              // Si no hay items, opcionalmente podés mostrar una fila vacía o un mensaje
+              $('#tablaItems').html('<tr><td colspan="6" class="text-center text-muted">Sin ítems asociados.</td></tr>');
+            }
+
+        }
+      },
+      error: function(xhr) {
+        alert("No se pudo obtener el detalle de la compra.");
+      }
+    });
+}
+function buscar_ordenes(cliente,numero,autogenerado){
+
+        if (!cliente || !numero || !autogenerado) {
+            alert('Faltan datos');
+            return;
+        }
+
+        $.ajax({
+            url: '/admin_cont/buscar_ordenes_por_boleta/',  // Cambia esto por tu URL real
+            type: 'GET',
+            data: {
+                cliente: cliente,
+                numero: numero,
+                autogenerado: autogenerado
+            },
+            success: function(response) {
+                let tbody = $('#tabla_pago_factura tbody');
+                tbody.empty();
+
+                if (response.resultados.length === 0) {
+                    tbody.append('<tr><td colspan="4">No se encontraron resultados</td></tr>');
+                } else {
+                    $.each(response.resultados, function(i, orden) {
+                        let row = `
+                            <tr>
+                                <td class="oculto">${orden.autogenerado}</td>
+                                <td>${orden.nro_documento}</td>
+                                <td>${orden.fecha}</td>
+                                <td>${orden.monto}</td>
+                                <td>${orden.tipo}</td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                }
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+                alert('Error al buscar órdenes');
+            }
+        });
+}
+function cargarImputacionesCompra(autogen) {
+    $.ajax({
+        url: '/admin_cont/obtener_imputados_compra/',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ autogen: autogen }),
+        headers: {
+            'X-CSRFToken': csrf_token  // Asegurate que esta variable exista
+        },
+        success: function (data) {
+            const tbody = document.getElementById('tablaImputaciones');
+            tbody.innerHTML = '';  // Limpiar tabla
+
+            if (data.documentos && data.documentos.length > 0) {
+                data.documentos.forEach(function (doc) {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td class="oculto">${doc.autogenerado}</td>
+                        <td>${doc.documento}</td>
+                        <td>${doc.imputado}</td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            } else {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `<td colspan="3" class="text-center">No se encontraron imputaciones.</td>`;
+                tbody.appendChild(fila);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error al cargar imputaciones:', error);
         }
     });
 }

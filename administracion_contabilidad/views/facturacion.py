@@ -15,7 +15,7 @@ from impaerea.models import ImportEmbarqueaereo, ImportCargaaerea, VEmbarqueaere
     ImportReservas
 from impterrestre.models import ImpterraEmbarqueaereo, ImpterraCargaaerea, VEmbarqueaereo as IT, ImpterraReservas
 from mantenimientos.models import Clientes, Servicios, Monedas, Vapores
-from administracion_contabilidad.forms import Factura, RegistroCargaForm
+from administracion_contabilidad.forms import Factura, RegistroCargaForm, VentasDetalleTabla
 from administracion_contabilidad.models import Boleta, Asientos, Movims, Infofactura, \
     VistaGastosPreventa, Dolar, Factudif, VPreventas, VistaVentas
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
@@ -101,6 +101,8 @@ def get_data(registros_filtrados):
             registro_json.append('' if registro.monto is None else str(registro.monto))
             registro_json.append('' if registro.iva is None else str(registro.iva))
             registro_json.append('' if registro.total is None else str(registro.total))
+            registro_json.append('' if registro.nrocliente is None else str(registro.nrocliente))
+            registro_json.append('' if registro.numero is None else str(registro.numero))
             data.append(registro_json)
         return data
     except Exception as e:
@@ -148,7 +150,8 @@ def get_order(request, columns):
 def facturacion_view(request):
     if request.user.has_perms(["administracion_contabilidad.view_boleta", ]):
         form = Factura(request.POST or None)
-        return render(request, 'facturacion.html', {'form': form,'form_pdf': pdfForm(),'complemento':RegistroCargaForm()})
+        detalle = VentasDetalleTabla(request.POST or None)
+        return render(request, 'facturacion.html', {'form': form,'form_pdf': pdfForm(),'complemento':RegistroCargaForm(),'detalle':detalle})
     else:
         messages.error(request, 'No tiene permisos para realizar esta accion.')
         return HttpResponseRedirect('/')

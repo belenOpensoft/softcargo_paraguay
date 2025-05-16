@@ -15,7 +15,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 
-from administracion_contabilidad.forms import OrdenPago
+from administracion_contabilidad.forms import OrdenPago, PagosDetalleTabla
 from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero
 from administracion_contabilidad.views.preventa import generar_autogenerado
 from cargosystem import settings
@@ -29,7 +29,8 @@ def orden_pago_view(request):
     #if request.user.has_perms(["administracion_contabilidad.view_vistapagos", ]):
     #if request.user.has_perms(["administracion_contabilidad.view_forzarerror", ]):
     form = OrdenPago(initial={'fecha':datetime.now().strftime('%Y-%m-%d')})
-    return render(request, 'orden_pago.html', {'form': form})
+    detalle = PagosDetalleTabla()
+    return render(request, 'orden_pago.html', {'form': form,'detalle':detalle})
     #else:
      #   messages.error(request,'Funcionalidad en construcción.')
       #  return HttpResponseRedirect('/')

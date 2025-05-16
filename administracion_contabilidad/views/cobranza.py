@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
 from django.db import transaction
 from django.shortcuts import render
-from administracion_contabilidad.forms import Cobranza
+from administracion_contabilidad.forms import Cobranza,CobranzasDetalleTabla
 from administracion_contabilidad.models import Boleta, Impuvtas, Asientos, Movims, Cheques, Cuentas, VistaCobranza, \
     Dolar, ListaCobranzas
 from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero
@@ -41,11 +41,15 @@ columns_table = {
     8: 'total',
 }
 
+
+
+
 @login_required(login_url='/login')
 def cobranza_view(request):
     if request.user.has_perms(["administracion_contabilidad.view_listacobranzas", ]):
         form = Cobranza(initial={'fecha':datetime.now().strftime('%Y-%m-%d') })
-        return render(request, 'cobranza.html', {'form': form})
+        detalle = CobranzasDetalleTabla()
+        return render(request, 'cobranza.html', {'form': form,'detalle':detalle})
     else:
         messages.error(request, 'No tiene permisos para realizar esta accion.')
         return HttpResponseRedirect('/')
@@ -159,6 +163,9 @@ def get_data(registros_filtrados):
             registro_json.append(f"{float(registro.monto):.2f}" if registro.monto is not None else '')
             registro_json.append(f"{float(registro.iva):.2f}" if registro.iva is not None else '')
             registro_json.append(f"{float(registro.total):.2f}" if registro.total is not None else '')
+            registro_json.append('' if registro.nrocliente is None else str(registro.nrocliente))
+            registro_json.append('' if registro.numero is None else str(registro.numero))
+
             data.append(registro_json)
         return data
     except Exception as e:

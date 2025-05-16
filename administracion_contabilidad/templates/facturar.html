@@ -1,13 +1,47 @@
 
 {% load static %}
 <style>
-    #segundo_grupo{
-    margin-top:5%;
-    }
-    #segundo_grupo button{
-        padding: 6px 18px;
-    }
+#facturar_modal input.form-control,
+#facturar_modal select.form-control,
+#facturar_modal textarea.form-control {
+    padding: 2px 6px;
+    height: 26px;
+    font-size: 0.8rem;
+}
+
+#facturar_modal label {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+}
+
+#facturar_modal .btn {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+}
+
+#facturar_modal .form-group {
+    margin-bottom: 6px;
+}
+
+#facturar_modal .form-row {
+    margin-bottom: 8px;
+}
+
+#facturar_modal table.table th,
+#facturar_modal table.table td {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+}
+
+#segundo_grupo {
+    margin-top: 5%;
+}
+#segundo_grupo button {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+}
 </style>
+
 <div id="facturar_modal" style="display:none;">
     <form id="facturar_form" method="post">
 

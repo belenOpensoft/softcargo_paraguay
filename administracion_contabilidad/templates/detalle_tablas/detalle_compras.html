@@ -1,0 +1,228 @@
+<!-- Modal Proveedores Gastos - jQuery UI -->
+<style>
+  #modalDetalleCompra {
+    max-width: 80vw;
+    max-height: 90vh;
+    overflow: hidden;
+    font-size: 0.85rem;
+  }
+
+  #modalDetalleCompra .form-control {
+    font-size: 12px;
+    padding: 2px 5px;
+    height: 20px;
+  }
+
+  #modalDetalleCompra select {
+    font-size: 0.85rem;
+    height: 30px;
+  }
+
+  #modalDetalleCompra label {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+  }
+
+  #modalDetalleCompra .table {
+    font-size: 0.8rem;
+  }
+
+  #modalDetalleCompra .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  #modalDetalleCompra .col-md-1,
+  #modalDetalleCompra .col-md-2,
+  #modalDetalleCompra .col-md-3,
+  #modalDetalleCompra .col-md-4,
+  #modalDetalleCompra .col-md-6 {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+
+  #modalDetalleCompra h6 {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  #modalDetalleCompra .btn-sm {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+
+  #modalDetalleCompra .table-sm th,
+  #modalDetalleCompra .table-sm td {
+    padding: 4px;
+    vertical-align: middle;
+  }
+
+  #modalDetalleCompra input.bg-warning {
+    background-color: #fff3cd !important;
+  }
+
+    #modalDetalleCompra table {
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 4px;
+  }
+</style>
+<style>
+  .tabla-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+
+  .tabla-scroll table {
+    max-width: 90%;
+  }
+
+  .tabla-scroll thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #f8f9fa;
+  }
+
+  .tabla-scroll th {
+    background-color: #f8f9fa;
+  }
+</style>
+<div id="modalDetalleCompra" title="Detalle de Factura del Proveedor" style="display: none; overflow-y:auto;">
+  <form method="post" id="formFacturaDetalle">
+    {% csrf_token %}
+    <div class="container-fluid">
+
+      <!-- Primera Fila: Prefijo, Serie, Numero, Tipo, Moneda -->
+      <div class="row mb-2">
+        <div class="col-md-2">
+          <input type="hidden" name="" id="autogen_detalle_compra">
+          {{ detalle.prefijo.label_tag }}
+          {{ detalle.prefijo }}
+        </div>
+        <div class="col-md-2">
+          {{ detalle.serie.label_tag }}
+          {{ detalle.serie }}
+        </div>
+        <div class="col-md-3">
+          {{ detalle.numero.label_tag }}
+          {{ detalle.numero }}
+        </div>
+        <div class="col-md-2">
+          {{ detalle.tipo.label_tag }}
+          {{ detalle.tipo }}
+        </div>
+        <div class="col-md-3">
+          {{ detalle.moneda.label_tag }}
+          {{ detalle.moneda }}
+        </div>
+      </div>
+
+      <!-- Segunda Fila: Fechas, Paridad, Arbitraje, Proveedor -->
+      <div class="row mb-2">
+        <div class="col-md-2">
+          {{ detalle.fecha.label_tag }}
+          {{ detalle.fecha }}
+        </div>
+        <div class="col-md-2">
+          {{ detalle.fecha_ingreso.label_tag }}
+          {{ detalle.fecha_ingreso }}
+        </div>
+        <div class="col-md-2">
+          {{ detalle.fecha_vencimiento.label_tag }}
+          {{ detalle.fecha_vencimiento }}
+        </div>
+        <div class="col-md-2">
+          {{ detalle.paridad.label_tag }}
+          {{ detalle.paridad }}
+        </div>
+        <div class="col-md-2">
+          {{ detalle.arbitraje.label_tag }}
+          {{ detalle.arbitraje }}
+        </div>
+        <div class="col-md-2">
+          <input type="hidden" id="nro_prov">
+          {{ detalle.proveedor.label_tag }}
+          {{ detalle.proveedor }}
+        </div>
+      </div>
+
+      <!-- Fila: Detalle, Total, Imputable -->
+      <div class="row mb-2">
+        <div class="col-md-6">
+          {{ detalle.detalle.label_tag }}
+          {{ detalle.detalle }}
+        </div>
+        <div class="col-md-3">
+          {{ detalle.total.label_tag }}
+          {{ detalle.total }}
+        </div>
+        <div class="col-md-3">
+          {{ detalle.imputable.label_tag }}
+          {{ detalle.imputable }}
+        </div>
+      </div>
+
+      <!-- Tabla de Items -->
+      <div class="table-responsive mb-3 table-scroll">
+        <h6 class="mt-3">Gastos (Items)</h6>
+        <table class="table table-bordered table-sm" id="tabla_items_compra">
+          <thead class="thead-light">
+            <tr>
+              <th>Concepto</th>
+              <th>Nombre</th>
+              <th>Precio</th>
+              <th>IVA</th>
+              <th>Embarque
+                <i class="fa fa-info-circle" style="color:#6c757d; font-size:12px;" title="Doble clic para cambiar"></i>
+              </th>
+              <th>
+                Posición
+                <i class="fa fa-info-circle" style="color:#6c757d; font-size:12px;" title="Doble clic para ver detalle"></i>
+            </th>
+            </tr>
+          </thead>
+          <tbody id="tablaItems"></tbody>
+        </table>
+      </div>
+
+      <!-- Tabla de Imputaciones y Recibos -->
+      <div class="row">
+        <div class="col-md-8" style="padding:0px;">
+          <h6>Documentos Imputados</h6>
+          <table class="table table-bordered table-sm">
+            <thead class="thead-light">
+              <tr>
+                <th class="oculto">Autogenerado</th>
+                <th>Documento</th>
+                <th>Imputado</th>
+              </tr>
+            </thead>
+            <tbody id="tablaImputaciones"></tbody>
+          </table>
+        </div>
+        <div class="col-md-4">
+          <h6>Recibo con el que se pagó</h6>
+          <table class="table table-bordered table-sm" id="tabla_pago_factura">
+            <thead class="thead-light">
+              <tr>
+                <th class="oculto">autogenerado</th>
+                <th>Nº Recibo</th>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th>Tipo</th>
+              </tr>
+            </thead>
+            <tbody id="tablaRecibos"></tbody>
+          </table>
+        </div>
+      </div>
+
+
+
+    </div>
+  </form>
+</div>
+

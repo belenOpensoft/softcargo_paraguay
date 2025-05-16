@@ -316,6 +316,8 @@ var que_buscar = '';
         { "orderable": true },
         { "orderable": true },
         { "orderable": true },
+        { "visible": false },
+        { "visible": false },
     ],
     "order": [[2, "desc"]],
     "processing": true,
@@ -623,6 +625,31 @@ var que_buscar = '';
 
     actualizarPestanias();
 
+
+    $("#tabla_facturas tbody").on("dblclick", "tr", function () {
+        const row = $('#tabla_facturas').DataTable().row(this).data();
+        const autogenerado = row[1];
+        const nrocliente = row[9];
+        const numero = row[10];
+
+
+        $("#autogen_detalle_venta").val(autogenerado);
+        buscar_gastos(autogenerado);
+        buscar_ordenes(nrocliente, numero, autogenerado);
+
+        $("#modalFacturaDetalle").dialog({
+          modal: true,
+          width: '80%',
+          height: 'auto',
+          position: { my: "center top", at: "center top+20", of: window },
+            autoOpen: true,
+        });
+    });
+
+    $("#tabla_facturas tbody").on("click", "tr", function () {
+        $("#tabla_facturas tbody tr").removeClass("table-secondary");
+        $(this).addClass("table-secondary");
+    });
 });
 
 /* INITIAL CONTROL PAGE */
@@ -645,7 +672,7 @@ $("#facturaM").dialog({
         maxWidth: $(window).width() * 0.90,
         maxHeight: $(window).height() * 0.90,
         minWidth: 500,
-        minHeight: 200,
+        minHeight: 500,
         buttons: [{
             text: "Salir",
             class: "btn btn-dark btn-sm",
@@ -2128,4 +2155,106 @@ function cargar_arbitraje(){
             alert("Error al cargar los datos iniciales: " + error);
         }
     });
+}
+
+function buscar_gastos(autogenerado){
+    $.ajax({
+      url: '/admin_cont/detalle_venta/',
+      method: 'GET',
+      data: {
+        autogenerado: autogenerado
+      },
+      success: function(response) {
+        if (response.success) {
+          const data = response.data;
+          $('#id_prefijo_detalle').val(data.prefijo);
+          $('#id_serie_detalle').val(data.serie);
+          $('#numero_detalle_venta').val(data.numero);
+          $('#id_tipo_detalle').val(data.tipo);
+          $('#id_moneda_detalle_venta').val(data.moneda);
+          $('#id_fecha_detalle_venta').val(data.fecha);
+          $('#id_fecha_ingreso').val(data.fecha_ingreso);
+          $('#id_fecha_vencimiento').val(data.fecha_vencimiento);
+          $('#id_cliente_detalle').val(data.cliente);
+          $('#nro_cli').val(data.nrocliente);
+          $('#id_detalle_detalle_venta').val(data.detalle);
+
+        $('#id_paridad_detalle_venta').val(parseFloat(data.paridad || 0).toFixed(2));
+        $('#id_arbitraje_detalle_venta').val(parseFloat(data.arbitraje || 0).toFixed(2));
+        $('#id_total_detalle').val(parseFloat(data.total || 0).toFixed(2));
+        $('#id_posicion_venta').val(data.posicion);
+        $('#id_observaciones').val(data.observaciones);
+        $('#id_cae').val(data.cae);
+
+
+            if (data.items && data.items.length > 0) {
+              $('#tablaItems').empty();
+
+              data.items.forEach(function(item) {
+                const fila = `
+                  <tr>
+                    <td>${item.concepto || ''}</td>
+                    <td>${item.nombre || ''}</td>
+                    <td class="text-right">${item.precio != null ? parseFloat(item.precio).toFixed(2) : ''}</td>
+                    <td class="text-right">${item.iva != null ? parseFloat(item.iva).toFixed(2) : ''}</td>
+                    <td>${item.embarque || ''}</td>
+                    <td>${item.posicion || ''}</td>
+                  </tr>
+                `;
+                $('#tablaItems').append(fila);
+              });
+            } else {
+              // Si no hay items, opcionalmente podés mostrar una fila vacía o un mensaje
+              $('#tablaItems').html('<tr><td colspan="6" class="text-center text-muted">Sin ítems asociados.</td></tr>');
+            }
+
+
+        }
+      },
+      error: function(xhr) {
+        alert("No se pudo obtener el detalle de la venta.");
+      }
+    });
+}
+function buscar_ordenes(cliente,numero,autogenerado){
+
+        if (!cliente || !numero || !autogenerado) {
+            alert('Faltan datos');
+            return;
+        }
+
+        $.ajax({
+            url: '/admin_cont/buscar_ordenes_por_boleta_ventas/',  // Cambia esto por tu URL real
+            type: 'GET',
+            data: {
+                cliente: cliente,
+                numero: numero,
+                autogenerado: autogenerado,
+            },
+            success: function(response) {
+                let tbody = $('#tabla_pago_factura tbody');
+                tbody.empty();
+
+                if (response.resultados.length === 0) {
+                    tbody.append('<tr><td colspan="4">No se encontraron resultados</td></tr>');
+                } else {
+                    $.each(response.resultados, function(i, orden) {
+                        let row = `
+                            <tr>
+                                <td class="oculto">${orden.autogenerado}</td>
+                                <td>${orden.nro_documento}</td>
+                                <td>${orden.fecha}</td>
+                                <td>${orden.monto}</td>
+                                <td>${orden.tipo}</td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                }
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+                alert('Error al buscar órdenes');
+            }
+        });
 }

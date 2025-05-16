@@ -262,7 +262,29 @@ $('#id_importe').on('focusout', function () {
 });
 
 
+    $("#tabla_cobranzas tbody").on("dblclick", "tr", function () {
+        const row = $('#tabla_cobranzas').DataTable().row(this).data();
+        const autogenerado = row[1];
+        const nrocliente = row[9];
+        const numero = row[10];
 
+
+        $("#autogen_detalle_cobranza").val(autogenerado);
+        buscar_detalle(autogenerado);
+
+        $("#modalCobranzaDetalle").dialog({
+          modal: true,
+          width: '80%',
+          height: 'auto',
+          position: { my: "center top", at: "center top+20", of: window },
+            autoOpen: true,
+        });
+    });
+
+    $("#tabla_cobranzas tbody").on("click", "tr", function () {
+        $("#tabla_cobranzas tbody tr").removeClass("table-secondary");
+        $(this).addClass("table-secondary");
+    });
 
 });
 /* INITIAL CONTROL PAGE */
@@ -1529,3 +1551,77 @@ $('#abrir_arbi').on('click', function (event) {
         }
     });
 });
+
+function buscar_detalle(autogenerado) {
+  $.ajax({
+    url: '/admin_cont/detalle_cobranza/',
+    method: 'GET',
+    data: {
+      autogenerado: autogenerado
+    },
+    success: function(response) {
+      if (response.success) {
+        const data = response.data;
+
+        $('#autogen_detalle_cobranza').val(autogenerado);
+        $('#numero_detalle_cobranza').val(data.numero);
+        $('#moneda_detalle_cobranza').val(data.moneda);
+        $('#fecha_detalle_cobranza').val(data.fecha);
+        $('#arbitraje_detalle_cobranza').val(parseFloat(data.arbitraje || 0).toFixed(2));
+        $('#por_imputar_detalle_cobranza').val(parseFloat(data.imputable || 0).toFixed(2));
+        $('#paridad_detalle_cobranza').val(parseFloat(data.paridad || 0).toFixed(2));
+        $('#detalle_detalle_cobranza').val(data.detalle);
+        $('#diferencia_cobranza').val(data.diferencia || '');
+        $('#id_importe_detalle').val(data.total || 0);
+        $('#nro_cliente_detalle_cobranza').val(data.nrocliente);
+        $('#cliente_detalle_cobranza').val(data.cliente);
+
+        $('#efectivo_recibido').val(data.efectivo || '');
+        $('#transferencia_recibida').val(data.transferencia || '');
+        $('#deposito_recibido').val(data.deposito || '');
+
+        $('#tablaChequesRecibidos').empty();
+        if (data.cheques && data.cheques.length > 0) {
+          data.cheques.forEach(function(cheque) {
+            const fila = `
+              <tr>
+                <td>${cheque.fecha || ''}</td>
+                <td>${cheque.banco || ''}</td>
+                <td>${cheque.numero || ''}</td>
+                <td class="text-right">${cheque.monto != null ? parseFloat(cheque.monto).toFixed(2) : ''}</td>
+                <td>${cheque.vencimiento || ''}</td>
+              </tr>
+            `;
+            $('#tablaChequesRecibidos').append(fila);
+          });
+        } else {
+          $('#tablaChequesRecibidos').html('<tr><td colspan="5" class="text-center text-muted">Sin cheques registrados.</td></tr>');
+        }
+
+        $('#tablaDocumentosImputados').empty();
+        if (data.imputados && data.imputados.length > 0) {
+          data.imputados.forEach(function(doc) {
+            const fila = `
+              <tr>
+                <td class="oculto">${doc.autogenerado || ''}</td>
+                <td>${doc.documento || ''}</td>
+                <td class="text-right">${doc.imputado != null ? parseFloat(doc.imputado).toFixed(2) : ''}</td>
+                <td>${doc.referencia || ''}</td>
+                <td>${doc.posicion || ''}</td>
+              </tr>
+            `;
+            $('#tablaDocumentosImputados').append(fila);
+          });
+        } else {
+          $('#tablaDocumentosImputados').html('<tr><td colspan="4" class="text-center text-muted">Sin documentos imputados.</td></tr>');
+        }
+
+        $("#modalCobranzaDetalle").dialog("open");
+
+      }
+    },
+    error: function(xhr) {
+      alert("No se pudo obtener el detalle de la cobranza.");
+    }
+  });
+}

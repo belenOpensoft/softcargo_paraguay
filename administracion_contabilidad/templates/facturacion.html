@@ -10,33 +10,38 @@
 {% include 'preventa_multiple.html' %}
 {% include 'menu/menu_facturacion.html' %}
 <style>
-.ui-autocomplete {
-    z-index: 2050;
-}
-#facturaM .form-control {
-    font-size: 0.85rem; /* Reducir tamaño del texto */
-    padding: 2px 5px; /* Ajustar padding */
-    height: 30px; /* Reducir altura */
-}
-
-#facturaM select {
-    font-size: 0.85rem;
-    height: 30px;
+#facturaM .form-control,
+#facturaM .form-select,
+#facturaM input[type="text"],
+#facturaM input[type="number"],
+#facturaM input[type="date"],
+#facturaM select,
+#facturaM textarea {
+    font-size: 0.75rem !important;
+    padding: 1px 4px !important;
+    height: 26px !important;
+    line-height: 1.2;
 }
 
 #facturaM label {
-    font-size: 0.8rem;
-    margin-bottom: 2px; /* Reducir espacio entre label e input */
+    font-size: 0.75rem;
+    margin-bottom: 1px;
+}
+
+#facturaM .btn-sm {
+    font-size: 0.75rem;
+    padding: 2px 6px;
 }
 
 #facturaM .table {
-    font-size: 0.8rem; /* Reducir tamaño de texto en la tabla */
+    font-size: 0.75rem;
 }
 
-#facturaM .row {
-    margin-left: 0;
-    margin-right: 0;
+#facturaM .d-grid,
+#facturaM .form-group {
+    margin-bottom: 4px;
 }
+
 </style>
 
 <table id="tabla_facturas" class="table table-striped table-bordered" cellspacing="0" width="100%">
@@ -51,6 +56,8 @@
             <th class="text-left">Monto</th>
             <th class="text-left">IVA</th>
             <th class="text-left">Monto total</th>
+            <th class="d-none">cliente</th>
+            <th class="d-none">numero</th>
         </tr>
 
         </thead>
@@ -165,7 +172,7 @@
                         </div>
                     </div>
 
-                    <div style="height: 8rem; overflow-y: scroll; border-radius: 5px;">
+                    <div style="height: 14rem; overflow-y: scroll; border-radius: 5px;">
                         <table id="itemTable" class="table table-striped table-sm mt-2" style="border-collapse: collapse;visibility:visible;">
                             <thead style="position: sticky; top: 0; background: white; z-index: 2;">
                                 <tr>
@@ -217,6 +224,7 @@
 {% include 'arbitraje.html' %}
 {% include 'complementarios_facturacion.html' %}
 {% include 'embarque.html' %}
+{% include 'detalle_tablas/detalle_facturas.html' %}
 {% endblock table_datatable %}
 {% block script_datatable %}
 <script src="{% static 'js/jquery-ui.min_last.js' %}"></script>
