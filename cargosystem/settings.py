@@ -82,7 +82,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
+    'administracion_contabilidad.middleware.VerificarArbitrajeMiddleware',
 ]
+
 
 ROOT_URLCONF = 'cargosystem.urls'
 
