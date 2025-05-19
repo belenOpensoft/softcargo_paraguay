@@ -119,7 +119,7 @@ def is_ajax(request):
 
 def get_sugerencias_envases(request, numero):
     try:
-        carga = get_object_or_404(Cargaaerea, numero=numero)
+        carga = Cargaaerea.objects.filter(numero=numero).first()
 
         data = {
             'bultos': carga.bultos,

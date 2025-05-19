@@ -2934,6 +2934,8 @@ function fillFormWithDataHouse(data) {
         $('#moneda_e').val(data.moneda_e);
         $('#arbitraje_house_e').val(data.arbitraje_e);
         $('#pago_house_e').val(data.pagoflete_e);
+        $('#id_pago').val(data.pagoflete_e);
+
         $('#status_h_e').val(data.status_e);
         $('#wreceipt_he').val(data.wreceipt_e);
         $('#trackid_he').val(data.trackid_e);
@@ -4498,8 +4500,6 @@ function get_sugerencias_envases(numero) {
                 if (response.data.cbm !== null && response.data.cbm !== undefined && response.data.cbm !== "") {
                     $("#id_volumen").val(response.data.cbm);
                 }
-            } else {
-                alert("No se encontró la carga aérea.");
             }
         },
         error: function() {

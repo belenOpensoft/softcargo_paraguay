@@ -473,7 +473,7 @@ def house_detail(request):
                     'hawb_e': house.hawb,
                     'vapor_e': vapor,
                     'viaje_e': house.viaje,
-                    'pagoflete_e': house.pago,
+                    'pagoflete_e': house.pagoflete,
                     'moneda_e': house.moneda,
                     'arbitraje_e': house.arbitraje,
                     'demora_e': house.demora,

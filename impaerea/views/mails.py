@@ -412,6 +412,8 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                     texto += formatear_linea("Peso", bruto)
 
                     texto += formatear_linea("Aplicable", str(aplicable))
+                    texto += formatear_linea("CBM", str(volumen or 'S/I')+' M³')
+
 
                 texto += "<br>"
 
@@ -617,7 +619,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += formatear_linea("Depósito", seguimiento.deposito or "")
 
-            texto += formatear_linea("Doc. Originales", "SI" if seguimiento.originales else "NO")
+
 
             if gastos_boolean == 'true':
 

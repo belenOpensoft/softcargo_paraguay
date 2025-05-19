@@ -10,7 +10,7 @@ import base64
 from reportlab.lib.validators import isNumber, isInstanceOf
 
 from cargosystem import settings
-from impomarit.views.mails import formatear_linea
+from impomarit.views.mails import formatear_linea, format_fecha
 from mantenimientos.models import Clientes, Servicios, Vapores, Monedas
 from mantenimientos.views.bancos import is_ajax
 from seguimientos.models import VGrillaSeguimientos, Envases, Cargaaerea, Conexaerea, Serviceaereo
@@ -85,6 +85,91 @@ def get_data_email(request):
                 texto += formatear_linea("COURIER/GUIA", "")
 
                 resultado['asunto'] = f'SEGUIMIENTO {row.numero} // TRASPASO A OPERACIONES'
+            elif title == 'Notificación de transbordo de carga':
+
+                if row.modo=='IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO':
+                    if str(row.vapor).isdigit():
+                        vapor = Vapores.objects.get(codigo=row.vapor).nombre
+
+                    else:
+                        vapor = row.vapor
+                else:
+                    conex = Conexaerea.objects.filter(numero=row.numero)
+                    if conex:
+                        vapor=conex.vapor if conex.vapor else 'S/I'
+
+                fecha_actual = datetime.datetime.now()
+
+                resultado['asunto'] = 'NOTIFICACIÓN DE TRABSBORDO DE CARGA - Ref.: ' + str(row.embarque) + \
+                                      '/ CS: ' + str(row.numero) + '- H B/L: ' + str(row.hawb) + '- Shipper: '
+
+                fecha_formateada = fecha_actual.strftime(
+                    f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y'
+                )
+
+                texto += fecha_formateada.capitalize().upper() + '<br><br>'
+
+                # Bultos, peso y CBM agrupados
+                carga = Cargaaerea.objects.filter(numero=row.numero)
+                merca = []
+                if carga is not None:
+                    for m in carga:
+                        merca.append(m.producto)
+
+                    bultos = [str(b.bultos) if b.bultos is not None else "S/I" for b in carga]
+                    pesos = [str(b.bruto) if b.bruto is not None else "S/I" for b in carga]
+                    cbms = [str(b.cbm) if b.cbm is not None else "S/I" for b in carga]
+
+                    texto += formatear_linea("Bultos", ", ".join(bultos))
+                    texto += formatear_linea("Peso", ", ".join(pesos))
+                    texto += formatear_linea("CBM", ", ".join(cbms))
+
+                # Contenedores y precintos agrupados
+                envase=Envases.objects.filter(numero=row.numero)
+                if envase:
+                    contenedores = [str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I" for e in envase]
+                    precintos = [str(e.precinto) if e.precinto is not None else "S/I" for e in envase]
+
+                    texto += formatear_linea("Nro. Contenedores", ", ".join(contenedores))
+                    texto += formatear_linea("Precintos", ", ".join(precintos))
+
+                # Datos generales
+                if row.modo == 'IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO':
+                    texto += formatear_linea("Vapor", str(vapor))
+                else:
+                    texto += formatear_linea("Vuelo", str(vapor))
+
+                texto += formatear_linea("Viaje", str(row.viaje) if row.viaje is not None else "S/I")
+                texto += formatear_linea("Llegada estimada", format_fecha(row.eta))
+                texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
+                texto += formatear_linea("B/L", str(row.awb) if row.awb is not None else "S/I")
+                texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I")
+                texto += formatear_linea("Referencia", str(row.embarque) if row.embarque is not None else "S/I")
+                texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
+                texto += formatear_linea("Seguimiento", str(row.numero) if row.numero is not None else "S/I")
+                texto += formatear_linea("Consignatario",
+                                         str(row.consignatario) if row.consignatario is not None else "S/I")
+                texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
+                texto += formatear_linea("Orden cliente",
+                                         str(row.refcliente) if row.refcliente is not None else "S/I")
+                texto += formatear_linea("Ref. proveedor",
+                                         str(row.refproveedor) if row.refproveedor is not None else "S/I")
+                if merca:
+                    nombres_merc = [m.nombre if m.nombre else "S/I" for m in merca]
+                    texto += formatear_linea("Mercadería", ", ".join(nombres_merc))
+
+                texto += "<br>"
+
+                # Mini tabla como líneas
+                texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
+                texto += formatear_linea("Destino", str(row.destino) if row.destino is not None else "S/I")
+                texto += formatear_linea("Vapor/Vuelo", str(vapor))
+                texto += formatear_linea("Viaje", str(row.viaje) if row.viaje is not None else "S/I")
+                texto += formatear_linea("Salida", format_fecha(row.etd))
+                texto += formatear_linea("Llegada", format_fecha(row.eta))
+
+                texto += "<br>"
+
             elif title == 'Aviso de embarque':
                 if row.modo=='IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO':
                     if str(row.vapor).isdigit():
@@ -260,7 +345,6 @@ def get_data_email(request):
 
                 texto += formatear_linea("Depósito", row.deposito or "")
 
-                texto += formatear_linea("Doc. Originales", 'SI' if row.originales else 'NO')
 
                 texto += "<br>"
                 if gastos_boolean == 'true':
@@ -484,6 +568,8 @@ def get_data_email(request):
                         texto += formatear_linea("Peso", bruto)
 
                         texto += formatear_linea("Aplicable", str(aplicable))
+                        texto += formatear_linea("CBM", str(c.cbm or 'S/I')+' M³')
+
 
                     texto += "<br>"
 

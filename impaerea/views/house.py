@@ -441,7 +441,7 @@ def house_detail(request):
                     'operacion_e': house.operacion,
                     'awb_e': house.awb,
                     'hawb_e': house.hawb,
-                    'pagoflete_e': house.pago,
+                    'pagoflete_e': house.pagoflete,
                     'moneda_e': house.moneda,
                     'arbitraje_e': house.arbitraje,
                     'embarcador_e': house.embarcador,

@@ -724,7 +724,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("Depósito", seguimiento.deposito or "")
 
-        texto += formatear_linea("Doc. Originales", "SI" if seguimiento.originales else "NO")
 
         texto += "<br>"
 

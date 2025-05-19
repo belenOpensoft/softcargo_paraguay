@@ -644,7 +644,7 @@ class edit_house(BSModalModelForm):
                  )
 
     # primer columna
-    pago = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("C","Collect"),("P","Prepaid")))
+    pago = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("","-------"),("C","Collect"),("P","Prepaid")))
 
     awb = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'id_awbhijo_e'}), label='Master')
     cliente = forms.CharField(widget=forms.TextInput(

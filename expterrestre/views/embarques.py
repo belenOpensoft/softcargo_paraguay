@@ -227,7 +227,7 @@ def redondear_a_05_o_0(numero):
 
 def get_sugerencias_envases(request, numero):
     try:
-        carga = get_object_or_404(ExpterraCargaaerea, numero=numero)
+        carga = ExpterraCargaaerea.objects.filter(numero=numero).first()
 
         data = {
             'bultos': carga.bultos,

@@ -251,7 +251,7 @@ def redondear_a_05_o_0(numero):
 #     return HttpResponse(data_json, mimetype)
 def get_sugerencias_envases(request, numero):
     try:
-        carga = get_object_or_404(ExpmaritCargaaerea, numero=numero)
+        carga = ExpmaritCargaaerea.objects.filter(numero=numero).first()
 
         data = {
             'bultos': carga.bultos,

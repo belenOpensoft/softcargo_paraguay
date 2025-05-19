@@ -696,7 +696,7 @@ class edit_house(BSModalModelForm):
                  )
 
     # primer columna
-    pago = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("C","Collect"),("P","Prepaid")))
+    pago = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("","-------"),("C","Collect"),("P","Prepaid")))
 
     awb = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'id_awbhijo_e'}), label='Master')
     cliente = forms.CharField(widget=forms.TextInput(
@@ -800,7 +800,6 @@ class edit_house(BSModalModelForm):
     embarcador_i = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
                'id': 'embarcador_ih_e', 'name': 'embarcador_ih'}), required=False)
-
 
 class gastosForm(BSModalModelForm):
     class Meta:
@@ -1278,8 +1277,6 @@ class GenerarDocumentoForm(forms.Form):
         choices=[('', '---------')] + OPERATIVAS,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-
-
 
 class EntregaDocumentacionForm(forms.Form):
     # Datos generales

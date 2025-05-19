@@ -111,19 +111,23 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
             texto += fecha_formateada.capitalize().upper() + '<br><br>'
 
-            # Bultos y pesos
-            cont = 1
-            for b in row2:
-                texto += formatear_linea(f"Bultos {cont}", b.bultos if b.bultos is not None else "S/I")
-                texto += formatear_linea(f"Peso {cont}", b.bruto if b.bruto is not None else "S/I")
-                cont += 1
+            # Bultos, peso y CBM agrupados
+            if row2:
+                bultos = [str(b.bultos) if b.bultos is not None else "S/I" for b in row2]
+                pesos = [str(b.bruto) if b.bruto is not None else "S/I" for b in row2]
+                cbms = [str(b.cbm) if b.cbm is not None else "S/I" for b in row2]
 
-            # Contenedores
-            cont = 1
-            for e in row3:
-                texto += formatear_linea(f"Nro. Contenedor {cont}",
-                                         str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I")
-                cont += 1
+                texto += formatear_linea("Bultos", ", ".join(bultos))
+                texto += formatear_linea("Peso", ", ".join(pesos))
+                texto += formatear_linea("CBM", ", ".join(cbms))
+
+            # Contenedores y precintos agrupados
+            if row3:
+                contenedores = [str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I" for e in row3]
+                precintos = [str(e.precinto) if e.precinto is not None else "S/I" for e in row3]
+
+                texto += formatear_linea("Nro. Contenedores", ", ".join(contenedores))
+                texto += formatear_linea("Precintos", ", ".join(precintos))
 
             # Datos generales
             texto += formatear_linea("Vapor", str(vapor))
@@ -135,11 +139,16 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             texto += formatear_linea("Referencia", str(row_number) if row_number is not None else "S/I")
             texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
             texto += formatear_linea("Seguimiento", str(row.seguimiento) if row.seguimiento is not None else "S/I")
-            texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario is not None else "S/I")
+            texto += formatear_linea("Consignatario",
+                                     str(row.consignatario) if row.consignatario is not None else "S/I")
             texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
-            texto += formatear_linea("Orden cliente", str(row.orden_cliente) if row.orden_cliente is not None else "S/I")
-            texto += formatear_linea("Ref. proveedor", str(row.ref_proveedor) if row.ref_proveedor is not None else "S/I")
-            texto += formatear_linea("Mercadería", str(merca) if merca is not None else "S/I")
+            texto += formatear_linea("Orden cliente",
+                                     str(row.orden_cliente) if row.orden_cliente is not None else "S/I")
+            texto += formatear_linea("Ref. proveedor",
+                                     str(row.ref_proveedor) if row.ref_proveedor is not None else "S/I")
+            if merca:
+                nombres_merc = [m.nombre if m.nombre else "S/I" for m in merca]
+                texto += formatear_linea("Mercadería", ", ".join(nombres_merc))
 
             texto += "<br>"
 
@@ -154,6 +163,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             texto += "<br>"
 
             return texto, resultado
+
         elif title == 'Novedades sobre la carga':
 
             fecha_actual = datetime.now()
@@ -420,6 +430,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                     texto += formatear_linea("Peso", str(c.bruto))
 
                     texto += formatear_linea("Aplicable", str(aplicable))
+                    texto += formatear_linea("CBM", str(ap1)+' M³')
 
                 texto += "<br>"
 
@@ -682,7 +693,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
             texto += formatear_linea("Depósito", seguimiento.deposito or "")
 
-            texto += formatear_linea("Doc. Originales", "SI" if seguimiento.originales else "NO")
 
             texto += "<br>"
             if gastos_boolean == 'true':
