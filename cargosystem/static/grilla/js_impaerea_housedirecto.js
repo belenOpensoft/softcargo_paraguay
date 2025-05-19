@@ -19,8 +19,8 @@ $('#buscadorEmailsHouse').on('keyup', function () {
 });
 
     //buscadores
-    $('#tabla_house_directo tfoot th').each(function(index) {
-        let title = $('#tabla_house_directo th').eq(index).text();
+    $('#tabla_house_directo_ia tfoot th').each(function(index) {
+        let title = $('#tabla_house_directo_ia th').eq(index).text();
 
         if (index === 0) {
             // Si es la primera columna, colocar el botón de limpiar filtros
@@ -46,7 +46,7 @@ $('#buscadorEmailsHouse').on('keyup', function () {
         }
     });
     // Tabla general
-    table = $('#tabla_house_directo').DataTable({
+    table = $('#tabla_house_directo_ia').DataTable({
         "stateSave": true,
         "dom": 'Btlipr',
         "scrollX": true,
@@ -61,7 +61,7 @@ $('#buscadorEmailsHouse').on('keyup', function () {
             'type': 'GET',
             "data": function (d) {
                 // Obtener los valores de búsqueda de los inputs del footer
-                $('#tabla_house_directo tfoot input').each(function() {
+                $('#tabla_house_directo_ia tfoot input').each(function() {
                     const index = $(this).parent().index();  // Obtener el índice de la columna
                     d['columns[' + index + '][search][value]'] = this.value;  // Asignar el valor de búsqueda
                 });
@@ -227,8 +227,8 @@ $('#buscadorEmailsHouse').on('keyup', function () {
             });
         }
     });
-    $('#tabla_house_directo tbody').off('dblclick').on('dblclick', 'tr', function () {
-                    var table = $('#tabla_house_directo').DataTable();
+    $('#tabla_house_directo_ia tbody').off('dblclick').on('dblclick', 'tr', function () {
+                    var table = $('#tabla_house_directo_ia').DataTable();
                     var row = table.row($(this));
                     var rowData = row.data();
 
@@ -299,15 +299,15 @@ $('#buscadorEmailsHouse').on('keyup', function () {
                     alert('Seleccione una fila.');
                     }
                 });
-    $('#tabla_house_directo tbody').off('click').on('click', 'tr', function (event) {
+    $('#tabla_house_directo_ia tbody').off('click').on('click', 'tr', function (event) {
                 event.stopPropagation();
                 if ($(this).hasClass('table-secondary')) {
                 } else {
-                    $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                    $('#tabla_house_directo_ia tbody tr').removeClass('table-secondary');
                     $(this).addClass('table-secondary');
                 }
 
-                var table = $('#tabla_house_directo').DataTable();
+                var table = $('#tabla_house_directo_ia').DataTable();
                 var row = table.row($(this));
                 var rowData = row.data();
 
@@ -405,7 +405,7 @@ if (!$('#id_awbhijo').val()) {
                 let numero = localStorage.getItem('num_house_gasto');
 
                 let title = this.getAttribute('data-tt');
-                var row = $('#tabla_house_directo').DataTable().rows('.table-secondary').data();
+                var row = $('#tabla_house_directo_ia').DataTable().rows('.table-secondary').data();
                 $("#id_to").val('');
                 $("#id_cc").val('');
                 $("#id_cco").val('');
@@ -501,7 +501,7 @@ if (!$('#id_awbhijo').val()) {
                        // localStorage.removeItem('num_house_gasto');
                         $('#table_add_im tbody tr').removeClass('table-secondary');
                         $('#table_edit_im tbody tr').removeClass('table-secondary');
-                        $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                        $('#tabla_house_directo_ia tbody tr').removeClass('table-secondary');
                         }
                     })
                 } else {
@@ -538,7 +538,7 @@ if (confirm('¿Confirma eliminar seleccionado?')) {
                 success: function (resultado) {
                     aux = resultado['resultado'];
                     if (aux === 'exito') {
-                           $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                           $('#tabla_house_directo_ia').DataTable().ajax.reload(null, false);
                         alert('Eliminado correctamente');
                     } else {
                         alert(aux);
@@ -664,7 +664,7 @@ function guardar_importado_house_directo(data, seguimientos) {
                 alert('House/s importado/s con éxito');
                 $("#importar_hijo_modal").dialog('close');
                 $('#tabla_seguimiento_IH').DataTable().destroy();
-                $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                $('#tabla_house_directo_ia').DataTable().ajax.reload(null, false);
                 localStorage.removeItem('seleccionados');
             } else {
                 console.log(response.message);

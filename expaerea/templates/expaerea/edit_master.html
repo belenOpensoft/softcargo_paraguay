@@ -5,17 +5,17 @@
     }
 
     /* Ancho automático de columnas */
-    #table_edit_im th {
+    #table_edit_ea th {
         width: auto !important;
     }
 
     /* Altura flexible para la tabla */
-    #table_edit_im {
+    #table_edit_ea {
         height: fit-content !important;
     }
 
     /* Tooltip al pasar el mouse por filas */
-    #table_edit_im tr:hover::after {
+    #table_edit_ea tr:hover::after {
         content: 'Doble click para editar';
         color: #f9edbe;
         position: absolute;
@@ -223,7 +223,7 @@
 </form>
     <div class="col-12 flex-wrap" id="segment_response_2" style="display:none">
         {% include 'master_exp_aerea/menu_houses.html' %}
-    <table class="table table-striped dataTable flex-wrap"  id="table_edit_im">
+    <table class="table table-striped dataTable flex-wrap"  id="table_edit_ea">
         <thead class="">
             <tr>
                 <th class="text-right"></th>

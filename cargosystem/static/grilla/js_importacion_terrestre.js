@@ -42,7 +42,7 @@ var que_buscar = '';
 var nombre_form = 'Nuevo'
 var awbRegex = "";
 
-let table_add_im;
+let table_add_it;
 
 $(document).ready(function () {
     $('#buscadorEmailsHouse9').on('keyup', function () {
@@ -1133,7 +1133,7 @@ $('#tabla_importterrestre tfoot th').each(function(index) {
 
                     }
                 });
-            if ($('#table_add_im tbody tr').length === 0) {
+            if ($('#table_add_it tbody tr').length === 0) {
             $('#segment_response').hide();
         } else {
             $('#segment_response').show();
@@ -1282,7 +1282,7 @@ var expandedRow;
                             validarCoincidenciaAcumulados();
                                 $(this).dialog("close");
                                 localStorage.removeItem('id_master_editar');
-                                $('#table_edit_im').DataTable().destroy();
+                                $('#table_edit_it').DataTable().destroy();
                                 $('#segment_response_2').css({'display':'none'});
                             },
                         },
@@ -1349,7 +1349,7 @@ var expandedRow;
                     }
                     table.ajax.reload(null, false);
                     $('#edit_master_modal').dialog('close');
-//                    $('#table_edit_im').DataTable().destroy();
+//                    $('#table_edit_it').DataTable().destroy();
                 } else {
                     alert('Error: ' + response.error_message);
                 }
@@ -1415,12 +1415,12 @@ var expandedRow;
         $('#tabla_importterrestre tbody tr').removeClass('table-secondary');
     }
 //    //tabla de houses en edit master
-//    if (!$(event.target).closest('#table_edit_im').length) {
-//        $('#table_edit_im tbody tr').removeClass('table-secondary');
+//    if (!$(event.target).closest('#table_edit_it').length) {
+//        $('#table_edit_it tbody tr').removeClass('table-secondary');
 //    }
 //    //tabla de houses en add master
-//    if (!$(event.target).closest('#table_add_im').length) {
-//        $('#table_add_im tbody tr').removeClass('table-secondary');
+//    if (!$(event.target).closest('#table_add_it').length) {
+//        $('#table_add_it tbody tr').removeClass('table-secondary');
 //    }
 });
     $('#tabla_importterrestre tbody').on('click', 'tr', function (event) {
@@ -1460,8 +1460,8 @@ var expandedRow;
                            style: "width:100px",
                            click: function () {
                                $(this).dialog("close");
-                               if (table_add_im instanceof $.fn.dataTable.Api) {
-                               $('#table_add_im').DataTable().destroy();
+                               if (table_add_it instanceof $.fn.dataTable.Api) {
+                               $('#table_add_it').DataTable().destroy();
                                $('#segment_response').css({'display':'none'});
                                }
                            },
@@ -1514,14 +1514,14 @@ var expandedRow;
         success: function(response) {
             if (response.success) {
             if(lugar_editar==='agregar'){
-            if (table_add_im instanceof $.fn.dataTable.Api) {
-                    table_add_im.ajax.reload(null, false);
+            if (table_add_it instanceof $.fn.dataTable.Api) {
+                    table_add_it.ajax.reload(null, false);
                 } else {
                     cargar_hauses_master();
                 }
             }else if(lugar_editar==='editar'){
-            if (table_edit_im instanceof $.fn.dataTable.Api) {
-                    table_edit_im.ajax.reload(null, false);
+            if (table_edit_it instanceof $.fn.dataTable.Api) {
+                    table_edit_it.ajax.reload(null, false);
                 } else {
                     cargar_hauses_master_edit();
                 }
@@ -1598,9 +1598,9 @@ var expandedRow;
                         }
                     }
                     if(lugar==='add_master'){
-                    table_add_im.ajax.reload(null, false);
+                    table_add_it.ajax.reload(null, false);
                     }else if(lugar==='edit_master'){
-                    table_edit_im.ajax.reload(null, false);
+                    table_edit_it.ajax.reload(null, false);
                     }else if(lugar==='edit_directo'){
                     $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                     }
@@ -1854,12 +1854,12 @@ var expandedRow;
                        let aux= document.getElementById('numero_gasto_house').value;
                        $('#gastos_form_house').trigger("reset");
                        document.getElementById('numero_gasto_house').value=aux;
-                        if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                            $('#table_add_it').DataTable().ajax.reload(null, false);
                         }
 
-                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                            $('#table_edit_it').DataTable().ajax.reload(null, false);
                         }
                         if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                             $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -1937,12 +1937,12 @@ var expandedRow;
                        $('#rutas_form_house').trigger("reset");
                        document.getElementById('id_ruta_id').value=aux;
                        $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
-                       if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                       if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                            $('#table_add_it').DataTable().ajax.reload(null, false);
                         }
 
-                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                            $('#table_edit_it').DataTable().ajax.reload(null, false);
                         }
                         if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                             $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -2015,12 +2015,12 @@ var expandedRow;
                        let aux= document.getElementById('numero_envase').value;
                        $('#envases_form_house').trigger("reset");
                        document.getElementById('numero_envase').value=aux;
-                       if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                       if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                            $('#table_add_it').DataTable().ajax.reload(null, false);
                         }
 
-                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                            $('#table_edit_it').DataTable().ajax.reload(null, false);
                         }
                         if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                             $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -2107,12 +2107,12 @@ var expandedRow;
                        let aux= document.getElementById('numero_embarque').value;
                        $('#embarques_form_house').trigger("reset");
                        document.getElementById('numero_embarque').value=aux;
-                       if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                       if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                            $('#table_add_it').DataTable().ajax.reload(null, false);
                         }
 
-                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                            $('#table_edit_it').DataTable().ajax.reload(null, false);
                         }
                         if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                             $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -2382,12 +2382,12 @@ var expandedRow;
                                             var idx = table.cell('.table-secondary', 0).index();
                                             $("#tabla_archivos tr.selected").removeClass('selected');
                                             $('#tabla_archivos').DataTable().ajax.reload(null, false);
-                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                                                    $('#table_add_it').DataTable().ajax.reload(null, false);
                                                 }
 
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                                                    $('#table_edit_it').DataTable().ajax.reload(null, false);
                                                 }
                                                 if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                                                     $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -2434,12 +2434,12 @@ var expandedRow;
                 success: function (resultado) {
                     if (resultado['resultado'] === 'exito') {
                         $('#tabla_archivos').DataTable().ajax.reload(null, false);
-                         if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                         if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                            $('#table_add_it').DataTable().ajax.reload(null, false);
                         }
 
-                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                            $('#table_edit_it').DataTable().ajax.reload(null, false);
                         }
                         if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                             $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -2505,13 +2505,13 @@ function getCookie2(name) {
     return cookieValue;
 }
 function cargar_hauses_master(){
-$('#table_add_im').DataTable().destroy();
+$('#table_add_it').DataTable().destroy();
 //tabla dentro del add-master form
 localStorage.setItem('lugar','add_master');
 let master = localStorage.getItem('master');
 //let master='MOLU13000250048';
 let csrftoken = getCookie2('csrftoken');
-table_add_im = $('#table_add_im').DataTable({
+table_add_it = $('#table_add_it').DataTable({
     "stateSave": true,
     "info":false,
     "dom": 'Btlipr',
@@ -2623,8 +2623,8 @@ table_add_im = $('#table_add_im').DataTable({
         d.master = master;  // acá mandás el valor como POST
     },
         "dataSrc": function (json) {
-         $('#table_add_im th').css({'width':'auto'});
-         $('#table_add_im_wrapper .dataTables_scrollBody').css({
+         $('#table_add_it th').css({'width':'auto'});
+         $('#table_add_it_wrapper .dataTables_scrollBody').css({
         'height': 'fit-content',
         });
 
@@ -2694,9 +2694,9 @@ table_add_im = $('#table_add_im').DataTable({
         },
     "initComplete": function() {
      //doble click modificar house en add_master form
-    $('#table_add_im tbody').off('dblclick').on('dblclick', 'tr', function () {
+    $('#table_add_it tbody').off('dblclick').on('dblclick', 'tr', function () {
         var tr = $(this).closest('tr');
-        var row = table_add_im.row(tr);
+        var row = table_add_it.row(tr);
         var rowData = row.data();
 
         if (rowData) {
@@ -2763,16 +2763,16 @@ table_add_im = $('#table_add_im').DataTable({
         alert('Seleccione una fila.');
         }
     });
-    $('#table_add_im tbody').off('click').on('click', 'tr', function (event) {
+    $('#table_add_it tbody').off('click').on('click', 'tr', function (event) {
     event.stopPropagation();
     if ($(this).hasClass('table-secondary')) {
     } else {
-        $('#table_add_im tbody tr').removeClass('table-secondary');
+        $('#table_add_it tbody tr').removeClass('table-secondary');
         $(this).addClass('table-secondary');
     }
 
     var tr = $(this).closest('tr');
-    var row = table_add_im.row(tr);
+    var row = table_add_it.row(tr);
     var rowData = row.data();
 
     if (rowData) {
@@ -2922,13 +2922,13 @@ $.ajax({
 return name;
 }
 function cargar_hauses_master_edit(){
-$('#table_edit_im').DataTable().destroy();
+$('#table_edit_it').DataTable().destroy();
 //tabla dentro del edit-master form
 localStorage.setItem('lugar','edit_master');
 let master = localStorage.getItem('master_editar');
 //let master='MOLU13000250048';
 let csrftoken = getCookie2('csrftoken');
-table_edit_im = $('#table_edit_im').DataTable({
+table_edit_it = $('#table_edit_it').DataTable({
     "stateSave": true,
     "info":false,
     "dom": 'Btlipr',
@@ -3046,8 +3046,8 @@ table_edit_im = $('#table_edit_im').DataTable({
         d.master = master;  // acá mandás el valor como POST
     },
         "dataSrc": function (json) {
-         $('#table_edit_im th').css({'width':'auto'});
-         $('#table_edit_im_wrapper .dataTables_scrollBody').css({
+         $('#table_edit_it th').css({'width':'auto'});
+         $('#table_edit_it_wrapper .dataTables_scrollBody').css({
         'height': 'fit-content',
         });
 
@@ -3117,9 +3117,9 @@ table_edit_im = $('#table_edit_im').DataTable({
         },
     "initComplete": function() {
      //doble click modificar house en edit_master form
-    $('#table_edit_im tbody').off('dblclick').on('dblclick', 'tr', function () {
+    $('#table_edit_it tbody').off('dblclick').on('dblclick', 'tr', function () {
         var tr = $(this).closest('tr');
-        var row = table_edit_im.row(tr);
+        var row = table_edit_it.row(tr);
         var rowData = row.data();
 
         if (rowData) {
@@ -3186,16 +3186,16 @@ table_edit_im = $('#table_edit_im').DataTable({
         alert('Seleccione una fila.');
         }
     });
-    $('#table_edit_im tbody').off('click').on('click', 'tr', function (event) {
+    $('#table_edit_it tbody').off('click').on('click', 'tr', function (event) {
     event.stopPropagation();
     if ($(this).hasClass('table-secondary')) {
     } else {
-        $('#table_edit_im tbody tr').removeClass('table-secondary');
+        $('#table_edit_it tbody tr').removeClass('table-secondary');
         $(this).addClass('table-secondary');
     }
 
     var tr = $(this).closest('tr');
-    var row = table_edit_im.row(tr);
+    var row = table_edit_it.row(tr);
     var rowData = row.data();
 
     if (rowData) {
@@ -3470,8 +3470,8 @@ function guardar_importado_house(data, seguimientos) {
                agregarASeleccionados();
                 $("#importar_hijo_modal").dialog('close');
                 $('#tabla_seguimiento_IH').DataTable().destroy();
-                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                    table_edit_im.ajax.reload(null, false);
+                if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                    table_edit_it.ajax.reload(null, false);
                 } else {
 
                     if(localStorage.getItem('lugar_importarhijo')==='editmaster'){
@@ -3803,7 +3803,7 @@ function guardar_archivo_importado(data) {
 function eliminar_house(){
     if(localStorage.getItem('lugar_importarhijo')==='editmaster'){
          if (confirm('¿Confirma eliminar seleccionado?')) {
-       let row = table_edit_im.rows('.table-secondary').data();
+       let row = table_edit_it.rows('.table-secondary').data();
         if (row.length === 1) {
             let master = localStorage.getItem('master_editar');
             eliminar_agregado(master,row[0][0]);
@@ -3821,7 +3821,7 @@ function eliminar_house(){
                     aux = resultado['resultado'];
                     if (aux === 'exito') {
                     //actualizar dependiendo de si es la tabla de editar master o de addmaster
-                        $('#table_edit_im').DataTable().destroy();
+                        $('#table_edit_it').DataTable().destroy();
                         cargar_hauses_master_edit();
                         alert('Eliminado correctamente');
                     } else {
@@ -3835,7 +3835,7 @@ function eliminar_house(){
     }
     }else if(localStorage.getItem('lugar_importarhijo')==='addmaster'){
          if (confirm('¿Confirma eliminar seleccionado?')) {
-      let row = table_add_im.rows('.table-secondary').data();
+      let row = table_add_it.rows('.table-secondary').data();
         if (row.length === 1) {
             miurl = "/importacion_terrestre/eliminar_house/";
             var toData = {
@@ -3852,7 +3852,7 @@ function eliminar_house(){
                     let master = localStorage.getItem('master_editar');
                     eliminar_agregado(master,row[0][0]);
                     //actualizar dependiendo de si es la tabla de editar master o de addmaster
-                        $('#table_add_im').DataTable().destroy();
+                        $('#table_add_it').DataTable().destroy();
                         cargar_hauses_master();
                         alert('Eliminado correctamente');
                     } else {
@@ -4039,8 +4039,8 @@ function gastos_btn_h_click(){
         let selectedRowId = localStorage.getItem('id_house_gasto');
         let selectedRowN = localStorage.getItem('num_house_gasto');
         let consignatario_code;
-        if ($.fn.dataTable.isDataTable('#table_edit_im')) {
-            consignatario_code = $('#table_edit_im').DataTable().row('.table-secondary').data()[20];
+        if ($.fn.dataTable.isDataTable('#table_edit_it')) {
+            consignatario_code = $('#table_edit_it').DataTable().row('.table-secondary').data()[20];
         } else {
             consignatario_code = $('#tabla_house_directo').DataTable().row('.table-secondary').data()[20];
         }
@@ -4082,12 +4082,12 @@ function gastos_btn_h_click(){
                                                 $("#table_gastos_house").dataTable().fnDestroy();
                                                 get_datos_gastos_house();
                                                 alert('Eliminado correctamente');
-                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                                                    $('#table_add_it').DataTable().ajax.reload(null, false);
                                                 }
 
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                                                    $('#table_edit_it').DataTable().ajax.reload(null, false);
                                                 }
                                                 if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                                                     $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -4112,8 +4112,8 @@ function gastos_btn_h_click(){
                     }],
                 beforeClose: function (event, ui) {
                // localStorage.removeItem('num_house_gasto');
-//                $('#table_add_im tbody tr').removeClass('table-secondary');
-//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#table_add_it tbody tr').removeClass('table-secondary');
+//                $('#table_edit_it tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                     // table.ajax.reload();
                 $("#tabla_gastos").dataTable().fnDestroy();
@@ -4192,12 +4192,12 @@ function rutas_btn_h_click(){
                                                 $("#tabla_rutas_house").dataTable().fnDestroy();
                                                 get_datos_rutas_house();
                                                 alert('Eliminado correctamente');
-                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                                                    $('#table_add_it').DataTable().ajax.reload(null, false);
                                                 }
 
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                                                    $('#table_edit_it').DataTable().ajax.reload(null, false);
                                                 }
                                                 if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                                                     $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -4223,8 +4223,8 @@ function rutas_btn_h_click(){
                 beforeClose: function (event, ui) {
                // localStorage.removeItem('num_house_gasto');
                  $("#table_rutas_house").dataTable().fnDestroy();
-//                 $('#table_add_im tbody tr').removeClass('table-secondary');
-//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                 $('#table_add_it tbody tr').removeClass('table-secondary');
+//                $('#table_edit_it tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
@@ -4330,12 +4330,12 @@ $("#id_envase_id").val('');
                                                 $("#tabla_envases_house").dataTable().fnDestroy();
                                                 get_datos_envases_house();
                                                 alert('Eliminado correctamente');
-                                                 if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                 if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                                                    $('#table_add_it').DataTable().ajax.reload(null, false);
                                                 }
 
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                                                    $('#table_edit_it').DataTable().ajax.reload(null, false);
                                                 }
                                                 if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                                                     $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -4361,8 +4361,8 @@ $("#id_envase_id").val('');
                 beforeClose: function (event, ui) {
               //  localStorage.removeItem('num_house_gasto');
                    $("#tabla_envases_house").dataTable().fnDestroy();
-//                 $('#table_add_im tbody tr').removeClass('table-secondary');
-//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                 $('#table_add_it tbody tr').removeClass('table-secondary');
+//                $('#table_edit_it tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
@@ -4477,12 +4477,12 @@ $("#id_embarque_id").val('');
                                                 $("#tabla_embarques_house").dataTable().fnDestroy();
                                                 get_datos_embarques_house();
                                                 alert('Eliminado correctamente');
-                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                                                    $('#table_add_it').DataTable().ajax.reload(null, false);
                                                 }
 
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                                                    $('#table_edit_it').DataTable().ajax.reload(null, false);
                                                 }
                                                 if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                                                     $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -4508,8 +4508,8 @@ $("#id_embarque_id").val('');
                 beforeClose: function (event, ui) {
                // localStorage.removeItem('num_house_gasto');
                  $("#tabla_embarques_house").dataTable().fnDestroy();
-//                 $('#table_add_im tbody tr').removeClass('table-secondary');
-//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                 $('#table_add_it tbody tr').removeClass('table-secondary');
+//                $('#table_edit_it tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
@@ -4525,7 +4525,7 @@ $('.email').click(function () {
         let numero = localStorage.getItem('num_house_gasto');
 
         let title = this.getAttribute('data-tt');
-        var row = $('#table_edit_im').DataTable().rows('.table-secondary').data();
+        var row = $('#table_edit_it').DataTable().rows('.table-secondary').data();
         $("#id_to").val('');
         $("#id_cc").val('');
         $("#id_cco").val('');
@@ -4627,8 +4627,8 @@ $('.email').click(function () {
                     },],
                 beforeClose: function (event, ui) {
               //  localStorage.removeItem('num_house_gasto');
-//                $('#table_add_im tbody tr').removeClass('table-secondary');
-//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#table_add_it tbody tr').removeClass('table-secondary');
+//                $('#table_edit_it tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
@@ -4777,9 +4777,9 @@ let lugar=localStorage.getItem('lugar');
         },
         success: function(response) {
             if(lugar==='add_master'){
-            table_add_im.ajax.reload(null, false);
+            table_add_it.ajax.reload(null, false);
             }else if(lugar==='edit_master'){
-            table_edit_im.ajax.reload(null, false);
+            table_edit_it.ajax.reload(null, false);
             }else if(lugar==='edit_directo'){
             $('#tabla_house_directo').DataTable().ajax.reload(null, false);
             }
@@ -4848,12 +4848,12 @@ function archivos_btn_h_click(){
                                             var idx = table.cell('.table-secondary', 0).index();
                                             $("#tabla_archivos tr.selected").removeClass('selected');
                                             $('#tabla_archivos').DataTable().ajax.reload(null, false);
-                                                 if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                 if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                                                    $('#table_add_it').DataTable().ajax.reload(null, false);
                                                 }
 
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                                                    $('#table_edit_it').DataTable().ajax.reload(null, false);
                                                 }
                                                 if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                                                     $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -4881,8 +4881,8 @@ function archivos_btn_h_click(){
             beforeClose: function (event, ui) {
                 // table.ajax.reload();
                 $("#tabla_archivos").dataTable().fnDestroy();
-//                $('#table_add_im tbody tr').removeClass('table-secondary');
-//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#table_add_it tbody tr').removeClass('table-secondary');
+//                $('#table_edit_it tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
             }
         })
@@ -5111,8 +5111,8 @@ function notas_house() {
                 // localStorage.removeItem('num_house_gasto');
                  $('#notas_table').DataTable().destroy();
                  $("#notas_form").trigger("reset");
-//                 $('#table_add_im tbody tr').removeClass('table-secondary');
-//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                 $('#table_add_it tbody tr').removeClass('table-secondary');
+//                $('#table_edit_it tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                 }
             })
@@ -5190,12 +5190,12 @@ function agregar_nota(event) {
                 $('#notas_table').DataTable().ajax.reload();
                 $("#notas_form")[0].reset();  // Limpia el formulario después de guardar
                 $("#id_nota").val('');  // Restablece el campo oculto para futuras creaciones
-                        if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                            $('#table_add_it').DataTable().ajax.reload(null, false);
                         }
 
-                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                            $('#table_edit_it').DataTable().ajax.reload(null, false);
                         }
                         if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                             $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -5222,12 +5222,12 @@ function eliminarNota(id) {
                 if (response.resultado === 'exito') {
                     alert("Nota eliminada exitosamente");
                     $('#notas_table').DataTable().ajax.reload();
-                        if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#table_add_it')) {
+                            $('#table_add_it').DataTable().ajax.reload(null, false);
                         }
 
-                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#table_edit_it')) {
+                            $('#table_edit_it').DataTable().ajax.reload(null, false);
                         }
                         if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
                             $('#tabla_house_directo').DataTable().ajax.reload(null, false);
@@ -5463,7 +5463,7 @@ function validarCoincidenciaAcumulados() {
 function abrir_modal_mails(e){
     e.preventDefault();
 
-    let row = table_edit_im.rows('.table-secondary').data();
+    let row = table_edit_it.rows('.table-secondary').data();
     if (row.length !== 1) {
         alert('Debe seleccionar un embarque primero.');
         return;
