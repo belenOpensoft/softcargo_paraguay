@@ -143,8 +143,8 @@ $(document).ready(function() {
     var que_buscar = '';
     let contador = 0;
 
-    $('#tabla_cobranzas tfoot th').each(function(index) {
-        let title = $('#tabla_cobranzas thead th').eq(index).text();
+    $('#tabla_op tfoot th').each(function(index) {
+        let title = $('#tabla_op thead th').eq(index).text();
 
         if (index === 0) {
             // Si es la primera columna, colocar el botón de limpiar filtros
@@ -169,13 +169,13 @@ $(document).ready(function() {
             $(this).removeClass("is-invalid"); // Se quita el rojo si se vacía
         }
     });
-    table = $('#tabla_cobranzas').DataTable({
+    table = $('#tabla_op').DataTable({
     "stateSave": true,
     "dom": 'Btlipr',
     "scrollX": true,
     "bAutoWidth": false,
     "scrollY": wHeight * 0.60,
-    "order": [[1, "desc"]],
+    "order": [[2, "desc"]],
     "processing": true,
     "serverSide": true,
     "pageLength": 100,
@@ -294,8 +294,8 @@ $('#id_importe').on('focusout', function () {
     $('#a_imputar').val(resultado.toFixed(2));
 });
 
-    $("#tabla_cobranzas tbody").on("dblclick", "tr", function () {
-        const row = $('#tabla_cobranzas').DataTable().row(this).data();
+    $("#tabla_op tbody").on("dblclick", "tr", function () {
+        const row = $('#tabla_op').DataTable().row(this).data();
         const autogenerado = row[1];
         const nrocliente = row[9];
         const numero = row[10];
@@ -313,8 +313,8 @@ $('#id_importe').on('focusout', function () {
         });
     });
 
-    $("#tabla_cobranzas tbody").on("click", "tr", function () {
-        $("#tabla_cobranzas tbody tr").removeClass("table-secondary");
+    $("#tabla_op tbody").on("click", "tr", function () {
+        $("#tabla_op tbody tr").removeClass("table-secondary");
         $(this).addClass("table-secondary");
     });
 
@@ -363,6 +363,12 @@ function abrir_cobranza() {
         maxHeight: $(window).height() * 0.90,
         minWidth: 500,
         minHeight: 200,
+        beforeClose: function () {
+            existe_cliente = false;
+            localStorage.removeItem('medios_pago');
+            resetModal("#dialog-form");
+            resetModal("#paymentModal");
+        },
         buttons: [
             {
                 class: "btn btn-dark btn-sm",
@@ -371,6 +377,7 @@ function abrir_cobranza() {
                 click: function() {
                     $(this).dialog("close");
                     existe_cliente=false;
+                    localStorage.removeItem('medios_pago');
                      resetModal("#dialog-form");
                     resetModal("#paymentModal");
                 }
@@ -449,11 +456,10 @@ function abrir_forma_pago() {
           let monto=$('#amount').val();
           //crear_impuventa_asiento_movimiento();
           verificar();
-          localStorage.removeItem('medios_pago');
+          //localStorage.removeItem('medios_pago');
         },
       },
     ],beforeClose: function () {
-        localStorage.removeItem('medios_pago');
     },
     open: function () {
             // Obtener fecha de hoy en formato YYYY-MM-DD
@@ -491,6 +497,7 @@ function tabla_facturas_pendientes(cliente,moneda) {
             type: "GET",
             data: function (d) {
                 d.codigo = $('#cliente_cobranza_hidden').val();
+                d.moneda = $('#id_moneda').val();
             }
         },
         columns: [
@@ -1095,78 +1102,6 @@ const obtenerFechaHoy = () => {
     const día = String(fechaHoy.getDate()).padStart(2, '0');
     return `${año}-${mes}-${día}`;
 };
-
-function cheques_terceros_tabla(){
-let importe=$('#checkAmountTerceros').val();
-let importe_o=$('#amount').html();
-let monto=$('#cashAmount').val();
-
-const tbody = $('#exampleTable tbody');
-let modo,emision,banco,numero,tc,cuenta,moneda,vencimiento,total;
-let seleccionadas = JSON.parse(localStorage.getItem('chequesData'));
-const moneda_select = document.getElementById('id_moneda_cheque_terceros');
-const monedaV = moneda_select.value;
-modo='CHEQUE TERCEROS';
-let arbitraje=$('#id_arbitraje').val();
-tc=arbitraje;
-moneda=monedaV;
-let nuevaFilaObj;
-let nuevaFila;
-for (let i = 0; i < seleccionadas.length; i++) {
-    let cheque = seleccionadas[i];
-    emision=cheque.emision;
-    banco=cheque.banco;
-    numero=cheque.numero;
-    vencimiento=cheque.vto;
-    total=cheque.total;
-    cuenta=cheque.id;
-
-    nuevaFilaObj = {
-        modo: modo,
-        emision: emision,
-        banco: banco,
-        numero: numero,
-        moneda: moneda,
-        total: total,
-        tc: tc,
-        vencimiento: vencimiento,
-        cuenta: cuenta
-    };
-    nuevaFila = `
-            <tr>
-                <td>${modo}</td>
-                <td>${emision}</td>
-                <td>${banco}</td>
-                <td>${numero}</td>
-                <td>${moneda}</td>
-                <td>${total}</td>
-                <td>${tc}</td>
-                <td>${vencimiento}</td>
-                <td>${cuenta}</td>
-            </tr>
-        `;
-
-        tbody.append(nuevaFila);
-}
-
-    let medios_pago=JSON.parse(localStorage.getItem('medios_pago')) || [];
-    medios_pago.push(nuevaFilaObj);
-    localStorage.setItem('medios_pago', JSON.stringify(medios_pago));
-
-    let accum = parseFloat($('#accumulated').val()) || 0;
-    let totalParsed = parseFloat(importe || 0);
-    accum += totalParsed;
-    $('#accumulated').val(accum.toFixed(2));
-    let diferencia = parseFloat(importe_o || 0) - accum;
-    $('#difference').val(diferencia.toFixed(2));
-    $('#cashAmount').val(diferencia.toFixed(2));
-    $('#checkAmount').val(diferencia.toFixed(2));
-    $('#checkAmount_trans').val(diferencia.toFixed(2));
-    $('#checkAmount_deposito').val(diferencia.toFixed(2));
-    $('#checkAmount_otro').val(diferencia.toFixed(2));
-
-
-}
 
 function crear_impuventa_asiento_movimiento() {
 

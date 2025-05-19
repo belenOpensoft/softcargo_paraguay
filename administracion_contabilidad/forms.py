@@ -675,18 +675,6 @@ class Cobranza(forms.Form):
         error_messages={'required': 'Este campo es obligatorio'}
     )
 
-    banco_transferencia = forms.ModelChoiceField(
-        queryset=Bancos.objects.all(),
-        label="Banco",
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        error_messages={'required': 'Este campo es obligatorio'}
-    )
-    banco_deposito = forms.ModelChoiceField(
-        queryset=Bancos.objects.all(),
-        label="Banco",
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        error_messages={'required': 'Este campo es obligatorio'}
-    )
     banco_otro = forms.ModelChoiceField(
         queryset=Bancos.objects.all(),
         label="Banco",

@@ -10,6 +10,7 @@ from administracion_contabilidad.forms import Cobranza,CobranzasDetalleTabla
 from administracion_contabilidad.models import Boleta, Impuvtas, Asientos, Movims, Cheques, Cuentas, VistaCobranza, \
     Dolar, ListaCobranzas
 from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero
+from administracion_contabilidad.views.orden_pago import convertir_monto
 from administracion_contabilidad.views.preventa import generar_autogenerado
 from mantenimientos.models import Clientes, Monedas
 
@@ -188,6 +189,7 @@ def source_facturas_pendientes(request):
         start = int(request.GET.get('start', 0))
         length = int(request.GET.get('length', 10))
         cliente = int(request.GET.get('cliente'))
+        moneda_objetivo = request.GET.get('moneda')
 
         # Filtrar registros por cliente
         pendientes = VistaCobranza.objects.filter(nrocliente=cliente)
@@ -204,13 +206,27 @@ def source_facturas_pendientes(request):
             except ObjectDoesNotExist:
                 moneda_nombre = "Desconocida"
 
+            try:
+                arbitraje, paridad = Movims.objects.filter(mautogen=pendiente.autogenerado).values_list('mcambio','mparidad').first() or (0, 0)
+            except Exception:
+                arbitraje, paridad = 0, 0
+
+            total = float(pendiente.total or 0)
+            saldo = float(pendiente.saldo or 0)
+
+            arbitraje = float(arbitraje)
+            paridad = float(paridad)
+
+            total_convertido = convertir_monto(total, int(pendiente.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+            saldo_convertido = convertir_monto(saldo, int(pendiente.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+
             data.append({
                 'id': 0,
                 'vencimiento': pendiente.vencimiento.strftime('%Y-%m-%d') if pendiente.vencimiento is not None else '',
                 'emision': pendiente.emision.strftime('%Y-%m-%d') if pendiente.emision is not None else '',
                 'documento': pendiente.documento,
-                'total': pendiente.total,
-                'saldo': pendiente.saldo,
+                'total': total_convertido,
+                'saldo': saldo_convertido,
                 'imputado': pendiente.pago if pendiente.pago is not None else 0,
                 'tipo_cambio': pendiente.arbitraje,
                 'embarque': pendiente.embarque,
@@ -231,8 +247,6 @@ def source_facturas_pendientes(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)})
-
-
 
 def guardar_impuventa(request):
     try:

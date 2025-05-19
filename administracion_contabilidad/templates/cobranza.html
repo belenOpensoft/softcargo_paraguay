@@ -4,161 +4,162 @@
 {% include 'menu/menu_cobranza.html' %}
 
 <style>
-.ui-autocomplete {
-    z-index: 3050;
-}
+    .ui-autocomplete {
+        z-index: 3050;
+    }
+
     .payment-section {
-  display: none;
-}
+        display: none;
+    }
+
     #paymentModal {
-  font-family: Arial, sans-serif;
-}
+        font-family: Arial, sans-serif;
+    }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 2px solid #ccc;
-  padding-bottom: 10px;
-}
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #ccc;
+        padding-bottom: 10px;
+    }
 
-.payment-methods {
-  margin: 20px 0;
-}
+    .payment-methods {
+        margin: 20px 0;
+    }
 
-.payment-methods label {
-  margin-right: 15px;
-}
+    .payment-methods label {
+        margin-right: 15px;
+    }
 
-.payment-section {
-  margin-top: 20px;
-}
+    .payment-section {
+        margin-top: 20px;
+    }
 
-.footer-section input {
-  width: 100px;
-  margin-left: 10px;
-}
+    .footer-section input {
+        width: 100px;
+        margin-left: 10px;
+    }
 
-.observations input {
-  width: 100%;
-}
+    .observations input {
+        width: 100%;
+    }
 
-.icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
+    .icon-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
 
     /* Clase para resaltar filas seleccionadas */
-.selected {
-    background-color: #d1ecf1 !important; /* Cambia el color según tu preferencia */
-    color: #0c5460; /* Ajusta el color del texto */
-}
-
+    .selected {
+        background-color: #d1ecf1 !important; /* Cambia el color según tu preferencia */
+        color: #0c5460; /* Ajusta el color del texto */
+    }
 
 
 </style>
 
 <style>
- #dialog-form {
-    max-width: 80vw; /* Limitar el ancho del modal */
-    max-height: 90vh; /* Limitar la altura */
-    overflow: hidden; /* Evitar scroll */
-}
+    #dialog-form {
+        max-width: 80vw; /* Limitar el ancho del modal */
+        max-height: 90vh; /* Limitar la altura */
+        overflow: hidden; /* Evitar scroll */
+    }
 
-#dialog-form .form-control {
-    font-size: 0.85rem; /* Reducir tamaño del texto */
-    padding: 2px 5px; /* Ajustar padding */
-    height: 30px; /* Reducir altura */
-}
+    #dialog-form .form-control {
+        font-size: 0.85rem; /* Reducir tamaño del texto */
+        padding: 2px 5px; /* Ajustar padding */
+        height: 30px; /* Reducir altura */
+    }
 
-#dialog-form select {
-    font-size: 0.85rem;
-    height: 30px;
-}
+    #dialog-form select {
+        font-size: 0.85rem;
+        height: 30px;
+    }
 
-#dialog-form label {
-    font-size: 0.8rem;
-    margin-bottom: 2px; /* Reducir espacio entre label e input */
-}
+    #dialog-form label {
+        font-size: 0.8rem;
+        margin-bottom: 2px; /* Reducir espacio entre label e input */
+    }
 
-#dialog-form .table {
-    font-size: 0.8rem; /* Reducir tamaño de texto en la tabla */
-}
+    #dialog-form .table {
+        font-size: 0.8rem; /* Reducir tamaño de texto en la tabla */
+    }
 
-#dialog-form .row {
-    margin-left: 0;
-    margin-right: 0;
-}
+    #dialog-form .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
 
 
-#paymentModal {
-    max-width: 80vw; /* Limitar el ancho del modal */
-    max-height: 90vh; /* Limitar la altura */
-    overflow: hidden; /* Evitar scroll */
-}
+    #paymentModal {
+        max-width: 80vw; /* Limitar el ancho del modal */
+        max-height: 90vh; /* Limitar la altura */
+        overflow: hidden; /* Evitar scroll */
+    }
 
-#paymentModal .form-control {
-    font-size: 0.85rem; /* Reducir tamaño del texto */
-    padding: 2px 5px; /* Ajustar padding */
-    height: 30px; /* Reducir altura */
-}
+    #paymentModal .form-control {
+        font-size: 0.85rem; /* Reducir tamaño del texto */
+        padding: 2px 5px; /* Ajustar padding */
+        height: 30px; /* Reducir altura */
+    }
 
-#paymentModal select {
-    font-size: 0.85rem;
-    height: 30px;
-}
+    #paymentModal select {
+        font-size: 0.85rem;
+        height: 30px;
+    }
 
-#paymentModal label {
-    font-size: 0.8rem;
-    margin-bottom: 2px; /* Reducir espacio entre label e input */
-}
+    #paymentModal label {
+        font-size: 0.8rem;
+        margin-bottom: 2px; /* Reducir espacio entre label e input */
+    }
 
-#paymentModal .table {
-    font-size: 0.8rem; /* Reducir tamaño de texto en la tabla */
-}
+    #paymentModal .table {
+        font-size: 0.8rem; /* Reducir tamaño de texto en la tabla */
+    }
 
-#paymentModal .row {
-    margin-left: 0;
-    margin-right: 0;
-}
+    #paymentModal .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
 </style>
 
 
 <link rel="stylesheet" type="text/css" href="{% static 'css/administracion/administracion.css'  %}">
 
 <table id="tabla_cobranzas" class="table table-striped table-bordered" cellspacing="0" width="100%">
-        <thead>
-        <tr>
-            <th width="4%"></th>
-            <th class="text-left">Autogenerado</th>
-            <th class="text-left">Fecha</th>
-            <th class="text-left">Documento</th>
-            <th class="text-left">Cliente</th>
-            <th class="text-left">Posicion</th>
-            <th class="text-left">Monto</th>
-            <th class="text-left">IVA</th>
-            <th class="text-left">Monto total</th>
-        </tr>
+    <thead>
+    <tr>
+        <th width="4%"></th>
+        <th class="text-left">Autogenerado</th>
+        <th class="text-left">Fecha</th>
+        <th class="text-left">Documento</th>
+        <th class="text-left">Cliente</th>
+        <th class="text-left">Posicion</th>
+        <th class="text-left">Monto</th>
+        <th class="text-left">IVA</th>
+        <th class="text-left">Monto total</th>
+    </tr>
 
-        </thead>
-        <tbody>
+    </thead>
+    <tbody>
 
-        </tbody>
-        <tfoot>
-        <tr>
-          <th width="4%"></th>
-            <th class="text-right">Autogenerado</th>
-            <th class="text-right">Fecha</th>
-            <th class="text-right">Documento</th>
-            <th class="text-right">Cliente</th>
-            <th class="text-right">Posicion</th>
-            <th class="text-right">Monto</th>
-            <th class="text-right">IVA</th>
-            <th class="text-right">Monto total</th>
-        </tr>
-        </tfoot>
-    </table>
+    </tbody>
+    <tfoot>
+    <tr>
+        <th width="4%"></th>
+        <th class="text-right">Autogenerado</th>
+        <th class="text-right">Fecha</th>
+        <th class="text-right">Documento</th>
+        <th class="text-right">Cliente</th>
+        <th class="text-right">Posicion</th>
+        <th class="text-right">Monto</th>
+        <th class="text-right">IVA</th>
+        <th class="text-right">Monto total</th>
+    </tr>
+    </tfoot>
+</table>
 
 
 <div id="dialog-form" title="Formulario de Cobranza" style="display: none;">
@@ -187,10 +188,10 @@
                             <label class="form-check-label small" for="a_cliente">A cliente (Cuentas por cobrar)</label>
                         </div>
 
-                       <!--  <div class="form-check">
-                            <input class="form-check-input" type="radio" id="cancelar_prov" name="opcion">
-                            <label class="form-check-label small" for="cancelar_prov">Cancelar N/C y pagos proveedor</label>
-                        </div>-->
+                        <!--  <div class="form-check">
+                             <input class="form-check-input" type="radio" id="cancelar_prov" name="opcion">
+                             <label class="form-check-label small" for="cancelar_prov">Cancelar N/C y pagos proveedor</label>
+                         </div>-->
                     </div>
 
                     <!-- 📌 Datos monetarios -->
@@ -208,7 +209,8 @@
                     <div class="d-grid mt-2" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
                         <div>
                             <label for="cliente_cobranza">Buscar Cliente</label>
-                            <input type="text" id="cliente_cobranza" class="form-control form-control-sm" placeholder="Buscar cliente">
+                            <input type="text" id="cliente_cobranza" class="form-control form-control-sm"
+                                   placeholder="Buscar cliente">
                             <input type="hidden" id="cliente_cobranza_hidden">
                         </div>
                         <div>{{ form.importe.label_tag }} {{ form.importe }}</div>
@@ -219,23 +221,31 @@
                 <!-- 📌 Sección Lateral (Botones y Totales) -->
                 <div class="border p-3 rounded bg-light w-30">
                     <div>
-                        <button type="button" id="deshacer" class="btn btn-danger btn-sm w-100 mb-2" disabled>Deshacer</button>
-                        <button type="button" class="btn btn-warning btn-sm w-100 mb-2" id="imputarSeleccion" disabled>Imputar selección</button>
-                        <button type="button" class="btn btn-success btn-sm w-100 mb-2" onclick="abrir_forma_pago()" id="abrirpago">Cobrar</button>
+                        <button type="button" id="deshacer" class="btn btn-danger btn-sm w-100 mb-2" disabled>Deshacer
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm w-100 mb-2" id="imputarSeleccion" disabled>
+                            Imputar selección
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm w-100 mb-2" onclick="abrir_forma_pago()"
+                                id="abrirpago">Cobrar
+                        </button>
                     </div>
                 </div>
                 <div class="border p-3 rounded bg-light w-30">
                     <div>
                         <label for="a_imputar">A imputar</label>
-                        <input type="number" id="a_imputar" class="form-control form-control-sm mb-2" name="a_imputar" value="0.0" readonly>
+                        <input type="number" id="a_imputar" class="form-control form-control-sm mb-2" name="a_imputar"
+                               value="0.0" readonly>
                     </div>
                     <div>
                         <label for="acumulado">Acumulado</label>
-                        <input type="number" id="acumulado" class="form-control form-control-sm mb-2" name="acumulado" value="0.0" readonly>
+                        <input type="number" id="acumulado" class="form-control form-control-sm mb-2" name="acumulado"
+                               value="0.0" readonly>
                     </div>
                     <div>
                         <label for="balance">Balance</label>
-                        <input type="number" id="balance" class="form-control form-control-sm mb-2" name="balance" value="0.0" readonly>
+                        <input type="number" id="balance" class="form-control form-control-sm mb-2" name="balance"
+                               value="0.0" readonly>
                     </div>
                 </div>
             </div>
@@ -244,23 +254,23 @@
             <div style="height: 10rem; overflow-y: auto; border-radius: 5px;">
                 <table id="imputacionTable" class="table table-striped table-sm mt-2">
                     <thead style="position: sticky; top: 0; background: white; z-index: 2;">
-                        <tr>
-                            <th style="display:none;">Id</th>
-                            <th>Vencimiento</th>
-                            <th>Emisión</th>
-                            <th>Documento</th>
-                            <th>Total</th>
-                            <th>Saldo</th>
-                            <th>Imputado</th>
-                            <th>T.Cambio</th>
-                            <th>Embarque</th>
-                            <th>Detalle</th>
-                            <th>Posición</th>
-                            <th>Moneda</th>
-                            <th>Paridad</th>
-                            <th>Tipo Doc</th>
-                            <th>Tipo</th>
-                        </tr>
+                    <tr>
+                        <th style="display:none;">Id</th>
+                        <th>Vencimiento</th>
+                        <th>Emisión</th>
+                        <th>Documento</th>
+                        <th>Total</th>
+                        <th>Saldo</th>
+                        <th>Imputado</th>
+                        <th>T.Cambio</th>
+                        <th>Embarque</th>
+                        <th>Detalle</th>
+                        <th>Posición</th>
+                        <th>Moneda</th>
+                        <th>Paridad</th>
+                        <th>Tipo Doc</th>
+                        <th>Tipo</th>
+                    </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -272,261 +282,242 @@
 
 
 <div id="paymentModal" title="Forma de Cobro" style="display: none;">
-  <!-- Header del modal -->
-     <div class="d-grid" style="grid-template-columns: 3fr 1fr; gap: 15px; align-items: start;">
-<div class="p-2">
-  <div class="modal-header d-flex justify-content-between align-items-center">
-    <h3 style="color:black;">A cobrar: <span id="amount" class="text-primary fw-bold"></span></h3>
-    <div class="modal-icons">
-      <button class="icon-btn"><i class="ui-icon-folder-open"></i></button>
-      <button class="icon-btn"><i class="ui-icon-disk"></i></button>
-    </div>
-  </div>
+    <!-- Header del modal -->
+    <div class="d-grid" style="grid-template-columns: 3fr 1fr; gap: 15px; align-items: start;">
+        <div class="p-2">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h3 style="color:black;">A cobrar: <span id="amount" class="text-primary fw-bold"></span></h3>
+                <div class="modal-icons">
+                    <button class="icon-btn"><i class="ui-icon-folder-open"></i></button>
+                    <button class="icon-btn"><i class="ui-icon-disk"></i></button>
+                </div>
+            </div>
 
-  <!-- Radio buttons -->
-  <div class="payment-methods">
-    <label><input type="radio" name="paymentType" id="efectivo" value="cash" checked> Efectivo</label>
-    <label><input type="radio" name="paymentType" id="cheque" value="check"> Cheque</label>
-    <label><input type="radio" name="paymentType" id="trans" value="transfer"> Transferencia</label>
-    <label><input type="radio" name="paymentType" id="deposito" value="deposit"> Depósito</label>
-    <label><input type="radio" name="paymentType" id="otro" value="other"> Otro</label>
-  </div>
+            <!-- Radio buttons -->
+            <div class="payment-methods">
+                <label><input type="radio" name="paymentType" id="efectivo" value="cash" checked> Efectivo</label>
+                <label><input type="radio" name="paymentType" id="cheque" value="check"> Cheque</label>
+                <label><input type="radio" name="paymentType" id="trans" value="transfer"> Transferencia</label>
+                <label><input type="radio" name="paymentType" id="deposito" value="deposit"> Depósito</label>
+                <label><input type="radio" name="paymentType" id="otro" value="other"> Otro</label>
+            </div>
 
-  <!-- Secciones dinámicas -->
-  <!-- efectivo -->
-  <div id="cashSection" class="payment-section d-grid" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
-    <div>
-      <label for="id_cuenta_efectivo">Caja o Banco imputado:</label>
-        {{ form.cuenta_efectivo }}
-    </div>
-    <div>
-      <label for="cashAmount">Monto:</label>
-      <input type="number" id="cashAmount" value="200" class="form-control">
-    </div>
-    <div>
-      <label for="id_moneda_efectivo">Moneda:</label>
-        {{ form.moneda_efectivo }}
-    </div>
-  </div>
+            <!-- Secciones dinámicas -->
+            <!-- efectivo -->
+            <div id="cashSection" class="payment-section d-grid"
+                 style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                <div>
+                    <label for="id_cuenta_efectivo">Caja o Banco imputado:</label>
+                    {{ form.cuenta_efectivo }}
+                </div>
+                <div>
+                    <label for="cashAmount">Monto:</label>
+                    <input type="number" id="cashAmount" value="200" class="form-control">
+                </div>
+                <div>
+                    <label for="id_moneda_efectivo">Moneda:</label>
+                    {{ form.moneda_efectivo }}
+                </div>
+            </div>
 
-  <!-- cheques -->
-<div id="checkSection" class="payment-section" style="grid-template-columns: repeat(4, 1fr); gap: 10px; display:none;">
+            <!-- cheques -->
+            <div id="checkSection" class="payment-section"
+                 style="grid-template-columns: repeat(4, 1fr); gap: 10px; display:none;">
 
-    <div>
-      <label for="id_cuenta_cheque" class="form-label">Caja o Banco imputado:</label>
-        {{ form.cuenta_cheque }}
-    </div>
-    <div >
-      <label for="checkAmount" class="form-label">Monto:</label>
-      <input type="number" class="form-control" id="checkAmount" value="900">
-    </div>
+                <div>
+                    <label for="id_cuenta_cheque" class="form-label">Caja o Banco imputado:</label>
+                    {{ form.cuenta_cheque }}
+                </div>
+                <div>
+                    <label for="checkAmount" class="form-label">Monto:</label>
+                    <input type="number" class="form-control" id="checkAmount" value="900">
+                </div>
 
-    <div>
-      <label for="checkEmission" class="form-label">Emisión:</label>
-      <input type="date" class="form-control" id="checkEmission">
-    </div>
-    <div>
-      <label for="checkDueDate" class="form-label">Vto.:</label>
-      <input type="date" class="form-control" id="checkDueDate">
-    </div>
+                <div>
+                    <label for="checkEmission" class="form-label">Emisión:</label>
+                    <input type="date" class="form-control" id="checkEmission">
+                </div>
+                <div>
+                    <label for="checkDueDate" class="form-label">Vto.:</label>
+                    <input type="date" class="form-control" id="checkDueDate">
+                </div>
 
-      <div>
-      <label for="checkNumber" class="form-label">Número de Cheque:</label>
-      <input type="number" class="form-control" id="checkNumber">
-    </div>
-    <div>
-      <label for="id_banco_cheque" class="form-label">Banco:</label>
-        {{ form.banco_cheque }}
-    </div>
+                <div>
+                    <label for="checkNumber" class="form-label">Número de Cheque:</label>
+                    <input type="number" class="form-control" id="checkNumber">
+                </div>
+                <div>
+                    <label for="id_banco_cheque" class="form-label">Banco:</label>
+                    {{ form.banco_cheque }}
+                </div>
 
-    <div>
-      <label for="id_moneda_cheque">Moneda:</label>
-        {{ form.moneda_cheque }}
-    </div>
+                <div>
+                    <label for="id_moneda_cheque">Moneda:</label>
+                    {{ form.moneda_cheque }}
+                </div>
 
 
-</div>
+            </div>
 
-      <!-- transferencia -->
-<div id="transferSection" class="payment-section" style="grid-template-columns: repeat(4, 1fr); gap: 10px; display:none;">
+            <!-- transferencia -->
+            <div id="transferSection" class="payment-section"
+                 style="grid-template-columns: repeat(4, 1fr); gap: 10px; display:none;">
 
-    <div >
-      <label for="id_cuenta_transferencia" class="form-label">Caja o Banco imputado:</label>
-        {{ form.cuenta_transferencia }}
-    </div>
-    <div >
-      <label for="checkAmount_trans" class="form-label">Monto:</label>
-      <input type="number" class="form-control" id="checkAmount_trans" value="900">
-    </div>
+                <div>
+                    <label for="id_cuenta_transferencia" class="form-label">Caja o Banco imputado:</label>
+                    {{ form.cuenta_transferencia }}
+                </div>
+                <div>
+                    <label for="checkAmount_trans" class="form-label">Monto:</label>
+                    <input type="number" class="form-control" id="checkAmount_trans" value="900">
+                </div>
 
-          <div>
-      <label for="checkEmission_trans" class="form-label">Emisión:</label>
-      <input type="date" class="form-control" id="checkEmission_trans">
-    </div>
-<div>
-      <label for="checkDueDate_trans" class="form-label">Vto.:</label>
-      <input type="date" class="form-control" id="checkDueDate_trans">
-    </div>
+                <div>
+                    <label for="checkEmission_trans" class="form-label">Emisión:</label>
+                    <input type="date" class="form-control" id="checkEmission_trans">
+                </div>
+                <div>
+                    <label for="checkDueDate_trans" class="form-label">Vto.:</label>
+                    <input type="date" class="form-control" id="checkDueDate_trans">
+                </div>
 
-      <div >
-      <label for="checkNumber_trans" class="form-label">Número:</label>
-      <input type="number" class="form-control" id="checkNumber_trans">
-    </div>
-    <div >
-      <label for="id_banco_transferencia" class="form-label">Banco:</label>
-        {{ form.banco_transferencia }}
-    </div>
+                <div>
+                    <label for="id_moneda_transferencia">Moneda:</label>
+                    {{ form.moneda_transferencia }}
+                </div>
 
-        <div>
-            <label for="cuenta_trans" class="form-label">Cuenta:</label>
-            <input type="number" class="form-control" id="cuenta_trans">
+
+            </div>
+
+            <!-- deposito -->
+            <div id="depositSection" class="payment-section"
+                 style="grid-template-columns: repeat(4, 1fr); gap: 10px; display:none;">
+
+                <div>
+                    <label for="id_cuenta_deposito" class="form-label">Caja o Banco imputado:</label>
+                    {{ form.cuenta_deposito }}
+                </div>
+                <div>
+                    <label for="checkAmount_deposito" class="form-label">Monto:</label>
+                    <input type="number" class="form-control" id="checkAmount_deposito" value="900">
+                </div>
+
+                <div>
+                    <label for="checkEmission_deposito" class="form-label">Emisión:</label>
+                    <input type="date" class="form-control" id="checkEmission_deposito">
+                </div>
+                <div>
+                    <label for="checkDueDate_deposito" class="form-label">Vto.:</label>
+                    <input type="date" class="form-control" id="checkDueDate_deposito">
+                </div>
+
+                <div>
+                    <label for="id_moneda_deposito">Moneda:</label>
+                    {{ form.moneda_deposito }}
+                </div>
+
+            </div>
+
+            <!-- otro -->
+            <div id="otherSection" class="payment-section"
+                 style="grid-template-columns: repeat(4, 1fr); gap: 10px; display:none;">
+                <div>
+                    <label for="id_cuenta_otro" class="form-label">Cuenta:</label>
+                    {{ form.cuenta_otro }}
+                </div>
+                <div>
+                    <label for="checkAmount_otro" class="form-label">Monto:</label>
+                    <input type="number" class="form-control" id="checkAmount_otro" value="900">
+                </div>
+
+                <div>
+                    <label for="checkEmission_otro" class="form-label">Emisión:</label>
+                    <input type="date" class="form-control" id="checkEmission_otro">
+                </div>
+                <div>
+                    <label for="checkDueDate_otro" class="form-label">Vto.:</label>
+                    <input type="date" class="form-control" id="checkDueDate_otro">
+                </div>
+
+
+                <div>
+                    <label for="checkNumber_otro" class="form-label">Número:</label>
+                    <input type="number" class="form-control" id="checkNumber_otro">
+                </div>
+                <div>
+                    <label for="id_banco_otro" class="form-label">Banco:</label>
+                    {{ form.banco_otro }}
+                </div>
+
+                <div>
+                    <label for="cuenta_otro" class="form-label">Cuenta:</label>
+                    <input type="number" class="form-control" id="cuenta_otro">
+                </div>
+                <div>
+                    <label for="id_moneda_otro">Moneda:</label>
+                    {{ form.moneda_otro }}
+                </div>
+
+
+            </div>
+
+            <div class="text-end mt-1">
+                <button type="button" style="font-size:12px;" class="btn btn-success btn-sm" onclick="ingresar_datos()">
+                    Ingresar datos
+                </button>
+                <button type="button" style="font-size:12px;" class="btn btn-danger btn-sm" onclick="borrar_datos()">
+                    Borrar datos
+                </button>
+            </div>
+            <hr>
+
+            <div class="table-responsive" style="height:150px;">
+                <table id="exampleTableCobranza" style="overflow-y:auto;"
+                       class="table table-bordered table-hover table-striped">
+                    <thead class="table-light" style="position:sticky;top:0;">
+                    <tr>
+                        <th>Modo</th>
+                        <th>Emisión</th>
+                        <th>Banco</th>
+                        <th>Número</th>
+                        <th>Moneda</th>
+                        <th>Total</th>
+                        <th>T.C.</th>
+                        <th>Vencimiento</th>
+                        <th>Cuenta</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
         </div>
-            <div>
-      <label for="id_moneda_transferencia">Moneda:</label>
-        {{ form.moneda_transferencia }}
-    </div>
+        <div class="border p-3 rounded bg-light w-100">
+            <!-- Observaciones y cierre -->
 
-
-
-</div>
-
-      <!-- deposito -->
-<div id="depositSection" class="payment-section" style="grid-template-columns: repeat(4, 1fr); gap: 10px; display:none;">
-
-    <div>
-      <label for="id_cuenta_deposito" class="form-label">Caja o Banco imputado:</label>
-        {{ form.cuenta_deposito }}
-    </div>
-    <div>
-      <label for="checkAmount_deposito" class="form-label">Monto:</label>
-      <input type="number" class="form-control" id="checkAmount_deposito" value="900">
-    </div>
-
-          <div>
-      <label for="checkEmission_deposito" class="form-label">Emisión:</label>
-      <input type="date" class="form-control" id="checkEmission_deposito">
-    </div>
-    <div>
-      <label for="checkDueDate_deposito" class="form-label">Vto.:</label>
-      <input type="date" class="form-control" id="checkDueDate_deposito">
-    </div>
-
-      <div>
-      <label for="checkNumber_deposito" class="form-label">Número:</label>
-      <input type="number" class="form-control" id="checkNumber_deposito">
-    </div>
-    <div>
-      <label for="id_banco_deposito" class="form-label">Banco:</label>
-        {{ form.banco_deposito }}
-    </div>
-
-    <div>
-        <label for="cuenta_deposito" class="form-label">Cuenta:</label>
-        <input type="number" class="form-control" id="cuenta_deposito">
-    </div>
-    <div>
-      <label for="id_moneda_deposito">Moneda:</label>
-        {{ form.moneda_deposito }}
-    </div>
-
-</div>
-
-      <!-- otro -->
-<div id="otherSection" class="payment-section" style="grid-template-columns: repeat(4, 1fr); gap: 10px; display:none;">
-    <div>
-      <label for="id_cuenta_otro" class="form-label">Cuenta:</label>
-    {{ form.cuenta_otro }}
-    </div>
-    <div >
-      <label for="checkAmount_otro" class="form-label">Monto:</label>
-      <input type="number" class="form-control" id="checkAmount_otro" value="900">
-    </div>
-
-          <div >
-      <label for="checkEmission_otro" class="form-label">Emisión:</label>
-      <input type="date" class="form-control" id="checkEmission_otro">
-    </div>
-<div >
-      <label for="checkDueDate_otro" class="form-label">Vto.:</label>
-      <input type="date" class="form-control" id="checkDueDate_otro">
-    </div>
-
-
-
-
-      <div >
-      <label for="checkNumber_otro" class="form-label">Número:</label>
-      <input type="number" class="form-control" id="checkNumber_otro">
-    </div>
-    <div >
-      <label for="id_banco_otro" class="form-label">Banco:</label>
-    {{ form.banco_otro }}
-    </div>
-
-        <div >
-            <label for="cuenta_otro" class="form-label">Cuenta:</label>
-            <input type="number" class="form-control" id="cuenta_otro">
+            <div class="observations d-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                <div>
+                    <label for="observations">Obs.:</label>
+                    <input type="text" id="observations" class="form-control form-control-sm">
+                </div>
+                <div>
+                    <label for="id_cuenta_observaciones">Diferencia a:</label>
+                    {{ form.cuenta_observaciones }}
+                </div>
+            </div>
+            <div class="footer-section d-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                <div>
+                    <label for="accumulated">Acumulado:</label>
+                    <input type="text" id="accumulated" value="0.0000" class="form-control form-control-sm" readonly>
+                </div>
+                <div>
+                    <label for="difference">Diferencia:</label>
+                    <input type="text" id="difference" value="0.0000" class="form-control form-control-sm" readonly>
+                </div>
+            </div>
         </div>
-            <div>
-      <label for="id_moneda_otro">Moneda:</label>
-        {{ form.moneda_otro }}
     </div>
-
-
-</div>
-
-    <div class="text-end mt-1">
-        <button type="button" style="font-size:12px;" class="btn btn-success btn-sm" onclick="ingresar_datos()">Ingresar datos</button>
-        <button type="button" style="font-size:12px;" class="btn btn-danger btn-sm" onclick="borrar_datos()">Borrar datos</button>
-    </div>
-    <hr>
-
-  <div class="table-responsive" style="height:150px;">
-    <table id="exampleTable" style="overflow-y:auto;" class="table table-bordered table-hover table-striped">
-      <thead class="table-light" style="position:sticky;top:0;">
-        <tr>
-          <th>Modo</th>
-          <th>Emisión</th>
-          <th>Banco</th>
-          <th>Número</th>
-          <th>Moneda</th>
-          <th>Total</th>
-          <th>T.C.</th>
-          <th>Vencimiento</th>
-          <th>Cuenta</th>
-        </tr>
-      </thead>
-      <tbody>
-
-      </tbody>
-    </table>
-  </div>
-</div>
-         <div class="border p-3 rounded bg-light w-100">
-  <!-- Observaciones y cierre -->
-
-  <div class="observations d-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
-    <div>
-      <label for="observations">Obs.:</label>
-      <input type="text" id="observations" class="form-control form-control-sm">
-    </div>
-    <div>
-      <label for="id_cuenta_observaciones">Diferencia a:</label>
-      {{ form.cuenta_observaciones }}
-    </div>
-  </div>
-    <div class="footer-section d-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
-    <div>
-      <label for="accumulated">Acumulado:</label>
-      <input type="text" id="accumulated" value="0.0000" class="form-control form-control-sm" readonly>
-    </div>
-      <div>
-      <label for="difference">Diferencia:</label>
-      <input type="text" id="difference" value="0.0000" class="form-control form-control-sm" readonly>
-    </div>
-  </div>
- </div>
- </div>
 </div>
 
 

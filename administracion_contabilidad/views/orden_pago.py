@@ -233,7 +233,7 @@ def obtener_imputables_old(request):
 
 def obtener_imputables(request):
     proveedor_id = request.GET.get('codigo')
-
+    moneda_objetivo = request.GET.get('moneda')
     # Obtener los parámetros de paginación
     start = int(request.GET.get('start', 0))  # Inicio de la página (offset)
     length = int(request.GET.get('length', 5))  # Número de registros por página
@@ -248,17 +248,33 @@ def obtener_imputables(request):
         except Monedas.DoesNotExist:
             moneda_nombre = ''
 
+        try:
+            arbitraje, paridad = Movims.objects.filter(mautogen=r.autogenerado).values_list('mcambio','mparidad').first() or (0,0)
+        except Exception:
+            arbitraje, paridad = 0, 0
+
+        total = float(r.total or 0)
+        saldo = float(r.saldo or 0)
+
+        arbitraje = float(arbitraje)
+        paridad = float(paridad)
+
+        total_convertido = convertir_monto(total, int(r.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+        saldo_convertido = convertir_monto(saldo, int(r.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+
         filtrados.append({
             'autogenerado': r.autogenerado,
-            'fecha': r.fecha,
+            'fecha': r.fecha.strftime('%Y-%d-%m') if r.fecha else None,
             'documento': r.documento,
-            'total': round(float(r.total or 0),2),
+            'total': total_convertido,
             'monto': r.monto,
             'iva': r.iva,
             'tipo': r.tipo_factura,
             'moneda': moneda_nombre,
-            'saldo': round(float(r.saldo or 0),2),
-            'imputado': 0
+            'saldo': saldo_convertido,
+            'imputado': 0,
+            'arbitraje': arbitraje,
+            'paridad': paridad
         })
 
     # Aplicar la paginación: [start:start+length] para obtener solo los registros de la página solicitada
@@ -275,6 +291,44 @@ def obtener_imputables(request):
     }
 
     return JsonResponse(response_data, safe=False)
+
+def convertir_monto(monto, origen, destino, arbitraje, paridad):
+    """
+    Convierte un monto desde 'origen' a 'destino' utilizando arbitraje y paridad.
+    origen y destino son enteros representando códigos de moneda:
+    1 = moneda nacional, 2 = dólar, otros = otras monedas (ej: euro)
+    """
+
+    try:
+        if origen == destino or monto == 0:
+            return round(monto, 2)
+
+        if destino == 1:  # convertir a moneda nacional
+            if origen == 2 and arbitraje:
+                return round(monto * arbitraje, 2)
+            elif origen not in [1, 2] and arbitraje and paridad:
+                dolares = monto / paridad
+                return round(dolares * arbitraje, 2)
+
+        elif destino == 2:  # convertir a dólares
+            if origen == 1 and arbitraje:
+                return round(monto / arbitraje, 2)
+            elif origen not in [1, 2] and paridad:
+                return round(monto / paridad, 2)
+
+        else:  # convertir a otra moneda
+            if origen == 1 and arbitraje and paridad:
+                dolares = monto / arbitraje
+                return round(dolares * paridad, 2)
+            elif origen == 2 and paridad:
+                return round(monto * paridad, 2)
+            elif origen == destino:
+                return round(monto, 2)
+
+        # Si no se puede convertir, devolver sin modificar
+        return round(monto, 2)
+    except Exception as e:
+        return str(e)
 
 def guardar_impuorden_old(request):
     try:
