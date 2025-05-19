@@ -4846,7 +4846,7 @@ function get_data_email(row,title,numero,id,transportista,master,gastos,directo)
     });
 }
 function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
-    let miurl = "/importacion_maritima/envio_notificacion_seguimiento/";
+    let miurl = "/envio_notificacion/IM/";
     var toData = {
         'to': to,
         'cc': cc,

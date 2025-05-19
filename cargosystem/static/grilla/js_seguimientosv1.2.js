@@ -1834,7 +1834,7 @@ $(document).ready(function () {
             modal: true,
             title: titulo,
             height: wHeight * 0.95,
-            width: wWidth * 0.95,
+            width: wWidth * 0.75,
             class: 'modal fade',
             buttons: [
                 {
@@ -3378,7 +3378,7 @@ function get_datos_archivos() {
 
 }
 function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
-    let miurl = "/envio_notificacion_seguimiento";
+    let miurl = "/envio_notificacion/SG/";
     var toData = {
         'to': to,
         'cc': cc,

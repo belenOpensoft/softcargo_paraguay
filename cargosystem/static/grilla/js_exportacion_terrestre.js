@@ -4647,7 +4647,7 @@ function get_data_email(row,title,numero,id,master,gastos) {
     });
 }
 function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
-    let miurl = "/exportacion_terrestre/envio_notificacion_seguimiento/";
+    let miurl = "/envio_notificacion/ET/";
     var toData = {
         'to': to,
         'cc': cc,

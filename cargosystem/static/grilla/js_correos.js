@@ -22,7 +22,18 @@ $(document).ready(function()
              "scrollX": true,
              "bAutoWidth": false,
              'dom': 'Btlipr',
+            "rowCallback": function(row, data, index) {
+                var modulo = data[11];
 
+                // Limpiar clases anteriores de la primera celda solamente
+                $('td:eq(0)', row).removeClass('bg-success bg-primary text-white');
+
+                if (modulo === 'SG') {
+                    $('td:eq(0)', row).addClass('bg-success text-white');
+                } else if (modulo) {
+                    $('td:eq(0)', row).addClass('bg-primary text-white');
+                }
+            },
              "columnDefs": [
                 {
                    "targets": [ 0 ],

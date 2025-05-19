@@ -1,153 +1,220 @@
 {% load static %}
 {% load widget_tweaks %}
 <div id="impo_marit_modal" style="display: none;">
-    <form id="impo_marit_form">
-        <br>
-        <table class="table table-borderless table-lg mimodal">
-            <tbody>
-            <tr>
-                <td style="text-align: right">{{ form.cliente.label }}</td>
-                <td>{{ form.cliente }}{{ form.id }}{{ form.modo }}</td>
-                <!-- COLUMNA DOS -->
-                <td style="text-align: right">{{ form.origen.label }}</td>
-                <td>{{ form.origen }}</td>
-                <!-- COLUMNA TRES -->
-                <td style="text-align: right">{{ form.loading.label }}</td>
-                <td>{{ form.loading }}</td>
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.embarcador.label }}</td>
-                <td>{{ form.embarcador }}</td>
-                <!-- COLUMNA DOS -->
-                <td style="text-align: right">{{ form.destino.label }}</td>
-                <td>{{ form.destino }}</td>
-                <!-- COLUMNA TRES -->
-                <td style="text-align: right">{{ form.discharge.label }}</td>
-                <td>{{ form.discharge }}</td>
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.consignatario.label }}</td>
-                <td>{{ form.consignatario }}</td>
-                <!-- COLUMNA DOS -->
-                <td style="text-align: right">{{ form.operacion.label }}</td>
-                <td>{{ form.operacion }}</td>
-                <!-- COLUMNA TRES -->
-                <td style="text-align: right">{{ form.posicion.label }}</td>
-                <td>{{ form.posicion }}</td>
+  <form id="impo_marit_form" class="container-fluid">
+          <div class="row mt-1">
+      <div class="col-md-3">
+        {{ form.modo }}
+      </div>
+      </div>
+    <div class="row mt-3">
+      <div class="col-md-3">
+        <label>{{ form.cliente.label }}</label>
+        {{ form.cliente }}{{ form.id }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.origen.label }}</label>
+        {{ form.origen }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.loading.label }}</label>
+        {{ form.loading }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.embarcador.label }}</label>
+        {{ form.embarcador }}
+      </div>
+    </div>
 
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.notificar.label }}</td>
-                <td>{{ form.notificar }}</td>
-                <!-- COLUMNA DOS -->
-                <td style="text-align: right">{{ form.moneda.label }}</td>
-                <td>{{ form.moneda }}</td>
-                <!-- COLUMNA TRES -->
-                <td style="text-align: right">{{ form.arbitraje.label }}</td>
-                <td>{{ form.arbitraje }}</td>
+    <div class="row">
+      <div class="col-md-3">
+        <label>{{ form.destino.label }}</label>
+        {{ form.destino }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.discharge.label }}</label>
+        {{ form.discharge }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.consignatario.label }}</label>
+        {{ form.consignatario }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.operacion.label }}</label>
+        {{ form.operacion }}
+      </div>
+    </div>
 
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.agente.label }}</td>
-                <td>{{ form.agente }}</td>
-                <!-- COLUMNA DOS -->
-                <td style="text-align: right">{{ form.vendedor.label }}</td>
-                <td>{{ form.vendedor }}</td>
-                <!-- COLUMNA TRES -->
-                <td style="text-align: right">{{ form.pago.label }}</td>
-                <td>{{ form.pago }}</td>
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.transportista.label }}</td>
-                <td>{{ form.transportista }}</td>
-                <!-- COLUMNA DOS -->
-                <td style="text-align: right">{{ form.vapor.label }}</td>
-                <td>{{ form.vapor }}</td>
-                <!-- COLUMNA TRES -->
-                <td style="text-align: right">{{ form.viaje.label }}</td>
-                <td>{{ form.viaje }}</td>
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.armador.label }}</td>
-                <td>{{ form.armador }}</td>
-                <!-- COLUMNA DOS -->
-                <td style="text-align: right">{{ form.deposito.label }}</td>
-                <td>{{ form.deposito }}</td>
-                <!-- COLUMNA TRES -->
-                <td style="text-align: right">{{ form.ubicacion.label }}</td>
-                <td>{{ form.ubicacion }}</td>
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.agecompras.label }}</td>
-                <td>{{ form.agecompras }}</td>
-                <!-- COLUMNA DOS -->
-                <td style="text-align: right">{{ form.awb.label }}</td>
-                <td>{{ form.awb }}</td>
-                <!-- COLUMNA TRES -->
-                <td style="text-align: right">{{ form.booking.label }}</td>
-                <td>{{ form.booking }}</td>
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.ageventas.label }}</td>
-                <td>{{ form.ageventas }}</td>
-                <!-- COLUMNA DOS -->
-                <td style="text-align: right">{{ form.hawb.label }}</td>
-                <td>{{ form.hawb }}</td>
-                <!-- COLUMNA TRES -->
-                <td style="text-align: right">{{ form.trackid.label }}</td>
-                <td>{{ form.trackid }}</td>
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.terminos.label }}</td>
-                <td>{{ form.terminos }}</td>
-                <td style="text-align: right">{{ form.fecha.label }}</td>
-                <td>{{ form.fecha }}</td>
-                <td style="text-align: right">{{ form.vencimiento.label }}</td>
-                <td>{{ form.vencimiento }}</td>
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.loadingdate.label }}</td>
-                <td>{{ form.loadingdate }}</td>
-                <td style="display:none">{{ form.tomopeso }}</td>
-                <td style="text-align: right">{{ form.volumen.label }}</td>
-                <td>{{ form.volumen }}</td>
-                <td style="text-align: right">{{ form.despachante.label }}</td>
-                <td>{{ form.despachante }}</td>
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.diasalmacenaje.label }}</td>
-                <td>{{ form.diasalmacenaje }}</td>
-                <td style="text-align: right">{{ form.proyecto.label }}</td>
-                <td>{{ form.proyecto }}</td>
-                <td style="text-align: right">{{ form.observaciones.label }}</td>
-                <td>
-                    {{ form.observaciones }}
-                </td>
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.wreceipt.label }}</td>
-                <td>{{ form.wreceipt }}</td>
-                <td style="text-align: right">{{ form.actividad.label }}</td>
-                <td>{{ form.actividad }}</td>
-                <td style="text-align: right">{{ form.valor.label }}</td>
-                <td>{{ form.valor }}</td>
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.demora.label }}</td>
-                <td>{{ form.demora }}</td>
-                <td style="text-align: right">{{ form.status.label }}</td>
-                <td>{{ form.status }}</td>
+    <div class="row">
+      <div class="col-md-3">
+        <label>{{ form.posicion.label }}</label>
+        {{ form.posicion }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.notificar.label }}</label>
+        {{ form.notificar }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.moneda.label }}</label>
+        {{ form.moneda }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.arbitraje.label }}</label>
+        {{ form.arbitraje }}
+      </div>
+    </div>
 
-            </tr>
-            <tr>
-                <td style="text-align: right">{{ form.refproveedor.label }}</td>
-                <td>{{ form.refproveedor }}</td>
-                <td style="text-align: right">{{ form.refcliente.label }}</td>
-                <td>{{ form.refcliente }}</td>
-                <td style="text-align: right">{{ form.contratotra.label }}</td>
-                <td>{{ form.contratotra }}</td>
-            </tr>
-            </tbody>
-        </table>
-    </form>
+    <div class="row">
+      <div class="col-md-3">
+        <label>{{ form.agente.label }}</label>
+        {{ form.agente }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.vendedor.label }}</label>
+        {{ form.vendedor }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.pago.label }}</label>
+        {{ form.pago }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.transportista.label }}</label>
+        {{ form.transportista }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-3">
+        <label>{{ form.vapor.label }}</label>
+        {{ form.vapor }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.viaje.label }}</label>
+        {{ form.viaje }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.armador.label }}</label>
+        {{ form.armador }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.deposito.label }}</label>
+        {{ form.deposito }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-3">
+        <label>{{ form.ubicacion.label }}</label>
+        {{ form.ubicacion }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.agecompras.label }}</label>
+        {{ form.agecompras }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.awb.label }}</label>
+        {{ form.awb }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.booking.label }}</label>
+        {{ form.booking }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-3">
+        <label>{{ form.ageventas.label }}</label>
+        {{ form.ageventas }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.hawb.label }}</label>
+        {{ form.hawb }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.trackid.label }}</label>
+        {{ form.trackid }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.terminos.label }}</label>
+        {{ form.terminos }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-3">
+        <label>{{ form.fecha.label }}</label>
+        {{ form.fecha }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.vencimiento.label }}</label>
+        {{ form.vencimiento }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.loadingdate.label }}</label>
+        {{ form.loadingdate }}
+        {{ form.tomopeso }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.volumen.label }}</label>
+        {{ form.volumen }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-3">
+        <label>{{ form.despachante.label }}</label>
+        {{ form.despachante }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.diasalmacenaje.label }}</label>
+        {{ form.diasalmacenaje }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.proyecto.label }}</label>
+        {{ form.proyecto }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.observaciones.label }}</label>
+        {{ form.observaciones }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-3">
+        <label>{{ form.wreceipt.label }}</label>
+        {{ form.wreceipt }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.actividad.label }}</label>
+        {{ form.actividad }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.valor.label }}</label>
+        {{ form.valor }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.demora.label }}</label>
+        {{ form.demora }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-3">
+        <label>{{ form.status.label }}</label>
+        {{ form.status }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.refproveedor.label }}</label>
+        {{ form.refproveedor }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.refcliente.label }}</label>
+        {{ form.refcliente }}
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.contratotra.label }}</label>
+        {{ form.contratotra }}
+      </div>
+    </div>
+  </form>
 </div>

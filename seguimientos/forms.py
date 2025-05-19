@@ -151,9 +151,16 @@ class seguimientoForm(BSModalModelForm):
             'demora': 'Dias de demora',
             'contratotra': 'Contrato transport.',
         }
+        MODOS_CHOICES = [
+            ('IMPORT MARITIMO', 'IMPORT MARÍTIMO'),
+            ('EXPORT MARITIMO', 'EXPORT MARÍTIMO'),
+            ('IMPORT AEREO', 'IMPORT AÉREO'),
+            ('EXPORT AEREO', 'EXPORT AÉREO'),
+            ('IMPORT TERRESTRE', 'IMPORT TERRESTRE'),
+            ('EXPORT TERRESTRE', 'EXPORT TERRESTRE'),
+        ]
         widgets = {
-            # 'cliente': autocomplete.ModelSelect2(url='cliente_autocomplete')
-            'modo': forms.HiddenInput(),
+            'modo': forms.Select(choices=MODOS_CHOICES, attrs={'class': 'form-control form-control-sm'}),
         }
         attrs = {
             'deposito' : "tabindex=16;",

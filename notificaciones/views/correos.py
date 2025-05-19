@@ -15,13 +15,18 @@ from django.core.mail import EmailMessage
 from django.http import  HttpResponse
 
 from cargosystem.settings import BASE_DIR
+from expaerea.models import ExportEmbarqueaereo
+from expmarit.models import ExpmaritEmbarqueaereo
+from expterrestre.models import ExpterraEmbarqueaereo
+from impaerea.models import ImportEmbarqueaereo
+from impomarit.models import Embarqueaereo
+from impterrestre.models import ImpterraEmbarqueaereo
 from login.models import CorreoEnviado, Account
 from cargosystem import settings
 from login.views.correos import is_ajax
 from seguimientos.models import Attachhijo, Faxes, Seguimiento
 
-
-def envio_notificacion_seguimiento(request):
+def envio_notificacion_seguimiento(request,modulo=None):
     resultado = {}
     if is_ajax(request):
         try:
@@ -30,8 +35,29 @@ def envio_notificacion_seguimiento(request):
             cco = request.POST['cco'].split(';') if (request.POST['cco'] is not None and request.POST['cco']) else []
             tipo = request.POST['tipo']
             seguimiento = request.POST['seguimiento']
-            aux = Seguimiento.objects.get(numero=seguimiento)
-            num_seg = str(aux.numero) + ' ' + str(aux.modo)
+            num_seg = ''
+            if modulo == 'SG':
+                aux = Seguimiento.objects.get(numero=seguimiento)
+                num_seg = str(aux.numero) + ' ' + str(aux.modo)
+            elif modulo == 'IA':
+                aux = ImportEmbarqueaereo.objects.get(numero=seguimiento).seguimiento
+                num_seg = str(aux) + ' IMPORT AEREO'
+            elif modulo == 'IM':
+                aux = Embarqueaereo.objects.get(numero=seguimiento).seguimiento
+                num_seg = str(aux) + ' IMPORT MARITIMO'
+            elif modulo == 'IT':
+                aux = ImpterraEmbarqueaereo.objects.get(numero=seguimiento).seguimiento
+                num_seg = str(aux) + ' IMPORT TERRESTRE'
+            elif modulo == 'EA':
+                aux = ExportEmbarqueaereo.objects.get(numero=seguimiento).seguimiento
+                num_seg = str(aux) + ' EXPORT AEREO'
+            elif modulo == 'EM':
+                aux = ExpmaritEmbarqueaereo.objects.get(numero=seguimiento).seguimiento
+                num_seg = str(aux) + ' EXPORT MARITIMO'
+            elif modulo == 'ET':
+                aux = ExpterraEmbarqueaereo.objects.get(numero=seguimiento).seguimiento
+                num_seg = str(aux) + ' EXPORT TERRESTRE'
+
             adjuntos = simplejson.loads(request.POST['archivos_adjuntos'])
             subject = request.POST['subject']
             message = request.POST['message']
@@ -42,7 +68,7 @@ def envio_notificacion_seguimiento(request):
                 firma = user[0].firma
                 name_firma = user[0].firma.name
 
-                if envio_correo_electronico(message,to,subject,adjuntos,cc,cco,tipo=tipo,seguimiento=num_seg,usuario=request.user,emisor=usuario,clave=clave,name_firma=name_firma):
+                if envio_correo_electronico(message,to,subject,adjuntos,cc,cco,tipo=tipo,seguimiento=num_seg,usuario=request.user,emisor=usuario,clave=clave,name_firma=name_firma,modulo=modulo):
                     fx = Faxes()
                     fx.fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
                     fx.numero = seguimiento
@@ -62,9 +88,7 @@ def envio_notificacion_seguimiento(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
-
-
-def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave=None,seguimiento=None,usuario=None,empresa='', tipo='PRUEBA', archivos=None, emisor=None,name_firma=None):
+def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave=None,seguimiento=None,usuario=None,empresa='', tipo='PRUEBA', archivos=None, emisor=None,name_firma=None,modulo=None):
     correo = CorreoEnviado()
     try:
         # Crear el mensaje HTML con la imagen incrustada
@@ -111,6 +135,9 @@ def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave
             if len(co) > 0:
                 correo.enviado_a += ';' + co
         correo.enviado_a = correo.enviado_a[1:]
+        if modulo:
+            correo.modulo = modulo
+
         correo.tipo = tipo
         correo.usuario = usuario
         correo.seguimiento = seguimiento
@@ -143,46 +170,4 @@ def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave
 
 
 
-#
-# def envio_correo_electronico2(mensaje,remitentes,titulo,adjuntos,usuario=None,empresa='',tipo='PRUEBA',archivos=None,emisor=None):
-#     try:
-#         """ GUARDO CORREO A ENVIAR """
-#         with open(str(settings.BASE_DIR) + '/cargosystem/static/images/oceanlink.png', 'rb') as image_file:
-#             image_data = base64.b64encode(image_file.read()).decode('utf-8')
-#         mensaje += ' <img src="data:image/png;base64,' + image_data + '">'
-#         correo = CorreoEnviado()
-#         correo.correo = empresa
-#         correo.fecha = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-#         correo.enviado_a = remitentes
-#         correo.tipo = tipo
-#         correo.usuario = usuario
-#         correo.mensaje = mensaje
-#         """ ENVIO MAIL """
-#         from django.core.mail import EmailMessage
-#         """VALIDAR EMAIL """
-#         try:
-#             html_content = f'<html><body>' + mensaje + '</body></html>'
-#             email = EmailMessage(titulo, html_content, to=remitentes)
-#             if emisor is None:
-#                 email.from_email = settings.EMAIL_HOST_USER
-#             else:
-#                 email.from_email = emisor
-#             email.content_subtype = 'HTML'
-#             for a in adjuntos:
-#                 documento = Attachhijo.objects.get(id=a)
-#                 path_to_file = default_storage.path(documento.archivo.url[7:])
-#                 file_path = os.path.join(settings.MEDIA_ROOT, path_to_file)
-#                 email.attach_file(file_path)
-#             email.send()
-#             correo.estado = 'ENVIADO'
-#             correo.save()
-#             return True
-#         except Exception as e:
-#             correo.estado = 'FALLIDO'
-#             correo.error = str(e)
-#             correo.save()
-#             return False
-#     except Exception as e:
-#        raise TypeError(e)
-#
 

@@ -99,6 +99,7 @@ def __get_data(emails_filtrados):
             email_json.append('' if email.usuario is None else str(email.usuario))
             email_json.append('' if email.error is None else str(email.error))
             email_json.append('' if email.mensaje is None else str(email.mensaje))
+            email_json.append('' if email.modulo is None else str(email.modulo))
             data.append(email_json)
         return data
     except Exception as e:

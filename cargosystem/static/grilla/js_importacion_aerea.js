@@ -4449,7 +4449,7 @@ function get_data_email(row,title,numero,id,transportista,master,gastos,directo)
     });
 }
 function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
-    let miurl = "/importacion_aerea/envio_notificacion_seguimiento/";
+    let miurl = "/envio_notificacion/IA/";
     var toData = {
         'to': to,
         'cc': cc,

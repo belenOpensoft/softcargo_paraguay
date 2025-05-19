@@ -84,7 +84,7 @@ urlpatterns = [
     path('get_name_by_id/', get_name_by_id, name='get_name_by_id'),
     path('get_name_by_id_vendedor/', get_name_by_id_vendedores, name='get_name_by_id_vendedor'),
     path('source_seguimientos_modo/<str:modo>/', source_seguimientos_modo, name="source_seguimientos_modo"),
-    path('envio_notificacion_seguimiento/', envio_notificacion_seguimiento, name="envio_notificacion_seguimiento"),
+
     path('descargar_awb/<int:row_id>/', descargar_awb_operativas, name='descargar_awb'),
     path('descargar_awb_draft/<int:row_id>/<str:draft>', descargar_awb_operativas, name='descargar_awb'),
     path('descargar_hawb/<int:row_id>/', descargar_hawb_operativas, name='descargar_hawb'),

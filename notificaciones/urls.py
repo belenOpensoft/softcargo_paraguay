@@ -34,5 +34,7 @@ from notificaciones.views.correos import envio_notificacion_seguimiento
 
 urlpatterns = [
     ### CIUDADES ###
-    path('envio_notificacion_seguimiento', envio_notificacion_seguimiento, name="envio_notificacion_seguimiento"),
+    path('envio_notificacion', envio_notificacion_seguimiento, name="envio_notificacion"),
+    path('envio_notificacion/<str:modulo>/', envio_notificacion_seguimiento,name="envio_notificacion"),
+
 ]
