@@ -69,7 +69,7 @@ $(document).ready(function()
                 }
 
             ],
-            "order": [[ 1, "asc" ]],
+            "order": [[ 1, "desc" ]],
             "processing": true,
             "serverSide": true,
             "ajax": "/source_correos",

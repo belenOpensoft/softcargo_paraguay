@@ -21,6 +21,7 @@ from impaerea.forms import add_im_form, add_form, add_house, edit_form, edit_hou
 from impaerea.models import Master, ImportReservas, ImportEmbarqueaereo, VEmbarqueaereo, ImportAttachhijo, \
     ImportCargaaerea, \
     ImportServiceaereo, ImportConexaerea, ImportFaxes, VEmbarqueaereoDirecto
+from impomarit.views.logs_general import obtener_logs_generico
 from seguimientos.forms import archivosForm, pdfForm
 
 
@@ -688,6 +689,9 @@ def modificar_fecha_retiro(request):
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
 
+def source_logs(request):
+    modelos_secundarios = [ImportConexaerea, ImportCargaaerea,ImportServiceaereo,ImportAttachhijo]
+    return obtener_logs_generico(request, ImportEmbarqueaereo, 'numero', modelos_secundarios)
 
 def buscar_registros(request):
     if request.method == "POST":

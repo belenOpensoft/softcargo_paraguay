@@ -18,6 +18,7 @@ var row_selected_embarque = 0;
 var row_selected_archivo = 0;
 var row_selected_ruta = 0;
 var row_number = 0;
+var row_id = 0;
 var row_number_embarque = 0;
 var row_number_archivo = 0;
 var row_number_envase = 0;
@@ -227,6 +228,7 @@ $(document).ready(function () {
             $('td:eq(1)', row).html(texto + " " +  data[1] + " ");
             if (data[0] === row_selected) {
                 row_number = data[1];
+                row_id = data[0];
                 $(row).addClass('table-secondary');
             }
         },
@@ -1157,7 +1159,7 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
             let id = row[0][0];
-            if(confirm('¿Realmente desea eliminar el seguimiento: '+row[0][1]+'? Esta acción es irreversible.')){
+            if(confirm('¿Realmente desea cancelar el seguimiento: '+row[0][1]+'?')){
                 eliminar_seguimiento(id);
             }
         } else {
@@ -3098,6 +3100,7 @@ function get_datos_seguimiento_rutas(numero) {
     });
 }
 function get_datos_logs() {
+    row = table.rows('.table-secondary').data();
     $("#tabla_logs").dataTable().fnDestroy();
     table_logs = $('#tabla_logs').DataTable({
         "order": [[2, "desc"], [1, "desc"]],
@@ -3105,9 +3108,6 @@ function get_datos_logs() {
             {
                 "targets": [ 0 ],
                 "orderable": false,
-                "data": null,
-                "defaultContent": '',
-                "visible": false
             },
         ],
         "processing": true,
@@ -3123,21 +3123,25 @@ function get_datos_logs() {
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
-                    "numero": row_number,
+                    "id": row[0][0],'numero':row_number
                 });
             }
-        }, "columnDefs": [
-            {
-                "targets": [0],
-                "className": 'details-control',
-                "orderable": false,
-                "data": null,
-                "defaultContent": '',
-                render: function (data, type, row) {
+        },
+        "rowCallback": function(row, data, index) {
+            // data[3] es la columna 'Acción' => Created / Updated / Deleted
+            var accion = data[3].toLowerCase();
 
-                }
-            },
-        ]
+            // Limpiar clases anteriores
+            $(row).removeClass('table-success table-warning table-danger');
+
+            if (accion === 'create') {
+                $(row).addClass('table-success');
+            } else if (accion === 'update') {
+                $(row).addClass('table-warning');
+            } else if (accion === 'delete') {
+                $(row).addClass('table-danger');
+            }
+        }
     });
 
 }

@@ -10665,3 +10665,25 @@ class VItemsVenta(models.Model):
     class Meta:
         managed = False  # Indicates that this model represents a database view
         db_table = 'VItemsVenta'
+
+
+from auditlog.registry import auditlog
+from auditlog.models import AuditlogHistoryField
+
+class MyModel(models.Model):
+    history = AuditlogHistoryField()
+    # Model definition goes here
+
+
+auditlog.register(MyModel)
+
+from inspect import getmembers
+from auditlog.registry import auditlog
+from administracion_contabilidad import models
+
+tablas = getmembers(models)
+for t in tablas:
+    try:
+        auditlog.register(t[1], serialize_data=True)
+    except Exception as e:
+        pass

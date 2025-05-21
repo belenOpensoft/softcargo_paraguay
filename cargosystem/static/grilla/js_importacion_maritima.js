@@ -47,7 +47,6 @@ let table_add_im;
 let table_edit_im;
 $(document).ready(function () {
 
-
      $('input.autocomplete').on('keydown', function(event) {
         var keyCode = event.keyCode || event.which;
 
@@ -5636,3 +5635,77 @@ function abrir_modal_mails(e){
     });
 }
 
+//mostrar logs
+function get_datos_logs() {
+
+    row = table_edit_im.rows('.table-secondary').data();
+        if (row.length === 1) {
+            $("#logs_modal").dialog({
+                autoOpen: true,
+                open: function () {
+
+                },
+                modal: true,
+                title: "Log de interacciones para en el embarque N°: " + row[0][3],
+                height: wHeight * 0.90,
+                width: wWidth * 0.90,
+                class: 'modal fade',
+                buttons: [ {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        },
+                    },],
+                beforeClose: function (event, ui) {
+
+                }
+            });
+            $("#tabla_logs").dataTable().fnDestroy();
+            table_logs = $('#tabla_logs').DataTable({
+        "order": [[2, "desc"], [1, "desc"]],
+        "columnDefs": [
+            {
+                "targets": [ 0 ],
+                "orderable": false,
+            },
+        ],
+        "processing": true,
+        "serverSide": true,
+        "dom": 'Btlipr',
+        "scrollX": true,
+        "pageLength": 100,
+        "language": {
+            url: "/static/datatables/es_ES.json"
+        },
+        "ajax": {
+            "url": "/importacion_maritima/source_logs/",
+            'type': 'GET',
+            "data": function (d) {
+                return $.extend({}, d, {
+                    "id": row[0][0],'numero':row[0][3]
+                });
+            }
+        },
+        "rowCallback": function(row, data, index) {
+            // data[3] es la columna 'Acción' => Created / Updated / Deleted
+            var accion = data[3].toLowerCase();
+
+            // Limpiar clases anteriores
+            $(row).removeClass('table-success table-warning table-danger');
+
+            if (accion === 'create') {
+                $(row).addClass('table-success');
+            } else if (accion === 'update') {
+                $(row).addClass('table-warning');
+            } else if (accion === 'delete') {
+                $(row).addClass('table-danger');
+            }
+        }
+    });
+        } else {
+            alert('Debe seleccionar al menos un registro');
+        }
+
+}

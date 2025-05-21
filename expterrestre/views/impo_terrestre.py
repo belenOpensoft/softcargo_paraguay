@@ -19,6 +19,7 @@ from expterrestre.forms import add_im_form, add_form, add_house, edit_form, edit
 from expterrestre.models import Master, ExpterraEmbarqueaereo, VEmbarqueaereo, ExpterraAttachhijo, ExpterraCargaaerea, \
     ExpterraEnvases, \
     ExpterraServiceaereo, ExpterraConexaerea, ExpterraFaxes, VEmbarqueaereoDirecto
+from impomarit.views.logs_general import obtener_logs_generico
 from seguimientos.forms import archivosForm, pdfForm
 
 
@@ -605,6 +606,9 @@ def modificar_fecha_retiro(request):
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
 
+def source_logs(request):
+    modelos_secundarios = [ExpterraConexaerea, ExpterraCargaaerea,ExpterraServiceaereo,ExpterraAttachhijo,ExpterraEnvases]
+    return obtener_logs_generico(request, ExpterraEmbarqueaereo, 'numero', modelos_secundarios)
 
 def buscar_registros(request):
     if request.method == "POST":

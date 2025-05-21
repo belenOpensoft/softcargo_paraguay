@@ -684,7 +684,7 @@ class edit_house(BSModalModelForm):
                'readonly': True, 'id': 'posicion_gh_e'}))
 
     agente = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control input-sobrepasar', 'id': 'agente_addh_e', 'required': False}))
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'agente_addh_e', 'required': False}),required=False)
     transportista = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control input-sobrepasar', 'id': 'transportista_addh_e', 'required': False}))
     armador = forms.CharField(widget=forms.TextInput(

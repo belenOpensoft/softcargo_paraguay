@@ -12,7 +12,8 @@ from impterrestre.views.house import add_house, add_house_impmarit, edit_house_f
 from impterrestre.views.impo_terrestre import master_importacion_maritima, source_importacion_master, \
     source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
-    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros
+    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros, \
+    source_logs
 from impterrestre.views.mails import get_data_email_op
 from impterrestre.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
 from impterrestre.views.notas import guardar_notas, source, eliminar_nota
@@ -84,6 +85,7 @@ urlpatterns = [
     path('get_name_by_id_vendedor/', get_name_by_id_vendedores, name='get_name_by_id_vendedor'),
     path('source_seguimientos_modo/<str:modo>/', source_seguimientos_modo, name="source_seguimientos_modo"),
 
+    path('source_logs/', source_logs, name="source_logs"),
 
 ]
 

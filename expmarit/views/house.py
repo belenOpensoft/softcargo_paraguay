@@ -581,11 +581,16 @@ def eliminar_house(request):
     try:
         id = request.POST['id']
         embarque=ExpmaritEmbarqueaereo.objects.filter(numero=id).first()
+        embarque.trackid=id
+        embarque.save()
+        """
         ExpmaritEmbarqueaereo.objects.get(numero=id).delete()
         ExpmaritCargaaerea.objects.filter(numero=id).delete()
         ExpmaritConexaerea.objects.filter(numero=id).delete()
         ExpmaritServiceaereo.objects.filter(numero=id).delete()
         ExpmaritEnvases.objects.filter(numero=id).delete()
+        """
+
         seguimiento = Seguimiento.objects.filter(numero=embarque.seguimiento).first()
         if embarque:
             if seguimiento:

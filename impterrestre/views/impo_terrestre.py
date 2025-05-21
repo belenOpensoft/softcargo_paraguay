@@ -14,6 +14,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, Http40
 from django.shortcuts import render
 
 from cargosystem.settings import RUTA_PROYECTO
+from impomarit.views.logs_general import obtener_logs_generico
 from impterrestre.forms import add_im_form, add_form, add_house, edit_form, edit_house, gastosForm, gastosFormHouse, \
     rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse, NotasForm
 from impterrestre.models import Master, ImpterraReservas, ImpterraEmbarqueaereo, VEmbarqueaereo, ImpterraAttachhijo, \
@@ -307,6 +308,9 @@ def source_embarque_aereo_full(request, master):
     else:
         return HttpResponse("fail", content_type="application/json")
 
+def source_logs(request):
+    modelos_secundarios = [ImpterraConexaerea, ImpterraCargaaerea,ImpterraServiceaereo,ImpterraAttachhijo,ImpterraEnvases]
+    return obtener_logs_generico(request, ImpterraEmbarqueaereo, 'numero', modelos_secundarios)
 
 #traer datos houses tabla
 def source_embarque_aereo(request):

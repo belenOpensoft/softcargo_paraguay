@@ -14,7 +14,8 @@ from seguimientos.forms import NotasForm, seguimientoForm, cronologiaForm, envas
     pdfForm, archivosForm, rutasForm, emailsForm, clonarForm
 from seguimientos.models import VGrillaSeguimientos as Seguimiento, Seguimiento as SeguimientoReal, Envases, Cargaaerea, \
     Attachhijo, Serviceaereo, Conexaerea, Faxes
-
+from auditlog.models import LogEntry
+from django.contrib.contenttypes.models import ContentType
 
 @login_required(login_url='/')
 def grilla_seguimientos(request):
@@ -101,10 +102,8 @@ def source_seguimientos(request):
         end = start + length
         order = get_order(request, columns_table)
         """FILTRO REGISTROS"""
-        if filtro:
-            registros = Seguimiento.objects.filter(**filtro).order_by(*order)
-        else:
-            registros = Seguimiento.objects.all().order_by(*order)
+        filtro['nroreferedi__isnull'] = True
+        registros = Seguimiento.objects.filter(**filtro).order_by(*order)
         """PREPARO DATOS"""
         resultado = {}
         data = get_data(registros[start:end])
@@ -149,10 +148,9 @@ def source_seguimientos_modo(request, modo):
         ids_agregados = request.GET.getlist('ids_agregados[]')
 
         """FILTRO REGISTROS"""
-        if filtro:
-            registros = Seguimiento.objects.filter(**filtro).order_by(*order)
-        else:
-            registros = Seguimiento.objects.all().order_by(*order)
+        filtro['nroreferedi__isnull'] = True
+        registros = Seguimiento.objects.filter(**filtro).order_by(*order)
+
 
         # Excluir los registros que están en el array de 'agregados', solo si no está vacío
         if ids_agregados:
@@ -640,7 +638,7 @@ def guardar_seguimiento(request):
                         setattr(registro, name, None)
                     continue
 
-        registro.modo = tipo
+        #registro.modo = tipo
 
         if 'id' in data and data['id'][0] != '':
             registro.id = data['id'][0]
@@ -675,15 +673,15 @@ def eliminar_seguimiento(request):
         id = request.POST['id']
         seguimiento = SeguimientoReal.objects.get(id=id)
         numero = seguimiento.numero  # Obtener el número antes de borrar el seguimiento
-
+        seguimiento.nroreferedi=numero
         # Eliminar registros relacionados
-        Cargaaerea.objects.filter(numero=numero).delete()
-        Conexaerea.objects.filter(numero=numero).delete()
-        Serviceaereo.objects.filter(numero=numero).delete()
-        Envases.objects.filter(numero=numero).delete()
+        #Cargaaerea.objects.filter(numero=numero).delete()
+        #Conexaerea.objects.filter(numero=numero).delete()
+        #Serviceaereo.objects.filter(numero=numero).delete()
+        #Envases.objects.filter(numero=numero).delete()
 
         # Eliminar el seguimiento
-        seguimiento.delete()
+        seguimiento.save()
         resultado['resultado'] = 'exito'
 
     except IntegrityError:
@@ -777,6 +775,7 @@ def clonar_seguimiento(request):
         clonado.awb = None
         clonado.hawb = None
         clonado.posicion = None
+        clonado.embarque = None
         clonado.numero = numero + 1
         clonado.fecha = datetime.now().date()
         clonado.vapor = None
@@ -839,6 +838,19 @@ def clonar_seguimiento(request):
             clonado.eta = None
 
         clonado.save()
+
+        # Crear entrada extra en LogEntry que indique que esto fue un clonado
+        LogEntry.objects.create(
+            content_type=ContentType.objects.get_for_model(SeguimientoReal),
+            object_pk=str(clonado.id),
+            object_repr=str(clonado),
+            action=1,  # UPDATE (para que no sea confundido con create)
+            actor=request.user,
+            changes='{"info": ["", "Clonado desde seguimiento %s"]}' % original.numero,
+            timestamp=datetime.now()
+        )
+        print("Se creó log con PK:", clonado.id)
+
         resultado['resultado'] = 'exito'
         resultado['numero'] = str(clonado.numero)
     except IntegrityError as e:

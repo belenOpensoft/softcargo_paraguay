@@ -567,11 +567,16 @@ def eliminar_house(request):
     try:
         id = request.POST['id']
         embarque=ExpterraEmbarqueaereo.objects.filter(numero=id).first()
+        embarque.trackid=id
+        embarque.save()
+        """
         ExpterraEmbarqueaereo.objects.get(numero=id).delete()
         ExpterraCargaaerea.objects.filter(numero=id).delete()
         ExpterraConexaerea.objects.filter(numero=id).delete()
         ExpterraServiceaereo.objects.filter(numero=id).delete()
         ExpterraEnvases.objects.filter(numero=id).delete()
+        """
+
         seguimiento = Seguimiento.objects.filter(numero=embarque.seguimiento).first()
         if embarque:
             if seguimiento:

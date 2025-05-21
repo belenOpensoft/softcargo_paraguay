@@ -18,6 +18,7 @@ from impomarit.forms import add_im_form, add_form, add_house, edit_form, edit_ho
     rutasFormHouse, emailsForm, envasesFormHouse, embarquesFormHouse, NotasForm
 from impomarit.models import Master, Embarqueaereo, VEmbarqueaereo, VEmbarqueaereoDirecto, Attachhijo, Cargaaerea, Envases, \
     Serviceaereo, Conexaerea, Faxes, Reservas
+from impomarit.views.logs_general import obtener_logs_generico
 from seguimientos.forms import archivosForm, pdfForm
 
 
@@ -739,3 +740,6 @@ def buscar_registros(request):
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
 
+def source_logs(request):
+    modelos_secundarios = [Conexaerea, Cargaaerea,Serviceaereo,Envases,Attachhijo]
+    return obtener_logs_generico(request, Embarqueaereo, 'numero', modelos_secundarios)

@@ -10,7 +10,8 @@ from expaerea.views.house import add_house_impmarit, edit_house_function, house_
     generar_posicion, source_embarque_importado, source_archivos_importado
 from expaerea.views.exp_aerea import master_expo_aerea, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
-    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros
+    descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros, \
+    source_logs
 from expaerea.views.master import master_detail, add_importacion_maritima, edit_master, get_name_by_id, \
     consultar_seguimientos
 
@@ -84,6 +85,7 @@ urlpatterns = [
     path('get_name_by_id/', get_name_by_id, name='get_name_by_id'),
     path('get_name_by_id_vendedor/', get_name_by_id_vendedores, name='get_name_by_id_vendedor'),
     path('source_seguimientos_modo/<str:modo>/', source_seguimientos_modo, name="source_seguimientos_modo"),
+    path('source_logs/', source_logs, name="source_logs"),
 
     path('descargar_awb/<int:row_id>/', descargar_awb_operativas, name='descargar_awb'),
     path('descargar_awb_draft/<int:row_id>/<str:draft>', descargar_awb_operativas, name='descargar_awb'),

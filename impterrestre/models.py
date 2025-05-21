@@ -1,3 +1,4 @@
+from auditlog.models import AuditlogHistoryField
 from django.db import models
 
 from mantenimientos.models import Productos
@@ -799,3 +800,24 @@ class VGastosHouse(models.Model):
     class Meta:
         managed = False
         db_table = 'VImpTerrestreGastosHouse'
+
+
+from auditlog.registry import auditlog
+
+class MyModel(models.Model):
+    history = AuditlogHistoryField()
+    # Model definition goes here
+
+
+auditlog.register(MyModel)
+
+from inspect import getmembers
+from auditlog.registry import auditlog
+from impterrestre import models
+
+tablas = getmembers(models)
+for t in tablas:
+    try:
+        auditlog.register(t[1], serialize_data=True)
+    except Exception as e:
+        pass

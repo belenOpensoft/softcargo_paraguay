@@ -14,7 +14,7 @@ from django.db import transaction
 def consultar_seguimientos(request):
     if request.method == 'POST':
         awb_number = request.POST.get('awb_number')
-        seguimientos = Seguimiento.objects.filter(awb=awb_number).values('fecha', 'numero', 'cliente', 'origen', 'destino', 'status')
+        seguimientos = Seguimiento.objects.filter(awb=awb_number,nroreferedi__isnull=True).values('fecha', 'numero', 'cliente', 'origen', 'destino', 'status')
         data = list(seguimientos)
         return JsonResponse({'data': data})
     return JsonResponse({'error': 'Método no permitido'}, status=405)

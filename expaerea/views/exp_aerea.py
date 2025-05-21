@@ -20,6 +20,7 @@ from expaerea.forms import add_im_form, add_form, add_house, edit_form, edit_hou
     rutasFormHouse, emailsForm, embarquesFormHouse, NotasForm, rutasFormMaster
 from expaerea.models import Master, ExportEmbarqueaereo, VEmbarqueaereo,VEmbarqueaereoDirecto, ExportAttachhijo, ExportCargaaerea, \
     ExportServiceaereo, ExportConexaerea, ExportFaxes
+from impomarit.views.logs_general import obtener_logs_generico
 from seguimientos.forms import archivosForm, pdfForm
 
 
@@ -725,3 +726,7 @@ def buscar_registros(request):
         return JsonResponse({"resultados": list(resultados)}, safe=False)
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
+
+def source_logs(request):
+    modelos_secundarios = [ExportConexaerea, ExportCargaaerea,ExportServiceaereo,ExportAttachhijo]
+    return obtener_logs_generico(request, ExportEmbarqueaereo, 'numero', modelos_secundarios)
