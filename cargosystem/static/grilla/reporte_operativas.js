@@ -116,7 +116,8 @@ $(document).ready(function () {
         var $row = $(this).closest("tr");
         var prefId = $row.data("preferencia-id");
 
-        var selectedColumnsStr = $row.find("td").eq(3).text().trim();
+        var selectedColumnsStr = $row.find("td").eq(4).text().trim();
+
 
         var selectedArray = selectedColumnsStr.split(",").map(function(item) {
             return item.trim();
@@ -183,19 +184,19 @@ function modal_columnas() {
         width: 600,
         position: {
             my: "center top", // Centrar horizontalmente y posicionar desde la parte superior
-            at: "center top+20", // Agregar desplazamiento de 20px desde la parte superior
+            at: "center top", // Agregar desplazamiento de 20px desde la parte superior
             of: window // Referencia a la ventana del navegador
         },
         buttons: [
          {
-            class: "btn btn-primary",
+            class: "btn btn-primary btn-sm",
             text: "Generar Reporte",
             click: function () {
                 triggerFormSubmit();
             }
         },
         {
-            class: "btn btn-dark",
+            class: "btn btn-dark btn-sm",
             style: "width:100px",
             text: "Cerrar",
             click: function () {
@@ -222,7 +223,7 @@ function triggerFormSubmit() {
 function guardar_preferencia() {
     $('#form-guardar-preferencia').trigger("reset");
     $("#guardar-preferencia-modal").dialog("open");
-};
+}
 
 function cargar_preferencia() {
     $("#cargar-preferencia-modal").dialog("open");

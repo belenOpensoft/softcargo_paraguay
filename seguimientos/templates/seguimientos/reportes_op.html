@@ -7,7 +7,7 @@
             list-style: none;
             padding: 0;
             margin: 10px 0;
-            max-height: 500px; /* Tamaño máximo de la lista */
+            max-height: 300px; /* Tamaño máximo de la lista */
             overflow-y: auto; /* Scroll vertical */
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -129,58 +129,62 @@
         <p>Arrastra las columnas para ordenarlas como desees. Marca las columnas que deseas incluir en el reporte.</p>
 
         <ul id="sortable-columns">
-            <li data-column="col1" data-valor="Numero"><input type="checkbox" checked> Numero</li>
-            <li data-column="col2" data-valor="Embarque"><input type="checkbox" checked> Embarque</li>
-            <li data-column="col3" data-valor="Llegada"><input type="checkbox" checked> Llegada</li>
-            <li data-column="col4" data-valor="Origen"><input type="checkbox" checked> Origen</li>
-            <li data-column="col5" data-valor="Destino"><input type="checkbox" checked> Destino</li>
-            <li data-column="col6" data-valor="Cliente"><input type="checkbox" checked> Cliente</li>
-            <li data-column="col7" data-valor="Transportista"><input type="checkbox" checked> Transportista</li>
-            <li data-column="col8" data-valor="Conocimiento"><input type="checkbox" checked> Conocimiento</li>
-            <li data-column="col9" data-valor="Tipo"><input type="checkbox" checked> Tipo</li>
-            <li data-column="col10" data-valor="House"><input type="checkbox" checked> House</li>
-            <li data-column="col11" data-valor="Pago"><input type="checkbox" checked> Pago</li>
-            <li data-column="col12" data-valor="Flete"><input type="checkbox"> Flete</li>
-            <li data-column="col13" data-valor="Otros Ingresos"><input type="checkbox"> Otros Ingresos</li>
-            <li data-column="col14" data-valor="Costo"><input type="checkbox"> Costo</li>
-            <li data-column="col15" data-valor="Otros Egresos"><input type="checkbox"> Otros Egresos</li>
-            <li data-column="col16" data-valor="Profit Final"><input type="checkbox"> Profit Final</li>
-            <li data-column="col17" data-valor="Precio Vendido"><input type="checkbox"> Precio Vendido</li>
-            <li data-column="col18" data-valor="Profit Final"><input type="checkbox"> Profit Final</li>
-            <li data-column="col19" data-valor="Bultos"><input type="checkbox"> Bultos</li>
-            <li data-column="col20" data-valor="Peso Bruto"><input type="checkbox"> Peso Bruto</li>
-            <li data-column="col21" data-valor="Volumen"><input type="checkbox"> Volumen</li>
-            <li data-column="col22" data-valor="Aplicable"><input type="checkbox"> Aplicable</li>
-            <li data-column="col23" data-valor="Agente"><input type="checkbox" checked> Agente</li>
-            <li data-column="col24" data-valor="Consignatario"><input type="checkbox" checked> Consignatario</li>
-            <li data-column="col25" data-valor="Embarcador"><input type="checkbox" checked> Embarcador</li>
-            <li data-column="col26" data-valor="Vendedor"><input type="checkbox" checked> Vendedor</li>
-            <li data-column="col27" data-valor="User"><input type="checkbox"> User</li>
-            <li data-column="col28" data-valor="Vapor/Vuelo"><input type="checkbox"> Vapor/Vuelo</li>
-            <li data-column="col29" data-valor="Viaje"><input type="checkbox"> Viaje</li>
-            <li data-column="col30" data-valor="Tipo Contenedor"><input type="checkbox"> Tipo Contenedor</li>
-            <li data-column="col31" data-valor="Movimiento"><input type="checkbox"> Movimiento</li>
-            <li data-column="col32" data-valor="Contenedor"><input type="checkbox" checked> Contenedor</li>
-            <li data-column="col33" data-valor="Propio"><input type="checkbox"> Propio</li>
-            <li data-column="col34" data-valor="Cotizacion"><input type="checkbox"> Cotizacion</li>
-            <li data-column="col35" data-valor="Seguimiento"><input type="checkbox" checked> Seguimiento</li>
-            <li data-column="col36" data-valor="DUE Agent"><input type="checkbox"> DUE Agent</li>
-            <li data-column="col37" data-valor="DUE Carrier"><input type="checkbox"> DUE Carrier</li>
-            <li data-column="col38" data-valor="Local Charges"><input type="checkbox"> Local Charges</li>
-            <li data-column="col39" data-valor="Otros"><input type="checkbox"> Otros</li>
-            <li data-column="col40" data-valor="Producto"><input type="checkbox" checked> Producto</li>
-            <li data-column="col41" data-valor="Pais"><input type="checkbox" checked> Pais</li>
-            <li data-column="col42" data-valor="Fecha Facturacion"><input type="checkbox"> Fecha Facturacion</li>
-            <li data-column="col43" data-valor="Customer"><input type="checkbox"> Customer</li>
-            <li data-column="col44" data-valor="Status"><input type="checkbox" checked> Status</li>
-            <li data-column="col45" data-valor="Despachante"><input type="checkbox"> Despachante</li>
-            <li data-column="col46" data-valor="Operacion"><input type="checkbox" checked> Operacion</li>
-            <li data-column="col47" data-valor="Volumen Total"><input type="checkbox"> Volumen Total</li>
-            <li data-column="col48" data-valor="Armador/Arribado Con"><input type="checkbox"> Armador/Arribado Con</li>
-            <li data-column="col49" data-valor="Usuario"><input type="checkbox"> Usuario</li>
-            <li data-column="col50" data-valor="Loading"><input type="checkbox"> Loading</li>
-            <li data-column="col51" data-valor="Discharge"><input type="checkbox"> Discharge</li>
-        </ul>
+    <li data-column="col1" data-valor="Numero"><input type="checkbox" checked> Numero</li>
+    <li data-column="col2" data-valor="Fecha"><input type="checkbox" checked> Fecha</li>
+    <li data-column="col3" data-valor="ETA"><input type="checkbox" checked> ETA</li>
+    <li data-column="col4" data-valor="ETD"><input type="checkbox" checked> ETD</li>
+    <li data-column="col5" data-valor="Embarque"><input type="checkbox" checked> Embarque</li>
+    <li data-column="col6" data-valor="Llegada"><input type="checkbox" checked> Llegada</li>
+    <li data-column="col7" data-valor="Origen"><input type="checkbox" checked> Origen</li>
+    <li data-column="col8" data-valor="Destino"><input type="checkbox" checked> Destino</li>
+    <li data-column="col9" data-valor="Cliente"><input type="checkbox" checked> Cliente</li>
+    <li data-column="col10" data-valor="Transportista"><input type="checkbox" checked> Transportista</li>
+    <li data-column="col11" data-valor="Conocimiento"><input type="checkbox" checked> Conocimiento</li>
+    <li data-column="col12" data-valor="Tipo"><input type="checkbox" checked> Tipo</li>
+    <li data-column="col13" data-valor="House"><input type="checkbox" checked> House</li>
+    <li data-column="col14" data-valor="Pago"><input type="checkbox" checked> Pago</li>
+    <li data-column="col15" data-valor="Flete"><input type="checkbox"> Flete</li>
+    <li data-column="col16" data-valor="Otros Ingresos"><input type="checkbox"> Otros Ingresos</li>
+    <li data-column="col17" data-valor="Costo"><input type="checkbox"> Costo</li>
+    <li data-column="col18" data-valor="Otros Egresos"><input type="checkbox"> Otros Egresos</li>
+    <li data-column="col19" data-valor="Profit Final"><input type="checkbox"> Profit Final</li>
+    <li data-column="col20" data-valor="Precio Vendido"><input type="checkbox"> Precio Vendido</li>
+    <li data-column="col21" data-valor="Profit Final"><input type="checkbox"> Profit Final</li>
+    <li data-column="col22" data-valor="Bultos"><input type="checkbox"> Bultos</li>
+    <li data-column="col23" data-valor="Peso Bruto"><input type="checkbox"> Peso Bruto</li>
+    <li data-column="col24" data-valor="Volumen"><input type="checkbox"> Volumen</li>
+    <li data-column="col25" data-valor="Aplicable"><input type="checkbox"> Aplicable</li>
+    <li data-column="col26" data-valor="Agente"><input type="checkbox" checked> Agente</li>
+    <li data-column="col27" data-valor="Consignatario"><input type="checkbox" checked> Consignatario</li>
+    <li data-column="col28" data-valor="Embarcador"><input type="checkbox" checked> Embarcador</li>
+    <li data-column="col29" data-valor="Vendedor"><input type="checkbox" checked> Vendedor</li>
+    <li data-column="col30" data-valor="User"><input type="checkbox"> User</li>
+    <li data-column="col31" data-valor="Vapor/Vuelo"><input type="checkbox"> Vapor/Vuelo</li>
+    <li data-column="col32" data-valor="Viaje"><input type="checkbox"> Viaje</li>
+    <li data-column="col33" data-valor="Tipo Contenedor"><input type="checkbox"> Tipo Contenedor</li>
+    <li data-column="col34" data-valor="Movimiento"><input type="checkbox"> Movimiento</li>
+    <li data-column="col35" data-valor="Contenedor"><input type="checkbox" checked> Contenedor</li>
+    <li data-column="col36" data-valor="Propio"><input type="checkbox"> Propio</li>
+    <li data-column="col37" data-valor="Cotizacion"><input type="checkbox"> Cotizacion</li>
+    <li data-column="col38" data-valor="Seguimiento"><input type="checkbox" checked> Seguimiento</li>
+    <li data-column="col39" data-valor="DUE Agent"><input type="checkbox"> DUE Agent</li>
+    <li data-column="col40" data-valor="DUE Carrier"><input type="checkbox"> DUE Carrier</li>
+    <li data-column="col41" data-valor="Local Charges"><input type="checkbox"> Local Charges</li>
+    <li data-column="col42" data-valor="Otros"><input type="checkbox"> Otros</li>
+    <li data-column="col43" data-valor="Producto"><input type="checkbox" checked> Producto</li>
+    <li data-column="col44" data-valor="Pais"><input type="checkbox" checked> Pais</li>
+    <li data-column="col45" data-valor="Fecha Facturacion"><input type="checkbox"> Fecha Facturacion</li>
+    <li data-column="col46" data-valor="Customer"><input type="checkbox"> Customer</li>
+    <li data-column="col47" data-valor="Status"><input type="checkbox" checked> Status</li>
+    <li data-column="col48" data-valor="Despachante"><input type="checkbox"> Despachante</li>
+    <li data-column="col49" data-valor="Operacion"><input type="checkbox" checked> Operacion</li>
+    <li data-column="col50" data-valor="Volumen Total"><input type="checkbox"> Volumen Total</li>
+    <li data-column="col51" data-valor="Armador/Arribado Con"><input type="checkbox"> Armador/Arribado Con</li>
+    <li data-column="col52" data-valor="Usuario"><input type="checkbox"> Usuario</li>
+    <li data-column="col53" data-valor="Loading"><input type="checkbox"> Loading</li>
+    <li data-column="col54" data-valor="Discharge"><input type="checkbox"> Discharge</li>
+</ul>
+
 
         <button class="btn btn-success" onclick="guardar_preferencia()">Guardar</button>
         <button class="btn btn-warning" onclick="cargar_preferencia()">Cargar</button>

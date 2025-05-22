@@ -727,7 +727,7 @@ class reporte_operativas_form(forms.Form):
     hasta = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': True,"onkeypress":"return tabular(event,this)","class":"form-control mb-3"}),label="Hasta",initial=datetime.datetime.now().strftime("%Y-%m-%d"), required = True)
     filtros = (
         ('', '---------'),
-        ('fecha_llegada', 'Fecha llegada'),
+        ('eta', 'Fecha llegada'),
         ('modo', 'Modo'),
         ('tipo_operacion', 'Operación'),
         ('vendedor', 'Vendedor'),

@@ -991,6 +991,9 @@ class VistaOperativas(models.Model):
     vendedor = models.CharField(max_length=255, null=True)
     fecha_embarque = models.DateField(blank=True, null=True)
     fecha_retiro = models.DateField(blank=True, null=True)
+    etd = models.DateField(blank=True, null=True)
+    eta = models.DateField(blank=True, null=True)
+    fecha = models.DateField(blank=True, null=True)
     nrodespachante = models.CharField(max_length=255, null=True)
     despachante = models.CharField(max_length=255, null=True)
     house = models.CharField(max_length=255, null=True)
@@ -1039,6 +1042,7 @@ class VistaOperativasGastos(models.Model):
     tipo = models.CharField(max_length=255, null=True)
     fecha_embarque = models.DateField(blank=True, null=True)
     fecha_retiro = models.DateField(blank=True, null=True)
+    fecha = models.DateField(blank=True, null=True)
 
     class Meta:
         managed = False  # No intentes modificar la tabla

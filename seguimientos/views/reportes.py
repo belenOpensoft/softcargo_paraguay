@@ -795,8 +795,8 @@ def reportes_operativas(request):
                         selected_columns = json.loads(selected_columns)
 
                     orden = []
-                    desde = form.cleaned_data['desde']
-                    hasta = form.cleaned_data['hasta']
+                    desde = form.cleaned_data['desde'].strftime('%Y-%m-%d')
+                    hasta = form.cleaned_data['hasta'].strftime('%Y-%m-%d')
                     modo = form.cleaned_data['modo']
                     operacion = form.cleaned_data['operacion']
                     vendedor = form.cleaned_data['vendedor']
@@ -815,16 +815,16 @@ def reportes_operativas(request):
                     if form.cleaned_data['filtro3']:
                         orden.append(form.cleaned_data['filtro3'])
                     if len(orden) == 0:
-                        orden.append('fecha_embarque')
+                        orden.append('-fecha')
                     # Construye el filtro de consulta
                     filtro = {}
                     filtro2 = {}
                     if desde:
-                        filtro['fecha_embarque__gte'] = desde
-                        filtro2['fecha_embarque__gte'] = desde
+                        filtro['fecha__gte'] = desde
+                        filtro2['fecha__gte'] = desde
                     if hasta:
-                        filtro['fecha_retiro__lte'] = hasta
-                        filtro2['fecha_retiro__lte'] = hasta
+                        filtro['fecha__lte'] = hasta
+                        filtro2['fecha__lte'] = hasta
                     if modo:
                         filtro['modo'] = modo
                         filtro2['tipo'] = modo
@@ -851,8 +851,8 @@ def reportes_operativas(request):
                         filtro['nrotransportista'] = transportista.codigo
                     # Realiza la consulta a la tabla Seguimientos con el filtro
                     resultados = VistaOperativas.objects.filter(**filtro).order_by(*orden)
-                    gastos = VistaOperativasGastos.objects.filter(**filtro2).order_by('fecha_embarque')
-                    if resultados.count() > 0 and gastos.count()> 0:
+                    gastos = VistaOperativasGastos.objects.filter(**filtro2).order_by('-fecha')
+                    if resultados.count() > 0:
                         return genero_xls_operativas(resultados,desde,hasta,selected_columns,gastos)
                     else:
                         messages.info(request,'No se encontraron resultados para la busqueda')
@@ -893,10 +893,16 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
             for columna in columnas:
                 if columna == 'Numero':
                     datos_finales.append(str(p.numero).zfill(8))
-                elif columna == 'Embarque':
-                    datos_finales.append(p.fecha_embarque if p.fecha_embarque else None)
+                elif columna == 'Fecha':
+                    datos_finales.append(p.fecha if p.fecha else None)
+                elif columna == 'ETA':
+                    datos_finales.append(p.eta if p.eta else None)
+                elif columna == 'ETD':
+                    datos_finales.append(p.etd if p.etd else None)
                 elif columna == 'Llegada':
                     datos_finales.append(p.fecha_retiro if p.fecha_retiro else None)
+                elif columna == 'Embarque':
+                    datos_finales.append(p.fecha_embarque if p.fecha_embarque else None)
                 elif columna == 'Origen':
                     datos_finales.append(p.origen)
                 elif columna == 'Destino':

@@ -173,6 +173,8 @@ def add_house_importado(request):
                     reserva.pagoflete=house_data.get('pagoflete')
                     reserva.status=house_data.get('estado')
                     reserva.terminos = house_data.get('terminos')
+                    reserva.eta = house_data.get('eta')
+                    reserva.etd = house_data.get('etd')
                     reserva.fechaingreso=datetime.now()
                     reserva.save()
 
@@ -264,6 +266,8 @@ def source_seguimientos_importado(request):
                     "refproveedor":registro.refproveedor,
                     "refcliente":registro.refcliente,
                     "terminos": registro.terminos,
+                    "etd": registro.etd,
+                    "eta": registro.eta,
 
                 })
 
