@@ -795,6 +795,7 @@ class VEmbarqueaereo(models.Model):
     #viaje = models.CharField(max_length=20, null=True, blank=True, default=None)
     referencia = models.IntegerField(null=True, blank=True, default=None)
     seguimiento = models.IntegerField(null=True, blank=True, default=None)
+    aplicable = models.IntegerField(null=True, blank=True, default=None)
     orden_cliente = models.CharField(max_length=850, null=True, blank=True, default=None)
     ref_proveedor = models.CharField(max_length=250, null=True, blank=True, default=None)
     embarcador = models.CharField(max_length=50, null=True, blank=True, default=None)
@@ -816,6 +817,7 @@ class VEmbarqueaereoDirecto(models.Model):
     numero = models.IntegerField(unique=True, primary_key=True)
     consignatario_id = models.IntegerField()
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)
+    aplicable = models.IntegerField(null=True, blank=True, default=None)
 
     transportista = models.CharField(max_length=255, blank=True, null=True)  # Nombre del transportista
     awb = models.CharField(max_length=40, blank=True, null=True)

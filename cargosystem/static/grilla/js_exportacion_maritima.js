@@ -2938,7 +2938,6 @@ function fillFormWithDataHouse(data) {
 
         $('#status_h_e').val(data.status_e);
         $('#wreceipt_he').val(data.wreceipt_e);
-        $('#trackid_he').val(data.trackid_e);
         $('#id_awbhijo_e').val(data.awb_e);
         $('#house_addh_e').val(data.hawb_e);
         $('#posicion_gh_e').val(data.posicion_e);

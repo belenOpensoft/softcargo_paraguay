@@ -2791,7 +2791,6 @@ function fillFormWithDataHouse(data) {
 
         $('#status_h_e').val(data.status_e);
         $('#wreceipt_he').val(data.wreceipt_e);
-        $('#trackid_he').val(data.trackid_e);
         $('#id_awbhijo_e').val(data.awb_e);
         $('#house_addh_e').val(data.hawb_e);
         $('#posicion_gh_e').val(data.posicion_e);
@@ -3070,6 +3069,15 @@ table_edit_ia = $('#table_edit_ia').DataTable({
             texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">\n' +
             '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
             '</svg>';
+
+                }
+            if (data[22]) {
+            //aplicable
+            texto += ' <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-coin" viewBox="0 0 16 16">\n' +
+                        '                      <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>\n' +
+                        '                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>\n' +
+                        '                      <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>\n' +
+                        '                    </svg>';
 
                 }
             $('td:eq(3)', row).html(texto + " " + data[21]);
@@ -5330,4 +5338,163 @@ function get_datos_logs() {
             alert('Debe seleccionar al menos un registro');
         }
 
+}
+
+
+//calculo de aplicable
+function abrir_aplicable(){
+    row = table_edit_ia.rows('.table-secondary').data(); // Asumimos que seleccionás una fila
+
+        if (row.length === 1) {
+            $('#form_aplicable').trigger("reset");
+            cargar_datos_aplicables(row[0][3]);
+            $("#aplicable_modal").dialog({
+                autoOpen: true,
+                modal: true,
+                title: "Editar datos aplicables del embarque N°: " + row[0][3],
+                height: 'auto',
+                width: wWidth * 0.50,
+                buttons: [
+                    {
+                        text: "Guardar",
+                        class: "btn btn-primary",
+                        click: function () {
+                           guardar_aplicable(row[0][3]);
+                           table_edit_ia.ajax.reload();
+                            $(this).dialog("close");
+                        }
+                    },
+                    {
+                        text: "Cancelar",
+                        class: "btn btn-dark",
+                        click: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                ]
+            });
+        } else {
+            alert('Debe seleccionar un único registro');
+        }
+}
+function cargar_datos_aplicables(numero) {
+    $.ajax({
+        url: '/importacion_aerea/get_datos_aplicables/',
+        data: {
+            'numero': numero
+        },
+        type: 'GET',
+        success: function (data) {
+            if (data.status === 'ok' || data.status === 'parcial') {
+                $('#id_tarifacompra_ap').val(data.tarifacompra.toFixed(2));
+                $('#id_tarifaventa_ap').val(data.tarifaventa.toFixed(2));
+                $('#id_bruto_ap').val(data.bruto.toFixed(2));
+                $('#id_volumen_ap').val(data.volumen.toFixed(2));
+                $('#id_muestroflete_ap').val(data.muestroflete.toFixed(2));
+                $('#id_aplicable_ap').val(data.aplicable.toFixed(2));
+
+                if (data.status === 'parcial') {
+                    mostrarToast(data.mensaje, 'warning');
+                }
+            } else {
+                mostrarToast(data.mensaje, 'danger');
+            }
+        },
+        error: function (xhr) {
+            alert('Error al obtener los datos del seguimiento');
+        }
+    });
+}
+function recalculo_embarques() {
+    const coef = 166.67;
+
+        let tipo = null;
+        if ($('#id_tomopeso_ap_0').is(':checked')) {
+            tipo = '1';
+        } else if ($('#id_tomopeso_ap_1').is(':checked')) {
+            tipo = '2';
+        } else if ($('#id_tomopeso_ap_2').is(':checked')) {
+            tipo = '3';
+        }
+
+    const bruto = parseFloat($('#id_bruto_ap').val()) || 0;
+    const volumen = parseFloat($('#id_volumen_ap').val()) || 0;
+    const tarifa_venta = parseFloat($('#id_tarifaventa_ap').val()) || 0;
+    const tarifa_compra = parseFloat($('#id_tarifacompra_ap').val()) || 0;
+    let tarifa=0;
+    if(tarifa_venta==0){
+        tarifa=tarifa_compra;
+    }else{
+        tarifa=tarifa_venta
+    }
+
+    let aplicable = 0;
+    let flete = 0;
+
+    $('#id_aplicable_ap').val(0);
+    $('#id_muestroflete_ap').val(0);
+
+    if (tipo === '1') {
+        // Usar el bruto directamente
+        aplicable = redondear_a_05_o_0(bruto);
+        flete = aplicable * tarifa;
+    } else if (tipo === '2') {
+        // Calcular aplicable como volumen * coef
+        aplicable = redondear_a_05_o_0(volumen * coef);
+        flete = aplicable * tarifa;
+    } else if (tipo === '3') {
+        // Manual: fijar aplicable en 1 y flete vacío
+        aplicable = 1;
+        flete = tarifa;
+    }
+
+    $('#id_aplicable_ap').val(aplicable.toFixed(2));
+    $('#id_muestroflete_ap').val(flete ? flete.toFixed(2) : '');
+}
+function redondear_a_05_o_0(numero) {
+    let redondeado = parseFloat(numero.toFixed(1));
+    let decimal = redondeado - Math.floor(redondeado);
+
+    if (decimal < 0.25) {
+        return Math.floor(redondeado);
+    } else if (decimal < 0.75) {
+        return Math.floor(redondeado) + 0.5;
+    } else {
+        return Math.ceil(redondeado);
+    }
+}
+function guardar_aplicable(numero) {
+    const data = {
+        bruto: $('#id_bruto_ap').val(),
+        volumen: $('#id_volumen_ap').val(),
+        tarifacompra: $('#id_tarifacompra_ap').val(),
+        tarifaventa: $('#id_tarifaventa_ap').val(),
+        aplicable: $('#id_aplicable_ap').val(),
+        muestroflete: $('#id_muestroflete_ap').val(),
+        tomopeso: $('input[name="tomopeso_ap"]:checked').val(),
+        numero: numero,
+        csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val()
+    };
+
+    $.ajax({
+        url: '/importacion_aerea/guardar_aplicable/',
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: "application/json",
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function (resp) {
+            if (resp.status === 'ok') {
+                alert('Datos guardados correctamente.');
+                // o mostrarToast('Guardado', 'success');
+                $('#aplicable_modal').dialog('close');
+            } else {
+                alert('Error: ' + resp.mensaje);
+            }
+        },
+        error: function (xhr) {
+            alert('Error en el servidor: ' + xhr.status);
+        }
+    });
 }

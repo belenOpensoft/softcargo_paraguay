@@ -2,7 +2,7 @@ import datetime
 import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from administracion_contabilidad.models import MantenimientosClientes, MantenimientosCiudades
+from mantenimientos.models import Clientes as MantenimientosClientes, Ciudades as MantenimientosCiudades
 from impomarit.views.mails import formatear_caratula
 from mantenimientos.models import Vapores
 from mantenimientos.views.bancos import is_ajax

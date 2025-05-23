@@ -649,13 +649,11 @@ class edit_house(BSModalModelForm):
             'vapor',
             'operacion',
             'arbitraje',
-            'trackid',
             'wreceipt',
         ]
 
         labels = {
             'wreceipt': 'WR',
-            'trackid': 'Track ID',
             'pago': 'Pago flete',
             'diasalmacenaje': 'Dias de almacenaje',
             'demora': 'Dias de demora',
@@ -665,7 +663,6 @@ class edit_house(BSModalModelForm):
             'pago': forms.NumberInput(attrs={'id': 'pago_house_e'}),
             'arbitraje': forms.NumberInput(attrs={'id': 'arbitraje_house_e'}),
             'wreceipt': forms.TextInput(attrs={'id': 'wreceipt_he'}),
-            'trackid': forms.TextInput(attrs={'id': 'trackid_he'}),
             'operacion': forms.TextInput(attrs={'id': 'operacion_he'}),
             'modo': forms.HiddenInput(),
         }

@@ -22,7 +22,7 @@ from impaerea.models import Master, ImportReservas, ImportEmbarqueaereo, VEmbarq
     ImportCargaaerea, \
     ImportServiceaereo, ImportConexaerea, ImportFaxes, VEmbarqueaereoDirecto
 from impomarit.views.logs_general import obtener_logs_generico
-from seguimientos.forms import archivosForm, pdfForm
+from seguimientos.forms import archivosForm, pdfForm,aplicableForm
 
 
 @login_required(login_url='/')
@@ -55,6 +55,7 @@ def master_importacion_maritima(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
+                'form_aplicable': aplicableForm(),
                 'form_notas': NotasForm(initial={'fecha':datetime.datetime.now().strftime('%Y-%m-%d')}),
 
             })
@@ -91,6 +92,7 @@ def house_importacion_maritima(request):
                 'form_embarques_house': embarquesFormHouse(),
                 'form_archivos': archivosForm(),
                 'form_pdf': pdfForm(),
+                'form_aplicable': aplicableForm(),
                 'form_notas': NotasForm(initial={'fecha':datetime.datetime.now().strftime('%Y-%m-%d')}),
 
             })
@@ -374,6 +376,11 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append(notas)
             registro_json.append(registro.consignatario_id)
             registro_json.append(registro.seguimiento) #21
+            llave = False
+            if registro.aplicable and registro.aplicable != 0:
+                llave = True
+
+            registro_json.append(llave)
 
             data.append(registro_json)
         return data
@@ -726,3 +733,64 @@ def buscar_registros(request):
         return JsonResponse({"resultados": list(resultados)}, safe=False)
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
+
+
+
+def get_datos_aplicables(request):
+    numero = request.GET.get('numero')
+
+    try:
+        embarque = ImportEmbarqueaereo.objects.get(numero=numero)
+        cargas = ImportCargaaerea.objects.filter(numero=numero)
+
+        total_bruto = 0
+        total_volumen = 0
+
+        for c in cargas:
+            total_bruto += c.bruto or 0
+
+            if c.medidas:
+                partes = str(c.medidas).split('*')
+                if len(partes) == 3:
+                    try:
+                        largo = float(partes[0]) or 0
+                        ancho = float(partes[1]) or 0
+                        alto = float(partes[2]) or 0
+                        cbm = largo * ancho * alto
+                        total_volumen += cbm
+                    except ValueError:
+                        pass
+
+        data = {
+            'tarifacompra': float(embarque.tarifacompra or 0),
+            'tarifaventa': float(embarque.tarifaventa or 0),
+            'aplicable': float(embarque.aplicable or 0),
+            'muestroflete': 0,
+            'bruto': round(total_bruto, 2),
+            'volumen': round(total_volumen, 2),
+            'status': 'ok'
+        }
+
+    except ImportEmbarqueaereo.DoesNotExist:
+        data = {'status': 'error', 'mensaje': 'Embarque no encontrado'}
+
+    return JsonResponse(data)
+def guardar_aplicable(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            numero = data.get('numero')
+
+            seg = ImportEmbarqueaereo.objects.get(numero=numero)
+            seg.tarifacompra = data.get('tarifacompra') or None
+            seg.tarifaventa = data.get('tarifaventa') or None
+            seg.aplicable = data.get('aplicable') or None
+            #seg.muestroflete = data.get('muestroflete') or None
+
+            seg.save()
+
+            return JsonResponse({'status': 'ok'})
+        except ImportEmbarqueaereo.DoesNotExist:
+            return JsonResponse({'status': 'error', 'mensaje': 'Embarque no encontrado'})
+
+    return JsonResponse({'status': 'error', 'mensaje': 'Método no permitido'})

@@ -1,0 +1,77 @@
+{% load static %}
+{% load widget_tweaks %}
+
+<div id="aplicable_modal" style="display:none;">
+    <form id="form_aplicable">
+        <div class="container">
+            <!-- Grupo de Radio Buttons -->
+            <div class="form-group row mt-2">
+                <label class="col-sm-2 col-form-label">{{ form_aplicable.tomopeso.label }}</label>
+                <div class="col-sm-10">
+                    {% for radio in form_aplicable.tomopeso %}
+                        <div class="form-check form-check-inline">
+                            {{ radio.tag }}
+                            <label class="form-check-label">{{ radio.choice_label }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Fila principal -->
+            <div class="row">
+                <!-- Columna izquierda -->
+                <div class="col-md-6 ">
+                    <div class="form-group row mt-2">
+                        <label class="col-sm-4 col-form-label text-right">{{ form_aplicable.bruto.label }}</label>
+                        <div class="col-sm-8">
+                            {{ form_aplicable.bruto }}
+                        </div>
+                    </div>
+                    <div class="form-group row mt-2">
+                        <label class="col-sm-4 col-form-label text-right">{{ form_aplicable.volumen.label }}</label>
+                        <div class="col-sm-8">
+                            {{ form_aplicable.volumen }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna derecha -->
+                <div class="col-md-6 ">
+                    <div class="form-group row mt-2">
+                        <label class="col-sm-4 col-form-label text-right">{{ form_aplicable.tarifaventa.label }}</label>
+                        <div class="col-sm-8">
+                            {{ form_aplicable.tarifaventa }}
+                        </div>
+                    </div>
+                    <div class="form-group row mt-2">
+                        <label class="col-sm-4 col-form-label text-right">{{ form_aplicable.tarifacompra.label }}</label>
+                        <div class="col-sm-8">
+                            {{ form_aplicable.tarifacompra }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fila separada para Flete y Aplicable -->
+            <div class="row mt-3" style="border: 1px solid #ccc; padding: 15px; border-radius: 5px;">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-sm-4 col-form-label text-right">{{ form_aplicable.muestroflete.label }}</label>
+                        <div class="col-sm-8">
+                            {{ form_aplicable.muestroflete }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-sm-4 col-form-label text-right">{{ form_aplicable.aplicable.label }}</label>
+                        <div class="col-sm-8">
+                            {{ form_aplicable.aplicable }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

@@ -39,7 +39,7 @@ from seguimientos.views.reportes import reportes_seguimiento, descargar_pdf, des
 from seguimientos.views.rutas import source_rutas, guardar_ruta, eliminar_ruta, datos_seguimiento
 from seguimientos.views.seguimientos import grilla_seguimientos, source_seguimientos, guardar_notas, guardar_cronologia, \
     guardar_seguimiento, guardar_envases, eliminar_envase, clonar_seguimiento, eliminar_nota, source, \
-    eliminar_seguimiento
+    eliminar_seguimiento, get_datos_aplicables, guardar_aplicable
 from seguimientos.views.vapores import comprobar_vapores
 
 urlpatterns = [
@@ -108,6 +108,8 @@ urlpatterns = [
     path('descargar_pdf/<str:pdf_file_name>/', descargar_pdf, name='descargar_pdf'),
     path('descargar_awb_seguimientos/<int:row_id>/', descargar_awb_seguimientos, name='descargar_hawb'),
     path('descargar_awb_seguimientos_draft/<int:row_id>/<str:draft>', descargar_awb_seguimientos, name='descargar_hawb'),
+    path('get_datos_aplicables/', get_datos_aplicables, name='get_datos_aplicables'),
+    path('guardar_aplicable/', guardar_aplicable, name='guardar_aplicable'),
 
 ]
 

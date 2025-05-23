@@ -598,13 +598,11 @@ class edit_house(BSModalModelForm):
             'moneda',
             'operacion',
             'arbitraje',
-            'trackid',
             'wreceipt',
         ]
 
         labels = {
             'wreceipt': 'WR',
-            'trackid': 'Track ID',
             'pago': 'Pago flete',
             'diasalmacenaje': 'Dias de almacenaje',
         }
@@ -613,7 +611,6 @@ class edit_house(BSModalModelForm):
             'pago': forms.NumberInput(attrs={'id': 'pago_house_e'}),
             'arbitraje': forms.NumberInput(attrs={'id': 'arbitraje_house_e'}),
             'wreceipt': forms.TextInput(attrs={'id': 'wreceipt_he'}),
-            'trackid': forms.TextInput(attrs={'id': 'trackid_he'}),
             'operacion': forms.TextInput(attrs={'id': 'operacion_he'}),
             'modo': forms.HiddenInput(),
         }
@@ -1145,3 +1142,64 @@ class embarquesFormHouse(BSModalModelForm):
         widget=forms.RadioSelect(attrs={'style':'width:50px;'}),
     )
     tarifafija = forms.BooleanField(label="Tarifa fija")
+
+
+class aplicableForm(BSModalModelForm):
+    OPCIONES = (
+        ('1', 'Bruto'),
+        ('2', 'Volumen'),
+        ('3', 'Manual'),
+    )
+
+    tomopeso = forms.ChoiceField(
+        choices=OPCIONES,
+        widget=forms.RadioSelect(attrs={
+            'onchange': 'return recalculo_embarques();'
+        }),
+        label='Peso'
+    )
+
+    bruto = forms.DecimalField(
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control campo-estrecho',
+            "autocomplete": "off"
+        }),
+        max_digits=12, decimal_places=4, required=False, label="Peso"
+    )
+    volumen = forms.DecimalField(
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control campo-estrecho',
+            "autocomplete": "off"
+        }),
+        max_digits=12, decimal_places=4, required=False, label="Volumen"
+    )
+    muestroflete = forms.DecimalField(
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control campo-estrecho',
+            "autocomplete": "off"
+        }),
+        max_digits=12, decimal_places=4, required=False, label="Flete"
+    )
+
+
+    class Meta:
+        model = ImportEmbarqueaereo
+        fields = [
+            'aplicable',
+            'tarifacompra',
+            'tarifaventa',
+        ]
+        labels = {
+            'aplicable': 'Aplicable',
+            'tarifaventa': 'Tarifa Venta',
+            'tarifacompra': 'Tarifa Compra',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+
+        for field_name, field in self.fields.items():
+            if field_name != 'tomopeso':
+                field.widget.attrs['class'] = 'form-control'
+            field.widget.attrs['id'] = f'id_{field_name}_ap'

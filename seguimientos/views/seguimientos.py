@@ -11,7 +11,7 @@ from datetime import datetime
 
 from mantenimientos.models import Vapores
 from seguimientos.forms import NotasForm, seguimientoForm, cronologiaForm, envasesForm, embarquesForm, gastosForm, \
-    pdfForm, archivosForm, rutasForm, emailsForm, clonarForm
+    pdfForm, archivosForm, rutasForm, emailsForm, clonarForm,aplicableForm
 from seguimientos.models import VGrillaSeguimientos as Seguimiento, Seguimiento as SeguimientoReal, Envases, Cargaaerea, \
     Attachhijo, Serviceaereo, Conexaerea, Faxes
 from auditlog.models import LogEntry
@@ -45,6 +45,7 @@ def grilla_seguimientos(request):
                 'form_archivos': archivosForm(),
                 'form_rutas': rutasForm(),
                 'form_clonar': clonarForm(),
+                'form_aplicable': aplicableForm(),
                 'title_page': 'Seguimientos',
                 'opciones_busqueda': opciones_busqueda,
             })
@@ -310,6 +311,12 @@ def get_data(registros_filtrados):
 
             registro_json.append(get_datos_embarque(registro.numero))
             registro_json.append(notas)
+
+            llave = False
+            if registro.aplicable and registro.aplicable !=0 and registro.modo == 'IMPORT AEREO':
+                llave = True
+
+            registro_json.append(llave)
             data.append(registro_json)
         return data
     except Exception as e:
@@ -860,3 +867,66 @@ def clonar_seguimiento(request):
 
     data_json = json.dumps(resultado)
     return HttpResponse(data_json, content_type="application/json")
+
+def get_datos_aplicables(request):
+    numero = request.GET.get('numero')
+
+    try:
+        seguimiento = SeguimientoReal.objects.get(numero=numero)
+        cargas = Cargaaerea.objects.filter(numero=numero)
+
+        total_bruto = 0
+        total_volumen = 0
+
+        for c in cargas:
+            total_bruto += c.bruto or 0
+
+            if c.cbm:
+                total_volumen += c.cbm
+            elif c.medidas:
+                partes = str(c.medidas).split('*')
+                if len(partes) == 3:
+                    try:
+                        largo = float(partes[0]) or 0
+                        ancho = float(partes[1]) or 0
+                        alto = float(partes[2]) or 0
+                        cbm = largo * ancho * alto
+                        total_volumen += cbm
+                    except ValueError:
+                        pass
+
+        data = {
+            'tarifacompra': float(seguimiento.tarifacompra or 0),
+            'tarifaventa': float(seguimiento.tarifaventa or 0),
+            'aplicable': float(seguimiento.aplicable or 0),
+            'muestroflete': float(seguimiento.muestroflete or 0),
+            'bruto': round(total_bruto, 2),
+            'volumen': round(total_volumen, 2),
+            'status': 'ok'
+        }
+
+    except Seguimiento.DoesNotExist:
+        data = {'status': 'error', 'mensaje': 'Seguimiento no encontrado'}
+
+    return JsonResponse(data)
+
+
+def guardar_aplicable(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            numero = data.get('numero')
+
+            seg = SeguimientoReal.objects.get(numero=numero)
+            seg.tarifacompra = data.get('tarifacompra') or None
+            seg.tarifaventa = data.get('tarifaventa') or None
+            seg.aplicable = data.get('aplicable') or None
+            seg.muestroflete = data.get('muestroflete') or None
+
+            seg.save()
+
+            return JsonResponse({'status': 'ok'})
+        except Seguimiento.DoesNotExist:
+            return JsonResponse({'status': 'error', 'mensaje': 'Seguimiento no encontrado'})
+
+    return JsonResponse({'status': 'error', 'mensaje': 'Método no permitido'})

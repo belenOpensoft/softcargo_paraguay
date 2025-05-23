@@ -555,11 +555,10 @@ def get_data_email(request):
 
 
                 if carga:
-
+                    toneladas = calculado2= vol =0
                     for c in carga:
-                        ap1 = float(c.cbm) if c.cbm is not None else 0 * 166.67
                         bruto=float(c.bruto or 0)
-                        aplicable = round(ap1, 2) if ap1 > bruto else bruto
+                        vol = c.cbm if c.cbm is not None else 0
 
                         texto += formatear_linea("Mercadería", c.producto.nombre)
 
@@ -567,9 +566,16 @@ def get_data_email(request):
 
                         texto += formatear_linea("Peso", bruto)
 
-                        texto += formatear_linea("Aplicable", str(aplicable))
                         texto += formatear_linea("CBM", str(c.cbm or 'S/I')+' M³')
 
+
+                        toneladas = round(float(bruto) / 1000, 2) if bruto else 0
+
+                        calculado2 = str(vol) + ' AS VOL' if toneladas < vol else bruto
+
+                        aplicable = calculado2 if row.modo not in ['IMPORT AEREO', 'EXPORT AEREO'] else str(row.aplicable)
+
+                    texto += formatear_linea("Aplicable", str(aplicable))
 
                     texto += "<br>"
 
@@ -1103,7 +1109,7 @@ def get_data_email(request):
                     toneladas = round(float(m.bruto) / 1000, 2) if m.bruto else 0
                     calculado2 = str(vol) + ' AS VOL' if toneladas < vol else pes
                     calculado = pes if calculado < pes else str(calculado) + ' AS VOL'
-                    aplicable = calculado2 if row.modo not in ['IMPORT AEREO', 'EXPORT AEREO'] else calculado
+                    aplicable = calculado2 if row.modo not in ['IMPORT AEREO', 'EXPORT AEREO'] else str(row.aplicable)
 
                     texto += formatear_linea("Commodity", m.producto)
                     texto += formatear_linea("Pieces", m.bultos)
@@ -1223,12 +1229,7 @@ def get_data_email(request):
                     else:
                         calculado2=pes
 
-                    if calculado < pes:
-                        calculado= pes
-                    else:
-                        calculado = str(calculado)+' AS VOL'
-
-                    aplicable = calculado2 if row.modo !='IMPORT AEREO' and row.modo!='EXPORT AEREO' else calculado
+                    aplicable = calculado2 if row.modo !='IMPORT AEREO' and row.modo!='EXPORT AEREO' else str(row.aplicable)
                     texto += formatear_linea("Mercadería", m.producto)
                     texto += formatear_linea("Bultos", m.bultos)
                     texto += formatear_linea("Peso", str(m.bruto) + ' KGS')

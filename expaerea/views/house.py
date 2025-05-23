@@ -35,7 +35,6 @@ def add_house_impmarit(request):
                 reserva.demora = form.cleaned_data.get('demora', 0)
                 reserva.operacion = form.cleaned_data.get('operacion', "")
                 reserva.arbitraje = form.cleaned_data.get('arbitraje', "")
-                reserva.trackid = form.cleaned_data.get('trackid', "")
                 reserva.wreceipt = form.cleaned_data.get('wreceipt', "")
                 reserva.posicion = form.cleaned_data.get('posicion_h', 0)
                 reserva.status = form.cleaned_data.get('status_h', "")
@@ -139,7 +138,6 @@ def add_house_importado(request):
                     reserva.demora = house_data.get('demora')
                     reserva.operacion = house_data.get('operacion')
                     reserva.arbitraje = house_data.get('arbitraje')
-                    reserva.trackid = house_data.get('trackid')
                     reserva.wreceipt = house_data.get('wreceipt')
                     reserva.posicion = house_data.get('posicion')
                     reserva.status = house_data.get('status_h')
@@ -162,6 +160,9 @@ def add_house_importado(request):
                     reserva.fechaingreso=datetime.now()
                     reserva.eta = house_data.get('eta')
                     reserva.etd = house_data.get('etd')
+                    reserva.aplicable = house_data.get('aplicable')
+                    reserva.tarifaventa = house_data.get('tarifaventa')
+                    reserva.tarifacompra = house_data.get('tarifacompra')
                     reserva.save()
 
                     numero = reserva.get_number()
@@ -227,7 +228,6 @@ def source_seguimientos_importado(request):
                     "demora": registro.demora,
                     "operacion": registro.operacion,
                     "arbitraje": registro.arbitraje,
-                    "trackid": registro.trackid,
                     "wreceipt": registro.wreceipt,
                     "status": registro.status,
                     "vendedor": registro.vendedor,
@@ -247,6 +247,9 @@ def source_seguimientos_importado(request):
                     "terminos": registro.terminos,
                     "etd": registro.etd,
                     "eta": registro.eta,
+                    "aplicable": registro.aplicable,
+                    "tarifaventa": registro.tarifaventa,
+                    "tarifacompra": registro.tarifacompra,
                 })
 
             return JsonResponse({"data": resultado}, safe=False)
@@ -459,7 +462,6 @@ def house_detail(request):
                     'fechaembarque_e': house.fechaembarque,
                     'status_e': house.status,
                     'wreceipt_e': house.wreceipt,
-                    'trackid_e': house.trackid,
                 }
                 return JsonResponse(data)
             except ExportEmbarqueaereo.DoesNotExist:
@@ -516,7 +518,6 @@ def edit_house_function(request, numero):
             house.hawb = form.cleaned_data.get('house', "")
             house.demora = form.cleaned_data.get('demora', 0) if form.cleaned_data.get('demora') else 0
             house.wreceipt = form.cleaned_data.get('wreceipt', "")
-            house.trackid = form.cleaned_data.get('trackid', "")
             house.fecharetiro = form.cleaned_data.get('fecha_retiro', None)
             house.fechaembarque = form.cleaned_data.get('fecha_embarque', None)
 
