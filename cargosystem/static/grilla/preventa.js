@@ -1,8 +1,11 @@
 //facturar
 function facturar(){
     let selectedRowN = localStorage.getItem('num_house_gasto');
+    let tablaOrigen = localStorage.getItem('tabla_origen')
+
     if(selectedRowN==null){
     alert('Seleccione una fila.');
+    return;
     }
     const wHeight = $(window).height();
     const wWidth = $(window).width();
@@ -10,38 +13,40 @@ function facturar(){
     $('#destinatario_input').val('');
     $('#destinatario').css({"border-color": "", 'box-shadow': ''});
     $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
-    if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-        var table = $('#table_edit_im').DataTable();
+    if ($.fn.DataTable.isDataTable('#' + tablaOrigen)) {
+        var table = $('#' + tablaOrigen).DataTable();
         var rowData = table.row('.table-secondary').data();
         if (rowData) {
             var $destinatario = $('#destinatario');
-            var term = rowData[4]; // Valor a buscar y mostrar
+            var $destinatarioInput = $('#destinatario_input');
 
-            // Asigna el valor al input (simulando lo que escribe el usuario)
-            $destinatario.val(term);
+            var nombre = rowData[4];
+            var codigo = '';
 
-            // Inicia la búsqueda en el autocomplete
-            $destinatario.autocomplete("search", term);
+            if (tablaOrigen.endsWith('_em') || tablaOrigen.endsWith('_ea')) {
+                codigo = rowData[20];
+            } else if (tablaOrigen.endsWith('_et')) {
+                codigo = rowData[22];
+            } else if (tablaOrigen.endsWith('_im')) {
+                codigo = rowData[23];
+            } else if (tablaOrigen.endsWith('_it')) {
+                codigo = rowData[21];
+            } else if (tablaOrigen.endsWith('_ia')) {
+                codigo = rowData[23];
+            }
 
-            // Una vez que se rendericen las sugerencias, espera un momento y simula el clic
-            setTimeout(function(){
-                // Busca el primer elemento de la lista de sugerencias
-                // La lista se genera con la clase ui-menu-item dentro del contenedor ui-autocomplete
-                var $firstItem = $(".ui-autocomplete li.ui-menu-item:first");
-                if ($firstItem.length > 0) {
-                    // Simula el clic sobre el primer elemento
-                    $firstItem.trigger("click");
-                }
+            $destinatario.val(nombre);
+            $destinatario.attr('data-id', codigo);
+            $destinatarioInput.val(codigo);
 
-                var dataId = $('#destinatario').attr('data-id');
-                $('#destinatario_input').val(dataId);
-                $('#destinatario').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-            }, 200);
+            $destinatario.css({
+                "border-color": "#3D9A37",
+                'box-shadow': '0 0 0 0.1rem #3D9A37'
+            });
         }
     } else {
         console.log("La tabla no está inicializada.");
     }
-
 
     $("#facturar_modal").dialog({
         autoOpen: true,
@@ -53,9 +58,9 @@ function facturar(){
         modal: true,
         title: "Facturar el House N°: " + selectedRowN,
         height: wHeight * 0.90,
-        width: wWidth * 0.70,
+        width: wWidth * 0.90,
         class: 'modal fade',
-               buttons: [
+        buttons: [
             {
                 text: "Cancelar",
                 class: "btn btn-dark",
@@ -87,10 +92,6 @@ event.preventDefault();
         if(cliente){
             $('#facturar_table').DataTable().cell(filaSeleccionada, 3).data(cliente);
             $(filaSeleccionada).find('td').eq(3).text(cliente);
-            $('#destinatario').val('');
-            $('#destinatario_input').val('');
-            $('#destinatario').css({"border-color": "", 'box-shadow': ''});
-            $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
 
         } else {
             alert('Debe seleccionar un destinatario.');
@@ -149,17 +150,19 @@ event.preventDefault();
     // tabla.draw(); // Descomentar si necesitas que la tabla se redibuje
 }
 function enviarDatosTabla() {
-let preventa;
+    let preventa;
     let num=localStorage.getItem('num_house_gasto');
     let clase=localStorage.getItem('clase_house');
+    let tablaOrigen = localStorage.getItem('tabla_origen')
     let num_destina=$('#destinatario_input').val();
     let dest=$('#destinatario').val();
     $.ajax({
-                url: '/admin_cont/house_detail_factura',
+                url: '/admin_cont/house_detail_factura/',
                 data: { numero: num, clase:clase},
                 method: 'GET',
                 success: function (house) {
-                    if(house.awb_e==0){
+                    if (tablaOrigen.includes('tabla_house_directo')) {
+
                         $.ajax({
                         url: '/admin_cont/source_embarque_factura/',
                         data: { numero: num, clase:clase},
@@ -225,6 +228,9 @@ let preventa;
                         url: '/admin_cont/source_master_factura/',
                         data: { master: house.awb_e, clase:clase},
                         method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
                         success: function (master) {
                             $.ajax({
                         url: '/admin_cont/source_embarque_factura/',

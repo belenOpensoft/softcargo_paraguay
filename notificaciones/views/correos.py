@@ -57,6 +57,9 @@ def envio_notificacion_seguimiento(request,modulo=None):
             elif modulo == 'ET':
                 aux = ExpterraEmbarqueaereo.objects.get(numero=seguimiento).seguimiento
                 num_seg = str(aux) + ' EXPORT TERRESTRE'
+            elif modulo == 'AD':
+                num_seg = 'ADMINISTRACION'
+
 
             adjuntos = simplejson.loads(request.POST['archivos_adjuntos'])
             subject = request.POST['subject']

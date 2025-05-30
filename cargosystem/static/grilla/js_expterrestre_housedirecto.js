@@ -309,6 +309,8 @@ $('#buscadorEmailsHouse11').on('keyup', function () {
                     var selectedRowN = rowData[3];
                     localStorage.setItem('id_house_gasto', selectedRowId);
                     localStorage.setItem('num_house_gasto', selectedRowN);
+        localStorage.setItem('tabla_origen', 'tabla_house_directo_et');
+
                     localStorage.setItem('clase_house', 'ET');
 
                 }

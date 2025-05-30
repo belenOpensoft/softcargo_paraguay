@@ -26,6 +26,7 @@ class CorreoEnviado(models.Model):
         ('IT', 'IMPORT TERRESTRE'),
         ('ET', 'EXPORT TERRESTRE'),
         ('SG', 'SEGUIMIENTO'),
+        ('AD', 'ADMINISTRACION'),
     )
 
     fecha = models.DateTimeField()

@@ -1707,7 +1707,7 @@ function aplicable_volumen(volumen){
                     cargar_hauses_master_edit();
                 }
             }else if(lugar_editar==='edit_directo'){
-                $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                 }
 
                  $('#add_house_modal').dialog('close');
@@ -1786,7 +1786,7 @@ function aplicable_volumen(volumen){
                     }else if(lugar==='edit_master'){
                     table_edit_ea.ajax.reload(null, false);
                     }else if(lugar==='edit_directo'){
-                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                    $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                     }
                     else{
                     console.log('error en el lugar '+lugar);
@@ -2045,8 +2045,8 @@ function aplicable_volumen(volumen){
                         if ($.fn.DataTable.isDataTable('#table_edit_ea')) {
                             $('#table_edit_ea').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_ea')) {
+                            $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                         }
                     } else {
                         alert(resultado['resultado']);
@@ -2128,8 +2128,8 @@ function aplicable_volumen(volumen){
                         if ($.fn.DataTable.isDataTable('#table_edit_ea')) {
                             $('#table_edit_ea').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_ea')) {
+                            $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                         }
                     } else {
                         alert(resultado['resultado']);
@@ -2280,8 +2280,8 @@ function aplicable_volumen(volumen){
                         if ($.fn.DataTable.isDataTable('#table_edit_ea')) {
                             $('#table_edit_ea').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_ea')) {
+                            $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                         }
                     } else {
                         alert(resultado['resultado']);
@@ -2554,8 +2554,8 @@ function aplicable_volumen(volumen){
                                                 if ($.fn.DataTable.isDataTable('#table_edit_ea')) {
                                                     $('#table_edit_ea').DataTable().ajax.reload(null, false);
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo_ea')) {
+                                                    $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                                                 }
                                         } else {
                                             alert(aux);
@@ -2606,8 +2606,8 @@ function aplicable_volumen(volumen){
                         if ($.fn.DataTable.isDataTable('#table_edit_ea')) {
                             $('#table_edit_ea').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_ea')) {
+                            $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                         }
                     } else {
                         alert(resultado['resultado']);
@@ -2939,6 +2939,7 @@ table_add_ea = $('#table_add_ea').DataTable({
         var selectedRowN = rowData[3];
         localStorage.setItem('id_house_gasto', selectedRowId);
         localStorage.setItem('num_house_gasto', selectedRowN);
+        localStorage.setItem('tabla_origen', 'table_add_ea');
         localStorage.setItem('clase_house', 'EA');
 
     }
@@ -3361,6 +3362,7 @@ table_edit_ea = $('#table_edit_ea').DataTable({
         var selectedRowN = rowData[3];
         localStorage.setItem('id_house_gasto', selectedRowId);
         localStorage.setItem('num_house_gasto', selectedRowN);
+        localStorage.setItem('tabla_origen', 'table_edit_ea');
         localStorage.setItem('clase_house', 'EA');
 
     }
@@ -4147,7 +4149,7 @@ function gastos_btn_h_click(){
         if ($.fn.dataTable.isDataTable('#table_edit_ea')) {
             consignatario_code = $('#table_edit_ea').DataTable().row('.table-secondary').data()[18];
         } else {
-            consignatario_code = $('#tabla_house_directo').DataTable().row('.table-secondary').data()[18];
+            consignatario_code = $('#tabla_house_directo_ea').DataTable().row('.table-secondary').data()[18];
         }
         if (selectedRowN!=null) {
         get_datos_gastos_house();
@@ -4194,8 +4196,8 @@ function gastos_btn_h_click(){
                                                 if ($.fn.DataTable.isDataTable('#table_edit_ea')) {
                                                     $('#table_edit_ea').DataTable().ajax.reload(null, false);
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo_ea')) {
+                                                    $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                                                 }
                                             } else {
                                                 alert(aux);
@@ -4219,7 +4221,7 @@ function gastos_btn_h_click(){
                 //localStorage.removeItem('num_house_gasto');
 //                $('#table_add_ea tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ea tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
                     // table.ajax.reload();
                 $("#tabla_gastos").dataTable().fnDestroy();
                 }
@@ -4304,8 +4306,8 @@ function rutas_btn_h_click(){
                                                 if ($.fn.DataTable.isDataTable('#table_edit_ea')) {
                                                     $('#table_edit_ea').DataTable().ajax.reload(null, false);
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo_ea')) {
+                                                    $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                                                 }
                                             } else {
                                                 alert(aux);
@@ -4330,7 +4332,7 @@ function rutas_btn_h_click(){
                  $("#table_rutas_house").dataTable().fnDestroy();
 //                 $('#table_add_ea tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ea tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -4461,7 +4463,7 @@ function rutas_btn_h_click_master(){
                  $("#table_rutas_master").dataTable().fnDestroy();
 //                 $('#table_add_ea tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ea tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -4582,8 +4584,8 @@ $("#id_embarque_id").val('');
                                                 if ($.fn.DataTable.isDataTable('#table_edit_ea')) {
                                                     $('#table_edit_ea').DataTable().ajax.reload(null, false);
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo_ea')) {
+                                                    $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                                                 }
                                             } else {
                                                 alert(aux);
@@ -4608,7 +4610,7 @@ $("#id_embarque_id").val('');
                  $("#tabla_embarques_house").dataTable().fnDestroy();
 //                 $('#table_add_ea tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ea tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -4698,7 +4700,7 @@ $('.email').click(function () {
                // localStorage.removeItem('num_house_gasto');
 //                $('#table_add_ea tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ea tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
                 }
             })
         } else {
@@ -4848,7 +4850,7 @@ let lugar=localStorage.getItem('lugar');
             }else if(lugar==='edit_master'){
             table_edit_ea.ajax.reload(null, false);
             }else if(lugar==='edit_directo'){
-            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+            $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
             }
             else{
             console.log('error en el lugar '+lugar);
@@ -4922,8 +4924,8 @@ function archivos_btn_h_click(){
                                                 if ($.fn.DataTable.isDataTable('#table_edit_ea')) {
                                                     $('#table_edit_ea').DataTable().ajax.reload(null, false);
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo_ea')) {
+                                                    $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                                                 }
                                         } else {
                                             alert(aux);
@@ -4950,7 +4952,7 @@ function archivos_btn_h_click(){
                 $("#tabla_archivos").dataTable().fnDestroy();
 //                $('#table_add_ea tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ea tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
             }
         })
 }
@@ -5295,7 +5297,7 @@ function notas_house() {
                  $("#notas_form").trigger("reset");
 //                 $('#table_add_ea tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ea tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
                 }
             })
 }
@@ -5379,8 +5381,8 @@ function agregar_nota(event) {
                         if ($.fn.DataTable.isDataTable('#table_edit_ea')) {
                             $('#table_edit_ea').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_ea')) {
+                            $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                         }
             } else {
                 alert("Error al guardar las notas: " + response.errores);
@@ -5411,8 +5413,8 @@ function eliminarNota(id) {
                         if ($.fn.DataTable.isDataTable('#table_edit_ea')) {
                             $('#table_edit_ea').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_ea')) {
+                            $('#tabla_house_directo_ea').DataTable().ajax.reload(null, false);
                         }
                 } else {
                     alert("Error al eliminar la nota");
@@ -5431,6 +5433,8 @@ function cargar_gastos_factura(callback){
 
     $("#facturar_table").dataTable().fnDestroy();
     let tabla_factura = $('#facturar_table').DataTable({
+        info: false,        // Oculta "Mostrando X a Y de Z registros"
+        lengthChange: false ,
         "order": [[1, "desc"], [1, "desc"]],
         "processing": true,
         "serverSide": true,

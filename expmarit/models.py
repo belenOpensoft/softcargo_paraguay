@@ -954,6 +954,7 @@ class VEmbarqueaereo(models.Model):
     numero = models.IntegerField(unique=True, primary_key=True)
     consignatario_id = models.IntegerField()
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)
+    consignatario_codigo = models.IntegerField()
 
     transportista = models.CharField(max_length=255, blank=True, null=True)  # Nombre del transportista
     awb = models.CharField(max_length=40, blank=True, null=True)
@@ -996,6 +997,7 @@ class VEmbarqueaereo(models.Model):
         managed = False
         db_table = 'VExpMaritEmbarqueAereo'
 class VEmbarqueaereoDirecto(models.Model):
+    consignatario_codigo = models.IntegerField()
     numero = models.IntegerField(unique=True, primary_key=True)
     consignatario_id = models.IntegerField()
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)

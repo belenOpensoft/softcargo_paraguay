@@ -12,7 +12,8 @@ from administracion_contabilidad.views.editar_consultar_compras import editar_co
 from administracion_contabilidad.views.editar_consultar_pagos import editar_consultar_pagos, obtener_detalle_pago_orden, \
     cargar_pendientes_imputacion_pago, procesar_imputaciones_pagos, actualizar_campos_movims_pago, anular_pago
 from administracion_contabilidad.views.cobranza import cobranza_view, source_cobranza, source_cobranza_imputacion, \
-    source_facturas_pendientes, guardar_impuventa, guardar_anticipo, cargar_arbitraje, obtener_proximo_mboleta
+    source_facturas_pendientes, guardar_impuventa, guardar_anticipo, cargar_arbitraje, obtener_proximo_mboleta, \
+    get_email_recibo_cobranza
 from administracion_contabilidad.views.facturacion import facturacion_view, buscar_clientes, buscar_cliente, \
     buscar_item_v, buscar_items_v, procesar_factura, source_facturacion, source_infofactura, \
     cargar_preventa_infofactura, source_infofactura_cliente, cargar_preventa_infofactura_multiple, guardar_arbitraje, \
@@ -82,6 +83,7 @@ urlpatterns = [
     path('guardar_anticipo/', guardar_anticipo, name='guardar_anticipo'),
     path('cargar_arbitraje/', cargar_arbitraje, name='cargar_arbitraje'),
     path('proximo_mboleta/', obtener_proximo_mboleta, name='proximo_mboleta'),
+    path('get_email_recibo_cobranza/', get_email_recibo_cobranza, name='get_email_recibo_cobranza'),
     #cobranza
 
     #orden de pago

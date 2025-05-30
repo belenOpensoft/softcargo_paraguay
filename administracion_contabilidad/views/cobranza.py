@@ -6,12 +6,16 @@ from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
 from django.db import transaction
 from django.shortcuts import render
-from administracion_contabilidad.forms import Cobranza,CobranzasDetalleTabla
+from django.utils.dateformat import DateFormat
+from num2words import num2words
+
+from administracion_contabilidad.forms import Cobranza, CobranzasDetalleTabla, emailsForm
 from administracion_contabilidad.models import Boleta, Impuvtas, Asientos, Movims, Cheques, Cuentas, VistaCobranza, \
     Dolar, ListaCobranzas
 from administracion_contabilidad.views.facturacion import generar_numero, modificar_numero
 from administracion_contabilidad.views.orden_pago import convertir_monto
 from administracion_contabilidad.views.preventa import generar_autogenerado
+from impomarit.views.mails import formatear_linea
 from mantenimientos.models import Clientes, Monedas
 
 from collections import defaultdict
@@ -50,7 +54,8 @@ def cobranza_view(request):
     if request.user.has_perms(["administracion_contabilidad.view_listacobranzas", ]):
         form = Cobranza(initial={'fecha':datetime.now().strftime('%Y-%m-%d') })
         detalle = CobranzasDetalleTabla()
-        return render(request, 'cobranza.html', {'form': form,'detalle':detalle})
+        form_email = emailsForm()
+        return render(request, 'cobranza.html', {'form': form,'detalle':detalle,'form_email':form_email})
     else:
         messages.error(request, 'No tiene permisos para realizar esta accion.')
         return HttpResponseRedirect('/')
@@ -214,8 +219,8 @@ def source_facturas_pendientes(request):
             total = float(pendiente.total or 0)
             saldo = float(pendiente.saldo or 0)
 
-            arbitraje = float(arbitraje)
-            paridad = float(paridad)
+            arbitraje = float(arbitraje or 0)
+            paridad = float(paridad or 0)
 
             total_convertido = convertir_monto(total, int(pendiente.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
             saldo_convertido = convertir_monto(saldo, int(pendiente.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
@@ -275,6 +280,7 @@ def guardar_impuventa(request):
                             boleta = Boleta.objects.filter(numero=item['nroboleta']).order_by('-id').first()
                         except Exception as _:
                             boleta = None
+                            return JsonResponse({'status': 'Error: Boleta no encontrada.' })
 
                         if boleta:
                             autofac = boleta.autogenerado
@@ -335,7 +341,7 @@ def guardar_impuventa(request):
                             'mes': fecha_obj.month,
                             'fechacheque': fecha_obj,
                             'paridad': cobranza[0]['paridad'],
-                            'posicion': boleta.posicion if boleta.posicion else None
+                            'posicion': boleta.posicion if boleta else None
 
                         }  # haber
                         crear_asiento(asiento_vector_1)
@@ -421,7 +427,7 @@ def guardar_impuventa(request):
                     }
                     crear_movimiento(movimiento_vec)
 
-                return JsonResponse({'status': 'exito'})
+                return JsonResponse({'status': 'exito', 'autogenerado': autogenerado_impuventa})
             return None
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
@@ -700,3 +706,106 @@ def obtener_proximo_mboleta(request):
         return JsonResponse({'proximo_mboleta': str(proximo)})
     except Exception as e:
         return JsonResponse({'error': f'Error al obtener mboleta: {str(e)}'}, status=500)
+
+def get_email_recibo_cobranza(request):
+    try:
+        autogenerado = request.POST.get("autogenerado")
+        cobro = Movims.objects.filter(mautogen=autogenerado).first()
+        if not cobro:
+            return JsonResponse({'resultado': 'error', 'detalle': 'Cobro no encontrado'})
+
+        fecha = cobro.mfechamov.strftime("%d/%m/%Y")
+        nombre = f"{request.user.first_name} {request.user.last_name}"
+        cliente = Clientes.objects.filter(codigo=cobro.mcliente).first()
+        email_cliente = cliente.emailim if cliente and cliente.emailim else ""
+
+        texto = ""
+        texto += "<p style='font-family: Courier New, monospace; font-size: 14px; font-weight: bold;'>OCEANLINK LTDA</p>"
+        texto += '<br><span style="display: block; border-top: 0.5pt solid #CCC; margin: 6px 0;"></span><br>'
+        texto += formatear_linea("Comprobante", "Recibo confirmado")
+        texto += formatear_linea("Número", cobro.mboleta or "S/I")
+        texto += formatear_linea("Fecha emisión", fecha)
+        texto += formatear_linea("Emitido por", nombre)
+        texto += '<br>'
+        texto += formatear_linea("Cliente", cobro.mnombre or "S/I")
+        texto += '<br><span style="display: block; border-top: 0.5pt solid #CCC; margin: 6px 0;"></span><br>'
+        texto += formatear_linea("Moneda", cobro.mmoneda)
+        texto += formatear_linea("Cotización", cobro.mcambio)
+        texto += formatear_linea("Monto a cobrar", cobro.mtotal)
+        texto += formatear_linea("Detalle", cobro.mdetalle or "S/I")
+        texto += '<br>'
+
+        texto += "<p style='font-family: Courier New, monospace; font-size: 12px;'>Facturas canceladas:</p>"
+        texto += """
+        <table style='border:none;font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: auto;'>
+            <thead>
+                <tr>
+                    <th style='padding: 0 10px; text-align: left;'>Factura</th>
+                    <th style='padding: 0 10px; text-align: left;'>Detalle</th>
+                    <th style='padding: 0 10px; text-align: right;'>Monto</th>
+                </tr>
+            </thead>
+            <tbody>
+        """
+        imputaciones = Impuvtas.objects.filter(autogen=autogenerado)
+        for imp in imputaciones:
+            boleta = Movims.objects.filter(mautogen=imp.autofac).first()
+            if boleta:
+                num_completo = f"{boleta.mserie}{boleta.mprefijo}{boleta.mboleta}"
+                texto += f"""
+                <tr>
+                    <td style='padding: 0 10px;'>{num_completo}</td>
+                    <td style='padding: 0 10px;'>{boleta.mdetalle or ''}</td>
+                    <td style='padding: 0 10px; text-align: right;'>{boleta.mtotal:.2f}</td>
+                </tr>
+                """
+        texto += "</tbody></table><br>"
+
+        texto += '<br><span style="display: block; border-top: 0.5pt solid #CCC; margin: 6px 0;"></span><br>'
+
+        texto += "<p style='font-family: Courier New, monospace; font-size: 12px;'>Formas de cobro:</p>"
+        texto += """
+        <table style='border:none;font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: auto;'>
+            <thead>
+                <tr>
+                    <th style='padding: 0 10px; text-align: left;'>Banco</th>
+                    <th style='padding: 0 10px; text-align: right;'>Monto</th>
+                    <th style='padding: 0 10px; text-align: left;'>Medio</th>
+                </tr>
+            </thead>
+            <tbody>
+        """
+        formas = Asientos.objects.filter(autogenerado=autogenerado, imputacion=1)
+        for f in formas:
+            texto += f"""
+            <tr>
+                <td style='padding: 0 10px;'>{f.banco or ''}</td>
+                <td style='padding: 0 10px; text-align: right;'>{f.monto:.2f}</td>
+                <td style='padding: 0 10px;'>{f.modo or ''}</td>
+            </tr>
+            """
+        texto += "</tbody></table><br>"
+
+        texto += '<br><span style="display: block; border-top: 0.5pt solid #CCC; margin: 6px 0;"></span><br>'
+
+        texto += f"<p style='font-family: Courier New, monospace; font-size: 12px;'>{monto_a_letras(cobro.mtotal, cobro.mmoneda)}</p>"
+
+        return JsonResponse({
+            'resultado': 'exito',
+            'mensaje': texto,
+            'asunto': f"RECIBO DE COBRANZA - {cobro.mnombre}",
+            'email_cliente': email_cliente,
+        })
+
+    except Exception as e:
+        return JsonResponse({'resultado': 'error', 'detalle': str(e)})
+
+def monto_a_letras(monto, moneda):
+    try:
+        monto = float(str(monto).replace(",", ""))  # Asegura formato numérico
+        enteros = int(monto)
+        decimales = int(round((monto - enteros) * 100))
+        letras = num2words(enteros, lang='es').upper()
+        return f"SON {moneda} {letras} CON {decimales:02d}/100."
+    except:
+        return f"SON {moneda} S/I"

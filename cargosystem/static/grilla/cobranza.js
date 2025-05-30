@@ -331,10 +331,10 @@ function abrir_cobranza() {
         minWidth: 500,
         minHeight: 200,
         beforeClose: function () {
-        existe_cliente = false;
-        localStorage.removeItem('medios_pago');
-        resetModal("#dialog-form");
-        resetModal("#paymentModal");
+            existe_cliente = false;
+            localStorage.removeItem('medios_pago');
+            resetModal("#dialog-form");
+            resetModal("#paymentModal");
         },
         buttons: [
             {
@@ -397,6 +397,8 @@ function resetModal(modalId) {
 
 function tabla_para_imputar() {
     $('#imputacionTable').DataTable({
+        info: false,        // Oculta "Mostrando X a Y de Z registros"
+        lengthChange: false,
         "dom": 'Btlipr',
         "scrollX": true,
         "responsive": false,
@@ -534,7 +536,7 @@ function abrir_forma_pago() {
                 },
             },
         ], beforeClose: function () {
-
+            resetModal('paymentModal');
         },
         open: function () {
             // Obtener fecha de hoy en formato YYYY-MM-DD
@@ -569,6 +571,8 @@ function tabla_facturas_pendientes(cliente, moneda) {
 
 
     const table = $('#imputacionTable').DataTable({
+        info: false,        // Oculta "Mostrando X a Y de Z registros"
+        lengthChange: false,
         serverSide: true,
         ajax: {
             url: "/admin_cont/source_facturas_pendientes",
@@ -1269,6 +1273,14 @@ function crear_impuventa_asiento_movimiento() {
                 $('#dialog-form').dialog('close');
                 $('#paymentModal').dialog('close');
                 table.ajax.reload();
+                if(confirm('¿Desea enviar un email con el comprobante?')){
+                    let autogenerado = response.autogenerado;
+                    if(autogenerado!=null){
+                        get_data_email(autogenerado);
+                    }else{
+                        alert('Algo salió mal.');
+                    }
+                }
                 // Opcional: recargar una tabla o actualizar la UI
             } else {
                 alert(response.status);
@@ -1632,6 +1644,119 @@ function buscar_detalle(autogenerado) {
         },
         error: function (xhr) {
             alert("No se pudo obtener el detalle de la cobranza.");
+        }
+    });
+}
+
+function sendEmail(to, cc, cco, subject, message, title) {
+    let miurl = "/envio_notificacion/AD/";
+    var toData = {
+        'to': to,
+        'cc': cc,
+        'cco': cco,
+        'subject': subject,
+        'message': message,
+        'tipo': title,
+        'seguimiento': 0,
+        'archivos_adjuntos': JSON.stringify(archivos_adjuntos),
+        'csrfmiddlewaretoken': csrf_token,
+    };
+    $.ajax({
+        type: "POST",
+        url: miurl,
+        data: toData,
+        async: false,
+        success: function (resultado) {
+            if (resultado['resultado'] === 'exito') {
+                mostrarToast('¡Mensaje enviado con exito!', 'success');
+                return true;
+            } else {
+                alert(resultado['resultado']);
+            }
+        }
+    });
+
+
+}
+
+function get_data_email(autogenerado) {
+    let title = 'title';
+    let mail_to = 'mail to';
+    $("#id_to").val('');
+    $("#id_cc").val('');
+    $("#id_cco").val('');
+    cco = $("#id_subject").val('');
+    $('#email_add_input').summernote('destroy');
+
+    $("#emails_modal").dialog({
+            autoOpen: true,
+            open: function (event, ui) {
+                $('#email_add_input').summernote('destroy');
+                $('#email_add_input').summernote({
+                    placeholder: 'Ingrese su texto aqui',
+                    tabsize: 10,
+                    height: wHeight * 0.60,
+                    width: wWidth * 0.88,
+                    toolbar: [
+                        ['style', ['style']],
+                        ['font', ['bold', 'underline', 'clear']],
+                        ['color', ['color']],
+                        ['para', ['ul', 'ol', 'paragraph']],
+                        ['table', ['table']],
+                        ['insert', ['link', 'picture', 'video']],
+                        ['view', ['fullscreen', 'codeview']]
+                    ]
+                });
+                $('#email_add_input').focus();
+            },
+            modal: true,
+            title: title + " Correo con comprobante de cobranza",
+            height: wHeight * 0.90,
+            width: wWidth * 0.90,
+            class: 'modal fade',
+            buttons: [
+                {
+                    text: "Enviar",
+                    class: "btn btn-primary",
+                    style: "width:100px",
+                    click: function () {
+                        to = $("#id_to").val();
+                        cc = $("#id_cc").val();
+                        cco = $("#id_cco").val();
+                        subject = $("#id_subject").val();
+                        message = $("#email_add_input").summernote('code');
+                        sendEmail(to, cc, cco, subject, message, title);
+                        $(this).dialog("close");
+                    },
+                }, {
+                    text: "Salir",
+                    class: "btn btn-dark",
+                    style: "width:100px",
+                    click: function () {
+                        $(this).dialog("close");
+                        $('#modalSeleccionEmail').dialog("close");
+                    },
+                },],
+            beforeClose: function (event, ui) {
+                // table.ajax.reload();
+            }
+        })
+
+    $.ajax({
+        type: "POST",
+        url: "/admin_cont/get_email_recibo_cobranza/",
+        data: {
+            autogenerado: autogenerado,
+            csrfmiddlewaretoken: csrf_token
+        },
+        success: function (resultado) {
+            if (resultado['resultado'] === 'exito') {
+                $("#id_subject").val(resultado['asunto']);
+                $("#id_to").val(resultado['email_cliente']);
+                $("#email_add_input").summernote('code', resultado['mensaje']);
+            } else {
+                alert('Error: ' + resultado['detalle']);
+            }
         }
     });
 }

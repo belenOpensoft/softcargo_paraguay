@@ -420,7 +420,8 @@ def procesar_factura(request):
                     'mes': fecha_obj.month,
                     'fechacheque': fecha_obj,
                     'paridad': paridad,
-                    'posicion': 'S/I'
+                    'posicion': 'S/I',
+                    'nroserv':None
                 }
                 crear_movimiento(movimiento)
                 crear_asiento(asiento_general)
@@ -524,6 +525,7 @@ def procesar_factura(request):
                     movimiento_num = aux
 
                 return JsonResponse({'success':True})
+            return None
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
 
@@ -729,6 +731,7 @@ def cargar_preventa_infofactura(request):
                         'iva': gasto.iva,
                         'original': float(gasto.pinformar),
                         'moneda': gasto.moneda,
+                        'posicion': prev.zposicion,
                     }
                     total_sin_iva += gasto.precio
                     if gasto.iva == 'Basico':
@@ -782,6 +785,7 @@ def cargar_preventa_infofactura(request):
                 'total_con_iva': str(total_con_iva),
                 'total_sin_iva': str(total_sin_iva),
                 'cliente_i': cliente.empresa if cliente else None,
+                'nrocliente': cliente.codigo if cliente else None,
                 'peso': prev.zkilos,
                 'direccion': cliente.direccion if cliente else None,
                 'localidad': cliente.localidad if cliente else None,
@@ -824,6 +828,8 @@ def cargar_preventa_infofactura(request):
             return JsonResponse({'error': 'Infofactura no encontrada'}, safe=False)
         except Clientes.DoesNotExist:
             return JsonResponse({'error': 'Cliente no encontrado'}, safe=False)
+    return None
+
 
 def cargar_preventa_infofactura_multiple(request):
     if request.method == 'POST':

@@ -368,6 +368,7 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append(notas)
             registro_json.append(registro.consignatario_id)
             registro_json.append(registro.seguimiento) #20
+            registro_json.append(registro.consignatario_codigo)
 
             data.append(registro_json)
         return data

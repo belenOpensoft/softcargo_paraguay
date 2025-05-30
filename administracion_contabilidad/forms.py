@@ -2559,5 +2559,12 @@ class PagosDetalleTabla(forms.Form):
         })
     )
 
+class emailsForm(forms.Form):
+    to = forms.EmailField(label='Para',widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    cc = forms.EmailField(label='CC',widget=forms.EmailInput(attrs={'class': 'form-control'}), required=False)
+    cco = forms.EmailField(label='CCO',widget=forms.EmailInput(attrs={'class': 'form-control'}), required=False)
+    subject = forms.CharField(label='Asunto',widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
+    email = forms.CharField(widget=forms.Textarea(attrs={"id": 'email_add_input',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"100","class":"form-control"}, ), required=False,label="Email", max_length=500)
+
 
 

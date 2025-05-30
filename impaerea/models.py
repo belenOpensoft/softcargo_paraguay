@@ -767,6 +767,7 @@ class VGastosHouse(models.Model):
 class VEmbarqueaereo(models.Model):
     numero = models.IntegerField(unique=True, primary_key=True)
     consignatario_id = models.IntegerField()
+    consignatario_codigo = models.IntegerField()
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)
 
     transportista = models.CharField(max_length=255, blank=True, null=True)  # Nombre del transportista
@@ -818,6 +819,7 @@ class VEmbarqueaereoDirecto(models.Model):
     consignatario_id = models.IntegerField()
     fechaingreso = models.DateTimeField(db_column='FechaIngreso', blank=True, null=True)
     aplicable = models.IntegerField(null=True, blank=True, default=None)
+    consignatario_codigo = models.IntegerField()
 
     transportista = models.CharField(max_length=255, blank=True, null=True)  # Nombre del transportista
     awb = models.CharField(max_length=40, blank=True, null=True)

@@ -491,6 +491,8 @@ function tabla_facturas_pendientes(cliente,moneda) {
     }
 
     const table = $('#imputacionTablePagos').DataTable({
+                info: false,        // Oculta "Mostrando X a Y de Z registros"
+        lengthChange: false ,
         serverSide: true,
         ajax: {
             url: "/admin_cont/obtener_imputables",
