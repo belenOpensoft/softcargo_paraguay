@@ -756,7 +756,6 @@ $('#preventa_table tbody').on('dblclick', 'tr', function () {
         },
         headers: {'X-CSRFToken': csrf_token},
         success: function (response) {
-            console.log(response);
             let preventa = response.data_preventa;
             let gastos = response.data;
 
@@ -1728,7 +1727,6 @@ function guardar_preventa_unificada() {
         gastos_mostrar = gastos_originales;
     }
 
-    console.log(preventa);
     $.ajax({
         type: "POST",
         url: "/admin_cont/preventa/",
@@ -1738,7 +1736,6 @@ function guardar_preventa_unificada() {
             'X-CSRFToken': csrf_token
         },
         success: function (response) {
-            console.log(response);
             if (response.resultado === 'exito') {
                 guardar_gastos_uni(gastos_mostrar, clase, referencia);
                 borrar_preventas_multiples(ids);
@@ -1767,7 +1764,6 @@ function guardar_gastos_uni(gastos, clase, referencia) {
             'X-CSRFToken': csrf_token
         },
         success: function (response) {
-            console.log(response);
         },
         error: function () {
             alert("Error en la solicitud.");
@@ -1778,7 +1774,6 @@ function guardar_gastos_uni(gastos, clase, referencia) {
 function borrar_preventas_multiples(preventas) {
 
     preventas.forEach(function (p) {
-        console.log(p);
         $.ajax({
             url: '/admin_cont/eliminar_preventa/',
             method: 'POST',
@@ -1786,7 +1781,6 @@ function borrar_preventas_multiples(preventas) {
             data: JSON.stringify({id: p}),
             contentType: 'application/json',
             success: function (response) {
-                console.log(response);
             },
             error: function (xhr) {
                 alert("Error al eliminar la preventa: " + xhr.responseText);
@@ -1935,7 +1929,6 @@ function rellenar_tabla() {
 
     // Cerramos el modal
     $("#modal-embarque").dialog("close");
-    console.log("Tabla actualizada con registros del guardado-tabla.");
 }
 
 function procesar_factura() {
@@ -1982,7 +1975,7 @@ function procesar_factura() {
         let items = [];
         $('#itemTable tbody tr').each(function () {
             const tds = $(this).children('td'); // Incluye todos, incluso ocultos
-            console.log("Columnas:", tds.length, tds.map((i, td) => `(${i}) ${$(td).text().trim()}`).get());
+            //console.log("Columnas:", tds.length, tds.map((i, td) => `(${i}) ${$(td).text().trim()}`).get());
 
             const itemData = {
                 id: tds.eq(0).text().trim(),           // Id (oculto)
@@ -2003,7 +1996,6 @@ function procesar_factura() {
         });
 
         let preventa = JSON.parse(localStorage.getItem('preventa')) || [];
-        console.log(preventa);
         let data = [];
         if (preventa != null) {
             data = {
@@ -2134,7 +2126,7 @@ function procesar_factura_finalizada(datos_complementarios) {
         let items = [];
         $('#itemTable tbody tr').each(function () {
             const tds = $(this).children('td'); // Incluye todos, incluso ocultos
-            console.log("Columnas:", tds.length, tds.map((i, td) => `(${i}) ${$(td).text().trim()}`).get());
+            //console.log("Columnas:", tds.length, tds.map((i, td) => `(${i}) ${$(td).text().trim()}`).get());
 
             const itemData = {
                 id: tds.eq(0).text().trim(),           // Id (oculto)

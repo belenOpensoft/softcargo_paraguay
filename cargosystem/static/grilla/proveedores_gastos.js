@@ -2,6 +2,7 @@ var wWidth = $(window).width();
 var dWidth = wWidth * 0.40;
 var wHeight = $(window).height();
 var dHeight = wHeight * 0.30;
+let filaSeleccionada = null;
 
 $(document).ready(function() {
     var buscar = '';
@@ -105,8 +106,6 @@ $(document).ready(function() {
 
         actualizarImputado();
 
-        console.log("Facturas imputadas:", facturasGuardadas);
-        console.log("Saldo restante:", saldoRestante);
     });
 
     $("#cerrar-modal").on("click", function () {
@@ -715,10 +714,9 @@ $(document).ready(function() {
     });
 
 
-    let filaSeleccionada = null;
-
+    /*
     // Detectar doble clic en la celda de la columna "Embarque" (índice 7)
-    $("#itemTable tbody").on("dblclick", "td:nth-child(7)", function () {
+    $("#itemTable tbody").on("dblclick", "td:nth-child(9)", function () {
         filaSeleccionada = $(this).closest("tr");
 
         let embarqueValor = $(this).text().trim();
@@ -728,7 +726,7 @@ $(document).ready(function() {
             $("#modal-embarque").dialog("open");
         }
     });
-
+*/
     // Botón para cerrar el modal
     $("#cerrar-modal").click(function () {
         $("#modal-embarque").dialog("close");
@@ -754,15 +752,15 @@ $(document).ready(function() {
         let embarque = fila.querySelector("td:nth-child(6)")?.textContent.trim() || "";
         let lugar = fila.querySelector("td:nth-child(5)")?.textContent.trim() || "";
         let cliente = fila.querySelector("td:nth-child(4)")?.textContent.trim() || "";
-        let embarqueFinal = embarque + lugar;
+        let embarqueFinal = embarque + ' ' + lugar;
 
-        filaSeleccionada.find("td").eq(7).text(posicion);
-        filaSeleccionada.find("td").eq(8).text(cliente);
-        filaSeleccionada.find("td").eq(6).text(embarqueFinal);
+        //filaSeleccionada.find("td").eq(3).text(precio);           // Precio
+        filaSeleccionada.find("td").eq(8).text(embarqueFinal);    // Embarque
+        filaSeleccionada.find("td").eq(9).text(posicion);         // Posición
+        filaSeleccionada.find("td").eq(10).text(cliente);         // Socio Comercial
 
     } else {
-        let filaBase = filaSeleccionada.clone();
-
+       let filaBase = filaSeleccionada.clone();
         filaSeleccionada.remove();
 
         guardadoFilas.forEach(fila => {
@@ -771,21 +769,22 @@ $(document).ready(function() {
             let embarque = fila.querySelector("td:nth-child(6)")?.textContent.trim() || "";
             let lugar = fila.querySelector("td:nth-child(5)")?.textContent.trim() || "";
             let cliente = fila.querySelector("td:nth-child(4)")?.textContent.trim() || "";
-            let embarqueFinal = embarque + lugar;
+            let embarqueFinal = embarque + ' ' + lugar;
 
             let nuevaFila = filaBase.clone();
-            nuevaFila.find("td").eq(7).text(posicion);
-            nuevaFila.find("td").eq(8).text(cliente);
-            nuevaFila.find("td").eq(6).text(embarqueFinal);
-            nuevaFila.find("td").eq(3).text(precio);
+            nuevaFila.find("td").eq(3).text(precio);             // Precio
+            nuevaFila.find("td").eq(8).text(embarqueFinal);      // Embarque
+            nuevaFila.find("td").eq(9).text(posicion);           // Posición
+            nuevaFila.find("td").eq(10).text(cliente);           // Socio Comercial
 
             $("#itemTable tbody").append(nuevaFila);
         });
+
     }
 
     // Cerramos el modal
     $("#modal-embarque").dialog("close");
-    console.log("Tabla actualizada con registros del guardado-tabla.");
+    guardar_factura();
 }
 
     $("#tabla_proveedoresygastos tbody").on("dblclick", "tr", function () {
@@ -815,6 +814,7 @@ $(document).ready(function() {
         $(this).addClass("table-secondary");
     });
 
+
 });
 function procesar_factura(){
     if (confirm('¿Está seguro de que desea facturar?')) {
@@ -828,6 +828,7 @@ function procesar_factura(){
                 cargar_facturas_imputacion(cliente);
                 return;
             }else{
+
                 guardar_factura();
             }
         }else{
@@ -837,6 +838,24 @@ function procesar_factura(){
     }
 }
 function guardar_factura(){
+    let pendienteEncontrado = false;
+
+    $('#itemTable tbody tr').each(function () {
+        // Antes: columna 7 (index 6)
+        const estado = $(this).find('td:nth-child(9)').text().trim();  // Ahora es la 8.ª columna (estado)
+        if (estado.toUpperCase() === 'PENDIENTE') {
+            filaSeleccionada = $(this);
+            pendienteEncontrado = true;
+            return false; // cortar el .each
+        }
+    });
+
+    if (pendienteEncontrado) {
+        let total = $('#id_total').val();
+        localStorage.setItem("precio_item_imputar", total);
+        $("#modal-embarque").dialog("open");
+        return; // cortar la función, no continuar con el procesamiento
+    }
     let tipoFac = $('#id_tipo').val();
     let serie = $('#id_serie').val();
     let prefijo = $('#id_prefijo').val();
@@ -862,15 +881,16 @@ function guardar_factura(){
     let items = [];
     $('#itemTable tbody tr').each(function() {
         const itemData = {
-            id: $(this).find('td').eq(0).text(),
-            descripcion: $(this).find('td').eq(1).text(),
-            precio: $(this).find('td').eq(3).text(),
-            iva: $(this).find('td').eq(4).text(),
-            cuenta: $(this).find('td').eq(5).text(),
-            posicion: $(this).find('td').eq(7).text(),
+            id: $(this).find('td').eq(0).text().trim(),
+            descripcion: $(this).find('td').eq(2).text().trim(),
+            precio: $(this).find('td').eq(3).text().trim(),
+            iva: $(this).find('td').eq(4).text().trim(),
+            cuenta: $(this).find('td').eq(7).text().trim(),
+            posicion: $(this).find('td').eq(9).text().trim(),
         };
         items.push(itemData);
     });
+
     let data=[];
         data={
             csrfmiddlewaretoken: csrf_token,
