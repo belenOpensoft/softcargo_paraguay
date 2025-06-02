@@ -237,10 +237,15 @@ class RegistroCargaForm(forms.Form):
         widget=forms.DateInput(attrs={'type': 'date'})
     )
     consignatario = forms.CharField(label="Consignatario", max_length=100)
+    consignatario_num = forms.CharField(widget=forms.HiddenInput(), required=False)
+    transportista_num = forms.CharField(widget=forms.HiddenInput(), required=False)
+    shipper_num = forms.CharField(widget=forms.HiddenInput(), required=False)
+    agente_num = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     commodity = forms.CharField(label="Commodity", max_length=100)
     wr = forms.CharField(label="WR", max_length=100)
     shipper = forms.CharField(label="Shipper", max_length=100)
+
     incoterms = forms.CharField(label="Incoterms", max_length=100)
     pago = forms.CharField(label="Pago", max_length=100)
     agente = forms.CharField(label="Agente", max_length=100)

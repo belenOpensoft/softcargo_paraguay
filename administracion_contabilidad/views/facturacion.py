@@ -279,21 +279,21 @@ def procesar_factura(request):
 
                         seguimiento = registro_carga.get('seguimiento', '')
                         referencia = registro_carga.get('referencia', '')
-                        transportista = registro_carga.get('transportista', '')
+                        transportista = registro_carga.get('transportista_nro', '')
                         vuelo = registro_carga.get('vuelo_vapor', '')
                         master = registro_carga.get('mawb', '')
                         house = registro_carga.get('hawb', '')
                         origen = registro_carga.get('origen', '')
                         destino = registro_carga.get('destino', '')
                         llegasale = registro_carga.get('fecha_llegada_salida', None)
-                        consignatario = registro_carga.get('consignatario', '')
+                        consignatario = registro_carga.get('consignatario_nro', '')
                         commodity = registro_carga.get('commodity', '')
                         wr = registro_carga.get('wr', '')
-                        shipper = registro_carga.get('shipper', '')
+                        shipper = registro_carga.get('shipper_nro', '')
                         terminos = registro_carga.get('incoterms', '')
                         pagoflete = 'C' if registro_carga.get('pago', '') == 'COLLECT' else 'PREPAID' if registro_carga.get(
                             'pago', '') else ''
-                        agente = registro_carga.get('agente', '')
+                        agente = registro_carga.get('agente_nro', '')
                         posicion = registro_carga.get('posicion', '')
                         detalle = registro_carga.get('observaciones', '')
                     else:
@@ -1211,7 +1211,11 @@ def get_datos_embarque(request):
             "agente": embarque.agente,
             "posicion": embarque.posicion,
             "observaciones": 'S/I',
-            "servicio": None
+            "servicio": None,
+            "transportista_nro": embarqueReal.transportista,
+            "consignatario_nro": embarqueReal.consignatario,
+            "agente_nro": embarqueReal.agente,
+            "shipper_nro": embarqueReal.embarcador,
         })
 
     except Exception as e:

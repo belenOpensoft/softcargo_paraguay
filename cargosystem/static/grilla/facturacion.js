@@ -102,13 +102,13 @@ $(document).ready(function () {
     // Editar fila: al hacer doble clic sobre una fila, se cargan los datos en los campos de entrada
     $("#itemTable").on("dblclick", "tr", function () {
         var $row = $(this);
-        // Asume que la fila tiene las 6 celdas en el orden correcto
-        var codigo = $row.find("td").eq(0).text().trim();    // Código (oculto)
-        var item = $row.find("td").eq(1).text().trim();        // Item
-        var descripcion = $row.find("td").eq(2).text().trim(); // Descripción
-        var precio = $row.find("td").eq(3).text().trim();      // Precio
-        var iva = $row.find("td").eq(4).text().trim();         // IVA
-        var cuenta = $row.find("td").eq(5).text().trim();      // Cuenta
+        // Ajustar índices según las nuevas columnas agregadas
+        var codigo = $row.find("td").eq(0).text().trim();       // Código (oculto)
+        var item = $row.find("td").eq(1).text().trim();         // Item
+        var descripcion = $row.find("td").eq(2).text().trim();  // Descripción
+        var precio = $row.find("td").eq(3).text().trim();       // Precio
+        var iva = $row.find("td").eq(6).text().trim();          // IVA (columna 7 ahora)
+        var cuenta = $row.find("td").eq(7).text().trim();       // Cuenta (columna 8 ahora)
 
         // Cargar los datos en los campos de entrada
         $("#item").val(item);
@@ -130,9 +130,13 @@ $(document).ready(function () {
         const item = $('#item').val();
         const descripcion = $('#id_descripcion_item input').val();
         const precio = parseFloat($('#id_precio input').val());
+        if(precio == 0 || precio == null){
+            alert('Digite un precio');
+            return;
+        }
 
         if (item && descripcion && !isNaN(precio)) {
-            const iva = $('#id_precio input').data('iva') || "";   // puede estar vacío en un nuevo item
+            const iva = $('#id_precio input').data('iva') || "";
             const cuenta = $('#id_precio input').data('cuenta') || "";
             const codigo = $('#id_precio input').data('codigo') || "";
             const imputar = $('#id_precio input').data('imputar') || "";
@@ -144,24 +148,46 @@ $(document).ready(function () {
                 $editingRow.data("precio", precio);
                 $editingRow.data("iva", iva);
                 $editingRow.data("cuenta", cuenta);
+                 let montoIva, totalConIva;
+                    if (iva === 'Básico') {
+                        montoIva = precio * 0.22;
+                    } else {
+                        montoIva = 0;
+                    }
+                    totalConIva = precio + montoIva;
 
-                $editingRow.find("td").eq(0).text(codigo);
-                $editingRow.find("td").eq(1).text(item);
-                $editingRow.find("td").eq(2).text(descripcion);
-                $editingRow.find("td").eq(3).text(precio.toFixed(2));
-                $editingRow.find("td").eq(4).text(iva);
-                $editingRow.find("td").eq(5).text(cuenta);
-                $editingRow.find("td").eq(6).text(texto);
+                $editingRow.find("td").eq(0).text(codigo);           // Código
+                $editingRow.find("td").eq(1).text(item);             // Nombre del item
+                $editingRow.find("td").eq(2).text(descripcion);      // Descripción
+                $editingRow.find("td").eq(3).text(precio.toFixed(2));// Precio
+                $editingRow.find("td").eq(4).text(montoIva.toFixed(2));  // IVA
+                $editingRow.find("td").eq(5).text(totalConIva.toFixed(2)); // Total con IVA
+                $editingRow.find("td").eq(6).text(iva);              // Tipo de IVA
+                $editingRow.find("td").eq(7).text(cuenta);           // Cuenta
+                $editingRow.find("td").eq(8).text(texto);            // Estado
                 $editingRow.removeClass("editing");
             } else {
                 itemCounter++;
+                let montoIva;
+                let totalConIva;
                 const rowId = `item-${itemCounter}`;
+                if(iva==='Básico'){
+                    montoIva = parseFloat(precio) * (22 / 100);
+                    totalConIva = parseFloat(precio) + montoIva;
+                }else{
+                    montoIva = 0;
+                    totalConIva = parseFloat(precio) + montoIva;
+                }
+
+
                 const row = `
                     <tr id="${rowId}" data-precio="${precio}" data-iva="${iva}" data-cuenta="${cuenta}">
                         <td style="display:none;">${codigo}</td>
                         <td>${item}</td>
                         <td>${descripcion}</td>
                         <td>${precio.toFixed(2)}</td>
+                        <td>${montoIva.toFixed(2)}</td>
+                        <td>${totalConIva.toFixed(2)}</td>
                         <td>${iva}</td>
                         <td>${cuenta}</td>
                         <td>${texto}</td>
@@ -197,39 +223,6 @@ $(document).ready(function () {
 
         } else {
             alert("Selecciona una fila para clonar.");
-        }
-    });
-    // Agregar Item a la tabla
-    $('#agregarItem_old').on('click', function () {
-        const item = $('#item').val();
-        const descripcion = $('#id_descripcion_item input').val();
-        const precio = parseFloat($('#id_precio input').val());
-
-        if (item && descripcion && !isNaN(precio)) {
-            const iva = $('#id_precio input').data('iva');
-            const cuenta = $('#id_precio input').data('cuenta');
-            const codigo = $('#id_precio input').data('codigo');
-
-            itemCounter++;
-            const rowId = `item-${itemCounter}`;
-
-            const row = `
-                <tr id="${rowId}" data-precio="${precio}" data-iva="${iva}" data-cuenta="${cuenta}">
-                    <td>${codigo}</td>
-                    <td>${descripcion}</td>
-                    <td>${precio.toFixed(2)}</td>
-                    <td>${iva}</td>
-                    <td>${cuenta}</td>
-                </tr>`;
-
-            $('#itemTable tbody').append(row);
-            $('#itemTable').show();
-            $('#eliminarSeleccionados').show();
-            limpiarCampos();
-            actualizarTotal();
-            $('#totales').show();
-        } else {
-            alert('Por favor, completa todos los campos antes de agregar el item.');
         }
     });
 
@@ -1946,12 +1939,12 @@ function rellenar_tabla() {
 }
 
 function procesar_factura() {
-    if (confirm('¿Está seguro de que desea facturar?')) {
 
         let pendienteEncontrado = false;
 
         $('#itemTable tbody tr').each(function () {
-            const estado = $(this).find('td:nth-child(7)').text().trim();
+            // Antes: columna 7 (index 6)
+            const estado = $(this).find('td:nth-child(9)').text().trim();  // Ahora es la 8.ª columna (estado)
             if (estado.toUpperCase() === 'PENDIENTE') {
                 pendienteEncontrado = true;
                 return false; // cortar el .each
@@ -1964,6 +1957,9 @@ function procesar_factura() {
             $("#modal-embarque").dialog("open");
             return; // cortar la función, no continuar con el procesamiento
         }
+
+    if (confirm('¿Está seguro de que desea facturar?')) {
+
 
         let tipoFac = $('#id_tipo').val();
         let serie = $('#id_serie').val();
@@ -1983,23 +1979,28 @@ function procesar_factura() {
             localidad: $('#clienteTable tbody tr td').eq(4).text(),
             telefono: $('#clienteTable tbody tr td').eq(5).text()
         };
-
         let items = [];
         $('#itemTable tbody tr').each(function () {
+            const tds = $(this).children('td'); // Incluye todos, incluso ocultos
+            console.log("Columnas:", tds.length, tds.map((i, td) => `(${i}) ${$(td).text().trim()}`).get());
+
             const itemData = {
-                id: $(this).find('td').eq(0).text().trim(),           // Código del ítem
-                item: $(this).find('td').eq(1).text().trim(),         // Título del ítem
-                descripcion: $(this).find('td').eq(2).text().trim(),  // Descripción
-                precio: parseFloat($(this).find('td').eq(3).text().trim()),  // Precio como número
-                iva: $(this).find('td').eq(4).text().trim(),          // IVA
-                cuenta: $(this).find('td').eq(5).text().trim(),       // Cuenta contable
-                estado: $(this).find('td').eq(6).text().trim()        // Texto imputar (PENDIENTE/NO IMPUTABLE)
-                // Columnas 7 y 8 se ignoran
+                id: tds.eq(0).text().trim(),           // Id (oculto)
+                item: tds.eq(1).text().trim(),         // Item
+                descripcion: tds.eq(2).text().trim(),  // Descripción
+                precio: parseFloat(tds.eq(3).text().trim()),       // Precio base
+                precio_iva: parseFloat(tds.eq(4).text().trim()),   // IVA calculado
+                total: parseFloat(tds.eq(5).text().trim()),        // Total (precio + IVA)
+                iva: tds.eq(6).text().trim(),           // % IVA
+                cuenta: tds.eq(7).text().trim(),        // Cuenta contable
+                estado: tds.eq(8).text().trim(),        // Estado (PENDIENTE / NO IMPUTABLE)
+                embarque: tds.eq(9).text().trim(),      // Embarque
+                posicion: tds.eq(10).text().trim(),     // Posición
+                socio: tds.eq(11).text().trim()         // Socio Comercial
             };
+
             items.push(itemData);
         });
-
-
 
         let preventa = JSON.parse(localStorage.getItem('preventa')) || [];
         console.log(preventa);
@@ -2070,6 +2071,7 @@ function procesar_factura() {
                 alert('Error al procesar la factura');
             }
         });
+
     }
 }
 
@@ -2097,6 +2099,10 @@ function procesar_complementarios() {
         pago: $('#id_pago').val(),
         agente: $('#id_agente').val(),
         observaciones: $('#id_observaciones').val(),
+        transportista_nro: $('#id_transportista_nro').val(),
+        consignatario_nro: $('#id_consignatario_nro').val(),
+        agente_nro: $('#id_agente_nro').val(),
+        shipper_nro: $('#id_shipper_nro').val(),
         servicio: $("input[name='servicio']:checked").val()
     };
 
@@ -2105,111 +2111,125 @@ function procesar_complementarios() {
 }
 
 function procesar_factura_finalizada(datos_complementarios) {
-    let tipoFac = $('#id_tipo').val();
-    let serie = $('#id_serie').val();
-    let prefijo = $('#id_prefijo').val();
-    let numero = $('#id_numero').val();
-    let cliente = $('#cliente').val();
-    let fecha = $('#id_fecha').val();
-    let paridad = $('#id_paridad').val();
-    let arbitraje = $('#id_arbitraje').val();
-    let imputar = $('#id_imputar').val();
-    let moneda = $('#id_moneda select').val();
-    let clienteData = {
-        codigo: $('#clienteTable tbody tr td').eq(0).text(),
-        empresa: $('#clienteTable tbody tr td').eq(1).text(),
-        rut: $('#clienteTable tbody tr td').eq(2).text(),
-        direccion: $('#clienteTable tbody tr td').eq(3).text(),
-        localidad: $('#clienteTable tbody tr td').eq(4).text(),
-        telefono: $('#clienteTable tbody tr td').eq(5).text()
-    };
-
-    let items = [];
-    $('#itemTable tbody tr').each(function () {
-        const itemData = {
-            id: $(this).find('td').eq(0).text().trim(),           // Id (oculto)
-            descripcion: $(this).find('td').eq(2).text().trim(),  // Descripción
-            precio: $(this).find('td').eq(3).text().trim(),       // Precio
-            iva: $(this).find('td').eq(4).text().trim(),          // IVA
-            cuenta: $(this).find('td').eq(5).text().trim()        // Cuenta
+    if (confirm('¿Está seguro de que desea facturar?')) {
+        let tipoFac = $('#id_tipo').val();
+        let serie = $('#id_serie').val();
+        let prefijo = $('#id_prefijo').val();
+        let numero = $('#id_numero').val();
+        let cliente = $('#cliente').val();
+        let fecha = $('#id_fecha').val();
+        let paridad = $('#id_paridad').val();
+        let arbitraje = $('#id_arbitraje').val();
+        let imputar = $('#id_imputar').val();
+        let moneda = $('#id_moneda select').val();
+        let clienteData = {
+            codigo: $('#clienteTable tbody tr td').eq(0).text(),
+            empresa: $('#clienteTable tbody tr td').eq(1).text(),
+            rut: $('#clienteTable tbody tr td').eq(2).text(),
+            direccion: $('#clienteTable tbody tr td').eq(3).text(),
+            localidad: $('#clienteTable tbody tr td').eq(4).text(),
+            telefono: $('#clienteTable tbody tr td').eq(5).text()
         };
-        items.push(itemData);
-    });
+
+        let items = [];
+        $('#itemTable tbody tr').each(function () {
+            const tds = $(this).children('td'); // Incluye todos, incluso ocultos
+            console.log("Columnas:", tds.length, tds.map((i, td) => `(${i}) ${$(td).text().trim()}`).get());
+
+            const itemData = {
+                id: tds.eq(0).text().trim(),           // Id (oculto)
+                item: tds.eq(1).text().trim(),         // Item
+                descripcion: tds.eq(2).text().trim(),  // Descripción
+                precio: parseFloat(tds.eq(3).text().trim()),       // Precio base
+                precio_iva: parseFloat(tds.eq(4).text().trim()),   // IVA calculado
+                total: parseFloat(tds.eq(5).text().trim()),        // Total (precio + IVA)
+                iva: tds.eq(6).text().trim(),           // % IVA
+                cuenta: tds.eq(7).text().trim(),        // Cuenta contable
+                estado: tds.eq(8).text().trim(),        // Estado (PENDIENTE / NO IMPUTABLE)
+                embarque: tds.eq(9).text().trim(),      // Embarque
+                posicion: tds.eq(10).text().trim(),     // Posición
+                socio: tds.eq(11).text().trim()         // Socio Comercial
+            };
+
+            items.push(itemData);
+        });
 
 
-    let preventa = JSON.parse(localStorage.getItem('preventa')) || [];
-    let data = [];
-    if (preventa != null) {
-        //es preventa
-        data = {
-            csrfmiddlewaretoken: csrf_token,
-            fecha: fecha,
-            tipoFac: tipoFac,
-            serie: serie,
-            prefijo: prefijo,
-            numero: numero,
-            cliente: cliente,
-            arbitraje: arbitraje,
-            paridad: paridad,
-            imputar: imputar,
-            moneda: moneda,
-            clienteData: JSON.stringify(clienteData),
-            items: JSON.stringify(items),
-            total: total,
-            iva: iva,
-            neto: neto,
-            preventa: JSON.stringify(preventa),
-        }
-    } else {
-        data = {
-            csrfmiddlewaretoken: csrf_token,
-            fecha: fecha,
-            tipoFac: tipoFac,
-            serie: serie,
-            prefijo: prefijo,
-            numero: numero,
-            cliente: cliente,
-            arbitraje: arbitraje,
-            paridad: paridad,
-            imputar: imputar,
-            moneda: moneda,
-            clienteData: JSON.stringify(clienteData),
-            items: JSON.stringify(items),
-            total: total,
-            iva: iva,
-            neto: neto,
-            preventa: 0,
-        }
-    }
-    data["registroCarga"] = JSON.stringify(datos_complementarios);
-    $.ajax({
-        url: "/admin_cont/procesar_factura/",
-        dataType: 'json',
-        type: 'POST',
-        data: data,
-        headers: {'X-CSRFToken': csrf_token},
-        success: function (data) {
-            if (data.success) {
-                $('#facturaM').dialog('close');
-                $('#modalRegistroCarga').dialog('close');
-                $('#modal-embarque').dialog('close');
-                limpiarModalEmbarque();
-                $('#facturaForm').trigger('reset');
-                $('#formRegistroCarga').trigger('reset');
-                total = 0;
-                iva = 0;
-                neto = 0;
-
-            } else {
-                alert('ocurrió un error');
+        let preventa = JSON.parse(localStorage.getItem('preventa')) || [];
+        let data = [];
+        if (preventa != null) {
+            //es preventa
+            data = {
+                csrfmiddlewaretoken: csrf_token,
+                fecha: fecha,
+                tipoFac: tipoFac,
+                serie: serie,
+                prefijo: prefijo,
+                numero: numero,
+                cliente: cliente,
+                arbitraje: arbitraje,
+                paridad: paridad,
+                imputar: imputar,
+                moneda: moneda,
+                clienteData: JSON.stringify(clienteData),
+                items: JSON.stringify(items),
+                total: total,
+                iva: iva,
+                neto: neto,
+                preventa: JSON.stringify(preventa),
             }
-            //window.location.reload();
-        },
-        error: function (xhr) {
-            console.error('Error al facturar:', xhr);
-            alert('Error al procesar la factura');
+        } else {
+            data = {
+                csrfmiddlewaretoken: csrf_token,
+                fecha: fecha,
+                tipoFac: tipoFac,
+                serie: serie,
+                prefijo: prefijo,
+                numero: numero,
+                cliente: cliente,
+                arbitraje: arbitraje,
+                paridad: paridad,
+                imputar: imputar,
+                moneda: moneda,
+                clienteData: JSON.stringify(clienteData),
+                items: JSON.stringify(items),
+                total: total,
+                iva: iva,
+                neto: neto,
+                preventa: 0,
+            }
         }
-    });
+        data["registroCarga"] = JSON.stringify(datos_complementarios);
+        $.ajax({
+            url: "/admin_cont/procesar_factura/",
+            dataType: 'json',
+            type: 'POST',
+            data: data,
+            headers: {'X-CSRFToken': csrf_token},
+            success: function (data) {
+                if (data.success) {
+                    $('#facturaM').dialog('close');
+                    $('#modalRegistroCarga').dialog('close');
+                    $('#modal-embarque').dialog('close');
+                    limpiarModalEmbarque();
+                    $('#facturaForm').trigger('reset');
+                    $('#formRegistroCarga').trigger('reset');
+                    total = 0;
+                    iva = 0;
+                    neto = 0;
+
+                } else {
+                    alert('ocurrió un error');
+                }
+                //window.location.reload();
+            },
+            error: function (xhr) {
+                console.error('Error al facturar:', xhr);
+                alert('Error al procesar la factura');
+            }
+        });
+    }
+
 }
 
 function cargar_arbitraje() {
