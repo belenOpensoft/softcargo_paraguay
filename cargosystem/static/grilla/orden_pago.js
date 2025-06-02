@@ -1627,3 +1627,36 @@ function buscar_detalle(autogenerado) {
     }
   });
 }
+
+function imprimirPDF_op() {
+    const autogen= $('#autogen_detalle_pagos').val()
+    if(autogen==null){
+        return;
+    }
+  const url = `/admin_cont/reimprimir_op/?autogenerado=${encodeURIComponent(autogen)}`;
+
+  fetch(url, {
+    method: "GET",
+    headers: {
+      "X-CSRFToken": csrf_token,
+    }
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("Error al generar el PDF");
+    return response.blob();
+  })
+  .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "reimpresion_orden_de_pago.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  })
+  .catch(error => {
+    alert("Hubo un error al generar el PDF");
+    console.error(error);
+  });
+}

@@ -93,6 +93,7 @@
   <form method="post" id="formPagoDetalle">
   {% csrf_token %}
   <div class="container-fluid">
+
     <div class="row">
       <div class="col-md-8">
         <!-- Primera Fila -->
@@ -170,6 +171,7 @@
             <input type="number" step="0.01" class="form-control form-control-sm" id="diferencia_pagos" readonly>
           </div>
         </div>
+
       </div>
 
       <!-- 💵 Columna lateral -->
@@ -203,6 +205,11 @@
             <tbody id="tablaChequesRecibidos"></tbody>
           </table>
         </div>
+                  <div class="d-flex justify-content-end mb-2">
+            <button type="button" id="btnReimprimir" onclick="imprimirPDF_op()" class="btn btn-warning">
+              Re-imprimir
+            </button>
+          </div>
       </div>
     </div>
   </div>

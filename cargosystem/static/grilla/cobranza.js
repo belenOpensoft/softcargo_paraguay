@@ -236,8 +236,8 @@ $(document).ready(function () {
     document.querySelector('#exampleTableCobranza tbody').addEventListener('click', function (e) {
         const row = e.target.closest('tr');
         if (row) {
-            document.querySelectorAll('#exampleTableCobranza tbody tr').forEach(r => r.classList.remove('selected'));
-            row.classList.add('selected');
+            document.querySelectorAll('#exampleTableCobranza tbody tr').forEach(r => r.classList.remove('table-secondary'));
+            row.classList.add('table-secondary');
         }
     });
 
@@ -588,20 +588,20 @@ function tabla_facturas_pendientes(cliente, moneda) {
         },
         columns: [
             {data: 'id', visible: false}, // Oculto
-            {data: 'vencimiento'},
-            {data: 'emision'},
+            {data: 'vencimiento', },
+            {data: 'emision', },
             {data: 'documento'},
             {data: 'total'},
             {data: 'saldo'},
             {data: 'imputado'},
             {data: 'tipo_cambio'},
-            {data: 'embarque'},
+            {data: 'embarque', },   // OCULTO
             {data: 'detalle'},
-            {data: 'posicion'},
+            {data: 'posicion', },   // OCULTO
             {data: 'moneda'},
             {data: 'paridad'},
-            {data: 'tipo_doc'},
-            {data: 'source'}
+            {data: 'tipo_doc', },   // OCULTO
+            {data: 'source', }      // OCULTO
         ],
         responsive: true,
         processing: true,
@@ -616,8 +616,8 @@ function tabla_facturas_pendientes(cliente, moneda) {
 
             // Reasignar evento de clic a las filas
             $('#imputacionTable tbody').off('click', 'tr').on('click', 'tr', function () {
-                $(this).toggleClass('selected');
-                const selectedRows = table.rows('.selected').count();
+                $(this).toggleClass('table-secondary');
+                const selectedRows = table.rows('.table-secondary').count();
                 if (selectedRows > 0) {
                     $('#imputarSeleccion').prop('disabled', false);  // Habilitar el botón
                 } else {
@@ -642,7 +642,7 @@ function tabla_facturas_pendientes(cliente, moneda) {
                 }
 
                 let totalImporte = 0;
-                table.rows('.selected').nodes().each(function (node) {
+                table.rows('.table-secondary').nodes().each(function (node) {
                     let saldo = parseFloat(table.cell(node, 5).data()) || 0;
                     totalImporte += saldo;
                 });
@@ -650,6 +650,8 @@ function tabla_facturas_pendientes(cliente, moneda) {
                 $('#a_imputar').val(totalImporte.toFixed(2));
             });
         }
+
+
 
     });
     existe_cliente = true;
@@ -661,7 +663,7 @@ function tabla_facturas_pendientes(cliente, moneda) {
             return;
         }
 
-        const seleccionadas = table.rows('.selected'); // Obtener las filas seleccionadas
+        const seleccionadas = table.rows('.table-secondary'); // Obtener las filas seleccionadas
         const data = seleccionadas.data().toArray(); // Convertir a array para depuración
         let importe = parseFloat($('#id_importe').val()) || 0; // Obtener el importe disponible
         let imputado = parseFloat($('#a_imputar').val()) || 0; // Obtener el importe disponible
@@ -807,7 +809,7 @@ function tabla_facturas_pendientes(cliente, moneda) {
 
             localStorage.setItem('filasAfectadas', JSON.stringify(filasAfectadas));
             localStorage.setItem('historial', JSON.stringify(historial));
-            seleccionadas.nodes().to$().removeClass('selected');
+            seleccionadas.nodes().to$().removeClass('table-secondary');
             updateBalance();
             return;
         }
@@ -874,7 +876,7 @@ function tabla_facturas_pendientes(cliente, moneda) {
         calcular_acumulado();
         $('#a_imputar').val(total.toFixed(2));
 
-        seleccionadas.nodes().to$().removeClass('selected');
+        seleccionadas.nodes().to$().removeClass('table-secondary');
 
         localStorage.setItem('filasAfectadas', JSON.stringify(filasAfectadas));
         localStorage.setItem('historial', JSON.stringify(historial));
@@ -883,7 +885,7 @@ function tabla_facturas_pendientes(cliente, moneda) {
     });
 
     $('#deshacer').on('click', function () {
-        const seleccionadas = table.rows('.selected');
+        const seleccionadas = table.rows('.table-secondary');
         if (seleccionadas.count() === 0) {
             alert('No hay filas seleccionadas para deshacer cambios.');
             return;
@@ -934,7 +936,7 @@ function tabla_facturas_pendientes(cliente, moneda) {
         $("#a_imputar").val(imputarTotal.toFixed(2)); // Actualizar el valor de a_imputar
 
         // Quitar la clase 'selected' de las filas seleccionadas
-        seleccionadas.nodes().to$().removeClass('selected');
+        seleccionadas.nodes().to$().removeClass('table-secondary');
 
         // Llamar a updateBalance para recalcular cualquier dato adicional
         updateBalance();

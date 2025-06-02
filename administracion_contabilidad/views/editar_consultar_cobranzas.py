@@ -122,7 +122,7 @@ def obtener_detalle_cobranza(request):
                 for impu in imputados:
                     boleta = Movims.objects.filter(mautogen=impu.autofac).first()
                     if boleta:
-                        num_completo = f"{boleta.mtipo}-{boleta.mserie}{boleta.mprefijo}{boleta.mboleta}"
+                        num_completo = f"{boleta.mtipo} {boleta.mserie}{boleta.mprefijo}{boleta.mboleta}"
                         data['imputados'].append({
                             'autogenerado': boleta.mautogen,
                             'documento': num_completo,
