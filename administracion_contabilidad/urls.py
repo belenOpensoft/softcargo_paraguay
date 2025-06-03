@@ -21,6 +21,8 @@ from administracion_contabilidad.views.facturacion import facturacion_view, busc
 from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
 from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos, reimprimir_asiento
+from administracion_contabilidad.views.mantenimiento_chequeras import mantenimiento_chequeras, guardar_stock_cheques, \
+    buscar_cheques
 from administracion_contabilidad.views.modificar_asientos import filtro_asientos, guardar_asiento_editado, \
     eliminar_asiento
 from administracion_contabilidad.views.movimientos_bancarios import movimientos_bancarios, cheques_disponibles_clientes, \
@@ -180,6 +182,14 @@ urlpatterns = [
     path('guardar_movimiento_caja/', guardar_movimiento_caja, name='guardar_movimiento_caja'),
 
     #movimientod de caja
+
+    #mantenimiento y consulta de chequeras
+    path('ingresar_buscar_cheques/', mantenimiento_chequeras, name='mantenimiento_chequeras'),
+    path('guardar_stock_cheques/', guardar_stock_cheques, name='guardar_stock_cheques'),
+    path('buscar_cheques/', buscar_cheques, name='buscar_cheques'),
+
+    #mantenimiento y consulta de chequeras
+
 
 
     #contabilidad

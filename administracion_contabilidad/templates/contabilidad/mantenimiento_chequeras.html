@@ -1,0 +1,175 @@
+{% extends 'base_table_v2.html' %}
+{% load static %}
+{% block contenido %}
+<title>Mantenimiento de Chequeras</title>
+<link rel="stylesheet" type="text/css" href="{% static 'css/administracion/administracion.css' %}">
+
+<style>
+  .panel-resumen {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #f9f9f9;
+  }
+  .panel-resumen h6 {
+    font-weight: bold;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+  }
+  #formChequeras .form-control,
+  #formChequeras .btn,
+  #formChequeras select {
+    font-size: 0.85rem;
+    height: 26px;
+    padding: 3px 6px;
+  }
+</style>
+<style>
+  .tabla-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+
+
+  .tabla-scroll thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #f8f9fa;
+  }
+
+  .tabla-scroll th {
+    background-color: #f8f9fa;
+  }
+</style>
+
+<!-- Botonera superior -->
+<div class="container-fluid mt-3 mb-2">
+  <div class="d-flex gap-2 flex-wrap">
+
+    <button type="button" id="btn-stock" class="btn btn-success btn-sm">Stock</button>
+    <button type="button" class="btn btn-warning btn-sm">Imprimir</button>
+  </div>
+</div>
+
+<form method="post" id="formChequeras" class="container-fluid">
+  {% csrf_token %}
+<div class="border rounded p-3 bg-light">
+  <div class="row">
+    <!-- Contenedor izquierdo -->
+    <div class="col-md-9">
+      <div class="">
+
+        <!-- Banco -->
+        <div class="row mb-2 align-items-end">
+          <div class="col-md-3">
+            {{ form.banco.label_tag }}
+            {{ form.banco }}
+          </div>
+          <div class="col-md-3">
+            {{ form.cheque_desde.label_tag }}
+            {{ form.cheque_desde }}
+          </div>
+          <div class="col-md-3">
+            {{ form.cheque_hasta.label_tag }}
+            {{ form.cheque_hasta }}
+          </div>
+          <div class="col-md-3 mb-1">
+            <label>&nbsp;</label> <!-- Espacio para alinear con los label anteriores -->
+            <div class="d-grid">
+              <button type="button" id="btnBuscar" class="btn btn-primary">Buscar</button>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Checkboxes + Rango -->
+        <div class="row mb-2">
+          <div class="col-md-4">
+            <div class="form-check form-check-inline">
+              {{ form.ver_utilizados }}
+              <label class="form-check-label" for="{{ form.ver_utilizados.id_for_label }}">Ver Utilizados</label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Tabla -->
+          <div class="mb-2 mt-1 d-flex gap-2">
+          <button type="button" class="btn btn-danger btn-sm">Eliminar</button>
+          <button type="button" class="btn btn-secondary btn-sm">Bloquear</button>
+          <button type="button" class="btn btn-outline-dark btn-sm">Reactivar</button>
+        </div>
+
+        <div class="table-responsive tabla-scroll">
+          <table class="table table-bordered table-sm ">
+            <thead class="thead-light">
+              <tr>
+                <th>Cheque</th>
+                <th>Status</th>
+                <th>Referencia</th>
+                <th>Fecha</th>
+                <th>Diferido</th>
+              </tr>
+            </thead>
+            <tbody id="tablaChequeras">
+              <!-- filas -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen lateral derecho -->
+    <div class="col-md-3">
+      <div class="panel-resumen">
+        <h6>Resumen</h6>
+        <div class="form-group mb-2">
+          <label>Disponibles</label>
+          <input type="text" class="form-control form-control-sm" id="disponibles" readonly>
+        </div>
+        <div class="form-group mb-2">
+          <label>Utilizados</label>
+          <input type="text" class="form-control form-control-sm" id="utilizados" readonly>
+        </div>
+        <div class="form-group mb-2">
+          <label>Anulados</label>
+          <input type="text" class="form-control form-control-sm" id="anulados" readonly>
+        </div>
+        <div class="form-group">
+          <label>Total</label>
+          <input type="text" class="form-control form-control-sm" id="total_cheques" readonly>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+
+<div id="modalStock" title="Stock de Cheques" style="display:none;">
+  <div class="form-group">
+    <label for="banco_modal">Banco</label>
+    {{ form.banco_modal }}
+  </div>
+  <div class="form-group">
+    <label for="primer_cheque">Número del Primer Cheque</label>
+    {{ form.primer_cheque }}
+  </div>
+  <div class="form-group">
+    <label for="total_cheques">Total de Cheques</label>
+    {{ form.total_cheques }}
+  </div>
+  <div class="form-check">
+    {{ form.diferidos }}
+    <label class="form-check-label" for="diferidos">¿Diferidos?</label>
+  </div>
+</div>
+
+<script src="{% static 'grilla/mantenimiento_chequeras.js' %}"></script>
+<script>
+  var csrf_token = '{{ csrf_token }}';
+</script>
+{% endblock contenido %}

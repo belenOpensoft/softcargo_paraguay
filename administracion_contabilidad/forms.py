@@ -2571,5 +2571,50 @@ class emailsForm(forms.Form):
     subject = forms.CharField(label='Asunto',widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
     email = forms.CharField(widget=forms.Textarea(attrs={"id": 'email_add_input',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"100","class":"form-control"}, ), required=False,label="Email", max_length=500)
 
+class ChequerasForm(forms.Form):
+    banco = forms.ModelChoiceField(
+        label="Banco",
+        queryset=Cuentas.objects.filter(xcodigo__range=(11120, 11125)),
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    ver_utilizados = forms.BooleanField(
+        required=False,
+        label="Ver Utilizados y Anulados",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
 
 
+    cheque_desde = forms.IntegerField(
+        label="Del Cheque",
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'placeholder': 'Desde'})
+    )
+
+    cheque_hasta = forms.IntegerField(
+        label="Al Cheque",
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'placeholder': 'Hasta'})
+    )
+ # campos del modal
+    banco_modal = forms.ModelChoiceField(
+        label="Banco",
+        queryset=Cuentas.objects.filter(xcodigo__range=(11120, 11125)),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm', 'id': 'banco_modal'})
+    )
+    primer_cheque = forms.IntegerField(
+        label="Primer Cheque",
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'id': 'primer_cheque'})
+    )
+    total_cheques = forms.IntegerField(
+        label="Total de Cheques",
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'id': 'total_cheques_stock'})
+    )
+    diferidos = forms.BooleanField(
+        label="¿Diferidos?",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'diferidos'})
+    )
