@@ -2072,7 +2072,7 @@ class MovimientoBancarioForm(forms.Form):
 class MovimientoCajaForm(forms.Form):
     caja = forms.ModelChoiceField(
         label="Caja",
-        queryset=Cuentas.objects.filter(xcodigo__range=(11100, 11110)),  # Ajustar según código de cajas
+        queryset=Cuentas.objects.filter(xcodigo__range=(11111, 11114)),  # Ajustar según código de cajas
         widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
     )
 

@@ -21,43 +21,14 @@ from mantenimientos.models import Clientes
 
 
 def movimientos_caja(request):
-    form = MovimientoCajaForm({'fecha':datetime.now().strftime('%Y-%m-%d')})
+    form = MovimientoCajaForm({
+        'fecha': datetime.now().strftime('%Y-%m-%d'),
+        'tipo_movimiento': 'ingreso'
+    })
+
     return render(request, 'contabilidad/movimientos_caja.html', {'form': form})
 
-def cheques_disponibles_clientes(request):
-    try:
-        """ cheques = Cheques.objects.filter(
-            Q(cestado=0) | Q(cestado=None),
-            Q(cestadobco=0) | Q(cestadobco=None) ,
-            Q(cnrodepos=0) | Q(cnrodepos=None) ,
-            Q(cpago=None) | Q(cpago='')
-        ).order_by('-id')"""
-        cheques = Cheques.objects.filter(cestado=0,cestadobco=0,cnrodepos=0,cpago=None).order_by('-id')
-        clientes_dict = dict(Clientes.objects.filter(codigo__in=cheques.values_list('ccliente', flat=True).distinct())
-                             .values_list('codigo', 'empresa'))
-
-        if not cheques.exists():
-            return JsonResponse({'mensaje': 'No hay cheques disponibles.', })
-
-        data = []
-        for c in cheques:
-            cliente_nombre = clientes_dict.get(c.ccliente, '')
-            data.append({
-                'vencimiento': c.cvto.strftime('%d/%m/%Y') if c.cvto else '',
-                'emision': c.cfecha.strftime('%d/%m/%Y') if c.cfecha else '',
-                'banco': c.cbanco if c.cbanco else '',
-                'numero': c.cnumero,
-                'cliente': cliente_nombre,
-                'total': f"{c.cmonto:.2f}" if c.cmonto else 0,
-                'id': c.id if c.id else '',
-                'moneda': c.cmoneda if c.cmoneda else ''
-            })
-
-        return JsonResponse({'success':True,'cheques': data})
-    except Exception as e:
-        return JsonResponse({'success': False, 'cheques':[],'error':str(e)})
-
-def guardar_movimiento_bancario(request):
+def guardar_movimiento_caja(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
@@ -68,125 +39,48 @@ def guardar_movimiento_bancario(request):
                 numero=generar_numero()
                 autogenerado = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))
                 autogenerado=str(autogenerado)+'NA'
-                tipo_asiento=general.get('tipo')
+                #tipo_asiento=general.get('tipo')
 
-                if tipo_asiento=='cheque_comun' or tipo_asiento=='cheque_diferido':
-                    modo_asiento = 'CHEQUE'
-                elif tipo_asiento == 'depositar':
-                    modo_asiento = 'DEPOSITO'
-                elif tipo_asiento == 'transferencia':
-                    modo_asiento='TRANSFER'
-                elif tipo_asiento == 'egresos':
-                    modo_asiento='EGRESO'
-                elif tipo_asiento=='ingresos':
-                    modo_asiento='INGRESO'
 
                 if general.get('orden')==1:
-                    numero_orden=crear_orden_pago(general,autogenerado,tipo_asiento)
+                    numero_orden=crear_orden_pago(general,autogenerado)
 
                 cheque = general.get('cheque')
-                tipo_adentro = 'S/I'
-                tipo='S/I'
-                if tipo_asiento == 'cheque_comun' or tipo_asiento=='cheque_diferido' or tipo_asiento=='egresos':
-                    tipo='C'
-                elif tipo_asiento=='depositar' or tipo_asiento=='ingresos' or tipo_asiento=='transferencia':
-                    tipo='B'
+                tipo_adentro = 'C'
+                tipo='C'
 
-                if cheque == '1':
-                    tipo_adentro = 'B'
-                    tipo='B'
-                    modo_asiento = 'CHEQUE'
-                    #hacer los asientos de cheques, 1 haber y 1 deber por cheque
+                #asiento general
+                a=Asientos()
+                a.id=a.get_id()
+                a.fecha=general.get('fecha') or None
+                a.asiento=numero
+                a.cuenta = general.get("banco").split(" - ")[0].strip() if general.get("banco") else None
+                a.imputacion=2
+                a.tipo=tipo
+                a.autogenerado = autogenerado
+                a.paridad = general.get('paridad') or None
+                a.cambio=general.get('arbitraje') or None
+                a.monto=general.get('acumulado') or None
+                a.detalle=general.get('detalle') or None
+                #a.documento=general.get('documento') or None
+                #a.banco = general.get('banco') or None
 
-                    for asiento in asientos:
-                        # asiento general
-                        a = Asientos()
-                        a.id = a.get_id()
-                        a.fecha = general.get('fecha') or None
-                        a.asiento = numero
-                        a.cuenta = general.get("banco").split(" - ")[0].strip() if general.get("banco") else None
-                        a.imputacion = 1
-                        a.tipo = tipo
-                        a.autogenerado = autogenerado
-                        a.paridad = general.get('paridad') or None
-                        a.cambio = general.get('arbitraje') or None
-                        a.monto = asiento.get("monto") or None
-                        a.detalle = general.get('detalle') or None
-                        a.documento = general.get('documento') or None
-                        a.banco = general.get('banco') or None
-                        a.save()
+                a.save()
 
-                        a = Asientos()
-                        a.id = a.get_id()
-                        a.fecha = general.get('fecha') or None
-                        a.asiento = numero
-                        a.cuenta = asiento.get("cuenta").split(" - ")[0].strip() if asiento.get("cuenta") else None
-                        a.imputacion = 2
-                        a.autogenerado = autogenerado
-                        a.tipo = tipo_adentro
-                        a.paridad = general.get("paridad") or None
-                        a.cambio = general.get("arbitraje") or None
-                        a.monto = asiento.get("monto") or None
-                        a.detalle = asiento.get("detalle") or None
-                        a.documento = general.get("documento") or None
-                        a.banco = general.get('banco') or None
-                        a.modo = modo_asiento
-                        a.save()
-
-                        if asiento.get('autogen'):
-                            cheque = Cheques.objects.filter(id=asiento.get('autogen')).first()
-                            if cheque:
-                                cheque.cestado=2
-                                cheque.cnrodepos=general.get("documento") or None
-                                cheque.save()
-
-                else:
-                    if tipo_asiento == 'depositar':
-                        tipo_adentro='C'
-                    else:
-                        tipo_adentro='B'
-
-                    #asiento general
-                    a=Asientos()
-                    a.id=a.get_id()
-                    a.fecha=general.get('fecha') or None
-                    a.asiento=numero
-                    a.cuenta = general.get("banco").split(" - ")[0].strip() if general.get("banco") else None
-                    a.imputacion=1
-                    a.tipo=tipo
+                for asiento in asientos:
+                    a = Asientos()
+                    a.id = a.get_id()
+                    a.fecha = general.get('fecha') or None
+                    a.asiento = numero
+                    a.cuenta = asiento.get("cuenta").split(" - ")[0].strip() if asiento.get("cuenta") else None
+                    a.imputacion = 1
+                    a.tipo = tipo_adentro
+                    a.paridad = 0
+                    a.cambio = general.get("arbitraje") or None
+                    a.monto = asiento.get("monto")  or None
+                    a.detalle = asiento.get("detalle") or None
                     a.autogenerado = autogenerado
-                    a.paridad = general.get('paridad') or None
-                    a.cambio=general.get('arbitraje') or None
-                    a.monto=general.get('acumulado') or None
-                    a.detalle=general.get('detalle') or None
-                    a.documento=general.get('documento') or None
-                    a.banco = general.get('banco') or None
-
                     a.save()
-
-                    for asiento in asientos:
-                        a = Asientos()
-                        a.id = a.get_id()
-                        a.fecha = general.get('fecha') or None
-                        a.asiento = numero
-                        a.cuenta = asiento.get("cuenta").split(" - ")[0].strip() if asiento.get("cuenta") else None
-                        a.imputacion = 2
-                        a.tipo = tipo_adentro
-                        a.paridad = general.get("paridad") or None
-                        a.cambio = general.get("arbitraje") or None
-                        a.monto = asiento.get("monto")  or None
-                        a.detalle = asiento.get("detalle") or None
-                        a.documento = general.get("documento") or None
-                        a.modo=modo_asiento
-                        a.banco = general.get('banco') or None
-                        a.autogenerado = autogenerado
-                        a.save()
-
-                    if general.get('chequera')=='1':
-                        chequera=Chequeras.objects.filter(cheque=general.get("documento")).first()
-                        if chequera:
-                            chequera.estado=2
-                            chequera.save()
 
             return JsonResponse({"success": True,'numero_orden':numero_orden})
         except Exception as e:
@@ -194,31 +88,7 @@ def guardar_movimiento_bancario(request):
 
     return JsonResponse({"success": False, "error": "Método no permitido"}, status=405)
 
-def cheques_disponibles_listado(request):
-    cheques = Chequeras.objects.filter(estado=0,diferido='N').order_by('-id')
-    resultado = []
-
-    for c in cheques:
-        resultado.append({
-            'numero': c.cheque,
-            'fecha': c.fecha.strftime('%Y-%m-%d') if c.fecha else '',
-        })
-
-    return JsonResponse(resultado, safe=False)
-
-def cheques_disponibles_listado_diferidos(request):
-    cheques = Chequeras.objects.filter(estado=0,diferido='S').order_by('-id')
-    resultado = []
-
-    for c in cheques:
-        resultado.append({
-            'numero': c.cheque,
-            'fecha': c.fecha.strftime('%Y-%m-%d') if c.fecha else '',
-        })
-
-    return JsonResponse(resultado, safe=False)
-
-def crear_orden_pago(general,autogenerado_impuventa,tipo):
+def crear_orden_pago(general,autogenerado_impuventa):
     try:
         fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         fecha_orden = datetime.now().strftime("%Y-%m-%d")
@@ -232,21 +102,6 @@ def crear_orden_pago(general,autogenerado_impuventa,tipo):
         orden.mcaja=general.get("banco").split(" - ")[0].strip() if general.get("banco") else None
         orden.mautogenmovims=autogenerado_impuventa
         orden.save()
-
-        if tipo == 'cheque_comun' or tipo == 'cheque_diferido':
-            chequera = Chequeras.objects.filter(cheque=general.get('documento')).first()
-            if chequera:
-                chequera.estado = 2
-                chequera.save()
-                cheque = Chequeorden()
-                cheque.cnumero = general.get('documento')
-                cheque.cbanco = chequera.banco
-                cheque.cfecha = chequera.fecha
-                cheque.cvto = chequera.fecha
-                cheque.corden = numero
-                cheque.cmonto = general.get('acumulado')
-                cheque.save()
-
 
         #crear el movimiento
         movimiento_vec = {
@@ -434,104 +289,6 @@ def monto_a_letras(monto):
         return f"SON MONEDA NACIONAL {letras} CON {decimales:02d}/100."
     except:
         return "SON MONEDA NACIONAL S/I"
-
-def generar_comprobante_deposito_pdf(request):
-    try:
-        if request.method == 'POST':
-            data = request.POST
-            response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="comprobante_deposito.pdf"; filename*=UTF-8\'\'comprobante_deposito.pdf'
-
-            c = canvas.Canvas(response, pagesize=A4)
-            width, height = A4
-            y = height - 30 * mm
-
-            # Logo
-            logo_path = os.path.join(settings.PACKAGE_ROOT, 'static', 'images', 'oceanlink.png')
-            c.drawImage(logo_path, 20 * mm, y, width=40 * mm, preserveAspectRatio=True, mask='auto')
-            y -= 10 * mm
-
-            # Encabezado
-            nro = data.get("numero")
-            fecha_str = data.get("fecha", datetime.now().strftime('%d/%m/%Y'))
-            try:
-                fecha = datetime.strptime(fecha_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
-                fecha = fecha.strftime('%Y/%m/%d')
-            except (ValueError, TypeError):
-                fecha = fecha_str
-
-            c.setFont("Courier", 12)
-            c.drawString(20 * mm, y, f"Depósito ..........: {nro}")
-            y -= 6 * mm
-            c.drawString(20 * mm, y, f"Fecha ..............: {fecha}")
-            y -= 10 * mm
-
-            # Moneda y monto
-            moneda = data.get("moneda")
-            monto = data.get("monto_total")
-            banco_destino = data.get("banco")
-
-            c.setFont("Courier-Bold", 10)
-            c.drawString(20 * mm, y, f"Moneda .............: {moneda}")
-            y -= 6 * mm
-            c.drawString(20 * mm, y, f"Monto depositado ...: {monto}")
-            y -= 6 * mm
-            c.drawString(20 * mm, y, f"Banco destino ......: {banco_destino}")
-
-            # Línea de sección
-            y -= 12 * mm
-            c.setFont("Courier", 10)
-            titulo = "Valores depositados"
-            c.drawString(20 * mm, y, titulo)
-            y -= 8 * mm
-
-            cheques = json.loads(data.get('data', '[]'))
-            if cheques:
-                c.setFont("Courier", 9)
-                c.drawString(20 * mm, y, "Cheque")
-                c.drawString(50 * mm, y, "Banco")
-                c.drawString(100 * mm, y, "Cliente")
-                c.drawString(170 * mm, y, "Importe")
-                c.line(20 * mm, y - 1.5 * mm, 200 * mm, y - 1.5 * mm)
-                y -= 6 * mm
-
-                try:
-                    for chq in cheques:
-                        cheque = str(chq.get('numero', ''))
-                        banco = str(chq.get('banco', ''))
-                        cliente = str(chq.get('cliente', ''))
-                        monto = str(chq.get('monto', ''))
-
-                        # Calcular líneas por campo
-                        lineas_cheque = dividir_lineas(cheque, c, "Courier", 9, 28 * mm)
-                        lineas_banco = dividir_lineas(banco, c, "Courier", 9, 45 * mm)
-                        lineas_cliente = dividir_lineas(cliente, c, "Courier", 9, 65 * mm)
-
-                        # Determinar la cantidad de líneas necesarias
-                        max_lineas = max(len(lineas_cheque), len(lineas_banco), len(lineas_cliente))
-
-                        for i in range(max_lineas):
-                            c.setFont("Courier", 9)
-                            if i < len(lineas_cheque):
-                                c.drawString(20 * mm, y, lineas_cheque[i])
-                            if i < len(lineas_banco):
-                                c.drawString(50 * mm, y, lineas_banco[i])
-                            if i < len(lineas_cliente):
-                                c.drawString(100 * mm, y, lineas_cliente[i])
-                            if i == 0:
-                                c.drawRightString(184 * mm, y, monto)
-                            y -= 6 * mm
-                except Exception as e:
-                    c.setFont("Courier", 9)
-                    c.drawString(20 * mm, y, f"[Error al procesar cheques: {str(e)}]")
-                    y -= 6 * mm
-
-            c.showPage()
-            c.save()
-            return response
-        return None
-    except Exception as e:
-        return JsonResponse({'error': str(e)})
 
 def dividir_lineas(texto, c, fuente, tamano, max_width):
     c.setFont(fuente, tamano)

@@ -6,6 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.db.models import Max
 
 
 
@@ -1412,7 +1413,7 @@ class Ordenes(models.Model):
         db_table = 'dataset_ordenes'
 
     def get_next_mboleta(self):
-        current = Ordenes.objects.aggregate(maximo=models.Max('mboleta'))['maximo'] or 0
+        current = Ordenes.objects.aggregate(maximo=Max('mboleta'))['maximo'] or 0
         next_mboleta = current + 1
 
         while Ordenes.objects.filter(mboleta=next_mboleta).exists():
@@ -1872,7 +1873,7 @@ class VistaCobranza(models.Model):
         managed = False
         db_table = 'vista_cobranza'
 
-
+"""
 from auditlog.registry import auditlog
 from auditlog.models import AuditlogHistoryField
 
@@ -1893,5 +1894,7 @@ for t in tablas:
         auditlog.register(t[1], serialize_data=True)
     except Exception as e:
         pass
+"""
+
 
 

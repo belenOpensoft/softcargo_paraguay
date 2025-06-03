@@ -238,10 +238,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error("Error del servidor:", data.error || data);
         throw new Error("Error al guardar.");
       }
-      $('#formMovBancarios').trigger('reset');
-      $('#tablaCheques').empty();
-      $('#id_escheque').val('0');
-      actualizarDetalleMovimiento();
+        resetear_form();
       alert("Movimientos guardados correctamente.");
     })
     .catch(error => {
@@ -249,8 +246,8 @@ document.addEventListener('DOMContentLoaded', function () {
       alert("Ocurrió un error al enviar los datos.");
     });
 
-
     });
+
 /*
     document.getElementById("btnGenerarPDF").addEventListener("click", function () {
      let documento= $('#id_nro_documento').val();
@@ -594,6 +591,7 @@ document.addEventListener('DOMContentLoaded', function () {
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
+        resetear_form();
       })
       .catch(error => {
         alert("Hubo un error al generar el PDF");
@@ -662,9 +660,29 @@ document.addEventListener('DOMContentLoaded', function () {
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
+        resetear_form();
       })
       .catch(error => {
         alert("Hubo un error al generar el PDF");
         console.error(error);
       });
   }
+  function resetear_form(){
+    $('#formMovBancarios').trigger('reset');
+    $('#tablaCheques').empty();
+    $('#id_escheque').val('0');
+    actualizarDetalleMovimiento();
+    $.ajax({
+        url: "/admin_cont/cargar_arbitraje/",
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
+            // Cargar los valores en los campos
+            $('#id_arbitraje').val(data.arbitraje);
+            $('#id_paridad').val(data.paridad);
+        },
+        error: function (xhr, status, error) {
+            alert("Error al cargar los datos iniciales: " + error);
+        }
+    });
+}

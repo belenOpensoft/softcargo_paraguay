@@ -26,7 +26,7 @@ from administracion_contabilidad.views.modificar_asientos import filtro_asientos
 from administracion_contabilidad.views.movimientos_bancarios import movimientos_bancarios, cheques_disponibles_clientes, \
     guardar_movimiento_bancario, cheques_disponibles_listado, cheques_disponibles_listado_diferidos, \
     generar_orden_pago_pdf, generar_comprobante_deposito_pdf
-from administracion_contabilidad.views.movimientos_caja import movimientos_caja
+from administracion_contabilidad.views.movimientos_caja import movimientos_caja, guardar_movimiento_caja
 from administracion_contabilidad.views.proveedores_gastos import proveedores_gastos_view, buscar_proveedor, \
     buscar_proveedores, buscar_item_c, buscar_items_c, procesar_factura_proveedor, source_proveedoresygastos, \
     cargar_pendientes_imputacion, obtener_proximo_mboleta_compra
@@ -177,6 +177,7 @@ urlpatterns = [
     #movimientod de caja
     path('movimientos_caja/', movimientos_caja, name='movimientos_caja'),
     path('verificar_arbitraje/', verificar_arbitraje, name='verificar_arbitraje'),
+    path('guardar_movimiento_caja/', guardar_movimiento_caja, name='guardar_movimiento_caja'),
 
     #movimientod de caja
 
