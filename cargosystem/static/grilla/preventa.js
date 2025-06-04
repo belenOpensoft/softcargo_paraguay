@@ -192,32 +192,37 @@ function enviarDatosTabla() {
                                 });
 
                                 //guardar la preventa
-                                    guardar_preventa(preventa);
+                                   const tipoElegido = prompt("¿Desea facturar gastos Prepaid o Collect? (Ingrese 'Prepaid' o 'Collect')");
+
+                                    if (!tipoElegido || (tipoElegido.toLowerCase() !== "prepaid" && tipoElegido.toLowerCase() !== "collect")) {
+                                        alert("Debe ingresar 'Prepaid' o 'Collect'. Operación cancelada.");
+                                        return;
+                                    }
+
+                                    // Guardar preventa con tipo
+                                    guardar_preventa(preventa, tipoElegido);
+
+                                    // Filtrar y enviar los gastos seleccionados
                                     const tabla = $('#facturar_table').DataTable();
                                     let datosTabla = [];
 
-                                   tabla.rows().every(function() {
+                                    tabla.rows().every(function () {
                                         const data = this.data();
-
-                                        datosTabla.push({
-                                            id_gasto: data[0],
-                                            notas: $(this.node()).find('td').eq(7).text(),
-                                            descripcion: $(this.node()).find('td').eq(3).text()
-                                        });
+                                        const tipo = $(this.node()).find('td').eq(2).text().toLowerCase().trim(); // Columna "Tipo"
+                                        console.log(tipo);
+                                        if (tipo === tipoElegido.toLowerCase()) {
+                                            datosTabla.push({
+                                                id_gasto: data[0],
+                                                notas: $(this.node()).find('td').eq(7).text(),
+                                                descripcion: $(this.node()).find('td').eq(3).text()
+                                            });
+                                        }
                                     });
-                                   update_gastos(datosTabla);
+
+                                    update_gastos(datosTabla);
+
                                    $('#facturar_modal').dialog('close');
-                                    if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                        $('#table_add_im').DataTable().ajax.reload(null, false);
-                                    }
-
-                                    if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                        $('#table_edit_im').DataTable().ajax.reload(null, false);
-                                    }
-                                    if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                        $('#tabla_house_directo').DataTable().ajax.reload(null, false);
-                                    }
-
+                                    $('#'+tablaOrigen).DataTable().ajax.reload(null, false);
                         },
                         error: function (xhr, status, error) {
                             console.error("Error fetching data:", error);
@@ -261,19 +266,34 @@ function enviarDatosTabla() {
                                     commodity:getNameByIdProductos(embarque[0].producto_id),
                                 });
                                     //guardar la preventa
-                                    guardar_preventa(preventa);
+                                    const tipoElegido = prompt("¿Desea facturar gastos Prepaid o Collect? (Ingrese 'Prepaid' o 'Collect')");
+
+                                    if (!tipoElegido || (tipoElegido.toLowerCase() !== "prepaid" && tipoElegido.toLowerCase() !== "collect")) {
+                                        alert("Debe ingresar 'Prepaid' o 'Collect'. Operación cancelada.");
+                                        return;
+                                    }
+
+                                    // Guardar preventa con tipo
+                                    guardar_preventa(preventa, tipoElegido);
+
+                                    // Filtrar y enviar los gastos seleccionados
                                     const tabla = $('#facturar_table').DataTable();
                                     let datosTabla = [];
-                                    tabla.rows().every(function() {
-                                        const data = this.data();
 
-                                        datosTabla.push({
-                                            id_gasto: data[0],
-                                            notas: $(this.node()).find('td').eq(7).text(),
-                                            descripcion: $(this.node()).find('td').eq(3).text()
-                                        });
+                                    tabla.rows().every(function () {
+                                        const data = this.data();
+                                        const tipo = $(this.node()).find('td').eq(2).text().toLowerCase().trim(); // Columna "Tipo"
+                                        console.log(tipo);
+                                        if (tipo === tipoElegido.toLowerCase()) {
+                                            datosTabla.push({
+                                                id_gasto: data[0],
+                                                notas: $(this.node()).find('td').eq(7).text(),
+                                                descripcion: $(this.node()).find('td').eq(3).text()
+                                            });
+                                        }
                                     });
-                                   update_gastos(datosTabla);
+
+                                    update_gastos(datosTabla);
                                    $('#facturar_modal').dialog('close');
                                     if ($.fn.DataTable.isDataTable('#table_add_im')) {
                                         $('#table_add_im').DataTable().ajax.reload(null, false);
@@ -345,11 +365,11 @@ function update_gastos(x){
         }
     });
 }
-function guardar_preventa(preventa){
+function guardar_preventa(preventa,tipo){
     $.ajax({
         type: "POST",
         url: "/admin_cont/preventa/",
-        data: JSON.stringify(preventa),
+        data: JSON.stringify({'preventa':preventa,'tipo':tipo}),
         contentType: "application/json",
         headers: {
             'X-CSRFToken': csrf_token

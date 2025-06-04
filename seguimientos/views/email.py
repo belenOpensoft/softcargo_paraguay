@@ -333,6 +333,8 @@ def get_data_email(request):
                             tramo = f"({ruta.origen}/{ruta.destino})  {ruta.cia}{ruta.viaje}/{fecha}" if transportista == 'true' else f"({ruta.origen}/{ruta.destino}) {ruta.viaje}/{fecha}"
                             texto += formatear_linea("Vuelo", tramo)
 
+                texto += formatear_linea("Aplicable", str(row.aplicable))
+
                 texto += formatear_linea("Peso", f"{peso} KGS")
 
                 texto += formatear_linea("Bultos", str(bultos)+' '+str(tipo))
@@ -573,7 +575,7 @@ def get_data_email(request):
 
                         calculado2 = str(vol) + ' AS VOL' if toneladas < vol else bruto
 
-                        aplicable = calculado2 if row.modo not in ['IMPORT AEREO', 'EXPORT AEREO'] else str(row.aplicable)
+                        aplicable = str(row.aplicable)
 
                     texto += formatear_linea("Aplicable", str(aplicable))
 
@@ -1109,7 +1111,7 @@ def get_data_email(request):
                     toneladas = round(float(m.bruto) / 1000, 2) if m.bruto else 0
                     calculado2 = str(vol) + ' AS VOL' if toneladas < vol else pes
                     calculado = pes if calculado < pes else str(calculado) + ' AS VOL'
-                    aplicable = calculado2 if row.modo not in ['IMPORT AEREO', 'EXPORT AEREO'] else str(row.aplicable)
+                    aplicable =str(row.aplicable)
 
                     texto += formatear_linea("Commodity", m.producto)
                     texto += formatear_linea("Pieces", m.bultos)
@@ -1229,7 +1231,7 @@ def get_data_email(request):
                     else:
                         calculado2=pes
 
-                    aplicable = calculado2 if row.modo !='IMPORT AEREO' and row.modo!='EXPORT AEREO' else str(row.aplicable)
+                    aplicable = str(row.aplicable)
                     texto += formatear_linea("Mercadería", m.producto)
                     texto += formatear_linea("Bultos", m.bultos)
                     texto += formatear_linea("Peso", str(m.bruto) + ' KGS')

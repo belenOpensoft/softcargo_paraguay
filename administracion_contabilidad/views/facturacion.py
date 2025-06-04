@@ -201,7 +201,7 @@ def buscar_item_v(request):
 def buscar_items_v(request):
     if request.method == "GET":
         servicio_id = request.GET.get("id")
-        servicio = Servicios.objects.filter(id=servicio_id, tipogasto='V').first()
+        servicio = Servicios.objects.filter(id=int(servicio_id or 0)).first()
 
         if servicio:
             iva_texto = "Exento" if servicio.tasa == "X" else "Básico" if servicio.tasa == "B" else "Desconocido"
@@ -624,17 +624,8 @@ def crear_movimiento(movimiento):
 
 def source_infofactura(request):
     try:
-        start = int(request.GET.get('start', 0))
-        length = int(request.GET.get('length', 10))
+        registros = VPreventas.objects.all()
 
-        registros=VPreventas.objects.all()
-
-        total_registros = len(registros)
-
-        # Paginación
-        registros_paginated = registros[start:start + length]
-
-        # Construir los datos para la tabla
         data = [{
             'numero': item.znumero,
             'cliente': item.zconsignatario,
@@ -649,18 +640,13 @@ def source_infofactura(request):
             'clase': item.zclase,
             'referencia': item.zrefer,
             'fecha': item.zllegasale.strftime('%Y-%m-%d') if item.zllegasale else None,
-        } for item in registros_paginated]
+        } for item in registros]
 
-        # Respuesta JSON
-        return JsonResponse({
-            'draw': int(request.GET.get('draw', 1)),
-            'recordsTotal': total_registros,
-            'recordsFiltered': total_registros,
-            'data': data,
-        })
+        return JsonResponse({'data': data})
 
     except Exception as e:
         return JsonResponse({'error': str(e)})
+
 
 
 def source_infofactura_cliente(request):
@@ -732,6 +718,7 @@ def cargar_preventa_infofactura(request):
                         'original': float(gasto.pinformar),
                         'moneda': gasto.moneda,
                         'posicion': prev.zposicion,
+                        'cuenta': gasto.cuenta,
                     }
                     total_sin_iva += gasto.precio
                     if gasto.iva == 'Basico':

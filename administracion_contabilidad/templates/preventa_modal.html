@@ -3,9 +3,6 @@
 <style>
 /* Estilos generales para hacer más compacto el modal */
 #preventa_modal {
-    max-width: 70vw; /* Ajusta el ancho del modal */
-    max-height: 80vh; /* Ajusta la altura del modal */
-    overflow: hidden;
     font-size: 12px; /* Reduce el tamaño del texto */
     padding: 10px;
 }
@@ -75,7 +72,28 @@
 
 
 </style>
+<style>
+  .tabla-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
 
+  .tabla-scroll table{
+      max-width: 100% !important;
+  }
+
+  .tabla-scroll thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #f8f9fa;
+  }
+
+  .tabla-scroll th {
+    background-color: #f8f9fa;
+  }
+</style>
 <div id="preventa_modal" style="display:none">
     <div class="modal-content">
 
@@ -148,7 +166,7 @@
         </form>
 
         <div class="modal-block" style="">
-            <div style="max-width:700px;">
+            <div style="" class="tabla-scroll">
                 <table id="preventa_table" class="table table-striped mt-2" style="table-layout: fixed;">
                     <thead>
                         <tr>

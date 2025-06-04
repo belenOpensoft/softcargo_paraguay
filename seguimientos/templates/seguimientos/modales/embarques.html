@@ -17,7 +17,7 @@
 
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <!-- Contenido de la primera columna -->
                     <form id="embarques_form">
                         <table class="table table-borderless table-sm">
@@ -58,46 +58,6 @@
                                 </td>
                             </tr>
                             </tbody>
-                        </table>
-                    </form>
-                </div>
-                <div class="col-md-6" style="background-color:#ede1e1">
-                    <!-- Contenido de la segunda columna -->
-                    <br>
-                    <form id="embarques_extra_form">
-                        <table class="table table-borderless table-sm" border="0">
-                            <tr>
-                                <td style="text-align: right;">{{ form_embarques.volumen.label }}</td>
-                                <td>{{ form_embarques.volumen }}</td>
-    <!--                            <td style="text-align: right;"></td>-->
-                                <td rowspan="2">{{ form_embarques.tomopeso.label }}{{ form_embarques.tomopeso }}</td>
-                                <td style="text-align: right;">{{ form_embarques.muestroflete.label }}</td>
-                                <td>{{ form_embarques.muestroflete }}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: right;">{{ form_embarques.tarifaventa.label }}</td>
-                                <td>{{ form_embarques.tarifaventa }}</td>
-                                <td style="text-align: right;">{{ form_embarques.aplicable.label }}</td>
-                                <td>{{ form_embarques.aplicable }}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: right;">{{ form_embarques.tarifacompra.label }}</td>
-                                <td>{{ form_embarques.tarifacompra }}</td>
-                                <td rowspan="2">{{ form_embarques.tipobonifcli.label }}{{ form_embarques.tipobonifcli }}</td>
-                                 <td style="text-align: right;">{{ form_embarques.numero.label }}</td>
-                                <td>{{ form_embarques.numero }}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: right;">{{ form_embarques.tarifaprofit.label }}</td>
-                                <td>{{ form_embarques.tarifaprofit }}</td>
-                                <td style="text-align: right;"></td>
-                                <td>{{ form_embarques.bonifcli }}</td>
-
-                            </tr>
-                            <tr>
-                                <td style="text-align: right;">{{ form_embarques.tarifafija.label }}</td>
-                                <td colspan="4">{{ form_embarques.tarifafija }}</td>
-                            </tr>
                         </table>
                     </form>
                 </div>

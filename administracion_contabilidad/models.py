@@ -1631,6 +1631,7 @@ class Tiposrenta(models.Model):
 class VistaGastosPreventa(models.Model):
     numero = models.CharField(max_length=255, blank=True, null=True)
     servicio = models.CharField(max_length=255, blank=True, null=True)
+    cuenta = models.CharField(max_length=255, blank=True, null=True)
     moneda = models.CharField(max_length=255, blank=True, null=True)
     modo = models.CharField(max_length=10, blank=True, null=True)
     precio = models.FloatField(blank=True, null=True)

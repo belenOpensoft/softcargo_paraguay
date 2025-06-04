@@ -46,8 +46,11 @@ def generar_autogenerado(fecha_noseusa=None):
 def guardar_infofactura(request):
     if request.method == "POST":
         try:
-            datos = json.loads(request.body.decode('utf-8'))
-            fecha_str = datos.get("fecha")
+            datos_json = json.loads(request.body.decode('utf-8'))
+            preventa_datos = datos_json.get("preventa")
+            tipo = datos_json.get("tipo")
+            fecha_str = preventa_datos.get("fecha")
+
             if fecha_str is None:
                 fecha_str = datetime.now().strftime("%d-%m-%y")
 
@@ -59,53 +62,58 @@ def guardar_infofactura(request):
                 fecha_formateada = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             # Validar que 'datos' sea un diccionario
-            if not isinstance(datos, dict):
+            if not isinstance(preventa_datos, dict):
                 return JsonResponse({"resultado": "error", "mensaje": "Los datos no son un objeto válido."}, status=400)
 
             hoy = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            posicion = datos.get("posicion", "")
+            posicion = preventa_datos.get("posicion", "")
 
             # Obtener un número único para znumero
             infofactura = Factudif()
             numero = infofactura.get_num()  # Generar número único para todos los registros
 
-            embarque = datos.get("referencia")
+            embarque = preventa_datos.get("referencia")
             clase = posicion[:2]
 
-            # Filtrar los gastos relacionados
-            gastos = VistaGastosPreventa.objects.filter(numero=embarque, source=clase)
+
+            gastos = VistaGastosPreventa.objects.filter(
+                numero=embarque,
+                source=clase,
+                modo=tipo.capitalize()
+            )
 
             # Crear un registro de Infofactura para cada gasto
             for gasto in gastos:
                 nueva_infofactura = Factudif()
                 nueva_infofactura.znumero = numero  # Usar el mismo número para todos los registros
-                nueva_infofactura.zrefer = datos.get("referencia")
-                nueva_infofactura.zseguimiento = datos.get("seguimiento")
-                nueva_infofactura.zcarrier = datos.get("transportista")
-                nueva_infofactura.zmaster = datos.get("master")
-                nueva_infofactura.zhouse = datos.get("house")
+                nueva_infofactura.zrefer = preventa_datos.get("referencia")
+                nueva_infofactura.zseguimiento = preventa_datos.get("seguimiento")
+                nueva_infofactura.zcarrier = preventa_datos.get("transportista")
+                nueva_infofactura.zmaster = preventa_datos.get("master")
+                nueva_infofactura.zhouse = preventa_datos.get("house")
                 nueva_infofactura.zfechagen = hoy
                 nueva_infofactura.zllegasale = fecha_formateada
-                nueva_infofactura.zcommodity = datos.get("commodity")
-                nueva_infofactura.zkilos = datos.get("kilos")
-                nueva_infofactura.zvolumen = datos.get("volumen")
-                nueva_infofactura.zbultos = datos.get("bultos")
-                nueva_infofactura.zorigen = datos.get("origen")
-                nueva_infofactura.zdestino = datos.get("destino")
-                nueva_infofactura.zconsignatario = datos.get("consigna") or datos.get("consignatario")
-                nueva_infofactura.zcliente = datos.get("cliente")
-                nueva_infofactura.zembarcador = datos.get("embarca")
-                nueva_infofactura.zagente = datos.get("agente")
-                nueva_infofactura.zposicion = datos.get("posicion")
-                nueva_infofactura.zterminos = datos.get("terminos")
-                nueva_infofactura.zpagoflete = datos.get("pagoflete")
-                nueva_infofactura.zwr = datos.get("wr")
+                nueva_infofactura.zcommodity = preventa_datos.get("commodity")
+                nueva_infofactura.zkilos = preventa_datos.get("kilos")
+                nueva_infofactura.zvolumen = preventa_datos.get("volumen")
+                nueva_infofactura.zbultos = preventa_datos.get("bultos")
+                nueva_infofactura.zorigen = preventa_datos.get("origen")
+                nueva_infofactura.zdestino = preventa_datos.get("destino")
+                nueva_infofactura.zconsignatario = preventa_datos.get("consigna") or preventa_datos.get("consignatario")
+                nueva_infofactura.zcliente = preventa_datos.get("cliente")
+                nueva_infofactura.zembarcador = preventa_datos.get("embarca")
+                nueva_infofactura.zagente = preventa_datos.get("agente")
+                nueva_infofactura.zposicion = preventa_datos.get("posicion")
+                nueva_infofactura.zterminos = preventa_datos.get("terminos")
+                nueva_infofactura.zpagoflete = preventa_datos.get("pagoflete")
+                nueva_infofactura.zwr = preventa_datos.get("wr")
                 nueva_infofactura.ztransporte = posicion[1] if len(posicion) > 1 else None
                 nueva_infofactura.zclase = posicion[:2] if len(posicion) >= 2 else None
 
                 # Agregar información específica del gasto
+                monto = gasto.precio if gasto.precio not in [None, 0] else gasto.costo if gasto.costo not in [None, 0] else 0
                 nueva_infofactura.zitem = gasto.id_servicio  # Descripción del gasto
-                nueva_infofactura.zmonto = gasto.precio
+                nueva_infofactura.zmonto = monto
                 nueva_infofactura.ziva = 1 if gasto.iva == 'Basico' else 0
                 nueva_infofactura.zmoneda = gasto.id_moneda
 

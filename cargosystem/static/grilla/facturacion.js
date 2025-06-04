@@ -693,52 +693,179 @@ function abrir_modalfactura() {
 
 
 $('#preventa').on('click', function () {
-    if ($.fn.DataTable.isDataTable('#preventa_table')) {
-    $('#preventa_table').DataTable().clear().destroy();
-    }
+
     $("#preventa_modal").dialog({
         autoOpen: true,
         modal: true,
         draggable: true,
-        width: 'auto',  // Se ajusta al contenido
+        width: wWidth*0.90,  // Se ajusta al contenido
         height: 'auto', // Se ajusta al contenido
         minWidth: 500,  // Evita que sea demasiado pequeño
         minHeight: 200, // Evita que sea demasiado pequeño
         position: {my: "top", at: "top+20", of: window}, // Centrar el modal
     }).prev(".ui-dialog-titlebar").hide();
-    $('#preventa_table').DataTable({
-        info: false,
-        paging: false,
-        lengthChange: false,
-        ajax: {
-            url: "/admin_cont/source_infofactura",
-            type: "GET",
-            dataSrc: 'data'
-        },
-        scrollY: "200px",
-        scrollCollapse: true,
-        searching: false,
-        columns: [
-            {data: 'numero'},
-            {data: 'cliente'},
-            {data: 'posicion'},
-            {data: 'master'},
-            {data: 'house'},
-            {data: 'vapor_vuelo'},
-            {data: 'contenedor'},
-            {data: 'clase'},
-            {data: 'referencia'},
-            {data: 'fecha'}
-        ],
-        scrollX: true,
-        processing: true,
-        language: {
-            url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+    cargar_preventas();
+
+});
+function cargar_preventas(){
+    $('#preventa_table tbody').empty();
+    $.ajax({
+        url: "/admin_cont/source_infofactura",
+        type: "GET",
+        success: function(response) {
+            const data = response.data;
+            const tbody = $('#preventa_table tbody');
+            tbody.empty();  // Limpia la tabla
+
+            if (data.length === 0) {
+                tbody.append('<tr><td colspan="10" class="text-center">Sin registros</td></tr>');
+                return;
+            }
+
+            data.forEach(item => {
+                const fila = `
+                    <tr>
+                        <td>${item.numero}</td>
+                        <td>${item.cliente}</td>
+                        <td>${item.posicion}</td>
+                        <td>${item.master}</td>
+                        <td>${item.house}</td>
+                        <td>${item.vapor_vuelo}</td>
+                        <td>${item.contenedor}</td>
+                        <td>${item.clase}</td>
+                        <td>${item.referencia}</td>
+                        <td>${item.fecha || ''}</td>
+                    </tr>
+                `;
+                tbody.append(fila);
+            });
+
+            $('#preventa_table tbody').off('click').on('click', 'tr', function () {
+        let preventa = $(this).find('td').eq(0).text();
+        let clase = $(this).find('td').eq(7).text();
+
+        if ($(this).hasClass('table-secondary')) {
+            $(this).removeClass('table-secondary');
+            localStorage.removeItem('preventa_id');
+            localStorage.removeItem('preventa_clase');
+        } else {
+            $('#preventa_table tbody tr.table-secondary').removeClass('table-secondary');
+            $(this).addClass('table-secondary');
+            localStorage.setItem('preventa_id', preventa);
+            localStorage.setItem('preventa_clase', clase);
         }
     });
 
-});
+            $('#preventa_table tbody').off('dblclick').on('dblclick', 'tr', function () {
+                $('#pararesetear').trigger('reset');
+                $('#pararesetear2').trigger('reset');
 
+                let referencia = $(this).find('td').eq(8).text();
+                let clase = $(this).find('td').eq(7).text();
+                let preventa = $(this).find('td').eq(0).text();
+
+                $.ajax({
+                    url: "/admin_cont/cargar_preventa_infofactura/",
+                    method: 'POST',
+                    data: {
+                        'referencia': referencia,
+                        'clase': clase,
+                        'preventa': preventa
+                    },
+                    headers: {'X-CSRFToken': csrf_token},
+                    success: function (response) {
+                        let preventa = response.data_preventa;
+                        let gastos = response.data;
+
+                        localStorage.setItem('gastos_preventa', JSON.stringify(gastos));
+                        localStorage.setItem('preventa', JSON.stringify(preventa));
+
+                        $('#moneda').val(preventa.moneda);
+                        $('#total_con_iva').val(preventa.total_con_iva);
+                        $('#total_sin_iva').val(preventa.total_sin_iva);
+                        $('#cliente_i').val(preventa.cliente_i);
+                        $('#peso').val(preventa.peso);
+                        $('#direccion').val(preventa.direccion);
+                        $('#localidad').val(preventa.localidad);
+                        $('#aplic').val(preventa.aplic);
+                        $('#bultos').val(preventa.bultos);
+                        $('#volumen').val(preventa.volumen);
+                        $('#commodity').val(preventa.commodity);
+                        $('#inconterms').val(preventa.inconterms);
+                        $('#flete').val(preventa.flete);
+                        $('#deposito').val(preventa.deposito);
+                        $('#wr').val(preventa.wr);
+                        $('#referencia').val(preventa.referencia);
+                        $('#llegada_salida').val(preventa.llegada_salida);
+                        $('#origen').val(preventa.origen);
+                        $('#destino').val(preventa.destino);
+                        $('#transportista').val(preventa.transportista);
+                        $('#consignatario').val(preventa.consignatario);
+                        $('#embarcador').val(preventa.embarcador);
+                        $('#agente').val(preventa.agente);
+                        $('#vuelo_vapor').val(preventa.vuelo_vapor);
+                        $('#seguimiento').val(preventa.seguimiento);
+                        $('#mawb_mbl_mcrt').val(preventa.mawb_mbl_mcrt);
+                        $('#hawb_hbl_hcrt').val(preventa.hawb_hbl_hcrt);
+                        $('#posicion').val(preventa.posicion);
+                        $('#status').val(preventa.status);
+                        $('#orden').val(preventa.orden);
+                        $('#modo').val(preventa.modo);
+
+                        // Cargar gastos en DataTable como ya hacías
+                        if ($.fn.DataTable.isDataTable("#tabla_gastos_preventa_factura")) {
+                            $('#tabla_gastos_preventa_factura').DataTable().clear().destroy();
+                        }
+
+                        $('#tabla_gastos_preventa_factura').DataTable({
+                            info: false,
+                            lengthChange: false,
+                            data: gastos,
+                            columns: [
+                                {data: 'descripcion', title: 'Descripcion'},
+                                {data: 'total', title: 'Total'},
+                                {data: 'iva', title: 'IVA'},
+                                {data: 'original', title: 'Original'},
+                                {data: 'moneda', title: 'Moneda'}
+                            ],
+                            paging: false,
+                            searching: true,
+                            ordering: true,
+                            responsive: true,
+                            language: {
+                                url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                            },
+                            columnDefs: [
+                                {
+                                    targets: 0,
+                                    className: "dt-body-left"
+                                },
+                                {
+                                    targets: 1,
+                                    className: "dt-body-right",
+                                    render: function (data) {
+                                        return '$' + parseFloat(data).toFixed(2);
+                                    }
+                                },
+                                {
+                                    targets: [2, 3, 4],
+                                    className: "dt-body-center"
+                                }
+                            ]
+                        });
+                    },
+                    error: function () {
+                        alert('Error al realizar la consulta.');
+                    }
+                });
+            });
+            },
+            error: function(xhr) {
+                alert("Error al cargar la tabla de preventas.");
+            }
+            });
+}
+/*
 $('#preventa_table tbody').on('dblclick', 'tr', function () {
     $('#pararesetear').trigger('reset');
     $('#pararesetear2').trigger('reset');
@@ -879,7 +1006,7 @@ $('#preventa_table tbody').on('click', 'tr', function () {
         localStorage.setItem('preventa_clase', clase);
     }
 });
-
+*/
 function facturar_preventa() {
     $("#preventa_modal").dialog('close');
 
@@ -962,9 +1089,12 @@ function agregarItem_old(desc, codigo, precio,posicion=null) {
         alert('Por favor, completa todos los campos antes de agregar el item.');
     }
 }
+
 function agregarItem(desc, codigo, precio, posicion = null) {
     const item = desc;
     const descripcion = desc;
+    let itemCounter=0;
+    const preventa = JSON.parse(localStorage.getItem('preventa')) || [];
 
     if (item && descripcion && !isNaN(precio)) {
         $.ajax({
@@ -976,10 +1106,17 @@ function agregarItem(desc, codigo, precio, posicion = null) {
                 const cuenta = servicio.cuenta;
                 const codigo = servicio.item;
                 const imputar = servicio.imputar || "";
-                const texto = (imputar === 'S') ? 'PENDIENTE' : 'NO IMPUTABLE';
+
 
                 itemCounter++;
                 const rowId = `item-${itemCounter}`;
+                let montoIva, totalConIva;
+                    if (iva === 'Básico' || iva == 'Basico') {
+                        montoIva = precio * 0.22;
+                    } else {
+                        montoIva = 0;
+                    }
+                    totalConIva = precio + montoIva;
 
                 let row = `
                     <tr id="${rowId}" data-precio="${precio}" data-iva="${iva}" data-cuenta="${cuenta}">
@@ -987,11 +1124,13 @@ function agregarItem(desc, codigo, precio, posicion = null) {
                         <td>${item}</td>
                         <td>${descripcion}</td>
                         <td>${precio.toFixed(2)}</td>
+                        <td>${montoIva.toFixed(2)}</td>
+                        <td>${totalConIva.toFixed(2)}</td>
                         <td>${iva}</td>
                         <td>${cuenta}</td>
-                        <td>${texto}</td>
-                        <td>S/I</td>
-                        <td>S/I</td>
+                        <td>${preventa.posicion}</td>
+                        <td>${preventa.posicion}</td>
+                        <td>${preventa.cliente_i}</td>
                     </tr>`;
 
                 $('#itemTable tbody').append(row);
@@ -1094,7 +1233,7 @@ function borrar_preventa() {
         success: function (response) {
             if (response.resultado === "éxito") {
                 alert("Preventa eliminada correctamente");
-                $('#preventa_table').DataTable().ajax.reload(null, false);
+                cargar_preventas();
             } else {
                 alert(response.mensaje);
             }

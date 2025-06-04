@@ -612,7 +612,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             texto += formatear_linea("Bultos", str(bultos),)
 
             texto += formatear_linea("CBM", f"{volumen:.3f} M³",)
-
+            texto += formatear_linea("Aplicable", str(row.aplicable))
             texto += "<br>"
 
             texto += formatear_linea("Mercadería", mercaderias.rstrip(' -'))
