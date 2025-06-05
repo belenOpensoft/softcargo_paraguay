@@ -126,3 +126,28 @@ def eliminar_cheque(request):
             return JsonResponse({"status": "error", "mensaje": str(e)})
 
     return JsonResponse({"status": "error", "mensaje": "Método no permitido."}, status=405)
+
+def habilitar_deshabilitar(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            numero = data.get("numero")
+            habilitar_deshabilitar = data.get("habilitar_deshabilitar")
+
+            if not numero:
+                return JsonResponse({"status": "error", "mensaje": "Número de cheque no recibido."})
+
+            cheque = Chequeras.objects.filter(cheque=numero).first()
+
+            if not cheque:
+                return JsonResponse({"status": "error", "mensaje": "Cheque no encontrado."})
+
+            cheque.estado=habilitar_deshabilitar
+            cheque.save()
+
+            return JsonResponse({"status": "ok", "mensaje": "Cheque eliminado correctamente."})
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "mensaje": str(e)})
+
+    return JsonResponse({"status": "error", "mensaje": "Método no permitido."}, status=405)

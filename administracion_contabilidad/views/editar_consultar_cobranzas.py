@@ -123,6 +123,14 @@ def obtener_detalle_cobranza(request):
             if imputados:
                 for impu in imputados:
                     boleta = Movims.objects.filter(mautogen=impu.autofac).first()
+                    posicion = Asientos.objects.filter(
+                        autogenerado=impu.autofac
+                    ).exclude(
+                        posicion__isnull=True
+                    ).exclude(
+                        posicion=""
+                    ).values_list('posicion', flat=True).first()
+
                     if boleta:
                         num_completo = f"{boleta.mtipo} {boleta.mserie}{boleta.mprefijo}{boleta.mboleta}"
                         data['imputados'].append({
@@ -130,7 +138,7 @@ def obtener_detalle_cobranza(request):
                             'documento': num_completo,
                             'imputado': impu.monto,
                             'referencia': None,
-                            'posicion': boleta.mposicion,
+                            'posicion': posicion,
                         })
 
         data['transferencia'] = transferencia.strip()

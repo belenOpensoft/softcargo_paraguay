@@ -90,7 +90,7 @@
           <div class="col-md-4">
             <div class="form-check form-check-inline">
               {{ form.ver_utilizados }}
-              <label class="form-check-label" for="{{ form.ver_utilizados.id_for_label }}">Ver Utilizados</label>
+              <label class="form-check-label" for="{{ form.ver_utilizados.id_for_label }}">{{ form.ver_utilizados.label }}</label>
             </div>
           </div>
 
@@ -99,8 +99,8 @@
         <!-- Tabla -->
           <div class="mb-2 mt-1 d-flex gap-2">
           <button id="btnEliminar" type="button" class="btn btn-danger btn-sm">Eliminar</button>
-          <button type="button" class="btn btn-secondary btn-sm">Bloquear</button>
-          <button type="button" class="btn btn-outline-dark btn-sm">Reactivar</button>
+          <button type="button" id="btnBloquear" class="btn btn-secondary btn-sm">Bloquear</button>
+          <button type="button" id="btnHabilitar" class="btn btn-outline-dark btn-sm">Reactivar</button>
         </div>
 
         <div class="table-responsive tabla-scroll">

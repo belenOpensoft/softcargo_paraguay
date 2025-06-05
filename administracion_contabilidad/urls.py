@@ -23,7 +23,7 @@ from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
 from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos, reimprimir_asiento
 from administracion_contabilidad.views.mantenimiento_chequeras import mantenimiento_chequeras, guardar_stock_cheques, \
-    buscar_cheques, eliminar_cheque
+    buscar_cheques, eliminar_cheque, habilitar_deshabilitar
 from administracion_contabilidad.views.modificar_asientos import filtro_asientos, guardar_asiento_editado, \
     eliminar_asiento
 from administracion_contabilidad.views.movimientos_bancarios import movimientos_bancarios, cheques_disponibles_clientes, \
@@ -189,6 +189,7 @@ urlpatterns = [
     path('guardar_stock_cheques/', guardar_stock_cheques, name='guardar_stock_cheques'),
     path('buscar_cheques/', buscar_cheques, name='buscar_cheques'),
     path('eliminar_cheque/', eliminar_cheque, name='eliminar_cheque'),
+    path('habilitar_deshabilitar/', habilitar_deshabilitar, name='habilitar_deshabilitar'),
 
     #mantenimiento y consulta de chequeras
 

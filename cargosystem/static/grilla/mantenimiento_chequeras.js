@@ -159,5 +159,77 @@ $("#btnEliminar").on("click", function () {
         alert("Error de red o servidor: " + error);
     });
 });
+$("#btnHabilitar").on("click", function () {
+    const fila = document.querySelector("#tablaChequeras tr.table-secondary");
+    if (!fila) {
+        alert("Selecciona una fila.");
+        return;
+    }
 
+    let numero = fila.querySelector("td:nth-child(1)")?.textContent.trim() || "";
+    if (!numero) {
+        alert("No se pudo obtener el número de cheque.");
+        return;
+    }
 
+    if (!confirm("¿Estás seguro de que deseas habilitar el cheque " + numero + "?")) {
+        return;
+    }
+
+    fetch("/admin_cont/habilitar_deshabilitar/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrf_token,
+        },
+        body: JSON.stringify({ numero: numero,habilitar_deshabilitar:0 }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status != "ok") {
+            alert("Error: " + data.mensaje);
+        }
+    })
+    .catch(error => {
+        alert("Error de red o servidor: " + error);
+    });
+    $('#btnBuscar').trigger('click');
+
+});
+$("#btnBloquear").on("click", function () {
+    const fila = document.querySelector("#tablaChequeras tr.table-secondary");
+    if (!fila) {
+        alert("Selecciona una fila.");
+        return;
+    }
+
+    let numero = fila.querySelector("td:nth-child(1)")?.textContent.trim() || "";
+    if (!numero) {
+        alert("No se pudo obtener el número de cheque.");
+        return;
+    }
+
+    if (!confirm("¿Estás seguro de que deseas bloquear el cheque " + numero + "?")) {
+        return;
+    }
+
+    fetch("/admin_cont/habilitar_deshabilitar/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrf_token,
+        },
+        body: JSON.stringify({ numero: numero,habilitar_deshabilitar:2 }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status != "ok") {
+            alert("Error: " + data.mensaje);
+        }
+    })
+    .catch(error => {
+        alert("Error de red o servidor: " + error);
+    });
+
+    $('#btnBuscar').trigger('click');
+});
