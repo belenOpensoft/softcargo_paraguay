@@ -2618,3 +2618,39 @@ class ChequerasForm(forms.Form):
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'diferidos'})
     )
+
+class BajaChequesForm(forms.Form):
+    banco = forms.ModelChoiceField(
+        label="Banco",
+        queryset=Cuentas.objects.filter(xcodigo__range=(11120, 11125)),
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm', 'id': 'banco_baja'})
+    )
+
+    fecha = forms.DateField(
+        label="Fecha",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm', 'id': 'fecha_baja'})
+    )
+
+    contra = forms.ModelChoiceField(
+        label="Contra Cuenta",
+        queryset=Cuentas.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm', 'id': 'contra_baja'})
+    )
+
+    tomar_emision = forms.BooleanField(
+        label="Tomar Emisión para la Baja",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'tomar_emision'})
+    )
+
+    asentar_fecha_check = forms.BooleanField(
+        label="Asentar con Fecha",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'asentar_fecha_check'})
+    )
+
+    asentar_fecha = forms.DateField(
+        label="Fecha Asiento",
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm', 'id': 'asentar_fecha'})
+    )

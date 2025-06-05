@@ -1,5 +1,6 @@
 from django.urls import path
 
+from administracion_contabilidad.views.bajar_cheques import bajar_cheques, buscar_cheques_bajar
 from administracion_contabilidad.views.editar_consultar_cobranzas import editar_consultar_cobranzas, \
     obtener_detalle_cobranza, cargar_pendientes_imputacion_cobranza, procesar_imputaciones_cobranza, \
     actualizar_campos_movims_cobranza, anular_cobranza
@@ -22,7 +23,7 @@ from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
 from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos, reimprimir_asiento
 from administracion_contabilidad.views.mantenimiento_chequeras import mantenimiento_chequeras, guardar_stock_cheques, \
-    buscar_cheques
+    buscar_cheques, eliminar_cheque
 from administracion_contabilidad.views.modificar_asientos import filtro_asientos, guardar_asiento_editado, \
     eliminar_asiento
 from administracion_contabilidad.views.movimientos_bancarios import movimientos_bancarios, cheques_disponibles_clientes, \
@@ -187,9 +188,15 @@ urlpatterns = [
     path('ingresar_buscar_cheques/', mantenimiento_chequeras, name='mantenimiento_chequeras'),
     path('guardar_stock_cheques/', guardar_stock_cheques, name='guardar_stock_cheques'),
     path('buscar_cheques/', buscar_cheques, name='buscar_cheques'),
+    path('eliminar_cheque/', eliminar_cheque, name='eliminar_cheque'),
 
     #mantenimiento y consulta de chequeras
 
+    #bajar cheques
+    path('bajar_a_banco/', bajar_cheques, name='bajar_cheques'),
+    path('buscar_cheques_bajar/', buscar_cheques_bajar, name='buscar_cheques_bajar'),
+
+    #bajar cheques
 
 
     #contabilidad

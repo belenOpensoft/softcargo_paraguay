@@ -103,3 +103,26 @@ def buscar_cheques(request):
         except Exception as e:
             return JsonResponse({"status": "error", "mensaje": str(e)})
     return None
+
+def eliminar_cheque(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            numero = data.get("numero")
+
+            if not numero:
+                return JsonResponse({"status": "error", "mensaje": "Número de cheque no recibido."})
+
+            cheque = Chequeras.objects.filter(cheque=numero).first()
+
+            if not cheque:
+                return JsonResponse({"status": "error", "mensaje": "Cheque no encontrado."})
+
+            cheque.delete()
+
+            return JsonResponse({"status": "ok", "mensaje": "Cheque eliminado correctamente."})
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "mensaje": str(e)})
+
+    return JsonResponse({"status": "error", "mensaje": "Método no permitido."}, status=405)

@@ -22,6 +22,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         ]
     });
+    $('table tbody').on('click', 'tr', function () {
+        $('table tbody tr').removeClass('table-secondary');
+        $(this).toggleClass('table-secondary');
+      });
 
     $("#btn-stock").click(function () {
         $("#modalStock").dialog("open");
@@ -117,5 +121,43 @@ $("#btnBuscar").on("click", function() {
             alert("Error: " + data.mensaje);
         }
     });
-
 });
+$("#btnEliminar").on("click", function () {
+    const fila = document.querySelector("#tablaChequeras tr.table-secondary");
+    if (!fila) {
+        alert("Selecciona una fila para eliminar.");
+        return;
+    }
+
+    let numero = fila.querySelector("td:nth-child(1)")?.textContent.trim() || "";
+    if (!numero) {
+        alert("No se pudo obtener el número de cheque.");
+        return;
+    }
+
+    if (!confirm("¿Estás seguro de que deseas eliminar el cheque " + numero + "?")) {
+        return;
+    }
+
+    fetch("/admin_cont/eliminar_cheque/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrf_token,
+        },
+        body: JSON.stringify({ numero: numero }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "ok") {
+            fila.remove();
+        } else {
+            alert("Error: " + data.mensaje);
+        }
+    })
+    .catch(error => {
+        alert("Error de red o servidor: " + error);
+    });
+});
+
+
