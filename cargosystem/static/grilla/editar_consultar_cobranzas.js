@@ -1,3 +1,6 @@
+var wWidth = $(window).width();
+var wHeight = $(window).height();
+
 document.addEventListener("DOMContentLoaded", function () {
    $("#impucompra_nota").dialog({
         autoOpen: false,
@@ -559,5 +562,86 @@ function anularCobranza(autogen) {
     .catch(err => {
         console.error("Error en la solicitud:", err);
         alert("Error al conectar con el servidor.");
+    });
+}
+function get_data_email(autogenerado) {
+    let title = 'title';
+    let mail_to = 'mail to';
+    $("#id_to").val('');
+    $("#id_cc").val('');
+    $("#id_cco").val('');
+    cco = $("#id_subject").val('');
+    $('#email_add_input').summernote('destroy');
+
+    $("#emails_modal").dialog({
+            autoOpen: true,
+            open: function (event, ui) {
+                $('#email_add_input').summernote('destroy');
+                $('#email_add_input').summernote({
+                    placeholder: 'Ingrese su texto aqui',
+                    tabsize: 10,
+                    height: wHeight * 0.60,
+                    width: wWidth * 0.88,
+                    toolbar: [
+                        ['style', ['style']],
+                        ['font', ['bold', 'underline', 'clear']],
+                        ['color', ['color']],
+                        ['para', ['ul', 'ol', 'paragraph']],
+                        ['table', ['table']],
+                        ['insert', ['link', 'picture', 'video']],
+                        ['view', ['fullscreen', 'codeview']]
+                    ]
+                });
+                $('#email_add_input').focus();
+            },
+            modal: true,
+            title: " Correo con comprobante de cobranza",
+            height: wHeight * 0.90,
+            width: wWidth * 0.90,
+            class: 'modal fade',
+            buttons: [
+                {
+                    text: "Enviar",
+                    class: "btn btn-primary",
+                    style: "width:100px",
+                    click: function () {
+                        to = $("#id_to").val();
+                        cc = $("#id_cc").val();
+                        cco = $("#id_cco").val();
+                        subject = $("#id_subject").val();
+                        message = $("#email_add_input").summernote('code');
+                        sendEmail(to, cc, cco, subject, message, title);
+                        $(this).dialog("close");
+                    },
+                }, {
+                    text: "Salir",
+                    class: "btn btn-dark",
+                    style: "width:100px",
+                    click: function () {
+                        $(this).dialog("close");
+                        $('#modalSeleccionEmail').dialog("close");
+                    },
+                },],
+            beforeClose: function (event, ui) {
+                // table.ajax.reload();
+            }
+        })
+
+    $.ajax({
+        type: "POST",
+        url: "/admin_cont/get_email_recibo_cobranza/",
+        data: {
+            autogenerado: autogenerado,
+            csrfmiddlewaretoken: csrf_token
+        },
+        success: function (resultado) {
+            if (resultado['resultado'] === 'exito') {
+                $("#id_subject").val(resultado['asunto']);
+                $("#id_to").val(resultado['email_cliente']);
+                $("#email_add_input").summernote('code', resultado['mensaje']);
+            } else {
+                alert('Error: ' + resultado['detalle']);
+            }
+        }
     });
 }

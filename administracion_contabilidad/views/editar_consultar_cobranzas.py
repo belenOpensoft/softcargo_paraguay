@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.datetime_safe import datetime
 
-from administracion_contabilidad.forms import EditarConsultarCobranzas, CobranzasDetalle
+from administracion_contabilidad.forms import EditarConsultarCobranzas, CobranzasDetalle, emailsForm
 from administracion_contabilidad.models import ListaCobranzas, VistaCobranza, Movims, Asientos, Cuentas, Cheques, \
     Impuvtas, Boleta
 from mantenimientos.models import Monedas
@@ -13,6 +13,7 @@ from mantenimientos.models import Monedas
 def editar_consultar_cobranzas(request):
     form = EditarConsultarCobranzas(request.GET or None)
     form_cobranzas_detalle = CobranzasDetalle(request.GET or None)
+    form_email = emailsForm(request.GET or None)
     resultados = ListaCobranzas.objects.none()
 
     if form.is_valid():
@@ -55,6 +56,7 @@ def editar_consultar_cobranzas(request):
     return render(request, 'editar_consultar_cobranzas/editar_consultar_cobranzas.html', {
         'form': form,
         'cobranzas_detalle':form_cobranzas_detalle,
+        'form_email':form_email,
     })
 
 def obtener_detalle_cobranza(request):

@@ -151,6 +151,8 @@
 </div>
 {% include 'editar_consultar_cobranzas/editar_consultar_cobranzas_detalle.html' %}
 {% include 'impucompra_nota.html' %}
+{% include 'cobranza_mail.html' %}
+
 <script src="{% static 'grilla/editar_consultar_cobranzas.js' %}"></script>
 <script>
    var csrf_token = '{{ csrf_token }}';

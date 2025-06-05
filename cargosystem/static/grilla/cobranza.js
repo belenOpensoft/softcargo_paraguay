@@ -1712,7 +1712,7 @@ function get_data_email(autogenerado) {
                 $('#email_add_input').focus();
             },
             modal: true,
-            title: title + " Correo con comprobante de cobranza",
+            title: " Correo con comprobante de cobranza",
             height: wHeight * 0.90,
             width: wWidth * 0.90,
             class: 'modal fade',
