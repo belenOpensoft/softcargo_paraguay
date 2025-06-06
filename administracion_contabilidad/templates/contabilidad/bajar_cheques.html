@@ -101,25 +101,11 @@
         </div>
       </div>
 
-      <!-- Columna resumen o adicional -->
-      <div class="col-md-3">
-        <div class="panel-resumen">
-          <h6>Resumen</h6>
-          <div class="form-group mb-2">
-            <label>Total Seleccionados</label>
-            <input type="text" class="form-control form-control-sm" id="total_seleccionados" readonly>
-          </div>
-          <div class="form-group mb-2">
-            <label>Total a Bajar</label>
-            <input type="text" class="form-control form-control-sm" id="total_bajar" readonly>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </form>
 
-<script src="{% static 'grilla/bajar_cheques.js' %}"></script>
+<script src="{% static 'grilla/bajar_banco.js' %}"></script>
 <script>
   var csrf_token = '{{ csrf_token }}';
 </script>

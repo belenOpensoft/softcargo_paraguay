@@ -1874,6 +1874,24 @@ class VistaCobranza(models.Model):
         managed = False
         db_table = 'vista_cobranza'
 
+class VChequesDiferidosBajar(models.Model):
+    autogenerado = models.CharField(max_length=50,primary_key=True)
+    fecha = models.DateField()
+    vto = models.DateField(null=True, blank=True)
+    documento = models.IntegerField()
+    tipo = models.CharField(max_length=1)  # Por ejemplo: 'B', 'T'
+    detalle = models.TextField()
+    monto = models.DecimalField(max_digits=15, decimal_places=2)
+    mov = models.CharField(max_length=50, null=True, blank=True)
+    cambio = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    paridad = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    cuenta = models.IntegerField()
+    banco = models.CharField(max_length=50)
+
+    class Meta:
+        db_table = 'VChequesDiferidosBajar'
+
+
 """
 from auditlog.registry import auditlog
 from auditlog.models import AuditlogHistoryField
