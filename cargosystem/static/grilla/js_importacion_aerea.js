@@ -1078,7 +1078,8 @@ $(document).ready(function () {
                     modal: true,
                     title: "Ingresar un nuevo máster",
                     height: wHeight * 0.85,
-                    width: 'auto',
+                    width: wWidth*0.90,
+
                     position: { my: "top", at: "top+20", of: window },
                     buttons: [
                         {
@@ -5426,32 +5427,27 @@ function recalculo_embarques() {
     const bruto = parseFloat($('#id_bruto_ap').val()) || 0;
     const volumen = parseFloat($('#id_volumen_ap').val()) || 0;
     const tarifa_venta = parseFloat($('#id_tarifaventa_ap').val()) || 0;
-    const tarifa_compra = parseFloat($('#id_tarifacompra_ap').val()) || 0;
-    let tarifa=0;
-    if(tarifa_venta==0){
-        tarifa=tarifa_compra;
-    }else{
-        tarifa=tarifa_venta
-    }
+    //const tarifa_compra = parseFloat($('#id_tarifacompra_ap').val()) || 0;
+    let tarifa=tarifa_venta;
 
     let aplicable = 0;
     let flete = 0;
 
+        if (tipo === '1') {
     $('#id_aplicable_ap').val(0);
     $('#id_muestroflete_ap').val(0);
-
-    if (tipo === '1') {
         // Usar el bruto directamente
         aplicable = redondear_a_05_o_0(bruto);
         flete = aplicable * tarifa;
     } else if (tipo === '2') {
+            $('#id_aplicable_ap').val(0);
+    $('#id_muestroflete_ap').val(0);
         // Calcular aplicable como volumen * coef
         aplicable = redondear_a_05_o_0(volumen * coef);
         flete = aplicable * tarifa;
     } else if (tipo === '3') {
-        // Manual: fijar aplicable en 1 y flete vacío
-        aplicable = 1;
-        flete = tarifa;
+        aplicable = parseFloat($('#id_aplicable_ap').val()) || 0;
+        flete = aplicable * tarifa;
     }
 
     $('#id_aplicable_ap').val(aplicable.toFixed(2));

@@ -1217,7 +1217,7 @@ $('#tabla_expomarit tfoot th').each(function(index) {
                     modal: true,
                     title: "Ingresar un nuevo máster",
                     height: wHeight * 0.85,
-                    width: 'auto',
+                    width: wWidth*0.90,
                     position: { my: "top", at: "top+20", of: window },
                     buttons: [
                         {

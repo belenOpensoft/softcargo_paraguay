@@ -255,10 +255,9 @@ class edit_form(BSModalModelForm):
         required=False,  # No obligatorio
         label="Arbitraje", initial=0
     )
-    kilosmadre_e = forms.CharField(
-        widget=forms.TextInput(
-            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
-        max_length=20,
+    kilosmadre_e = forms.FloatField(
+        widget=forms.NumberInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off', 'type': 'number'}),
         required=False,  # Obligatorio
         label="Kilos", initial=0
     )
