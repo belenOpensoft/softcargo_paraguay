@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'expaerea',
     'impterrestre',
     'administracion_contabilidad',
+    'consultas_administrativas',
     'expterrestre'
 ]
 CSRF_COOKIE_SECURE = False

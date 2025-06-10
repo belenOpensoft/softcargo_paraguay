@@ -1,25 +1,58 @@
 from django.db import models
 
 
-class EJEMPLO(models.Model):
-    autogenerado = models.CharField(max_length=40,primary_key=True)
-    tipo = models.CharField(max_length=8, null=True, blank=True)
-    emision = models.DateTimeField(null=True, blank=True)
-    vencimiento = models.DateTimeField(null=True, blank=True)
-    nrocliente = models.IntegerField(null=True, blank=True)
-    cliente = models.CharField(max_length=50, null=True, blank=True)
-    embarque = models.CharField(max_length=30, null=True, blank=True)
-    total = models.DecimalField(null=True, blank=True,decimal_places=4,max_digits=4)
-    moneda = models.CharField(max_length=10, null=True, blank=True)
-    arbitraje = models.CharField(max_length=21, null=True, blank=True)
-    paridad = models.DecimalField(null=True, blank=True, decimal_places=4,max_digits=4)
-    posicion = models.CharField(max_length=30, null=True, blank=True)
-    documento = models.CharField(max_length=22, null=True, blank=True)
-    tipo_doc = models.CharField(max_length=20, null=True, blank=True)
-    detalle = models.CharField(max_length=200, null=True, blank=True)
-    source = models.CharField(max_length=8, null=True, blank=True)
-    saldo = models.DecimalField(null=True, blank=True,decimal_places=4,max_digits=4)
-    pago = models.DecimalField(null=True, blank=True,decimal_places=4,max_digits=4)
+class VReporteSubdiarioVentas(models.Model):
+    fecha = models.DateField(null=True, blank=True)
+    tipo = models.CharField(max_length=100, null=True, blank=True)
+    serie = models.CharField(max_length=100, null=True, blank=True)
+    prefijo = models.CharField(max_length=100, null=True, blank=True)
+    numero = models.CharField(max_length=100, null=True, blank=True)
+    nro_cliente = models.CharField(max_length=100, null=True, blank=True)
+    cliente = models.CharField(max_length=255, null=True, blank=True)
+    detalle = models.CharField(max_length=500, null=True, blank=True)
+    exento = models.CharField(max_length=100, null=True, blank=True)
+    gravado = models.CharField(max_length=100, null=True, blank=True)
+    iva = models.CharField(max_length=100, null=True, blank=True)
+    total = models.CharField(max_length=100, null=True, blank=True)
+    tipo_cambio = models.CharField(max_length=100, null=True, blank=True)
+    paridad = models.CharField(max_length=100, null=True, blank=True)
+    referencia = models.CharField(max_length=100, null=True, blank=True)
+    cancelada = models.CharField(max_length=10, null=True, blank=True)
+
+    posicion = models.CharField(max_length=100, null=True, blank=True)
+    cuenta = models.CharField(max_length=100, null=True, blank=True)
+    vendedor = models.CharField(max_length=255, null=True, blank=True)
+    vencimiento = models.DateField(null=True, blank=True)
+    cobro = models.DateField(null=True, blank=True)
+    tipo_cambio_cobro = models.CharField(max_length=100, null=True, blank=True)
+
+    moneda = models.CharField(max_length=100, null=True, blank=True)
+    rut = models.CharField(max_length=100, null=True, blank=True)
+
+    vapor = models.CharField(max_length=100, null=True, blank=True)
+    viaje = models.CharField(max_length=100, null=True, blank=True)
+    master = models.CharField(max_length=100, null=True, blank=True)
+    house = models.CharField(max_length=100, null=True, blank=True)
+    embarcador = models.CharField(max_length=255, null=True, blank=True)
+    consignatario = models.CharField(max_length=255, null=True, blank=True)
+    flete = models.CharField(max_length=100, null=True, blank=True)
+    etd = models.DateField(null=True, blank=True)
+    eta = models.DateField(null=True, blank=True)
+    imputada = models.CharField(max_length=100, null=True, blank=True)
+
+    agente = models.CharField(max_length=255, null=True, blank=True)
+    origen = models.CharField(max_length=100, null=True, blank=True)
+    destino = models.CharField(max_length=100, null=True, blank=True)
+
+    operacion = models.CharField(max_length=100, null=True, blank=True)
+    movimiento = models.CharField(max_length=100, null=True, blank=True)
+    deposito = models.CharField(max_length=100, null=True, blank=True)
+    transportista = models.CharField(max_length=255, null=True, blank=True)
+    orden_cliente = models.CharField(max_length=100, null=True, blank=True)
+    wr = models.CharField(max_length=100, null=True, blank=True)
+    autogen_cobro = models.CharField(max_length=100, null=True, blank=True)
+    autogen_factura = models.CharField(max_length=100, primary_key=True)
+
     class Meta:
         managed = False
-        db_table = 'vista_cobranza'
+        db_table = 'VReporteSubdiarioVentas'

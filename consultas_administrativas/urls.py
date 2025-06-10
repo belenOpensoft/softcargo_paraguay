@@ -14,8 +14,11 @@ from administracion_contabilidad.views.orden_pago import orden_pago_view, obtene
 from administracion_contabilidad.views.preventa import guardar_infofactura, source_embarques_factura, \
     house_detail_factura, source_master_factura, get_name_by_id_productos, update_gasto_house, \
     check_if_reference_exists, eliminar_preventa, guardar_gasto_unificado, get_datos_ordenfactura, datos_xls
+from consultas_administrativas.views.subdiario_ventas import subdiario_ventas
 
 urlpatterns = [
-    path('ejemplo/', facturacion_view, name='facturacion'),
+    #ventas
+    path('subdiario_ventas/', subdiario_ventas, name='subdiario_ventas'),
+    # ventas
 
 ]

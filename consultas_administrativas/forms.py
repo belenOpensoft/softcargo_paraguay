@@ -8,120 +8,54 @@ from mantenimientos.models import Monedas, Bancos
 from administracion_contabilidad.models import Dolar, Infofactura, Cuentas
 from django.db.models import Q
 
-class EJEMPLO(forms.Form):
-    numero = forms.CharField(
-        label="Número",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=True,
-        error_messages={
-            'invalid': 'Por favor, ingresa un número válido'
-        }
+class ReporteMovimientosForm(forms.Form):
+    fecha_desde = forms.DateField(
+        label="Desde",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
     )
-
-    moneda = forms.CharField(
-        required=True,
+    fecha_hasta = forms.DateField(
+        label="Hasta",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
+    )
+    moneda = forms.ModelChoiceField(
         label="Moneda",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-    )
-
-    prefijo = forms.CharField(
-        max_length=4,
-        required=True,
-        label="",
-        initial="0001",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
-        error_messages={
-            'required': 'Este campo es obligatorio',
-            'invalid': 'Por favor, ingresa un número válido'
-        }
-    )
-
-    voucher = forms.CharField(
-        label="Voucher",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=True
-    )
-
-    alta_de = forms.CharField(
-        label="Alta de",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=True
-    )
-
-    detalle = forms.CharField(
-        label="Detalle",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=True
-    )
-
-    fecha = forms.DateField(
-        label="Fecha",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'text'}),
-        required=True
-    )
-    documento = forms.CharField(
-        label="Documento",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=True
-    )
-    arbitraje = forms.CharField(
-        label="Arbitraje",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=True
-    )
-    importe = forms.DecimalField(
-        label="Importe",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=True,
-        max_digits=10,
-        decimal_places=2
-    )
-    por_imputar = forms.DecimalField(
-        label="Por imputar",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=True,
-        max_digits=10,
-        decimal_places=2
-    )
-    paridad = forms.DecimalField(
-        label="Paridad",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=True,
-        max_digits=10,
-        decimal_places=6
-    )
-
-    autogenerado = forms.CharField(
-        label="",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=True
-    )
-
-    buscar_ajuste_acr = forms.BooleanField(
-        label="Buscar ajuste de cuenta proveedora",
-        required=False,
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
-    )
-
-    buscar_ajuste_dif = forms.BooleanField(
-        label="Buscar ajuste de diferecncia de cambio",
-        required=False,
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
-    )
-
-    mov_efectivo = forms.CharField(
-        label="Movimiento de efectivo recibido",
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=True
-    )
-
-    moneda_f = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
-        required=True,
-        label="Moneda",
-        initial=2,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        error_messages={'required': 'Este campo es obligatorio'}
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    todas_monedas = forms.BooleanField(
+        required=False,
+        label="Todas las monedas",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    consolidar_dolares = forms.BooleanField(
+        required=False,
+        label="Consolidar en dólares",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    socio_comercial = forms.CharField(
+        label="Solo movimientos del socio comercial",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm'})
+    )
+    socio_comercial_i = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(attrs={'class': 'form-control form-control-sm','id':'id_cliente_hidden'})
+    )
+    movimiento = forms.ChoiceField(
+        label="Movimiento",
+        choices=[('todos', 'Todos'), (10, 'Contado'), (11, 'Dev. Contado'), (20, 'Factura'), (21, 'Not. Credito')],
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+    estado = forms.ChoiceField(
+        label="Estado",
+        choices=[
+            ('todo', 'Todo'),
+            ('canceladas', 'Canceladas'),
+            ('pendientes', 'Pendientes')
+        ],
+        widget=forms.RadioSelect()
     )
 
 
