@@ -381,6 +381,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += formatear_linea("Ref. Proveedor", row.embarcador)
 
+            volumen=0
             if carga:
 
                 for c in carga:
@@ -676,28 +677,33 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                     texto += "<br>"
 
             texto += "<br>"
-            texto += "<table style='border: none; font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: 100%;'>"
-            # Fila de títulos (encabezados)
-            texto += "<tr>"
-            texto += "<th style='padding: 2px 10px; text-align: left;'>Origen</th>"
-            texto += "<th style='padding: 2px 10px; text-align: left;'>Destino</th>"
-            texto += "<th style='padding: 2px 10px; text-align: left;'>Vuelo</th>"
-            texto += "<th style='padding: 2px 10px; text-align: left;'>Viaje</th>"
-            texto += "<th style='padding: 2px 10px; text-align: left;'>Salida</th>"
-            texto += "<th style='padding: 2px 10px; text-align: left;'>Llegada</th>"
-            texto += "</tr>"
+            if conex:
+                texto += "<table style='border: none; font-family: Courier New, monospace; font-size: 12px; border-collapse: collapse; width: 100%;'>"
 
-            # Fila de valores
-            #valor_vuelo = str(row.transportista) if armador !='true' else str(row.armador)
-            texto += "<tr>"
-            texto += f"<td style='padding: 2px 10px;'>{row.origen or ''}</td>"
-            texto += f"<td style='padding: 2px 10px;'>{row.destino or ''}</td>"
-            texto += f"<td style='padding: 2px 10px;'>{conex[0].ciavuelo}</td>"
-            texto += f"<td style='padding: 2px 10px;'>{str(conex[0].ciavuelo)+str(conex[0].vuelo)}</td>"
-            texto += f'<td style="padding: 2px 10px;">{salida}</td>'
-            texto += f'<td style="padding: 2px 10px;">{llegada}</td>'
-            texto += "</tr>"
-            texto += "</table><br>"
+                # Fila de títulos (encabezados)
+                texto += "<tr>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Origen</th>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Destino</th>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Vapor/Vuelo</th>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Viaje</th>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Salida</th>"
+                texto += "<th style='padding: 2px 10px; text-align: left;'>Llegada</th>"
+                texto += "</tr>"
+
+                # Fila de valores
+                for c in conex:
+                    salida = c.salida.strftime('%d/%m/%Y') if c.salida else 'S/i'
+                    llegada = c.llegada.strftime('%d/%m/%Y') if c.llegada else 'S/i'
+                    texto += "<tr>"
+                    texto += f"<td style='padding: 2px 10px;'>{c.origen or ''}</td>"
+                    texto += f"<td style='padding: 2px 10px;'>{c.destino or ''}</td>"
+                    texto += f"<td style='padding: 2px 10px;'>{c.ciavuelo or ''}</td>"
+                    texto += f"<td style='padding: 2px 10px;'>{c.viaje or ''}</td>"
+                    texto += f"<td style='padding: 2px 10px;'>{salida}</td>"
+                    texto += f"<td style='padding: 2px 10px;'>{llegada}</td>"
+                    texto += "</tr>"
+
+                texto += "</table><br>"
 
             texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
 

@@ -334,6 +334,13 @@ def add_ruta_importado(request):
                         else:
                             setattr(registro, nombre_campo, None)
 
+                valor_viaje = envase_data.get("viaje")
+                valor_vuelo = envase_data.get("vuelo")
+
+                if valor_viaje and not valor_vuelo:
+                    registro.vuelo = valor_viaje
+                elif valor_vuelo and not valor_viaje:
+                    registro.viaje = valor_vuelo
                 # Guardar el registro en la base de datos
                 registro.save()
 

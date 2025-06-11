@@ -663,12 +663,9 @@ function abrir_modalfactura() {
     $("#facturaM").dialog({
         autoOpen: true,
         modal: true,
-        resizable: false,
-        draggable: true,
-        maxWidth: $(window).width() * 0.90,
-        maxHeight: $(window).height() * 0.90,
-        minWidth: 500,
-        minHeight: 500,
+        width: wWidth * 0.90,
+        height: wHeight * 0.85,
+        dialogClass: "custom-dialog",
         buttons: [{
             text: "Salir",
             class: "btn btn-dark btn-sm",
@@ -680,17 +677,13 @@ function abrir_modalfactura() {
 
             },
         }],
-        open: function () {
+        open: function() {
             // 🔹 Ajustar el tamaño dinámicamente según el contenido
-            $(this).dialog("option", "width", "auto");
-            $(this).dialog("option", "height", "auto");
-            $(this).dialog("option", "position", {my: "center", at: "center", of: window});
-        }
+        },
     }).prev('.ui-dialog-titlebar').remove();
     cargar_arbitraje();
 
 }
-
 
 $('#preventa').on('click', function () {
 
