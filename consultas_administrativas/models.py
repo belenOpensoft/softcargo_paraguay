@@ -56,3 +56,17 @@ class VReporteSubdiarioVentas(models.Model):
     class Meta:
         managed = False
         db_table = 'VReporteSubdiarioVentas'
+
+class VCuentasCobrarBalance(models.Model):
+    id = models.IntegerField(primary_key=True)
+    fecha = models.DateField(null=True, blank=True)
+    codigo = models.CharField(max_length=20, db_column='codigo')
+    nombre = models.CharField(max_length=200, db_column='nombre')
+    moneda = models.IntegerField(db_column='moneda')
+    saldo = models.DecimalField(max_digits=18, decimal_places=2, db_column='saldo')
+    arbitraje = models.DecimalField(max_digits=18, decimal_places=2)
+    paridad = models.DecimalField(max_digits=18, decimal_places=2 )
+
+    class Meta:
+        managed = False
+        db_table = 'VCuentasCobrarBalance'
