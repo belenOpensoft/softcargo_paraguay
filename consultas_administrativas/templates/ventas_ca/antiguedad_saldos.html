@@ -1,0 +1,66 @@
+{% extends 'base_table_v2.html' %}
+{% load static %}
+{% block contenido %}
+<title>Antigüedad de Saldos</title>
+<link rel="stylesheet" type="text/css" href="{% static 'css/administracion/administracion.css' %}">
+
+<style>
+  #formAntiguedadSaldos .form-control,
+  #formAntiguedadSaldos .btn,
+  #formAntiguedadSaldos select {
+    font-size: 0.85rem;
+    height: 26px;
+    padding: 3px 6px;
+  }
+  #formAntiguedadSaldos .form-check-label {
+    margin-left: 5px;
+  }
+</style>
+
+<div class="container mt-3 mb-2">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <form method="post" id="formAntiguedadSaldos">
+        {% csrf_token %}
+        <div class="border rounded p-3 bg-light">
+
+          <!-- Moneda -->
+          <div class="row mb-2 align-items-end">
+            <div class="col-md-12">
+              {{ form.moneda.label_tag }}
+              {{ form.moneda }}
+            </div>
+          </div>
+
+          <!-- Base de cálculo (radio) -->
+          <div class="row mb-2">
+            <div class="col-md-12">
+              <label><strong>{{ form.base_calculo.label }}</strong></label><br>
+              {% for radio in form.base_calculo %}
+                <div class="form-check form-check-inline">
+                  {{ radio.tag }}
+                  <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Rango de antigüedad -->
+          <div class="row mb-2 align-items-end">
+            <div class="col-md-12">
+              {{ form.rango.label_tag }}
+              {{ form.rango }}
+            </div>
+          </div>
+
+          <!-- Botón -->
+          <div class="text-end mt-3">
+            <button type="submit" class="btn btn-warning btn-sm">Descargar reporte</button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock contenido %}

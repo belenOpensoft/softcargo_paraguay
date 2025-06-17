@@ -115,3 +115,35 @@ class ReporteCobranzasForm(forms.Form):
         label="Ver cobranzas anuladas",
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
+
+
+class AntiguedadSaldosForm(forms.Form):
+    BASE_CALCULO_CHOICES = [
+        ('vencimiento', 'Vencimiento del documento'),
+        ('emision', 'Emisión del documento'),
+    ]
+
+    RANGO_CHOICES = [
+        ('rango1', 'En fecha, 30, 60, 90, 120, más de 120 días'),
+        ('rango2', 'En fecha, 15, 30, 45, 60, más de 60 días'),
+        ('rango3', 'En fecha, 30, 90, 180, 360, más de 360 días'),
+    ]
+
+    moneda = forms.ModelChoiceField(
+        label="Moneda",
+        queryset=Monedas.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    base_calculo = forms.ChoiceField(
+        label="Calcular en base a",
+        choices=BASE_CALCULO_CHOICES,
+        widget=forms.RadioSelect
+    )
+
+    rango = forms.ChoiceField(
+        label="Rango de antigüedad",
+        choices=RANGO_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
