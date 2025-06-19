@@ -130,11 +130,11 @@ def balance_cobrar(request):
 
                 if isinstance(cli.fechadenegado, datetime.datetime) and cli.tipo != 1:
                     movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje').filter(
-                        mmoneda=2, mfechamov__lte=fecha_hasta, mfechamov__gt=cli.fechadenegado,
+                        mmoneda=moneda.codigo, mfechamov__lte=fecha_hasta, mfechamov__gt=cli.fechadenegado,
                         mcliente=cli.codigo, mactivo='S').order_by('mfechamov', 'id')
                 else:
                     movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje').filter(
-                        mmoneda=2, mfechamov__lte=fecha_hasta, mcliente=cli.codigo, mactivo='S').order_by('mfechamov', 'id')
+                        mmoneda=moneda.codigo, mfechamov__lte=fecha_hasta, mcliente=cli.codigo, mactivo='S').order_by('mfechamov', 'id')
 
                 if movimientos.exists():
                     for m in movimientos:
@@ -229,85 +229,6 @@ def generar_excel_balance_cobrar(queryset, fecha_hasta, moneda, consolidar_dolar
 
             worksheet.write(row, 0, get("codigo"), text_format)
             worksheet.write(row, 1, get("nombre"), text_format)
-            worksheet.write(row, 2, float(saldo), money_format)
-
-            total_general += saldo
-            row += 1
-
-        # Escribir el total al final
-        worksheet.write(row, 1, 'TOTAL GENERAL', total_label_format)
-        worksheet.write(row, 2, float(total_general), total_format)
-
-        # Ajuste de ancho
-        worksheet.set_column('A:A', 10)  # Código
-        worksheet.set_column('B:B', 40)  # Nombre
-        worksheet.set_column('C:C', 18)  # Saldo
-
-        workbook.close()
-        output.seek(0)
-
-        response = HttpResponse(
-            output.read(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-        response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
-        return response
-
-    except Exception as e:
-        raise RuntimeError(f"Error al generar el Excel de balance: {e}")
-
-def generar_excel_balance_cobrar_old(queryset, fecha_hasta, moneda, consolidar_dolares=False, consolidar_moneda_nac=False):
-    try:
-        if consolidar_dolares:
-            nombre_moneda = "DOLARES USA"
-            moneda_destino = 2
-        elif consolidar_moneda_nac:
-            nombre_moneda = "MONEDA NACIONAL"
-            moneda_destino = 1
-        else:
-            nombre_moneda = moneda.nombre.upper() if moneda else "TODAS LAS MONEDAS"
-            moneda_destino = None
-
-        fecha_formateada = fecha_hasta.strftime('%d/%m/%Y')
-        titulo = f'Cuentas a cobrar al {fecha_formateada} - {nombre_moneda}'
-        nombre_archivo = f'Balance_Cuentas_Cobrar_{fecha_hasta}.xlsx'
-
-        output = io.BytesIO()
-        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
-        worksheet = workbook.add_worksheet("Balance")
-
-        # Formatos
-        header_format = workbook.add_format({'bold': True, 'bg_color': '#d9d9d9', 'border': 1, 'align': 'center'})
-        title_format = workbook.add_format({'bold': True, 'font_size': 12})
-        money_format = workbook.add_format({'num_format': '#,##0.00', 'border': 1})
-        total_format = workbook.add_format({'bold': True, 'num_format': '#,##0.00', 'top': 2, 'border': 1})
-        total_label_format = workbook.add_format({'bold': True, 'top': 2, 'border': 1})
-        text_format = workbook.add_format({'border': 1})
-
-        # Título
-        worksheet.merge_range('A1:C1', titulo, title_format)
-
-        # Encabezados
-        encabezados = ['Código', 'Nombre', 'Saldo']
-        for col_num, encabezado in enumerate(encabezados):
-            worksheet.write(1, col_num, encabezado, header_format)
-
-        row = 2
-        total_general = Decimal('0.00')
-
-        for obj in queryset:
-            saldo = Decimal(obj.saldo or 0)
-            moneda_origen = obj.moneda
-
-            # Valores de arbitraje y paridad si están disponibles en el modelo
-            arbitraje = getattr(obj, 'arbitraje', Decimal('1'))
-            paridad = getattr(obj, 'paridad', Decimal('1'))
-
-            if moneda_destino and moneda_origen != moneda_destino:
-                saldo = convertir_monto(saldo, moneda_origen, moneda_destino, arbitraje, paridad)
-
-            worksheet.write(row, 0, obj.codigo, text_format)
-            worksheet.write(row, 1, obj.nombre, text_format)
             worksheet.write(row, 2, float(saldo), money_format)
 
             total_general += saldo

@@ -36,60 +36,52 @@
             </div>
           </div>
 
+          <!-- Campos comunes -->
+          <div class="row mb-2">
+            <div class="col-md-3">
+              {{ form.fecha_desde.label_tag }}
+              {{ form.fecha_desde }}
+            </div>
+            <div class="col-md-3">
+              {{ form.fecha_hasta.label_tag }}
+              {{ form.fecha_hasta }}
+            </div>
+            <div class="col-md-6">
+              {{ form.moneda.label_tag }}
+              {{ form.moneda }}
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <div class="col-md-4">
+              <div class="form-check">
+                {{ form.todas_las_monedas }}
+                <label class="form-check-label" for="{{ form.todas_las_monedas.id_for_label }}">{{ form.todas_las_monedas.label }}</label>
+              </div>
+              <div class="form-check">
+                {{ form.consolidar_dolares }}
+                <label class="form-check-label" for="{{ form.consolidar_dolares.id_for_label }}">{{ form.consolidar_dolares.label }}</label>
+              </div>
+              <div class="form-check">
+                {{ form.consolidar_moneda_nac }}
+                <label class="form-check-label" for="{{ form.consolidar_moneda_nac.id_for_label }}">{{ form.consolidar_moneda_nac.label }}</label>
+              </div>
+            </div>
+          </div>
+
           <!-- Sección Individual -->
           <div id="seccion_individual">
             <div class="row mb-2">
               <div class="col-md-6">
                 {{ form.cliente.label_tag }}
                 {{ form.cliente }}
-              </div>
-              <div class="col-md-3">
-                {{ form.fecha_desde.label_tag }}
-                {{ form.fecha_desde }}
-              </div>
-              <div class="col-md-3">
-                {{ form.fecha_hasta.label_tag }}
-                {{ form.fecha_hasta }}
-              </div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-md-6">
-                {{ form.moneda.label_tag }}
-                {{ form.moneda }}
-              </div>
-              <div class="col-md-6">
-                <div class="form-check">
-                  {{ form.todas_las_monedas }}
-                  <label class="form-check-label" for="{{ form.todas_las_monedas.id_for_label }}">{{ form.todas_las_monedas.label }}</label>
-                </div>
-                <div class="form-check">
-                  {{ form.consolidar_dolares }}
-                  <label class="form-check-label" for="{{ form.consolidar_dolares.id_for_label }}">{{ form.consolidar_dolares.label }}</label>
-                </div>
-                <div class="form-check">
-                  {{ form.consolidar_moneda_nac }}
-                  <label class="form-check-label" for="{{ form.consolidar_moneda_nac.id_for_label }}">{{ form.consolidar_moneda_nac.label }}</label>
-                </div>
+                {{ form.cliente_codigo }}
               </div>
             </div>
           </div>
 
           <!-- Sección General -->
           <div id="seccion_general">
-            <div class="row mb-2">
-              <div class="col-md-3">
-                {{ form.fecha_desde.label_tag }}
-                {{ form.fecha_desde }}
-              </div>
-              <div class="col-md-3">
-                {{ form.fecha_hasta.label_tag }}
-                {{ form.fecha_hasta }}
-              </div>
-              <div class="col-md-6">
-                {{ form.moneda.label_tag }}
-                {{ form.moneda }}
-              </div>
-            </div>
             <div class="row mb-2">
               <div class="col-md-12">
                 <label><strong>Filtrar por tipo:</strong></label><br>
@@ -103,14 +95,6 @@
             </div>
             <div class="row mb-2">
               <div class="col-md-4">
-                <div class="form-check">
-                  {{ form.consolidar_moneda_nac }}
-                  <label class="form-check-label" for="{{ form.consolidar_moneda_nac.id_for_label }}">{{ form.consolidar_moneda_nac.label }}</label>
-                </div>
-                <div class="form-check">
-                  {{ form.consolidar_dolares }}
-                  <label class="form-check-label" for="{{ form.consolidar_dolares.id_for_label }}">{{ form.consolidar_dolares.label }}</label>
-                </div>
                 <div class="form-check">
                   {{ form.omitir_saldos_cero }}
                   <label class="form-check-label" for="{{ form.omitir_saldos_cero.id_for_label }}">{{ form.omitir_saldos_cero.label }}</label>
@@ -127,10 +111,12 @@
       </form>
     </div>
   </div>
+      <div id="generando-alerta" class="alert alert-info text-center fixed-top w-100" role="alert" style="z-index: 2000;display: none;">
+  Generando el reporte... por favor espere.
+</div>
 </div>
 
 <script>
-  // Mostrar/ocultar secciones según selección
   function toggleSecciones() {
     const tipo = document.querySelector('input[name="tipo_consulta"]:checked').value;
     document.getElementById('seccion_individual').style.display = tipo === 'individual' ? 'block' : 'none';
@@ -141,7 +127,42 @@
     el.addEventListener('change', toggleSecciones);
   });
 
-  // Llamar al cargar la página
+  const form = document.getElementById("formEstadoCuenta");
+
+  form.addEventListener("submit", function () {
+   $('#generando-alerta').show();
+
+  setTimeout(function () {
+      $('#generando-alerta').hide();
+  }, 10000);
+  });
+
+    $('#id_cliente').autocomplete({
+    source: function(request, response) {
+        $.ajax({
+            url: "/admin_cont/buscar_proveedor",
+            dataType: 'json',
+            data: { term: request.term },
+            success: function(data) {
+                response(data.map(proveedor => ({
+                    label: proveedor.text,
+                    value: proveedor.text,
+                    codigo: proveedor.codigo
+                })));
+            },
+            error: xhr => console.error('Error al buscar proveedores:', xhr)
+        });
+    },
+    minLength: 2,
+    select: function(event, ui) {
+        const codigo = ui.item.codigo;
+        const nombre = ui.item.value;
+        $('#id_cliente').val(nombre);
+        $('#id_cliente_codigo').val(codigo);
+    }
+    });
+
+  // Ejecutar al cargar
   toggleSecciones();
 </script>
 

@@ -184,12 +184,12 @@ class EstadoCuentaForm(forms.Form):
     )
 
     # Individual
-    cliente = forms.ModelChoiceField(
+    cliente = forms.CharField(
         label="Cliente",
-        queryset=Clientes.objects.all(),
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm'})
     )
+    cliente_codigo=forms.CharField(widget=forms.HiddenInput())
     todas_las_monedas = forms.BooleanField(
         required=False,
         label="Todas las monedas",
