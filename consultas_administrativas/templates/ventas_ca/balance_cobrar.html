@@ -58,6 +58,20 @@
       </form>
     </div>
   </div>
+  <div id="generando-alerta" class="alert alert-info text-center fixed-top w-100" role="alert" style="z-index: 2000;display: none;">
+  Generando el reporte... por favor espere.
+</div>
 </div>
 
+<script>
+  const form = document.getElementById("formBalance");
+
+  form.addEventListener("submit", function () {
+   $('#generando-alerta').show();
+
+  setTimeout(function () {
+      $('#generando-alerta').hide();
+  }, 10000);
+  });
+</script>
 {% endblock contenido %}
