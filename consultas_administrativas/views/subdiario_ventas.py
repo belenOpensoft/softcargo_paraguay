@@ -6,6 +6,7 @@ import xlsxwriter
 from django.http import HttpResponse
 from django.shortcuts import render
 
+from administracion_contabilidad.models import Impuvtas, Movims
 from consultas_administrativas.forms import ReporteMovimientosForm
 from consultas_administrativas.models import VReporteSubdiarioVentas
 
@@ -75,15 +76,68 @@ def subdiario_ventas(request):
 
             queryset = VReporteSubdiarioVentas.objects.filter(**filtros)
 
-            # Convertimos los datos en una lista de tuplas para Excel
-            datos = queryset.values_list(
-                'fecha', 'tipo', 'numero', 'nro_cliente', 'cliente', 'detalle', 'exento', 'gravado',
-                'iva', 'total', 'tipo_cambio', 'paridad', 'referencia', 'cancelada',
-                'posicion', 'cuenta', 'vendedor', 'vencimiento', 'cobro', 'tipo_cambio_cobro',
-                'moneda', 'rut', 'vapor', 'viaje', 'master', 'house', 'embarcador',
-                'consignatario', 'flete', 'etd', 'eta', 'imputada', 'orden_cliente',
-                'agente', 'origen', 'destino', 'operacion', 'movimiento', 'deposito', 'wr', 'transportista','serie','prefijo'
-            )
+            cobros_factura = {}
+
+            for q in queryset:
+                impuvtas = Impuvtas.objects.filter(autofac=q.autogen_factura).only('autogen', 'monto')
+
+                if impuvtas.exists():
+                    lista_cobros = []
+                    for i in impuvtas:
+                        movim = Movims.objects.filter(mautogen=i.autogen).only('mfechamov', 'mcambio',
+                                                                               'mparidad').first()
+
+                        cobro = {
+                            'autogen': i.autogen,
+                            'monto': i.monto,
+                            'fecha': movim.mfechamov if movim else None,
+                            'cambio': movim.mcambio if movim else None,
+                            'paridad': movim.mparidad if movim else None,
+                        }
+                        lista_cobros.append(cobro)
+
+                    cobros_factura[q.autogen_factura] = lista_cobros
+
+            for q in queryset:
+                cobros = cobros_factura.get(q.autogen_factura, [])
+
+                if cobros:
+                    # Obtener el último cobro por fecha
+                    ultimo_cobro = max(cobros, key=lambda c: c['fecha'])
+
+                    # Sumar montos
+                    suma_cobros = sum(c['monto'] for c in cobros)
+
+                    # Determinar estado de cancelación
+                    if suma_cobros == q.total:
+                        q.cancelada = "SI"
+                    elif suma_cobros > 0:
+                        q.cancelada = "PARCIAL"
+
+                    # Asignar datos del último cobro
+                    if ultimo_cobro:
+                        q.cobro = ultimo_cobro['fecha']
+                        q.tipo_cambio_cobro = ultimo_cobro['cambio']
+                    else:
+                        q.cobro = None
+                        q.tipo_cambio_cobro = None
+
+                else:
+                    q.cancelada = "NO"
+                    q.cobro = None
+                    q.tipo_cambio_cobro = None
+
+            datos = []
+            for q in queryset:
+                datos.append((
+                    q.fecha, q.tipo, q.numero, q.nro_cliente, q.cliente, q.detalle, q.exento, q.gravado,
+                    q.iva, q.total, q.tipo_cambio, q.paridad, q.referencia, q.cancelada,
+                    q.posicion, q.cuenta, q.vendedor, q.vencimiento, q.cobro, q.tipo_cambio_cobro,
+                    q.moneda, q.rut, q.vapor, q.viaje, q.master, q.house, q.embarcador,
+                    q.consignatario, q.flete, q.etd, q.eta, q.imputada, q.orden_cliente,
+                    q.agente, q.origen, q.destino, q.operacion, q.movimiento, q.deposito, q.wr,
+                    q.transportista, q.serie, q.prefijo
+                ))
 
             # Generar Excel
             return generar_excel_subdiario_ventas(datos, fecha_desde, fecha_hasta,consolidar_dolares)

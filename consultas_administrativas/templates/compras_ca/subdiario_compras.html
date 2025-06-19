@@ -87,9 +87,19 @@
       </form>
     </div>
   </div>
+      <div id="generando-alerta" class="alert alert-info text-center fixed-top w-100" role="alert" style="z-index: 2000;display: none;">
+  Generando el reporte... por favor espere.
 </div>
-<script src="{% static 'grilla/subdiario_compras.js' %}"></script>
+</div>
 <script>
-    var csrf_token = "{{ csrf_token }}";
+  const form = document.getElementById("formReporte");
+
+  form.addEventListener("submit", function () {
+   $('#generando-alerta').show();
+
+  setTimeout(function () {
+      $('#generando-alerta').hide();
+  }, 10000);
+  });
 </script>
 {% endblock contenido %}
