@@ -1,6 +1,7 @@
 from django.urls import path
 
 from consultas_administrativas.views.antiguedad_saldos import antiguedad_saldos
+from consultas_administrativas.views.balance_pagar import balance_pagos
 from consultas_administrativas.views.estados_cuenta import estados_cuenta
 from consultas_administrativas.views.reporte_cobranzas import reporte_cobranzas
 from consultas_administrativas.views.subdiario_compras import subdiario_compras
@@ -18,6 +19,7 @@ urlpatterns = [
 
     #compras
     path('subdiario_compras/', subdiario_compras, name='subdiario_compras'),
+    path('balance_pagos/', balance_pagos, name='balance_pagos'),
 
     #compras
 

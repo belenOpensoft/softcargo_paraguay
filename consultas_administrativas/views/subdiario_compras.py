@@ -6,6 +6,7 @@ import xlsxwriter
 from django.http import HttpResponse
 from django.shortcuts import render
 
+from administracion_contabilidad.models import Impucompras, Movims
 from consultas_administrativas.forms import ReporteMovimientosComprasForm
 from consultas_administrativas.models import VReporteSubdiarioCompras
 
@@ -31,137 +32,151 @@ def subdiario_compras(request):
                 filtros['moneda'] = moneda.nombre
 
             if socio_comercial:
-                filtros['nro_cliente'] = socio_comercial
+                filtros['nro_proveedor'] = socio_comercial
 
-            if estado == 'canceladas':
-                filtros['cancelada'] = 'SI'
-            elif estado == 'pendientes':
-                filtros['cancelada'] = 'NO'
-
-            if movimiento and movimiento !='todos':
+            if movimiento and movimiento != 'todos':
                 filtros['tipo'] = movimiento
 
             queryset = VReporteSubdiarioCompras.objects.filter(**filtros)
-            #falta traer los pagos asociados a cada factura y revisar si esta efectivamente paga o no
+            pagos_factura = {}
+            for q in queryset:
+                impucompras = Impucompras.objects.filter(autofac=q.autogen_factura).only('autogen', 'monto')
 
-            # Convertimos los datos en una lista de tuplas para Excel
-            datos = queryset.values_list(
-                'fecha', 'tipo', 'numero', 'nro_proveedor', 'proveedor', 'detalle', 'exento', 'gravado',
-                'iva', 'total', 'tipo_cambio', 'paridad', 'cancelada',
-                'posicion', 'cuenta', 'vencimiento', 'pago', 'tipo_cambio_pago',
-                'moneda', 'rut', 'vapor', 'viaje', 'master', 'house', 'imputada', 'agente', 'operacion', 'wr', 'etd','eta','prefijo','serie'
-            )
+                if impucompras.exists():
+                    lista_pagos = []
+                    for i in impucompras:
+                        movim = Movims.objects.filter(mautogen=i.autogen).only('mfechamov', 'mcambio',
+                                                                               'mparidad').first()
 
-            # Generar Excel
-            return generar_excel_subdiario_compras(datos, fecha_desde, fecha_hasta,consolidar_dolares)
+                        pago = {
+                            'autogen': i.autogen,
+                            'monto': i.monto,
+                            'fecha': movim.mfechamov if movim else None,
+                            'cambio': movim.mcambio if movim else None,
+                            'paridad': movim.mparidad if movim else None,
+                        }
+                        lista_pagos.append(pago)
+
+                    pagos_factura[q.autogen_factura] = lista_pagos
+
+            for q in queryset:
+                pagos = pagos_factura.get(q.autogen_factura, [])
+
+                if pagos:
+                    # Obtener el último cobro por fecha
+                    ultimo_pago = max(pagos, key=lambda c: c['fecha'])
+
+                    # Sumar montos
+                    suma_pagos = sum(c['monto'] for c in pagos)
+
+                    # Determinar estado de cancelación
+                    if suma_pagos == q.total:
+                        q.cancelada = "SI"
+                    elif suma_pagos > 0:
+                        q.cancelada = "PARCIAL"
+
+                    # Asignar datos del último cobro
+                    if ultimo_pago:
+                        q.pago = ultimo_pago['fecha']
+                        q.tipo_cambio_pago = ultimo_pago['cambio']
+                    else:
+                        q.pago = None
+                        q.tipo_cambio_pago = None
+
+                else:
+                    q.cancelada = "NO"
+                    q.pago = None
+                    q.tipo_cambio_pago = None
+
+            datos = []
+            for q in queryset:
+                datos.append((
+                    q.fecha, q.tipo, str(q.serie or '')+str(q.prefijo or '') +str(q.numero or ''),
+                    q.nro_proveedor, q.proveedor, q.detalle, q.exento, q.gravado,
+                    q.total, q.arbitraje, q.paridad, q.cancelada,
+                    q.posicion, q.cuenta,q.vencimiento, q.pago, q.tipo_cambio_pago,
+                    q.moneda, q.rut,
+                ))
+
+            return generar_excel_subdiario_compras(datos, fecha_desde, fecha_hasta, consolidar_dolares)
 
     else:
         form = ReporteMovimientosComprasForm(initial={'estado': 'todo'})
 
     return render(request, 'compras_ca/subdiario_compras.html', {'form': form})
 
-def generar_excel_subdiario_compras(datos, fecha_desde, fecha_hasta,consolidar_dolares):
+def generar_excel_subdiario_compras(datos, fecha_desde, fecha_hasta, consolidar_dolares):
     try:
         nombre_archivo = f'Subdiario_Compras_{fecha_desde}_al_{fecha_hasta}.xlsx'
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
         worksheet = workbook.add_worksheet("Subdiario_compras")
 
-        # Encabezado superior
         title = f"Compras entre el {fecha_desde} y el {fecha_hasta}"
         worksheet.merge_range('A1:AD1', title, workbook.add_format({'bold': True, 'align': 'left'}))
 
-        # Encabezados de columnas (desde la fila 2, índice 1)
         encabezados = [
-            'Fecha', 'Tipo', 'Boleta', 'Cliente', 'Nombre', 'Detalle del movimiento', 'Exento', 'Gravado', 'I.V.A.',
-            'Total', 'T. Cambio', 'Paridad', 'Referencia', 'Cancel.', 'Posición', 'Cuenta',
-            'Vendedor', 'Vto.', 'Pago', 'Tca. Pag.', 'Moneda Original', 'R.U.T.', 'Vapor',
-            'Viaje', 'Master', 'House', 'Embarcador', 'Consignatario', 'Flete', 'ETD', 'ETA', 'Imputada',
-            'Orden cliente', 'Agente', 'Origen', 'Destino',
-            'Operación', 'Movimiento', 'Depósito', 'WR', 'Transportista'
+            'Fecha', 'Tipo', 'Nro', 'Proveedor', 'Nombre', 'Detalle', 'Exento', 'Gravado', 'Total',
+            'T. Cambio', 'Paridad','Cancelada','Posición','Cuenta','Vencimiento','Pago','Tca. Pago',
+            'Moneda', 'RUT'
         ]
+
         worksheet.set_column(0, 0, 8)  # Fecha
-        worksheet.set_column(17, 18, 8)  # Vto. y pago
-        worksheet.set_column(29, 30, 8)  # ETD, ETA, Imputada
+        worksheet.set_column(26, 27, 10)  # Pago, Tca. Pago
+        worksheet.set_column(22, 23, 10)  # ETD, ETA
 
         header_format = workbook.add_format({'bold': True, 'bg_color': '#d9d9d9', 'border': 1})
         normal_format = workbook.add_format({'border': 1})
         date_format = workbook.add_format({'num_format': 'dd-mm-yyyy'})
         datos_convertidos = []
+
         for fila in datos:
             fila = list(fila)
+
             if consolidar_dolares:
                 try:
-                    if fila[20]=='DOLARES USA':
-                        moneda_origen=2
+                    if fila[11] == 'DOLARES USA':
+                        moneda_origen = 2
                     else:
-                        moneda_origen=1
+                        moneda_origen = 1
 
                     moneda_destino = 2
-                    arbitraje = Decimal(fila[10] or 1)
-                    paridad = Decimal(fila[11] or 1)
+                    arbitraje = Decimal(fila[9] or 1)
+                    paridad = Decimal(fila[10] or 1)
 
-                    if moneda_origen != moneda_destino:
-                        # Índices a convertir
-                        for idx in [6, 7, 8, 9]:  # exento, gravado, iva, total
-                            monto = Decimal(fila[idx] or 0)
-                            fila[idx] = convertir_monto(monto, moneda_origen, moneda_destino, arbitraje, paridad)
-
+                    for idx in [6, 7, 8]:  # exento, gravado, total
+                        monto = Decimal(fila[idx] or 0)
+                        fila[idx] = convertir_monto(monto, moneda_origen, moneda_destino, arbitraje, paridad)
                 except Exception as e:
                     print(f"Error al convertir moneda: {e}")
+
             datos_convertidos.append(fila)
 
         for col_num, header in enumerate(encabezados):
             worksheet.write(1, col_num, header, header_format)
 
-        anchos = {i: len(encabezado) for i, encabezado in enumerate(encabezados)}
-
-        columnas_fecha = [0, 17, 18, 29,30]
+        columnas_fecha = [0, 22, 23, 25, 26]
 
         row_num = 2
         for fila in datos_convertidos:
-            col_excel = 0
-            for col_num in range(len(encabezados)):
-                if col_num == 2:  # Columna "Boleta"
-                    serie = fila[-2]
-                    prefijo = fila[-1]
-                    numero = fila[2]
-                    valor = f"{serie}{prefijo}-{numero}"
-                else:
-                    valor = fila[col_num]
-
-                # Aplicar formato de fecha si corresponde
-                if col_excel==31:
-                    print(valor)
+            for col_num, valor in enumerate(fila):
                 if col_num in columnas_fecha and isinstance(valor, (datetime.date, datetime.datetime)):
-                    worksheet.write(row_num, col_excel, valor, date_format)
+                    worksheet.write(row_num, col_num, valor, date_format)
                 else:
-                    worksheet.write(row_num, col_excel, valor, normal_format)
-
-                # Autoajuste de ancho
-                longitud = len(str(valor)) if valor is not None else 0
-                if longitud > anchos[col_excel]:
-                    anchos[col_excel] = longitud
-
-                col_excel += 1
+                    worksheet.write(row_num, col_num, valor, normal_format)
             row_num += 1
-
-        # Ajustar ancho de columnas al contenido
-        for col_num, ancho in anchos.items():
-            worksheet.set_column(col_num, col_num, ancho + 2)  # +2 para márgenes
 
         workbook.close()
         output.seek(0)
 
-        response = HttpResponse(
+        return HttpResponse(
             output.read(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={'Content-Disposition': f'attachment; filename="{nombre_archivo}"'}
         )
-        response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
-        return response
-
     except Exception as e:
-        raise RuntimeError(f"Error al generar el Excel: {e}")
+        raise RuntimeError(f"Error al generar el Excel de compras: {e}")
+
 
 def convertir_monto(monto, origen, destino, arbitraje, paridad):
     """

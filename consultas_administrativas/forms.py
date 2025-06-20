@@ -269,3 +269,25 @@ class ReporteMovimientosComprasForm(forms.Form):
         ],
         widget=forms.RadioSelect()
     )
+
+class BalanceCuentasPagarForm(forms.Form):
+    fecha_hasta = forms.DateField(
+        label="Generar saldos hasta",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
+    )
+    moneda = forms.ModelChoiceField(
+        label="Moneda",
+        queryset=Monedas.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+    consolidar_moneda_nac = forms.BooleanField(
+        required=False,
+        label="Consolidar en moneda nacional",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    consolidar_dolares = forms.BooleanField(
+        required=False,
+        label="Consolidar en dólares",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )

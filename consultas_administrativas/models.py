@@ -96,7 +96,7 @@ class VReporteSubdiarioCompras(models.Model):
     proveedor = models.CharField(max_length=255, null=True, blank=True)
     detalle = models.CharField(max_length=500, null=True, blank=True)
     gravado = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
-    excento = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    exento = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     total = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     arbitraje = models.DecimalField(max_digits=20, decimal_places=6, null=True, blank=True)
     paridad = models.DecimalField(max_digits=20, decimal_places=6, null=True, blank=True)
@@ -107,22 +107,13 @@ class VReporteSubdiarioCompras(models.Model):
     cuenta = models.CharField(max_length=100, null=True, blank=True)
     posicion = models.CharField(max_length=100, null=True, blank=True)
 
-    vapor = models.CharField(max_length=100, null=True, blank=True)
-    viaje = models.CharField(max_length=100, null=True, blank=True)
-    master = models.CharField(max_length=100, null=True, blank=True)
-    house = models.CharField(max_length=100, null=True, blank=True)
-    operacion = models.CharField(max_length=100, null=True, blank=True)
-    etd = models.DateField(null=True, blank=True)
-    eta = models.DateField(null=True, blank=True)
-
-    agente = models.CharField(max_length=255, null=True, blank=True)
     vencimiento = models.DateField(null=True, blank=True)
     pago = models.DateField(null=True, blank=True)
     tipo_cambio_pago = models.DecimalField(max_digits=20, decimal_places=6, null=True, blank=True)
+    cancelada = models.CharField(max_length=10, null=True, blank=True)
 
     imputada = models.CharField(max_length=100, null=True, blank=True)
-    wr = models.CharField(max_length=100, null=True, blank=True)
-    autogen_factura = models.CharField(max_length=255, null=True, blank=True)
+    autogen_factura = models.CharField(max_length=255, primary_key=True)
     autogen_pago = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
