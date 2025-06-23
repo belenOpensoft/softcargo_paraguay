@@ -140,12 +140,22 @@ def generar_excel_cobranzas(cobranzas, clientes_dict, asientos_dict, fecha_desde
             worksheet.write_row(row, 0, data, text_format)
             row += 1
 
-            # Asientos con imputación = 1
-            for asiento in asientos_dict.get(cob.mautogen, []):
-                if getattr(asiento, 'imputacion', None) == 1:
-                    worksheet.write(row, 4, asiento.modo or '', small_text)
-                    worksheet.write(row, 5, asiento.cuenta, small_text)
-                    row += 1
+            # Fila extra por cada asiento con imputación = 1
+            if ver_detalle:
+                detalle_format = workbook.add_format({'bg_color': '#f4cccc', 'font_size': 9, 'border': 1})
+                for asiento in asientos_dict.get(cob.mautogen, []):
+                    if getattr(asiento, 'imputacion', None) == 1:
+                        detalle_labels = ['Modo', 'Cuenta', 'Monto', 'Fecha']
+                        detalle_valores = [
+                            asiento.modo or '',
+                            asiento.cuenta or '',
+                            float(asiento.monto or 0),
+                            asiento.fecha.strftime('%d/%m/%Y') if asiento.fecha else ''
+                        ]
+                        for col, (label, valor) in enumerate(zip(detalle_labels, detalle_valores)):
+                            contenido = f"{label}: {valor}"
+                            worksheet.write(row, col, contenido, detalle_format)
+                        row += 1
 
         # Ajustar ancho de columnas
         worksheet.set_column('A:A', 12)  # Fecha

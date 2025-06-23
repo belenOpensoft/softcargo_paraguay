@@ -107,7 +107,7 @@ def generar_excel_pagos(pagos, clientes_dict, asientos_dict, fecha_desde, fecha_
 
             cliente = clientes_dict.get(cob.mcliente)
             asiento_principal = next(
-                (a for a in asientos_dict.get(cob.mautogen, []) if getattr(a, 'imputacion', None) == 2), None)
+                (a for a in asientos_dict.get(cob.mautogen, []) if getattr(a, 'imputacion', None) == 1), None)
 
             cuenta = asiento_principal.cuenta if asiento_principal else ''
             destino = asiento_principal.banco if asiento_principal else ''
@@ -140,22 +140,24 @@ def generar_excel_pagos(pagos, clientes_dict, asientos_dict, fecha_desde, fecha_
             worksheet.write_row(row, 0, data, text_format)
             row += 1
 
-            # Fila extra de detalle si se pidió ver
-            if ver_detalle and asiento_principal:
+            # Filas extra de detalle si se pidió ver (imputación == 2)
+            if ver_detalle:
                 detalle_format = workbook.add_format({'bg_color': '#f4cccc', 'font_size': 9, 'border': 1})
-                detalle_labels = ['Modo', 'Cuenta', 'Monto', 'Fecha']
-                detalle_valores = [
-                    asiento_principal.modo or '',
-                    asiento_principal.cuenta or '',
-                    float(asiento_principal.monto or 0),
-                    asiento_principal.fecha.strftime('%d/%m/%Y') if asiento_principal.fecha else ''
-                ]
+                for asiento in asientos_dict.get(cob.mautogen, []):
+                    if getattr(asiento, 'imputacion', None) == 2:
+                        detalle_labels = ['Modo', 'Cuenta', 'Monto', 'Fecha']
+                        detalle_valores = [
+                            asiento.modo or '',
+                            asiento.cuenta or '',
+                            float(asiento.monto or 0),
+                            asiento.fecha.strftime('%d/%m/%Y') if asiento.fecha else ''
+                        ]
 
-                for col, (label, valor) in enumerate(zip(detalle_labels, detalle_valores)):
-                    contenido = f"{label}: {valor}"
-                    worksheet.write(row, col, contenido, detalle_format)
+                        for col, (label, valor) in enumerate(zip(detalle_labels, detalle_valores)):
+                            contenido = f"{label}: {valor}"
+                            worksheet.write(row, col, contenido, detalle_format)
 
-                row += 1
+                        row += 1
 
         # Ajustar ancho de columnas
         worksheet.set_column('A:A', 12)  # Fecha
