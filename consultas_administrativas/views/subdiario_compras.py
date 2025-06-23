@@ -177,7 +177,6 @@ def generar_excel_subdiario_compras(datos, fecha_desde, fecha_hasta, consolidar_
     except Exception as e:
         raise RuntimeError(f"Error al generar el Excel de compras: {e}")
 
-
 def convertir_monto(monto, origen, destino, arbitraje, paridad):
     """
     Convierte un monto desde 'origen' a 'destino' utilizando arbitraje y paridad.
