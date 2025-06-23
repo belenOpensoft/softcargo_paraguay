@@ -4,6 +4,7 @@ from consultas_administrativas.views.antiguedad_saldos import antiguedad_saldos
 from consultas_administrativas.views.balance_pagar import balance_pagos
 from consultas_administrativas.views.estados_cuenta import estados_cuenta
 from consultas_administrativas.views.reporte_cobranzas import reporte_cobranzas
+from consultas_administrativas.views.reporte_pagos import reporte_pagos
 from consultas_administrativas.views.subdiario_compras import subdiario_compras
 from consultas_administrativas.views.subdiario_ventas import subdiario_ventas
 from consultas_administrativas.views.balance_cobrar import balance_cobrar
@@ -20,6 +21,7 @@ urlpatterns = [
     #compras
     path('subdiario_compras/', subdiario_compras, name='subdiario_compras'),
     path('balance_pagos/', balance_pagos, name='balance_pagos'),
+    path('reporte_pagos/', reporte_pagos, name='reporte_pagos'),
 
     #compras
 

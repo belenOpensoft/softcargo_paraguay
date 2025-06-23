@@ -291,3 +291,39 @@ class BalanceCuentasPagarForm(forms.Form):
         label="Consolidar en dólares",
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
+
+class ReportePagosForm(forms.Form):
+    fecha_desde = forms.DateField(
+        label="Desde",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
+    )
+    fecha_hasta = forms.DateField(
+        label="Hasta",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
+    )
+    moneda = forms.ModelChoiceField(
+        label="Moneda",
+        queryset=Monedas.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+    consolidar_moneda_nac = forms.BooleanField(
+        required=False,
+        label="Consolidar en moneda nacional",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    consolidar_dolares = forms.BooleanField(
+        required=False,
+        label="Consolidar en dólares",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    ver_detalle = forms.BooleanField(
+        required=False,
+        label="Ver detalle del Pago",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    ver_anuladas = forms.BooleanField(
+        required=False,
+        label="Ver pagos anulados",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
