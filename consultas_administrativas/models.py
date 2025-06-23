@@ -119,3 +119,19 @@ class VReporteSubdiarioCompras(models.Model):
     class Meta:
         managed = False
         db_table = 'VReporteSubdiarioCompras'
+
+class VAntiguedadSaldosCompras(models.Model):
+    id = models.IntegerField(primary_key=True)
+    nrocliente = models.IntegerField()
+    moneda = models.IntegerField()
+    cliente = models.CharField(max_length=255)
+    fecha = models.DateField()
+    vto = models.DateField()
+    total = models.DecimalField(max_digits=12, decimal_places=2)
+    total_pagado = models.DecimalField(max_digits=12, decimal_places=2)
+    saldo_pendiente = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        managed = False  # Es un VIEW, no una tabla real
+        db_table = 'VAntiguedadSaldosCompras'
+
