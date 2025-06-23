@@ -7,7 +7,7 @@ from django.forms import RadioSelect
 from mantenimientos.models import Monedas, Bancos, Clientes
 from administracion_contabilidad.models import Dolar, Infofactura, Cuentas
 from django.db.models import Q
-
+#ventas
 class ReporteMovimientosForm(forms.Form):
     fecha_desde = forms.DateField(
         label="Desde",
@@ -220,6 +220,7 @@ class EstadoCuentaForm(forms.Form):
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
 
+#compras
 class ReporteMovimientosComprasForm(forms.Form):
     fecha_desde = forms.DateField(
         label="Desde",
@@ -357,4 +358,77 @@ class AntiguedadSaldosComprasForm(forms.Form):
         label="Rango de antigüedad",
         choices=RANGO_CHOICES,
         widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+class EstadoCuentaComprasForm(forms.Form):
+    TIPO_CONSULTA_CHOICES = [
+        ('general', 'General'),
+        ('individual', 'Individual'),
+    ]
+
+    FILTRO_TIPO_CHOICES = [
+        ('todos', 'Todos'),
+        ('proveedor', 'Solo Proveedores'),
+        ('agentes', 'Solo Agentes'),
+        ('transportistas', 'Solo Transportistas'),
+    ]
+
+    tipo_consulta = forms.ChoiceField(
+        choices=TIPO_CONSULTA_CHOICES,
+        widget=forms.RadioSelect,
+        initial='general',
+        label="Tipo de consulta"
+    )
+
+    # General e individual
+    fecha_desde = forms.DateField(
+        label="Desde",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
+    )
+    fecha_hasta = forms.DateField(
+        label="Hasta",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
+    )
+    moneda = forms.ModelChoiceField(
+        label="Moneda",
+        queryset=Monedas.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    # Individual
+    cliente = forms.CharField(
+        label="Cliente",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm'})
+    )
+    cliente_codigo=forms.CharField(widget=forms.HiddenInput())
+    todas_las_monedas = forms.BooleanField(
+        required=False,
+        label="Todas las monedas",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
+    # General
+    filtro_tipo = forms.ChoiceField(
+        choices=FILTRO_TIPO_CHOICES,
+        widget=forms.RadioSelect,
+        initial='todos',
+        label="Filtrar por tipo",
+        required=False
+    )
+    consolidar_moneda_nac = forms.BooleanField(
+        required=False,
+        label="Consolidar en moneda nacional",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    consolidar_dolares = forms.BooleanField(
+        required=False,
+        label="Consolidar en dólares",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    omitir_saldos_cero = forms.BooleanField(
+        required=False,
+        label="No mostrar saldos en 0",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
