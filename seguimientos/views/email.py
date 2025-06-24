@@ -191,7 +191,6 @@ def get_data_email(request):
 
                 texto = formatear_linea("Fecha", fecha_formateada.capitalize())
 
-                texto += "<br>"
 
                 texto += formatear_linea("Sres.", str(row.cliente))
 
@@ -232,7 +231,6 @@ def get_data_email(request):
 
                 texto += formatear_linea("Llegada", llegada)
 
-                texto += "<br>"
 
                 texto += formatear_linea("Agente", row.agente or "")
 
@@ -1250,10 +1248,8 @@ def get_data_email(request):
 
 
             texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>SALUDOS,</p>"
-            texto += "<b><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OCEANLINK,</p></b>"
-            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>DEPARTAMENTO DE {tipos_operativa[row.modo]},</p>"
+            texto += f"<b><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OCEANLINK, DEPARTAMENTO DE {tipos_operativa[row.modo]}</p></b>"
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{request.user.first_name} {request.user.last_name}</p>"
-            texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OPERACIONES</p>"
             texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>PH: +598 26052332</p>"
 
             resultado['email_cliente'] = email_cliente

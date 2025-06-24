@@ -700,7 +700,7 @@ class clonarForm(forms.Form):
     ]
 
     embarques = forms.ChoiceField(
-        label='¿Clonar embarques?',
+        label='¿Clonar datos de la carga?',
         choices=yes_no_choices,
         widget=forms.Select(attrs={'class': 'form-control'}),
     )

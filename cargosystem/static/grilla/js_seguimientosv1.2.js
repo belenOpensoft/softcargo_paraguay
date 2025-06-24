@@ -1727,8 +1727,9 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data(); // Asumimos que seleccionás una fila
 
         if (row.length === 1) {
+
             if(row[0][2]=='IMPORT MARITIMO' || row[0][2]=='EXPORT MARITIMO'){
-                alert('No puede agregar envases a las operaciones aereas.');
+                alert('No puede asignar un aplicable a las operaciones maritimas.');
                 return;
             }
             $('#form_aplicable').trigger("reset");
@@ -3773,4 +3774,12 @@ function guardar_aplicable(numero) {
             alert('Error en el servidor: ' + xhr.status);
         }
     });
+}
+function formatDateToYYYYMMDD(isoDate) {
+    // Asegúrate de que la fecha esté en formato ISO
+    const date = new Date(isoDate);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }

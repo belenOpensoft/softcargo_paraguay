@@ -700,75 +700,6 @@ def eliminar_seguimiento(request):
 
     return HttpResponse(json.dumps(resultado), content_type="application/json")
 
-def clonar_seguimiento_old(request):
-    resultado = {}
-    try:
-        data = simplejson.loads(request.POST['data'])
-        original = SeguimientoReal.objects.get(id=request.POST['id'])
-        key = False
-        numero = SeguimientoReal.objects.all().values_list('numero').order_by('-numero')[:1][0][0]
-        clonado = deepcopy(original)
-        clonado.id = None
-        clonado.awb = None
-        clonado.hawb = None
-        clonado.posicion = None
-        clonado.numero = numero + 1
-        clonado.fecha = datetime.now().date()
-        clonado.vapor=None
-        clonado.awb=None
-        clonado.hawb=None
-        clonado.volumen=None
-
-        #cambiar cosas del clonado fechas
-        for row in data:
-            registros = None
-            if row['name'] == 'envases' and row['value'] == 'SI':
-                registros = Envases.objects.filter(numero=original.numero)
-            elif row['name'] == 'embarques' and row['value'] == 'SI':
-                registros = Cargaaerea.objects.filter(numero=original.numero)
-            elif row['name'] == 'gastos' and row['value'] == 'SI':
-                registros = Serviceaereo.objects.filter(numero=original.numero)
-            elif row['name'] == 'rutas' and row['value'] == 'SI':
-                registros = Conexaerea.objects.filter(numero=original.numero)
-            elif row['name'] == 'cronologia' and row['value'] == 'SI':
-                key = True
-
-            if registros is not None and registros.exists():
-                for r in registros:
-                    if row['name'] == 'embarques' and row['value'] == 'SI':
-                        aux = Cargaaerea(numero=clonado.numero, producto=r.producto)
-                    elif row['name'] == 'envases' and row['value'] == 'SI':
-                        aux = Envases(
-                            numero=clonado.numero,
-                            unidad=r.unidad,
-                            tipo=r.tipo,
-                            movimiento=r.movimiento,
-                            terminos=r.terminos,
-                            cantidad=r.cantidad
-                        )
-
-                    else:
-                        aux = deepcopy(r)
-                        aux.numero = clonado.numero
-
-                    aux.id = None
-                    aux.save()
-
-        if not key:
-            clonado.etd = None
-            clonado.eta = None
-
-        clonado.save()
-        resultado['resultado'] = 'exito'
-        resultado['numero'] = str(clonado.numero)
-    except IntegrityError as e:
-        resultado['resultado'] = 'Error de integridad, intente nuevamente:. ' + str(e)
-    except Exception as e:
-        resultado['resultado'] = str(e)
-    data_json = json.dumps(resultado)
-    mimetype = "application/json"
-    return HttpResponse(data_json, mimetype)
-
 
 def clonar_seguimiento(request):
     resultado = {}
@@ -790,6 +721,8 @@ def clonar_seguimiento(request):
         clonado.hawb = None
         clonado.volumen = None
         clonado.loadingdate=None
+        clonado.vencimiento=None
+        clonado.aplicable=None
 
         # Revisar las opciones seleccionadas antes de clonar
         clonar_envases = clonar_embarques = clonar_gastos = clonar_rutas = False

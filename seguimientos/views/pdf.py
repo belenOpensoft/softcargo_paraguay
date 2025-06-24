@@ -21,7 +21,7 @@ def get_datos_caratula_old(request):
                 aereo = True
 
             # Añadir un contenedor con ancho máximo
-            texto = '<div style="margin: 0 auto; font-family: Courier New, monospace; font-size: 11px;">'
+            texto = '<div style="margin: 0 auto; font-family: Courier New, monospace; font-size: 11.5px;">'
             texto = texto + '<h2 style="text-align: left;">OCEANLINK LTDA.</h2><HR>'
             # Ajustar el texto que se cortaba
             texto = texto + '<b><p style="text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
@@ -172,7 +172,7 @@ def get_datos_caratula(request):
             row = VGrillaSeguimientos.objects.get(numero=id)
             aereo = row.modo in ['IMPORT AEREO', 'EXPORT AEREO']
 
-            texto = '<div style="margin: 0 auto; font-family: Courier New, monospace; font-size: 11px;">'
+            texto = '<div style="margin: 0 auto; font-family: Courier New, monospace; font-size: 11.5px;">'
             texto += '<h2 style="text-align: left;">OCEANLINK LTDA.</h2>'
             texto += '<b><p style="font-size:17px;text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
             texto += f'Seguimiento: {row.numero}<br>'

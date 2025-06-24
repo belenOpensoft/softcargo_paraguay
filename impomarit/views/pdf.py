@@ -137,7 +137,7 @@ def get_datos_caratula(request):
             except VGrillaSeguimientos.DoesNotExist:
                 seguimiento = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='', deposito='', pago='', vendedor='')
 
-            texto = '<div style="margin: 0 auto; font-family: Courier New, monospace; font-size: 11px;">'
+            texto = '<div style="margin: 0 auto; font-family: Courier New, monospace; font-size: 11.5px;">'
             texto += '<h2 style="text-align: left;">OCEANLINK LTDA.</h2>'
             texto += '<b><p style="font-size:17px;text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
             texto += f'Seguimiento: {seguimiento.numero}<br>'
