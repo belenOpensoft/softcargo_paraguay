@@ -579,7 +579,6 @@ class ConsultaArbitrajesForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
     )
-
 class LibroDiarioForm(forms.Form):
     TIPO_CONSULTA_CHOICES = [
         ('todos', 'Todos'),
@@ -626,3 +625,55 @@ class LibroDiarioForm(forms.Form):
         choices=TIPO_CONSULTA_CHOICES,
         widget=forms.RadioSelect
     )
+
+class MayoresAnaliticosForm(forms.Form):
+
+    banco = forms.ModelChoiceField(
+        label="Cuenta",
+        required=False,
+        queryset=Cuentas.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+    cuenta_desde = forms.IntegerField(
+        label="Desde la cuenta",
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    cuenta_hasta = forms.IntegerField(
+        label="Hasta la cuenta",
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    fecha_desde = forms.DateField(
+        label="Fecha desde",
+        required=True,
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
+    )
+
+    fecha_hasta = forms.DateField(
+        label="Fecha hasta",
+        required=True,
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'})
+    )
+
+    moneda = forms.ModelChoiceField(
+        label="Moneda",
+        queryset=Monedas.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    consolidar_moneda_nac = forms.BooleanField(
+        label="Consolidar en moneda nacional",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
+    consolidar_dolares = forms.BooleanField(
+        label="Consolidar en dólares",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+

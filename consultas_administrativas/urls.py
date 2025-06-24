@@ -10,6 +10,7 @@ from consultas_administrativas.views.estados_cuenta import estados_cuenta
 from consultas_administrativas.views.estados_cuenta_compras import estados_cuenta_compras
 from consultas_administrativas.views.estados_cuenta_mixtas import estados_cuenta_mixtas
 from consultas_administrativas.views.libro_diario import libro_diario
+from consultas_administrativas.views.mayores_analiticos import mayores_analiticos
 from consultas_administrativas.views.plan_cuentas import plan_cuentas
 from consultas_administrativas.views.reporte_cobranzas import reporte_cobranzas
 from consultas_administrativas.views.reporte_pagos import reporte_pagos
@@ -46,6 +47,7 @@ urlpatterns = [
     path('plan_cuentas/', plan_cuentas, name='plan_cuentas'),
     path('consulta_arbitrajes/', consulta_arbitrajes, name='consulta_arbitrajes'),
     path('libro_diario/', libro_diario, name='libro_diario'),
+    path('mayores_analiticos/', mayores_analiticos, name='mayores_analiticos'),
 
     #contabilidad
 
