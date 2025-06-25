@@ -7,6 +7,8 @@ from django.db.models import Count
 from django.http import HttpResponse
 import base64
 from django.views.decorators.csrf import csrf_exempt
+
+from cargosystem import settings
 from expmarit.models import VEmbarqueaereo, ExpmaritCargaaerea as Cargaaerea, ExpmaritEnvases as Envases, \
     ExpmaritServiceaereo as Serviceaereo, ExpmaritEmbarqueaereo as Embarqueaereo, ExpmaritConexaerea as Conexaerea
 from impomarit.views.mails import formatear_linea
@@ -69,16 +71,20 @@ def get_data_email_op(request):
             texto = ''
             texto += f'<br>'
             texto, resultado = get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque,master,gastos_boolean,vapor,request)
-            texto += "<b><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OCEANLINK,</p></b>"
-            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>DEPARTAMENTO DE EXPORTACIÓN MARITIMA,</p>"
-            texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{request.user.first_name} {request.user.last_name}</p>"
-            texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>OPERACIONES</p>"
-            texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>PH: +598 26052332</p>"
+            estilo = "font-family: Courier New, Courier, monospace; font-size: 12px;"
+            texto += f"<div style='{estilo}'>Agradeciendo vuestra preferencia, le saludamos muy atentamente.</div></br>"
+            texto += f"<div style='{estilo}'>{request.user.first_name} {request.user.last_name}</div>"
+            texto += f"<div style='{estilo}'>{request.user.email}</div>"
+            texto += f"<div style='{estilo}; font-weight: bold;'>DEPARTAMENTO DE EXPORT MARITIMO</div>"
+            texto += f"<div style='{estilo}'>{settings.EMPRESA_firma}</div>"
+            texto += f"<div style='{estilo}'>PH: +598 26052332</div>"
             resultado['email_cliente'] = email_cliente
             resultado['email_agente'] = email_agente
 
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
+            resultado['asunto']=str(title.upper())+' - '+str(resultado['asunto'])
+
         except Exception as e:
             resultado['resultado'] = str(e)
     else:
@@ -101,7 +107,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
     if title == 'Notificación de transbordo de carga':
         fecha_actual = datetime.now()
 
-        resultado['asunto'] = 'NOTIFICACIÓN DE TRABSBORDO DE CARGA - Ref.: ' + str(row.referencia) + \
+        resultado['asunto'] = 'Ref.: ' + str(row.referencia) + \
                               '/ CS: ' + str(row.seguimiento) + '- H B/L: ' + str(row.hawb) + '- Shipper: '
 
         fecha_formateada = fecha_actual.strftime(
@@ -156,14 +162,11 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
 
         fecha_actual = datetime.now()
 
-        resultado['asunto'] = (
-
-                'NOVEDADES SOBRE LA CARGA - Ref.: ' + str(row.referencia) +
+        resultado['asunto'] = ( 'Ref.: ' + str(row.referencia) +
 
                 ' / CS: ' + str(row.seguimiento) + ' - Shipper: ' + str(row.embarcador) +
 
                 '; Consignee: ' + str(row.consignatario)
-
         )
 
         fecha_formateada = fecha_actual.strftime(
@@ -240,7 +243,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
 
         fecha_actual = datetime.now()
 
-        resultado['asunto'] = 'ROUTING ORDER - Ref.: ' + str(row.referencia) + \
+        resultado['asunto'] = 'Ref.: ' + str(row.referencia) + \
  \
                               '/ CS: ' + str(row.seguimiento) + '- Shipper: ' + str(row.embarcador) + \
  \
@@ -455,7 +458,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
         return texto, resultado
     elif title == 'Orden de facturacion':
 
-        resultado['asunto'] = 'ORDEN DE FACTURACION: - seguimiento: ' + str(
+        resultado['asunto'] = 'seguimiento: ' + str(
             row.seguimiento)
 
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
@@ -504,7 +507,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
 
         resultado['asunto'] = (
 
-            f'AVISO DE DESCONSOLIDACION - Ref.: {row.seguimiento} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador}'
+            f' Ref.: {row.seguimiento} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador}'
 
 
         )

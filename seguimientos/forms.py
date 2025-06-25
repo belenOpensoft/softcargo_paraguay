@@ -200,15 +200,16 @@ class seguimientoForm(BSModalModelForm):
             'loading', 'discharge'
         ]
 
+        EXCLUIR_VALIDACION_AUTOCOMPLETE = ['vapor']
+
         for nombre in campos_autocomplete:
             if nombre in self.fields:
                 clases_actuales = self.fields[nombre].widget.attrs.get('class', '')
-                nuevas_clases = f"{clases_actuales} autocomplete-validable"
-                self.fields[nombre].widget.attrs['class'] = nuevas_clases.strip()
 
+                if nombre not in EXCLUIR_VALIDACION_AUTOCOMPLETE:
+                    clases_actuales += ' autocomplete-validable'
 
-
-
+                self.fields[nombre].widget.attrs['class'] = clases_actuales.strip()
 
     choice_op = (("", ""),
                  ("IMPORTACION", "IMPORTACION"),
@@ -304,7 +305,6 @@ class seguimientoForm(BSModalModelForm):
         required=False,
         initial=0.00
     )
-
 
 
 class cronologiaForm(BSModalModelForm):

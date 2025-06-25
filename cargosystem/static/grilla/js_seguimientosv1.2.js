@@ -1882,7 +1882,7 @@ $(document).ready(function () {
         $("#impo_marit_modal").dialog({
             autoOpen: true,
             open: function () {
-
+                $('#id_modo').val(tipo);
             },
             modal: true,
             title: titulo,
@@ -1966,24 +1966,42 @@ $(document).ready(function () {
     // AUTOCOMPLETES
 
 
+    // $(".autocomplete-validable").on("blur", function () {
+    //     const inputVal = $(this).val().trim();
+    //     const expectedVal = $(this).attr('data-label') || '';
+    //
+    //     // Si el valor fue modificado y no coincide con la selección, limpiar
+    //     if (inputVal !== expectedVal) {
+    //         $(this).val('');
+    //         $(this).attr('data-id', '');
+    //         $(this).attr('data-label', '');
+    //         $(this).css({
+    //             "border-color": "",
+    //             "box-shadow": ""
+    //         });
+    //     }
+    // });
+
     $(".autocomplete-validable").on("blur", function () {
-        const inputVal = $(this).val().trim();
-        const expectedVal = $(this).attr('data-label') || '';
+    const input = $(this);
 
-        console.log(inputVal);
-        console.log(expectedVal);
+    // Si se está forzando desde autocomplete.change, no limpiar
+    if (input.attr('data-forzando') === '1') return;
 
-        // Si el valor fue modificado y no coincide con la selección, limpiar
-        if (inputVal !== expectedVal) {
-            $(this).val('');
-            $(this).attr('data-id', '');
-            $(this).attr('data-label', '');
-            $(this).css({
-                "border-color": "",
-                "box-shadow": ""
-            });
-        }
-    });
+    const inputVal = input.val().trim();
+    const expectedVal = input.attr('data-label') || '';
+
+    if (inputVal !== expectedVal) {
+        input.val('');
+        input.attr('data-id', '');
+        input.attr('data-label', '');
+        input.css({
+            "border-color": "",
+            "box-shadow": ""
+        });
+    }
+});
+
 
     $("#cliente_add").autocomplete({
         source: '/autocomplete_clientes/',
@@ -2308,6 +2326,7 @@ $(document).ready(function () {
             }
         }
     });
+
     $("#vapor_add").autocomplete({
     source: function (request, response) {
         $.getJSON('/autocomplete_vapores/', { term: request.term }, response);
@@ -2995,7 +3014,6 @@ function get_datos_seguimiento(id, modo = '') {
                 $("#discharge_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
             }
 
-            // CAMPOS NO MODIFICADOS (los que ya tenías antes)
             if (datos['proyecto']) $("#proyecto_add").val(datos['proyecto']).attr('data-id', datos['proyecto_codigo']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
             if (datos['actividad']) $("#actividad_add").val(datos['actividad']).attr('data-id', datos['actividad_codigo']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
             if (datos['desposito']) $("#id_desposito").val(datos['desposito']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
