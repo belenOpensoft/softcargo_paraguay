@@ -988,9 +988,9 @@ def get_data_email(request):
 
                 texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
 
-                texto += formatear_linea("Salida", row.etd.strftime('%Y-%m-%d'))
+                texto += formatear_linea("Salida", row.etd.strftime('%Y-%m-%d') if row.etd else '')
 
-                texto += formatear_linea("Llegada", row.eta.strftime('%Y-%m-%d'))
+                texto += formatear_linea("Llegada", row.eta.strftime('%Y-%m-%d') if row.eta else '')
 
                 texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
 

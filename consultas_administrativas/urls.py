@@ -9,6 +9,7 @@ from consultas_administrativas.views.balance_pagar import balance_pagos
 from consultas_administrativas.views.estados_cuenta import estados_cuenta
 from consultas_administrativas.views.estados_cuenta_compras import estados_cuenta_compras
 from consultas_administrativas.views.estados_cuenta_mixtas import estados_cuenta_mixtas
+from consultas_administrativas.views.ficha_embarque import ficha_embarque
 from consultas_administrativas.views.libro_diario import libro_diario
 from consultas_administrativas.views.mayores_analiticos import mayores_analiticos
 from consultas_administrativas.views.plan_cuentas import plan_cuentas
@@ -51,6 +52,10 @@ urlpatterns = [
 
     #contabilidad
 
+    #cargas
+    path('ficha_embarque/', ficha_embarque, name='ficha_embarque'),
+
+    #cargas
 
 
 ]

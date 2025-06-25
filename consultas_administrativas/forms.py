@@ -677,3 +677,53 @@ class MayoresAnaliticosForm(forms.Form):
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
 
+#cargas
+class FichaEmbarqueForm(forms.Form):
+    OPERATIVAS = [
+        ('import_maritimo', 'IMPORT MARÍTIMO'),
+        ('export_maritimo', 'EXPORT MARÍTIMO'),
+        ('import_aereo', 'IMP AÉREO'),
+        ('export_aereo', 'EXP AÉREO'),
+        ('import_terrestre', 'IMP TERRESTRE'),
+        ('export_terrestre', 'EXP TERRESTRE'),
+    ]
+
+    operativa = forms.ChoiceField(
+        choices=OPERATIVAS,
+        label="Tipo de Operativa",
+        widget=forms.Select(attrs={'class': 'form-control form-control-sm'})
+    )
+
+    master = forms.CharField(
+        required=False,
+        label="Master",
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', 'id': 'id_master'})
+    )
+    house = forms.CharField(
+        required=False,
+        label="House",
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', 'id': 'id_house'})
+    )
+
+    posicion = forms.CharField(
+        required=False,
+        label="Posición",
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', 'id': 'id_posicion'})
+    )
+
+    seguimiento = forms.CharField(
+        required=False,
+        label="Seguimiento",
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', 'id': 'id_seguimiento'})
+    )
+
+    detallar_preventas = forms.BooleanField(
+        required=False,
+        label="Detallar preventas",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    expresar_moneda_nac = forms.BooleanField(
+        required=False,
+        label="Expresar en moneda nacional",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
