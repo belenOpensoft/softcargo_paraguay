@@ -181,7 +181,7 @@ def get_data_email(request):
 
                 refcliente = row.refcliente if row.refcliente else "S/I"
                 resultado[
-                    'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.numero} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}; Ord. Cliente: {refcliente}'
+                    'asunto'] = f'Ref: {row.numero} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}; Ord. Cliente: {refcliente}'
 
                 fecha_actual = datetime.datetime.now()
 

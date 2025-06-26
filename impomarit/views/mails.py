@@ -574,7 +574,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             refcliente = seguimiento.refcliente if seguimiento.refcliente else "S/I"
 
             resultado[
-                'asunto'] = f'AVISO DE EMBARQUE / Ref: {row.seguimiento} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}; Ord. Cliente: {refcliente}'
+                'asunto'] = f'Ref: {row.seguimiento} - HB/l: {row.hawb} - Shipper: {row.embarcador} - Consig: {row.consignatario}; Vapor: {vapor}; Ord. Cliente: {refcliente}'
 
             fecha_actual = datetime.now()
 
