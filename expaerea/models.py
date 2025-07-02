@@ -1028,6 +1028,81 @@ class VGastosHouse(models.Model):
         managed = False
         db_table = 'VExpAereaGastosHouse'
 
+from django.db import models
+
+class GuiasHijas(models.Model):
+    numero = models.CharField(max_length=100)
+
+    # Numéricos (pueden ser Decimal si necesitás precisión en dinero)
+    total_bultos = models.IntegerField(default=0)
+    total_pesos = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    volumen_total_embarque = models.DecimalField(max_digits=12, decimal_places=4, default=0)
+
+    valppd = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    valcol = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    prepaid = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    collect = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    taxppd = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    taxcol = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    agentppd = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    agentcol = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    carrierppd = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    carriercol = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_prepaid = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_collect = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    # Textos (sin límite)
+    posicion = models.TextField(blank=True)
+    consignatario = models.TextField(blank=True)
+    shipper = models.TextField(blank=True)
+    awb_sf = models.TextField(blank=True)
+    awb1 = models.TextField(blank=True)
+    awb2 = models.TextField(blank=True)
+    awb3 = models.TextField(blank=True)
+    hawb = models.TextField(blank=True)
+    empresa = models.TextField(blank=True)
+    info = models.TextField(blank=True)
+    vuelos1 = models.TextField(blank=True)
+    vuelos2 = models.TextField(blank=True)
+    airport_departure = models.TextField(blank=True)
+    airport_final = models.TextField(blank=True)
+    final = models.TextField(blank=True)
+    by_cia_1 = models.TextField(blank=True)
+    by_cia_2 = models.TextField(blank=True)
+    by_cia_3 = models.TextField(blank=True)
+    to_1 = models.TextField(blank=True)
+    to_2 = models.TextField(blank=True)
+    to_3 = models.TextField(blank=True)
+    by_first_carrier = models.TextField(blank=True)
+    array_destinos = models.TextField(blank=True)
+    modopago = models.TextField(blank=True)
+    cc1 = models.TextField(blank=True)
+    cc2 = models.TextField(blank=True)
+    pp1 = models.TextField(blank=True)
+    pp2 = models.TextField(blank=True)
+    pago_code = models.TextField(blank=True)
+    otros_gastos = models.TextField(blank=True)
+    shipper_signature = models.TextField(blank=True)
+    carrier_signature = models.TextField(blank=True)
+    amount_insurance = models.TextField(blank=True)
+    handling = models.TextField(blank=True)
+    declared_value_for_carriage = models.TextField(blank=True)
+    declared_value_for_customs = models.TextField(blank=True)
+    iata_code_agente = models.TextField(blank=True)
+    account_nro = models.TextField(blank=True)
+    notify = models.TextField(blank=True)
+    currency = models.TextField(blank=True)
+    fecha_ingreso = models.DateTimeField(blank=True, null=True)
+
+    # Otros posibles campos como JSON (si querés guardar estructuras)
+    mercaderias = models.JSONField(blank=True, null=True)
+    medidas_text = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'guias_hijas'
+
+
 from auditlog.registry import auditlog
 
 class MyModel(models.Model):

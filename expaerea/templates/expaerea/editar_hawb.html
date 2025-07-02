@@ -1,0 +1,158 @@
+{% extends 'base_table_v2.html' %}
+{% load static %}
+{% block contenido %}
+<style>
+    .campo {
+        position: absolute;
+        border: none;
+        border-bottom: 1px solid #000;
+        background: transparent;
+        font-size: 10px;
+        padding: 2px;
+    }
+    .grande{
+        font-size:18px !important;
+    }
+    .mediano{
+        font-size: 14px !important;
+    }
+
+</style>
+
+    <form id="guias_hijas_form">
+        {% csrf_token %}
+        <div class="text-center mt-4">
+        <button type="button" class="btn btn-success" onclick="guardar_hawb({{ row_id }})">Guardar Guía</button>
+        </div>
+        <div style="position: relative; width: 1487px; height: 2105px; margin: auto;" >
+
+
+    <img src="data:image/png;base64,{{ imagen }}" style="position: absolute; width: 1487px; height: 2105px;" />
+
+    <!-- AWB y número guía -->
+    <input class="campo grande " type="text" name="awb" value="{{ datos.hawb }}" style="top:115px; left:1240px; width:180px;" />
+
+    <input class="campo grande" type="text" name="awb1" value="{{ datos.awb1 }}" style="top:115px; left:130px; width:50px;" />
+    <input class="campo grande" type="text" name="awb2" value="{{ datos.awb2 }}" style="top:115px; left:190px; width:50px;" />
+    <input class="campo grande" type="text" name="awb3" value="{{ datos.awb3 }}" style="top:115px; left:250px; width:120px;" />
+
+    <!-- empresa ocean -->
+    <textarea class="campo grande" name="empresa" style="top:180px; left:960px; width:400px; height:90px;">{{ datos.empresa }}</textarea>
+
+    <!-- Consignee -->
+    <textarea class="campo grande" name="shipper" style="top:225px; left:160px; width:520px; height:90px;">{{ datos.shipper }}</textarea>
+
+    <!-- Compañía -->
+    <textarea class="campo grande" name="consignatario" style="top:400px; left:160px; width:520px; height:85px;">{{ datos.consignatario }}</textarea>
+
+    <textarea class="campo grande" name="issuing_carrier" style="top:530px; left:160px; width:400px; height:80px;">{{ datos.empresa }}</textarea>
+
+    <!--probar-->
+    <textarea class="campo grande" name="iata_code_agente" style="top:650px; left:160px; width:200px; height:20px;">{{ datos.iata_code_agente }}</textarea>
+    <textarea class="campo grande" name="account_nro" style="top:650px; left:460px; width:100px; height:20px;">{{ datos.account_nro }}</textarea>
+
+    <textarea class="campo grande" name="info" style="top:560px; left:780px; width:500px; height:150px;">{{ datos.info }}</textarea>
+
+
+    <!-- Notify -->
+    <textarea class="campo" name="notify" style="top:400px; left:910px; width:480px; height:85px;">{{ datos.notify }}</textarea>
+
+    <!-- Origen y destino -->
+    <input class="campo" type="text" name="airport_departure" value="{{ datos.airport_departure }}" style="top:705px; left:130px; width:300px;" />
+
+    <input class="campo" type="text" name="airport_final" value="{{ datos.airport_final }}" style="top:822px; left:130px; width:300px;" />
+
+   <!-- Primer transbordo -->
+<input class="campo" type="text" name="to_1" value="{{ datos.to_1 }}" style="top:765px; left:130px; width:50px;" />
+<input class="campo" type="text" name="by_cia_1" value="{{ datos.by_cia_1 }}" style="top:765px; left:195px; width:200px;" />
+
+<!-- Segundo transbordo -->
+<input class="campo" type="text" name="to_2" value="{{ datos.to_2 }}" style="top:765px; left:520px; width:45px;" />
+<input class="campo" type="text" name="by_cia_2" value="{{ datos.by_cia_2 }}" style="top:765px; left:580px; width:45px;" />
+
+<!-- Tercer transbordo -->
+<input class="campo" type="text" name="to_3" value="{{ datos.to_3 }}" style="top:765px; left:635px; width:45px;" />
+<input class="campo" type="text" name="by_cia_3" value="{{ datos.by_cia_3 }}" style="top:765px; left:705px; width:45px;" />
+
+
+    <input class="campo" type="text" name="currency" value="{{ datos.currency }}" style="top:770px; left:770px; width:50px;" />
+
+
+    <input class="campo" type="text" name="pago_code" value="{{ datos.pago_code }}" style="top:770px; left:835px; width:25px;" />
+    <input class="campo" type="text" name="pp1" value="{{ datos.pp1 }}" style="top:775px; left:870px; width:20px;" />
+    <input class="campo" type="text" name="cc1" value="{{ datos.cc1 }}" style="top:775px; left:910px; width:20px;" />
+    <input class="campo" type="text" name="pp2" value="{{ datos.pp2 }}" style="top:775px; left:940px; width:20px;" />
+    <input class="campo" type="text" name="cc2" value="{{ datos.cc2 }}" style="top:775px; left:970px; width:20px;" />
+
+    <input class="campo" type="text" name="declared_value_for_carriage" value="{{ datos.declared_value_for_carriage }}" style="top:770px; left:1250px; width:150px;" />
+    <input class="campo" type="text" name="declared_value_for_customs" value="{{ datos.declared_value_for_customs }}" style="top:770px; left:1050px; width:150px;" />
+
+    <!-- Vuelo, fecha -->
+    <textarea class="campo mediano" type="text" name="vuelos1"  style="top:822px; left:445px; width:150px;height:35px;" >{{ datos.vuelos1 }}</textarea>
+    <textarea class="campo mediano" type="text" name="vuelos2" style="top:822px; left:600px; width:150px;height:35px;" >{{ datos.vuelos2 }}</textarea>
+
+    <textarea class="campo grande" type="text" name="amount_insurance" style="top:822px; left:770px; width:150px;height:35px;" >{{ datos.amount_insurance }}</textarea>
+
+    <!-- Handling -->
+    <textarea class="campo grande" name="handling" style="top:900px; left:180px; width:520px; height:50px;">{{ datos.handling }}</textarea>
+
+{% for m in datos.mercaderias %}
+    <input type="hidden" name="top_{{ forloop.counter }}" value="{{ m.top }}">
+  <input class="campo mediano" type="text" name="bultos_{{ forloop.counter }}" value="{{ m.bultos }}" style="top:{{ m.top }}px; left:145px; width:25px;" />
+  <input class="campo mediano" type="text" name="pesos_{{ forloop.counter }}" value="{{ m.peso }}" style="top:{{ m.top }}px; left:220px; width:55px;" />
+  <input class="campo mediano" type="text" name="unidad_{{ forloop.counter }}" value="{{ m.unidad }}" style="top:{{ m.top }}px; left:310px; width:20px;" />
+  <input class="campo mediano" type="text" name="aplicable_{{ forloop.counter }}" value="{{ m.aplicable }}" style="top:{{ m.top }}px; left:530px; width:55px;" />
+  <input class="campo mediano" type="text" name="tarifa_{{ forloop.counter }}" value="{{ m.tarifa }}" style="top:{{ m.top }}px; left:660px; width:60px;" />
+  <input class="campo mediano" type="text" name="total_{{ forloop.counter }}" value="{{ m.total }}" style="top:{{ m.top }}px; left:850px; width:70px;" />
+  <textarea class="campo mediano" name="descripcion_{{ forloop.counter }}" style="top:{{ m.top }}px; left:1050px; width:320px; height:50px;">{{ m.descripcion }}</textarea>
+{% endfor %}
+
+
+<!-- Totales -->
+<input class="campo mediano" type="text" name="total_bultos" value="{{ datos.total_bultos }}" style="top:1395px; left:145px; width:20px;" />
+<input class="campo mediano" type="text" name="total_pesos" value="{{ datos.total_pesos }}" style="top:1395px; left:220px; width:55px;" />
+<input class="campo mediano" type="text" name="total_total" value="{{ datos.total_total }}" style="top:1395px; left:850px; width:70px;" />
+
+
+    <!-- Valores -->
+    <input class="campo mediano" type="text" name="prepaid" value="{{ datos.prepaid }}" style="top:1460px; left:160px; width:60px;" />
+    <input class="campo mediano" type="text" name="collect" value="{{ datos.collect }}" style="top:1460px; left:510px; width:60px;" />
+    <input class="campo mediano" type="text" name="valppd" value="{{ datos.valppd }}" style="top:1510px; left:160px; width:60px;" />
+    <input class="campo mediano" type="text" name="valcol" value="{{ datos.valcol }}" style="top:1510px; left:510px; width:60px;" />
+    <input class="campo mediano" type="text" name="taxppd" value="{{ datos.taxppd }}" style="top:1570px; left:160px; width:60px;" />
+    <input class="campo mediano" type="text" name="taxcol" value="{{ datos.taxcol }}" style="top:1570px; left:510px; width:60px;" />
+    <input class="campo mediano" type="text" name="agentppd" value="{{ datos.agentppd }}" style="top:1640px; left:160px; width:60px;" />
+    <input class="campo mediano" type="text" name="agentcol" value="{{ datos.agentcol }}" style="top:1640px; left:510px; width:60px;" />
+    <input class="campo mediano" type="text" name="carrierppd" value="{{ datos.carrierppd }}" style="top:1700px; left:160px; width:60px;" />
+    <input class="campo mediano" type="text" name="carriercol" value="{{ datos.carriercol }}" style="top:1700px; left:510px; width:60px;" />
+    <input class="campo mediano" type="text" name="total_prepaid" value="{{ datos.total_prepaid }}" style="top:1810px; left:160px; width:60px;" />
+    <input class="campo mediano" type="text" name="total_collect" value="{{ datos.total_collect }}" style="top:1810px; left:510px; width:60px;" />
+    <!-- Otros gastos -->
+    <textarea class="campo mediano" name="otros_gastos" style="top:1455px; left:660px; width:700px; height:35px;">{{ datos.otros_gastos }}</textarea>
+    <textarea class="campo mediano" name="posicion" style="top:1560px; left:660px; width:700px; height:35px;">{{ datos.posicion }}</textarea>
+    <textarea class="campo grande" name="shipper_signature" style="top:1690px; left:790px; width:520px; height:70px;">{{ datos.shipper_signature }}</textarea>
+    <textarea class="campo grande" name="carrier_signature" style="top:1820px; left:790px; width:520px; height:70px;">{{ datos.carrier_signature }}</textarea>
+    <input class="campo grande" type="text" name="hawb" value="{{ datos.hawb }}" style="top:1900px; left:1240px; width:180px;" />
+
+    <!-- Totales -->
+</div>
+    </form>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const inputs = document.querySelectorAll("input");
+      const textareas = document.querySelectorAll("textarea");  // ← renombrado
+
+      inputs.forEach(function(input) {
+        input.classList.add("text-primary");
+      });
+
+      textareas.forEach(function(textarea) {
+        textarea.classList.add("text-primary");
+      });
+  });
+</script>
+<script src="{% static 'grilla/js_exportacion_aerea.js' %}"></script>
+
+{% endblock %}

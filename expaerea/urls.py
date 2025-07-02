@@ -22,7 +22,7 @@ from expaerea.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta
     datos_embarque_ruta, source_rutas_master, eliminar_ruta_master, guardar_ruta_master, datos_embarque_ruta_master
 
 from notificaciones.views.correos import envio_notificacion_seguimiento
-from seguimientos.views.reportes import descargar_awb_operativas, descargar_hawb_operativas
+from seguimientos.views.reportes import descargar_awb_operativas, descargar_hawb_operativas, editar_hawb, guardar_hawb
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
@@ -91,6 +91,12 @@ urlpatterns = [
     path('descargar_awb_draft/<int:row_id>/<str:draft>', descargar_awb_operativas, name='descargar_awb'),
     path('descargar_hawb/<int:row_id>/', descargar_hawb_operativas, name='descargar_hawb'),
     path('descargar_hawb_draft/<int:row_id>/<str:draft>', descargar_hawb_operativas, name='descargar_hawb'),
+
+
+    #editar guia
+    path('editar_hawb/<int:row_id>/', editar_hawb, name='editar_hawb'),
+    path('guardar_hawb/<int:row_id>/', guardar_hawb, name='guardar_hawb'),
+
 ]
 
 
