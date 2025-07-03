@@ -1575,7 +1575,7 @@ var expandedRow;
     $('#edit_house_form').submit(function(e){
     let lugar=localStorage.getItem('lugar');
        e.preventDefault();
-        if(document.getElementById('arbitraje_house_e').value<0||document.getElementById('dias_demora_e').value<0){
+        if(document.getElementById('arbitraje_house_e').value<0){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
         var numero = localStorage.getItem('numero_embarque');
@@ -2841,8 +2841,8 @@ function fillFormWithDataHouse(data) {
 
         $('#notificar_cliente_e').val(data.notifcliente_e ? formatDateToYYYYMMDD(data.notifcliente_e) : '');
         $('#notificar_agente_e').val(data.notifagente_e ? formatDateToYYYYMMDD(data.notifagente_e) : '');
-        $('#fecha_embarque_e').val(data.fechaembarque_e ? formatDateToYYYYMMDD(data.fechaembarque_e) : '');
-        $('#fecha_retiro_e').val(data.fecharetiro_e ? formatDateToYYYYMMDD(data.fecharetiro_e) : '');
+        $('#eta_e').val(data.eta_e ? formatDateToYYYYMMDD(data.eta_e) : '');
+        $('#etd_e').val(data.etd_e ? formatDateToYYYYMMDD(data.etd_e) : '');
 
 
     }
@@ -2953,9 +2953,15 @@ table_edit_et = $('#table_edit_et').DataTable({
     },
     {
         "targets": [1],
+        "render": function (data, type, row, meta) {
+            return row[23]; // Toma el índice 5 para la columna 6
+        }
     },
     {
         "targets": [2],
+            "render": function (data, type, row, meta) {
+            return row[24]; // Toma el índice 5 para la columna 6
+        }
     },
     {
         "targets": [3],

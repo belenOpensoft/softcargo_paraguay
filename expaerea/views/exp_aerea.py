@@ -361,10 +361,10 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append('' if registro.posicion is None else str(registro.posicion))  # Estado
             registro_json.append('' if registro.operacion is None else str(registro.operacion))  # Estado
             registro_json.append('' if registro.awb is None else str(registro.awb))  # Estado
-            registro_json.append('' if registro.hawb is None else str(registro.hawb))  # Estado
+            registro_json.append('' if registro.hawb is None else str(registro.hawb))  # Estado 11
 
-            archivos = ExportAttachhijo.objects.filter(numero=registro.numero).count() #12
-            embarques = ExportCargaaerea.objects.filter(numero=registro.numero).count()#13
+            archivos = ExportAttachhijo.objects.filter(numero=registro.numero).count()
+            embarques = ExportCargaaerea.objects.filter(numero=registro.numero).count()
             #envases = ImportEnvases.objects.filter(numero=registro.numero).count()
             gastos = ExportServiceaereo.objects.filter(numero=registro.numero).count()
             rutas = ExportConexaerea.objects.filter(numero=registro.numero).count()
@@ -379,6 +379,8 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append(registro.consignatario_id)
             registro_json.append(registro.seguimiento) #19
             registro_json.append(registro.consignatario_codigo)
+            registro_json.append('' if registro.etd is None else str(registro.etd)[:10])  #21
+            registro_json.append('' if registro.eta is None else str(registro.eta)[:10])  #22
 
             data.append(registro_json)
         return data

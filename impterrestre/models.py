@@ -683,6 +683,8 @@ class VEmbarqueaereo(models.Model):
     terminos = models.CharField(max_length=3, null=True, blank=True, default=None)
     pago_flete = models.CharField(max_length=1, null=True, blank=True, default=None)
     consolidado = models.CharField(max_length=1, null=True, blank=True, default=None)
+    etd = models.DateTimeField(db_column='etd', blank=True, null=True)
+    eta = models.DateTimeField(db_column='eta', blank=True, null=True)
 
     class Meta:
         managed = False
@@ -729,7 +731,8 @@ class VEmbarqueaereoDirecto(models.Model):
     terminos = models.CharField(max_length=3, null=True, blank=True, default=None)
     pago_flete = models.CharField(max_length=1, null=True, blank=True, default=None)
     consolidado = models.CharField(max_length=1, null=True, blank=True, default=None)
-
+    etd = models.DateTimeField(db_column='etd', blank=True, null=True)
+    eta = models.DateTimeField(db_column='eta', blank=True, null=True)
     class Meta:
         managed = False
         db_table = 'VImpTerrestreEmbarqueAereoDirecto'

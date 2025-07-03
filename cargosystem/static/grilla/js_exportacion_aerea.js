@@ -2994,8 +2994,8 @@ function fillFormWithDataHouse(data) {
 
         $('#notificar_cliente_e').val(data.notifcliente_e ? formatDateToYYYYMMDD(data.notifcliente_e) : '');
         $('#notificar_agente_e').val(data.notifagente_e ? formatDateToYYYYMMDD(data.notifagente_e) : '');
-        $('#fecha_embarque_e').val(data.fechaembarque_e ? formatDateToYYYYMMDD(data.fechaembarque_e) : '');
-        $('#fecha_retiro_e').val(data.fecharetiro_e ? formatDateToYYYYMMDD(data.fecharetiro_e) : '');
+        $('#eta_e').val(data.eta_e ? formatDateToYYYYMMDD(data.eta_e) : '');
+        $('#etd_e').val(data.etd_e ? formatDateToYYYYMMDD(data.etd_e) : '');
 
 
     }
@@ -3122,9 +3122,15 @@ table_edit_ea = $('#table_edit_ea').DataTable({
     },
     {
         "targets": [1],
+        "render": function (data, type, row, meta) {
+            return row[21]; // Toma el índice 5 para la columna 6
+        }
     },
     {
         "targets": [2],
+            "render": function (data, type, row, meta) {
+            return row[22]; // Toma el índice 5 para la columna 6
+        }
     },
     {
         "targets": [3],

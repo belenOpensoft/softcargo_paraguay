@@ -83,9 +83,15 @@ $(document).ready(function () {
             },
             {
                 "targets": [1],
+                "render": function (data, type, row, meta) {
+                    return row[21]; // Toma el índice 5 para la columna 6
+                }
             },
             {
                 "targets": [2],
+                    "render": function (data, type, row, meta) {
+                    return row[22]; // Toma el índice 5 para la columna 6
+                }
             },
             {
                 "targets": [3],

@@ -462,6 +462,8 @@ def house_detail(request):
                     'fechaembarque_e': house.fechaembarque,
                     'status_e': house.status,
                     'wreceipt_e': house.wreceipt,
+                    'eta_e': house.eta,
+                    'etd_e': house.etd,
                 }
                 return JsonResponse(data)
             except ExportEmbarqueaereo.DoesNotExist:
@@ -518,8 +520,8 @@ def edit_house_function(request, numero):
             house.hawb = form.cleaned_data.get('house', "")
             house.demora = form.cleaned_data.get('demora', 0) if form.cleaned_data.get('demora') else 0
             house.wreceipt = form.cleaned_data.get('wreceipt', "")
-            house.fecharetiro = form.cleaned_data.get('fecha_retiro', None)
-            house.fechaembarque = form.cleaned_data.get('fecha_embarque', None)
+            house.etd = form.cleaned_data.get('etd', None)
+            house.eta = form.cleaned_data.get('eta', None)
 
             try:
                 house.save()

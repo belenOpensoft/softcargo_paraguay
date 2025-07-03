@@ -80,11 +80,17 @@ $('#buscadorEmailsHouse8').on('keyup', function () {
                     return '<span style="display:none;">' + row[0] + '</span>'; // Oculta el número visualmente
                 }
             },
-             {
+            {
                 "targets": [1],
+                "render": function (data, type, row, meta) {
+                    return row[22]; // Toma el índice 5 para la columna 6
+                }
             },
             {
                 "targets": [2],
+                    "render": function (data, type, row, meta) {
+                    return row[23]; // Toma el índice 5 para la columna 6
+                }
             },
             {
                 "targets": [3],

@@ -663,18 +663,18 @@ class edit_house(BSModalModelForm):
     notificar_agente = forms.DateField(
         widget=forms.DateInput(attrs={'class': 'form-control', 'id': 'notificar_agente_e', 'type': 'date'}),
         label='Notificar Agente', required=False)
-    fecha_embarque = forms.DateField(
-        widget=forms.DateInput(attrs={'class': 'form-control', 'id': 'fecha_embarque_e', 'type': 'date'}),
-        label='Fecha Embarque', required=False)
-    fecha_retiro = forms.DateField(
-        widget=forms.DateInput(attrs={'class': 'form-control', 'id': 'fecha_retiro_e', 'type': 'date'}),
-        label='Fecha Retiro', required=False)
+    etd = forms.DateField(
+        widget=forms.DateInput(attrs={'class': 'form-control', 'id': 'etd_e', 'type': 'date'}),
+        label='ETD', required=False)
+    eta = forms.DateField(
+        widget=forms.DateInput(attrs={'class': 'form-control', 'id': 'eta_e', 'type': 'date'}),
+        label='ETA', required=False)
     posicion_h = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', 'autocomplete': 'off', 'required': True, 'name': 'posicion_h', 'maxlength': 20,
                'readonly': True, 'id': 'posicion_gh_e'}))
 
     agente = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control input-sobrepasar', 'id': 'agente_addh_e', 'required': False}))
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'agente_addh_e', 'required': False}),required=False)
     transportista = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control input-sobrepasar', 'id': 'transportista_addh_e', 'required': False}))
     armador = forms.CharField(widget=forms.TextInput(

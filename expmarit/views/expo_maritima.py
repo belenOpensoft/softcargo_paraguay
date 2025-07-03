@@ -358,9 +358,10 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append(rutas)
             registro_json.append(notas)
             registro_json.append(registro.consignatario_id)
-            registro_json.append(registro.seguimiento) #19
+            registro_json.append(registro.seguimiento) #20
             registro_json.append(registro.consignatario_codigo)
-
+            registro_json.append('' if registro.etd is None else str(registro.etd)[:10])  #22
+            registro_json.append('' if registro.eta is None else str(registro.eta)[:10])  #23
             data.append(registro_json)
         return data
     except Exception as e:

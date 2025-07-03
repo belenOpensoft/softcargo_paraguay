@@ -80,11 +80,17 @@ $('#buscadorEmailsHouse10').on('keyup', function () {
                     return '<span style="display:none;">' + row[0] + '</span>'; // Oculta el número visualmente
                 }
             },
-             {
+            {
                 "targets": [1],
+                "render": function (data, type, row, meta) {
+                    return row[23]; // Toma el índice 5 para la columna 6
+                }
             },
             {
                 "targets": [2],
+                    "render": function (data, type, row, meta) {
+                    return row[24]; // Toma el índice 5 para la columna 6
+                }
             },
             {
                 "targets": [3],
@@ -165,8 +171,7 @@ $('#buscadorEmailsHouse10').on('keyup', function () {
             url: "/static/datatables/es_ES.json"
         },
         "rowCallback": function (row, data) {
-        console.log(row);
-        console.log(data);
+
         $('td:eq(3)', row).html('');
             let texto = ''
             if (data[14] > 0) {
