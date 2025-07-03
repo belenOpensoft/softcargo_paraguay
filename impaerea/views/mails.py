@@ -467,8 +467,6 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += "Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR.\n"
 
-            texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
-
             texto += "</pre>"
 
             return texto, resultado
@@ -714,7 +712,6 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += "Los vuelos y las llegadas al aeropuerto de Montevideo son siempre a CONFIRMAR, ya que puede haber trasbordos y/o alteraciones en las fechas estimadas de llegada\n"
             texto += "sin previo aviso, por lo cual le sugerimos consultarnos por la fecha de arribo que aparece en este aviso.\n"
-            texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
             texto += "</pre>"
             return texto, resultado
         elif title == 'Aviso de desconsolidacion':

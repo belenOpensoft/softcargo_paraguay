@@ -620,7 +620,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += "Los buques, vuelos y las fechas pueden variar sin previo aviso y son siempre a CONFIRMAR.\n"
 
-        texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
 
         texto += "</pre>"
 
@@ -803,7 +802,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += "Los buques y las fechas pueden variar sin previo aviso y son siempre a confirmar.\n"
 
-        texto += "Agradeciendo vuestra preferencia, le saludamos muy atentamente."
 
         texto += "</pre>"
 

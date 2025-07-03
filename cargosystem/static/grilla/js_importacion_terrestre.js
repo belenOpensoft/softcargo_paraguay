@@ -4670,8 +4670,10 @@ function get_data_email(row,title,numero,id,transportista,master,gastos,directo)
                 $("#id_subject").val(resultado['asunto']);
 
                 let asunto = resultado['asunto'].toLowerCase();
-                if (asunto.includes("traspaso a operaciones") || asunto.includes("orden de facturacion")) {
-                    $("#id_to").val("");  // No colocar nada en id_to
+                if (asunto.includes("traspaso a operaciones")) {
+                    $("#id_to").val("customerservices@oceanlinkgroup.com;lucas.bocskor@oceanlinkgroup.com;ines.delafuente@oceanlinkgroup.com");
+                }else if(asunto.includes("orden de facturacion")){
+                    $("#id_to").val("");
                 }else if(asunto.includes("instrucción de embarque") || asunto.includes("shipping instruction")){
                 $("#id_to").val(resultado['email_agente']);
                 } else {
