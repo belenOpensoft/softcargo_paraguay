@@ -237,9 +237,6 @@ class GuiasReport:
             c.drawString(335, 505, self.amount_insurance )
             """ MERCADERIAS """
             y = 420
-            bultos = 0
-            pesos = 0
-            fletes = 0
             if self.mercaderias:
                 for m in self.mercaderias:
                     c.drawString(52, y, str(m['bultos']))  # Total de bultos
@@ -248,11 +245,6 @@ class GuiasReport:
                     c.drawString(205, y, str(m['aplicable']))  # Aplicable
                     c.drawString(280, y, str(m['tarifa']))  # Tarifa de venta
                     c.drawString(340, y, str(m['total']))  # Total
-
-                    # Asignar las sumas a las variables
-                    bultos = m['bultos']
-                    pesos = m['peso']
-                    fletes = m['total']
 
                     """ DESCRIPCIÓN MERCADERÍA """
                     texto = m['descripcion']  # Ya viene con salto de línea y CBM incluido
@@ -273,21 +265,21 @@ class GuiasReport:
                     y -= 50
 
             # Totales pie
-            c.drawString(52, 280, str(bultos))
-            c.drawString(82, 280, str(pesos))
-            c.drawString(340, 280, str(fletes))
+            c.drawString(52, 280, str(self.total_bultos))
+            c.drawString(82, 280, str(self.total_pesos))
+            c.drawString(340, 280, str(self.total_total))
 
             # Prepaid o Collect
-            if self.modopago == 'Prepaid':
-                c.drawString(80, 250, str(fletes))
+            if self.pago_code == 'PP':
+                c.drawString(80, 250, str(self.total_total))
                 c.drawString(200, 250, '')
-                montoppd = fletes
+                montoppd = self.total_total
                 montocol = 0
             else:
                 c.drawString(80, 250, '')
-                c.drawString(200, 250, str(fletes))
+                c.drawString(200, 250, str(self.total_total))
                 montoppd = 0
-                montocol = fletes
+                montocol = self.total_total
 
             # Posición
             c.drawString(253, 200, str(self.posicion))
@@ -311,12 +303,14 @@ class GuiasReport:
             c.drawString(80, 230, validar_valor(self.valppd))
             c.drawString(80, 200, validar_valor(self.taxppd ))
             c.drawString(80, 180, validar_valor(self.agentppd ))
+            c.drawString(80, 155, validar_valor(self.carrierppd ))
             c.drawString(80, 107, validar_valor(self.total_prepaid))
 
             # Montos columna derecha (COLLECT)
             c.drawString(200, 230, validar_valor(self.valcol))
             c.drawString(200, 200, validar_valor(self.taxcol))
             c.drawString(200, 180, validar_valor(self.agentcol))
+            c.drawString(80, 155, validar_valor(self.carriercol))
             c.drawString(200, 107, validar_valor(self.total_collect))
 
             # Otros gastos (cuadro texto libre)

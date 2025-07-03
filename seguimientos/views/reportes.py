@@ -15,7 +15,7 @@ from django.shortcuts import render
 
 from cargosystem.settings import BASE_DIR
 from expaerea.models import ExportEmbarqueaereo, ExportConexaerea, ExportCargaaerea, ExportServiceaereo, ExportReservas, \
-    VEmbarqueaereo, ExportServireserva, ExportConexreserva, GuiasHijas
+    VEmbarqueaereo, ExportServireserva, ExportConexreserva, GuiasHijas, GuiasMadres
 from impomarit.models import VistaOperativas, VistaOperativasGastos
 from mantenimientos.models import Clientes as SociosComerciales, Ciudades, Servicios
 from cargosystem import settings
@@ -28,7 +28,7 @@ from seguimientos.views.guias_hijas import GuiasReport as GuiasReportHijas, vali
 from base64 import b64encode
 import  datetime
 from io import BytesIO
-from pdf2image import convert_from_path
+
 
 def reportes_seguimiento(request):
     try:
@@ -397,200 +397,7 @@ def descargar_awb_seguimientos(request,row_id,draft=None):
         print(traceback.format_exc())
         raise Http404(f"Error: {str(e)}")
 
-def descargar_awb_operativas(request,row_id,draft=None):
-    try:
-        rep = GuiasReport()
-        master = ExportReservas.objects.get(numero=row_id)
-        houses = ExportEmbarqueaereo.objects.filter(awb=master.awb)
 
-
-        """ CONSIGNATARIO """
-        consignatario = SociosComerciales.objects.get(codigo=master.consignatario)
-        con = str(consignatario.empresa) + '<br />\n' + \
-              str(consignatario.direccion) + '<br />\n' + \
-              str(consignatario.ciudad) + '<br />\n' + \
-              str(consignatario.pais) + ' RUT: ' + str(consignatario.ruc)
-        rep.consignatario = con
-        """ SHIPPER """
-        shipper = SociosComerciales.objects.get(codigo=master.transportista)
-        con = str(shipper.empresa) + '<br />\n' + \
-              str(shipper.direccion) + '<br />\n' + \
-              str(shipper.ciudad) + '<br />\n' + \
-              str(shipper.pais) + ' RUT: ' + str(shipper.ruc)
-        rep.shipper = con
-        rep.shipper_nom = str(shipper.empresa)
-        """ NOTIFY """
-        pago = 'COLLECT' if master.pagoflete == 'C' else 'PREPAID'
-        notify = 'FREIGHT ' + pago + '<br />\n'
-        notificador = SociosComerciales.objects.get(codigo=master.consignatario)
-        notify += 'NOTIFY: ' + str(notificador.empresa) + '<br />\n' + \
-                  str(notificador.direccion) + '<br />\n' + \
-                  str(notificador.ciudad) + '<br />\n' + \
-                  str(notificador.pais) + ' RUT: ' + str(notificador.ruc)
-        rep.notify = notify
-        if master.awb is not None and len(master.awb) > 0 and master.awb != 'S/I':
-            awb = master.awb.split('-')
-            rep.awb = awb[0] + '   MVD   ' + awb[1]
-            rep.awb_sf=master.awb
-
-        #if houses[0].hawb is not None and len(houses[0].hawb) > 0 and houses[0].hawb != 'S/I':
-            #rep.hawb = houses[0].hawb
-        trasbordos = ExportConexreserva.objects.filter(numero=master.numero).order_by('llegada', 'id')
-        arraydestinos = []
-
-        if trasbordos.exists():
-            rep.routing += 'MONTEVIDEO (' + str(trasbordos[0].origen)
-            rep.compania = trasbordos[0].ciavuelo
-            rep.destino = str(trasbordos[0].destino)
-
-            for index, x in enumerate(trasbordos):
-                arraydestinos.append(str(x.destino) + '    ' + str(x.ciavuelo)[:2])
-
-                fecha_str = f"{x.ciavuelo}{x.vuelo}/{x.salida.strftime('%d-%B')[:6].upper()} "
-
-                if index % 2 == 0:
-                    rep.fechas += fecha_str
-                else:
-                    rep.fechas2 += fecha_str
-
-                rep.routing += '/' + str(x.destino)
-                rep.final = str(x.destino)
-
-        arraydestinos.reverse()
-        flag = 0
-        if len(arraydestinos) > 0:
-            for x in arraydestinos:
-                if flag < 2:
-                    rep.arraydestinos = x + '   ' + rep.arraydestinos
-                    flag += 1
-        if len(rep.routing) > 0:
-            rep.routing += ')'
-        ciudad = Ciudades.objects.filter(codigo=rep.final)
-        if ciudad.count() > 0:
-            rep.airport_final = ciudad[0].nombre
-        rep.modopago = 'Collect' if master.pagoflete == 'C' else 'Prepaid'
-        if master.pagoflete == 'C':
-            rep.pago = 'CC          C            C'
-        else:
-            rep.pago = 'PP    P           P'
-        cargas = ExportCargaaerea.objects.filter(numero=houses[0].numero)
-
-        if cargas.exists():
-            # Inicializar acumuladores
-            total_bultos = 0
-            total_bruto = 0
-            total_volumen = 0
-            total_tarifa = master.tarifaawb
-            aplicable = 0
-            total = 0
-            productos = set()
-
-            for x in cargas:
-                total_bultos += x.bultos
-                total_bruto += x.bruto
-
-                volumen = x.bruto  # Por defecto, se usa el peso bruto si no se calcula el volumen
-
-                if houses[0].tomopeso == 2 and x.medidas:
-                    texto_medidas = '(' + str(x.bultos) + ') * ' + str(x.medidas)+' MTS'
-                    rep.medidas_text.append(texto_medidas)
-                    medidas = x.medidas.split('*')
-                    if len(medidas) == 3 and all(m.isdigit() for m in medidas):
-                        volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2]) * 166.67
-                        total_volumen += redondear_a_05_o_0(volumen)
-                    else:
-                        volumen = 'Error en medidas'
-
-                productos.add(x.producto.descripcion)
-            total=0
-            if master.aplicable is not None:
-                aplicable = master.aplicable
-                total += round(aplicable * float(total_tarifa), 2)
-            # Guardar solo un registro con los totales
-            rep.mercaderias.append([
-                total_bultos, total_bruto, 'K', '',
-                total_volumen if houses[0].tomopeso == 2 else total_bruto,
-                total_tarifa,aplicable, total,
-                ', '.join(productos)  # Unir los productos en una sola cadena
-            ])
-
-        rep.posicion = master.posicion
-        """ GASTOS """
-        gastos = ExportServireserva.objects.filter(numero=master.numero)
-
-        if gastos.count() > 0:
-            for g in gastos:
-                if g.modo == 'Collect':
-                    if g.tipogasto == 'OTHER':
-                        rep.othcol+=g.costo
-                        rep.total_precio_c+=g.costo
-                    elif g.tipogasto == 'DUE CARRIER':
-                        rep.carriercol += g.costo
-                        rep.total_precio_c+=g.costo
-                    elif g.tipogasto == 'TAX':
-                        rep.taxcol += g.costo
-                        rep.total_precio_c+=g.costo
-                    elif g.tipogasto == 'VALUATION CHARGES':
-                        rep.valcol += g.costo
-                        rep.total_precio_c+=g.costo
-
-                    servicio = Servicios.objects.get(codigo=g.servicio).nombre
-                    rep.otros_gastos += str(servicio if servicio else None)+' '+str(round(g.costo,2)) +'&nbsp;&nbsp;&nbsp;'
-                else:
-                    if g.tipogasto == 'OTHER':
-                        rep.othppd+=g.costo
-                        rep.total_precio_p+=g.costo
-                    elif g.tipogasto == 'DUE CARRIER':
-                        rep.carrierppd += g.costo
-                        rep.total_precio_p+=g.costo
-                    elif g.tipogasto == 'TAX':
-                        rep.taxppd += g.costo
-                        rep.total_precio_p+=g.costo
-                    elif g.tipogasto == 'VALUATION CHARGES':
-                        rep.valppd += g.costo
-                        rep.total_precio_p+=g.costo
-
-                    servicio = Servicios.objects.get(codigo=g.servicio).nombre
-                    rep.otros_gastos += str(servicio if servicio else None) +' '+ str(round(g.costo, 2)) + '&nbsp;&nbsp;&nbsp;'
-
-
-        """ OUTPUT """
-        name = 'HWBL_' + str(master.numero)
-        output = str(BASE_DIR) + '/archivos/' + name + '.pdf'
-        if draft is not None:
-            rep.generar_awb(output,fondo='carrier_hawb.jpg')
-            rep.generar_awb(output,fondo='dorso01.jpg',dorso=1)
-            rep.generar_awb(output,fondo='consignee.jpg')
-            rep.generar_awb(output,fondo='dorso02.jpg',dorso=1)
-            rep.generar_awb(output,fondo='shipper.jpg')
-            rep.generar_awb(output,fondo='dorso03.jpg',dorso=1)
-            rep.generar_awb(output,fondo='delivery_receipt.jpg')
-            rep.generar_awb(output,fondo='dorso04.jpg',dorso=1)
-            rep.generar_awb(output,fondo='copia1.jpg')
-            rep.generar_awb(output,fondo='dorso11.jpg',dorso=1)
-            rep.generar_awb(output,fondo='copia2.jpg')
-            rep.generar_awb(output,fondo='dorso12.jpg',dorso=1)
-            rep.generar_awb(output,fondo='copia3.jpg')
-            rep.generar_awb(output,fondo='dorso13.jpg',dorso=1)
-            rep.generar_awb(output,fondo='copia4.jpg')
-            rep.generar_awb(output,fondo='dorso14.jpg',dorso=1)
-            rep.generar_awb(output,fondo='copia5.jpg')
-            rep.generar_awb(output,fondo='dorso15.jpg',dorso=1)
-            rep.generar_awb(output,fondo='copia6.jpg')
-            rep.generar_awb(output,fondo='dorso16.jpg',dorso=1)
-        else:
-            rep.generar_awb(output)
-
-
-        return rep.descargo_archivo(output)
-
-    except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
-        import traceback
-        print(traceback.format_exc())
-        raise Http404(f"Error: {str(e)}")
 
 def descargar_hawb_operativas_old(request,row_id,draft=None,asagreed=None):
     try:
@@ -1107,6 +914,200 @@ def cargar_preferencias(request):
     else:
         return HttpResponseBadRequest("Método no permitido.")
 
+def descargar_awb_operativas_old(request,row_id,draft=None):
+    try:
+        rep = GuiasReport()
+        master = ExportReservas.objects.get(numero=row_id)
+        houses = ExportEmbarqueaereo.objects.filter(awb=master.awb)
+
+
+        """ CONSIGNATARIO """
+        consignatario = SociosComerciales.objects.get(codigo=master.consignatario)
+        con = str(consignatario.empresa) + '<br />\n' + \
+              str(consignatario.direccion) + '<br />\n' + \
+              str(consignatario.ciudad) + '<br />\n' + \
+              str(consignatario.pais) + ' RUT: ' + str(consignatario.ruc)
+        rep.consignatario = con
+        """ SHIPPER """
+        shipper = SociosComerciales.objects.get(codigo=master.transportista)
+        con = str(shipper.empresa) + '<br />\n' + \
+              str(shipper.direccion) + '<br />\n' + \
+              str(shipper.ciudad) + '<br />\n' + \
+              str(shipper.pais) + ' RUT: ' + str(shipper.ruc)
+        rep.shipper = con
+        rep.shipper_nom = str(shipper.empresa)
+        """ NOTIFY """
+        pago = 'COLLECT' if master.pagoflete == 'C' else 'PREPAID'
+        notify = 'FREIGHT ' + pago + '<br />\n'
+        notificador = SociosComerciales.objects.get(codigo=master.consignatario)
+        notify += 'NOTIFY: ' + str(notificador.empresa) + '<br />\n' + \
+                  str(notificador.direccion) + '<br />\n' + \
+                  str(notificador.ciudad) + '<br />\n' + \
+                  str(notificador.pais) + ' RUT: ' + str(notificador.ruc)
+        rep.notify = notify
+        if master.awb is not None and len(master.awb) > 0 and master.awb != 'S/I':
+            awb = master.awb.split('-')
+            rep.awb = awb[0] + '   MVD   ' + awb[1]
+            rep.awb_sf=master.awb
+
+        #if houses[0].hawb is not None and len(houses[0].hawb) > 0 and houses[0].hawb != 'S/I':
+            #rep.hawb = houses[0].hawb
+        trasbordos = ExportConexreserva.objects.filter(numero=master.numero).order_by('llegada', 'id')
+        arraydestinos = []
+
+        if trasbordos.exists():
+            rep.routing += 'MONTEVIDEO (' + str(trasbordos[0].origen)
+            rep.compania = trasbordos[0].ciavuelo
+            rep.destino = str(trasbordos[0].destino)
+
+            for index, x in enumerate(trasbordos):
+                arraydestinos.append(str(x.destino) + '    ' + str(x.ciavuelo)[:2])
+
+                fecha_str = f"{x.ciavuelo}{x.vuelo}/{x.salida.strftime('%d-%B')[:6].upper()} "
+
+                if index % 2 == 0:
+                    rep.fechas += fecha_str
+                else:
+                    rep.fechas2 += fecha_str
+
+                rep.routing += '/' + str(x.destino)
+                rep.final = str(x.destino)
+
+        arraydestinos.reverse()
+        flag = 0
+        if len(arraydestinos) > 0:
+            for x in arraydestinos:
+                if flag < 2:
+                    rep.arraydestinos = x + '   ' + rep.arraydestinos
+                    flag += 1
+        if len(rep.routing) > 0:
+            rep.routing += ')'
+        ciudad = Ciudades.objects.filter(codigo=rep.final)
+        if ciudad.count() > 0:
+            rep.airport_final = ciudad[0].nombre
+        rep.modopago = 'Collect' if master.pagoflete == 'C' else 'Prepaid'
+        if master.pagoflete == 'C':
+            rep.pago = 'CC          C            C'
+        else:
+            rep.pago = 'PP    P           P'
+        cargas = ExportCargaaerea.objects.filter(numero=houses[0].numero)
+
+        if cargas.exists():
+            # Inicializar acumuladores
+            total_bultos = 0
+            total_bruto = 0
+            total_volumen = 0
+            total_tarifa = master.tarifaawb
+            aplicable = 0
+            total = 0
+            productos = set()
+
+            for x in cargas:
+                total_bultos += x.bultos
+                total_bruto += x.bruto
+
+                volumen = x.bruto  # Por defecto, se usa el peso bruto si no se calcula el volumen
+
+                if houses[0].tomopeso == 2 and x.medidas:
+                    texto_medidas = '(' + str(x.bultos) + ') * ' + str(x.medidas)+' MTS'
+                    rep.medidas_text.append(texto_medidas)
+                    medidas = x.medidas.split('*')
+                    if len(medidas) == 3 and all(m.isdigit() for m in medidas):
+                        volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2]) * 166.67
+                        total_volumen += redondear_a_05_o_0(volumen)
+                    else:
+                        volumen = 'Error en medidas'
+
+                productos.add(x.producto.descripcion)
+            total=0
+            if master.aplicable is not None:
+                aplicable = master.aplicable
+                total += round(aplicable * float(total_tarifa), 2)
+            # Guardar solo un registro con los totales
+            rep.mercaderias.append([
+                total_bultos, total_bruto, 'K', '',
+                total_volumen if houses[0].tomopeso == 2 else total_bruto,
+                total_tarifa,aplicable, total,
+                ', '.join(productos)  # Unir los productos en una sola cadena
+            ])
+
+        rep.posicion = master.posicion
+        """ GASTOS """
+        gastos = ExportServireserva.objects.filter(numero=master.numero)
+
+        if gastos.count() > 0:
+            for g in gastos:
+                if g.modo == 'Collect':
+                    if g.tipogasto == 'OTHER':
+                        rep.othcol+=g.costo
+                        rep.total_precio_c+=g.costo
+                    elif g.tipogasto == 'DUE CARRIER':
+                        rep.carriercol += g.costo
+                        rep.total_precio_c+=g.costo
+                    elif g.tipogasto == 'TAX':
+                        rep.taxcol += g.costo
+                        rep.total_precio_c+=g.costo
+                    elif g.tipogasto == 'VALUATION CHARGES':
+                        rep.valcol += g.costo
+                        rep.total_precio_c+=g.costo
+
+                    servicio = Servicios.objects.get(codigo=g.servicio).nombre
+                    rep.otros_gastos += str(servicio if servicio else None)+' '+str(round(g.costo,2)) +'&nbsp;&nbsp;&nbsp;'
+                else:
+                    if g.tipogasto == 'OTHER':
+                        rep.othppd+=g.costo
+                        rep.total_precio_p+=g.costo
+                    elif g.tipogasto == 'DUE CARRIER':
+                        rep.carrierppd += g.costo
+                        rep.total_precio_p+=g.costo
+                    elif g.tipogasto == 'TAX':
+                        rep.taxppd += g.costo
+                        rep.total_precio_p+=g.costo
+                    elif g.tipogasto == 'VALUATION CHARGES':
+                        rep.valppd += g.costo
+                        rep.total_precio_p+=g.costo
+
+                    servicio = Servicios.objects.get(codigo=g.servicio).nombre
+                    rep.otros_gastos += str(servicio if servicio else None) +' '+ str(round(g.costo, 2)) + '&nbsp;&nbsp;&nbsp;'
+
+
+        """ OUTPUT """
+        name = 'HWBL_' + str(master.numero)
+        output = str(BASE_DIR) + '/archivos/' + name + '.pdf'
+        if draft is not None:
+            rep.generar_awb(output,fondo='carrier_hawb.jpg')
+            rep.generar_awb(output,fondo='dorso01.jpg',dorso=1)
+            rep.generar_awb(output,fondo='consignee.jpg')
+            rep.generar_awb(output,fondo='dorso02.jpg',dorso=1)
+            rep.generar_awb(output,fondo='shipper.jpg')
+            rep.generar_awb(output,fondo='dorso03.jpg',dorso=1)
+            rep.generar_awb(output,fondo='delivery_receipt.jpg')
+            rep.generar_awb(output,fondo='dorso04.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia1.jpg')
+            rep.generar_awb(output,fondo='dorso11.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia2.jpg')
+            rep.generar_awb(output,fondo='dorso12.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia3.jpg')
+            rep.generar_awb(output,fondo='dorso13.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia4.jpg')
+            rep.generar_awb(output,fondo='dorso14.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia5.jpg')
+            rep.generar_awb(output,fondo='dorso15.jpg',dorso=1)
+            rep.generar_awb(output,fondo='copia6.jpg')
+            rep.generar_awb(output,fondo='dorso16.jpg',dorso=1)
+        else:
+            rep.generar_awb(output)
+
+
+        return rep.descargo_archivo(output)
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        import traceback
+        print(traceback.format_exc())
+        raise Http404(f"Error: {str(e)}")
 
 def eliminar_preferencia(request):
     if request.method == "POST":
@@ -1326,7 +1327,7 @@ def obtener_datos_guia(row_id):
                     data['final']=xN.destino
 
 
-        data['airport_departure'] += ')' if data['airport_departure'] else ''
+        data['airport_departure'] += ' (MVD/'+str(data['to_1'])+')'
         data['array_destinos'] = '   '.join(reversed(destinos[:2]))
 
         ciudad = Ciudades.objects.filter(codigo=data['final'])
@@ -1349,7 +1350,7 @@ def obtener_datos_guia(row_id):
         data['mercaderias'] = []
         data['volumen_total_embarque'] = 0
         top_base = 1030
-        incremento = 10
+        incremento = 30
 
         if cargas.exists():
             total_bultos = total_bruto = total_total = 0
@@ -1448,10 +1449,20 @@ def obtener_datos_guia(row_id):
 
             data['otros_gastos'] += f"{round(g.precio, 2)}   "
 
+            data['valcol']=round(Decimal(data['valcol']),2)
+            data['valppd']=round(Decimal(data['valppd']),2)
+            data['carriercol']=round(Decimal(data['carriercol']),2)
+            data['carrierppd']=round(Decimal(data['carrierppd']),2)
+            data['agentcol']=round(Decimal(data['agentcol']),2)
+            data['agentppd']=round(Decimal(data['agentppd']),2)
+            data['agentppd']=round(Decimal(data['agentppd']),2)
+            data['total_prepaid']=round(Decimal(data['total_prepaid']),2)
+            data['total_collect']=round(Decimal(data['total_collect']),2)
+
         if house.pagoflete=='C':
-            data['total_collect'] += Decimal(data['collect'] or 0)
+            data['total_collect'] += round(Decimal(data['collect'] or 0),2)
         else:
-            data['total_prepaid'] += Decimal(data['prepaid'] or 0)
+            data['total_prepaid'] += round(Decimal(data['prepaid'] or 0),2)
 
 
         return data
@@ -1525,7 +1536,7 @@ def guardar_hawb(request, row_id):
             guia.notify = request.POST.get("notify", "")
             guia.currency = request.POST.get("currency", "")
             guia.fecha_ingreso=datetime.datetime.now()
-            guia.numero=row_id;
+            guia.numero=row_id
             # Mercaderías
             mercaderias = []
             i = 1
@@ -1548,7 +1559,6 @@ def guardar_hawb(request, row_id):
         except Exception as e:
             return JsonResponse({'success': False, 'mensaje': str(e)})
     return JsonResponse({'success': False, 'mensaje': 'Método inválido'})
-
 
 def descargar_hawb_operativas(request,row_id,draft=None,asagreed=None):
     try:
@@ -1602,7 +1612,7 @@ def descargar_hawb_operativas(request,row_id,draft=None,asagreed=None):
             rep.by_first_carrier = carrier.empresa
 
             trasbordos = list(ExportConexaerea.objects.filter(numero=house.numero).order_by('llegada', 'id'))
-            rep.airport_departure = "MONTEVIDEO"
+            rep.airport_departure = 'MONTEVIDEO (MVD/'+str(trasbordos[0].origen)+')'
             rep.to_1 = rep.to_2 = rep.to_3 = ''
             rep.by_cia_1 = rep.by_cia_2 = rep.by_cia_3 = ''
             rep.vuelos1 = rep.vuelos2 = ''
@@ -1761,3 +1771,613 @@ def descargar_hawb_operativas(request,row_id,draft=None,asagreed=None):
         import traceback
         print(traceback.format_exc())
         raise Http404(f"Error: {str(e)}")
+
+#editar guias madre
+
+
+def editar_awb(request, row_id):
+    try:
+        imagen_path = os.path.join(settings.BASE_DIR,'cargosystem', 'static', 'images', 'guias', 'normal.jpg')
+
+
+        if not os.path.exists(imagen_path):
+            raise FileNotFoundError(f"No se encontró la imagen: {imagen_path}")
+
+        with open(imagen_path, 'rb') as img_file:
+            img_b64 = b64encode(img_file.read()).decode('utf-8')
+        guias = GuiasMadres.objects.filter(numero=row_id).order_by('-fecha_ingreso')
+
+        if guias.exists():
+            guia_existente = guias.first()
+            datos = model_to_dict(guia_existente)
+        else:
+            datos = obtener_datos_guia_madre(row_id)
+        return render(request, 'expaerea/editar_awb.html', {
+            'imagen': img_b64,
+            'datos': datos,
+            'row_id': row_id,
+        })
+    except Exception as e:
+        messages.error(request,str(e))
+        return HttpResponseRedirect('/')
+
+def obtener_datos_guia_madre(row_id):
+    try:
+        data = {
+            'numero':row_id,
+            'total_bultos': 0,
+            'total_pesos': 0,
+            'total_total': 0,
+            'posicion': '',
+            'consignatario':'',
+            'shipper':'',
+            'awb_sf':'',
+            'awb1':'',
+            'awb2':'',
+            'awb3':'',
+            'hawb':'',
+            'empresa':'',
+            'issuing_carrier':'',
+            'info':'',
+            'vuelos1':'',
+            'vuelos2':'',
+            'airport_departure':'',
+            'airport_final':'',
+            'final':'',
+            'by_cia_1':'',
+            'by_cia_3':'',
+            'by_cia_2':'',
+            'to_1':'',
+            'to_2':'',
+            'by_first_carrier':'',
+            'array_destinos':'',
+            'modopago':'',
+            'cc1': '',
+            'cc2': '',
+            'pp1': '',
+            'pp2': '',
+            'pago_code': '',
+            'mercaderias': [],
+            'medidas_text': [],
+            'volumen_total_embarque': 0,
+            'valppd': 0,
+            'valcol': 0,
+            'prepaid': 0,
+            'collect': 0,
+            'taxppd': 0,
+            'taxcol': 0,
+            'agentppd': 0,
+            'agentcol': 0,
+            'carrierppd': 0,
+            'carriercol': 0,
+            'total_prepaid': 0,
+            'total_collect': 0,
+            'otros_gastos': '',
+            'shipper_signature': '',
+            'carrier_signature': '',
+            'amount_insurance': 'NIL',
+            'handling': '',
+            'declared_value_for_carriage': 'NVD',
+            'declared_value_for_customs': 'NCV',
+            'iata_code_agente': '94-1-0046',
+            'account_nro': '',
+            'notify': '',
+            'currency': '',
+            'descripcion_mercaderias': '',
+        }
+
+        master = ExportReservas.objects.get(numero=row_id)
+
+        # CONSIGNATARIO
+        consignatario = SociosComerciales.objects.get(codigo=master.consignatario)
+        carrier = SociosComerciales.objects.get(codigo=master.transportista)
+
+        data['consignatario'] = f"{consignatario.empresa}\n{consignatario.direccion}\n{consignatario.ciudad}\n{consignatario.pais} RUT: {consignatario.ruc} PH: {consignatario.telefono}"
+        data['shipper']=settings.EMPRESA_HAWB_editar
+        data['issuing_carrier']=settings.EMPRESA_AWB_editar
+        data['by_first_carrier']=carrier.empresa
+        # SHIPPER
+        empresa = SociosComerciales.objects.get(codigo=master.transportista)
+        data['empresa'] = f"{empresa.empresa}\n{empresa.direccion}\n{empresa.ciudad}\n{empresa.pais} RUT: {empresa.ruc} PH: {empresa.telefono}"
+        data['shipper_signature'] = 'OCEANLINK'
+        data['carrier_signature'] = (
+                'OCEANLINK AS AGENT\n'
+                'OF DE CARRIER ' + str(empresa.empresa) + '\n' +
+                datetime.datetime.now().strftime('%Y-%m-%d') + ' MONTEVIDEO\n' +
+                'OCEAN LINK LTDA / LLB'
+        )
+
+        # NOTIFY
+        pago = 'COLLECT' if master.pagoflete == 'C' else 'PREPAID'
+        notificador = SociosComerciales.objects.get(codigo=master.consignatario)
+        data['info'] = f"FREIGHT {pago}\nNOTIFY: {notificador.empresa}\n{notificador.direccion}\n{notificador.ciudad}\n{notificador.pais} RUT: {notificador.ruc} PH: {notificador.telefono}"
+
+        # AWB y HAWB
+        if master.awb and master.awb != 'S/I':
+            awb = master.awb.split('-')
+            data['awb1'] = awb[0]
+            data['awb2'] = "MVD"
+            data['awb3'] = awb[1]
+            data['hawb'] = master.awb
+
+        # TRANSBORDOS
+        trasbordos = list(ExportConexreserva.objects.filter(numero=master.numero).order_by('llegada', 'id'))
+        data['airport_departure'] = "MONTEVIDEO"
+        data['vuelos1'] = ''
+        data['vuelos2'] = ''
+        data['array_destinos'] = ''
+        data['to_1'] = ''
+        data['to_2'] = ''
+        data['to_3'] = ''
+        data['by_cia'] = ''
+        data['by_cia_2'] = ''
+        data['by_cia_3'] = ''
+
+        destinos = []
+
+        if trasbordos:
+            count = len(trasbordos)
+
+            if count == 1:
+                data['to_1'] = str(trasbordos[0].destino)
+                data['by_cia_1'] = trasbordos[0].ciavuelo
+
+            elif count == 2:
+                data['to_1'] = str(trasbordos[0].destino)
+                data['by_cia_1'] = trasbordos[0].ciavuelo
+
+                data['to_2'] = str(trasbordos[1].destino)
+                data['by_cia_2'] = trasbordos[1].ciavuelo
+
+            elif count == 3:
+                data['to_1'] = str(trasbordos[0].destino)
+                data['by_cia_1'] = trasbordos[0].ciavuelo
+
+                data['to_2'] = str(trasbordos[1].destino)
+                data['by_cia_2'] = trasbordos[1].ciavuelo
+
+                data['to_3'] = str(trasbordos[2].destino)
+                data['by_cia_3'] = trasbordos[2].ciavuelo
+
+            else:  # más de 3
+                data['to_1'] = str(trasbordos[0].destino)
+                data['by_cia_1'] = trasbordos[0].ciavuelo
+
+                data['to_2'] = str(trasbordos[1].destino)
+                data['by_cia_2'] = trasbordos[1].ciavuelo
+
+                data['to_3'] = str(trasbordos[-1].destino)
+                data['by_cia_3'] = trasbordos[-1].ciavuelo
+
+            data['vuelos1'] = ''
+            data['vuelos2'] = ''
+
+            if trasbordos:
+                count = len(trasbordos)
+
+                if count == 1:
+                    x = trasbordos[0]
+                    data['vuelos1'] = f"{x.ciavuelo}{x.vuelo}/{x.salida.strftime('%d-%B')[:6].upper()} "
+                    data['final']=x.destino
+
+                elif count == 2:
+                    x1, x2 = trasbordos[0], trasbordos[1]
+                    data['vuelos1'] = f"{x1.ciavuelo}{x1.vuelo}/{x1.salida.strftime('%d-%B')[:6].upper()} "
+                    data['vuelos2'] = f"{x2.ciavuelo}{x2.vuelo}/{x2.salida.strftime('%d-%B')[:6].upper()} "
+                    data['final']=x2.destino
+
+                else:  # más de 2 vuelos
+                    x1, xN = trasbordos[0], trasbordos[-1]
+                    data['vuelos1'] = f"{x1.ciavuelo}{x1.vuelo}/{x1.salida.strftime('%d-%B')[:6].upper()} "
+                    data['vuelos2'] = f"{xN.ciavuelo}{xN.vuelo}/{xN.salida.strftime('%d-%B')[:6].upper()} "
+                    data['final']=xN.destino
+
+        data['airport_departure'] += ' (MVD/'+str(data['to_1'])+')'
+
+        data['array_destinos'] = '   '.join(reversed(destinos[:2]))
+
+        ciudad = Ciudades.objects.filter(codigo=data['final'])
+        if ciudad.exists():
+            data['airport_final'] = ciudad[0].nombre
+
+        # PAGO
+        data['modopago'] = 'Collect' if master.pagoflete == 'C' else 'Prepaid'
+        if master.pagoflete=='C':
+            data['pago_code']='CC'
+            data['cc1']='C'
+            data['cc2']='C'
+        else:
+            data['pago_code']='PP'
+            data['pp1']='P'
+            data['pp2']='P'
+
+        # Cargas y mercadería
+        houses = ExportEmbarqueaereo.objects.only('numero', 'hawb').filter(awb=master.awb)
+        house_numeros = houses.values_list('numero', flat=True)
+        cargas = ExportCargaaerea.objects.filter(numero__in=house_numeros)
+
+        data['mercaderias'] = []
+        data['descripcion_mercaderias'] = ""  # una sola descripción común
+        data['volumen_total_embarque'] = 0
+        top_base = 1030
+        incremento = 30
+
+        if cargas.exists():
+            total_bultos = total_bruto = total_total = 0
+            medidas_descripciones = []
+
+            # Generar descripción consolidada
+            hawbs = [h.hawb for h in houses if h.hawb]
+
+            for carga in cargas:
+                if carga.medidas:
+                    medidas_descripciones.append(f"({carga.bultos}) * {carga.medidas} MTS")
+
+            descripcion_unica = (
+                    "CONSOLIDATION AS PER ATTACHED CARGO MANIFEST\n" +
+                    "; ".join(hawbs) + "\n" +
+                    "\n".join(medidas_descripciones)
+            )
+            data['descripcion_mercaderias'] = descripcion_unica
+
+            # Generar filas sin descripción
+            for idx, carga in enumerate(cargas):
+                bruto = carga.bruto or 0
+                valor_aplicable = carga.aplicable or 0
+
+                if valor_aplicable == 0:
+                    aplicable_display = 'MIN'
+                    total = float(master.tarifaawb)
+                else:
+                    aplicable_display = round(valor_aplicable, 2)
+                    total = round(valor_aplicable * float(master.tarifaawb), 2)
+
+                data['mercaderias'].append({
+                    'bultos': carga.bultos,
+                    'peso': bruto,
+                    'unidad': 'K',
+                    'aplicable': aplicable_display,
+                    'tarifa': master.tarifaawb,
+                    'total': total,
+                    'top': top_base + (idx * incremento),
+                })
+
+                total_bultos += carga.bultos
+                total_bruto += bruto
+                total_total += total
+
+            data['total_bultos'] = total_bultos
+            data['total_pesos'] = total_bruto
+            data['total_total'] = total_total
+
+        data['posicion'] = master.posicion
+
+        if master.pagoflete=='C':
+            data['collect']=data['total_total']
+        else:
+            data['prepaid']=data['total_total']
+
+        # GASTOS
+        gastos = ExportServireserva.objects.filter(numero=master.numero)
+        for g in gastos:
+            if g.costo == 0:
+                continue
+
+            if g.modo == 'C':  # COLLECT
+                if g.tipogasto == 'OTHER':
+                    data['valcol'] += g.costo
+                elif g.tipogasto == 'DUE CARRIER':
+                    data['carriercol'] += g.costo
+                elif g.tipogasto == 'DUE AGENT':
+                    data['agentcol'] += g.costo
+                data['total_collect'] += g.costo
+            else:  # PREPAID
+                if g.tipogasto == 'OTHER':
+                    data['valppd'] += g.costo
+                elif g.tipogasto == 'DUE CARRIER':
+                    data['carrierppd'] += g.costo
+                elif g.tipogasto == 'DUE AGENT':
+                    data['agentppd'] += g.costo
+                data['total_prepaid'] += g.costo
+
+            data['otros_gastos'] += f"{round(g.costo, 2)}   "
+
+            data['valcol']=round(Decimal(data['valcol']),2)
+            data['valppd']=round(Decimal(data['valppd']),2)
+            data['carriercol']=round(Decimal(data['carriercol']),2)
+            data['carrierppd']=round(Decimal(data['carrierppd']),2)
+            data['agentcol']=round(Decimal(data['agentcol']),2)
+            data['agentppd']=round(Decimal(data['agentppd']),2)
+            data['agentppd']=round(Decimal(data['agentppd']),2)
+            data['total_prepaid']=round(Decimal(data['total_prepaid']),2)
+            data['total_collect']=round(Decimal(data['total_collect']),2)
+
+        if master.pagoflete=='C':
+            data['total_collect'] += round(Decimal(data['collect'] or 0),2)
+        else:
+            data['total_prepaid'] += round(Decimal(data['prepaid'] or 0),2)
+
+
+        return data
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        raise Http404(f"Error: {str(e)}")
+
+def descargar_awb_operativas(request,row_id,draft=None):
+    try:
+        rep = GuiasReport()
+        ultima_guia = GuiasMadres.objects.filter(numero=row_id).order_by('-fecha_ingreso').first()
+        master = ExportReservas.objects.get(numero=row_id)
+
+        if ultima_guia:
+            datos_previos = model_to_dict(ultima_guia)
+            for key, value in datos_previos.items():
+                if hasattr(rep, key):
+                    setattr(rep, key, value)
+        else:
+            # CONSIGNATARIO
+            consignatario = SociosComerciales.objects.get(codigo=master.consignatario)
+            carrier = SociosComerciales.objects.get(codigo=master.transportista)
+
+            rep.numero = row_id
+            rep.posicion = master.posicion
+            rep.consignatario = f"{consignatario.empresa}\n{consignatario.direccion}\n{consignatario.ciudad}\n{consignatario.pais} RUT: {consignatario.ruc} PH: {consignatario.telefono}"
+            rep.shipper = settings.EMPRESA_HAWB_editar
+            rep.issuing_carrier = settings.EMPRESA_AWB_editar
+            rep.by_first_carrier = carrier.empresa
+
+            rep.empresa = f"{carrier.empresa}\n{carrier.direccion}\n{carrier.ciudad}\n{carrier.pais} RUT: {carrier.ruc} PH: {carrier.telefono}"
+            rep.shipper_signature = 'OCEANLINK'
+            rep.carrier_signature = (
+                'OCEANLINK AS AGENT\n'
+                f'OF DE CARRIER {carrier.empresa}\n' +
+                datetime.datetime.now().strftime('%Y-%m-%d') + ' MONTEVIDEO\n' +
+                'OCEAN LINK LTDA / LLB'
+            )
+
+            pago = 'COLLECT' if master.pagoflete == 'C' else 'PREPAID'
+            rep.modopago = pago.capitalize()
+            rep.pago_code = 'CC' if master.pagoflete == 'C' else 'PP'
+            rep.cc1 = 'C' if master.pagoflete == 'C' else ''
+            rep.cc2 = 'C' if master.pagoflete == 'C' else ''
+            rep.pp1 = 'P' if master.pagoflete == 'P' else ''
+            rep.pp2 = 'P' if master.pagoflete == 'P' else ''
+
+            rep.info = f"FREIGHT {pago}\nNOTIFY: {consignatario.empresa}\n{consignatario.direccion}\n{consignatario.ciudad}\n{consignatario.pais} RUT: {consignatario.ruc} PH: {consignatario.telefono}"
+
+            if master.awb and master.awb != 'S/I':
+                awb = master.awb.split('-')
+                rep.awb1 = awb[0]
+                rep.awb2 = "MVD"
+                rep.awb3 = awb[1]
+                rep.awb_sf = master.awb
+                rep.hawb = master.awb
+
+            # Conexiones
+            trasbordos = list(ExportConexreserva.objects.filter(numero=master.numero).order_by('llegada', 'id'))
+            rep.airport_departure = 'MONTEVIDEO (MVD/'+str(trasbordos[0].origen)+')'
+
+            rep.to_1 = rep.to_2 = rep.to_3 = ''
+            rep.by_cia_1 = rep.by_cia_2 = rep.by_cia_3 = ''
+            rep.vuelos1 = rep.vuelos2 = ''
+            rep.final = ''
+
+            if trasbordos:
+                destinos = []
+                if len(trasbordos) >= 1:
+                    rep.to_1 = str(trasbordos[0].destino)
+                    rep.by_cia_1 = trasbordos[0].ciavuelo
+                if len(trasbordos) >= 2:
+                    rep.to_2 = str(trasbordos[1].destino)
+                    rep.by_cia_2 = trasbordos[1].ciavuelo
+                if len(trasbordos) >= 3:
+                    rep.to_3 = str(trasbordos[2].destino)
+                    rep.by_cia_3 = trasbordos[2].ciavuelo
+
+                x1, xN = trasbordos[0], trasbordos[-1]
+                rep.vuelos1 = f"{x1.ciavuelo}{x1.vuelo}/{x1.salida.strftime('%d-%B')[:6].upper()}"
+                if len(trasbordos) > 1:
+                    rep.vuelos2 = f"{xN.ciavuelo}{xN.vuelo}/{xN.salida.strftime('%d-%B')[:6].upper()}"
+                rep.final = xN.destino
+
+                ciudad = Ciudades.objects.filter(codigo=rep.final).first()
+                if ciudad:
+                    rep.airport_final = ciudad.nombre
+
+            # Mercaderías
+            houses = ExportEmbarqueaereo.objects.only('numero', 'hawb').filter(awb=master.awb)
+            house_numeros = houses.values_list('numero', flat=True)
+            cargas = ExportCargaaerea.objects.filter(numero__in=house_numeros)
+
+            rep.mercaderias = []
+            rep.descripcion_mercaderias = ""
+            rep.volumen_total_embarque = Decimal('0.00')
+            top_base = 1030
+            incremento = 30
+            rep.total_bultos = rep.total_pesos = rep.total_total = 0
+
+            hawbs = [h.hawb for h in houses if h.hawb]
+            medidas_descripciones = []
+
+            for idx, carga in enumerate(cargas):
+                bruto = carga.bruto or 0
+                valor_aplicable = carga.aplicable or 0
+                total = float(master.tarifaawb) if valor_aplicable == 0 else round(valor_aplicable * float(master.tarifaawb), 2)
+                aplicable_display = 'MIN' if valor_aplicable == 0 else round(valor_aplicable, 2)
+
+                if carga.medidas:
+                    medidas_descripciones.append(f"({carga.bultos}) * {carga.medidas} MTS")
+
+                rep.mercaderias.append({
+                    'bultos': carga.bultos,
+                    'peso': bruto,
+                    'unidad': 'K',
+                    'aplicable': aplicable_display,
+                    'tarifa': master.tarifaawb,
+                    'total': total,
+                    'top': top_base + (idx * incremento),
+                })
+
+                rep.total_bultos += carga.bultos
+                rep.total_pesos += bruto
+                rep.total_total += total
+
+            rep.descripcion_mercaderias = (
+                "CONSOLIDATION AS PER ATTACHED CARGO MANIFEST\n" +
+                "; ".join(hawbs) + "\n" +
+                "\n".join(medidas_descripciones)
+            )
+
+            if rep.modopago == 'Collect':
+                rep.collect = rep.total_total
+            else:
+                rep.prepaid = rep.total_total
+
+            # Gastos
+            gastos = ExportServireserva.objects.filter(numero=master.numero)
+            rep.otros_gastos = ''
+            for g in gastos:
+                if g.costo == 0:
+                    continue
+                if g.modo == 'C':
+                    if g.tipogasto == 'OTHER':
+                        rep.valcol += g.costo
+                    elif g.tipogasto == 'DUE CARRIER':
+                        rep.carriercol += g.costo
+                    elif g.tipogasto == 'DUE AGENT':
+                        rep.agentcol += g.costo
+                    rep.total_collect += g.costo
+                else:
+                    if g.tipogasto == 'OTHER':
+                        rep.valppd += g.costo
+                    elif g.tipogasto == 'DUE CARRIER':
+                        rep.carrierppd += g.costo
+                    elif g.tipogasto == 'DUE AGENT':
+                        rep.agentppd += g.costo
+                    rep.total_prepaid += g.costo
+
+                rep.otros_gastos += f"{round(g.costo, 2)}   "
+
+            if rep.modopago == 'Collect':
+                rep.total_collect += round(Decimal(rep.collect or 0), 2)
+            else:
+                rep.total_prepaid += round(Decimal(rep.prepaid or 0), 2)
+
+        name = 'AWB_' + str(rep.numero)
+        output = str(BASE_DIR) + f'/archivos/{name}.pdf'
+
+        if draft is not None:
+            rep.generar_awb(output, fondo='carrier_hawb.jpg')
+            rep.generar_awb(output, fondo='dorso01.jpg', dorso=1)
+            rep.generar_awb(output, fondo='consignee.jpg')
+            rep.generar_awb(output, fondo='dorso02.jpg', dorso=1)
+            rep.generar_awb(output, fondo='shipper.jpg')
+            rep.generar_awb(output, fondo='dorso03.jpg', dorso=1)
+            rep.generar_awb(output, fondo='delivery_receipt.jpg')
+            rep.generar_awb(output, fondo='dorso04.jpg', dorso=1)
+            rep.generar_awb(output, fondo='copia1.jpg')
+            rep.generar_awb(output, fondo='copia2.jpg')
+            rep.generar_awb(output, fondo='copia3.jpg')
+            rep.generar_awb(output, fondo='copia4.jpg')
+            rep.generar_awb(output, fondo='copia5.jpg')
+            rep.generar_awb(output, fondo='copia6.jpg')
+        else:
+            rep.generar_awb(output)
+
+        return rep.descargo_archivo(output)
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        raise Http404(f"Error: {str(e)}")
+
+def guardar_awb(request, row_id):
+    if request.method == 'POST':
+        try:
+            guia = GuiasMadres()
+            # Campos numéricos
+            guia.total_bultos = int(request.POST.get("total_bultos", 0) or 0)
+            guia.total_pesos = Decimal(request.POST.get("total_pesos", 0) or 0)
+            guia.total_total = Decimal(request.POST.get("total_total", 0) or 0)
+            guia.volumen_total_embarque = Decimal(request.POST.get("volumen_total_embarque", 0) or 0)
+            guia.valppd = Decimal(request.POST.get("valppd", 0) or 0)
+            guia.valcol = Decimal(request.POST.get("valcol", 0) or 0)
+            guia.prepaid = Decimal(request.POST.get("prepaid", 0) or 0)
+            guia.collect = Decimal(request.POST.get("collect", 0) or 0)
+            guia.taxppd = Decimal(request.POST.get("taxppd", 0) or 0)
+            guia.taxcol = Decimal(request.POST.get("taxcol", 0) or 0)
+            guia.agentppd = Decimal(request.POST.get("agentppd", 0) or 0)
+            guia.agentcol = Decimal(request.POST.get("agentcol", 0) or 0)
+            guia.carrierppd = Decimal(request.POST.get("carrierppd", 0) or 0)
+            guia.carriercol = Decimal(request.POST.get("carriercol", 0) or 0)
+            guia.total_prepaid = Decimal(request.POST.get("total_prepaid", 0) or 0)
+            guia.total_collect = Decimal(request.POST.get("total_collect", 0) or 0)
+
+            # Campos de texto
+            guia.posicion = request.POST.get("posicion", "")
+            guia.consignatario = request.POST.get("consignatario", "")
+            guia.shipper = request.POST.get("shipper", "")
+            guia.awb_sf = request.POST.get("awb", "")
+            guia.awb1 = request.POST.get("awb1", "")
+            guia.awb2 = request.POST.get("awb2", "")
+            guia.awb3 = request.POST.get("awb3", "")
+            guia.hawb = request.POST.get("hawb", "")
+            guia.empresa = request.POST.get("empresa", "")
+            guia.info = request.POST.get("info", "")
+            guia.vuelos1 = request.POST.get("vuelos1", "")
+            guia.vuelos2 = request.POST.get("vuelos2", "")
+            guia.airport_departure = request.POST.get("airport_departure", "")
+            guia.airport_final = request.POST.get("airport_final", "")
+            guia.issuing_carrier = request.POST.get("issuing_carrier", "")
+            guia.final = request.POST.get("final", "")
+            guia.by_cia_1 = request.POST.get("by_cia_1", "")
+            guia.by_cia_2 = request.POST.get("by_cia_2", "")
+            guia.by_cia_3 = request.POST.get("by_cia_3", "")
+            guia.to_1 = request.POST.get("to_1", "")
+            guia.to_2 = request.POST.get("to_2", "")
+            guia.to_3 = request.POST.get("to_3", "")
+            guia.by_first_carrier = request.POST.get("by_first_carrier", "")
+            guia.array_destinos = request.POST.get("array_destinos", "")
+            guia.modopago = request.POST.get("modopago", "")
+            guia.cc1 = request.POST.get("cc1", "")
+            guia.cc2 = request.POST.get("cc2", "")
+            guia.pp1 = request.POST.get("pp1", "")
+            guia.pp2 = request.POST.get("pp2", "")
+            guia.pago_code = request.POST.get("pago_code", "")
+            guia.otros_gastos = request.POST.get("otros_gastos", "")
+            guia.shipper_signature = request.POST.get("shipper_signature", "")
+            guia.carrier_signature = request.POST.get("carrier_signature", "")
+            guia.amount_insurance = request.POST.get("amount_insurance", "")
+            guia.handling = request.POST.get("handling", "")
+            guia.declared_value_for_carriage = request.POST.get("declared_value_for_carriage", "")
+            guia.declared_value_for_customs = request.POST.get("declared_value_for_customs", "")
+            guia.iata_code_agente = request.POST.get("iata_code_agente", "")
+            guia.account_nro = request.POST.get("account_nro", "")
+            guia.notify = request.POST.get("notify", "")
+            guia.currency = request.POST.get("currency", "")
+            guia.descripcion_mercaderias = request.POST.get("descripcion_unica", "")
+            guia.fecha_ingreso=datetime.datetime.now()
+            guia.numero=row_id
+            # Mercaderías
+            mercaderias = []
+            i = 1
+            while f"bultos_{i}" in request.POST:
+                mercaderias.append({
+                    "bultos": request.POST.get(f"bultos_{i}", ""),
+                    "peso": request.POST.get(f"pesos_{i}", ""),
+                    "unidad": request.POST.get(f"unidad_{i}", ""),
+                    "aplicable": request.POST.get(f"aplicable_{i}", ""),
+                    "tarifa": request.POST.get(f"tarifa_{i}", ""),
+                    "total": request.POST.get(f"total_{i}", ""),
+                    "descripcion": request.POST.get(f"descripcion_{i}", ""),
+                    "top": request.POST.get(f"top_{i}", ""),
+                })
+                i += 1
+            guia.mercaderias = mercaderias
+
+            guia.save()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'mensaje': str(e)})
+    return JsonResponse({'success': False, 'mensaje': 'Método inválido'})

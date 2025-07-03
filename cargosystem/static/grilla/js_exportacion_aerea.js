@@ -5656,6 +5656,78 @@ function guardar_hawb(row_id) {
         alert("Error en la solicitud: " + err.message);
     });
 }
+//guias madre
+function editar_guia_madre() {
+    row = table.rows('.table-secondary').data();
+    if (row.length === 1) {
+        let numero_master=row[0][0];
+        window.location.href = `/exportacion_aerea/editar_awb/${numero_master}/`;
+    }else{
+        alert("Debes seleccionar un registro.");
+        return;
+    }
+}
+function guardar_awb(row_id) {
+    const form = document.getElementById('guias_madres_form');
+
+    // Lista de campos decimales
+    const camposDecimales = [
+        'total_pesos', 'total_total', 'volumen_total_embarque', 'valppd', 'valcol',
+        'prepaid', 'collect', 'taxppd', 'taxcol', 'agentppd', 'agentcol',
+        'carrierppd', 'carriercol', 'total_prepaid', 'total_collect'
+    ];
+
+    // Sanitizar los campos decimales
+    camposDecimales.forEach(campo => {
+        const input = form.querySelector(`[name="${campo}"]`);
+        if (input && input.value) {
+            input.value = input.value.replace(',', '.');
+        }
+    });
+
+    const mercaderiaCampos = ['peso', 'tarifa', 'total', 'aplicable'];
+
+    mercaderiaCampos.forEach(nombre => {
+        const inputs = form.querySelectorAll(`[name^="${nombre}_"]`);
+        inputs.forEach(input => {
+            if (input.value) {
+                const val = input.value.trim();
+
+                if (nombre === 'aplicable') {
+                    // Solo reemplazamos si es un número
+                    if (!isNaN(val.replace(',', '.'))) {
+                        input.value = val.replace(',', '.');
+                    }
+                } else {
+                    input.value = val.replace(',', '.');
+                }
+            }
+        });
+    });
+
+
+    const formData = new FormData(form);
+
+
+    fetch(`/exportacion_aerea/guardar_awb/${row_id}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("¡Guía guardada exitosamente!");
+        } else {
+            alert("Error al guardar: " + (data.mensaje || 'Error desconocido'));
+        }
+    })
+    .catch(err => {
+        alert("Error en la solicitud: " + err.message);
+    });
+}
 
 //modal para buscar
 function modal_buscar(){

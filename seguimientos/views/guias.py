@@ -18,34 +18,46 @@ class GuiasReport:
 
     def __init__(self):
         self.archivo = None
-        self.awb = ''
-        self.awb_sf = ''
-        self.hawb = ''
-        # VARIABLES BL
-        self.seguimiento = ''
-        # VARIABLES BL
-        self.shipper = ''
-        self.shipper_nom = ''
+        self.numero = ''
+        self.total_bultos = 0
+        self.total_pesos = 0
+        self.total_total = 0
+        self.posicion = ''
         self.consignatario = ''
-        self.empresa = settings.EMPRESA_HAWB
-        self.notify = ''
-        self.agente = settings.EMPRESA_AWB
-        self.trasbordos = ''
-        self.routing = ''
-        self.destino = ''
-        self.final = ''
-        self.airport_final = ''
-        self.compania = ''
-        self.arraydestinos = ''
+        self.shipper = ''
+        self.awb_sf = ''
+        self.awb1 = ''
+        self.awb2 = ''
+        self.awb3 = ''
+        self.hawb = ''
+        self.empresa = ''
+        self.info = ''
         self.fechas = ''
         self.fechas2 = ''
-        self.pago = ''
-        self.othppd=0
-        self.othcol=0
-        self.mercaderias = []
+        self.airport_departure = ''
+        self.airport_final = ''
+        self.final = ''
+        self.by_cia_1 = ''
+        self.by_cia_2 = ''
+        self.by_cia_3 = ''
+        self.to_1 = ''
+        self.to_2 = ''
+        self.to_3 = ''
+        self.by_first_carrier = ''
+        self.arraydestinos = ''
         self.modopago = ''
+        self.cc1 = ''
+        self.cc2 = ''
+        self.pp1 = ''
+        self.pp2 = ''
+        self.pago_code = ''
+        self.mercaderias = []
+        self.medidas_text = []
+        self.volumen_total_embarque = 0
         self.valppd = 0
         self.valcol = 0
+        self.prepaid = 0
+        self.collect = 0
         self.taxppd = 0
         self.taxcol = 0
         self.agentppd = 0
@@ -54,9 +66,22 @@ class GuiasReport:
         self.carriercol = 0
         self.total_precio_p = 0
         self.total_precio_c = 0
+        self.total_prepaid = 0
+        self.total_collect = 0
         self.otros_gastos = ''
-        self.posicion = ''
-        self.medidas_text = []
+        self.shipper_signature = ''
+        self.carrier_signature = ''
+        self.amount_insurance = 'NIL'
+        self.handling = ''
+        self.declared_value_for_carriage = 'NVD'
+        self.declared_value_for_customs = 'NCV'
+        self.iata_code_agente = ''
+        self.account_nro = ''
+        self.currency = ''
+        self.vuelos1 = ''
+        self.vuelos2 = ''
+        self.issuing_carrier = ''
+        self.descripcion_mercaderias = ''
 
     def generar_awb(self,output,fondo=None,dorso=0):
         try:
@@ -130,7 +155,7 @@ class GuiasReport:
             table.wrapOn(c, 0, 0)
             table.drawOn(c, 18 * mm, 228 * mm)
             """ NOTIFY """
-            data = [[Paragraph(self.notify, encoding='utf-8', style=style_texto_7)]]
+            data = [[Paragraph(self.info, encoding='utf-8', style=style_texto_7)]]
             table = Table(data=data, colWidths=[9 * cm, ], rowHeights=[2.1 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
@@ -140,7 +165,7 @@ class GuiasReport:
             table.wrapOn(c, 0, 0)
             table.drawOn(c, 110 * mm, 195 * mm)
             """ AGENTE """
-            data = [[Paragraph(self.agente, encoding='utf-8', style=style_texto_7)]]
+            data = [[Paragraph(self.issuing_carrier, encoding='utf-8', style=style_texto_7)]]
             table = Table(data=data, colWidths=[9 * cm, ], rowHeights=[1.6 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
@@ -150,17 +175,25 @@ class GuiasReport:
             table.wrapOn(c, 0, 0)
             table.drawOn(c, 18 * mm, 208.3 * mm)
             """ DATOS """
-            c.drawString(49,785,self.awb)
+            c.drawString(49,785,self.awb1)
+            c.drawString(76,785,self.awb2)
+            c.drawString(100,785,self.awb3)
             c.drawString(500,785,self.awb_sf)
             c.drawString(500,70,self.awb_sf)
             c.setFont("Helvetica", 8)
-            c.drawString(55,550,self.routing)
-            c.drawString(55,527,self.destino)
-            c.drawString(80,527,self.compania)
-            c.drawString(217,527,self.arraydestinos)
+            c.drawString(55,550,self.airport_departure)
+            c.drawString(55,575,self.iata_code_agente)
+            #acomodar
+            c.drawString(55,527,self.to_1)
+            c.drawString(80,527,self.by_cia_1)
+            c.drawString(55,527,self.to_2)
+            c.drawString(80,527,self.by_cia_2)
+            c.drawString(55,527,self.to_3)
+            c.drawString(80,527,self.by_cia_3)
             c.drawString(55,505,self.airport_final)
+
             """ FECHA1 """
-            data = [[Paragraph(self.fechas, encoding='utf-8', style=style_texto_6)]]
+            data = [[Paragraph(self.vuelos1, encoding='utf-8', style=style_texto_6)]]
             table = Table(data=data, colWidths=[2.5 * cm, ], rowHeights=[1 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
@@ -170,7 +203,7 @@ class GuiasReport:
             table.wrapOn(c, 0, 0)
             table.drawOn(c, 61 * mm, 172 * mm)
             """ FECHA2 """
-            data = [[Paragraph(self.fechas2, encoding='utf-8', style=style_texto_6)]]
+            data = [[Paragraph(self.vuelos2, encoding='utf-8', style=style_texto_6)]]
             table = Table(data=data, colWidths=[2.5 * cm, ], rowHeights=[1 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
@@ -181,7 +214,7 @@ class GuiasReport:
             table.drawOn(c, 83 * mm, 172 * mm)
 
             """ handling info """
-            data = [[Paragraph('MARKS: AS PER ATTACHED MANIFEST<br/><br/>ATTACHED: ENVELOPE WITH DOCS',
+            data = [[Paragraph(self.handling,
                                encoding='utf-8',
                                style=style_texto_7)]]
             table = Table(data=data, colWidths=[5.5 * cm, ], rowHeights=[1.4 * cm, ],
@@ -192,67 +225,68 @@ class GuiasReport:
                           )
             table.wrapOn(c, 0, 0)
             table.drawOn(c, 20 * mm, 158 * mm)
-
-            c.drawString(305, 527, 'USD')
-            c.drawString(332, 527, self.pago)
-            c.drawString(440, 527, 'NVD')
-            c.drawString(520, 527, 'NCV')
-            c.drawString(335, 505, 'NIL')
+            c.drawString(305, 527, self.currency)
+            c.drawString(333, 527, self.pago_code)
+            c.drawString(350, 523, self.pp1)
+            c.drawString(364, 523, self.cc1)
+            c.drawString(375, 523, self.pp2)
+            c.drawString(390, 523, self.cc2)
+            c.drawString(440, 527, self.declared_value_for_carriage)
+            c.drawString(520, 527, self.declared_value_for_customs)
+            c.drawString(335, 505, self.amount_insurance )
             """ MERCADERIAS """
             y = 420
-            bultos = 0
-            pesos = 0
-            fletes = 0
+
             if self.mercaderias:
-                m = self.mercaderias[0]
+                for m in self.mercaderias:
+                    c.drawString(52, y, str(m['bultos']))  # Bultos
+                    c.drawString(82, y, str(m['peso']))  # Peso bruto
+                    c.drawString(127, y, str(m['unidad']))  # Unidad (K)
+                    c.drawString(205, y, str(m['aplicable']))  # Aplicable
+                    c.drawString(280, y, str(m['tarifa']))  # Tarifa
+                    c.drawString(340, y, str(m['total']))  # Total
 
-                c.drawString(52, y, str(m[0]))  # Total de bultos
-                c.drawString(82, y, str(round(m[1], 2)))  # Total de peso bruto
-                c.drawString(127, y, str(m[2]))  # Unidad de medida (K)
-                c.drawString(205, y, str(m[6]))  # aplicable
-                c.drawString(280, y, str(m[5]))  # Tarifa de venta
-                c.drawString(340, y, str(m[7]))  # Total
+                    y -= 50  # espacio entre filas
 
-                # Asignar las sumas a las variables
-                bultos = m[0]
-                pesos = m[1]
-                fletes = m[7]
-
-                """ DESCRIPCION MERCADERIA """
-                texto='CONSOLIDATION AS PER ATTACHED CARGO MANIFEST '+str(self.hawb)
-                for txt in self.medidas_text:
-                    texto+='<br/>'+txt
-
-                data = [[Paragraph(str(texto), encoding='utf-8', style=style_texto_7)]]
-                table = Table(data=data, colWidths=[5 * cm, ], rowHeights=[1 * cm, ],
-                              style=[
-                                  ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
-                                  ('VALIGN', (0, 0), (0, 0), 'TOP'),
-                              ]
-                              )
+            # Mostrar descripción una sola vez
+            if hasattr(self, 'descripcion_mercaderias') and self.descripcion_mercaderias:
+                data = [[Paragraph(self.descripcion_mercaderias, encoding='utf-8', style=style_texto_7)]]
+                table = Table(
+                    data=data,
+                    colWidths=[5 * cm],
+                    style=[
+                        ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
+                        ('VALIGN', (0, 0), (0, 0), 'TOP'),
+                    ]
+                )
                 table.wrapOn(c, 0, 0)
-                table.drawOn(c, 145 * mm, 142 * mm)
-                y -= 50
-            c.drawString(52,280,str(bultos))
-            c.drawString(82,280,str(pesos))
-            c.drawString(340,280,str(fletes))
-            if self.modopago == 'Prepaid':
-                c.drawString(80,250,str(fletes))
-                c.drawString(200,250,str(''))
-                montoppd = fletes
+                table.drawOn(c, 145 * mm, 142 * mm)  # ajustar posición si hace falta
+
+            # Totales pie
+            c.drawString(52, 280, str(self.total_bultos))
+            c.drawString(82, 280, str(self.total_pesos))
+            c.drawString(340, 280, str(self.total_total))
+
+            # Prepaid o Collect
+            if self.pago_code == 'PP':
+                c.drawString(80, 250, str(self.total_total))
+                c.drawString(200, 250, '')
+                montoppd = self.total_total
                 montocol = 0
             else:
-                c.drawString(80,250,str(''))
-                c.drawString(200,250,str(fletes))
+                c.drawString(80, 250, '')
+                c.drawString(200, 250, str(self.total_total))
                 montoppd = 0
-                montocol = fletes
-            c.drawString(253,200,str(self.posicion))
-            #c.drawString(350,200,str(self.shipper_nom))
-            c.drawString(370,145,'OCEANLINK')
+                montocol = self.total_total
+
+            # Posición
+            c.drawString(253, 200, str(self.posicion))
+
+            # Shipper en posición final
+            c.drawString(300, 145, self.shipper_signature)
 
             """ otros datos """
-            data = [[Paragraph('OCEANLINK AS AGENT<br/>OF DE CARRIER '+str(self.shipper_nom)+
-                               '<br/>'+str(datetime.now().strftime('%Y-%m-%d'))+' MONTEVIDEO'+ '     OCEAN LINK LTDA / LLB',
+            data = [[Paragraph(self.carrier_signature,
                                encoding='utf-8',
                                style=style_texto_7)]]
             table = Table(data=data, colWidths=[10 * cm, ], rowHeights=[1.4 * cm, ],
@@ -263,44 +297,36 @@ class GuiasReport:
                           )
             table.wrapOn(c, 0, 0)
             table.drawOn(c, 90 * mm, 30 * mm)
-            total_oth_ppd=0
-            total_oth_col=0
-            if self.othppd !=0:
-                total_oth_ppd=float(self.othppd)
-            if self.othcol !=0:
-                total_oth_col=float(self.othcol)
-            """ MONTOS """
-            c.drawString(80, 230, validar_valor(round(self.valppd,2)))
-            c.drawString(200, 230, validar_valor(round(self.valcol,2)))
-            c.drawString(80, 200, validar_valor(round(self.taxppd,2)))
-            c.drawString(200, 200, validar_valor(round(self.taxcol,2)))
-            c.drawString(80, 155, validar_valor(round(self.total_precio_p,2)))
-            c.drawString(200, 155, validar_valor(round(self.total_precio_c,2)))
-            """ OTHER """
+            # Montos columna izquierda (PREPAID)
+            c.drawString(80, 230, validar_valor(self.valppd))
+            c.drawString(80, 200, validar_valor(self.taxppd))
+            c.drawString(80, 180, validar_valor(self.agentppd))
+            c.drawString(80, 155, validar_valor(self.carrierppd))
+            c.drawString(80, 107, validar_valor(self.total_prepaid))
 
-            data = [[Paragraph(self.otros_gastos,encoding='utf-8',style=style_texto_7)]]
-            table = Table(data=data, colWidths=[10 * cm, ], rowHeights=[1 * cm, ],
-                          style=[
-                              ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
-                              ('VALIGN', (0, 0), (0, 0), 'TOP'),
-                          ]
-                          )
-            table.wrapOn(c, 0, 0)
-            table.drawOn(c, 90 * mm, 82 * mm)
-            """ TOTALES """
+            # Montos columna derecha (COLLECT)
+            c.drawString(200, 230, validar_valor(self.valcol))
+            c.drawString(200, 200, validar_valor(self.taxcol))
+            c.drawString(200, 180, validar_valor(self.agentcol))
+            c.drawString(200, 155, validar_valor(self.carriercol))
+            c.drawString(200, 107, validar_valor(self.total_collect))
 
-            fletes = Decimal(fletes)
-            if self.total_precio_p ==0 and self.total_precio_c==0:
-                self.total_precio_p= fletes if self.modopago=='Collect' else 0
-                self.total_precio_c= fletes if self.modopago=='Prepaid' else 0
+            # Otros gastos (cuadro texto libre)
+            otros_data = [[Paragraph(self.otros_gastos, encoding='utf-8', style=style_texto_7)]]
+            tabla_otros = Table(
+                data=otros_data,
+                colWidths=[10 * cm],
+                rowHeights=[1 * cm],
+                style=[
+                    ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
+                    ('VALIGN', (0, 0), (0, 0), 'TOP'),
+                ]
+            )
+            tabla_otros.wrapOn(c, 0, 0)
+            tabla_otros.drawOn(c, 90 * mm, 74 * mm)
 
-            if self.total_precio_p < fletes:
-                self.total_precio_p+= fletes
-            elif self.total_precio_c < fletes:
-                self.total_precio_c+= fletes
-
-            c.drawString(80, 107, validar_valor(round(self.total_precio_p,2)))
-            c.drawString(200, 107, validar_valor(round(self.total_precio_c,2)))
+            c.drawString(80, 107, validar_valor(self.total_precio_p))  # Total Prepaid
+            c.drawString(200, 107, validar_valor(self.total_precio_c))  # Total Collect
 
             self.archivo = c
         except Exception as e:
