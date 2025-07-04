@@ -158,25 +158,6 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y')
 
         texto += fecha_formateada.capitalize().upper() + '<br><br>'
-        texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador else "S/I")
-
-        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario else "S/I")
-
-        cont = 1
-
-        for m in merca:
-            texto += formatear_linea(f"Mercadería {cont}", str(m.nombre) if m.nombre else "S/I")
-
-            cont += 1
-
-        cont = 1
-
-        for b in row2:
-            texto += formatear_linea(f"Bultos {cont}", b.bultos if b.bultos is not None else "S/I")
-
-            texto += formatear_linea(f"Peso {cont}", b.bruto if b.bruto is not None else "S/I")
-
-            cont += 1
 
         texto += formatear_linea("Embarque", str(row_number) if row_number else "S/I")
 
@@ -193,8 +174,30 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         texto += formatear_linea("Vuelo", str(vapor))
 
         texto += formatear_linea("H B/L", str(row.hawb) if row.hawb else "S/I")
+        texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador else "S/I")
+
+        texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario else "S/I")
 
 
+
+        cont = 1
+
+        for m in merca:
+            texto += formatear_linea(f"Mercadería {cont}", str(m.nombre) if m.nombre else "S/I")
+
+            cont += 1
+
+        cont = 1
+
+        for b in row2:
+            texto += formatear_linea(f"Bultos {cont}", b.bultos if b.bultos is not None else "S/I")
+
+            texto += formatear_linea(f"Peso {cont}", b.bruto if b.bruto is not None else "S/I")
+
+            cont += 1
+        texto += ('Los buques y las llegadas al puerto de Montevideo son siempre a CONFIRMAR, ya </br>'
+                  ' que puede haber trasbordos y/o alteraciones en las fechas estimadas de llegada </br>'
+                  'sin previo aviso, por lo cual sugerimos consultarnos por la fecha de arribo que aparece en este aviso.')
         texto += "<br>"
 
         return texto, resultado

@@ -171,9 +171,29 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             )
 
             texto += fecha_formateada.capitalize().upper() + '<br><br>'
+
+            # Datos generales
+
+            texto += formatear_linea("Embarque", str(row_number) if row_number is not None else "S/I")
+
+            texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
+
+            texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
+
+            texto += formatear_linea("Llegada", format_fecha(row.fecha_retiro))
+
+            texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
+
+            texto += formatear_linea("Destino", str(row.destino) if row.destino is not None else "S/I")
+
+            texto += formatear_linea("Vuelo", str(vapor) if vapor is not None else "S/I")
+
+            texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I")
             texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
 
             texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario is not None else "S/I")
+
+
 
             # Mercaderías
             if merca:
@@ -203,26 +223,9 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                 texto += formatear_linea("Bultos", ", ".join(bultos))
                 texto += formatear_linea("Peso", ", ".join(pesos))
                 texto += formatear_linea("CBM", ", ".join(cbms))
-
-            # Datos generales
-
-            texto += formatear_linea("Embarque", str(row_number) if row_number is not None else "S/I")
-
-            texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
-
-            texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
-
-            texto += formatear_linea("Llegada", format_fecha(row.fecha_retiro))
-
-            texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
-
-            texto += formatear_linea("Destino", str(row.destino) if row.destino is not None else "S/I")
-
-            texto += formatear_linea("Vuelo", str(vapor) if vapor is not None else "S/I")
-
-            texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I")
-
-
+            texto += ('Los buques y las llegadas al puerto de Montevideo son siempre a CONFIRMAR, ya </br>'
+                      ' que puede haber trasbordos y/o alteraciones en las fechas estimadas de llegada </br>'
+                      'sin previo aviso, por lo cual sugerimos consultarnos por la fecha de arribo que aparece en este aviso.')
             texto += "<br>"
 
             return texto, resultado

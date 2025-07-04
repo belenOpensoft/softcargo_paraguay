@@ -931,11 +931,7 @@ def get_data_email(request):
 
                 fecha_actual = datetime.datetime.now()
 
-                resultado['asunto'] = 'Ref.: ' + str(row.numero) + \
- \
-                                      '/ CS: ' + str(row.embarque) if row.embarque else '' + '- Shipper: ' + str(row.embarcador) + \
- \
-                                      '; Consignee: ' + str(row.consignatario)
+                resultado['asunto'] = 'Ref.: ' + str(row.numero) + '/ CS: ' + (str(row.embarque) if row.embarque else '') + '- Shipper: ' + str(row.embarcador) + '; Consignee: ' + str(row.consignatario)
 
                 fecha_formateada = fecha_actual.strftime(
 
@@ -944,38 +940,11 @@ def get_data_email(request):
                 )
 
                 texto += fecha_formateada.capitalize().upper() + '<br><br>'
-                texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
-
-                texto += formatear_linea("Consignatario",
-                                         str(row.consignatario) if row.consignatario is not None else "S/I")
 
 
-                # Mercaderías
-
-                mercaderia = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre','bultos','bruto','cbm')
-                # Mercaderías
-                # Bultos, peso y CBM
-                if mercaderia:
-                    bultos = [str(b['bultos']) if b['bultos'] else "S/I" for b in mercaderia]
-                    pesos = [str(b['bruto']) if b['bruto'] else "S/I" for b in mercaderia]
-                    cbms = [str(b['cbm']) if b['cbm'] else "S/I" for b in mercaderia]
-                    nombres_merc = [b['producto__nombre'] if b['producto__nombre'] else "S/I" for b in mercaderia]
-                    texto += formatear_linea("Mercadería", ", ".join(nombres_merc))
-                    texto += formatear_linea("Bultos", ", ".join(bultos))
-                    texto += formatear_linea("Peso", ", ".join(pesos))
-                    texto += formatear_linea("CBM", ", ".join(cbms))
-
-                # Contenedores y precintos
 
 
-                if row.modo not in ['IMPORT AEREO','EXPORT AEREO']:
-                    envases=Envases.objects.filter(numero=row.numero).values('nrocontenedor','precinto')
-                    if envases:
-                        contenedores = [str(e['nrocontenedor']) if e['nrocontenedor'] else "S/I" for e in envases]
-                        precintos = [str(e['precinto']) if e['precinto'] else "S/I" for e in envases]
 
-                        texto += formatear_linea("Nro. Contenedores", ", ".join(contenedores))
-                        texto += formatear_linea("Precintos", ", ".join(precintos))
 
                 # Datos generales
 
@@ -983,9 +952,9 @@ def get_data_email(request):
 
                 texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
 
-                texto += formatear_linea("Salida", row.etd.strftime('%Y-%m-%d') if row.etd else '')
+                texto += formatear_linea("Salida", row.etd.strftime('%d-%m-%Y') if row.etd else '')
 
-                texto += formatear_linea("Llegada", row.eta.strftime('%Y-%m-%d') if row.eta else '')
+                texto += formatear_linea("Llegada", row.eta.strftime('%d-%m-%Y') if row.eta else '')
 
                 texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
 
@@ -1004,6 +973,39 @@ def get_data_email(request):
 
                 texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I") if row.modo in ['IMPORT MARITIMO','EXPORT MARITIMO'] else formatear_linea("HAWB", str(row.hawb) if row.hawb is not None else "S/I")
 
+                texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
+
+                texto += formatear_linea("Consignatario",
+                                         str(row.consignatario) if row.consignatario is not None else "S/I")
+                # Mercaderías
+
+                mercaderia = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre','bultos','bruto','cbm')
+                # Mercaderías
+                # Bultos, peso y CBM
+                if mercaderia:
+                    bultos = [str(b['bultos']) if b['bultos'] else "S/I" for b in mercaderia]
+                    pesos = [str(b['bruto']) if b['bruto'] else "S/I" for b in mercaderia]
+                    cbms = [str(b['cbm']) if b['cbm'] else "S/I" for b in mercaderia]
+                    nombres_merc = [b['producto__nombre'] if b['producto__nombre'] else "S/I" for b in mercaderia]
+                    texto += formatear_linea("Mercadería", ", ".join(nombres_merc))
+                    texto += formatear_linea("Bultos", ", ".join(bultos))
+                    texto += formatear_linea("Peso", ", ".join(pesos))
+                    texto += formatear_linea("CBM", ", ".join(cbms))
+                # Contenedores y precintos
+
+
+                if row.modo not in ['IMPORT AEREO','EXPORT AEREO']:
+                    envases=Envases.objects.filter(numero=row.numero).values('nrocontenedor','precinto')
+                    if envases:
+                        contenedores = [str(e['nrocontenedor']) if e['nrocontenedor'] else "S/I" for e in envases]
+                        precintos = [str(e['precinto']) if e['precinto'] else "S/I" for e in envases]
+
+                        texto += formatear_linea("Nro. Contenedores", ", ".join(contenedores))
+                        texto += formatear_linea("Precintos", ", ".join(precintos))
+
+                texto += ('Los buques y las llegadas al puerto de Montevideo son siempre a CONFIRMAR, ya </br>'
+                          ' que puede haber trasbordos y/o alteraciones en las fechas estimadas de llegada </br>'
+                          'sin previo aviso, por lo cual sugerimos consultarnos por la fecha de arribo que aparece en este aviso.')
 
                 texto += "<br>"
             elif title == 'Shipping instruction':
@@ -1144,8 +1146,7 @@ def get_data_email(request):
                 else:
                     moneda_nombre = 'S/I'
 
-                resultado[
-                    'asunto'] = f"INSTRUCCIÓN DE EMBARQUE - Ref.: {row.numero} - Shipper: {empresa} - Consignee: {consignatario.empresa if consignatario else ''}"
+                resultado['asunto'] = f"INSTRUCCIÓN DE EMBARQUE - Ref.: {row.numero} - Shipper: {empresa} - Consignee: {consignatario.empresa if consignatario else ''}"
 
                 locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
                 fecha_actual = datetime.datetime.now()

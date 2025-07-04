@@ -176,9 +176,29 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
         )
 
         texto += fecha_formateada.capitalize().upper() + '<br><br>'
+
+
+        # Datos generales
+
+        texto += formatear_linea("Embarque", row_number if row_number else "S/I")
+
+        texto += formatear_linea("Posición", row.posicion if row.posicion else "S/I")
+
+        texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
+
+        texto += formatear_linea("Llegada", format_fecha(row.fecha_retiro))
+
+        texto += formatear_linea("Origen", row.origen if row.origen else "S/I")
+
+        texto += formatear_linea("Destino", row.destino if row.destino else "S/I")
+
+        texto += formatear_linea("Vapor", vapor if vapor else "S/I")
+
+        texto += formatear_linea("H B/L", row.hawb if row.hawb else "S/I")
         texto += formatear_linea("Embarcador", row.embarcador if row.embarcador else "S/I")
 
         texto += formatear_linea("Consignatario", row.consignatario if row.consignatario else "S/I")
+
 
         # Mercadería
 
@@ -212,29 +232,11 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
             texto += formatear_linea(f"Precintos {cont}", e.precinto if e.precinto else "S/I")
 
             cont += 1
-
-        # Datos generales
-
-        texto += formatear_linea("Embarque", row_number if row_number else "S/I")
-
-        texto += formatear_linea("Posición", row.posicion if row.posicion else "S/I")
-
-        texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
-
-        texto += formatear_linea("Llegada", format_fecha(row.fecha_retiro))
-
-        texto += formatear_linea("Origen", row.origen if row.origen else "S/I")
-
-        texto += formatear_linea("Destino", row.destino if row.destino else "S/I")
-
-        texto += formatear_linea("Vapor", vapor if vapor else "S/I")
-
-        texto += formatear_linea("H B/L", row.hawb if row.hawb else "S/I")
-
-
         # Despedida
 
-        texto += "<br>Saludos cordiales,<br><b>OCEANLINK</b><br>"
+        texto += ('Los buques y las llegadas al puerto de Montevideo son siempre a CONFIRMAR, ya </br>'
+                  ' que puede haber trasbordos y/o alteraciones en las fechas estimadas de llegada </br>'
+                  'sin previo aviso, por lo cual sugerimos consultarnos por la fecha de arribo que aparece en este aviso.')
 
         return texto, resultado
     elif title == 'Routing Order':
