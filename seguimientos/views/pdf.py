@@ -18,15 +18,33 @@ def get_datos_caratula(request):
             row = VGrillaSeguimientos.objects.get(numero=id)
             aereo = row.modo in ['IMPORT AEREO', 'EXPORT AEREO']
 
-            texto = '<div style="margin: 0 auto; font-family: Courier New, monospace; font-size: 11.5px;">'
-            texto += '<h2 style="text-align: left;">OCEANLINK LTDA.</h2>'
-            texto += '<b><p style="font-size:17px;text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
-            texto += f'Seguimiento: {row.numero}<br>'
-            texto += f'Posicion:  {row.posicion or ""}<br>'
-            texto += f'Incoterms: {row.terminos or ""}</p></b>'
-            texto += '<p style="text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
-            texto += f'Origen: {row.origen or ""}<br>'
-            texto += f'Destino:  {row.destino or ""}</p><br>'
+            texto = '<div style="margin: 0px auto 0 auto; font-family: Courier New, monospace; font-size: 11.5px;">'
+
+            # Encabezado: Oceanlink y datos a la derecha
+            texto += '''
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="text-align: left;">
+                    <b><h1 style="margin: 0; font-size: 21px;font-family: Courier New, monospace;">OCEANLINK LTDA.</h1></b>
+                </div>
+                <div style="text-align: right; font-size: 20px; line-height: 1.4; margin-top: 8px; margin-right:20px; max-width: 60%;font-family: Courier New, monospace;">
+                    <b>
+                        Seguimiento: {seguimiento}<br>
+                        Posición: {posicion}<br>
+                        Incoterms: {incoterms}
+                    </b>
+                </div>
+            </div><br>
+            '''.format(
+                seguimiento=row.numero,
+                posicion=row.posicion or '',
+                incoterms=row.terminos or ''
+            )
+
+            texto += '<p style="text-align:right;font-size: 14px; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:20px;">'
+            origen = MantenimientosCiudades.objects.filter(codigo=row.origen).first()
+            destino = MantenimientosCiudades.objects.filter(codigo=row.destino).first()
+            texto += f'Origen: {origen.nombre or ""}<br>'
+            texto += f'Destino:  {destino.nombre or ""}</p><br>'
 
             texto += formatear_caratula("Master", row.awb or "")
             texto += formatear_caratula("House", row.hawb or "")
@@ -127,8 +145,8 @@ def get_datos_caratula(request):
                 texto += formatear_caratula("Nro Bultos", f"{e.bultos} {e.tipo}") if movimiento is not None and movimiento == 'LCL/LCL' else formatear_caratula("Nro Bultos", f"{e.bultos}")
                 texto += formatear_caratula("Mercadería", e.producto.nombre if e.producto else '')
                 texto += '<br>'
-                texto += formatear_caratula("Peso", e.bruto)
-                texto += formatear_caratula("Volumen", e.cbm)
+                texto += formatear_caratula("Peso", round(e.bruto,2))
+                texto += formatear_caratula("Volumen", round(e.cbm,2))
                 texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             texto += formatear_caratula("Forma de pago", row.pago)

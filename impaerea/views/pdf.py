@@ -5,7 +5,7 @@ from django.http import HttpResponse
 
 from impaerea.models import (VEmbarqueaereo, ImportEmbarqueaereo, ImportCargaaerea, ImportConexaerea)
 from impomarit.views.mails import formatear_caratula
-from mantenimientos.models import Clientes
+from mantenimientos.models import Clientes, Ciudades
 from mantenimientos.views.bancos import is_ajax
 from seguimientos.models import VGrillaSeguimientos, Envases
 
@@ -29,21 +29,41 @@ def get_datos_caratula(request):
             except VGrillaSeguimientos.DoesNotExist:
                 seguimiento = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='', deposito='', pago='', vendedor='')
 
-            texto = '<div style="margin: 0 auto; font-family: Courier New, monospace; font-size: 11.5px !important;">'
-            texto += '<h2 style="text-align: left;">OCEANLINK LTDA.</h2>'
-            texto += '<b><p style="font-size:17px;text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
-            texto += f'Seguimiento: {seguimiento.numero}<br>'
-            texto += f'Posicion:  {Vembarque.posicion}<br>'
-            texto += f'Incoterms: {seguimiento.terminos}</p></b>'
-            texto += '<p style="text-align:right; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:60px;">'
-            texto += f'Origen: {Vembarque.origen}<br>'
-            texto += f'Destino:  {Vembarque.destino}</p><br>'
+            texto = '<div style="margin: 0px auto 0 auto; font-family: Courier New, monospace; font-size: 11.5px;">'
+
+            # Encabezado: Oceanlink y datos a la derecha
+            texto += '''
+                       <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                           <div style="text-align: left;">
+                               <b><h1 style="margin: 0; font-size: 21px;font-family: Courier New, monospace;">OCEANLINK LTDA.</h1></b>
+                           </div>
+                           <div style="text-align: right; font-size: 20px; line-height: 1.4; margin-top: 8px; margin-right:20px; max-width: 60%;font-family: Courier New, monospace;">
+                               <b>
+                                   Seguimiento: {seguimiento}<br>
+                                   Posición: {posicion}<br>
+                                   Incoterms: {incoterms}
+                               </b>
+                           </div>
+                       </div><br>
+                       '''.format(
+                seguimiento=seguimiento.numero,
+                posicion=Vembarque.posicion or '',
+                incoterms=seguimiento.terminos or ''
+            )
+
+            texto += '<p style="text-align:right;font-size: 14px; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:20px;">'
+            origen = Ciudades.objects.filter(codigo=Vembarque.origen).first()
+            destino = Ciudades.objects.filter(codigo=Vembarque.destino).first()
+            texto += f'Origen: {origen.nombre or ""}<br>'
+            texto += f'Destino:  {destino.nombre or ""}</p><br>'
 
             # Primer bloque
             texto += formatear_caratula("Master", Vembarque.awb)
             texto += formatear_caratula("House", Vembarque.hawb)
-            texto += formatear_caratula("ETA", llegada.strftime('%d-%m-%Y') if isinstance(llegada, datetime.datetime) else '?')
-            texto += formatear_caratula("ETD", salida.strftime('%d-%m-%Y') if isinstance(salida, datetime.datetime) else '?')
+            texto += formatear_caratula("ETA",
+                                        Vembarque.eta.strftime('%d/%m/%Y') if isinstance(Vembarque.eta, datetime.datetime) else '?')
+            texto += formatear_caratula("ETD",
+                                        Vembarque.etd.strftime('%d/%m/%Y') if isinstance(Vembarque.etd, datetime.datetime) else '?')
             texto += formatear_caratula("Vuelo", vuelo if vuelo else 'S/I')
             texto += formatear_caratula("Compañía", cia if cia else 'S/I')
             texto += formatear_caratula("Transportista", Vembarque.transportista)
@@ -95,7 +115,7 @@ def get_datos_caratula(request):
                 texto += formatear_caratula("Mercaderia", e.producto.nombre if e.producto else '')
                 texto += '<br>'
                 texto += formatear_caratula("Peso", e.bruto)
-                texto += formatear_caratula("Volumen", volumen)
+                texto += formatear_caratula("Volumen", round(volumen,2))
                 texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             texto += formatear_caratula("Forma de pago", seguimiento.pago)
