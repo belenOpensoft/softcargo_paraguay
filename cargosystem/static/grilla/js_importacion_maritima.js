@@ -47,6 +47,20 @@ let table_add_im;
 let table_edit_im;
 $(document).ready(function () {
 
+    $("#modalSeleccionEmailHouse4").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 400,
+        height: 400,
+        resizable: false,
+        draggable: false,
+        title: 'Seleccione el tipo de aviso House',
+        open: function (event, ui) {
+            $(this).parent().css('overflow', 'hidden');
+            $('#buscadorEmailsHouse4').val('');
+            $("#listaEmailsHouse4 tr").show();
+        }
+    });
      $('input.autocomplete').on('keydown', function(event) {
         var keyCode = event.keyCode || event.which;
 
@@ -4702,6 +4716,8 @@ $("#id_embarque_id").val('');
 
 //acciones mails house
 $('.email').click(function () {
+
+    $("#modalSeleccionEmailHouse4").dialog('close');
         let id = localStorage.getItem('id_house_gasto');
         let numero = localStorage.getItem('num_house_gasto');
 
@@ -5632,20 +5648,7 @@ function abrir_modal_mails(e){
         return;
     }
 
-    $("#modalSeleccionEmailHouse4").dialog({
-        autoOpen: true,
-        modal: true,
-        width: 400,
-        height: 400,
-        resizable: false,
-        draggable: false,
-        title: 'Seleccione el tipo de aviso House',
-        open: function (event, ui) {
-            $(this).parent().css('overflow', 'hidden');
-            $('#buscadorEmailsHouse4').val('');
-            $("#listaEmailsHouse4 tr").show();
-        }
-    });
+    $("#modalSeleccionEmailHouse4").dialog('open');
 }
 
 //mostrar logs

@@ -45,7 +45,20 @@ var awbRegex = "";
 let table_add_ia;
 
 $(document).ready(function () {
-
+    $("#modalSeleccionEmailHouse2").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 400,
+        height: 400,
+        resizable: false,
+        draggable: false,
+        title: 'Seleccione el tipo de aviso House',
+        open: function (event, ui) {
+            $(this).parent().css('overflow', 'hidden');
+            $('#buscadorEmailsHouse2').val('');
+            $("#listaEmailsHouse2 tr").show();
+        }
+    });
     $('#buscadorEmailsHouse2').on('keyup', function () {
         let valor = $(this).val().toLowerCase();
         $("#listaEmailsHouse2 tr").filter(function () {
@@ -4313,6 +4326,7 @@ $("#id_embarque_id").val('');
 
 //acciones mails house
 $('.email').click(function () {
+        $("#modalSeleccionEmailHouse2").dialog('close');
         let id = localStorage.getItem('id_house_gasto');
         let numero = localStorage.getItem('num_house_gasto');
 
@@ -5264,20 +5278,8 @@ function abrir_modal_mails(e){
         return;
     }
 
-    $("#modalSeleccionEmailHouse2").dialog({
-        autoOpen: true,
-        modal: true,
-        width: 400,
-        height: 400,
-        resizable: false,
-        draggable: false,
-        title: 'Seleccione el tipo de aviso House',
-        open: function (event, ui) {
-            $(this).parent().css('overflow', 'hidden');
-            $('#buscadorEmailsHouse2').val('');
-            $("#listaEmailsHouse2 tr").show();
-        }
-    });
+
+    $("#modalSeleccionEmailHouse2").dialog('open');
 }
 
 //mostrar logs

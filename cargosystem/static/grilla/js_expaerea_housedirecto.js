@@ -10,6 +10,21 @@ $(document).ready(function () {
 //        console.log('Error:', error);
 //    }
 //});
+
+    $("#modalSeleccionEmailHouse6").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 400,
+        height: 400,
+        resizable: false,
+        draggable: false,
+        title: 'Seleccione el tipo de aviso House',
+        open: function (event, ui) {
+            $(this).parent().css('overflow', 'hidden');
+            $('#buscadorEmailsHouse6').val('');
+            $("#listaEmailsHouse6 tr").show();
+        }
+    });
     $('#buscadorEmailsHouse6').on('keyup', function () {
         let valor = $(this).val().toLowerCase();
         $("#listaEmailsHouse6 tr").filter(function () {
@@ -399,6 +414,7 @@ $(document).ready(function () {
     });
     //mails
     $('.email2').click(function () {
+        $("#modalSeleccionEmailHouse6").dialog("close");
         let id = localStorage.getItem('id_house_gasto');
         let numero = localStorage.getItem('num_house_gasto');
 
@@ -479,6 +495,8 @@ $(document).ready(function () {
                     $('#table_add_im tbody tr').removeClass('table-secondary');
                     $('#table_edit_im tbody tr').removeClass('table-secondary');
                     $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
+
+
                 }
             })
         } else {
@@ -699,20 +717,7 @@ function abrir_modal_mails_d(e) {
         return;
     }
 
-    $("#modalSeleccionEmailHouse6").dialog({
-        autoOpen: true,
-        modal: true,
-        width: 400,
-        height: 400,
-        resizable: false,
-        draggable: false,
-        title: 'Seleccione el tipo de aviso House',
-        open: function (event, ui) {
-            $(this).parent().css('overflow', 'hidden');
-            $('#buscadorEmailsHouse6').val('');
-            $("#listaEmailsHouse6 tr").show();
-        }
-    });
+    $("#modalSeleccionEmailHouse6").dialog('open');
 }
 
 function get_datos_logs_h() {

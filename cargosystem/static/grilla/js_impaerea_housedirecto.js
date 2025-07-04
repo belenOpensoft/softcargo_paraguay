@@ -11,6 +11,20 @@ $(document).ready(function () {
 //        console.log('Error:', error);
 //    }
 //});
+        $("#modalSeleccionEmailHouse").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 400,
+        height: 400,
+        resizable: false,
+        draggable: false,
+        title: 'Seleccione el tipo de aviso House',
+        open: function (event, ui) {
+            $(this).parent().css('overflow', 'hidden');
+            $('#buscadorEmailsHouse').val('');
+            $("#listaEmailsHouse tr").show();
+        }
+    });
 $('#buscadorEmailsHouse').on('keyup', function () {
     let valor = $(this).val().toLowerCase();
     $("#listaEmailsHouse tr").filter(function () {
@@ -419,6 +433,7 @@ if (!$('#id_awbhijo').val()) {
         });
     //mails
         $('.email2').click(function () {
+            $("#modalSeleccionEmailHouse").dialog('close');
                 let id = localStorage.getItem('id_house_gasto');
                 let numero = localStorage.getItem('num_house_gasto');
 
@@ -704,20 +719,9 @@ function abrir_modal_mails_d(e){
         return;
     }
 
-    $("#modalSeleccionEmailHouse").dialog({
-        autoOpen: true,
-        modal: true,
-        width: 400,
-        height: 400,
-        resizable: false,
-        draggable: false,
-        title: 'Seleccione el tipo de aviso House',
-        open: function (event, ui) {
-            $(this).parent().css('overflow', 'hidden');
-            $('#buscadorEmailsHouse').val('');
-            $("#listaEmailsHouse tr").show();
-        }
-    });
+
+    $("#modalSeleccionEmailHouse").dialog('open');
+
 }
 
 function get_datos_logs_h() {

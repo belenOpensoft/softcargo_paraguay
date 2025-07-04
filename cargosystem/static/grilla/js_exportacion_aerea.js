@@ -46,6 +46,22 @@ var awbRegex = "";
 let table_add_ea;
 
 $(document).ready(function () {
+
+    $("#modalSeleccionEmailHouse5").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 400,
+        height: 400,
+        resizable: false,
+        draggable: false,
+        title: 'Seleccione el tipo de aviso House',
+        open: function (event, ui) {
+            $(this).parent().css('overflow', 'hidden');
+            $('#buscadorEmailsHouse5').val('');
+            $("#listaEmailsHouse5 tr").show();
+        }
+    });
+
      $('input.autocomplete').on('keydown', function(event) {
         var keyCode = event.keyCode || event.which;
 
@@ -4628,6 +4644,7 @@ $("#id_embarque_id").val('');
 
 //acciones mails house
 $('.email').click(function () {
+        $("#modalSeleccionEmailHouse5").dialog("close");
         let id = localStorage.getItem('id_house_gasto');
         let numero = localStorage.getItem('num_house_gasto');
 
@@ -4699,7 +4716,6 @@ $('.email').click(function () {
                         style: "width:100px",
                         click: function () {
                             $(this).dialog("close");
-                            $('#modalSeleccionEmail').dialog("close");
 
                         },
                     },],
@@ -4714,6 +4730,14 @@ $('.email').click(function () {
             alert('Debe seleccionar al menos un registro');
         }
     });
+
+function cerrarDialogo(id) {
+    const $dlg = $("#" + id);
+    if ($dlg.length && $dlg.hasClass("ui-dialog-content") && $dlg.dialog("isOpen")) {
+        $dlg.dialog("close");
+    }
+}
+
 function get_data_email(row,title,numero,id,master,gastos) {
     let miurl = "/exportacion_aerea/get_data_email/";
     var toData = {
@@ -5821,20 +5845,7 @@ function abrir_modal_mails(e){
         return;
     }
 
-    $("#modalSeleccionEmailHouse5").dialog({
-        autoOpen: true,
-        modal: true,
-        width: 400,
-        height: 400,
-        resizable: false,
-        draggable: false,
-        title: 'Seleccione el tipo de aviso House',
-        open: function (event, ui) {
-            $(this).parent().css('overflow', 'hidden');
-            $('#buscadorEmailsHouse5').val('');
-            $("#listaEmailsHouse5 tr").show();
-        }
-    });
+    $("#modalSeleccionEmailHouse5").dialog('open');
 }
 
 //mostrar logs
