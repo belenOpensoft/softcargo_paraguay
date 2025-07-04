@@ -280,7 +280,8 @@ def actualizar_fechas(etd, eta, numero, viaje, salida_original, llegada_original
 
                         except Seguimiento.DoesNotExist:
                             continue
-
+                        except Conexaerea.DoesNotExist:
+                            continue
                         break
 
         resultado['resultado'] = 'ok'

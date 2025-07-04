@@ -300,7 +300,8 @@ def actualizar_fechas(etd, eta, numero, viaje, vuelo, cia, salida_original, lleg
 
                         except Seguimiento.DoesNotExist:
                             continue
-
+                        except Conexaerea.DoesNotExist:
+                            continue
                         break  # Solo actualizamos una ruta por embarque
 
         resultado['resultado'] = 'ok'

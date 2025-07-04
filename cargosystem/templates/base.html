@@ -15,6 +15,7 @@
         <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
         <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-select.min.css' %}">
         <script src="{% static 'bootstrap/js/bootstrap-select.min.js' %}"></script>
+        <script src="{% static 'js/html2pdf.bundle.min.js' %}"></script>
 
         <style>
           .modal-dialog:not(.modal-fullscreen) .modal-body {
@@ -155,7 +156,27 @@
 
             return null; // Devuelve null si la cookie no se encuentra
         }
+        function imprimirPDF() {
+            var contenido = $('#pdf_add_input').summernote('code');
+            var elemento = document.createElement('div');
+            elemento.innerHTML = contenido;
 
+            var opt = {
+                margin:       0.5,
+                filename:     'documento.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(elemento).outputPdf('bloburl').then(function (url) {
+                var nuevaVentana = window.open(url, '_blank');
+                nuevaVentana.onload = function () {
+                    nuevaVentana.focus();
+                    nuevaVentana.print();
+                };
+            });
+        }
         </script>
         {% endblock js_datatables_block %}
 

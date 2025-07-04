@@ -215,7 +215,7 @@ def actualizar_fechas(etd, eta, numero, viaje, vapor, salida_original, llegada_o
                     ruta_actual.vapor = vapor
                 ruta_actual.save()
 
-            except Conexaerea.DoesNotExist:
+            except conexseg.DoesNotExist:
                 pass
 
             # Buscar otros embarques con el mismo AWB (distinto número)
@@ -263,7 +263,8 @@ def actualizar_fechas(etd, eta, numero, viaje, vapor, salida_original, llegada_o
 
                         except Seguimiento.DoesNotExist:
                             continue
-
+                        except conexseg.DoesNotExist:
+                            continue
                         break  # Solo una ruta por embarque
 
         resultado['resultado'] = 'ok'

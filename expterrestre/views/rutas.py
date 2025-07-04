@@ -276,7 +276,8 @@ def actualizar_fechas(etd, eta, numero, viaje, salida_original, llegada_original
                                 ruta_seg.save()
                         except Seguimiento.DoesNotExist:
                             continue
-
+                        except Conexaerea.DoesNotExist:
+                            continue
                         break
 
         resultado = 'ok'
