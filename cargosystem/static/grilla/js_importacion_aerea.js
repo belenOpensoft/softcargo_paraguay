@@ -57,14 +57,16 @@ $(document).ready(function () {
             $(this).parent().css('overflow', 'hidden');
             $('#buscadorEmailsHouse2').val('');
             $("#listaEmailsHouse2 tr").show();
+
+            $('#buscadorEmailsHouse2').on('keyup', function () {
+                let valor = $(this).val().toLowerCase();
+                $("#listaEmailsHouse2 tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+                });
+            });
         }
     });
-    $('#buscadorEmailsHouse2').on('keyup', function () {
-        let valor = $(this).val().toLowerCase();
-        $("#listaEmailsHouse2 tr").filter(function () {
-            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
-        });
-    });
+
 
      $('input.autocomplete').on('keydown', function(event) {
     var keyCode = event.keyCode || event.which;

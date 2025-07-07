@@ -59,6 +59,13 @@ $(document).ready(function () {
             $(this).parent().css('overflow', 'hidden');
             $('#buscadorEmailsHouse5').val('');
             $("#listaEmailsHouse5 tr").show();
+
+            $('#buscadorEmailsHouse5').on('keyup', function () {
+                let valor = $(this).val().toLowerCase();
+                $("#listaEmailsHouse5 tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+                });
+            });
         }
     });
 
@@ -82,12 +89,7 @@ $(document).ready(function () {
         $(this).alert('close');
     });
 
-    $('#buscadorEmailsHouse5').on('keyup', function () {
-        let valor = $(this).val().toLowerCase();
-        $("#listaEmailsHouse5 tr").filter(function () {
-            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
-        });
-    });
+
 
     getCookie('row_selected_impomarit');
     let contador = 0;

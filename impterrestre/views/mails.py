@@ -768,19 +768,19 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                                 total_iva += 0
 
                         if g.precio is not None:
-                            texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}", 1)
+                            texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}", 1)
                         elif g.costo is not None:
-                            texto += formatear_linea(servicio.nombre, f"{g.costo:.2f}", 1)
+                            texto += formatear_linea(servicio.nombre, f"${g.costo:.2f}", 1)
                         else:
                             texto += formatear_linea("Problema con los gastos cargados", 0)
 
                 texto += "<br>"
 
-                texto += formatear_linea("TOTAL DE GASTOS", f"{total_gastos:.2f}", 1)
+                texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}", 1)
 
-                texto += formatear_linea("I.V.A", f"{total_iva:.2f}", 1)
+                texto += formatear_linea("I.V.A", f"${total_iva:.2f}", 1)
 
-                texto += formatear_linea("TOTAL A PAGAR", f"{total_gastos + total_iva:.2f}", 1)
+                texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}", 1)
 
                 texto += "<br>"
 

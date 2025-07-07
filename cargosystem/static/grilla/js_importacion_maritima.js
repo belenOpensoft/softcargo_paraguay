@@ -59,6 +59,15 @@ $(document).ready(function () {
             $(this).parent().css('overflow', 'hidden');
             $('#buscadorEmailsHouse4').val('');
             $("#listaEmailsHouse4 tr").show();
+
+
+            $('#buscadorEmailsHouse4').on('keyup', function () {
+                let valor = $(this).val().toLowerCase();
+                $("#listaEmailsHouse4 tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+                });
+            });
+
         }
     });
      $('input.autocomplete').on('keydown', function(event) {
@@ -264,14 +273,6 @@ $(document).ready(function () {
         table.draw();
     }
 
-
-
-    $('#buscadorEmailsHouse4').on('keyup', function () {
-        let valor = $(this).val().toLowerCase();
-        $("#listaEmailsHouse4 tr").filter(function () {
-            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
-        });
-    });
 
     //autocompletes add master form
     $("#transportista_add").autocomplete({
