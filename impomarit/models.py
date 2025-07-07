@@ -1042,8 +1042,8 @@ class VistaOperativasGastos(models.Model):
     others = models.CharField(max_length=255, null=True)
     operacion = models.CharField(max_length=255, null=True)
     tipo = models.CharField(max_length=255, null=True)
-    fecha_embarque = models.DateField(blank=True, null=True)
-    fecha_retiro = models.DateField(blank=True, null=True)
+    eta = models.DateField(blank=True, null=True)
+    etd = models.DateField(blank=True, null=True)
     fecha = models.DateField(blank=True, null=True)
 
     class Meta:

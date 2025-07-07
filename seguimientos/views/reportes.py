@@ -599,13 +599,10 @@ def reportes_operativas(request):
                    'title_page': 'Reporte de operativas'}
             if request.method == 'POST':
                 form = reporte_operativas_form(request.POST)
-
                 if form.is_valid():
-
                     selected_columns = request.POST.get('selected_columns')
                     if selected_columns:
                         selected_columns = json.loads(selected_columns)
-
                     orden = []
                     desde = form.cleaned_data['desde'].strftime('%Y-%m-%d')
                     hasta = form.cleaned_data['hasta'].strftime('%Y-%m-%d')
@@ -632,11 +629,11 @@ def reportes_operativas(request):
                     filtro = {}
                     filtro2 = {}
                     if desde:
-                        filtro['fecha__gte'] = desde
-                        filtro2['fecha__gte'] = desde
+                        filtro['eta__gte'] = desde
+                        filtro2['eta__gte'] = desde
                     if hasta:
-                        filtro['fecha__lte'] = hasta
-                        filtro2['fecha__lte'] = hasta
+                        filtro['eta__lte'] = hasta
+                        filtro2['eta__lte'] = hasta
                     if modo:
                         filtro['modo'] = modo
                         filtro2['tipo'] = modo

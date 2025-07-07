@@ -547,7 +547,8 @@ $(document).ready(function () {
                             $("#id_gasto_id").val('');
                             $('#tabla_gastos').DataTable().ajax.reload();
                             $('#tabla_seguimiento').DataTable().ajax.reload();
-
+                            //setear de nuevo el socio comercial por defecto
+                            $('#id_socio').val(row[0][54]);
                         } else {
                             alert(resultado['resultado']);
                         }
@@ -1545,7 +1546,7 @@ $(document).ready(function () {
             $("#gastos_modal").dialog({
                 autoOpen: true,
                 open: function () {
-
+                $('#id_socio').val(row[0][54]);
                 },
                 modal: true,
                 title: "Gastos para el seguimiento N°: " + row[0][1],
@@ -1559,11 +1560,11 @@ $(document).ready(function () {
                         style: "width:100px",
                         click: function () {
                             if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                row = table_gastos.rows('.table-secondary').data();
-                                if (row.length === 1) {
+                                row_g = table_gastos.rows('.table-secondary').data();
+                                if (row_g.length === 1) {
                                     miurl = "/eliminar_gasto/";
                                     var toData = {
-                                        'id': row[0][0],
+                                        'id': row_g[0][0],
                                         'csrfmiddlewaretoken': csrf_token,
                                     };
                                     $.ajax({
@@ -1577,11 +1578,14 @@ $(document).ready(function () {
                                                 $('#gastos_btn').addClass('triggered').trigger('click');
                                                 $('#tabla_seguimiento').DataTable().ajax.reload();
                                                 mostrarToast('¡Gasto eliminado correctamente!', 'success');
+                                                $('#id_socio').val(row[0][54]);
+
                                             } else {
                                                 alert(aux);
                                             }
                                         }
                                     });
+
                                 } else {
                                     alert('Debe seleccionar un unico registro');
                                 }

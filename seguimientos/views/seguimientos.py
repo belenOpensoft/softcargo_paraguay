@@ -317,6 +317,7 @@ def get_data(registros_filtrados):
                 llave = True
 
             registro_json.append(llave)
+            registro_json.append(registro.cliente_codigo)
             data.append(registro_json)
         return data
     except Exception as e:
