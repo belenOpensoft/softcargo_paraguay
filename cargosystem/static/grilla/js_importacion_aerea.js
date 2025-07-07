@@ -5208,8 +5208,8 @@ function validarCoincidenciaAcumulados() {
 
     if (difPeso > 0.01 || difBultos > 0) {
         alert("⚠️ Los valores ingresados en el máster no coinciden con los acumulados de los hijos.\n\n" +
-              `Peso máster: ${kilosMadre} / Acumulado: ${pesoAcumulado}\n` +
-              `Bultos máster: ${bultosMadre} / Acumulado: ${bultosAcumulado}`);
+              `Peso ingresado: ${kilosMadre} / Peso Acumulado: ${pesoAcumulado}\n` +
+              `Bultos ingresado: ${bultosMadre} / Bultos Acumulado: ${bultosAcumulado}`);
         return false;
     }
 
