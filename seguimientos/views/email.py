@@ -94,7 +94,7 @@ def get_data_email(request):
                     else:
                         vapor = row.vapor
                 else:
-                    conex = Conexaerea.objects.filter(numero=row.numero)
+                    conex = Conexaerea.objects.filter(numero=row.numero).first()
                     if conex:
                         vapor=conex.vapor if conex.vapor else 'S/I'
 
@@ -138,10 +138,11 @@ def get_data_email(request):
                     texto += formatear_linea("Vapor", str(vapor))
                 else:
                     texto += formatear_linea("Vuelo", str(vapor))
+                # origen y destino nombre entero
 
                 texto += formatear_linea("Viaje", str(row.viaje) if row.viaje is not None else "S/I")
                 texto += formatear_linea("Llegada estimada", format_fecha(row.eta))
-                texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
+                texto += formatear_linea("Origen", str(row.origen_text) if row.origen_text is not None else "S/I")
                 texto += formatear_linea("B/L", str(row.awb) if row.awb is not None else "S/I")
                 texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I")
                 texto += formatear_linea("Referencia", str(row.embarque) if row.embarque is not None else "S/I")
@@ -161,8 +162,8 @@ def get_data_email(request):
                 texto += "<br>"
 
                 # Mini tabla como líneas
-                texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
-                texto += formatear_linea("Destino", str(row.destino) if row.destino is not None else "S/I")
+                texto += formatear_linea("Origen", str(row.origen_text) if row.origen_text is not None else "S/I")
+                texto += formatear_linea("Destino", str(row.destino_text) if row.destino_text is not None else "S/I")
                 texto += formatear_linea("Vapor/Vuelo", str(vapor))
                 texto += formatear_linea("Viaje", str(row.viaje) if row.viaje is not None else "S/I")
                 texto += formatear_linea("Salida", format_fecha(row.etd))
@@ -488,9 +489,9 @@ def get_data_email(request):
 
                 texto += formatear_linea("Llegada",llegada)
 
-                texto += formatear_linea("Origen", row.origen if conex else "")
+                texto += formatear_linea("Origen", row.origen_text )
 
-                texto += formatear_linea("Destino", row.destino if conex else "")
+                texto += formatear_linea("Destino", row.destino_text )
                 texto += formatear_linea("Vapor", vapor) if row.modo in ['IMPORT MARITIMO','EXPORT MARITIMO'] else formatear_linea("Vuelo", vapor)
 
                 texto += formatear_linea("HAWB", row.hawb) if row.modo in ['IMPORT AEREO','EXPORT AEREO'] else  formatear_linea("HBL", row.hawb)
@@ -682,8 +683,8 @@ def get_data_email(request):
                 texto += formatear_linea("Embarcador", row.embarcador)
 
                 texto += formatear_linea("Consignatario", row.consignatario)
-                texto += formatear_linea("Origen", row.origen)
-                texto += formatear_linea("Destino", row.destino)
+                texto += formatear_linea("Origen", row.origen_text)
+                texto += formatear_linea("Destino", row.destino_text)
 
                 texto += formatear_linea("Orden cliente", row.refcliente)
 
@@ -956,9 +957,9 @@ def get_data_email(request):
 
                 texto += formatear_linea("Llegada", row.eta.strftime('%d-%m-%Y') if row.eta else '')
 
-                texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
+                texto += formatear_linea("Origen", str(row.origen_text) if row.origen_text is not None else "S/I")
 
-                texto += formatear_linea("Destino", str(row.destino) if row.destino is not None else "S/I")
+                texto += formatear_linea("Destino", str(row.destino_text) if row.destino_text is not None else "S/I")
 
                 if row.modo=='IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO':
                     if str(row.vapor).isdigit():

@@ -14,7 +14,7 @@ from impomarit.views.mails import formatear_linea
 from impterrestre.models import VEmbarqueaereo, ImpterraCargaaerea, ImpterraEnvases, ImpterraServiceaereo, VGastosHouse, \
     ImpterraEmbarqueaereo, ImpterraReservas, ImpterraConexaerea
 from mantenimientos.views.bancos import is_ajax
-from mantenimientos.models import Productos, Clientes, Servicios, Monedas, Vapores
+from mantenimientos.models import Productos, Clientes, Servicios, Monedas, Vapores, Ciudades
 from seguimientos.models import VGrillaSeguimientos
 
 DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
@@ -122,10 +122,13 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             texto += formatear_linea(f"Nro. Contenedor {cont}",
                                      str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I")
             cont += 1
+        # origen y destino nombre entero
+        origen = Ciudades.objects.filter(codigo=row.origen).first()
+        destino = Ciudades.objects.filter(codigo=row.destino).first()
 
         texto += formatear_linea("Viaje", str(viaje))
         texto += formatear_linea("Llegada estimada", format_fecha(row.fecha_retiro))
-        texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
+        texto += formatear_linea("Origen", str(origen) if origen is not None else "S/I")
         texto += formatear_linea("B/L", str(row.awb) if row.awb is not None else "S/I")
         texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I")
         texto += formatear_linea("Referencia", str(row_number) if row_number is not None else "S/I")
@@ -139,8 +142,8 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         # Mini tabla como bloque visual horizontal (si es imprescindible mantenerla)
         texto += "<br><b>Resumen del viaje:</b><br><br>"
-        texto += formatear_linea("Origen", str(row.origen) if row.origen else "S/I")
-        texto += formatear_linea("Destino", str(row.destino) if row.destino else "S/I")
+        texto += formatear_linea("Origen", str(origen) if origen else "S/I")
+        texto += formatear_linea("Destino", str(destino) if destino else "S/I")
         texto += formatear_linea("Vuelo/Viaje", str(row.vapor) if row.vapor else "S/I")
         texto += formatear_linea("Viaje", str(row.viaje) if row.viaje else "S/I")
         texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
@@ -425,13 +428,16 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                                      str(e.nrocontenedor) if e.nrocontenedor is not None else "S/I")
             texto += formatear_linea(f"Precintos {cont}", str(e.precinto) if e.precinto is not None else "S/I")
             cont += 1
+        # origen y destino nombre entero
+        origen = Ciudades.objects.filter(codigo=row.origen).first()
+        destino = Ciudades.objects.filter(codigo=row.destino).first()
 
         texto += formatear_linea("Embarque", str(row_number) if row_number is not None else "S/I")
         texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
         texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
         texto += formatear_linea("LLegada", format_fecha(row.fecha_retiro))
-        texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
-        texto += formatear_linea("Destino", str(row.destino) if row.destino is not None else "S/I")
+        texto += formatear_linea("Origen", str(origen) if origen is not None else "S/I")
+        texto += formatear_linea("Destino", str(destino) if destino is not None else "S/I")
         texto += formatear_linea("Viaje", str(viaje))
         texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I")
 
@@ -471,12 +477,14 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("País", str(row.pais_consignatario) if row.pais_consignatario is not None else "S/I")
 
         texto += "<br>"
-
+        # origen y destino nombre entero
+        origen = Ciudades.objects.filter(codigo=row.origen).first()
+        destino = Ciudades.objects.filter(codigo=row.destino).first()
         # Detalles de la operación
         texto += formatear_linea("Referencia interna", str(row_number) if row_number is not None else "S/I")
         texto += formatear_linea("Orden cliente", str(row.orden_cliente) if row.orden_cliente is not None else "S/I")
-        texto += formatear_linea("Origen", str(row.origen) if row.origen is not None else "S/I")
-        texto += formatear_linea("Destino", str(row.destino) if row.destino is not None else "S/I")
+        texto += formatear_linea("Origen", str(origen) if origen is not None else "S/I")
+        texto += formatear_linea("Destino", str(destino) if destino is not None else "S/I")
 
         texto += "<br>"
 
@@ -539,10 +547,13 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("Salida", conex.salida if conex else "")
 
         texto += formatear_linea("Llegada", conex.llegada if conex else "")
+        # origen y destino nombre entero
+        origen = Ciudades.objects.filter(codigo=row.origen).first()
+        destino = Ciudades.objects.filter(codigo=row.destino).first()
 
-        texto += formatear_linea("Origen", conex.origen if conex else "")
+        texto += formatear_linea("Origen", origen)
 
-        texto += formatear_linea("Destino", conex.destino if conex else "")
+        texto += formatear_linea("Destino", destino)
 
         texto += formatear_linea("HAWB", embarque.hawb)
 
@@ -671,10 +682,13 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             texto += formatear_linea("Transportista", row.transportista or "")
 
         texto += "<br>"
+        # origen y destino nombre entero
+        origen = Ciudades.objects.filter(codigo=row.origen).first()
+        destino = Ciudades.objects.filter(codigo=row.destino).first()
 
-        texto += formatear_linea("Origen", row.origen or "")
+        texto += formatear_linea("Origen", origen or "")
 
-        texto += formatear_linea("Destino", row.destino or "")
+        texto += formatear_linea("Destino", destino or "")
 
         texto += formatear_linea("Salida", salida)
 
@@ -785,10 +799,13 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                 texto += "<br>"
 
         # Reemplazo de tabla por líneas alineadas
+        # origen y destino nombre entero
+        origen = Ciudades.objects.filter(codigo=row.origen).first()
+        destino = Ciudades.objects.filter(codigo=row.destino).first()
 
-        texto += formatear_linea("Origen", row.origen or "")
+        texto += formatear_linea("Origen", origen or "")
 
-        texto += formatear_linea("Destino", row.destino or "")
+        texto += formatear_linea("Destino", destino or "")
 
         texto += formatear_linea("Viaje/Vuelo", row.transportista or "")
 
@@ -903,10 +920,13 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("Orden cliente", seguimiento.refcliente)
 
         texto += formatear_linea("Referencia proveedor", seguimiento.refproveedor)
+        # origen y destino nombre entero
+        origen = Ciudades.objects.filter(codigo=row.origen).first()
+        destino = Ciudades.objects.filter(codigo=row.destino).first()
 
-        texto += formatear_linea("Origen", row.origen)
+        texto += formatear_linea("Origen", origen)
 
-        texto += formatear_linea("Destino", row.destino)
+        texto += formatear_linea("Destino", destino)
 
         # Datos de contenedores
 
