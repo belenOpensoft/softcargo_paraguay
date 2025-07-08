@@ -313,6 +313,19 @@ def edit_master(request, id_master):
                                     house.vapor = vapor_nuevo
                                 house.save()
 
+                    nuevo_deposito = form.cleaned_data.get('deposito_nro', "")
+                    if nuevo_deposito not in [None, '']:
+                        try:
+                            houses = Embarqueaereo.objects.filter(awb=awb_nuevo)
+                            for house in houses:
+                                if house.seguimiento:
+                                    seguimiento = Seguimiento.objects.filter(numero=house.seguimiento).first()
+                                    if seguimiento:
+                                        seguimiento.deposito = nuevo_deposito
+                                        seguimiento.save()
+                        except Exception as e:
+                            pass
+
                     messages.success(request, 'Datos actualizados con éxito.')
                     return JsonResponse({
                         'success': True,
@@ -322,7 +335,6 @@ def edit_master(request, id_master):
                 except IntegrityError:
                     messages.error(request, 'Error: No se pudo actualizar los datos.')
                     return HttpResponseRedirect(request.path_info)
-
     except Exception as e:
         messages.error(request, str(e))
         return JsonResponse({

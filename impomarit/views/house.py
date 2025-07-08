@@ -563,8 +563,19 @@ def edit_house_function(request, numero):
             house.notifagente = form.cleaned_data.get('notificar_agente', None)
             house.notifcliente = form.cleaned_data.get('notificar_cliente', None)
 
+
             try:
                 house.save()
+
+                if form.cleaned_data.get('wreceipt') is not None:
+                    try:
+                        seg = Seguimiento.objects.filter(numero=house.seguimiento).first()
+                        if seg is not None:
+                            seg.wreceipt = form.cleaned_data.get('wreceipt')
+                            seg.save()
+                    except Exception as e:
+                        pass
+
                 messages.success(request, 'Datos actualizados con éxito.')
                 return JsonResponse({
                     'success': True,

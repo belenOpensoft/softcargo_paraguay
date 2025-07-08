@@ -447,7 +447,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
                     texto += formatear_linea("Peso", str(c.bruto))
 
-                    texto += formatear_linea("Aplicable", str(aplicable))
+                    #texto += formatear_linea("Aplicable", str(aplicable))
                     texto += formatear_linea("CBM", str(ap1)+' M³')
 
                 texto += "<br>"

@@ -146,12 +146,23 @@ $(document).ready(function () {
                 "className": 'derecha archivos',
                 "visible":false
             },
+
             {
                 "targets": [2],
-
             },
             {
                 "targets": [3],
+                "className": 'text-primary',
+
+                render: function (data, type, row, meta) {
+                if (type === 'display' && data) {
+                    const partes = data.split(';');
+                    if (partes.length <= 3) return data;
+                    const visibles = partes.slice(0, 3).join(';') + ';...';
+                    return `<span title="${data}">${visibles}</span>`;
+                }
+                return data;
+            }
             },
             {
                 "targets": [4],
@@ -171,6 +182,7 @@ $(document).ready(function () {
             {
                 "targets": [9],
             },
+
 
         ],
         "order": [[1, "desc"],],
@@ -1396,7 +1408,7 @@ function aplicable_volumen(volumen){
                 expandedRow.node().classList.remove('shown');
             }
             var rowData = row.data();
-            var selectedRowId = rowData[4];
+            var selectedRowId = rowData[5];
 
             $.ajax({
                 url: '/exportacion_aerea/source_embarque_aereo/',
@@ -3408,9 +3420,9 @@ var tableContent;
          <table id="tabla_detalles" class="table table-striped" style="font-size:12px; margin:0; padding:0;">
             <thead>
                 <tr style="color: #3392a1">
-                    <th class="text-right">Fecha Embarque</th>
-                    <th class="text-right">Fecha Retiro</th>
-                    <th class="text-right">N° Embarque</th>
+                    <th class="text-right">ETD</th>
+                    <th class="text-right">ETA</th>
+                    <th class="text-right">N° Seguimiento</th>
                     <th class="text-right">Cliente</th>
                     <th class="text-right">Origen</th>
                     <th class="text-right">Destino</th>
@@ -3429,9 +3441,9 @@ var tableContent;
     data.forEach(function (item) {
         tableContent += `
             <tr>
-                <td>${item[1]}</td>
-                <td>${item[2]}</td>
-                <td>${item[3]}</td>
+                <td>${item[23]}</td>
+                <td>${item[24]}</td>
+                <td>${item[19]}</td>
                 <td>${item[4]}</td>
                 <td>${item[5]}</td>
                 <td>${item[6]}</td>

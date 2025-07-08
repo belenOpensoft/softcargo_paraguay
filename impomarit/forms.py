@@ -249,12 +249,13 @@ class edit_form(BSModalModelForm):
     label = "Posición"
         )
 
-    tarifa_e = forms.CharField(
-        widget=forms.TextInput(
-            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
-        max_length=20,
+    tarifa_e = forms.DecimalField(
+        widget=forms.NumberInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off', 'type': 'number'}),
         required=False,  # No obligatorio
-        label="Tarifa"
+        label="Tarifa",
+        initial = 0,
+
     )
     arbitraje_e = forms.CharField(
         widget=forms.TextInput(

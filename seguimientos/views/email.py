@@ -331,7 +331,7 @@ def get_data_email(request):
                             tramo = f"({ruta.origen}/{ruta.destino})  {ruta.cia}{ruta.viaje}/{fecha}" if transportista == 'true' else f"({ruta.origen}/{ruta.destino}) {ruta.viaje}/{fecha}"
                             texto += formatear_linea("Vuelo", tramo)
 
-                texto += formatear_linea("Aplicable", str(row.aplicable))
+                    texto += formatear_linea("Aplicable", str(row.aplicable))
 
                 texto += formatear_linea("Peso", f"{peso} KGS")
 
@@ -573,7 +573,8 @@ def get_data_email(request):
 
                         aplicable = str(row.aplicable)
 
-                    texto += formatear_linea("Aplicable", str(aplicable))
+                    if row.modo in ['IMPORT AEREO','EXPORT AEREO']:
+                        texto += formatear_linea("Aplicable", str(aplicable))
 
                     texto += "<br>"
 

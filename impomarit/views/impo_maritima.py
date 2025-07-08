@@ -105,30 +105,32 @@ def house_importacion_maritima(request):
 param_busqueda = {
     1: 'numero__icontains',
     2: 'llegada__icontains',
-    3: 'transportista__icontains',
-    4: 'awb__icontains',
-    5: 'agente__icontains',
-    6: 'consignatario__icontains',
-    7: 'armador__icontains',
-    8: 'vapor__icontains',
-    9: 'origen__icontains',
-    10: 'destino__icontains',
-    11: 'status__icontains',
+    3: 'seguimientos__icontains',
+    4: 'transportista__icontains',
+    5: 'awb__icontains',
+    6: 'agente__icontains',
+    7: 'consignatario__icontains',
+    8: 'armador__icontains',
+    9: 'vapor__icontains',
+    10: 'origen__icontains',
+    11: 'destino__icontains',
+    12: 'status__icontains',
 }
 
 columns_table = {
     0: 'id',
     1: 'numero',
     2: 'llegada',
-    3: 'transportista',
-    4: 'awb',
-    5: 'agente',
-    6: 'consignatario',
-    7: 'armador',
-    8: 'vapor',
-    9: 'origen',
-    10: 'destino',
-    11: 'status',
+    3: 'seguimientos',
+    4: 'transportista',
+    5: 'awb',
+    6: 'agente',
+    7: 'consignatario',
+    8: 'armador',
+    9: 'vapor',
+    10: 'origen',
+    11: 'destino',
+    12: 'status',
 }
 
 
@@ -223,6 +225,7 @@ def source_importacion_master(request):
             '9': request.GET['columns[9][search][value]'],
             '10': request.GET['columns[10][search][value]'],
             '11': request.GET['columns[11][search][value]'],
+            '12': request.GET['columns[12][search][value]'],
         }
         filtro = get_argumentos_busqueda(**args)
 
@@ -265,37 +268,12 @@ def source_importacion_master(request):
 def get_data(registros_filtrados):
     try:
         data = []
-        cronologia = [
-            'fecha',
-            'estimadorecepcion',
-            'recepcion',
-            'fecemision',
-            'fecseguro',
-            'fecdocage',
-            'loadingdate',
-            'arriboreal',
-            'fecaduana',
-            'pagoenfirme',
-            'vencimiento',
-            'etd',
-            'eta',
-            'fechaonhand',
-            'fecrecdoc',
-            'recepcionprealert',
-            'lugar',
-            'nroseguro',
-            'bltipo',
-            'manifiesto',
-            'credito',
-            'prima',
-            'observaciones',
-
-        ]
         for registro in registros_filtrados:
             registro_json = []
             registro_json.append(str(registro.id))
             registro_json.append('' if registro.numero is None else str(registro.numero))
             registro_json.append('' if registro.llegada is None else str(registro.llegada)[:10])
+            registro_json.append('' if registro.seguimientos is None else str(registro.seguimientos))
             registro_json.append('' if registro.transportista is None else str(registro.transportista))
             registro_json.append('' if registro.awb is None else str(registro.awb))
             registro_json.append('' if registro.agente is None else str(registro.agente))
@@ -431,7 +409,8 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append(registro.consignatario_codigo)
             registro_json.append('' if registro.etd is None else str(registro.etd)[:10])  #24
             registro_json.append('' if registro.eta is None else str(registro.eta)[:10])  #25
-
+            registro_json.append('' if registro.etd is None else str(registro.etd.strftime('%d/%m/%Y')))  #26
+            registro_json.append('' if registro.eta is None else str(registro.eta.strftime('%d/%m/%Y')))  #27
             data.append(registro_json)
         return data
     except Exception as e:

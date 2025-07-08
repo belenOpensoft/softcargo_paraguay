@@ -103,30 +103,28 @@ def house_importacion_maritima(request):
 param_busqueda = {
     1: 'numero__icontains',
     2: 'llegada__icontains',
-    3: 'transportista__icontains',
-    4: 'awb__icontains',
-    5: 'agente__icontains',
-    6: 'consignatario__icontains',
-    7: 'armador__icontains',
-    8: 'vapor__icontains',
-    9: 'origen__icontains',
-    10: 'destino__icontains',
-    11: 'status__icontains',
+    3: 'seguimientos__icontains',
+    4: 'transportista__icontains',
+    5: 'awb__icontains',
+    6: 'agente__icontains',
+    7: 'consignatario__icontains',
+    8: 'origen__icontains',
+    9: 'destino__icontains',
+    10: 'status__icontains',
 }
 
 columns_table = {
     0: 'numero',
     1: 'numero',
     2: 'llegada',
-    3: 'transportista',
-    4: 'awb',
-    5: 'agente',
-    6: 'consignatario',
-    7: 'armador',
-    8: 'vapor',
-    9: 'origen',
-    10: 'destino',
-    11: 'status',
+    3: 'seguimientos',
+    4: 'transportista',
+    5: 'awb',
+    6: 'agente',
+    7: 'consignatario',
+    8: 'origen',
+    9: 'destino',
+    10: 'status',
 }
 
 def source_importacion_master(request):
@@ -142,6 +140,7 @@ def source_importacion_master(request):
             '7': request.GET['columns[7][search][value]'],
             '8': request.GET['columns[8][search][value]'],
             '9': request.GET['columns[9][search][value]'],
+            '10': request.GET['columns[10][search][value]'],
         }
         filtro = get_argumentos_busqueda(**args)
 
@@ -213,6 +212,8 @@ def get_data(registros_filtrados):
             registro_json.append(str(registro.numero))
             registro_json.append('' if registro.numero is None else str(registro.numero))
             registro_json.append('' if registro.llegada is None else str(registro.llegada)[:10])
+            registro_json.append('' if registro.seguimientos is None else str(registro.seguimientos))
+
             registro_json.append('' if registro.transportista is None else str(registro.transportista))
             registro_json.append('' if registro.awb is None else str(registro.awb))
             registro_json.append('' if registro.agente is None else str(registro.agente))
@@ -371,6 +372,8 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append(registro.consignatario_codigo)
             registro_json.append('' if registro.etd is None else str(registro.etd)[:10])  #23
             registro_json.append('' if registro.eta is None else str(registro.eta)[:10])  #24
+            registro_json.append('' if registro.etd is None else str(registro.etd.strftime('%d/%m/%Y')))  #25
+            registro_json.append('' if registro.eta is None else str(registro.eta.strftime('%d/%m/%Y')))  #26
 
             data.append(registro_json)
         return data
