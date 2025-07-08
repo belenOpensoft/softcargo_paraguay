@@ -519,6 +519,8 @@ def get_data_email(request):
 
                 texto += formatear_linea("Ref. Proveedor", row.refproveedor)
 
+                cantidad_cntr = contenedores = precintos = movimiento = ''
+
                 if row.modo not in ['IMPORT AEREO','EXPORT AEREO']:
                     cant_cntr = Envases.objects.filter(numero=row.numero).values(
 
@@ -526,7 +528,6 @@ def get_data_email(request):
 
                     ).annotate(total=Count('id'))
 
-                    cantidad_cntr = contenedores = precintos = movimiento= ''
                     peso = volumen = bultos = 0
                     if cant_cntr.exists():
 
@@ -563,8 +564,8 @@ def get_data_email(request):
                         texto += formatear_linea("Bultos", str(c.bultos) if c.bultos else 0)
 
                         texto += formatear_linea("Peso", bruto)
-
-                        texto += formatear_linea("CBM", str(c.cbm or 'S/I')+' M³')
+                        cbm=round(float(c.cbm or 0),2)
+                        texto += formatear_linea("CBM", str(cbm or 'S/I')+' M³')
 
 
                         toneladas = round(float(bruto) / 1000, 2) if bruto else 0
@@ -574,6 +575,9 @@ def get_data_email(request):
                         aplicable = str(row.aplicable)
 
                     if row.modo in ['IMPORT AEREO','EXPORT AEREO']:
+                        texto += formatear_linea("Aplicable", str(aplicable))
+
+                    if row.modo in ['IMPORT MARITIMO'] and movimiento != 'FCL/FCL':
                         texto += formatear_linea("Aplicable", str(aplicable))
 
                     texto += "<br>"

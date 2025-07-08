@@ -845,7 +845,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         return tabla_html, resultado
     elif title == 'Traspaso a operaciones':
 
-        texto += formatear_linea("SEGUIMIENTO", row.numero)
+        texto += formatear_linea("SEGUIMIENTO", row.seguimiento)
 
         texto += formatear_linea("CLIENTE", row.consignatario)
 
