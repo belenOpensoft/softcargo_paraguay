@@ -112,7 +112,7 @@ def get_datos_caratula(request):
                 texto += formatear_caratula("Nro Bultos", e.bultos)
                 texto += formatear_caratula("Mercaderia", e.producto.nombre)
                 texto += '<br>'
-                texto += formatear_caratula("Peso", round(e.bruto,2))
+                texto += formatear_caratula("Peso", round(float(e.bruto or 0),2))
                 texto += formatear_caratula("Volumen", round(volumen,2))
                 texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 

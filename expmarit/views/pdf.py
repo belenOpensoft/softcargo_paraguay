@@ -121,8 +121,8 @@ def get_datos_caratula(request):
                 texto += formatear_caratula("Nro Bultos", f"{e.bultos} {e.tipo}") if movimiento is not None and movimiento == 'LCL/LCL' else formatear_caratula("Nro Bultos", f"{e.bultos}")
                 texto += formatear_caratula("Mercadería", e.producto.nombre if e.producto else '')
                 texto += '<br>'
-                texto += formatear_caratula("Peso", round(e.bruto,2))
-                texto += formatear_caratula("Volumen", round(e.cbm,2))
+                texto += formatear_caratula("Peso", round(float(e.bruto or 0),2))
+                texto += formatear_caratula("Volumen", round(float(e.cbm or 0),2))
                 texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             texto += formatear_caratula("Forma de pago", seguimiento.pago)
