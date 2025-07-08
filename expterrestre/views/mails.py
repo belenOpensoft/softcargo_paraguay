@@ -411,15 +411,15 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                     total_iva += float(g.precio) * 0.22
 
                 if g.precio != 0:
-                    texto += formatear_linea(servicio.nombre, f"${g.precio:.2f}")
+                    texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}")
 
             texto += "<br>"
 
-            texto += formatear_linea("TOTAL DE GASTOS", f"${total_gastos:.2f}")
+            texto += formatear_linea("TOTAL DE GASTOS", f"{total_gastos:.2f}")
 
-            texto += formatear_linea("I.V.A", f"${total_iva:.2f}")
+            texto += formatear_linea("I.V.A", f"{total_iva:.2f}")
 
-            texto += formatear_linea("TOTAL A PAGAR", f"${total_gastos + total_iva:.2f}")
+            texto += formatear_linea("TOTAL A PAGAR", f"{total_gastos + total_iva:.2f}")
 
             texto += "<br>"
 
