@@ -10,7 +10,12 @@ $(document).ready(function () {
 //        console.log('Error:', error);
 //    }
 //});
-
+    $(document).on("submit", "#searchForm", function(e) {
+        e.preventDefault();
+        let formData = $(this).serialize();
+        filtrar_tabla_master(formData, e);
+        $("#searchModal").dialog("close");
+    });
     $("#modalSeleccionEmailHouse6").dialog({
         autoOpen: false,
         modal: true,

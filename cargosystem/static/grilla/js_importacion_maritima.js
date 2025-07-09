@@ -47,6 +47,13 @@ let table_add_im;
 let table_edit_im;
 $(document).ready(function () {
 
+    $(document).on("submit", "#searchForm", function(e) {
+        e.preventDefault();
+        let formData = $(this).serialize();
+        filtrar_tabla_master(formData, e);
+        $("#searchModal").dialog("close");
+    });
+
     $("#modalSeleccionEmailHouse4").dialog({
         autoOpen: false,
         modal: true,

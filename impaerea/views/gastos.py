@@ -61,7 +61,7 @@ def source_gastos_house(request):
         end = start + length
         order = get_order(request, columns_table)
         """FILTRO REGISTROS"""
-        registros = VGastosHouse.objects.filter(numero=numero).order_by(*order)
+        registros = VGastosHouse.objects.filter(numero=numero,modo='Collect').order_by(*order)
         """PREPARO DATOS"""
         resultado = {}
         data = get_data(registros[start:end])
@@ -69,7 +69,7 @@ def source_gastos_house(request):
         resultado['data'] = data
         resultado['length'] = length
         resultado['draw'] = request.GET['draw']
-        resultado['recordsTotal'] = VGastosHouse.objects.filter(numero=numero).count()
+        resultado['recordsTotal'] = VGastosHouse.objects.filter(numero=numero,modo='Collect').count()
         resultado['recordsFiltered'] = str(registros.count())
         data_json = json.dumps(resultado)
     else:

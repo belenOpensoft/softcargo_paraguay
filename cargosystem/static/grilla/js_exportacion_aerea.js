@@ -46,6 +46,12 @@ var awbRegex = "";
 let table_add_ea;
 
 $(document).ready(function () {
+    $(document).on("submit", "#searchForm", function(e) {
+        e.preventDefault();
+        let formData = $(this).serialize();
+        filtrar_tabla_master(formData, e);
+        $("#searchModal").dialog("close");
+    });
 
     $("#modalSeleccionEmailHouse5").dialog({
         autoOpen: false,

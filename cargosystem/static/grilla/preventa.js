@@ -53,6 +53,8 @@ function facturar(){
         open: function (event, ui) {
         cargar_gastos_factura(function() {
             sumar_ingresos_tabla();
+            asignar_costo_todos(event);
+
         });
         },
         modal: true,
@@ -157,172 +159,174 @@ function enviarDatosTabla() {
     let num_destina=$('#destinatario_input').val();
     let dest=$('#destinatario').val();
     $.ajax({
-                url: '/admin_cont/house_detail_factura/',
+        url: '/admin_cont/house_detail_factura/',
+        data: { numero: num, clase:clase},
+        method: 'GET',
+        success: function (house) {
+            if (tablaOrigen.includes('tabla_house_directo')) {
+
+                $.ajax({
+                url: '/admin_cont/source_embarque_factura/',
                 data: { numero: num, clase:clase},
                 method: 'GET',
-                success: function (house) {
-                    if (tablaOrigen.includes('tabla_house_directo')) {
-
-                        $.ajax({
-                        url: '/admin_cont/source_embarque_factura/',
-                        data: { numero: num, clase:clase},
-                        method: 'GET',
-                        success: function (embarque) {
-                                preventa=({
-                                    seguimiento:house.seguimiento,
-                                    referencia:num,
-                                    transportista:getNameByIdClientes(house.transportista_e),
-                                    vuelo:house.viaje_e,
-                                    master:house.awb_e,
-                                    house:house.hawb_e,
-                                    fecha:house.fecharetiro_e,
-                                    kilos:0,
-                                    bultos:0,
-                                    volumen:0,
-                                    origen:house.origen_e,
-                                    destino:house.destino_e,
-                                    consigna:dest,
-                                    cliente:num_destina,
-                                    embarca:getNameByIdClientes(house.embarcador_e),
-                                    agente:getNameByIdClientes(house.agente_e),
-                                    posicion:house.posicion_e,
-                                    terminos:house.terminos,
-                                    pagoflete:house.pago,
-                                    commodity:embarque[0].producto_id,
-                                });
-
-                                //guardar la preventa
-                                   const tipoElegido = prompt("¿Desea facturar gastos Prepaid o Collect? (Ingrese 'Prepaid' o 'Collect')");
-
-                                    if (!tipoElegido || (tipoElegido.toLowerCase() !== "prepaid" && tipoElegido.toLowerCase() !== "collect")) {
-                                        alert("Debe ingresar 'Prepaid' o 'Collect'. Operación cancelada.");
-                                        return;
-                                    }
-
-                                    // Guardar preventa con tipo
-                                    guardar_preventa(preventa, tipoElegido);
-
-                                    // Filtrar y enviar los gastos seleccionados
-                                    const tabla = $('#facturar_table').DataTable();
-                                    let datosTabla = [];
-
-                                    tabla.rows().every(function () {
-                                        const data = this.data();
-                                        const tipo = $(this.node()).find('td').eq(2).text().toLowerCase().trim(); // Columna "Tipo"
-                                        console.log(tipo);
-                                        if (tipo === tipoElegido.toLowerCase()) {
-                                            datosTabla.push({
-                                                id_gasto: data[0],
-                                                notas: $(this.node()).find('td').eq(7).text(),
-                                                descripcion: $(this.node()).find('td').eq(3).text()
-                                            });
-                                        }
-                                    });
-
-                                    update_gastos(datosTabla);
-
-                                   $('#facturar_modal').dialog('close');
-                                    $('#'+tablaOrigen).DataTable().ajax.reload(null, false);
-                        },
-                        error: function (xhr, status, error) {
-                            console.error("Error fetching data:", error);
+                success: function (embarque) {
+                    let tipoElegido;
+                        preventa=({
+                            seguimiento:house.seguimiento,
+                            referencia:num,
+                            transportista:getNameByIdClientes(house.transportista_e),
+                            vuelo:house.viaje_e,
+                            master:house.awb_e,
+                            house:house.hawb_e,
+                            fecha:house.fecharetiro_e,
+                            kilos:0,
+                            bultos:0,
+                            volumen:0,
+                            origen:house.origen_e,
+                            destino:house.destino_e,
+                            consigna:dest,
+                            cliente:num_destina,
+                            embarca:getNameByIdClientes(house.embarcador_e),
+                            agente:getNameByIdClientes(house.agente_e),
+                            posicion:house.posicion_e,
+                            terminos:house.terminos,
+                            pagoflete:house.pago,
+                            commodity:embarque[0].producto_id,
+                        });
+                        if(['EM','EA','ET'].includes(clase)){
+                            const confirmacion = confirm("¿Desea facturar gastos como 'Collect'?\n\nPresione ACEPTAR para 'Collect'\nPresione CANCELAR para 'Prepaid'");
+                            tipoElegido = confirmacion ? "Collect" : "Prepaid";
+                        }else{
+                            tipoElegido='Collect';
                         }
-                    });
-                    }else{
+
+
+                        //guardar la preventa
+
+
+
+                            // Guardar preventa con tipo
+                            guardar_preventa(preventa, tipoElegido);
+
+                            // Filtrar y enviar los gastos seleccionados
+                            const tabla = $('#facturar_table').DataTable();
+                            let datosTabla = [];
+
+                            tabla.rows().every(function () {
+                                const data = this.data();
+                                const tipo = $(this.node()).find('td').eq(2).text().toLowerCase().trim(); // Columna "Tipo"
+                                console.log(tipo);
+                                if (tipo === tipoElegido.toLowerCase()) {
+                                    datosTabla.push({
+                                        id_gasto: data[0],
+                                        notas: $(this.node()).find('td').eq(7).text(),
+                                        descripcion: $(this.node()).find('td').eq(3).text()
+                                    });
+                                }
+                            });
+
+                            update_gastos(datosTabla);
+
+                           $('#facturar_modal').dialog('close');
+                            $('#'+tablaOrigen).DataTable().ajax.reload(null, false);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching data:", error);
+                }
+            });
+            }else{
+            $.ajax({
+                url: '/admin_cont/source_master_factura/',
+                data: { master: house.awb_e, clase:clase},
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function (master) {
                     $.ajax({
-                        url: '/admin_cont/source_master_factura/',
-                        data: { master: house.awb_e, clase:clase},
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        success: function (master) {
-                            $.ajax({
-                        url: '/admin_cont/source_embarque_factura/',
-                        data: { numero: num, clase:clase},
-                        method: 'GET',
-                        success: function (embarque) {
-                                preventa=({
-                                    seguimiento:house.seguimiento,
-                                    referencia:num,
-                                    transportista_id:house.transportista_e,
-                                    vuelo:house.viaje_e,
-                                    master:house.awb_e,
-                                    house:house.hawb_e,
-                                    fecha:house.fecharetiro_e,
-                                    kilos:master.kilos,
-                                    bultos:master.bultos,
-                                    volumen:master.volumen,
-                                    origen:house.origen_e,
-                                    destino:house.destino_e,
-                                    consigna:dest,
-                                    cliente:num_destina,
-                                    embarca:getNameByIdClientes(house.embarcador_e),
-                                    agente:getNameByIdClientes(house.agente_e),
-                                    posicion:house.posicion_e,
-                                    terminos:house.terminos,
-                                    pagoflete:house.pago,
-                                    wr:house.wr,
-                                    commodity:getNameByIdProductos(embarque[0].producto_id),
-                                });
-                                    //guardar la preventa
-                                    const tipoElegido = prompt("¿Desea facturar gastos Prepaid o Collect? (Ingrese 'Prepaid' o 'Collect')");
+                url: '/admin_cont/source_embarque_factura/',
+                data: { numero: num, clase:clase},
+                method: 'GET',
+                success: function (embarque) {
+                        preventa=({
+                            seguimiento:house.seguimiento,
+                            referencia:num,
+                            transportista_id:house.transportista_e,
+                            vuelo:house.viaje_e,
+                            master:house.awb_e,
+                            house:house.hawb_e,
+                            fecha:house.fecharetiro_e,
+                            kilos:master.kilos,
+                            bultos:master.bultos,
+                            volumen:master.volumen,
+                            origen:house.origen_e,
+                            destino:house.destino_e,
+                            consigna:dest,
+                            cliente:num_destina,
+                            embarca:getNameByIdClientes(house.embarcador_e),
+                            agente:getNameByIdClientes(house.agente_e),
+                            posicion:house.posicion_e,
+                            terminos:house.terminos,
+                            pagoflete:house.pago,
+                            wr:house.wr,
+                            commodity:getNameByIdProductos(embarque[0].producto_id),
+                        });
 
-                                    if (!tipoElegido || (tipoElegido.toLowerCase() !== "prepaid" && tipoElegido.toLowerCase() !== "collect")) {
-                                        alert("Debe ingresar 'Prepaid' o 'Collect'. Operación cancelada.");
-                                        return;
-                                    }
+                            //guardar la preventa
+                            const confirmacion = confirm("¿Desea facturar gastos como 'Collect'?\n\nPresione ACEPTAR para 'Collect'\nPresione CANCELAR para 'Prepaid'");
 
-                                    // Guardar preventa con tipo
-                                    guardar_preventa(preventa, tipoElegido);
+                            const tipoElegido = confirmacion ? "Collect" : "Prepaid";
 
-                                    // Filtrar y enviar los gastos seleccionados
-                                    const tabla = $('#facturar_table').DataTable();
-                                    let datosTabla = [];
+                            // Guardar preventa con tipo
+                            guardar_preventa(preventa, tipoElegido);
 
-                                    tabla.rows().every(function () {
-                                        const data = this.data();
-                                        const tipo = $(this.node()).find('td').eq(2).text().toLowerCase().trim(); // Columna "Tipo"
-                                        console.log(tipo);
-                                        if (tipo === tipoElegido.toLowerCase()) {
-                                            datosTabla.push({
-                                                id_gasto: data[0],
-                                                notas: $(this.node()).find('td').eq(7).text(),
-                                                descripcion: $(this.node()).find('td').eq(3).text()
-                                            });
-                                        }
+                            // Filtrar y enviar los gastos seleccionados
+                            const tabla = $('#facturar_table').DataTable();
+                            let datosTabla = [];
+
+                            tabla.rows().every(function () {
+                                const data = this.data();
+                                const tipo = $(this.node()).find('td').eq(2).text().toLowerCase().trim(); // Columna "Tipo"
+                                console.log(tipo);
+                                if (tipo === tipoElegido.toLowerCase()) {
+                                    datosTabla.push({
+                                        id_gasto: data[0],
+                                        notas: $(this.node()).find('td').eq(7).text(),
+                                        descripcion: $(this.node()).find('td').eq(3).text()
                                     });
+                                }
+                            });
 
-                                    update_gastos(datosTabla);
-                                   $('#facturar_modal').dialog('close');
-                                    if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                        $('#table_add_im').DataTable().ajax.reload(null, false);
-                                    }
+                            update_gastos(datosTabla);
+                           $('#facturar_modal').dialog('close');
+                            if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                $('#table_add_im').DataTable().ajax.reload(null, false);
+                            }
 
-                                    if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                        $('#table_edit_im').DataTable().ajax.reload(null, false);
-                                    }
-                                    if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                        $('#tabla_house_directo').DataTable().ajax.reload(null, false);
-                                    }
-
-                        },
-                        error: function (xhr, status, error) {
-                            console.error("Error fetching data:", error);
-                        }
-                    });
-                        },
-                        error: function (xhr, status, error) {
-                            console.error("Error fetching data:", error);
-                        }
-                    });
-                    }
+                            if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                $('#table_edit_im').DataTable().ajax.reload(null, false);
+                            }
+                            if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                            }
 
                 },
                 error: function (xhr, status, error) {
                     console.error("Error fetching data:", error);
                 }
             });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching data:", error);
+                }
+            });
+            }
+
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching data:", error);
+        }
+    });
 
 
 }
