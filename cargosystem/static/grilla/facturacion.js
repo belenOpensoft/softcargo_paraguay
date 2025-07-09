@@ -7,6 +7,11 @@ $(document).ready(function () {
     var buscar = '';
     var que_buscar = '';
 
+    $('#id_fecha').on('change', function () {
+            if ($(this).val()) {
+                cargar_arbitraje();
+            }
+        });
 
     const valorInicial = $('#id_tipo').find('option:selected').text();
     $('#tipoSeleccionado').text(valorInicial);
@@ -2357,12 +2362,14 @@ function procesar_factura_finalizada(datos_complementarios) {
 }
 
 function cargar_arbitraje() {
+    const fecha = $('#id_fecha').val();
+
     $.ajax({
         url: "/admin_cont/cargar_arbitraje/",
         type: "GET",
+        data: { fecha: fecha },
         dataType: "json",
         success: function (data) {
-            // Cargar los valores en los campos
             $('#id_arbitraje').val(data.arbitraje);
             $('#id_paridad').val(data.paridad);
         },
@@ -2371,6 +2378,7 @@ function cargar_arbitraje() {
         }
     });
 }
+
 
 function buscar_gastos(autogenerado) {
     $.ajax({

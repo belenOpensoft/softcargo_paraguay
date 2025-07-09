@@ -327,9 +327,11 @@ $(document).ready(function() {
      });
      });
 
-
     $("#modal-embarque").tabs();
     $("#id_fecha_registro").change(function () {
+        if ($(this).val()) {
+            cargar_arbitraje();
+        }
         actualizarFechas(this, "#id_fecha_documento");  // Copia la fecha al segundo campo
         actualizarFechas(this, "#id_vencimiento");  // Copia la fecha al tercer campo
     });
@@ -1019,19 +1021,7 @@ $("#proveedoresModal").dialog({
         limpiarModalProveedor();
     }
 }).prev('.ui-dialog-titlebar').remove();
-$.ajax({
-        url: "/admin_cont/cargar_arbitraje/",
-        type: "GET",
-        dataType: "json",
-        success: function (data) {
-            // Cargar los valores en los campos
-            $('#id_arbitraje').val(data.arbitraje);
-            $('#id_paridad').val(data.paridad);
-        },
-        error: function (xhr, status, error) {
-            alert("Error al cargar los datos iniciales: " + error);
-        }
-    });
+cargar_arbitraje();
 traer_proximo_numero();
 }
 function resetModal(modalId) {
@@ -1379,6 +1369,24 @@ function cargarImputacionesCompra(autogen) {
         },
         error: function (xhr, status, error) {
             console.error('Error al cargar imputaciones:', error);
+        }
+    });
+}
+
+function cargar_arbitraje() {
+    const fecha = $('#id_fecha_registro').val();
+
+    $.ajax({
+        url: "/admin_cont/cargar_arbitraje/",
+        type: "GET",
+        data: { fecha: fecha },
+        dataType: "json",
+        success: function (data) {
+            $('#id_arbitraje').val(data.arbitraje);
+            $('#id_paridad').val(data.paridad);
+        },
+        error: function (xhr, status, error) {
+            alert("Error al cargar los datos iniciales: " + error);
         }
     });
 }

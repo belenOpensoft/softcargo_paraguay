@@ -675,16 +675,21 @@ def crear_asiento(asiento):
 
 def cargar_arbitraje(request):
     try:
-        fecha_hoy = datetime.today().date()
+        fecha_str = request.GET.get('fecha')
+        if not fecha_str:
+            return JsonResponse({'error': 'Fecha no proporcionada'}, status=400)
 
-        dolar_hoy = Dolar.objects.filter(ufecha__date=fecha_hoy).first()
+        # Convertir string a objeto date
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+
+        dolar_hoy = Dolar.objects.filter(ufecha__date=fecha).first()
 
         if dolar_hoy:
             return JsonResponse({
                 'arbitraje': dolar_hoy.uvalor,
                 'paridad': dolar_hoy.paridad,
-                'pizarra':dolar_hoy.upizarra,
-                'moneda':dolar_hoy.umoneda,
+                'pizarra': dolar_hoy.upizarra,
+                'moneda': dolar_hoy.umoneda,
                 'contenido': True
             })
         else:
@@ -696,7 +701,6 @@ def cargar_arbitraje(request):
                 'contenido': False
             })
     except Exception as e:
-        # Manejar errores inesperados
         return JsonResponse({'error': str(e)}, status=500)
 
 def obtener_proximo_mboleta(request):

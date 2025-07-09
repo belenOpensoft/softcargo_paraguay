@@ -587,27 +587,6 @@ def crear_movimiento(movimiento):
     except Exception as e:
         raise
 
-def cargar_arbitraje(request):
-    try:
-        fecha_hoy = datetime.today().date()
-
-        dolar_hoy = Dolar.objects.filter(ufecha__date=fecha_hoy).first()
-
-        if dolar_hoy:
-            return JsonResponse({
-                'arbitraje': dolar_hoy.uvalor,
-                'paridad': dolar_hoy.paridad,
-                'contenido': True
-            })
-        else:
-            return JsonResponse({
-                'arbitraje': 0.0,
-                'paridad': 0.0,
-                'contenido': False
-            })
-    except Exception as e:
-        # Manejar errores inesperados
-        return JsonResponse({'error': str(e)}, status=500)
 
 def obtener_cheques_disponibles(request):
 

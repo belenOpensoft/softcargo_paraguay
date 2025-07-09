@@ -1,4 +1,9 @@
 $(document).ready(function () {
+    $('#id_fecha').on('change', function () {
+            if ($(this).val()) {
+                cargar_arbitraje();
+            }
+        });
 
     $('#id_cuenta_deposito').on('change', function () {
         const cuentaSeleccionada = $(this).val();
@@ -351,19 +356,7 @@ function abrir_cobranza() {
             }
         ]
     }).prev('.ui-dialog-titlebar').remove();
-    $.ajax({
-        url: "/admin_cont/cargar_arbitraje/",
-        type: "GET",
-        dataType: "json",
-        success: function (data) {
-            // Cargar los valores en los campos
-            $('#id_arbitraje').val(data.arbitraje);
-            $('#id_paridad').val(data.paridad);
-        },
-        error: function (xhr, status, error) {
-            alert("Error al cargar los datos iniciales: " + error);
-        }
-    });
+    cargar_arbitraje();
     traer_proximo_numero();
 }
 
@@ -1759,6 +1752,24 @@ function get_data_email(autogenerado) {
             } else {
                 alert('Error: ' + resultado['detalle']);
             }
+        }
+    });
+}
+
+function cargar_arbitraje() {
+    const fecha = $('#id_fecha').val();
+
+    $.ajax({
+        url: "/admin_cont/cargar_arbitraje/",
+        type: "GET",
+        data: { fecha: fecha },
+        dataType: "json",
+        success: function (data) {
+            $('#id_arbitraje').val(data.arbitraje);
+            $('#id_paridad').val(data.paridad);
+        },
+        error: function (xhr, status, error) {
+            alert("Error al cargar los datos iniciales: " + error);
         }
     });
 }
