@@ -1351,10 +1351,12 @@ $(document).ready(function () {
                                         success: function (resultado) {
                                             aux = resultado['resultado'];
                                             if (aux == 'exito') {
+                                                $("#clonar_modal").dialog("close");
                                                 var idx = table.cell('.table-secondary', 0).index();
                                                 alert('Seguimiento clonardo N° ' + resultado['numero'] )
                                                 mostrarToast('¡Seguimiento clonado correctamente!', 'success');
                                                 table.ajax.reload();
+
                                             } else {
                                                 alert(aux);
                                             }
