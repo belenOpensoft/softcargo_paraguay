@@ -2734,9 +2734,15 @@ table_add_im = $('#table_add_im').DataTable({
     },
     {
         "targets": [1],
+        "render": function (data, type, row, meta) {
+            return row[24]; // Toma el índice 5 para la columna 6
+        }
     },
     {
         "targets": [2],
+            "render": function (data, type, row, meta) {
+            return row[25]; // Toma el índice 5 para la columna 6
+        }
     },
     {
         "targets": [3],

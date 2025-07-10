@@ -548,11 +548,10 @@ $(document).ready(function() {
             });
         },
         minLength: 2,
+        appendTo: "#proveedoresModal",
         select: function(event, ui) {
             const cobroActual = $('#id_cobro select').val();
             const precio = parseFloat($('#id_precio input').val());
-
-
             $.ajax({
                 url: "/admin_cont/buscar_items_c",
                 data: { id: ui.item.id },

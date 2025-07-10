@@ -146,13 +146,13 @@ class add_form(BSModalModelForm):
     consignatario = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'consignatario_add', 'name':'otro' }),
-        required=False,initial='OCEANLINK LTDA')
+        required=False,label='Embarcador')
 
     transportista= forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required':False, 'id': 'transportista_add', 'name':'otro'}),
         required=False)
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': False,"class":'form-control'}),
-                     required=True, label="Moneda", choices=((1,'USD'),(2,'EURO'),(3,'PESOS')), initial='')
+                     required=True, label="Moneda", choices=((2,'USD'),(3,'EURO'),(1,'PESOS')), initial='')
     fecha = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': False,"onkeypress":"return tabular(event,this)","class":"form-control mb-3",}),label="Llegada",required=True)
 
     origen = forms.CharField(
@@ -307,12 +307,12 @@ class edit_form(BSModalModelForm):
     consignatario_e = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'consignatario_edit', 'name':'otro' }),
-        required=False,label="Consignatario")
+        required=False,label="Embarcador")
     transportista_e= forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'required':False, 'id': 'transportista_edit', 'name':'otro'}),
         required=False,label="Transportista")
     moneda_e = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': False,"class":'form-control'}),
-                     required=True, label="Moneda", choices=((1,'USD'),(2,'EURO'),(3,'PESOS')), initial='')
+                     required=True, label="Moneda", choices=((2,'USD'),(3,'EURO'),(1,'PESOS')), initial='')
     fecha_e = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': False,"onkeypress":"return tabular(event,this)","class":"form-control mb-3",}),label="Llegada",required=True)
 
     origen_e = forms.CharField(

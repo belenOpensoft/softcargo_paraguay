@@ -2720,7 +2720,7 @@ table_add_ea = $('#table_add_ea').DataTable({
     "bAutoWidth": false,
     "scrollX": true,
     "scrollY": wHeight * 0.60,
-"columnDefs": [
+    "columnDefs": [
     {
         "targets": [0],  // Nueva columna para detalles
         "className": '',
@@ -2734,9 +2734,15 @@ table_add_ea = $('#table_add_ea').DataTable({
     },
     {
         "targets": [1],
+        "render": function (data, type, row, meta) {
+            return row[21]; // Toma el índice 5 para la columna 6
+        }
     },
     {
         "targets": [2],
+            "render": function (data, type, row, meta) {
+            return row[22]; // Toma el índice 5 para la columna 6
+        }
     },
     {
         "targets": [3],
@@ -2810,6 +2816,7 @@ table_add_ea = $('#table_add_ea').DataTable({
             return row[13]; // Toma el índice 13 para la columna 14
         }
     },
+
 ],
     "order": [[0, "desc"]],
     "processing": true,

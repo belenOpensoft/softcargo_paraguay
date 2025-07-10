@@ -132,7 +132,7 @@ class add_form(BSModalModelForm):
     consignatario = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'consignatario_add', 'name':'otro' }),
-        required=False, initial='OCEANLINK LTDA')
+        required=False,label='Embarcador')
     armador = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'armador_add', 'name':'otro'}),
@@ -145,7 +145,7 @@ class add_form(BSModalModelForm):
         required=False)
     viaje = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': False,'max_length': 20,'id':'id_viaje_master' },),max_length=20,required=False,label="Viaje")
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': False,"class":'form-control'}),
-                     required=True, label="Moneda", choices=((1,'USD'),(2,'EURO'),(3,'PESOS')), initial='')
+                     required=True, label="Moneda", choices=((2,'USD'),(3,'EURO'),(1,'PESOS')), initial='')
     fecha = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': False,"onkeypress":"return tabular(event,this)","class":"form-control mb-3",}),label="Llegada",required=True)
 
     origen = forms.CharField(
@@ -294,7 +294,7 @@ class edit_form(BSModalModelForm):
     consignatario_e = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'consignatario_edit', 'name':'otro' }),
-        required=False,label="Consignatario")
+        required=False,label="Embarcador")
     armador_e = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required':False, 'id': 'armador_edit', 'name':'otro'}),
@@ -307,7 +307,7 @@ class edit_form(BSModalModelForm):
         required=False,label="Vapor")
     viaje_e = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',"autocomplete" :"off",'required': False,'max_length': 20},),max_length=20,required=True,label="Viaje")
     moneda_e = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': False,"class":'form-control'}),
-                     required=True, label="Moneda", choices=((1,'USD'),(2,'EURO'),(3,'PESOS')), initial='')
+                     required=True, label="Moneda", choices=((2,'USD'),(3,'EURO'),(1,'PESOS')), initial='')
     fecha_e = forms.DateField(widget= forms.DateInput(attrs={"type":'date','required': False,"onkeypress":"return tabular(event,this)","class":"form-control mb-3",}),label="Llegada",required=True)
 
     origen_e = forms.CharField(

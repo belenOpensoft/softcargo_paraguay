@@ -70,7 +70,7 @@ def get_datos_caratula(request):
             # Embarcador
             emb = MantenimientosClientes.objects.filter(codigo=row.embarcador_codigo).first()
             if emb:
-                emb_ciudad = MantenimientosCiudades.objects.filter(codedi=emb.ciudad).first()
+                emb_ciudad = MantenimientosCiudades.objects.filter(codigo=emb.ciudad).first()
                 direccion_emb = f"{emb.direccion} - {emb_ciudad.nombre if emb_ciudad else 'S/I'} - {emb.pais}"
                 texto += f"<b>Embarcador: {emb.empresa}</b><br>"
                 texto += "<b>Datos del embarcador:</b><br>"
@@ -91,7 +91,7 @@ def get_datos_caratula(request):
             # Consignatario
             con = MantenimientosClientes.objects.filter(codigo=row.consignatario_codigo).first()
             if con:
-                con_ciudad = MantenimientosCiudades.objects.filter(codedi=con.ciudad).first()
+                con_ciudad = MantenimientosCiudades.objects.filter(codigo=con.ciudad).first()
                 direccion_con = f"{con.direccion} - {con_ciudad.nombre if con_ciudad else 'S/I'} - {con.pais}"
                 texto += f"<b>Consignatario: {con.empresa}</b><br>"
                 texto += "<b>Datos del consignatario:</b><br>"
@@ -113,7 +113,7 @@ def get_datos_caratula(request):
             agente_ciudad = MantenimientosClientes.objects.filter(codigo=row.agente_codigo).first()
 
             if agente_ciudad:
-                ciudad = MantenimientosCiudades.objects.filter(codedi=agente_ciudad.ciudad).first()
+                ciudad = MantenimientosCiudades.objects.filter(codigo=agente_ciudad.ciudad).first()
                 agente_ciudad_nombre = ciudad.nombre if ciudad else "S/I"
             else:
                 agente_ciudad_nombre = "S/I"
