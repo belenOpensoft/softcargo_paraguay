@@ -38,7 +38,7 @@ columns_table = {
 def proveedores_gastos_view(request):
 
     hoy = datetime.now().strftime('%Y-%m-%d')
-    form = ProveedoresGastos(initial={'fecha_registro':hoy,'fecha_documento':hoy,'vencimiento':hoy})
+    form = ProveedoresGastos(initial={'fecha_registro':hoy,'fecha_documento':hoy,'vencimiento':hoy,'prefijo': '0001'})
     detalle= ComprasDetalleTabla()
 
     return render(request, 'proveedores_gastos.html', {'form': form,'detalle':detalle})
@@ -126,7 +126,7 @@ def procesar_factura_proveedor(request):
                 seguimiento=None
 
                 serie = request.POST.get('serie', "")
-                prefijo = request.POST.get('prefijo', 0)
+                prefijo = request.POST.get('prefijo', 1)
                 moneda = request.POST.get('moneda', "")
                 arbitraje = request.POST.get('arbitraje', 0)
                 paridad = request.POST.get('paridad', 0)

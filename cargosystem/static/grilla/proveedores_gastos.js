@@ -5,6 +5,31 @@ var dHeight = wHeight * 0.30;
 let filaSeleccionada = null;
 
 $(document).ready(function() {
+
+    const $iva = $('#id_iva');
+    const $neto = $('#id_neto');
+    const $total = $('#id_total');
+
+    // Cuando se hace clic en "Ajustar IVA"
+    $('#ajustarIVA').on('click', function () {
+        $iva.prop('readonly', false);
+        $iva.focus();
+    });
+
+    // Cuando se pierde el foco del campo IVA
+    $iva.on('blur', function () {
+        $iva.prop('readonly', true);
+        recalcularTotalAjuste();
+    });
+
+    // Función para recalcular el total
+    function recalcularTotalAjuste() {
+        const iva = parseFloat($iva.val()) || 0;
+        const neto = parseFloat($neto.val()) || 0;
+        const total = neto + iva;
+        $total.val(total.toFixed(2));
+    }
+
     var buscar = '';
     var que_buscar = '';
     let contador = 0;
@@ -568,6 +593,8 @@ $(document).ready(function() {
                     $('#id_descripcion_item input').val(servicio.nombre);
                     $('#id_cobro select').val(cobroActual);
                     $('#id_precio input').val(precio);
+                    $('#iva_item').val(servicio.iva);
+
                 },
                 error: xhr => console.error('Error al obtener los detalles del item:', xhr)
             });
@@ -579,7 +606,10 @@ $(document).ready(function() {
     const item = $('#item').val();
     const descripcion = $('#id_descripcion_item input').val();
     const precio = parseFloat($('#id_precio input').val());
-
+    if(precio == 0 || precio == null){
+        alert('Digite un precio');
+        return;
+    }
     if (item && descripcion && !isNaN(precio)) {
         const iva = $('#id_precio input').data('iva') || "";
         const cuenta = $('#id_precio input').data('cuenta') || "";
@@ -1021,7 +1051,7 @@ $("#proveedoresModal").dialog({
     }
 }).prev('.ui-dialog-titlebar').remove();
 cargar_arbitraje();
-traer_proximo_numero();
+//traer_proximo_numero();
 }
 function resetModal(modalId) {
     const modal = $(modalId);
@@ -1078,6 +1108,8 @@ function limpiarCampos() {
     $('#item').val('');
     $('#id_descripcion_item input').val('');
     $('#id_precio input').val('');
+    $('#iva_item').val('');
+
 }
 // Función para mostrar u ocultar el campo proveedor2
 function toggleProveedor2() {
@@ -1112,7 +1144,7 @@ function actualizarTotal() {
     const iva_t = total - neto;
     $('#id_iva').val(iva_t.toFixed(2)).prop('readonly', true);
 }
-$('#abrir_arbi_prov').on('click', function (event) {
+$('#abrir_arbi').on('click', function (event) {
     $("#arbitraje_modal").dialog({
         autoOpen: true,
         modal: true,
@@ -1174,6 +1206,7 @@ $('#abrir_arbi_prov').on('click', function (event) {
         $.ajax({
         url: "/admin_cont/cargar_arbitraje/",
         type: "GET",
+        data: { fecha: hoy },
         dataType: "json",
         success: function (data) {
             // Cargar los valores en los campos

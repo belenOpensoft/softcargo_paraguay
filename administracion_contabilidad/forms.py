@@ -337,21 +337,15 @@ class ProveedoresGastos(forms.Form):
 
     prefijo = forms.CharField(
         max_length=4,
-        required=True,
-        label="",
-        initial="0000",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
-        error_messages={
-            'required': 'Este campo es obligatorio',
-            'invalid': 'Por favor, ingresa un número válido'
-        }
+        initial="0001",
+        widget=forms.HiddenInput(),
+        required=False
     )
 
     numero = forms.CharField(
         max_length=10,
         required=True,
-        label="",
-        initial="0000000000",
+        label="Numero",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingresa el número de factura'}),
         error_messages={
             'required': 'Este campo es obligatorio',

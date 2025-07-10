@@ -1555,6 +1555,8 @@ $('#abrir_arbi').on('click', function (event) {
     $.ajax({
         url: "/admin_cont/cargar_arbitraje/",
         type: "GET",
+        data: { fecha: hoy },
+
         dataType: "json",
         success: function (data) {
             // Cargar los valores en los campos

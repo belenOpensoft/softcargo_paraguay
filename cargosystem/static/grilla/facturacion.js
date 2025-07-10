@@ -1,5 +1,30 @@
 $(document).ready(function () {
 
+
+    const $iva = $('#id_iva');
+    const $neto = $('#id_neto');
+    const $total = $('#id_total');
+
+    // Cuando se hace clic en "Ajustar IVA"
+    $('#ajustarIVA').on('click', function () {
+        $iva.prop('readonly', false);
+        $iva.focus();
+    });
+
+    // Cuando se pierde el foco del campo IVA
+    $iva.on('blur', function () {
+        $iva.prop('readonly', true);
+        recalcularTotalAjuste();
+    });
+
+    // Función para recalcular el total
+    function recalcularTotalAjuste() {
+        const iva = parseFloat($iva.val()) || 0;
+        const neto = parseFloat($neto.val()) || 0;
+        const total = neto + iva;
+        $total.val(total.toFixed(2));
+    }
+
     let total = 0;
     let neto = 0;
     let iva = 0;
@@ -97,6 +122,7 @@ $(document).ready(function () {
                         imputar: servicio.imputar,
                     });
                     $('#id_descripcion_item input').val(servicio.nombre);
+                    $('#iva_item').val(servicio.iva);
                 },
                 error: xhr => console.error('Error al obtener los detalles del item:', xhr)
             });
@@ -1148,6 +1174,8 @@ function limpiarCampos() {
     $('#item').val('');
     $('#id_descripcion_item input').val('');
     $('#id_precio input').val('');
+    $('#iva_item').val('');
+
 }
 
 function actualizarPestanias() {
@@ -2001,6 +2029,8 @@ $('#abrir_arbi').on('click', function (event) {
     $.ajax({
         url: "/admin_cont/cargar_arbitraje/",
         type: "GET",
+        data: { fecha: hoy },
+
         dataType: "json",
         success: function (data) {
             // Cargar los valores en los campos

@@ -96,10 +96,7 @@
                             {{ form.serie.label_tag }}
                             {{ form.serie }}
                         </div>
-                        <div>
-                            {{ form.prefijo.label_tag }}
-                            {{ form.prefijo }}
-                        </div>
+
                         <div>
                             {{ form.numero.label_tag }}
                             {{ form.numero }}
@@ -107,6 +104,9 @@
                         <div>
                             {{ form.tipo_factura.label_tag }}
                             {{ form.tipo_factura }}
+                        </div>
+                                                <div>
+                            {{ form.prefijo }}
                         </div>
                     </div>
 
@@ -176,6 +176,10 @@
                             {{ form.precio.label_tag }}
                             {{ form.precio }}
                         </div>
+                        <div>
+                            <label for="iva_item">IVA</label>
+                            <input type="text" id="iva_item" name="iva" class="form-control form-control-sm" readonly>
+                        </div>
                         <div class="mt-4">
                             <button type="button" id="agregarItem" class="btn btn-success btn-sm" style="font-size:12px">Agregar</button>
                         </div>
@@ -229,7 +233,9 @@
                         {{ form.total.label_tag }}
                         {{ form.total }}
                     </div>
-
+                    <div class="mt-2">
+                        <button type="button" id="ajustarIVA" class="btn btn-warning btn-sm" style="font-size:14px">Ajustar IVA</button>
+                    </div>
                     <div class="mt-2">
                         <button type="button" onclick="procesar_factura()" class="btn btn-primary btn-sm" style="font-size:14px">Grabar</button>
                     </div>
