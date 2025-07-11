@@ -127,41 +127,45 @@ class GuiasReport:
             table = Table(data=data, colWidths=[8.5 * cm, ], rowHeights=[1.5 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
-                              ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
+                              ('VALIGN', (0, 0), (0, 0), 'TOP'),
                           ]
                           )
             table.wrapOn(c, 0, 0)
             table.drawOn(c, 18 * mm, 251 * mm)
+
             """ SHIPPER """
             data = [[Paragraph(self.empresa, encoding='utf-8', style=style_texto_7)]]
             table = Table(data=data, colWidths=[7 * cm, ], rowHeights=[1.1 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
-                              ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
+                              ('VALIGN', (0, 0), (0, 0), 'TOP'),
                           ]
                           )
             table.wrapOn(c, 0, 0)
-            table.drawOn(c, 130 * mm, 257.5 * mm)
+            table.drawOn(c, 130 * mm, 260.5 * mm)
+
             """ CONSIGNATARIO """
             data = [[Paragraph(self.consignatario, encoding='utf-8', style=style_texto_7)]]
             table = Table(data=data, colWidths=[9 * cm, ], rowHeights=[1.7 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
-                              ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
+                                  ('VALIGN', (0, 0), (0, 0), 'TOP'),
                           ]
                           )
             table.wrapOn(c, 0, 0)
-            table.drawOn(c, 18 * mm, 228 * mm)
+            table.drawOn(c, 18 * mm, 226 * mm)
+
             """ NOTIFY """
             data = [[Paragraph(self.info, encoding='utf-8', style=style_texto_7)]]
             table = Table(data=data, colWidths=[9 * cm, ], rowHeights=[2.1 * cm, ],
                           style=[
                               ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
-                              ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
+                              ('VALIGN', (0, 0), (0, 0), 'TOP'),
                           ]
                           )
             table.wrapOn(c, 0, 0)
             table.drawOn(c, 110 * mm, 195 * mm)
+
             """ AGENTE """
             data = [[Paragraph(self.empresa, encoding='utf-8', style=style_texto_7)]]
             table = Table(data=data, colWidths=[9 * cm, ], rowHeights=[1.6 * cm, ],
@@ -173,7 +177,6 @@ class GuiasReport:
             table.wrapOn(c, 0, 0)
             table.drawOn(c, 18 * mm, 208.3 * mm)
             """ DATOS """
-            #acomodar
             c.drawString(49,785,self.awb1)
             c.drawString(76,785,self.awb2)
             c.drawString(100,785,self.awb3)
@@ -181,13 +184,13 @@ class GuiasReport:
             c.drawString(500,70,self.hawb)
             c.setFont("Helvetica", 8)
             c.drawString(55,550,self.airport_departure)
-            #acomodar
+
             c.drawString(55,527,self.to_1)
             c.drawString(80,527,self.by_cia_1)
-            c.drawString(55,527,self.to_2)
-            c.drawString(80,527,self.by_cia_2)
-            c.drawString(55,527,self.to_3)
-            c.drawString(80,527,self.by_cia_3)
+            c.drawString(205,527,self.to_2)
+            c.drawString(232,527,self.by_cia_2)
+            c.drawString(255,527,self.to_3)
+            c.drawString(280,527,self.by_cia_3)
 
             #acomodar esto en vuelos
             #c.drawString(217,527,self.arraydestinos)
@@ -242,9 +245,9 @@ class GuiasReport:
                     c.drawString(52, y, str(m['bultos']))  # Total de bultos
                     c.drawString(82, y, str(m['peso']))  # Peso bruto
                     c.drawString(127, y, str(m['unidad']))  # Unidad (K)
-                    c.drawString(205, y, str(m['aplicable']))  # Aplicable
-                    c.drawString(280, y, str(m['tarifa']))  # Tarifa de venta
-                    c.drawString(340, y, str(m['total']))  # Total
+                    c.drawString(205, y, self.formatear_valor(m['aplicable']))  # Aplicable
+                    c.drawString(280, y, self.formatear_valor(m['tarifa']))  # Tarifa de venta
+                    c.drawString(340, y, self.formatear_valor(m['total']))  # Total
 
                     """ DESCRIPCIÓN MERCADERÍA """
                     texto = m['descripcion']  # Ya viene con salto de línea y CBM incluido
@@ -266,18 +269,18 @@ class GuiasReport:
 
             # Totales pie
             c.drawString(52, 280, str(self.total_bultos))
-            c.drawString(82, 280, str(self.total_pesos))
-            c.drawString(340, 280, str(self.total_total))
+            c.drawString(82, 280, self.formatear_valor(self.total_pesos))
+            c.drawString(340, 280, self.formatear_valor(self.total_total))
 
             # Prepaid o Collect
             if self.pago_code == 'PP':
-                c.drawString(80, 250, str(self.total_total))
+                c.drawString(80, 250, self.formatear_valor(self.total_total))
                 c.drawString(200, 250, '')
                 montoppd = self.total_total
                 montocol = 0
             else:
                 c.drawString(80, 250, '')
-                c.drawString(200, 250, str(self.total_total))
+                c.drawString(200, 250, self.formatear_valor(self.total_total))
                 montoppd = 0
                 montocol = self.total_total
 
@@ -300,18 +303,18 @@ class GuiasReport:
             table.wrapOn(c, 0, 0)
             table.drawOn(c, 90 * mm, 30 * mm)
             # Montos columna izquierda (PREPAID)
-            c.drawString(80, 230, validar_valor(self.valppd))
-            c.drawString(80, 200, validar_valor(self.taxppd ))
-            c.drawString(80, 180, validar_valor(self.agentppd ))
-            c.drawString(80, 155, validar_valor(self.carrierppd ))
-            c.drawString(80, 107, validar_valor(self.total_prepaid))
+            c.drawString(80, 230, self.formatear_valor(self.valppd))
+            c.drawString(80, 200, self.formatear_valor(self.taxppd ))
+            c.drawString(80, 180, self.formatear_valor(self.agentppd ))
+            c.drawString(80, 155, self.formatear_valor(self.carrierppd ))
+            c.drawString(80, 107, self.formatear_valor(self.total_prepaid))
 
             # Montos columna derecha (COLLECT)
-            c.drawString(200, 230, validar_valor(self.valcol))
-            c.drawString(200, 200, validar_valor(self.taxcol))
-            c.drawString(200, 180, validar_valor(self.agentcol))
-            c.drawString(80, 155, validar_valor(self.carriercol))
-            c.drawString(200, 107, validar_valor(self.total_collect))
+            c.drawString(200, 230, self.formatear_valor(self.valcol))
+            c.drawString(200, 200, self.formatear_valor(self.taxcol))
+            c.drawString(200, 180, self.formatear_valor(self.agentcol))
+            c.drawString(80, 155, self.formatear_valor(self.carriercol))
+            c.drawString(200, 107, self.formatear_valor(self.total_collect))
 
             # Otros gastos (cuadro texto libre)
             otros_data = [[Paragraph(self.otros_gastos, encoding='utf-8', style=style_texto_7)]]
@@ -327,8 +330,8 @@ class GuiasReport:
             tabla_otros.wrapOn(c, 0, 0)
             tabla_otros.drawOn(c, 90 * mm, 82 * mm)
 
-            c.drawString(80, 107, validar_valor(self.total_precio_p))  # Total Prepaid
-            c.drawString(200, 107, validar_valor(self.total_precio_c))  # Total Collect
+            c.drawString(80, 107, self.formatear_valor(self.total_precio_p))  # Total Prepaid
+            c.drawString(200, 107, self.formatear_valor(self.total_precio_c))  # Total Collect
 
             self.archivo = c
         except Exception as e:
@@ -343,6 +346,19 @@ class GuiasReport:
         except Exception as e:
             raise TypeError(e)
 
+    def formatear_valor(self, valor):
+        try:
+            if valor is not None:
+                valor_str = str(valor)
+                try:
+                    val = Decimal(valor_str)
+                    return str(round(val, 2)) if val != 0 else ''
+                except:
+                    return valor_str
+            else:
+                return ''
+        except Exception:
+            return 'ERROR'
 
 def validar_valor(valor):
     return str(valor) if valor != 0 else ' '
