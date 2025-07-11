@@ -32,6 +32,13 @@ function calcularTotales() {
 
 document.addEventListener('DOMContentLoaded', function () {
 
+    $('#id_detalle').on('input', function () {
+        const texto = $(this).val().toUpperCase();
+        $(this).val(texto);
+        $('#id_detalle_cuenta').val(texto);
+    });
+
+
     $('#id_banco').on('change', function () {
   const banco = parseInt($(this).val(), 10);
 
@@ -60,9 +67,11 @@ document.addEventListener('DOMContentLoaded', function () {
         $(this).toggleClass('table-secondary');
       });
 
+    const hoy = new Date().toISOString().split('T')[0];
     $.ajax({
         url: "/admin_cont/cargar_arbitraje/",
         type: "GET",
+        data: { fecha: hoy },
         dataType: "json",
         success: function (data) {
             // Cargar los valores en los campos
@@ -229,10 +238,14 @@ document.addEventListener('DOMContentLoaded', function () {
     .then(response => response.json())
     .then(data => {
       if(tipo=='depositar'){
-        descargar_depo();
+          if (confirm('¿Desea imprimir el comprobante de deposito?')){
+            descargar_depo();
+          }
       }
       if(data.numero_orden!=0){
-        descargar_op(data.numero_orden);
+          if (confirm('¿Desea imprimir el comprobante de pago?')){
+            descargar_op(data.numero_orden);
+          }
       }
       if (!data.success && !data.status) {
         console.error("Error del servidor:", data.error || data);
@@ -583,6 +596,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return response.blob();
       })
       .then(blob => {
+          /*
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -590,7 +604,13 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.appendChild(a);
         a.click();
         a.remove();
-        window.URL.revokeObjectURL(url);
+        window.URL.revokeObjectURL(url);*/
+        const url = window.URL.createObjectURL(blob);
+        const ventana = window.open(url);
+        ventana.onload = function () {
+            ventana.focus();
+            ventana.print();
+        };
         resetear_form();
       })
       .catch(error => {
@@ -652,6 +672,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return response.blob();
       })
       .then(blob => {
+          /*
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -660,6 +681,13 @@ document.addEventListener('DOMContentLoaded', function () {
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
+           */
+        const url = window.URL.createObjectURL(blob);
+        const ventana = window.open(url);
+        ventana.onload = function () {
+            ventana.focus();
+            ventana.print();
+        };
         resetear_form();
       })
       .catch(error => {
@@ -672,9 +700,11 @@ document.addEventListener('DOMContentLoaded', function () {
     $('#tablaCheques').empty();
     $('#id_escheque').val('0');
     actualizarDetalleMovimiento();
+const hoy = new Date().toISOString().split('T')[0];
     $.ajax({
         url: "/admin_cont/cargar_arbitraje/",
         type: "GET",
+        data: { fecha: hoy },
         dataType: "json",
         success: function (data) {
             // Cargar los valores en los campos

@@ -310,8 +310,9 @@ def generar_orden_pago_pdf(request):
             try:
                 fecha_pago = datetime.strptime(fecha_pago_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
                 vto = datetime.strptime(vto_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
-                fecha_pago = fecha_pago.strftime('%Y/%m/%d')
-                vto = vto.strftime('%Y/%m/%d')
+                fecha_pago = fecha_pago.strftime('%d/%m/%Y')
+                vto = vto.strftime('%d/%m/%Y')
+
             except (ValueError, TypeError):
                 fecha_pago = fecha_pago_str
                 vto = fecha_pago_str
@@ -319,7 +320,7 @@ def generar_orden_pago_pdf(request):
                 # Datos principales
             c.setFont("Courier", 12)
             y -= 5 * mm
-            c.drawString(20 * mm, y, f"Orden de pago .....: {data.get('nro', '011877')}")
+            c.drawString(20 * mm, y, f"Orden de pago .....: {data.get('orden')}")
             y -= 6 * mm
             c.drawString(20 * mm, y, f"Fecha de pago .....: {fecha_pago}")
             y -= 6 * mm
@@ -408,7 +409,7 @@ def generar_orden_pago_pdf(request):
             # Texto en letras
             y -= 10 * mm
             monto = data.get('monto_total', '0')
-            leyenda_monto = monto_a_letras(monto)
+            leyenda_monto = monto_a_letras(monto,data.get('moneda'))
             c.drawString(20 * mm, y, leyenda_monto)
 
             # Firmas
@@ -425,13 +426,14 @@ def generar_orden_pago_pdf(request):
         return None
     except Exception as e:
         return JsonResponse({'error':str(e)})
-def monto_a_letras(monto):
+
+def monto_a_letras(monto, moneda):
     try:
         monto = float(str(monto).replace(",", ""))  # Asegura formato numérico
         enteros = int(monto)
         decimales = int(round((monto - enteros) * 100))
         letras = num2words(enteros, lang='es').upper()
-        return f"SON MONEDA NACIONAL {letras} CON {decimales:02d}/100."
+        return f"SON {moneda} {letras} CON {decimales:02d}/100."
     except:
         return "SON MONEDA NACIONAL S/I"
 

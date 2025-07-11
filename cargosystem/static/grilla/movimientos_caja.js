@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+const hoy = new Date().toISOString().split('T')[0];
     $.ajax({
         url: "/admin_cont/cargar_arbitraje/",
         type: "GET",
+        data: { fecha: hoy },
         dataType: "json",
         success: function (data) {
             // Cargar los valores en los campos
@@ -259,9 +261,11 @@ function descargar_op(op){
 function resetear_form(){
   $('#formMovCaja').trigger('reset');
   $('#tablaCaja').empty();
-  $.ajax({
+const hoy = new Date().toISOString().split('T')[0];
+    $.ajax({
         url: "/admin_cont/cargar_arbitraje/",
         type: "GET",
+        data: { fecha: hoy },
         dataType: "json",
         success: function (data) {
             // Cargar los valores en los campos

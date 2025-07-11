@@ -228,9 +228,11 @@ function calcularTotales() {
   document.getElementById("saldo").value = (totalDebe - totalHaber).toFixed(2);
 }
 function arbitraje_carga(){
-  $.ajax({
-            url: "/admin_cont/cargar_arbitraje/",
-            type: "GET",
+const hoy = new Date().toISOString().split('T')[0];
+    $.ajax({
+        url: "/admin_cont/cargar_arbitraje/",
+        type: "GET",
+        data: { fecha: hoy },
             dataType: "json",
             success: function (data) {
                 // Cargar los valores en los campos

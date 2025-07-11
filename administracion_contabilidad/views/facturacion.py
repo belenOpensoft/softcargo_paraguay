@@ -1,5 +1,7 @@
 import json
 import re
+from functools import reduce
+from operator import or_
 
 from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
@@ -21,7 +23,7 @@ from administracion_contabilidad.models import Boleta, Asientos, Movims, Infofac
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from datetime import datetime
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Max, Q
 from impomarit.models import VGastosHouse, Envases, Cargaaerea, Embarqueaereo, VEmbarqueaereo as IM, Reservas
 from decimal import Decimal
 from administracion_contabilidad.forms import pdfForm
@@ -50,7 +52,7 @@ columns_table = {
 }
 
 
-def source_facturacion(request):
+def source_facturacion_old(request):
     args = {
         '1': request.GET['columns[1][search][value]'],
         '2': request.GET['columns[2][search][value]'],
@@ -80,11 +82,66 @@ def source_facturacion(request):
     resultado['data'] = data
     resultado['length'] = length
     resultado['draw'] = request.GET['draw']
-    resultado['recordsTotal'] = Boleta.objects.all().count()
+    resultado['recordsTotal'] = VistaVentas.objects.all().count()
     resultado['recordsFiltered'] = str(registros.count())
     data_json = json.dumps(resultado)
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
+def source_facturacion(request):
+    args = {
+        '1': request.GET['columns[1][search][value]'],
+        '2': request.GET['columns[2][search][value]'],
+        '3': request.GET['columns[3][search][value]'],
+        '4': request.GET['columns[4][search][value]'],
+        '5': request.GET['columns[5][search][value]'],
+        '6': request.GET['columns[6][search][value]'],
+        '7': request.GET['columns[7][search][value]'],
+        '8': request.GET['columns[8][search][value]'],
+    }
+
+    filtro = get_argumentos_busqueda(**args)
+    start = int(request.GET['start'])
+    length = int(request.GET['length'])
+    buscar = str(request.GET['buscar'])
+    que_buscar = str(request.GET['que_buscar'])
+
+    if len(buscar) > 0:
+        filtro[que_buscar] = buscar
+
+    order = get_order(request, columns_table)
+
+    # Agrupar por autogenerado y obtener fecha más reciente
+    agrupados = (VistaVentas.objects
+                 .filter(**filtro)
+                 .values('autogenerado')
+                 .annotate(fecha_max=Max('fecha'))
+                 )
+
+    # Ahora traemos todos los registros que coinciden con autogenerado y fecha_max
+    todo = VistaVentas.objects.filter(
+        reduce(
+            or_,
+            [Q(autogenerado=row['autogenerado'], fecha=row['fecha_max']) for row in agrupados]
+        )
+    ).order_by(*order)
+
+    # Agrupar manualmente en Python por autogenerado (por si hay más de uno con misma fecha)
+    vista_unicos = {}
+    for row in todo:
+        if row.autogenerado not in vista_unicos:
+            vista_unicos[row.autogenerado] = row
+
+    # Convertir a lista y paginar
+    registros_finales = list(vista_unicos.values())
+    resultado = {
+        'data': get_data(registros_finales[start:start + length]),
+        'length': length,
+        'draw': request.GET['draw'],
+        'recordsTotal': len(vista_unicos),
+        'recordsFiltered': len(vista_unicos),
+    }
+    return JsonResponse(resultado)
 
 
 def get_data(registros_filtrados):
@@ -291,8 +348,7 @@ def procesar_factura(request):
                         wr = registro_carga.get('wr', '')
                         shipper = registro_carga.get('shipper_nro', '')
                         terminos = registro_carga.get('incoterms', '')
-                        pagoflete = 'C' if registro_carga.get('pago', '') == 'COLLECT' else 'PREPAID' if registro_carga.get(
-                            'pago', '') else ''
+                        pagoflete = 'C' if registro_carga.get('pago', '') == 'COLLECT' else 'P'  if registro_carga.get('pago', '')=='PREPAID' else ''
                         agente = registro_carga.get('agente_nro', '')
                         posicion = registro_carga.get('posicion', '')
                         detalle = registro_carga.get('observaciones', '')
@@ -340,7 +396,7 @@ def procesar_factura(request):
                 tipo_mov = tipo
                 tipo_asiento = 'V'
                 detalle1 = 'S/I'
-                detalle_mov = ""  #si viene de la preventa, sino vacio
+                detalle_mov = detalle  if registro_carga else 'S/I'
                 nombre_mov = ""
                 asiento = generar_numero()
                 movimiento_num = modificar_numero(asiento)

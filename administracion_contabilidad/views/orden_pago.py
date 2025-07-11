@@ -1058,8 +1058,8 @@ def generar_orden_pago_pdf_sin_prov(pdf_data, request):
         fecha_pago_str = pdf_data.get("fecha_pago")
         vto_str = pdf_data.get("vto")
         try:
-            fecha_pago = datetime.strptime(fecha_pago_str, "%Y-%m-%d").strftime('%Y/%m/%d')
-            vto = datetime.strptime(vto_str, "%Y-%m-%d").strftime('%Y/%m/%d')
+            fecha_pago = datetime.strptime(fecha_pago_str, "%Y-%m-%d").strftime('%d/%m/%Y')
+            vto = datetime.strptime(vto_str, "%Y-%m-%d").strftime('%d/%m/%Y')
         except (ValueError, TypeError):
             fecha_pago = fecha_pago_str
             vto = fecha_pago_str
@@ -1067,7 +1067,7 @@ def generar_orden_pago_pdf_sin_prov(pdf_data, request):
         # Datos principales
         c.setFont("Courier", 12)
         y -= 5 * mm
-        c.drawString(20 * mm, y, f"Orden de pago .....: {pdf_data.get('nro', '011877')}")
+        c.drawString(20 * mm, y, f"Orden de pago .....: {pdf_data.get('nro')}")
         y -= 6 * mm
         c.drawString(20 * mm, y, f"Fecha de pago .....: {fecha_pago}")
         y -= 6 * mm
@@ -1188,8 +1188,8 @@ def generar_orden_pago_pdf(data,request):
         try:
             fecha_pago = datetime.strptime(fecha_pago_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
             vto = datetime.strptime(vto_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
-            fecha_pago = fecha_pago.strftime('%Y/%m/%d')
-            vto = vto.strftime('%Y/%m/%d')
+            fecha_pago = fecha_pago.strftime('%d/%m/%Y')
+            vto = vto.strftime('%d/%m/%Y')
         except (ValueError, TypeError):
             fecha_pago = fecha_pago_str
             vto = fecha_pago_str
@@ -1197,7 +1197,7 @@ def generar_orden_pago_pdf(data,request):
             # Datos principales
         c.setFont("Courier", 12)
         y -= 5 * mm
-        c.drawString(20 * mm, y, f"Orden de pago .....: {data.get('nro', '011877')}")
+        c.drawString(20 * mm, y, f"Orden de pago .....: {data.get('nro')}")
         y -= 6 * mm
         c.drawString(20 * mm, y, f"Fecha de pago .....: {fecha_pago}")
         y -= 6 * mm
@@ -1413,7 +1413,7 @@ def reimprimir_op(request):
         fecha_pago_str = orden.mfechamov.strftime("%Y-%m-%d")
         vto_str = fecha_pago_str
         moneda_str = "MONEDA NACIONAL" if orden.mmoneda == 1 else "DÓLARES"
-        cambio = float(movimiento.marbitraje) if hasattr(movimiento, 'marbitraje') else 0
+        cambio = float(movimiento.marbitraje) if hasattr(movimiento, 'marbitraje') and movimiento.marbitraje else 0
 
         forma_pago = json.dumps([
             {
@@ -1440,7 +1440,7 @@ def reimprimir_op(request):
                     "documento": movimiento_fac.mboleta if movimiento_fac else 'S/I',
                     "importe": float(imp.monto),
                     "detalle_fac": movimiento_fac.mdetalle if movimiento_fac and movimiento_fac.mdetalle else "S/I",
-                    "cambio": float(movimiento_fac.marbitraje) if movimiento_fac else 0,
+                    "cambio": float(movimiento_fac.marbitraje) if movimiento_fac and movimiento.marbitraje else 0,
                     "posicion": asiento_fac['posicion'] if asiento_fac else "S/I"
                 })
 
