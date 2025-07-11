@@ -137,7 +137,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
         texto += formatear_linea("Vapor", str(vapor) if vapor is not None else "S/I")
         texto += formatear_linea("Viaje", str(row.viaje) if row.viaje is not None else "S/I")
         texto += formatear_linea("Llegada estimada", format_fecha(row.fecha_retiro))
-        texto += formatear_linea("Origen", str(origen) if origen is not None else "S/I")
+        texto += formatear_linea("Origen", str(origen.nombre) if origen is not None else "S/I")
         texto += formatear_linea("B/L", str(row.awb) if row.awb is not None else "S/I")
         texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I")
         texto += formatear_linea("Referencia", str(row_number) if row_number is not None else "S/I")
@@ -152,8 +152,8 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
         texto += "<br>"
 
         # Mini resumen
-        texto += formatear_linea("Origen", str(origen) if origen is not None else "S/I")
-        texto += formatear_linea("Destino", str(destino) if destino is not None else "S/I")
+        texto += formatear_linea("Origen", str(origen.nombre) if origen is not None else "S/I")
+        texto += formatear_linea("Destino", str(destino.nombre) if destino is not None else "S/I")
         texto += formatear_linea("Vapor/Vuelo", str(vapor) if vapor is not None else "S/I")
         texto += formatear_linea("Viaje", str(row.viaje) if row.viaje is not None else "S/I")
         texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
@@ -195,9 +195,9 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
 
         texto += formatear_linea("Llegada", format_fecha(row.fecha_retiro))
 
-        texto += formatear_linea("Origen", origen if origen else "S/I")
+        texto += formatear_linea("Origen", origen.nombre if origen else "S/I")
 
-        texto += formatear_linea("Destino", destino if destino else "S/I")
+        texto += formatear_linea("Destino", destino.nombre if destino else "S/I")
 
         texto += formatear_linea("Vapor", vapor if vapor else "S/I")
 
@@ -208,37 +208,29 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
 
 
         # Mercadería
-
-        cont = 1
-
-        for m in merca:
-            texto += formatear_linea(f"Mercadería {cont}", m.nombre if m.nombre else "S/I")
-
-            cont += 1
+        # Mercaderías
+        if merca:
+            nombres_merc = [m.nombre if m.nombre else "S/I" for m in merca]
+            texto += formatear_linea("Mercadería", ", ".join(nombres_merc))
 
         # Bultos / Peso / CBM
 
-        cont = 1
+        if row2:
+            bultos = [str(b.bultos) if b.bultos else "S/I" for b in row2]
+            pesos = [str(round(float(b.bruto or 0),2)) if b.bruto else "S/I" for b in row2]
+            cbms = [str(round(float(b.cbm or 0),2)) if b.cbm else "S/I" for b in row2]
 
-        for b in row2:
-            texto += formatear_linea(f"Bultos {cont}", b.bultos if b.bultos is not None else "S/I")
-
-            texto += formatear_linea(f"Peso {cont}", b.bruto if b.bruto is not None else "S/I")
-
-            texto += formatear_linea(f"CBM {cont}", b.cbm if b.cbm is not None else "S/I")
-
-            cont += 1
+            texto += formatear_linea("Bultos", ", ".join(bultos))
+            texto += formatear_linea("Peso", ", ".join(pesos))
+            texto += formatear_linea("CBM", ", ".join(cbms))
 
         # Contenedores y precintos
+        if row3:
+                contenedores = [str(e.nrocontenedor) if e.nrocontenedor else "S/I" for e in row3]
+                precintos = [str(e.precinto) if e.precinto else "S/I" for e in row3]
 
-        cont = 1
-
-        for e in row3:
-            texto += formatear_linea(f"Nro. Contenedor {cont}", e.nrocontenedor if e.nrocontenedor else "S/I")
-
-            texto += formatear_linea(f"Precintos {cont}", e.precinto if e.precinto else "S/I")
-
-            cont += 1
+                texto += formatear_linea("Nro. Contenedores", ", ".join(contenedores))
+                texto += formatear_linea("Precintos", ", ".join(precintos))
         # Despedida
 
         texto += ('Los buques y las llegadas al puerto de Montevideo son siempre a CONFIRMAR, ya </br>'
@@ -308,9 +300,9 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
 
         texto += formatear_linea("Orden cliente", str(row.orden_cliente) if row.orden_cliente is not None else "S/I")
 
-        texto += formatear_linea("Origen", str(origen) if origen is not None else "S/I")
+        texto += formatear_linea("Origen", str(origen.nombre) if origen is not None else "S/I")
 
-        texto += formatear_linea("Destino", str(destino) if destino is not None else "S/I")
+        texto += formatear_linea("Destino", str(destino.nombre) if destino is not None else "S/I")
 
         texto += '<br>'
 
@@ -383,9 +375,9 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
 
         texto += formatear_linea("Llegada", row.eta.strftime('%d-%m-%Y') if row.eta else '')
 
-        texto += formatear_linea("Origen", origen )
+        texto += formatear_linea("Origen", origen.nombre if origen else 'S/I' )
 
-        texto += formatear_linea("Destino", destino)
+        texto += formatear_linea("Destino", destino.nombre if destino else 'S/I')
 
         texto += formatear_linea("HAWB", embarque.hawb)
 
@@ -564,9 +556,9 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado, seguimie
         origen = Ciudades.objects.filter(codigo=row.origen).first()
         destino = Ciudades.objects.filter(codigo=row.destino).first()
 
-        texto += formatear_linea("Origen", origen)
+        texto += formatear_linea("Origen", origen.nombre if origen else 'S/I')
 
-        texto += formatear_linea("Destino", destino)
+        texto += formatear_linea("Destino", destino.nombre if destino else 'S/I')
 
         # Datos de contenedores
 

@@ -11,7 +11,7 @@ from reportlab.lib.validators import isNumber, isInstanceOf
 
 from cargosystem import settings
 from impomarit.views.mails import formatear_linea, format_fecha
-from mantenimientos.models import Clientes, Servicios, Vapores, Monedas
+from mantenimientos.models import Clientes, Servicios, Vapores, Monedas, Ciudades
 from mantenimientos.views.bancos import is_ajax
 from seguimientos.models import VGrillaSeguimientos, Envases, Cargaaerea, Conexaerea, Serviceaereo
 
@@ -1100,8 +1100,18 @@ def get_data_email(request):
                 texto += "<br>"
                 texto += formatear_linea("Internal Reference", f"{row.numero}/{row.embarque}")
                 texto += formatear_linea("Estimated delivery date", llegada)
-                texto += formatear_linea("Port of loading", row.loading)
-                texto += formatear_linea("Port of discharge", row.discharge)
+                loading = 'S/I'
+                discharge = 'S/I'
+
+                if row.loading is not None:
+                    ciudad_l = Ciudades.objects.filter(codigo=row.loading).first()
+                    loading = ciudad_l.nombre
+                if row.discharge is not None:
+                    ciudad_d = Ciudades.objects.filter(codigo=row.discharge).first()
+                    discharge = ciudad_d.nombre
+
+                texto += formatear_linea("Port of loading", loading)
+                texto += formatear_linea("Port of discharge", discharge)
 
                 texto += "<br>"
                 for m in mercaderia:
@@ -1214,8 +1224,20 @@ def get_data_email(request):
                 texto += formatear_linea("Referencia interna", f"{row.numero}/{row.embarque}")
                 texto += formatear_linea("Posición", row.posicion)
                 texto += formatear_linea("Recepción estimada de mercadería", llegada)
-                texto += formatear_linea("Puerto de carga", row.loading)
-                texto += formatear_linea("Puerto de descarga", row.discharge)
+
+                #aca
+                loading = 'S/I'
+                discharge = 'S/I'
+
+                if row.loading is not None:
+                    ciudad_l = Ciudades.objects.filter(codigo=row.loading).first()
+                    loading=ciudad_l.nombre
+                if row.discharge is not None:
+                    ciudad_d = Ciudades.objects.filter(codigo=row.discharge).first()
+                    discharge=ciudad_d.nombre
+
+                texto += formatear_linea("Puerto de carga", loading)
+                texto += formatear_linea("Puerto de descarga", discharge)
 
 
                 texto += "<br>"
