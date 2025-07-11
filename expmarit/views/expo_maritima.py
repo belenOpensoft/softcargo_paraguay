@@ -369,6 +369,8 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append('' if registro.eta is None else str(registro.eta)[:10])  #23
             registro_json.append('' if registro.etd is None else str(registro.etd.strftime('%d/%m/%Y')))  #24
             registro_json.append('' if registro.eta is None else str(registro.eta.strftime('%d/%m/%Y')))  #25
+            registro_json.append('' if registro.vapor is None else str(registro.vapor))  # 26
+
             data.append(registro_json)
         return data
     except Exception as e:

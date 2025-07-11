@@ -1162,7 +1162,9 @@ $('#tabla_importterrestre tfoot th').each(function(index) {
 
                     ],
                     beforeClose: function (event, ui) {
-
+                    if ($.fn.dataTable.isDataTable('#tabla_importterrestre')) {
+                        $('#tabla_importterrestre').DataTable().ajax.reload(null, false);
+                    }
                     }
                 });
             if ($('#table_add_it tbody tr').length === 0) {
@@ -1324,6 +1326,9 @@ var expandedRow;
                         localStorage.removeItem('id_master_editar');
                         localStorage.removeItem('num_house_gasto');
                         localStorage.removeItem('id_house_gasto');
+                    if ($.fn.dataTable.isDataTable('#tabla_importterrestre')) {
+                        $('#tabla_importterrestre').DataTable().ajax.reload(null, false);
+                    }
                     }
                 });
 
@@ -2640,18 +2645,6 @@ table_add_it = $('#table_add_it').DataTable({
             return row[12]; // Toma el índice 12 para la columna 13
         }
     },
-    {
-        "targets": [14],
-        "render": function (data, type, row, meta) {
-            return row[13]; // Toma el índice 13 para la columna 14
-        }
-    },
-    {
-        "targets": [15],
-        "render": function (data, type, row, meta) {
-            return row[14]; // Toma el índice 14 para la columna 15
-        }
-    },
 ],
     "order": [[0, "desc"]],
     "processing": true,
@@ -3068,18 +3061,6 @@ table_edit_it = $('#table_edit_it').DataTable({
         "targets": [13],
         "render": function (data, type, row, meta) {
             return row[12]; // Toma el índice 12 para la columna 13
-        }
-    },
-    {
-        "targets": [14],
-        "render": function (data, type, row, meta) {
-            return row[13]; // Toma el índice 13 para la columna 14
-        }
-    },
-    {
-        "targets": [15],
-        "render": function (data, type, row, meta) {
-            return row[14]; // Toma el índice 14 para la columna 15
         }
     },
 ],

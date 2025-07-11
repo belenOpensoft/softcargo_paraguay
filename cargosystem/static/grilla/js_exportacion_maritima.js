@@ -1268,6 +1268,9 @@ $('#tabla_expomarit tfoot th').each(function(index) {
 
                     ],
                     beforeClose: function (event, ui) {
+                    if ($.fn.dataTable.isDataTable('#tabla_expomarit')) {
+                        $('#tabla_expomarit').DataTable().ajax.reload(null, false);
+                    }
 
                     }
                 });
@@ -1429,6 +1432,9 @@ var expandedRow;
                         localStorage.removeItem('id_master_editar');
                         localStorage.removeItem('num_house_gasto');
                         localStorage.removeItem('id_house_gasto');
+                    if ($.fn.dataTable.isDataTable('#tabla_expomarit')) {
+                        $('#tabla_expomarit').DataTable().ajax.reload(null, false);
+                    }
                     }
                 });
 
@@ -2744,19 +2750,7 @@ table_add_em = $('#table_add_em').DataTable({
     {
         "targets": [13],
         "render": function (data, type, row, meta) {
-            return row[12]; // Toma el índice 12 para la columna 13
-        }
-    },
-    {
-        "targets": [14],
-        "render": function (data, type, row, meta) {
-            return row[13]; // Toma el índice 13 para la columna 14
-        }
-    },
-    {
-        "targets": [15],
-        "render": function (data, type, row, meta) {
-            return row[14]; // Toma el índice 14 para la columna 15
+            return row[26]; // Toma el índice 12 para la columna 13
         }
     },
 ],
@@ -3165,19 +3159,7 @@ table_edit_em = $('#table_edit_em').DataTable({
     {
         "targets": [13],
         "render": function (data, type, row, meta) {
-            return row[12]; // Toma el índice 12 para la columna 13
-        }
-    },
-    {
-        "targets": [14],
-        "render": function (data, type, row, meta) {
-            return row[13]; // Toma el índice 13 para la columna 14
-        }
-    },
-    {
-        "targets": [15],
-        "render": function (data, type, row, meta) {
-            return row[14]; // Toma el índice 14 para la columna 15
+            return row[26]; // Toma el índice 12 para la columna 13
         }
     },
 ],

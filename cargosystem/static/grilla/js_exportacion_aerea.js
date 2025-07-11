@@ -1177,7 +1177,9 @@ $(document).ready(function () {
 
                     ],
                     beforeClose: function (event, ui) {
-
+                    if ($.fn.dataTable.isDataTable('#tabla_exportaerea')) {
+                        $('#tabla_exportaerea').DataTable().ajax.reload(null, false);
+                    }
                     }
                 });
         if ($('#table_add_ea tbody tr').length === 0) {
@@ -1490,6 +1492,9 @@ function aplicable_volumen(volumen){
                         localStorage.removeItem('id_master_editar');
                         localStorage.removeItem('num_house_gasto');
                         localStorage.removeItem('id_house_gasto');
+                    if ($.fn.dataTable.isDataTable('#tabla_exportaerea')) {
+                        $('#tabla_exportaerea').DataTable().ajax.reload(null, false);
+                    }
                     }
                 });
 
@@ -2804,18 +2809,7 @@ table_add_ea = $('#table_add_ea').DataTable({
             return row[11]; // Toma el índice 11 para la columna 12
         }
     },
-    {
-        "targets": [13],
-        "render": function (data, type, row, meta) {
-            return row[12]; // Toma el índice 12 para la columna 13
-        }
-    },
-    {
-        "targets": [14],
-        "render": function (data, type, row, meta) {
-            return row[13]; // Toma el índice 13 para la columna 14
-        }
-    },
+
 
 ],
     "order": [[0, "desc"]],
@@ -3235,18 +3229,7 @@ table_edit_ea = $('#table_edit_ea').DataTable({
             return row[11]; // Toma el índice 11 para la columna 12
         }
     },
-    {
-        "targets": [13],
-        "render": function (data, type, row, meta) {
-            return row[12]; // Toma el índice 12 para la columna 13
-        }
-    },
-    {
-        "targets": [14],
-        "render": function (data, type, row, meta) {
-            return row[13]; // Toma el índice 13 para la columna 14
-        }
-    },
+
 
 ],
     "order": [[0, "desc"]],
