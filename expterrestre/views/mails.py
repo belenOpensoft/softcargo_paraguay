@@ -70,7 +70,8 @@ def get_data_email_op(request):
             texto += f"<div style='{estilo}'>PH: +598 26052332</div>"
             resultado['email_cliente'] = email_cliente
             resultado['email_agente'] = email_agente
-
+            emails_disponibles = list(AccountEmail.objects.filter(user=request.user).values_list('email', flat=True))
+            resultado['emails_disponibles'] = emails_disponibles
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
             resultado['asunto']=str(title.upper())+' - '+str(resultado['asunto'])

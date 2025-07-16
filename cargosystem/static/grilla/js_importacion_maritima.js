@@ -4816,7 +4816,11 @@ $('.email').click(function () {
                             cco = $("#id_cco").val();
                             subject = $("#id_subject").val();
                             message = $("#email_add_input").summernote('code');
-                            sendEmail(to,cc,cco,subject,message,title,numero);
+                            from = $('#id_from').val();
+                            if(!confirm('¿Realmente desea ENVIAR el correo?')){
+                                return;
+                            }
+                            sendEmail(to,cc,cco,subject,message,title,numero,from);
                             $(this).dialog("close");
                         },
                     }, {
@@ -4872,18 +4876,30 @@ function get_data_email(row,title,numero,id,transportista,master,gastos,directo)
                 } else {
                     $("#id_to").val(resultado['email_cliente']);  // Asignar el email normalmente
                 }
+                let selectEmails = document.getElementById("id_from");
+                if (selectEmails && resultado['emails_disponibles']) {
+                    selectEmails.innerHTML = "";
+
+                    resultado['emails_disponibles'].forEach(function(email) {
+                        let option = document.createElement("option");
+                        option.value = email;
+                        option.text = email;
+                        selectEmails.appendChild(option);
+                    });
+                }
             } else {
                 alert(resultado['resultado']);
             }
         }
     });
 }
-function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
+function sendEmail(to,cc,cco,subject,message,title,seguimiento,from) {
     let miurl = "/envio_notificacion/IM/";
     var toData = {
         'to': to,
         'cc': cc,
         'cco': cco,
+        'from':from,
         'subject': subject,
         'message': message,
         'tipo': title,

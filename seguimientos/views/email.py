@@ -11,6 +11,7 @@ from reportlab.lib.validators import isNumber, isInstanceOf
 
 from cargosystem import settings
 from impomarit.views.mails import formatear_linea, format_fecha
+from login.models import AccountEmail
 from mantenimientos.models import Clientes, Servicios, Vapores, Monedas, Ciudades
 from mantenimientos.views.bancos import is_ajax
 from seguimientos.models import VGrillaSeguimientos, Envases, Cargaaerea, Conexaerea, Serviceaereo
@@ -1278,6 +1279,8 @@ def get_data_email(request):
 
             resultado['email_cliente'] = email_cliente
             resultado['email_agente'] = email_agente
+            emails_disponibles = list(AccountEmail.objects.filter(user=request.user).values_list('email', flat=True))
+            resultado['emails_disponibles'] = emails_disponibles
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
             resultado['asunto']=str(title.upper())+' - '+str(resultado['asunto'])

@@ -11,6 +11,7 @@ from reportlab.lib.validators import isNumber
 
 from cargosystem import settings
 from impomarit.models import VEmbarqueaereo, Cargaaerea, Envases, Serviceaereo, VGastosHouse, Embarqueaereo, Conexaerea
+from login.models import AccountEmail
 from mantenimientos.models import Productos, Clientes, Monedas, Servicios, Vapores, Ciudades
 from mantenimientos.views.bancos import is_ajax
 import locale
@@ -81,6 +82,8 @@ def get_data_email_op(request):
             texto += f"<div style='{estilo}'>PH: +598 26052332</div>"
             resultado['email_cliente'] = email_cliente
             resultado['email_agente'] = email_agente
+            emails_disponibles = list(AccountEmail.objects.filter(user=request.user).values_list('email', flat=True))
+            resultado['emails_disponibles'] = emails_disponibles
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
             resultado['asunto']=str(title.upper())+' - '+str(resultado['asunto'])

@@ -389,7 +389,7 @@ def source_embarque_consolidado(request):
 
         # Mapeo de columnas
         columnas = [
-            'id', 'fecha_embarque', 'fecha_retiro', 'numero', 'seguimiento', 'consignatario', 'origen', 'destino',
+            'id', 'etd', 'eta', 'numero', 'seguimiento', 'consignatario', 'origen', 'destino',
             'status', 'posicion', 'operacion', 'awb', 'hawb', 'vapor', 'notificar_agente', 'notificar_cliente'
         ]
 

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+"""
 class Account(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
     documento = models.CharField(max_length=20,blank=True,null=True)
@@ -10,6 +11,30 @@ class Account(models.Model):
 
     def __str__(self):
         return self.user.first_name + ' - ' + str(self.user.last_name)
+"""
+
+
+class Account(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    documento = models.CharField(max_length=20, blank=True, null=True)
+    firma = models.FileField(upload_to='firmas', blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.first_name} - {self.user.last_name}"
+
+
+
+class AccountEmail(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.CharField(max_length=200)
+    clave = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        unique_together = ('user', 'email')
+
+    def __str__(self):
+        return f"{self.email} ({self.user.username})"
+
 
 
 class CorreoEnviado(models.Model):

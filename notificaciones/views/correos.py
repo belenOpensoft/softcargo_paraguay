@@ -21,7 +21,7 @@ from expterrestre.models import ExpterraEmbarqueaereo
 from impaerea.models import ImportEmbarqueaereo
 from impomarit.models import Embarqueaereo
 from impterrestre.models import ImpterraEmbarqueaereo
-from login.models import CorreoEnviado, Account
+from login.models import CorreoEnviado, Account, AccountEmail
 from cargosystem import settings
 from login.views.correos import is_ajax
 from seguimientos.models import Attachhijo, Faxes, Seguimiento
@@ -31,6 +31,7 @@ def envio_notificacion_seguimiento(request,modulo=None):
     if is_ajax(request):
         try:
             to = request.POST['to'].split(';')
+            from_email = request.POST['from']
             cc = request.POST['cc'].split(';') if request.POST['cc'] is not None else []
             cco = request.POST['cco'].split(';') if (request.POST['cco'] is not None and request.POST['cco']) else []
             tipo = request.POST['tipo']
@@ -64,14 +65,15 @@ def envio_notificacion_seguimiento(request,modulo=None):
             adjuntos = simplejson.loads(request.POST['archivos_adjuntos'])
             subject = request.POST['subject']
             message = request.POST['message']
-            user = Account.objects.filter(user__id=request.user.id)
-            if user.count() > 0 and user[0].email is not None and len(user[0].email) > 0 and len(user[0].clave) > 0:
-                usuario = user[0].email
-                clave = user[0].clave
-                firma = user[0].firma
-                name_firma = user[0].firma.name
+            user = Account.objects.filter(user__id=request.user.id).first()
+            account_email = AccountEmail.objects.filter(user=request.user, email=from_email).first()
+            if not account_email or not account_email.clave:
+                resultado['resultado'] = 'El usuario no tiene definido correctamente su email y contraseña, favor avisar a un supervisor.'
+            else:
+                clave = account_email.clave
 
-                if envio_correo_electronico(message,to,subject,adjuntos,cc,cco,tipo=tipo,seguimiento=num_seg,usuario=request.user,emisor=usuario,clave=clave,name_firma=name_firma,modulo=modulo):
+            if clave is not None:
+                if envio_correo_electronico(message,to,subject,adjuntos,cc,cco,tipo=tipo,seguimiento=num_seg,usuario=request.user,emisor=from_email,clave=clave,name_firma=user.firma.name,modulo=modulo):
                     fx = Faxes()
                     fx.fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
                     fx.numero = seguimiento
@@ -81,8 +83,7 @@ def envio_notificacion_seguimiento(request,modulo=None):
                     resultado['resultado'] = 'exito'
                 else:
                     resultado['resultado'] = 'Ocurrio un error al enviar el email'
-            else:
-                resultado['resultado'] = 'El usuario no tiene definido correctamente su email y contraseña, favor avisar a un supervisor.'
+
         except Exception as e:
             resultado['resultado'] = str(e)
     else:
@@ -170,6 +171,9 @@ def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave
         correo.error = str(e)
         correo.save()
         return False
+
+
+
 
 
 

@@ -482,7 +482,11 @@ $(document).ready(function () {
                             cco = $("#id_cco").val();
                             subject = $("#id_subject").val();
                             message = $("#email_add_input").summernote('code');
-                            sendEmail(to, cc, cco, subject, message, title, numero);
+                            from = $('#id_from').val();
+                            if(!confirm('¿Realmente desea ENVIAR el correo?')){
+                                return;
+                            }
+                            sendEmail(to, cc, cco, subject, message, title, numero,from);
                             $(this).dialog("close");
                         },
                     }, {

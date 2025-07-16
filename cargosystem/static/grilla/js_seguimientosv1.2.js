@@ -838,7 +838,11 @@ $(document).ready(function () {
                             cco = $("#id_cco").val();
                             subject = $("#id_subject").val();
                             message = $("#email_add_input").summernote('code');
-                            sendEmail(to,cc,cco,subject,message,title,row_number);
+                            from = $('#id_from').val();
+                            if(!confirm('¿Realmente desea ENVIAR el correo?')){
+                                return;
+                            }
+                            sendEmail(to,cc,cco,subject,message,title,row_number,from);
                             $(this).dialog("close");
                         },
                     }, {
@@ -3399,12 +3403,13 @@ function get_datos_archivos() {
     });
 
 }
-function sendEmail(to,cc,cco,subject,message,title,seguimiento) {
+function sendEmail(to,cc,cco,subject,message,title,seguimiento,from) {
     let miurl = "/envio_notificacion/SG/";
     var toData = {
         'to': to,
         'cc': cc,
         'cco': cco,
+        'from':from,
         'subject': subject,
         'message': message,
         'tipo': title,
@@ -3460,6 +3465,17 @@ function get_data_email(row,title,row_number,transportista,master,gastos,directo
                     $("#id_to").val(resultado['email_agente']);
                 } else {
                     $("#id_to").val(resultado['email_cliente']);
+                }
+                let selectEmails = document.getElementById("id_from");
+                if (selectEmails && resultado['emails_disponibles']) {
+                    selectEmails.innerHTML = "";
+
+                    resultado['emails_disponibles'].forEach(function(email) {
+                        let option = document.createElement("option");
+                        option.value = email;
+                        option.text = email;
+                        selectEmails.appendChild(option);
+                    });
                 }
             } else {
                 alert(resultado['resultado']);

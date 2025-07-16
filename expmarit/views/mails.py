@@ -12,6 +12,7 @@ from cargosystem import settings
 from expmarit.models import VEmbarqueaereo, ExpmaritCargaaerea as Cargaaerea, ExpmaritEnvases as Envases, \
     ExpmaritServiceaereo as Serviceaereo, ExpmaritEmbarqueaereo as Embarqueaereo, ExpmaritConexaerea as Conexaerea
 from impomarit.views.mails import formatear_linea
+from login.models import AccountEmail
 from mantenimientos.views.bancos import is_ajax
 from mantenimientos.models import Productos, Clientes, Monedas, Servicios, Vapores, Ciudades
 from seguimientos .models import VGrillaSeguimientos
@@ -80,7 +81,8 @@ def get_data_email_op(request):
             texto += f"<div style='{estilo}'>PH: +598 26052332</div>"
             resultado['email_cliente'] = email_cliente
             resultado['email_agente'] = email_agente
-
+            emails_disponibles = list(AccountEmail.objects.filter(user=request.user).values_list('email', flat=True))
+            resultado['emails_disponibles'] = emails_disponibles
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
             resultado['asunto']=str(title.upper())+' - '+str(resultado['asunto'])
