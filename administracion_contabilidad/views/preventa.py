@@ -1,6 +1,7 @@
 import io
 import random
 from datetime import datetime
+from django.db.models import Q
 
 import xlsxwriter
 from django.core.checks import messages
@@ -41,8 +42,6 @@ def generar_autogenerado(fecha_noseusa=None):
 
     return autogenerado
 
-
-
 def guardar_infofactura(request):
     if request.method == "POST":
         try:
@@ -55,37 +54,34 @@ def guardar_infofactura(request):
                 fecha_str = datetime.now().strftime("%d-%m-%y")
 
             try:
-                # Convertir fecha al formato estándar
                 fecha_obj = datetime.strptime(fecha_str, "%d-%m-%y")
                 fecha_formateada = fecha_obj.strftime("%Y-%m-%d %H:%M:%S")
             except ValueError:
                 fecha_formateada = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            # Validar que 'datos' sea un diccionario
             if not isinstance(preventa_datos, dict):
                 return JsonResponse({"resultado": "error", "mensaje": "Los datos no son un objeto válido."}, status=400)
 
             hoy = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             posicion = preventa_datos.get("posicion", "")
 
-            # Obtener un número único para znumero
             infofactura = Factudif()
-            numero = infofactura.get_num()  # Generar número único para todos los registros
+            numero = infofactura.get_num()
 
             embarque = preventa_datos.get("referencia")
             clase = posicion[:2]
-
 
             gastos = VistaGastosPreventa.objects.filter(
                 numero=embarque,
                 source=clase,
                 modo=tipo.capitalize()
+            ).filter(
+                Q(detalle__isnull=True) | Q(detalle='S/I') | Q(detalle='')
             )
 
-            # Crear un registro de Infofactura para cada gasto
             for gasto in gastos:
                 nueva_infofactura = Factudif()
-                nueva_infofactura.znumero = numero  # Usar el mismo número para todos los registros
+                nueva_infofactura.znumero = numero
                 nueva_infofactura.zrefer = preventa_datos.get("referencia")
                 nueva_infofactura.zseguimiento = preventa_datos.get("seguimiento")
                 nueva_infofactura.zcarrier = preventa_datos.get("transportista")
@@ -110,14 +106,12 @@ def guardar_infofactura(request):
                 nueva_infofactura.ztransporte = posicion[1] if len(posicion) > 1 else None
                 nueva_infofactura.zclase = posicion[:2] if len(posicion) >= 2 else None
 
-                # Agregar información específica del gasto
                 monto = gasto.precio if gasto.precio not in [None, 0] else gasto.costo if gasto.costo not in [None, 0] else 0
-                nueva_infofactura.zitem = gasto.id_servicio  # Descripción del gasto
+                nueva_infofactura.zitem = gasto.id_servicio
                 nueva_infofactura.zmonto = monto
                 nueva_infofactura.ziva = 1 if gasto.iva == 'Basico' else 0
                 nueva_infofactura.zmoneda = gasto.id_moneda
 
-                # Guardar cada registro
                 nueva_infofactura.save()
 
             return JsonResponse({"resultado": "exito"})
@@ -154,78 +148,6 @@ def source_embarques_factura(request):
 
     mimetype = "application/json"
     return HttpResponse(data_json, content_type=mimetype)
-
-
-def house_detail_factura(request):
-    if request.method == 'GET':
-        numero = request.GET.get('numero', None)
-        clase = request.GET.get('clase', None)
-
-
-        if numero and clase:
-
-            if clase == "IM":
-                house = Embarqueaereo.objects.get(numero=numero)
-            elif clase == "EM":
-                house = ExpmaritEmbarqueaereo.objects.get(numero=numero)
-            elif clase == "IA":
-                house = ImportEmbarqueaereo.objects.get(numero=numero)
-            elif clase == "EA":
-                house = ExportEmbarqueaereo.objects.get(numero=numero)
-            elif clase == "IT":
-                house = ImpterraEmbarqueaereo.objects.get(numero=numero)
-            elif clase == "ET":
-                house = ExpterraEmbarqueaereo.objects.get(numero=numero)
-            else:
-                return JsonResponse({'error': 'Clase no válida'}, status=400)
-
-        if numero:
-            try:
-                data = {
-                    'id': house.id if clase == 'IM' else house.numero,
-                    'cliente_e': house.cliente,
-                    'vendedor_e': house.vendedor,
-                    'transportista_e': house.transportista,
-                    'agente_e': house.agente,
-                    'consignatario_e': house.consignatario,
-                    'origen_e': house.origen,
-                    'loading_e': house.loading if clase == 'IM' or clase =='EM' else None,
-                    'destino_e': house.destino ,
-                    'discharge_e': house.discharge if clase == 'IM' or clase =='EM' else None,
-                    'posicion_e': house.posicion,
-                    'operacion_e': house.operacion,
-                    'hawb_e': house.hawb,
-                    'vapor_e': house.vapor if clase == 'IM' or clase =='EM' else None,
-                    'viaje_e': house.viaje if clase == 'IM' or clase =='EM' else None,
-                    'pago': house.pagoflete,
-                    'moneda_e': house.moneda,
-                    'arbitraje_e': house.arbitraje,
-                    'demora_e': house.demora if clase == 'IM' or clase =='EM' else None,
-                    'embarcador_e': house.embarcador,
-                    'armador_e': house.armador if clase == 'IM' or clase =='EM' else None,
-                    'agventas_e': house.ageventas,
-                    'agcompras_e': house.agecompras,
-                    'notifcliente_e': house.notifcliente if clase == 'IM' or clase == 'IA' or clase == 'IT' else None,
-                    'notifagente_e': house.notifagente if clase == 'IM' or clase == 'IA' or clase == 'IT' else None,
-                    'fecharetiro_e': house.fecharetiro,
-                    'fechaembarque_e': house.fechaembarque,
-                    'status_e': house.status,
-                    'wreceipt_e': house.wreceipt,
-                    'trackid_e': house.trackid,
-                    'seguimiento': house.seguimiento,
-                    'terminos':house.terminos,
-                    'wr':house.wreceipt,
-                }
-
-                data['awb_e'] = house.awb if house.awb is not None else 0
-
-                return JsonResponse(data)
-            except Embarqueaereo.DoesNotExist:
-                raise Http404("House does not exist")
-        else:
-            return JsonResponse({'error': 'No ID provided'}, status=400)
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
 def source_master_factura(request):
@@ -278,19 +200,190 @@ def get_name_by_id_productos(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
-def update_gasto_house(request):
-    resultado = {'exitosos': [], 'errores': []}  # Resultado de éxitos y errores
+def house_detail_factura_old(request):
+    if request.method == 'GET':
+        numero = request.GET.get('numero', None)
+        clase = request.GET.get('clase', None)
+
+
+        if numero and clase:
+
+            if clase == "IM":
+                house = Embarqueaereo.objects.get(numero=numero)
+            elif clase == "EM":
+                house = ExpmaritEmbarqueaereo.objects.get(numero=numero)
+            elif clase == "IA":
+                house = ImportEmbarqueaereo.objects.get(numero=numero)
+            elif clase == "EA":
+                house = ExportEmbarqueaereo.objects.get(numero=numero)
+            elif clase == "IT":
+                house = ImpterraEmbarqueaereo.objects.get(numero=numero)
+            elif clase == "ET":
+                house = ExpterraEmbarqueaereo.objects.get(numero=numero)
+            else:
+                return JsonResponse({'error': 'Clase no válida'}, status=400)
+
+            try:
+                data = {
+                    'id': house.id if clase == 'IM' else house.numero,
+                    'cliente_e': house.cliente,
+                    'vendedor_e': house.vendedor,
+                    'transportista_e': house.transportista,
+                    'agente_e': house.agente,
+                    'consignatario_e': house.consignatario,
+                    'origen_e': house.origen,
+                    'loading_e': house.loading if clase == 'IM' or clase =='EM' else None,
+                    'destino_e': house.destino ,
+                    'discharge_e': house.discharge if clase == 'IM' or clase =='EM' else None,
+                    'posicion_e': house.posicion,
+                    'operacion_e': house.operacion,
+                    'hawb_e': house.hawb,
+                    'vapor_e': house.vapor if clase == 'IM' or clase =='EM' else None,
+                    'viaje_e': house.viaje if clase == 'IM' or clase =='EM' else None,
+                    'pago': house.pagoflete,
+                    'moneda_e': house.moneda,
+                    'arbitraje_e': house.arbitraje,
+                    'demora_e': house.demora if clase == 'IM' or clase =='EM' else None,
+                    'embarcador_e': house.embarcador,
+                    'armador_e': house.armador if clase == 'IM' or clase =='EM' else None,
+                    'agventas_e': house.ageventas,
+                    'agcompras_e': house.agecompras,
+                    'notifcliente_e': house.notifcliente if clase == 'IM' or clase == 'IA' or clase == 'IT' else None,
+                    'notifagente_e': house.notifagente if clase == 'IM' or clase == 'IA' or clase == 'IT' else None,
+                    'fecharetiro_e': house.fecharetiro,
+                    'fechaembarque_e': house.fechaembarque,
+                    'status_e': house.status,
+                    'wreceipt_e': house.wreceipt,
+                    'trackid_e': house.trackid,
+                    'seguimiento': house.seguimiento,
+                    'terminos':house.terminos,
+                    'wr':house.wreceipt,
+                }
+
+                data['awb_e'] = house.awb if house.awb is not None else 0
+
+                return JsonResponse(data)
+            except Exception as e:
+                raise Http404("Ocurrió un error")
+        else:
+            return JsonResponse({'error': 'No ID provided'}, status=400)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def house_detail_factura(request):
+    if request.method == 'GET':
+        numero = request.GET.get('numero', None)
+        clase = request.GET.get('clase', None)
+
+
+        if numero and clase:
+
+            if clase == "IM":
+                house = Embarqueaereo.objects.get(numero=numero)
+                registros = Cargaaerea.objects.filter(numero=numero).values('producto','bruto','bultos','cbm').first()
+            elif clase == "EM":
+                house = ExpmaritEmbarqueaereo.objects.get(numero=numero)
+                registros = ExpmaritCargaaerea.objects.filter(numero=numero).values('producto','bruto','bultos','cbm').first()
+            elif clase == "IA":
+                house = ImportEmbarqueaereo.objects.get(numero=numero)
+                registros = ImportCargaaerea.objects.filter(numero=numero).values('producto','bruto','bultos','medidas').first()
+            elif clase == "EA":
+                house = ExportEmbarqueaereo.objects.get(numero=numero)
+                registros = ExportCargaaerea.objects.filter(numero=numero).values('producto','bruto','bultos','medidas').first()
+            elif clase == "IT":
+                house = ImpterraEmbarqueaereo.objects.get(numero=numero)
+                registros = ImpterraCargaaerea.objects.filter(numero=numero).values('producto','bruto','bultos','cbm').first()
+            elif clase == "ET":
+                house = ExpterraEmbarqueaereo.objects.get(numero=numero)
+                registros = ExpterraCargaaerea.objects.filter(numero=numero).values('producto','bruto','bultos','cbm').first()
+            else:
+                return JsonResponse({'error': 'Clase no válida'}, status=400)
+
+            try:
+
+                bruto = registros.get('bruto') if registros else None
+                bultos = registros.get('bultos') if registros else None
+                cbm = registros.get('cbm') if registros else None
+
+                if not cbm and registros:
+                    medidas = registros.get('medidas')
+                    if medidas:
+                        cbm = calcular_cbm_desde_medidas(medidas)
+
+
+                data = {
+                    'id': house.id if clase == 'IM' else house.numero,
+                    'cliente_e': house.cliente,
+                    'vendedor_e': house.vendedor,
+                    'transportista_e': house.transportista,
+                    'agente_e': house.agente,
+                    'consignatario_e': house.consignatario,
+                    'origen_e': house.origen,
+                    'loading_e': house.loading if clase == 'IM' or clase =='EM' else None,
+                    'destino_e': house.destino ,
+                    'discharge_e': house.discharge if clase == 'IM' or clase =='EM' else None,
+                    'posicion_e': house.posicion,
+                    'operacion_e': house.operacion,
+                    'hawb_e': house.hawb,
+                    'vapor_e': house.vapor if clase == 'IM' or clase =='EM' else None,
+                    'viaje_e': house.viaje if clase == 'IM' or clase =='EM' else None,
+                    'pago': house.pagoflete,
+                    'moneda_e': house.moneda,
+                    'arbitraje_e': house.arbitraje,
+                    'demora_e': house.demora if clase == 'IM' or clase =='EM' else None,
+                    'embarcador_e': house.embarcador,
+                    'armador_e': house.armador if clase == 'IM' or clase =='EM' else None,
+                    'agventas_e': house.ageventas,
+                    'agcompras_e': house.agecompras,
+                    'notifcliente_e': house.notifcliente if clase == 'IM' or clase == 'IA' or clase == 'IT' else None,
+                    'notifagente_e': house.notifagente if clase == 'IM' or clase == 'IA' or clase == 'IT' else None,
+                    'fecharetiro_e': house.fecharetiro,
+                    'fechaembarque_e': house.fechaembarque,
+                    'status_e': house.status,
+                    'wreceipt_e': house.wreceipt,
+                    'trackid_e': house.trackid,
+                    'seguimiento': house.seguimiento,
+                    'terminos':house.terminos,
+                    'wr':house.wreceipt,
+                    'producto_id':registros['producto'] if registros else None,
+                    'bultos': bultos,
+                    'bruto': bruto,
+                    'cbm': cbm if cbm else 0
+                }
+
+                data['awb_e'] = house.awb if house.awb is not None else 0
+
+                return JsonResponse(data)
+            except Exception as e:
+                raise Http404("Ocurrió un error")
+        else:
+            return JsonResponse({'error': 'No ID provided'}, status=400)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def calcular_cbm_desde_medidas(medidas_str):
     try:
-        # Recibir y decodificar los datos JSON enviados por AJAX
+        partes = medidas_str.strip().lower().replace(' ', '').split('*')
+        if len(partes) == 3:
+            largo = float(partes[0])
+            ancho = float(partes[1])
+            alto = float(partes[2])
+            volumen = largo * ancho * alto
+            return round(volumen, 2)
+    except:
+        pass
+    return None
+
+def update_gasto_house(request):
+    resultado = {'exitosos': [], 'errores': []}
+    try:
         data = json.loads(request.body.decode('utf-8'))
 
-        # Iterar sobre el vector de gastos que llega
         for gasto in data:
-            id_gasto = int(gasto.get('id_gasto'))  # ID del gasto a actualizar
+            id_gasto = int(gasto.get('id_gasto'))
             notas = gasto.get('notas')
             descripcion = gasto.get('descripcion')
 
-            # Verificar si se ha proporcionado el ID del gasto
             if id_gasto:
                 try:
                     # Buscar el registro y actualizar los campos

@@ -2,7 +2,7 @@ from django.urls import path
 
 from impaerea.views.embarques import source_embarques, eliminar_embarque, guardar_embarques, add_embarque_importado
 from impaerea.views.gastos import add_gasto_master, source_gastos, eliminar_gasto_master, source_gastos_house, \
-    eliminar_gasto_house, add_gasto_house, add_gasto_importado
+    eliminar_gasto_house, add_gasto_house, add_gasto_importado, source_gastos_house_preventa
 from impaerea.views.house import add_house, add_house_impmarit, edit_house_function, house_detail, \
     get_name_by_id_vendedores, source_seguimientos_importado, add_house_importado, source_gastos_importado, \
     eliminar_house, source_envases_importado, source_rutas_importado, source_embarque_id, source_seguimiento_id, \
@@ -43,6 +43,8 @@ urlpatterns = [
     path(r'source_seguimiento_id/', source_seguimiento_id, name="source_seguimiento_id"),
     path(r'source_embarque_consolidado/', source_embarque_consolidado, name="source_embarque_consolidado"),
     path(r'source_gastos_house/', source_gastos_house, name="source_gastos_house"),
+    path(r'source_gastos_house_preventa/', source_gastos_house_preventa, name="source_gastos_house_preventa"),
+
     path(r'source_rutas_house/', source_rutas_house, name="source_rutas_house"),
     path(r'source_embarques_house/', source_embarques, name="source_embarques_house"),
     path(r'source_seguimientos_importado/', source_seguimientos_importado, name="source_seguimientos_importado"),

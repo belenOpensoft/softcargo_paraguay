@@ -1,3 +1,5 @@
+let table_fac;
+
 $(document).ready(function () {
 
 
@@ -307,7 +309,7 @@ $(document).ready(function () {
             $(this).removeClass("is-invalid"); // Se quita el rojo si se vacía
         }
     });
-    let table_fac = $('#tabla_facturas').DataTable({
+    table_fac = $('#tabla_facturas').DataTable({
         "dom": 'Btlipr',
         "scrollX": true,
         "bAutoWidth": false,
@@ -726,11 +728,25 @@ $('#preventa').on('click', function () {
         height: 'auto', // Se ajusta al contenido
         minWidth: 500,  // Evita que sea demasiado pequeño
         minHeight: 200, // Evita que sea demasiado pequeño
-        position: {my: "top", at: "top+20", of: window}, // Centrar el modal
+        position: {my: "top", at: "top+20", of: window},
+        beforeClose: function(event, ui) {
+            limpiar_modal_preventa();
+        }
     }).prev(".ui-dialog-titlebar").hide();
     cargar_preventas();
 
 });
+function limpiar_modal_preventa() {
+    // Limpiar todos los inputs dentro del modal
+    $('#preventa_modal input').val('');
+
+    // Limpiar las tablas (excepto el thead)
+    $('#preventa_table tbody').empty();
+    $('#tabla_gastos_preventa_factura tbody').empty();
+
+}
+
+
 function cargar_preventas(){
     $('#preventa_table tbody').empty();
     $.ajax({
@@ -2216,9 +2232,11 @@ function procesar_factura() {
                 if (data.success) {
                     $('#facturaM').dialog('close');
                     $('#facturaForm').trigger('reset');
+
                     total = 0;
                     iva = 0;
                     neto = 0;
+                    table_fac.ajax.reload();
                 } else {
                     alert('ocurrió un error');
                 }
@@ -2373,6 +2391,7 @@ function procesar_factura_finalizada(datos_complementarios) {
                     limpiarModalEmbarque();
                     $('#facturaForm').trigger('reset');
                     $('#formRegistroCarga').trigger('reset');
+                    table_fac.ajax.reload();
                     total = 0;
                     iva = 0;
                     neto = 0;

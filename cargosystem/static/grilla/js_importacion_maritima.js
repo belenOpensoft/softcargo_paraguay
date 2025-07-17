@@ -5412,7 +5412,7 @@ function cargar_gastos_factura(callback){
 
     $("#facturar_table").dataTable().fnDestroy();
     let tabla_factura = $('#facturar_table').DataTable({
-        info: false,        // Oculta "Mostrando X a Y de Z registros"
+        info: false,
         lengthChange: false ,
         "order": [[1, "desc"], [1, "desc"]],
         "processing": true,
@@ -5422,7 +5422,7 @@ function cargar_gastos_factura(callback){
             url: "/static/datatables/es_ES.json"
         },
         "ajax": {
-            "url": "/importacion_maritima/source_gastos_house/",
+            "url": "/importacion_maritima/source_gastos_house_preventa/",
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
@@ -5451,12 +5451,12 @@ function cargar_gastos_factura(callback){
                     } else if (costo !== 0) {
                         return costo.toFixed(2);
                     } else {
-                        return "0.00"; // o "S/I" si preferís
+                        return "0.00";
                     }
                 }
             },
             {
-                "data": null, // Facturar a.. - Valor de relleno "S/I"
+                "data": null,
                 "title": "Facturar a..",
                 "render": function() {
                     return "S/I";
@@ -5484,19 +5484,26 @@ function cargar_gastos_factura(callback){
 
         ],
         rowCallback: function(row, data) {
-            // Agregar el evento de clic para resaltar la fila seleccionada
+            // Remover clases anteriores si hay
+            $(row).removeClass('fila-rojo fila-amarillo');
+
+            const color = data[17];
+            if (color === 'ROJO') {
+                $(row).addClass('fila-rojo');
+            } else if (color === 'AMARILLO') {
+                $(row).addClass('fila-amarillo');
+            }
+
+            // Evento para resaltar fila seleccionada
             $(row).off('click').on('click', function () {
                 $('#facturar_table tbody tr').removeClass('table-secondary');
                 $(this).addClass('table-secondary');
-            const valorColumna7 = $(row).find('td').eq(7).text().trim();
 
-            if (valorColumna7 === 'S/I') {
-                $('#concepto_detalle').prop('checked', false); // Desmarcar el checkbox
-            } else {
-                $('#concepto_detalle').prop('checked', true); // Marcar el checkbox
-            }
+                const valorColumna7 = $(row).find('td').eq(7).text().trim();
+                $('#concepto_detalle').prop('checked', valorColumna7 !== 'S/I');
             });
         }
+
     });
 
     setTimeout(function() {

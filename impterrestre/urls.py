@@ -4,7 +4,7 @@ from impterrestre.views.embarques import source_embarques, eliminar_embarque, gu
     get_sugerencias_envases
 from impterrestre.views.envases import source_envases, eliminar_envase, guardar_envases, add_envase_importado
 from impterrestre.views.gastos import add_gasto_master, source_gastos, eliminar_gasto_master, source_gastos_house, \
-    eliminar_gasto_house, add_gasto_house, add_gasto_importado
+    eliminar_gasto_house, add_gasto_house, add_gasto_importado, source_gastos_house_preventa
 from impterrestre.views.house import add_house, add_house_impmarit, edit_house_function, house_detail, \
     get_name_by_id_vendedores, source_seguimientos_importado, add_house_importado, source_gastos_importado, \
     eliminar_house, source_envases_importado, source_rutas_importado, source_embarque_id, source_seguimiento_id, \
@@ -47,6 +47,8 @@ urlpatterns = [
     path(r'source_seguimiento_id/', source_seguimiento_id, name="source_seguimiento_id"),
     path(r'source_embarque_consolidado/', source_embarque_consolidado, name="source_embarque_consolidado"),
     path(r'source_gastos_house/', source_gastos_house, name="source_gastos_house"),
+    path(r'source_gastos_house_preventa/', source_gastos_house_preventa, name="source_gastos_house_preventa"),
+
     path(r'source_rutas_house/', source_rutas_house, name="source_rutas_house"),
     path(r'source_envases_house/', source_envases, name="source_envases_house"),
     path(r'source_embarques_house/', source_embarques, name="source_embarques_house"),

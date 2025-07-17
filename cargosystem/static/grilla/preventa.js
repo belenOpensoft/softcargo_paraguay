@@ -57,10 +57,15 @@ function facturar(){
 
         });
         },
+        position: {
+        my: "center top+20",
+        at: "center top",
+        of: window
+        },
         modal: true,
         title: "Facturar el House N°: " + selectedRowN,
-        height: wHeight * 0.90,
-        width: wWidth * 0.90,
+        height: 'auto',
+        width: 'auto',
         class: 'modal fade',
         buttons: [
             {
@@ -82,8 +87,7 @@ function facturar(){
         }
     })
 }
-function asignar_costo(event) {
-event.preventDefault();
+function asignar_costo() {
     const filaSeleccionada = $('#facturar_table tbody tr.table-secondary');
 
     if (filaSeleccionada.length > 0) {
@@ -103,8 +107,7 @@ event.preventDefault();
         alert("No hay ninguna fila seleccionada.");
     }
 }
-function asignar_costo_todos(event) {
-event.preventDefault();
+function asignar_costo_todos() {
     let cliente = $('#destinatario').val();
     let cliente_id = $('#destinatario_input').val();
 
@@ -121,8 +124,7 @@ event.preventDefault();
 
 
 }
-function asignar_no(event) {
-    event.preventDefault();
+function asignar_no() {
     const filaSeleccionada = $('#facturar_table tbody tr.table-secondary');
 
     if (filaSeleccionada.length > 0) {
@@ -138,8 +140,7 @@ function asignar_no(event) {
         alert("No hay ninguna fila seleccionada.");
     }
 }
-function asignar_no_todos(event) {
-event.preventDefault();
+function asignar_no_todos() {
     const mensaje = 'NO SE FACTURA EL CONCEPTO'; // Texto a asignar
 
     let tabla = $('#facturar_table').DataTable();
@@ -151,7 +152,8 @@ event.preventDefault();
 
     // tabla.draw(); // Descomentar si necesitas que la tabla se redibuje
 }
-function enviarDatosTabla() {
+function enviarDatosTabla_old() {
+//unificar esta funcion a que traiga los mismos datos en ambos casos
     let preventa;
     let num=localStorage.getItem('num_house_gasto');
     let clase=localStorage.getItem('clase_house');
@@ -163,8 +165,8 @@ function enviarDatosTabla() {
         data: { numero: num, clase:clase},
         method: 'GET',
         success: function (house) {
-            if (tablaOrigen.includes('tabla_house_directo')) {
 
+            if (tablaOrigen.includes('tabla_house_directo')) {
                 $.ajax({
                 url: '/admin_cont/source_embarque_factura/',
                 data: { numero: num, clase:clase},
@@ -200,22 +202,14 @@ function enviarDatosTabla() {
                             tipoElegido='Collect';
                         }
 
-
-                        //guardar la preventa
-
-
-
-                            // Guardar preventa con tipo
                             guardar_preventa(preventa, tipoElegido);
 
-                            // Filtrar y enviar los gastos seleccionados
                             const tabla = $('#facturar_table').DataTable();
                             let datosTabla = [];
 
                             tabla.rows().every(function () {
                                 const data = this.data();
-                                const tipo = $(this.node()).find('td').eq(2).text().toLowerCase().trim(); // Columna "Tipo"
-                                console.log(tipo);
+                                const tipo = $(this.node()).find('td').eq(2).text().toLowerCase().trim();
                                 if (tipo === tipoElegido.toLowerCase()) {
                                     datosTabla.push({
                                         id_gasto: data[0],
@@ -327,8 +321,77 @@ function enviarDatosTabla() {
             console.error("Error fetching data:", error);
         }
     });
+}
+function enviarDatosTabla() {
 
+    let hayFilaSinClase = false;
 
+    $('#facturar_table tbody tr').each(function () {
+        if (!$(this).hasClass('fila-rojo') && !$(this).hasClass('fila-amarillo')) {
+            hayFilaSinClase = true;
+            return false;
+        }
+    });
+
+    if (!hayFilaSinClase){
+        alert('Todos los gastos estan pasados a facturacion.');
+        return;
+    }
+
+    let preventa;
+    let num=localStorage.getItem('num_house_gasto');
+    let clase=localStorage.getItem('clase_house');
+    let tablaOrigen = localStorage.getItem('tabla_origen')
+    let num_destina=$('#destinatario_input').val();
+    let dest=$('#destinatario').val();
+    $.ajax({
+        url: '/admin_cont/house_detail_factura/',
+        data: { numero: num, clase:clase},
+        method: 'GET',
+        success: function (house) {
+            let tipoElegido;
+                preventa=({
+                    seguimiento:house.seguimiento,
+                    referencia:num,
+                    transportista:getNameByIdClientes(house.transportista_e),
+                    vuelo:house.viaje_e,
+                    master:house.awb_e,
+                    house:house.hawb_e,
+                    fecha:house.fecharetiro_e,
+                    kilos:house.bruto,
+                    bultos:house.bultos,
+                    volumen:house.cbm,
+                    origen:house.origen_e,
+                    destino:house.destino_e,
+                    consigna:dest,
+                    cliente:num_destina,
+                    embarca:getNameByIdClientes(house.embarcador_e),
+                    agente:getNameByIdClientes(house.agente_e),
+                    posicion:house.posicion_e,
+                    terminos:house.terminos,
+                    pagoflete:house.pago,
+                    commodity:house.producto_id,
+                });
+                if(['EM','EA','ET'].includes(clase)){
+                    const confirmacion = confirm("¿Desea facturar gastos como 'Collect'?\n\nPresione ACEPTAR para 'Collect'\nPresione CANCELAR para 'Prepaid'");
+                    tipoElegido = confirmacion ? "Collect" : "Prepaid";
+                }else{
+                    tipoElegido='Collect';
+                }
+
+                    guardar_preventa(preventa, tipoElegido);
+
+                // preguntar a ana si se pasan todos los disponibles o
+            // si se seleccionan por fila
+
+                   $('#facturar_modal').dialog('close');
+                   $('#'+tablaOrigen).DataTable().ajax.reload(null, false);
+
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching data:", error);
+        }
+    });
 }
 $('#concepto_detalle').change(function() {
     const filaSeleccionada = $('#facturar_table tbody tr.table-secondary');

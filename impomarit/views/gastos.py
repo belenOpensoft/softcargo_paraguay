@@ -5,6 +5,8 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
+
+from administracion_contabilidad.models import Movims, Impuvtas
 #from seguimientos.models import VGrillaServiceaereo as ServiceServiceaereo as ServiceaereoReal
 from impomarit.models import Servireserva, VGastosMaster, VGastosHouse, Serviceaereo
 import json
@@ -51,7 +53,8 @@ def source_gastos(request):
         data_json = 'fail'
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
-def source_gastos_house(request):
+
+def source_gastos_house_preventa(request):
     if is_ajax(request):
         """ BUSCO ORDEN """
         """PROCESO FILTRO Y ORDEN BY"""
@@ -65,12 +68,76 @@ def source_gastos_house(request):
 
         """PREPARO DATOS"""
         resultado = {}
-        data = get_data(registros[start:end])
+        data = get_data_preventa(registros[start:end])
         """Devuelvo parametros"""
         resultado['data'] = data
         resultado['length'] = length
         resultado['draw'] = request.GET['draw']
         resultado['recordsTotal'] = VGastosHouse.objects.filter(numero=numero,modo='Collect').count()
+        resultado['recordsFiltered'] = str(registros.count())
+        data_json = json.dumps(resultado)
+    else:
+        data_json = 'fail'
+    mimetype = "application/json"
+    return HttpResponse(data_json, mimetype)
+
+def get_data_preventa(registros_filtrados):
+    try:
+
+        data = []
+        for registro in registros_filtrados:
+            registro_json = []
+            registro_json.append(str(registro.id))
+            registro_json.append('' if registro.servicio is None else str(registro.servicio))
+            registro_json.append('' if registro.moneda is None else str(registro.moneda))
+            registro_json.append('' if registro.precio is None else str(registro.precio))
+            registro_json.append('' if registro.costo is None else str(registro.costo))
+            registro_json.append('' if registro.detalle is None else str(registro.detalle))
+            registro_json.append('' if registro.modo is None else str(registro.modo))
+            registro_json.append('' if registro.tipogasto is None else str(registro.tipogasto))
+            registro_json.append('' if registro.arbitraje is None else str(registro.arbitraje))
+            registro_json.append('' if registro.notomaprofit is None else str(registro.notomaprofit))
+            registro_json.append('' if registro.secomparte is None else str(registro.secomparte))
+            registro_json.append('' if registro.pinformar is None else str(registro.pinformar))
+            registro_json.append('' if registro.socio is None else str(registro.socio))
+            registro_json.append('' if registro.notas is None else str(registro.notas))
+            registro_json.append('' if registro.id_servicio is None else str(registro.id_servicio))
+            registro_json.append('' if registro.id_moneda is None else str(registro.id_moneda))
+            registro_json.append('' if registro.id_socio is None else str(registro.id_socio))
+            color = 'NINGUNO'
+            if registro.detalle is not None and registro.detalle !='S/I' and registro.detalle !='':
+                color = 'AMARILLO'
+                se_cobro = Impuvtas.objects.filter(autofac=registro.detalle).exists()
+                if se_cobro:
+                    color = 'ROJO'
+
+            registro_json.append(color)
+
+            data.append(registro_json)
+        return data
+    except Exception as e:
+        raise TypeError(e)
+
+def source_gastos_house(request):
+    if is_ajax(request):
+        """ BUSCO ORDEN """
+        """PROCESO FILTRO Y ORDEN BY"""
+        start = int(request.GET['start'])
+        numero = request.GET['numero']
+        length = int(request.GET['length'])
+        end = start + length
+        order = get_order(request, columns_table)
+        """FILTRO REGISTROS"""
+        registros = VGastosHouse.objects.filter(numero=numero).order_by(*order)
+
+        """PREPARO DATOS"""
+        resultado = {}
+        data = get_data(registros[start:end])
+        """Devuelvo parametros"""
+        resultado['data'] = data
+        resultado['length'] = length
+        resultado['draw'] = request.GET['draw']
+        resultado['recordsTotal'] = VGastosHouse.objects.filter(numero=numero).count()
         resultado['recordsFiltered'] = str(registros.count())
         data_json = json.dumps(resultado)
     else:
@@ -104,6 +171,7 @@ def get_data(registros_filtrados):
         return data
     except Exception as e:
         raise TypeError(e)
+
 def get_order(request, columns):
     try:
         result = []

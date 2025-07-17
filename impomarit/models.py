@@ -943,8 +943,8 @@ class VGastosHouse(models.Model):
     secomparte = models.CharField(max_length=1, blank=True, null=True)
     notomaprofit = models.BooleanField()
     pinformar = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    socio = models.IntegerField(db_column='Socio', blank=True, null=True)  # Field name made lowercase.
+    notas = models.CharField(db_column='Notas', max_length=100, blank=True, null=True)
+    socio = models.IntegerField(db_column='Socio', blank=True, null=True)
     id_servicio = models.SmallIntegerField()
     id_moneda = models.SmallIntegerField()
     id_socio = models.SmallIntegerField()

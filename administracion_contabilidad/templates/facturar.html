@@ -1,6 +1,13 @@
 
 {% load static %}
 <style>
+.fila-rojo {
+    background-color: #f8d7da !important;  /* rojo claro */
+}
+.fila-amarillo {
+    background-color: #fff3cd !important;  /* amarillo claro */
+}
+
 #facturar_modal input.form-control,
 #facturar_modal select.form-control,
 #facturar_modal textarea.form-control {
@@ -47,31 +54,32 @@
 <div id="facturar_modal" style="display:none;">
   <form id="facturar_form" method="post">
 
-    <!-- Fila principal distribuida -->
-    <div class="form-row" style="display:flex; justify-content:space-between; align-items:flex-end; margin: 0 auto; width:100%; max-width: 980px; gap: 10px; flex-wrap: wrap;">
+    <div class="container mt-3">
+       <!-- Fila principal distribuida -->
+    <div class="form-row" style="display:flex; justify-content:space-between; align-items:flex-end; width:100%; gap: 10px; flex-wrap: wrap;">
 
       <div class="form-group" style="display:flex; align-items:flex-end; gap: 5px;">
         <label for="destinatario"><b>Destinatario de facturación</b></label>
         <input type="hidden" class="form-control" id="destinatario_input" style="width:30px;" readonly>
         <input class="form-control" type="text" name="destinatario" id="destinatario">
       </div>
-
+<!--
       <div class="form-group" style="display:flex; align-items:center; gap: 5px;">
         <label for="concepto_detalle">Concepto + detalle</label>
         <input type="checkbox" name="concepto_detalle" id="concepto_detalle">
       </div>
-
+-->
       <div class="form-group d-flex" style="display:flex; gap:6px; flex-wrap:wrap;">
-        <button type="button" class="btn btn-sm btn-outline-primary" onclick="asignar_costo(event)" id="facturar_a">Facturar a..</button>
-        <button type="button" class="btn btn-sm btn-outline-primary" onclick="asignar_costo_todos(event)" id="facturar_todos">Facturar a todos</button>
-        <button type="button" class="btn btn-sm btn-outline-danger" onclick="asignar_no(event)" id="no_facturar">No facturar</button>
-        <button type="button" class="btn btn-sm btn-outline-danger" onclick="asignar_no_todos(event)" id="ninguno">No facturar a ninguno</button>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="asignar_costo()" id="facturar_a">Facturar a..</button>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="asignar_costo_todos()" id="facturar_todos">Facturar a todos</button>
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="asignar_no()" id="no_facturar">No facturar</button>
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="asignar_no_todos()" id="ninguno">No facturar a ninguno</button>
       </div>
 
     </div>
 
     <!-- Grupo inferior: total + botones -->
-    <div class="form-row mt-3" style="display:flex; justify-content:space-between; align-items:flex-end; margin: 0 auto; width:100%; max-width: 980px; flex-wrap: wrap; gap: 10px;">
+    <div class="form-row mt-3" style="display:flex; justify-content:space-between; align-items:flex-end; width:100%;  flex-wrap: wrap; gap: 10px;">
 
       <div class="form-group">
         <label for="total_ingresos"><b>Total de ingresos</b></label>
@@ -83,6 +91,8 @@
         <button type="button" class="btn btn-secondary" id="orden_factura">Orden factura</button>
         <button type="button" class="btn btn-warning" onclick="enviarDatosTabla()" id="enviar_factura">Enviar</button>
       </div>
+
+    </div>
 
     </div>
 

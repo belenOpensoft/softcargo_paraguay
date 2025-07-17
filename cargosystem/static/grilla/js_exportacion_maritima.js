@@ -5329,7 +5329,7 @@ function cargar_gastos_factura(callback){
             url: "/static/datatables/es_ES.json"
         },
         "ajax": {
-            "url": "/exportacion_maritima/source_gastos_house/",
+            "url": "/exportacion_maritima/source_gastos_house_preventa/",
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
@@ -5391,6 +5391,14 @@ function cargar_gastos_factura(callback){
 
         ],
         rowCallback: function(row, data) {
+            $(row).removeClass('fila-rojo fila-amarillo');
+
+            const color = data[17];
+            if (color === 'ROJO') {
+                $(row).addClass('fila-rojo');
+            } else if (color === 'AMARILLO') {
+                $(row).addClass('fila-amarillo');
+            }
             // Agregar el evento de clic para resaltar la fila seleccionada
             $(row).off('click').on('click', function () {
                 $('#facturar_table tbody tr').removeClass('table-secondary');
