@@ -126,6 +126,7 @@ def procesar_factura_proveedor(request):
                 seguimiento=None
 
                 serie = request.POST.get('serie', "")
+                detalle = request.POST.get('detalle', "")
                 prefijo = request.POST.get('prefijo', 1)
                 moneda = request.POST.get('moneda', "")
                 arbitraje = request.POST.get('arbitraje', 0)
@@ -340,7 +341,7 @@ def procesar_factura_proveedor(request):
                     'total': precio_total,
                     'saldo': precio_total if int(tipo) !=41 else saldo_nota_cred,
                     'moneda': moneda,
-                    'detalle': detalle_mov,
+                    'detalle': detalle,
                     'cliente': cliente.codigo,
                     'nombre': cliente.empresa,
                     'nombremov': nombre_mov,
@@ -430,11 +431,16 @@ def crear_movimiento(movimiento):
 
 def source_proveedoresygastos(request):
     try:
-        # Usar un bucle para recoger dinámicamente las columnas que existen
-        args = {}
-        for i in range(10):  # Cambia el rango según el número de columnas reales
-            key = f'columns[{i}][search][value]'
-            args[str(i)] = request.GET.get(key, '')  # Usa un valor predeterminado si la clave no existe
+        args = {
+            '1': request.GET['columns[1][search][value]'],
+            '2': request.GET['columns[2][search][value]'],
+            '3': request.GET['columns[3][search][value]'],
+            '4': request.GET['columns[4][search][value]'],
+            '5': request.GET['columns[5][search][value]'],
+            '6': request.GET['columns[6][search][value]'],
+            '7': request.GET['columns[7][search][value]'],
+            '8': request.GET['columns[8][search][value]'],
+        }
 
         # Filtros y lógica de búsqueda
         filtro = get_argumentos_busqueda(**args)

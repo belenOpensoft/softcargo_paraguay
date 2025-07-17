@@ -444,16 +444,16 @@ $(document).ready(function() {
         url: "/static/datatables/es_ES.json"
     },
     initComplete: function () {
-        let api = this.api();
-        api.columns().every(function () {
-            var that = this;
-            $('tfoot input', that.header()).on('keyup change', function () {
-                if (that.search() !== this.value) {
-                    that.search(this.value).draw();
-                }
+            var api = this.api();
+            api.columns().every(function () {
+                var that = this;
+                $('input', this.footer()).on('keyup change', function () {
+                    if (that.search() !== this.value) {
+                        that.search(this.value).draw();
+                    }
+                });
             });
-        });
-    },
+        },
     "rowCallback": function (row, data) {}
 });
     const valorInicial = $('#id_tipo').find('option:selected').text();
@@ -848,7 +848,6 @@ $(document).ready(function() {
 
 });
 function procesar_factura(){
-    if (confirm('¿Está seguro de que desea facturar?')) {
         let tipo= $("#id_tipo").val();
         if(tipo==41){
             if(confirm('¿Desea imputar esta Nota?')){
@@ -866,7 +865,6 @@ function procesar_factura(){
             guardar_factura();
         }
 
-    }
 }
 function guardar_factura(){
     let pendienteEncontrado = false;
@@ -887,8 +885,14 @@ function guardar_factura(){
         $("#modal-embarque").dialog("open");
         return; // cortar la función, no continuar con el procesamiento
     }
+
+    if (!confirm('¿Está seguro de que desea guardar?')) {
+        return;
+    }
+
     let tipoFac = $('#id_tipo').val();
     let serie = $('#id_serie').val();
+    let detalle = $('#id_detalle_ingreso_compra').val();
     let prefijo = $('#id_prefijo').val();
     let numero = $('#id_numero').val();
     let cliente = $('#cliente').val();
@@ -929,6 +933,7 @@ function guardar_factura(){
             tipoFac: tipoFac,
             serie: serie,
             prefijo: prefijo,
+            detalle: detalle,
             numero: numero,
             cliente: cliente,
             arbitraje: arbitraje,

@@ -458,6 +458,11 @@ class ProveedoresGastos(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'}),
     )
 
+    detalle = forms.CharField(
+        required=False,
+        label="Observaciones",
+        widget=forms.TextInput(attrs={'class': 'form-control','id':'id_detalle_ingreso_compra'}),
+    )
 
 
     precio = forms.FloatField(

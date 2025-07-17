@@ -57,41 +57,6 @@ columns_table = {
 }
 
 
-def source_facturacion_old(request):
-    args = {
-        '1': request.GET['columns[1][search][value]'],
-        '2': request.GET['columns[2][search][value]'],
-        '3': request.GET['columns[3][search][value]'],
-        '4': request.GET['columns[4][search][value]'],
-        '5': request.GET['columns[5][search][value]'],
-        '6': request.GET['columns[6][search][value]'],
-        '7': request.GET['columns[7][search][value]'],
-        '8': request.GET['columns[8][search][value]'],
-    }
-
-    filtro = get_argumentos_busqueda(**args)
-    start = int(request.GET['start'])
-    length = int(request.GET['length'])
-    buscar = str(request.GET['buscar'])
-    que_buscar = str(request.GET['que_buscar'])
-    if len(buscar) > 0:
-        filtro[que_buscar] = buscar
-    end = start + length
-    order = get_order(request, columns_table)
-    if filtro:
-        registros = VistaVentas.objects.filter(**filtro).order_by(*order)
-    else:
-        registros = VistaVentas.objects.all().order_by(*order)
-    resultado = {}
-    data = get_data(registros[start:end])
-    resultado['data'] = data
-    resultado['length'] = length
-    resultado['draw'] = request.GET['draw']
-    resultado['recordsTotal'] = VistaVentas.objects.all().count()
-    resultado['recordsFiltered'] = str(registros.count())
-    data_json = json.dumps(resultado)
-    mimetype = "application/json"
-    return HttpResponse(data_json, mimetype)
 
 def source_facturacion(request):
     args = {
@@ -148,6 +113,15 @@ def source_facturacion(request):
     }
     return JsonResponse(resultado)
 
+def get_argumentos_busqueda(**kwargs):
+    try:
+        result = {}
+        for row in kwargs:
+            if len(kwargs[row]) > 0:
+                result[param_busqueda[int(row)]] = kwargs[row]
+        return result
+    except Exception as e:
+        raise TypeError(e)
 
 def get_data(registros_filtrados):
     try:
@@ -169,18 +143,6 @@ def get_data(registros_filtrados):
         return data
     except Exception as e:
         raise TypeError(e)
-
-
-def get_argumentos_busqueda(**kwargs):
-    try:
-        result = {}
-        for row in kwargs:
-            if len(kwargs[row]) > 0:
-                result[param_busqueda[int(row)]] = kwargs[row]
-        return result
-    except Exception as e:
-        raise TypeError(e)
-
 
 def get_order(request, columns):
     try:
