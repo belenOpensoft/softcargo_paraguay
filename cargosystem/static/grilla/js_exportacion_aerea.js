@@ -2022,7 +2022,7 @@ function aplicable_volumen(volumen){
 
             $("#id_costo").val(data[4]);
         }
-        $("#id_detalle").val(data[5]);
+        //$("#id_detalle").val(data[5]);
         if(data[6] === 'Collect'){
             $("#id_modo_id").val('C');
         }else{

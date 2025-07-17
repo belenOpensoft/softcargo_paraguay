@@ -144,7 +144,7 @@ def guardar_gasto(request):
             registro.notomaprofit = True
         else:
             registro.notomaprofit = False
-        registro.detalle = data[12]['value']
+        #registro.detalle = data[12]['value']
         registro.save()
         resultado['resultado'] = 'exito'
         resultado['numero'] = str(registro.numero)
