@@ -99,7 +99,7 @@ def obtener_detalle_compra(request):
         if not detalle:
             detalle = qs.first()
 
-        items = VItemsCompra.objects.filter(autogenerado=autogenerado)
+        items = VItemsCompra.objects.filter(autogenerado=autogenerado).exclude(imputacion=2)
         imputable_total = sum(
             (item.precio or 0) + (item.iva or 0)
             for item in items

@@ -1835,10 +1835,12 @@ class VItemsCompra(models.Model):
     posicion = models.CharField(max_length=50, null=True, blank=True)
     autogenerado = models.CharField(max_length=50, null=True, blank=True)
     imputar = models.CharField(max_length=50, null=True, blank=True)
+    imputacion = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
-        managed = False  # Indicates that this model represents a database view
+        managed = False
         db_table = 'VItemsCompra'
+
 class VItemsVenta(models.Model):
     concepto = models.CharField(primary_key=True, max_length=50)
     nombre = models.CharField(max_length=50, null=True, blank=True)
@@ -1847,6 +1849,7 @@ class VItemsVenta(models.Model):
     posicion = models.CharField(max_length=50, null=True, blank=True)
     autogenerado = models.CharField(max_length=50, null=True, blank=True)
     imputar = models.CharField(max_length=50, null=True, blank=True)
+    imputacion = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         managed = False  # Indicates that this model represents a database view

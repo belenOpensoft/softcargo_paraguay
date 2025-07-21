@@ -505,7 +505,7 @@ if (guardadoFilas.length === 1) {
     let lugar = fila.querySelector("td:nth-child(5)")?.textContent.trim() || "";
     let cliente = fila.querySelector("td:nth-child(4)")?.textContent.trim() || "";
     let embarqueFinal = embarque + lugar;
-console.log(filaSeleccionada);
+
     filaSeleccionada.find("td").eq(5).text(posicion);
     filaSeleccionada.find("td").eq(4).text(embarqueFinal);
 

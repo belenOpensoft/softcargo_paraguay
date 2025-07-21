@@ -91,14 +91,14 @@ def obtener_detalle_venta(request):
         if not detalle:
             detalle = qs.first()
 
-        items = VItemsVenta.objects.filter(autogenerado=autogenerado)
+        items = VItemsVenta.objects.filter(autogenerado=autogenerado).exclude(imputacion=1)
 
         data = {
             'numero': detalle.numero,
             'prefijo': detalle.prefijo,
             'serie': detalle.serie,
             'tipo': detalle.tipo,
-            'moneda': detalle.moneda,  # Ajustar si es ForeignKey: detalle.moneda.nombre
+            'moneda': detalle.moneda,
             'fecha': detalle.fecha.strftime('%Y-%m-%d') if detalle.fecha else '',
             'fecha_ingreso': detalle.fecha_ingreso.strftime('%Y-%m-%d') if detalle.fecha_ingreso else '',
             'fecha_vencimiento': detalle.fecha_vencimiento.strftime('%Y-%m-%d') if detalle.fecha_vencimiento else '',
