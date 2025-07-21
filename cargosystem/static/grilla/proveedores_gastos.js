@@ -3,7 +3,8 @@ var dWidth = wWidth * 0.40;
 var wHeight = $(window).height();
 var dHeight = wHeight * 0.30;
 let filaSeleccionada = null;
-
+let modoImputacionIndividual = false;
+let mismaPosicionTodos = false;
 $(document).ready(function() {
 
     const $iva = $('#id_iva');
@@ -150,6 +151,15 @@ $(document).ready(function() {
 
     $("#modal-embarque").dialog({
         autoOpen: false,
+        open: function () {
+            if (modoImputacionIndividual) {
+                $("#guardarCerrar").hide();
+                $("#guardarImputacion").show();
+            } else {
+                $("#guardarCerrar").show();
+                $("#guardarImputacion").hide();
+            }
+        },
         width: "auto",
         height: "auto",
         maxWidth: $(window).width() * 0.90,
@@ -160,8 +170,40 @@ $(document).ready(function() {
         create: function () {
             var $buttons = $(this).parent().find(".ui-dialog-buttonpane button");
             $buttons.eq(0).addClass("btn btn-warning");
-            $buttons.eq(1).addClass("btn btn-success");
+            $buttons.eq(1).addClass("btn btn-success").attr("id", "guardarCerrar");
             $buttons.eq(2).addClass("btn btn-dark");
+
+            const $guardarParcial = $('<button>', {
+                text: 'Continuar',
+                class: 'btn btn-success',
+                id: 'guardarImputacion',
+                click: function () {
+                    let total= localStorage.getItem('precio_item_imputar');
+                    let total_tabla = 0;
+                    let filas = document.querySelectorAll("#guardado-tabla tbody tr");
+                    if(filas.length==0){
+                    alert('No se ha armado nada.');
+                    return;
+                    }
+                    filas.forEach(fila => {
+                        let montoCelda = fila.querySelector("td:nth-child(2)");
+
+                        if (montoCelda) {
+                            let monto = parseFloat(montoCelda.textContent.trim().replace(',', '.')) || 0;
+                            total_tabla += monto;
+                        }
+                    });
+                    if(total!=total_tabla){
+                    alert('Los montos armados: '+ total_tabla+', difieren del ingresado: '+total);
+                    return;
+                    }
+
+                    //guardar_impucompra();
+                    rellenar_tabla_sin_guardar();
+                }
+            });
+
+            $guardarParcial.insertBefore($buttons.eq(2));
         },
         buttons: {
             "Armar": function () {
@@ -225,7 +267,7 @@ $(document).ready(function() {
 
                 //guardar_impucompra();
                 rellenar_tabla();
-                $(this).dialog("close");
+               // $(this).dialog("close");
             },
             "Cancelar": function () {
                 $(this).dialog("close");
@@ -679,6 +721,11 @@ $(document).ready(function() {
 });
 
     $("#itemTable").on("dblclick", "tr", function() {
+        let colIndex = $(e.target).closest('td').index();
+        if (colIndex === 8) {
+            return;
+        }
+
         var $row = $(this);
         // Asume que la fila tiene las 6 celdas en el orden correcto
         var codigo = $row.find("td").eq(0).text().trim();    // Código (oculto)
@@ -745,7 +792,7 @@ $(document).ready(function() {
     });
 
 
-    /*
+
     // Detectar doble clic en la celda de la columna "Embarque" (índice 7)
     $("#itemTable tbody").on("dblclick", "td:nth-child(9)", function () {
         filaSeleccionada = $(this).closest("tr");
@@ -754,16 +801,17 @@ $(document).ready(function() {
         if (embarqueValor==='PENDIENTE'){
             let precioValor = filaSeleccionada.find("td:nth-child(4)").text().trim();
             localStorage.setItem("precio_item_imputar", precioValor);
+            modoImputacionIndividual = true;
             $("#modal-embarque").dialog("open");
         }
     });
-*/
+
     // Botón para cerrar el modal
     $("#cerrar-modal").click(function () {
         $("#modal-embarque").dialog("close");
     });
 
-    function rellenar_tabla() {
+    function rellenar_tabla_old() {
     if (!filaSeleccionada || filaSeleccionada.length === 0) {
         alert("No se ha seleccionado ninguna fila para actualizar.");
         return;
@@ -818,6 +866,124 @@ $(document).ready(function() {
     guardar_factura();
 }
 
+    function rellenar_tabla() {
+    let guardadoFilas = document.querySelectorAll("#guardado-tabla tbody tr");
+
+    if (guardadoFilas.length === 0) {
+        alert("No hay registros en la tabla guardado-tabla.");
+        return;
+    }
+
+    let posicion = guardadoFilas[0].querySelector("td:nth-child(1)")?.textContent.trim() || "";
+    let precio = guardadoFilas[0].querySelector("td:nth-child(2)")?.textContent.trim() || "";
+    let embarque = guardadoFilas[0].querySelector("td:nth-child(6)")?.textContent.trim() || "";
+    let lugar = guardadoFilas[0].querySelector("td:nth-child(5)")?.textContent.trim() || "";
+    let cliente = guardadoFilas[0].querySelector("td:nth-child(4)")?.textContent.trim() || "";
+    let embarqueFinal = embarque + ' ' + lugar;
+
+    if (mismaPosicionTodos) {
+        // MODO GLOBAL: aplicar a todas las filas con estado 'PENDIENTE'
+        $('#itemTable tbody tr').each(function () {
+            let fila = $(this);
+            let estado = fila.find('td:nth-child(9)').text().trim();
+            if (estado.toUpperCase() === 'PENDIENTE') {
+                fila.find("td").eq(8).text(embarqueFinal);   // Embarque
+                fila.find("td").eq(9).text(posicion);        // Posición
+                fila.find("td").eq(10).text(cliente);        // Socio Comercial
+            }
+        });
+    } else {
+        // MODO INDIVIDUAL
+        if (!filaSeleccionada || filaSeleccionada.length === 0) {
+            alert("No se ha seleccionado ninguna fila para actualizar.");
+            return;
+        }
+
+        if (guardadoFilas.length === 1) {
+            filaSeleccionada.find("td").eq(8).text(embarqueFinal);
+            filaSeleccionada.find("td").eq(9).text(posicion);
+            filaSeleccionada.find("td").eq(10).text(cliente);
+        } else {
+            let filaBase = filaSeleccionada.clone();
+            filaSeleccionada.remove();
+
+            guardadoFilas.forEach(fila => {
+                let pos = fila.querySelector("td:nth-child(1)")?.textContent.trim() || "";
+                let pre = fila.querySelector("td:nth-child(2)")?.textContent.trim() || "";
+                let emb = fila.querySelector("td:nth-child(6)")?.textContent.trim() || "";
+                let lug = fila.querySelector("td:nth-child(5)")?.textContent.trim() || "";
+                let cli = fila.querySelector("td:nth-child(4)")?.textContent.trim() || "";
+                let embFinal = emb + ' ' + lug;
+
+                let nuevaFila = filaBase.clone();
+                nuevaFila.find("td").eq(3).text(pre);          // Precio
+                nuevaFila.find("td").eq(8).text(embFinal);     // Embarque
+                nuevaFila.find("td").eq(9).text(pos);          // Posición
+                nuevaFila.find("td").eq(10).text(cli);         // Socio Comercial
+
+                $("#itemTable tbody").append(nuevaFila);
+            });
+        }
+    }
+
+    $("#modal-embarque").dialog("close");
+    guardar_factura();
+}
+
+    function rellenar_tabla_sin_guardar() {
+    if (!filaSeleccionada || filaSeleccionada.length === 0) {
+        alert("No se ha seleccionado ninguna fila para actualizar.");
+        return;
+    }
+
+    let guardadoFilas = document.querySelectorAll("#guardado-tabla tbody tr");
+
+    if (guardadoFilas.length === 0) {
+        alert("No hay registros en la tabla guardado-tabla.");
+        return;
+    }
+
+    if (guardadoFilas.length === 1) {
+        let fila = guardadoFilas[0];
+        let posicion = fila.querySelector("td:nth-child(1)")?.textContent.trim() || "";
+        let precio = fila.querySelector("td:nth-child(2)")?.textContent.trim() || "";
+        let embarque = fila.querySelector("td:nth-child(6)")?.textContent.trim() || "";
+        let lugar = fila.querySelector("td:nth-child(5)")?.textContent.trim() || "";
+        let cliente = fila.querySelector("td:nth-child(4)")?.textContent.trim() || "";
+        let embarqueFinal = embarque + ' ' + lugar;
+
+        //filaSeleccionada.find("td").eq(3).text(precio);           // Precio
+        filaSeleccionada.find("td").eq(8).text(embarqueFinal);    // Embarque
+        filaSeleccionada.find("td").eq(9).text(posicion);         // Posición
+        filaSeleccionada.find("td").eq(10).text(cliente);         // Socio Comercial
+
+    } else {
+       let filaBase = filaSeleccionada.clone();
+        filaSeleccionada.remove();
+
+        guardadoFilas.forEach(fila => {
+            let posicion = fila.querySelector("td:nth-child(1)")?.textContent.trim() || "";
+            let precio = fila.querySelector("td:nth-child(2)")?.textContent.trim() || "";
+            let embarque = fila.querySelector("td:nth-child(6)")?.textContent.trim() || "";
+            let lugar = fila.querySelector("td:nth-child(5)")?.textContent.trim() || "";
+            let cliente = fila.querySelector("td:nth-child(4)")?.textContent.trim() || "";
+            let embarqueFinal = embarque + ' ' + lugar;
+
+            let nuevaFila = filaBase.clone();
+            nuevaFila.find("td").eq(3).text(precio);             // Precio
+            nuevaFila.find("td").eq(8).text(embarqueFinal);      // Embarque
+            nuevaFila.find("td").eq(9).text(posicion);           // Posición
+            nuevaFila.find("td").eq(10).text(cliente);           // Socio Comercial
+
+            $("#itemTable tbody").append(nuevaFila);
+        });
+
+    }
+
+    // Cerramos el modal
+    $("#modal-embarque").dialog("close");
+}
+
     $("#tabla_proveedoresygastos tbody").on("dblclick", "tr", function () {
         const row = $('#tabla_proveedoresygastos').DataTable().row(this).data();
         const autogenerado = row[1];
@@ -838,7 +1004,6 @@ $(document).ready(function() {
             autoOpen: true,
         });
     });
-
 
     $("#tabla_proveedoresygastos tbody").on("click", "tr", function () {
         $("#tabla_proveedoresygastos tbody tr").removeClass("table-secondary");
@@ -867,25 +1032,45 @@ function procesar_factura(){
 
 }
 function guardar_factura(){
-    let pendienteEncontrado = false;
+    let pendientes = [];
 
     $('#itemTable tbody tr').each(function () {
-        // Antes: columna 7 (index 6)
-        const estado = $(this).find('td:nth-child(9)').text().trim();  // Ahora es la 8.ª columna (estado)
-        if (estado.toUpperCase() === 'PENDIENTE') {
-            filaSeleccionada = $(this);
-            pendienteEncontrado = true;
-            return false; // cortar el .each
+        const estado = $(this).find('td:nth-child(9)').text().trim().toUpperCase();
+        if (estado === 'PENDIENTE') {
+            pendientes.push($(this));
         }
     });
 
-    if (pendienteEncontrado) {
-        let total = $('#id_total').val();
-        localStorage.setItem("precio_item_imputar", total);
-        $("#modal-embarque").dialog("open");
-        return; // cortar la función, no continuar con el procesamiento
+    if (pendientes.length > 0) {
+        if (pendientes.length === 1) {
+            // Solo uno pendiente → Imputar directamente
+            filaSeleccionada = pendientes[0];
+            let precio = filaSeleccionada.find("td:nth-child(4)").text().trim();
+            localStorage.setItem("precio_item_imputar", precio);
+            modoImputacionIndividual = false;
+            $("#modal-embarque").dialog("open");
+            return;
+        } else {
+            // Varios pendientes → Consultar al usuario
+            if (confirm("Se encontraron varios ítems sin imputar.\n¿Desea imputar el total completo a un solo embarque?\n(Si elige 'Cancelar', se imputará individualmente de a uno)")) {
+                // Imputar total
+                let total = $('#id_total').val();
+                localStorage.setItem("precio_item_imputar", total);
+                modoImputacionIndividual = false;
+                mismaPosicionTodos=true;
+                $("#modal-embarque").dialog("open");
+                return;
+            } else {
+                // Imputar de a uno → tomar el precio del primero
+                filaSeleccionada = pendientes[0];
+                let precio = filaSeleccionada.find("td:nth-child(4)").text().trim();
+                localStorage.setItem("precio_item_imputar", precio);
+                modoImputacionIndividual = true;
+                $("#modal-embarque").dialog("open");
+                return;
+            }
+        }
     }
-
     if (!confirm('¿Está seguro de que desea guardar?')) {
         return;
     }

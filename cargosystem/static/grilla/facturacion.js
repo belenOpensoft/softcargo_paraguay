@@ -366,7 +366,7 @@ $(document).ready(function () {
             var api = this.api();
             api.columns().every(function () {
                 var that = this;
-                $('input', this.footer()).on('keyup change', function () {
+                $('#tabla_facturas tfoot input.filter-input', this.footer()).on('keyup change', function () {
                     if (that.search() !== this.value) {
                         that.search(this.value).draw();
                     }
