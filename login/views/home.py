@@ -5,7 +5,7 @@ from django.shortcuts import render
 
 
 @login_required(login_url='/login/')
-def home_view(request):
+def home_view_old(request):
     try:
         if 'rol' in request.session:
             return render(request, 'base.html')
@@ -13,4 +13,15 @@ def home_view(request):
             return HttpResponseRedirect('/login')
     except Exception as e:
         messages.error(request,str(e))
+        return render(request, 'base.html')
+
+@login_required(login_url='/login/')
+def home_view(request):
+    try:
+        if getattr(request, 'rol_pestana', None):
+            return render(request, 'base.html')
+        else:
+            return HttpResponseRedirect('/login')
+    except Exception as e:
+        messages.error(request, str(e))
         return render(request, 'base.html')

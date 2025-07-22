@@ -201,15 +201,29 @@
                     <i class="fa fa-puzzle-piece pe-2"></i>
                     {{ request.session.rol|filtro_menu|capfirst }}
                 </a>
+<!--                <ul id="auth1" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">-->
+<!--                   {% for modulo in request.session.roles %}-->
+<!--                        {% if modulo != request.session.rol %}-->
+<!--                            <li class="sidebar-item">-->
+<!--                                <a href="{% url 'vista_cambiar_modulo' modulo %}" class="sidebar-link">{{ modulo|capfirst|filtro_menu }}</a>-->
+<!--                            </li>-->
+<!--                        {% endif %}-->
+<!--                   {% endfor %}-->
+<!--                </ul>-->
+
                 <ul id="auth1" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                   {% for modulo in request.session.roles %}
-                        {% if modulo != request.session.rol %}
+                    {% for modulo in request.session.roles %}
+                        {% if modulo != rol_pestana %}
+                            {% url 'vista_cambiar_modulo' modulo as url_modulo %}
                             <li class="sidebar-item">
-                                <a href="{% url 'vista_cambiar_modulo' modulo %}" class="sidebar-link">{{ modulo|capfirst|filtro_menu }}</a>
+                                <a href="javascript:void(0)" onclick="cambiarRol('{{ modulo }}', '{{ url_modulo }}')" class="sidebar-link">
+                                    {{ modulo|capfirst|filtro_menu }}
+                                </a>
                             </li>
                         {% endif %}
-                   {% endfor %}
+                    {% endfor %}
                 </ul>
+
             </li>
              <li class="sidebar-header">
                 Sesion usuario

@@ -84,6 +84,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
     'administracion_contabilidad.middleware.VerificarArbitrajeMiddleware',
+    'cargosystem.middleware.RolPorPestanaMiddleware',
+    'cargosystem.middleware.RolRedirectMiddleware'
 ]
 
 
@@ -112,6 +114,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
+                'cargosystem.context_processors.rol_pestana'
             ],
             'libraries': {
                 'my_templatetag': 'seguimientos.templatetags.filtros',

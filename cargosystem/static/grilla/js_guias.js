@@ -35,7 +35,8 @@ $(document).ready(function()
     {
         text: 'Agregar',
         action: function (e, dt, button, config) {
-            window.location.replace("/agregar_guias");
+            redirectConRol
+("/agregar_guias");
         }
     },
     {

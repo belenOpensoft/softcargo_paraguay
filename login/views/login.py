@@ -82,7 +82,7 @@ def verificar_arbitraje(request):
         'hoy': datetime.today().strftime('%Y-%m-%d')
     })
 
-def cambiar_modulo(request, modulo):
+def cambiar_modulo_old(request, modulo):
     request.session["rol"] = modulo
     if modulo == 'administracion':
         hoy = datetime.today().date()
@@ -95,3 +95,22 @@ def cambiar_modulo(request, modulo):
         return  HttpResponseRedirect('/seguimientos')
     else:
         return HttpResponseRedirect('/')
+
+
+def cambiar_modulo(request, modulo):
+    # solo actualizar la sesión si no vino por pestaña
+    if not (
+        request.headers.get('X-Rol-Activo') or request.GET.get('rol')
+    ):
+        request.session["rol"] = modulo
+
+    if modulo == 'administracion':
+        hoy = datetime.today().date()
+        arbitraje_existente = Dolar.objects.filter(ufecha__date=hoy).exists()
+        if not arbitraje_existente:
+            return redirect('/admin_cont/verificar_arbitraje/')
+
+    if modulo == 'seguimientos':
+        return redirect('/seguimientos')
+
+    return redirect(f"/?rol={modulo}")

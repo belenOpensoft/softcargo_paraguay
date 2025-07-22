@@ -28,14 +28,16 @@ $(document).ready(function()
                     {
                         text: 'Agregar',
                         action: function (e, dt, button, config) {
-                            window.location.replace("/agregar_ciudad");
+                            redirectConRol
+("/agregar_ciudad");
                         }
                     },
                     {
                         text: 'Modificar',
                         action: function (e, dt, button, config) {
                             if(row = table.row('.table-secondary').data()){
-                                window.location.replace("/modificar_ciudad/" + row[0]);
+                                redirectConRol
+("/modificar_ciudad/" + row[0]);
                             }else{
                                 alert('Debe seleccionar un registro');
                             }

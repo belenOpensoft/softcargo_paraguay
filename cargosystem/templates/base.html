@@ -29,6 +29,58 @@
         font-size:10px !important;
         }
         </style>
+                    <script>
+                //usa ren varias pestañas
+        function setRolActivo(rol) {
+            sessionStorage.setItem('rol_activo', rol);
+        }
+
+        function getRolActivo() {
+            return sessionStorage.getItem('rol_activo');
+        }
+
+        // En cada AJAX, mandar el rol activo como header
+        $(document).ready(function () {
+            $.ajaxSetup({
+                beforeSend: function(xhr) {
+                    const rol = sessionStorage.getItem('rol_activo');
+                    if (rol) {
+                        xhr.setRequestHeader('X-Rol-Activo', rol);
+                    }
+                }
+            });
+        });
+        function cambiarRol(modulo, baseUrl) {
+        setRolActivo(modulo);
+
+        // Verifica si ya hay parámetros en la URL
+        var url = baseUrl.includes('?') ? baseUrl + '&rol=' + encodeURIComponent(modulo)
+                                        : baseUrl + '?rol=' + encodeURIComponent(modulo);
+
+        window.location.href = url;
+    }
+
+    function redirectConRol(urlBase) {
+            const rol = sessionStorage.getItem('rol_activo');
+            if (!rol) {
+                window.location.replace(urlBase);
+                return;
+            }
+
+            try {
+                let url = new URL(urlBase, window.location.origin);
+                if (!url.searchParams.has("rol")) {
+                    url.searchParams.set("rol", rol);
+                }
+                window.location.replace(url.toString());
+            } catch (error) {
+                console.log(error);
+                window.location.replace(urlBase);
+            }
+
+        }
+
+        </script>
         <script>
 
 
@@ -187,8 +239,9 @@
     </head>
     <body id="body">
 
+
         {% block menu %}
-            {% with "menu/"|add:request.session.rol|add:".html" as template %}
+            {% with "menu/"|add:rol_pestana|add:".html" as template %}
                    <div class="wrapper" style="position: relative;z-index: 1;">
                 <!-- Sidebar -->
                     {% include template %}
@@ -228,6 +281,28 @@
             {% endwith %}
         {% endblock menu %}
         <br>
+    <script>
+    function agregarRolActivoALinks() {
+        const rol = getRolActivo();
+        if (!rol) return;
+
+        document.querySelectorAll('a[href^="/"]:not([href^="//"])').forEach(link => {
+            const href = link.getAttribute('href');
+
+            // Evita modificar enlaces externos, anclas o JavaScript
+            if (!href || href.startsWith('javascript:') || href.startsWith('#')) return;
+
+            const url = new URL(href, window.location.origin);
+
+            if (!url.searchParams.has('rol')) {
+                url.searchParams.set('rol', rol);
+                link.setAttribute('href', url.pathname + url.search + url.hash);
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', agregarRolActivoALinks);
+    </script>
     <script src="{% static 'js/script.js' %}"></script>
     <script src="{% static 'grilla/js_controlador_sidemenu.js' %}"></script>
     </body>

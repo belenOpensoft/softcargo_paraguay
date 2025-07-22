@@ -27,7 +27,8 @@ $(document).ready(function()
                     {
                         text: 'Agregar',
                         action: function (e, dt, button, config) {
-                            window.location.replace("/agregar_moneda");
+                            redirectConRol
+("/agregar_moneda");
                         }
                     },
                     {
@@ -35,7 +36,8 @@ $(document).ready(function()
                         action: function (e, dt, button, config) {
                             let row = table.row('.selected').data();
                             if(row){
-                                window.location.replace("/modificar_moneda/" + row[0]);
+                                redirectConRol
+("/modificar_moneda/" + row[0]);
                             }else{
                                 alert('Debe seleccionar un registro');
                             }
