@@ -70,7 +70,10 @@ def get_data_cronologia(request, id):
 
             resultado.append(item)
 
-        return JsonResponse(resultado, safe=False)
+        return JsonResponse({
+            'bloqueado': False,
+            'datos': resultado
+        })
 
     except Exception as e:
         return JsonResponse({'error': 'El objeto no existe'}, status=404)

@@ -1,4 +1,5 @@
 from auditlog.models import AuditlogHistoryField
+from django.contrib.auth.models import User
 from django.db import models
 
 from mantenimientos.models import Productos
@@ -250,36 +251,6 @@ class Embarqueaereo(models.Model):
             nuevo_numero = 1
 
         return nuevo_numero
-
-
-class VEmbarqueaereo_old(models.Model):
-    numero = models.IntegerField(unique=True)
-    transportista = models.CharField(max_length=255, blank=True, null=True)  # Nombre del transportista
-    awb = models.CharField(max_length=40, blank=True, null=True)
-    hawb = models.CharField(max_length=50, blank=True, null=True)
-    agente = models.CharField(max_length=255, blank=True, null=True)  # Nombre del agente
-    consignatario = models.CharField(max_length=255, blank=True, null=True)  # Nombre del consignatario
-    armador = models.CharField(max_length=255, blank=True, null=True)  # Nombre del armador
-    vapor = models.CharField(max_length=30, blank=True, null=True)
-    posicion = models.CharField(max_length=20, blank=True, null=True)
-    operacion = models.CharField(max_length=25, blank=True, null=True)
-    origen = models.CharField(max_length=5, blank=True, null=True)
-    destino = models.CharField(max_length=5, blank=True, null=True)
-    status = models.CharField(max_length=20, blank=True, null=True)
-    fecha_embarque = models.DateTimeField(blank=True, null=True)
-    fecha_retiro = models.DateTimeField(blank=True, null=True)
-    notificar_agente = models.DateTimeField(blank=True, null=True)
-    notificar_cliente = models.DateTimeField(blank=True, null=True)
-    valor_transporte = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    valor_aduana = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    tarifa_venta = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    tarifa_compra = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
-    volumen_cubico = models.FloatField(blank=True, null=True)
-    notas = models.TextField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'VEmbarqueAereo'
 
 
 class VEmbarqueaereo(models.Model):
@@ -1051,6 +1022,22 @@ class VistaOperativasGastos(models.Model):
         managed = False  # No intentes modificar la tabla
         db_table = 'VOperativasGastos'
 
+"""Vista general para bloqueo"""
+
+class BloqueoEdicion(models.Model):
+    referencia = models.CharField(max_length=100)  # ID lógico del objeto a editar
+    formulario = models.CharField(max_length=100)  # Nombre del formulario
+    modulo = models.CharField(max_length=100)      # App o módulo del sistema
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    fecha_inicio = models.DateTimeField(auto_now_add=True)
+    fecha_expiracion = models.DateTimeField()  # Fecha límite para el bloqueo
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        managed = False  # No intentes modificar la tabla
+        db_table = 'bloqueo_edicion'
+
+
 from auditlog.registry import auditlog
 
 class MyModel(models.Model):
@@ -1070,3 +1057,4 @@ for t in tablas:
         auditlog.register(t[1], serialize_data=True)
     except Exception as e:
         pass
+

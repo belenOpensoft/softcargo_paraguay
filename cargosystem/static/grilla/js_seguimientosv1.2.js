@@ -712,40 +712,50 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
         $("#notas_add_input").val(row[0][8]);
         if (row.length === 1) {
-
-            $("#notas_modal").dialog({
-                autoOpen: true,
-                open: function (event, ui) {
-                cargar_notas(row[0][1]);
-                },
-                modal: true,
-                title: "Notas para el Seguimiento N°: " + row[0][1],
-                height: wHeight * 0.90,
-                width: wWidth * 0.70,
-                class: 'modal fade',
-                       buttons: [
-                    {
-                        text: "Cancelar",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        }
+            $.ajax({
+                url: '/get_data_seguimiento/' + row[0][0] + '/',
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
                     }
-                ],
-                beforeClose: function (event, ui) {
-                // localStorage.removeItem('num_house_gasto');
-                 $('#notas_table').DataTable().destroy();
-                 $("#notas_form").trigger("reset");
-//                 $('#table_add_im tbody tr').removeClass('table-secondary');
-//                $('#table_edit_im tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                    $("#notas_modal").dialog({
+                        autoOpen: true,
+                        open: function (event, ui) {
+                            cargar_notas(row[0][1]);
+                        },
+                        modal: true,
+                        title: "Notas para el Seguimiento N°: " + row[0][1],
+                        height: wHeight * 0.90,
+                        width: wWidth * 0.70,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Cancelar",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                }
+                            }
+                        ],
+                        beforeClose: function (event, ui) {
+                            // localStorage.removeItem('num_house_gasto');
+                            $('#notas_table').DataTable().destroy();
+                            $("#notas_form").trigger("reset");
+            //                 $('#table_add_im tbody tr').removeClass('table-secondary');
+            //                $('#table_edit_im tbody tr').removeClass('table-secondary');
+            //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                        }
+                    })
+
                 }
-            })
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
-    });
+    }); // falta este
     $('.email').click(function () {
         let title = this.getAttribute('data-tt');
         let mail_to = this.getAttribute('data-to');
@@ -800,64 +810,75 @@ $(document).ready(function () {
         }
 
         if (row.length === 1) {
-            get_data_email(row,title,row_number,transportista,master,gastos,directo);
-            $("#emails_modal").dialog({
-                autoOpen: true,
-                open: function (event, ui) {
-                    $('#email_add_input').summernote('destroy');
-                    $('#email_add_input').summernote({
-                        placeholder: 'Ingrese su texto aqui',
-                        tabsize: 10,
-                        height: wHeight * 0.60,
-                        width: wWidth * 0.88,
-                        toolbar: [
-                            ['style', ['style']],
-                            ['font', ['bold', 'underline', 'clear']],
-                            ['color', ['color']],
-                            ['para', ['ul', 'ol', 'paragraph']],
-                            ['table', ['table']],
-                            ['insert', ['link', 'picture', 'video']],
-                            ['view', ['fullscreen', 'codeview']]
-                        ]
-                    });
-                    $('#email_add_input').focus();
-                },
-                modal: true,
-                title:   title  + " para el seguimiento N°: " + row_number,
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Enviar",
-                        class: "btn btn-primary",
-                        style: "width:100px",
-                        click: function () {
-                            to = $("#id_to").val();
-                            cc = $("#id_cc").val();
-                            cco = $("#id_cco").val();
-                            subject = $("#id_subject").val();
-                            message = $("#email_add_input").summernote('code');
-                            from = $('#id_from').val();
-                            if(!confirm('¿Realmente desea ENVIAR el correo?')){
-                                return;
-                            }
-                            sendEmail(to,cc,cco,subject,message,title,row_number,from);
-                            $(this).dialog("close");
+            $.ajax({
+                url: '/get_data_seguimiento/' + row[0][0] + '/',
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+
+                    get_data_email(row, title, row_number, transportista, master, gastos, directo);
+                    $("#emails_modal").dialog({
+                        autoOpen: true,
+                        open: function (event, ui) {
+                            $('#email_add_input').summernote('destroy');
+                            $('#email_add_input').summernote({
+                                placeholder: 'Ingrese su texto aqui',
+                                tabsize: 10,
+                                height: wHeight * 0.60,
+                                width: wWidth * 0.88,
+                                toolbar: [
+                                    ['style', ['style']],
+                                    ['font', ['bold', 'underline', 'clear']],
+                                    ['color', ['color']],
+                                    ['para', ['ul', 'ol', 'paragraph']],
+                                    ['table', ['table']],
+                                    ['insert', ['link', 'picture', 'video']],
+                                    ['view', ['fullscreen', 'codeview']]
+                                ]
+                            });
+                            $('#email_add_input').focus();
                         },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                            $('#modalSeleccionEmail').dialog("close");
-                        },
-                    },],
-                beforeClose: function (event, ui) {
-                    // table.ajax.reload();
+                        modal: true,
+                        title: title + " para el seguimiento N°: " + row_number,
+                        height: wHeight * 0.90,
+                        width: wWidth * 0.90,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Enviar",
+                                class: "btn btn-primary",
+                                style: "width:100px",
+                                click: function () {
+                                    to = $("#id_to").val();
+                                    cc = $("#id_cc").val();
+                                    cco = $("#id_cco").val();
+                                    subject = $("#id_subject").val();
+                                    message = $("#email_add_input").summernote('code');
+                                    from = $('#id_from').val();
+                                    if (!confirm('¿Realmente desea ENVIAR el correo?')) {
+                                        return;
+                                    }
+                                    sendEmail(to, cc, cco, subject, message, title, row_number, from);
+                                    $(this).dialog("close");
+                                },
+                            }, {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                    $('#modalSeleccionEmail').dialog("close");
+                                },
+                            },],
+                        beforeClose: function (event, ui) {
+                            // table.ajax.reload();
+                        }
+                    })
                 }
-            })
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -866,9 +887,18 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
         $("#pdf_add_input").html('');
         $('#pdf_add_input').summernote('destroy');
-        get_datos_pdf();
+
         if (row.length === 1) {
-            $("#pdf_modal").dialog({
+            $.ajax({
+                url: '/get_data_seguimiento/' + row[0][0] + '/',
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    get_datos_pdf();
+                    $("#pdf_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
                     $('#pdf_add_input').summernote('destroy');
@@ -922,6 +952,9 @@ $(document).ready(function () {
                     // table.ajax.reload();
                 }
             })
+
+                }
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -962,84 +995,94 @@ $(document).ready(function () {
         $("#tabla_archivos").dataTable().fnDestroy();
        row = table.rows('.table-secondary').data();
         if (row.length === 1) {
+            $.ajax({
+                url: '/get_data_seguimiento/' + row[0][0] + '/',
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    get_datos_archivos();
+                    $("#archivos_modal").dialog({
+                        autoOpen: true,
+                        open: function (event, ui) {
 
-        get_datos_archivos();
-            $("#archivos_modal").dialog({
-                autoOpen: true,
-                open: function (event, ui) {
-
-                },
-                modal: true,
-                title: "Archivos para el seguimiento N°: " + row[0][1],
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Descargar",
-                        class: "btn btn-warning",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma descargar el archivo seleccionado?')) {
-                                row = table_archivos.rows('.table-secondary').data();
-                                var url = '/descargar_archivo/' + row[0][0];  // Ruta de la vista que devuelve el archivo
-                                window.open(url, '_blank');
-                            }
                         },
-                    },{
-                        text: "Eliminar",
-                        class: "btn btn-danger",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma eliminar archivo?')) {
-                                row = table_archivos.rows('.table-secondary').data();
-                                if (row.length === 1) {
-                                    miurl = "/eliminar_archivo/";
-                                    var toData = {
-                                        'id': row[0][0],
-                                        'csrfmiddlewaretoken': csrf_token,
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        url: miurl,
-                                        data: toData,
-                                        success: function (resultado) {
-                                            aux = resultado['resultado'];
-                                            if (aux == 'exito') {
-                                                var idx = table.cell('.table-secondary', 0).index();
-                                                table_archivos.$("tr.table-secondary").removeClass('table-secondary');
-                                                table_archivos.row(idx).remove().draw(true);
-                                                mostrarToast('¡Archivo eliminado correctamente!', 'success');
-                                                table.ajax.reload();
-                                            } else {
-                                                alert(aux);
-                                            }
+                        modal: true,
+                        title: "Archivos para el seguimiento N°: " + row[0][1],
+                        height: wHeight * 0.90,
+                        width: wWidth * 0.90,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Descargar",
+                                class: "btn btn-warning",
+                                style: "width:100px",
+                                click: function () {
+                                    if (confirm('¿Confirma descargar el archivo seleccionado?')) {
+                                        row = table_archivos.rows('.table-secondary').data();
+                                        var url = '/descargar_archivo/' + row[0][0];  // Ruta de la vista que devuelve el archivo
+                                        window.open(url, '_blank');
+                                    }
+                                },
+                            }, {
+                                text: "Eliminar",
+                                class: "btn btn-danger",
+                                style: "width:100px",
+                                click: function () {
+                                    if (confirm('¿Confirma eliminar archivo?')) {
+                                        row = table_archivos.rows('.table-secondary').data();
+                                        if (row.length === 1) {
+                                            miurl = "/eliminar_archivo/";
+                                            var toData = {
+                                                'id': row[0][0],
+                                                'csrfmiddlewaretoken': csrf_token,
+                                            };
+                                            $.ajax({
+                                                type: "POST",
+                                                url: miurl,
+                                                data: toData,
+                                                success: function (resultado) {
+                                                    aux = resultado['resultado'];
+                                                    if (aux == 'exito') {
+                                                        var idx = table.cell('.table-secondary', 0).index();
+                                                        table_archivos.$("tr.table-secondary").removeClass('table-secondary');
+                                                        table_archivos.row(idx).remove().draw(true);
+                                                        mostrarToast('¡Archivo eliminado correctamente!', 'success');
+                                                        table.ajax.reload();
+                                                    } else {
+                                                        alert(aux);
+                                                    }
+                                                }
+                                            });
+                                        } else {
+                                            alert('Debe seleccionar un unico registro');
                                         }
-                                    });
-                                } else {
-                                    alert('Debe seleccionar un unico registro');
-                                }
-                            }
-                        },
-                    },
-                    {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    },
-                ],
-                beforeClose: function (event, ui) {
-                    // table.ajax.reload();
-                    $("#tabla_archivos").dataTable().fnDestroy();
+                                    }
+                                },
+                            },
+                            {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                },
+                            },
+                        ],
+                        beforeClose: function (event, ui) {
+                            // table.ajax.reload();
+                            $("#tabla_archivos").dataTable().fnDestroy();
+                        }
+                    })
+
                 }
-            })
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
-    });
+    }); //falta este
     $('#adjuntar_btn').click(function () {
         $("#tabla_archivos").dataTable().fnDestroy();
                row = table.rows('.table-secondary').data();
@@ -1151,21 +1194,28 @@ $(document).ready(function () {
         if (row.length === 1) {
             let tipo = row[0][2];
             tipo_seguimiento = 'IMPOMARIT';
-            get_datos_seguimiento(row[0][0]);
-            nombre_form = 'Modificar'
-            if(tipo == 'IMPORT MARITIMO'){
-                $('#seguimiento_im').addClass('triggered').trigger('click');
-            }else if(tipo === 'EXPORT MARITIMO'){
-                $('#seguimiento_em').addClass('triggered').trigger('click');
-            }else if(tipo === 'IMPORT TERRESTRE'){
-                $('#seguimiento_it').addClass('triggered').trigger('click');
-            }else if(tipo === 'EXPORT TERRESTRE'){
-                $('#seguimiento_et').addClass('triggered').trigger('click');
-            }else if(tipo === 'EXPORT AEREO'){
-                $('#seguimiento_ea').addClass('triggered').trigger('click');
-            }else if(tipo === 'IMPORT AEREO'){
-                $('#seguimiento_ia').addClass('triggered').trigger('click');
-            }
+            let boton_guardar = true;
+            get_datos_seguimiento(row[0][0], function (datos) {
+                if (!datos) return;
+
+                let boton_guardar = !datos.bloqueado;
+
+                nombre_form = 'Modificar'
+                if(tipo == 'IMPORT MARITIMO'){
+                    $('#seguimiento_im').addClass('triggered').trigger('click', [boton_guardar]);
+                }else if(tipo === 'EXPORT MARITIMO'){
+                    $('#seguimiento_em').addClass('triggered').trigger('click', [boton_guardar]);
+                }else if(tipo === 'IMPORT TERRESTRE'){
+                    $('#seguimiento_it').addClass('triggered').trigger('click', [boton_guardar]);
+                }else if(tipo === 'EXPORT TERRESTRE'){
+                    $('#seguimiento_et').addClass('triggered').trigger('click', [boton_guardar]);
+                }else if(tipo === 'EXPORT AEREO'){
+                    $('#seguimiento_ea').addClass('triggered').trigger('click', [boton_guardar]);
+                }else if(tipo === 'IMPORT AEREO'){
+                    $('#seguimiento_ia').addClass('triggered').trigger('click', [boton_guardar]);
+                }
+
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -1185,8 +1235,9 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
             $('#cronologia_form').trigger("reset");
-            get_datos_cronologia(row[0][0]);
-            $("#cronologia_modal").dialog({
+            get_datos_cronologia(row[0][0], function (ok) {
+                if (!ok) return;
+                $("#cronologia_modal").dialog({
                 autoOpen: true,
                 open: function () {
 
@@ -1240,6 +1291,7 @@ $(document).ready(function () {
                     // table.ajax.reload();
                 }
             })
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -1251,7 +1303,17 @@ $(document).ready(function () {
         alert('No puede agregar envases a las operaciones aereas.');
         return;
         }
-        get_datos_envases();
+        $.ajax({
+            url: '/get_data_seguimiento/' + row[0][0] + '/',
+            type: 'GET',
+            success: function (data) {
+                if (data.bloqueado) {
+                    alert(data.mensaje);
+                    return;
+                }
+                get_datos_envases();
+            }
+        });
         $('#envases_form').trigger("reset");
 
         $("#envases_modal").dialog({
@@ -1342,30 +1404,41 @@ $(document).ready(function () {
                                 if (row.length === 1) {
                                     let formData = $("#clonar_form").serializeArray();
                                     let data = JSON.stringify(formData);
-                                    miurl = "/clonar_seguimiento/";
-                                    var toData = {
-                                        'id': row[0][0],
-                                        'data': data,
-                                        'csrfmiddlewaretoken': csrf_token,
-                                    };
                                     $.ajax({
-                                        type: "POST",
-                                        url: miurl,
-                                        data: toData,
-                                        success: function (resultado) {
-                                            aux = resultado['resultado'];
-                                            if (aux == 'exito') {
-                                                $("#clonar_modal").dialog("close");
-                                                var idx = table.cell('.table-secondary', 0).index();
-                                                alert('Seguimiento clonardo N° ' + resultado['numero'] )
-                                                mostrarToast('¡Seguimiento clonado correctamente!', 'success');
-                                                table.ajax.reload();
-
-                                            } else {
-                                                alert(aux);
+                                        url: '/get_data_seguimiento/' + row[0][0] + '/',
+                                        type: 'GET',
+                                        success: function (data) {
+                                            if (data.bloqueado) {
+                                                alert(data.mensaje);
+                                                return;
                                             }
+
+                                            miurl = "/clonar_seguimiento/";
+                                            var toData = {
+                                                'id': row[0][0],
+                                                'data': data,
+                                                'csrfmiddlewaretoken': csrf_token,
+                                            };
+                                            $.ajax({
+                                                type: "POST",
+                                                url: miurl,
+                                                data: toData,
+                                                success: function (resultado) {
+                                                    aux = resultado['resultado'];
+                                                    if (aux == 'exito') {
+                                                        $("#clonar_modal").dialog("close");
+                                                        var idx = table.cell('.table-secondary', 0).index();
+                                                        alert('Seguimiento clonardo N° ' + resultado['numero'])
+                                                        mostrarToast('¡Seguimiento clonado correctamente!', 'success');
+                                                        table.ajax.reload();
+
+                                                    } else {
+                                                        alert(aux);
+                                                    }
+                                                }
+                                            });
                                         }
-                                    });
+                                     });
                                 } else {
                                     alert('Debe seleccionar un unico registro a clonar');
                                 }
@@ -1392,123 +1465,133 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
 
         if (row.length === 1) {
-        get_datos_rutas();
-            $('#rutas_form').trigger("reset");
-            $("#id_origen").val(row[0][5]);
-            $("#id_destino").val(row[0][5]);
-            $("#id_cia").val(row[0][14]);
-            $("#id_viaje").val(row[0][24]);
-            $("#id_vapor").val(row[0][23]);
-            $("#rutas_modal").dialog({
-                autoOpen: true,
-                open: function () {
-                $('#rutas_form')[0].reset();
-                },
-                modal: true,
-                title: "Ingreso de datos para transbordos en el seguimiento N°: " + row[0][1],
-                height: 'auto',
-                width: 'auto',
-                position: { my: "top", at: "top+20", of: window },
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Eliminar",
-                        class: "btn btn-danger",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma eliminar?')) {
-                                row = table_rutas.rows('.table-secondary').data();
-                                if (row.length === 1) {
-                                    miurl = "/eliminar_ruta/";
-                                    var toData = {
-                                        'id': row[0][0],
-                                        'csrfmiddlewaretoken': csrf_token,
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        url: miurl,
-                                        data: toData,
-                                        success: function (resultado) {
-                                            aux = resultado['resultado'];
-                                            if (aux === 'exito') {
-                                                var idx = table.cell('.table-secondary', 0).index();
-                                                table_rutas.$("tr.table-secondary").removeClass('table-secondary');
-                                                table_rutas.row(idx).remove().draw(true);
-                                                $('#tabla_rutas').DataTable().ajax.reload();
-                                                $('#tabla_seguimiento').DataTable().ajax.reload();
-                                                mostrarToast('¡Ruta eliminada correctamente!', 'success');
-                                            } else {
-                                                alert(aux);
-                                            }
-                                        }
-                                    });
-                                } else {
-                                    alert('Debe seleccionar un unico registro');
-                                }
-                            }
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    }],
-                beforeClose: function (event, ui) {
-                    const $ciaInput = $("#id_cia");
-
-                    // Solo destruimos si estaba inicializado
-                    if ($ciaInput.data("autocomplete-initialized")) {
-                        $ciaInput.autocomplete("destroy");
-                        $ciaInput.removeData("autocomplete-initialized");
+            $.ajax({
+                url: '/get_data_seguimiento/' + row[0][0] + '/',
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
                     }
-                }
+                    get_datos_rutas();
 
-            });
-            if (row[0][2] != 'IMPORT AEREO' && row[0][2] != 'EXPORT AEREO') {
-                const $ciaInput = $("#id_cia");
-
-                // Verificamos si ya fue inicializado antes
-                if (!$ciaInput.data("autocomplete-initialized")) {
-                    $ciaInput.autocomplete({
-                        source: '/autocomplete_clientes/',
-                        minLength: 2,
-                        select: function (event, ui) {
-                            $(this).attr('data-id', ui.item['id']);
+                    $('#rutas_form').trigger("reset");
+                    $("#id_origen").val(row[0][5]);
+                    $("#id_destino").val(row[0][5]);
+                    $("#id_cia").val(row[0][14]);
+                    $("#id_viaje").val(row[0][24]);
+                    $("#id_vapor").val(row[0][23]);
+                    $("#rutas_modal").dialog({
+                        autoOpen: true,
+                        open: function () {
+                        $('#rutas_form')[0].reset();
                         },
-                        change: function (event, ui) {
-                            if (ui.item) {
-                                $(this).css({
-                                    "border-color": "#3D9A37",
-                                    'box-shadow': '0 0 0 0.1rem #3D9A37'
-                                });
-                                $('#id_cia').val(ui.item['value']);
-                                $('#id_cia').css({
-                                    "border-color": "#3D9A37",
-                                    'box-shadow': '0 0 0 0.1rem #3D9A37'
-                                });
-                            } else {
-                                $(this).val('');
-                                $('#id_cia').val('');
-                                $(this).css({
-                                    "border-color": "",
-                                    'box-shadow': ''
-                                });
-                                $('#id_cia').css({
-                                    "border-color": "",
-                                    'box-shadow': ''
-                                });
+                        modal: true,
+                        title: "Ingreso de datos para transbordos en el seguimiento N°: " + row[0][1],
+                        height: 'auto',
+                        width: 'auto',
+                        position: { my: "top", at: "top+20", of: window },
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Eliminar",
+                                class: "btn btn-danger",
+                                style: "width:100px",
+                                click: function () {
+                                    if (confirm('¿Confirma eliminar?')) {
+                                        row = table_rutas.rows('.table-secondary').data();
+                                        if (row.length === 1) {
+                                            miurl = "/eliminar_ruta/";
+                                            var toData = {
+                                                'id': row[0][0],
+                                                'csrfmiddlewaretoken': csrf_token,
+                                            };
+                                            $.ajax({
+                                                type: "POST",
+                                                url: miurl,
+                                                data: toData,
+                                                success: function (resultado) {
+                                                    aux = resultado['resultado'];
+                                                    if (aux === 'exito') {
+                                                        var idx = table.cell('.table-secondary', 0).index();
+                                                        table_rutas.$("tr.table-secondary").removeClass('table-secondary');
+                                                        table_rutas.row(idx).remove().draw(true);
+                                                        $('#tabla_rutas').DataTable().ajax.reload();
+                                                        $('#tabla_seguimiento').DataTable().ajax.reload();
+                                                        mostrarToast('¡Ruta eliminada correctamente!', 'success');
+                                                    } else {
+                                                        alert(aux);
+                                                    }
+                                                }
+                                            });
+                                        } else {
+                                            alert('Debe seleccionar un unico registro');
+                                        }
+                                    }
+                                },
+                            }, {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                },
+                            }],
+                        beforeClose: function (event, ui) {
+                            const $ciaInput = $("#id_cia");
+
+                            // Solo destruimos si estaba inicializado
+                            if ($ciaInput.data("autocomplete-initialized")) {
+                                $ciaInput.autocomplete("destroy");
+                                $ciaInput.removeData("autocomplete-initialized");
                             }
                         }
+
                     });
+                    if (row[0][2] != 'IMPORT AEREO' && row[0][2] != 'EXPORT AEREO') {
+                        const $ciaInput = $("#id_cia");
 
-                    // Marcamos que ya fue inicializado
-                    $ciaInput.data("autocomplete-initialized", true);
+                        // Verificamos si ya fue inicializado antes
+                        if (!$ciaInput.data("autocomplete-initialized")) {
+                            $ciaInput.autocomplete({
+                                source: '/autocomplete_clientes/',
+                                minLength: 2,
+                                select: function (event, ui) {
+                                    $(this).attr('data-id', ui.item['id']);
+                                },
+                                change: function (event, ui) {
+                                    if (ui.item) {
+                                        $(this).css({
+                                            "border-color": "#3D9A37",
+                                            'box-shadow': '0 0 0 0.1rem #3D9A37'
+                                        });
+                                        $('#id_cia').val(ui.item['value']);
+                                        $('#id_cia').css({
+                                            "border-color": "#3D9A37",
+                                            'box-shadow': '0 0 0 0.1rem #3D9A37'
+                                        });
+                                    } else {
+                                        $(this).val('');
+                                        $('#id_cia').val('');
+                                        $(this).css({
+                                            "border-color": "",
+                                            'box-shadow': ''
+                                        });
+                                        $('#id_cia').css({
+                                            "border-color": "",
+                                            'box-shadow': ''
+                                        });
+                                    }
+                                }
+                            });
+
+                            // Marcamos que ya fue inicializado
+                            $ciaInput.data("autocomplete-initialized", true);
+                        }
+                    }
+
                 }
-            }
-
-
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -1516,8 +1599,16 @@ $(document).ready(function () {
     $('#logs_btn').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
-                get_datos_logs();
-            $("#logs_modal").dialog({
+            $.ajax({
+                url: '/get_data_seguimiento/' + row[0][0] + '/',
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    get_datos_logs();
+                    $("#logs_modal").dialog({
                 autoOpen: true,
                 open: function () {
 
@@ -1539,6 +1630,9 @@ $(document).ready(function () {
 
                 }
             })
+                }
+            });
+
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -1547,69 +1641,79 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
 
         if (row.length === 1) {
-                get_datos_gastos();
-            $('#gastos_form').trigger("reset");
-            $("#gastos_modal").dialog({
-                autoOpen: true,
-                open: function () {
-                $('#id_socio').val(row[0][54]);
-                },
-                modal: true,
-                title: "Gastos para el seguimiento N°: " + row[0][1],
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Eliminar",
-                        class: "btn btn-danger",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                row_g = table_gastos.rows('.table-secondary').data();
-                                if (row_g.length === 1) {
-                                    miurl = "/eliminar_gasto/";
-                                    var toData = {
-                                        'id': row_g[0][0],
-                                        'csrfmiddlewaretoken': csrf_token,
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        url: miurl,
-                                        data: toData,
-                                        success: function (resultado) {
-                                            aux = resultado['resultado'];
-                                            if (aux === 'exito') {
-                                                $("#table_gastos").dataTable().fnDestroy();
-                                                $('#gastos_btn').addClass('triggered').trigger('click');
-                                                $('#tabla_seguimiento').DataTable().ajax.reload();
-                                                mostrarToast('¡Gasto eliminado correctamente!', 'success');
-                                                $('#id_socio').val(row[0][54]);
-
-                                            } else {
-                                                alert(aux);
-                                            }
-                                        }
-                                    });
-
-                                } else {
-                                    alert('Debe seleccionar un unico registro');
-                                }
-                            }
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    }],
-                beforeClose: function (event, ui) {
-                    // table.ajax.reload();
-                    // $("#tabla_gastos").dataTable().fnDestroy();
+        $.ajax({
+            url: '/get_data_seguimiento/' + row[0][0] + '/',
+            type: 'GET',
+            success: function (data) {
+                if (data.bloqueado) {
+                    alert(data.mensaje);
+                    return;
                 }
-            })
+                get_datos_gastos();
+                $('#gastos_form').trigger("reset");
+                $("#gastos_modal").dialog({
+                    autoOpen: true,
+                    open: function () {
+                        $('#id_socio').val(row[0][54]);
+                    },
+                    modal: true,
+                    title: "Gastos para el seguimiento N°: " + row[0][1],
+                    height: wHeight * 0.90,
+                    width: wWidth * 0.90,
+                    class: 'modal fade',
+                    buttons: [
+                        {
+                            text: "Eliminar",
+                            class: "btn btn-danger",
+                            style: "width:100px",
+                            click: function () {
+                                if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
+                                    row_g = table_gastos.rows('.table-secondary').data();
+                                    if (row_g.length === 1) {
+                                        miurl = "/eliminar_gasto/";
+                                        var toData = {
+                                            'id': row_g[0][0],
+                                            'csrfmiddlewaretoken': csrf_token,
+                                        };
+                                        $.ajax({
+                                            type: "POST",
+                                            url: miurl,
+                                            data: toData,
+                                            success: function (resultado) {
+                                                aux = resultado['resultado'];
+                                                if (aux === 'exito') {
+                                                    $("#table_gastos").dataTable().fnDestroy();
+                                                    $('#gastos_btn').addClass('triggered').trigger('click');
+                                                    $('#tabla_seguimiento').DataTable().ajax.reload();
+                                                    mostrarToast('¡Gasto eliminado correctamente!', 'success');
+                                                    $('#id_socio').val(row[0][54]);
+
+                                                } else {
+                                                    alert(aux);
+                                                }
+                                            }
+                                        });
+
+                                    } else {
+                                        alert('Debe seleccionar un unico registro');
+                                    }
+                                }
+                            },
+                        }, {
+                            text: "Salir",
+                            class: "btn btn-dark",
+                            style: "width:100px",
+                            click: function () {
+                                $(this).dialog("close");
+                            },
+                        }],
+                    beforeClose: function (event, ui) {
+                        // table.ajax.reload();
+                        // $("#tabla_gastos").dataTable().fnDestroy();
+                    }
+                })
+            }
+        });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -1618,8 +1722,18 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
             if(row[0][2] == 'EXPORT AEREO'){
-                   window.open('/descargar_awb_seguimientos/' + row[0][0], '_blank');
+                $.ajax({
+                    url: '/get_data_seguimiento/' + row[0][0] + '/',
+                    type: 'GET',
+                    success: function (data) {
+                        if (data.bloqueado) {
+                            alert(data.mensaje);
+                            return;
+                        }
 
+                        window.open('/descargar_awb_seguimientos/' + row[0][0], '_blank');
+                    }
+                });
             }else{
                 alert('La guias solo pueden ser asignadas a EXPORTACION AEREA');
             }
@@ -1632,8 +1746,17 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
             if(row[0][2] == 'EXPORT AEREO'){
-                   window.open('/descargar_awb_seguimientos_draft/' + row[0][0] + '/d' ,'_blank');
-
+                $.ajax({
+                    url: '/get_data_seguimiento/' + row[0][0] + '/',
+                    type: 'GET',
+                    success: function (data) {
+                        if (data.bloqueado) {
+                            alert(data.mensaje);
+                            return;
+                        }
+                        window.open('/descargar_awb_seguimientos_draft/' + row[0][0] + '/d', '_blank');
+                    }
+                });
             }else{
                 alert('La guias solo pueden ser asignadas a EXPORTACION AEREA');
             }
@@ -1743,31 +1866,41 @@ $(document).ready(function () {
                 return;
             }
             $('#form_aplicable').trigger("reset");
-            cargar_datos_aplicables(row[0][1]);
-            $("#aplicable_modal").dialog({
-                autoOpen: true,
-                modal: true,
-                title: "Editar datos aplicables del seguimiento N°: " + row[0][1],
-                height: 'auto',
-                width: wWidth * 0.50,
-                buttons: [
-                    {
-                        text: "Guardar",
-                        class: "btn btn-primary",
-                        click: function () {
-                           guardar_aplicable(row_number);
-                           table.ajax.reload();
-                            $(this).dialog("close");
-                        }
-                    },
-                    {
-                        text: "Cancelar",
-                        class: "btn btn-dark",
-                        click: function () {
-                            $(this).dialog("close");
-                        }
+            $.ajax({
+                url: '/get_data_seguimiento/' + row[0][0] + '/',
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
                     }
-                ]
+                    cargar_datos_aplicables(row[0][1]);
+                    $("#aplicable_modal").dialog({
+                        autoOpen: true,
+                        modal: true,
+                        title: "Editar datos aplicables del seguimiento N°: " + row[0][1],
+                        height: 'auto',
+                        width: wWidth * 0.50,
+                        buttons: [
+                            {
+                                text: "Guardar",
+                                class: "btn btn-primary",
+                                click: function () {
+                                    guardar_aplicable(row_number);
+                                    table.ajax.reload();
+                                    $(this).dialog("close");
+                                }
+                            },
+                            {
+                                text: "Cancelar",
+                                class: "btn btn-dark",
+                                click: function () {
+                                    $(this).dialog("close");
+                                }
+                            }
+                        ]
+                    });
+                }
             });
         } else {
             alert('Debe seleccionar un único registro');
@@ -1778,106 +1911,116 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
 
         if (row.length === 1) {
-                get_datos_embarques();
-            $('#embarques_form').trigger("reset");
-            // get_datos_cronologia(row[0][0]);
-            $("#embarques_modal").dialog({
-                autoOpen: true,
-                open: function () {
+            $.ajax({
+                url: '/get_data_seguimiento/' + row[0][0] + '/',
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    get_datos_embarques();
+                    $('#embarques_form').trigger("reset");
+                    // get_datos_cronologia(row[0][0]);
+                    $("#embarques_modal").dialog({
+                        autoOpen: true,
+                        open: function () {
 
-                },
-                modal: true,
-                title: "Embarques para el seguimiento N°: " + row[0][1],
-                height: wHeight * 0.80,
-                width: wWidth * 0.80,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Eliminar",
-                        class: "btn btn-danger",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma eliminar?')) {
-                                row = table_embarques.rows('.table-secondary').data();
-                                let formDataExtra = $("#embarques_extra_form").serializeArray();
-                                let data_extra = JSON.stringify(formDataExtra);
-                                if (row.length === 1) {
-                                    miurl = "/eliminar_embarque/";
+                        },
+                        modal: true,
+                        title: "Embarques para el seguimiento N°: " + row[0][1],
+                        height: wHeight * 0.80,
+                        width: wWidth * 0.80,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Eliminar",
+                                class: "btn btn-danger",
+                                style: "width:100px",
+                                click: function () {
+                                    if (confirm('¿Confirma eliminar?')) {
+                                        row = table_embarques.rows('.table-secondary').data();
+                                        let formDataExtra = $("#embarques_extra_form").serializeArray();
+                                        let data_extra = JSON.stringify(formDataExtra);
+                                        if (row.length === 1) {
+                                            miurl = "/eliminar_embarque/";
+                                            var toData = {
+                                                'id': row[0][0],
+                                                'data_extra': data_extra,
+                                                'csrfmiddlewaretoken': csrf_token,
+                                            };
+                                            $.ajax({
+                                                type: "POST",
+                                                url: miurl,
+                                                data: toData,
+                                                success: function (resultado) {
+                                                    aux = resultado['resultado'];
+
+                                                    mostrarToast('¡Embarque eliminado correctamente!', 'success');
+                                                    $("#tabla_embarques").dataTable().fnDestroy();
+                                                    $("#ingresar_embarque").html('Agregar');
+                                                    $('#embarques_btn').addClass('triggered').trigger('click');
+                                                    $('#id_embarque_id').val("");
+                                                    table.ajax.reload(function (json) {
+                                                        // Callback function to handle the response data
+
+
+                                                    });
+                                                    $('#tabla_embarques').DataTable().ajax.reload();
+                                                    $('#tabla_seguimiento').DataTable().ajax.reload();
+
+
+                                                }
+                                            });
+                                        } else {
+                                            alert('Debe seleccionar un unico registro');
+                                        }
+                                    }
+                                },
+                            }, {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    miurl = "/actualizo_datos_embarque/";
+                                    let formDataExtra = $("#embarques_extra_form").serializeArray();
+                                    let data_extra = JSON.stringify(formDataExtra);
+                                    let numero = localStorage.getItem('numero_embarque');
                                     var toData = {
-                                        'id': row[0][0],
-                                        'data_extra' : data_extra,
+                                        'numero': numero, //row[0][1]
+                                        'data': data_extra,
                                         'csrfmiddlewaretoken': csrf_token,
                                     };
                                     $.ajax({
                                         type: "POST",
                                         url: miurl,
                                         data: toData,
+                                        async: false,
                                         success: function (resultado) {
-                                            aux = resultado['resultado'];
-
-                                                mostrarToast('¡Embarque eliminado correctamente!', 'success');
-                                               $("#tabla_embarques").dataTable().fnDestroy();
-                                                $("#ingresar_embarque").html('Agregar');
-                                                $('#embarques_btn').addClass('triggered').trigger('click');
-                                                $('#id_embarque_id').val("");
-                                                table.ajax.reload(function(json) {
-                                                    // Callback function to handle the response data
-
-
-                                                });
-                                                $('#tabla_embarques').DataTable().ajax.reload();
-                                                $('#tabla_seguimiento').DataTable().ajax.reload();
-
-
+                                            if (resultado['resultado'] === 'exito') {
+                                                mostrarToast('¡Datos de embarques actualizados con exito!', 'success');
+                                                table.ajax.reload();
+                                            } else {
+                                                console.log(resultado['resultado']);
+                                                //alert(resultado['resultado']);
+                                            }
                                         }
                                     });
-                                } else {
-                                    alert('Debe seleccionar un unico registro');
-                                }
-                            }
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            miurl = "/actualizo_datos_embarque/";
-                            let formDataExtra = $("#embarques_extra_form").serializeArray();
-                            let data_extra = JSON.stringify(formDataExtra);
-                            let numero= localStorage.getItem('numero_embarque');
-                            var toData = {
-                                'numero': numero, //row[0][1]
-                                'data': data_extra,
-                                'csrfmiddlewaretoken': csrf_token,
-                            };
-                            $.ajax({
-                                type: "POST",
-                                url: miurl,
-                                data: toData,
-                                async: false,
-                                success: function (resultado) {
-                                    if (resultado['resultado'] === 'exito') {
-                                        mostrarToast('¡Datos de embarques actualizados con exito!', 'success');
-                                        table.ajax.reload();
-                                    } else {
-                                    console.log(resultado['resultado']);
-                                        //alert(resultado['resultado']);
-                                    }
-                                }
-                            });
-                            $(this).dialog("close");
-                        },
-                    }],
-                beforeClose: function (event, ui) {
-                    // table.ajax.reload();
-                    $("#tabla_embarques").dataTable().fnDestroy();
+                                    $(this).dialog("close");
+                                },
+                            }],
+                        beforeClose: function (event, ui) {
+                            // table.ajax.reload();
+                            $("#tabla_embarques").dataTable().fnDestroy();
+                        }
+                    })
                 }
-            })
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
     });
-    $('.nuevo_seguimiento ').click(function (event) {
+    $('.nuevo_seguimiento ').click(function (event,boton_guardar=true) {
         tipo_seguimiento = this.getAttribute('data-tp');
         var titulo = this.getAttribute('data-tt');
         var tipo = this.getAttribute('data-tipo');
@@ -1893,6 +2036,11 @@ $(document).ready(function () {
             autoOpen: true,
             open: function () {
                 $('#id_modo').val(tipo);
+                if (!boton_guardar) {
+                $(".btn-guardar-seguimiento").prop("disabled", true);
+                } else {
+                    $(".btn-guardar-seguimiento").prop("disabled", false);
+                }
             },
             modal: true,
             title: titulo,
@@ -1902,7 +2050,7 @@ $(document).ready(function () {
             buttons: [
                 {
                     text: "Guardar",
-                    class: "btn btn-primary",
+                    class: "btn btn-primary btn-guardar-seguimiento",
                     style: "width:100px",
                     click: function () {
                         var form = $('#impo_marit_form');
@@ -2598,14 +2746,21 @@ function getCookie(name) {
     }
     return null;
 }
-function get_datos_cronologia(id) {
+function get_datos_cronologia(id,callback) {
     $("#id_originales").val("S");
     $.ajax({
         url: '/get_data_cronologia/' + id + '/',
         type: 'GET',
         async: false,
         success: function (data) {
-            var datos = data[0];
+
+            if (data.bloqueado) {
+                alert(data.mensaje);
+                callback(false);
+                return;
+            }
+
+            var datos = data.datos[0];
             // Establece los valores en los campos del formulario
             if (datos['fecha'] !== null) {
                 $("#id_fecha_crono").val(datos['fecha']);
@@ -2683,11 +2838,13 @@ function get_datos_cronologia(id) {
             if (datos['originales'] !== null) {
                 $("#id_originales").val(datos['originales'])
             }
-            return datos;
+            callback(true);
         },
         error: function (xhr, status, error) {
             alert(error);
+            callback(true);
         }
+
     });
 }
 function get_datos_seguimiento_old(id, modo = '') {
@@ -2902,13 +3059,15 @@ function get_datos_seguimiento_old(id, modo = '') {
         }
     });
 }
-function get_datos_seguimiento(id, modo = '') {
+function get_datos_seguimiento(id,callback) {
     $("#id_originales").val("S");
     $.ajax({
         url: '/get_data_seguimiento/' + id + '/',
         type: 'GET',
-        async: false,
         success: function (datos) {
+            if(datos.bloqueado){
+                alert(datos.mensaje);
+            }
             if (datos['fecha'] !== null) {
                 $("#id_fecha").val(datos['fecha']);
             }
@@ -3051,15 +3210,18 @@ function get_datos_seguimiento(id, modo = '') {
             if (datos['trafico']) $("#id_trafico_seg").val(datos['trafico']);
             if (datos['contratotra']) $("#id_contratotra").val(datos['contratotra']);
 
-            return datos;
+            //return datos;}
+            callback(datos);
         },
         error: function (xhr, status, error) {
             alert(error);
+            callback(null);
         }
     });
 }
 
-function eliminar_seguimiento(id) {
+function eliminar_seguimiento_old(id) {
+
 miurl = "/eliminar_seguimiento/";
             var toData = {
                 'id': id,
@@ -3079,6 +3241,42 @@ miurl = "/eliminar_seguimiento/";
                 }
             });
 }
+function eliminar_seguimiento(id) {
+    $.ajax({
+        url: '/get_data_seguimiento/' + id + '/',
+        type: 'GET',
+        success: function (data) {
+            if (data.bloqueado) {
+                alert(data.mensaje);
+                return;
+            }
+
+            // Si no está bloqueado, seguimos con la eliminación
+            $.ajax({
+                type: "POST",
+                url: "/eliminar_seguimiento/",
+                data: {
+                    'id': id,
+                    'csrfmiddlewaretoken': csrf_token,
+                },
+                success: function (resultado) {
+                    if (resultado['resultado'] === 'exito') {
+                        table.ajax.reload();
+                    } else {
+                        alert(resultado['resultado']);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error al eliminar: " + error);
+                }
+            });
+        },
+        error: function (xhr, status, error) {
+            alert("Error al verificar bloqueo: " + error);
+        }
+    });
+}
+
 function get_datos_envases() {
     $("#tabla_envases").dataTable().fnDestroy();
     table_envases = $('#tabla_envases').DataTable({

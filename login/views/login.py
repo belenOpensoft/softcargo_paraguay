@@ -111,6 +111,6 @@ def cambiar_modulo(request, modulo):
             return redirect('/admin_cont/verificar_arbitraje/')
 
     if modulo == 'seguimientos':
-        return redirect('/seguimientos')
+        return redirect('/seguimientos?rol=seguimientos')
 
     return redirect(f"/?rol={modulo}")

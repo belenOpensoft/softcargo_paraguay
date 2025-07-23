@@ -1732,7 +1732,7 @@ var expandedRow;
                     cargar_hauses_master_edit();
                 }
             }else if(lugar_editar==='edit_directo'){
-                $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                 }
 
                  $('#add_house_modal').dialog('close');
@@ -1808,7 +1808,7 @@ var expandedRow;
                     }else if(lugar==='edit_master'){
                     table_edit_im.ajax.reload(null, false);
                     }else if(lugar==='edit_directo'){
-                    $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                     }
                     else{
                     console.log('error en el lugar '+lugar);
@@ -2068,8 +2068,8 @@ var expandedRow;
                         if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                             $('#table_edit_im').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                            $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                         }
                     } else {
                         alert(resultado['resultado']);
@@ -2150,8 +2150,8 @@ var expandedRow;
                         if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                             $('#table_edit_im').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                            $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                         }
                     } else {
                         alert(resultado['resultado']);
@@ -2229,8 +2229,8 @@ var expandedRow;
                         if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                             $('#table_edit_im').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                            $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                         }
                      //  $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
                     } else {
@@ -2321,8 +2321,8 @@ var expandedRow;
                         if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                             $('#table_edit_im').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                            $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                         }
                     } else {
                         alert(resultado['resultado']);
@@ -2596,8 +2596,8 @@ var expandedRow;
                                                 if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                                                     $('#table_edit_im').DataTable().ajax.reload(null, false);
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                                                    $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                                                 }
                                         } else {
                                             alert(aux);
@@ -2648,8 +2648,8 @@ var expandedRow;
                         if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                             $('#table_edit_im').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                            $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                         }
                     } else {
                         alert(resultado['resultado']);
@@ -4246,7 +4246,8 @@ function gastos_btn_h_click(){
         if ($.fn.dataTable.isDataTable('#table_edit_im')) {
             consignatario_code = $('#table_edit_im').DataTable().row('.table-secondary').data()[21];
         } else {
-            consignatario_code = $('#tabla_house_directo_im').DataTable().row('.table-secondary').data()[21];
+            console.log($('#tabla_house_directo').DataTable().row('.table-secondary').data());
+            consignatario_code = $('#tabla_house_directo').DataTable().row('.table-secondary').data()[21];
         }
         if (selectedRowN!=null) {
             get_datos_gastos_house();
@@ -4293,8 +4294,8 @@ function gastos_btn_h_click(){
                                                 if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                                                     $('#table_edit_im').DataTable().ajax.reload(null, false);
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                                                    $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                                                 }
                                             } else {
                                                 alert(aux);
@@ -4397,8 +4398,8 @@ function rutas_btn_h_click(){
                                                 if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                                                     $('#table_edit_im').DataTable().ajax.reload(null, false);
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                                                    $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                                                 }
                                             } else {
                                                 alert(aux);
@@ -4423,7 +4424,7 @@ function rutas_btn_h_click(){
                  $("#table_rutas_house").dataTable().fnDestroy();
 //                 $('#table_add_im tbody tr').removeClass('table-secondary');
 //                $('#table_edit_im tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo_im_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directo_im tbody tr').removeClass('table-secondary');
                 }
             })
 
@@ -4535,8 +4536,8 @@ $("#id_envase_id").val('');
                                                 if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                                                     $('#table_edit_im').DataTable().ajax.reload(null, false);
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                                                    $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                                                 }
                                             } else {
                                                 alert(aux);
@@ -4561,7 +4562,7 @@ $("#id_envase_id").val('');
                    $("#tabla_envases_house").dataTable().fnDestroy();
 //                 $('#table_add_im tbody tr').removeClass('table-secondary');
 //                $('#table_edit_im tbody tr').removeClass('table-secondary');
-//                $('#'#tabla_house_directo_im' tbody tr').removeClass('table-secondary');
+//                $('#'#tabla_house_directo' tbody tr').removeClass('table-secondary');
                 }
             })
             get_sugerencias_envases(selectedRowN);
@@ -4686,8 +4687,8 @@ $("#id_embarque_id").val('');
                                                 if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                                                     $('#table_edit_im').DataTable().ajax.reload(null, false);
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                                                    $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                                                 }
                                             } else {
                                                 alert(aux);
@@ -5002,7 +5003,7 @@ let lugar=localStorage.getItem('lugar');
             }else if(lugar==='edit_master'){
             table_edit_im.ajax.reload(null, false);
             }else if(lugar==='edit_directo'){
-            $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
             }
             else{
             console.log('error en el lugar '+lugar);
@@ -5076,8 +5077,8 @@ function archivos_btn_h_click(){
                                                 if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                                                     $('#table_edit_im').DataTable().ajax.reload(null, false);
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                                                    $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                                                 }
                                         } else {
                                             alert(aux);
@@ -5104,7 +5105,7 @@ function archivos_btn_h_click(){
                 $("#tabla_archivos").dataTable().fnDestroy();
 //                $('#table_add_im tbody tr').removeClass('table-secondary');
 //                $('#table_edit_im tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directotbody tr').removeClass('table-secondary');
             }
         })
 }
@@ -5199,7 +5200,7 @@ function get_datos_pdf() {
     });
 }
 //}else if(lugar==='edit_directo'){
-//$('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+//$('#tabla_house_directo').DataTable().ajax.reload(null, false);
 //}
 //acumulados
 function acumulados(master, callback) {
@@ -5276,7 +5277,7 @@ function notas_house() {
                  $("#notas_form").trigger("reset");
 //                 $('#table_add_im tbody tr').removeClass('table-secondary');
 //                $('#table_edit_im tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo_im tbody tr').removeClass('table-secondary');
+//                $('#tabla_house_directotbody tr').removeClass('table-secondary');
                 }
             })
 }
@@ -5360,8 +5361,8 @@ function agregar_nota(event) {
                         if ($.fn.DataTable.isDataTable('#table_edit_im')) {
                             $('#table_edit_im').DataTable().ajax.reload(null, false);
                         }
-                        if ($.fn.DataTable.isDataTable('#tabla_house_directo_im')) {
-                            $('#tabla_house_directo_im').DataTable().ajax.reload(null, false);
+                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
                         }
             } else {
                 alert("Error al guardar las notas: " + response.errores);

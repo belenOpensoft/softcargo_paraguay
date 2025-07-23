@@ -85,7 +85,8 @@ MIDDLEWARE = [
     'auditlog.middleware.AuditlogMiddleware',
     'administracion_contabilidad.middleware.VerificarArbitrajeMiddleware',
     'cargosystem.middleware.RolPorPestanaMiddleware',
-    'cargosystem.middleware.RolRedirectMiddleware'
+    'cargosystem.middleware.RolRedirectMiddleware',
+    'cargosystem.middleware.BloqueoModalMiddleware'
 ]
 
 
