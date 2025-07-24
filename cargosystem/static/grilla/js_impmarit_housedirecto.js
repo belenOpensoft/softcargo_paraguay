@@ -288,7 +288,7 @@ $(document).ready(function () {
                                    },
                        {
                            text: "Modificar",
-                           class: "btn btn-primary",
+                           class: "btn btn-primary boton-modificar-directo",
                            style: "width:100px",
                            click: function () {
                             if (confirm('¿Confirma la acción de modificar el H B/L?')) {
@@ -305,6 +305,12 @@ $(document).ready(function () {
                             });
 
                             fillFormWithDataHouse(data);
+                            if(data.bloqueado){
+                                alert(data.mensaje);
+                                $('.boton-modificar-directo').prop('disabled',true);
+                            } else{
+                                $('.boton-modificar-directo').prop('disabled',false);
+                            }
                         },
                         error: function (xhr, status, error) {
                             console.error("Error fetching data:", error);
@@ -320,6 +326,7 @@ $(document).ready(function () {
                         $('#ageventas_addh_e').addClass('input-sobrepasar');
                         $('#deposito_addh_e').addClass('input-sobrepasar');
                         $('#vendedor_addh_e').addClass('input-sobrepasar');
+
                     }else{
                     alert('Seleccione una fila.');
                     }
@@ -477,7 +484,19 @@ $(document).ready(function () {
                     }
                 }
                 if (row.length === 1) {
-                    get_data_email(row,title,numero,id,transportista,master,gastos,directo);
+
+            let selectedRowN= localStorage.getItem('num_house_gasto');
+
+            $.ajax({
+                url: '/importacion_maritima/house-detail/',
+                data: {id: selectedRowN},
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    get_data_email(row, title, numero, id, transportista, master, gastos, directo);
                     //$("#id_to").val(row[0][50]);
                     $("#emails_modal").dialog({
                         autoOpen: true,
@@ -501,7 +520,7 @@ $(document).ready(function () {
                             $('#email_add_input').focus();
                         },
                         modal: true,
-                        title:   title  + " para el house N°: " + numero,
+                        title: title + " para el house N°: " + numero,
                         height: wHeight * 0.90,
                         width: wWidth * 0.90,
                         class: 'modal fade',
@@ -517,10 +536,10 @@ $(document).ready(function () {
                                     subject = $("#id_subject").val();
                                     message = $("#email_add_input").summernote('code');
                                     from = $('#id_from').val();
-                                    if(!confirm('¿Realmente desea ENVIAR el correo?')){
+                                    if (!confirm('¿Realmente desea ENVIAR el correo?')) {
                                         return;
                                     }
-                                    sendEmail(to,cc,cco,subject,message,title,numero,from);
+                                    sendEmail(to, cc, cco, subject, message, title, numero, from);
                                     $(this).dialog("close");
                                 },
                             }, {
@@ -529,17 +548,19 @@ $(document).ready(function () {
                                 style: "width:100px",
                                 click: function () {
                                     $(this).dialog("close");
-                            $('#modalSeleccionEmail').dialog("close");
+                                    $('#modalSeleccionEmail').dialog("close");
 
                                 },
                             },],
                         beforeClose: function (event, ui) {
-                        //localStorage.removeItem('num_house_gasto');
-                        $('#table_add_im tbody tr').removeClass('table-secondary');
-                        $('#table_edit_im tbody tr').removeClass('table-secondary');
-                        $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                            //localStorage.removeItem('num_house_gasto');
+                            $('#table_add_im tbody tr').removeClass('table-secondary');
+                            $('#table_edit_im tbody tr').removeClass('table-secondary');
+                            $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                         }
                     })
+                }
+            });
                 } else {
                     alert('Debe seleccionar al menos un registro');
                 }
@@ -560,34 +581,46 @@ function generar_posicion(){
     });
 }
 function eliminar_house_directo(){
-if (confirm('¿Confirma eliminar seleccionado?')) {
+    let selectedRowN= localStorage.getItem('num_house_gasto');
 
-      let id= localStorage.getItem('num_house_gasto');
-        if (id) {
-            miurl = "/importacion_maritima/eliminar_house/";
-            var toData = {
-                'id': id,
-                'csrfmiddlewaretoken': csrf_token,
-            };
             $.ajax({
-                type: "POST",
-                url: miurl,
-                data: toData,
-                success: function (resultado) {
-                    aux = resultado['resultado'];
-                    if (aux === 'exito') {
-                           $('#tabla_house_directo').DataTable().ajax.reload(null, false);
-                        alert('Eliminado correctamente');
-                    } else {
-                        alert(aux);
+                url: '/importacion_martima/house-detail/',
+                data: {id: selectedRowN},
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    if (confirm('¿Confirma eliminar seleccionado?')) {
+
+                        let id = localStorage.getItem('num_house_gasto');
+                        if (id) {
+                            miurl = "/importacion_maritima/eliminar_house/";
+                            var toData = {
+                                'id': id,
+                                'csrfmiddlewaretoken': csrf_token,
+                            };
+                            $.ajax({
+                                type: "POST",
+                                url: miurl,
+                                data: toData,
+                                success: function (resultado) {
+                                    aux = resultado['resultado'];
+                                    if (aux === 'exito') {
+                                        $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                        alert('Eliminado correctamente');
+                                    } else {
+                                        alert(aux);
+                                    }
+                                }
+                            });
+                        } else {
+                            alert('Debe seleccionar un registro');
+                        }
                     }
                 }
             });
-        } else {
-            alert('Debe seleccionar un registro');
-        }
-    }
-
 
 }
 function importar_hijo_tabla_directo(){
@@ -730,74 +763,85 @@ function abrir_modal_mails_d(e){
 }
 function get_datos_logs_h() {
 
-    row = table.rows('.table-secondary').data();
-        if (row.length === 1) {
-            $("#logs_modal").dialog({
-                autoOpen: true,
-                open: function () {
+         let selectedRowN = localStorage.getItem('num_house_gasto');
 
-                },
-                modal: true,
-                title: "Log de interacciones para en el embarque N°: " + row[0][3],
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
-                class: 'modal fade',
-                buttons: [ {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    },],
-                beforeClose: function (event, ui) {
+            $.ajax({
+                url: '/importacion_maritima/house-detail/',
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    row = table.rows('.table-secondary').data();
+                    if (row.length === 1) {
+                        $("#logs_modal").dialog({
+                            autoOpen: true,
+                            open: function () {
 
-                }
-            });
-            $("#tabla_logs").dataTable().fnDestroy();
-            table_logs = $('#tabla_logs').DataTable({
-        "order": [[2, "desc"], [1, "desc"]],
-        "columnDefs": [
-            {
-                "targets": [ 0 ],
-                "orderable": false,
-            },
-        ],
-        "processing": true,
-        "serverSide": true,
-        "dom": 'Btlipr',
-        "scrollX": true,
-        "pageLength": 100,
-        "language": {
-            url: "/static/datatables/es_ES.json"
-        },
-        "ajax": {
-            "url": "/importacion_maritima/source_logs/",
-            'type': 'GET',
-            "data": function (d) {
-                return $.extend({}, d, {
-                    "id": row[0][0],'numero':row[0][3]
-                });
-            }
-        },
-        "rowCallback": function(row, data, index) {
-            // data[3] es la columna 'Acción' => Created / Updated / Deleted
-            var accion = data[3].toLowerCase();
+                            },
+                            modal: true,
+                            title: "Log de interacciones para en el embarque N°: " + row[0][3],
+                            height: wHeight * 0.90,
+                            width: wWidth * 0.90,
+                            class: 'modal fade',
+                            buttons: [{
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                },
+                            },],
+                            beforeClose: function (event, ui) {
 
-            // Limpiar clases anteriores
-            $(row).removeClass('table-success table-warning table-danger');
+                            }
+                        });
+                        $("#tabla_logs").dataTable().fnDestroy();
+                        table_logs = $('#tabla_logs').DataTable({
+                            "order": [[2, "desc"], [1, "desc"]],
+                            "columnDefs": [
+                                {
+                                    "targets": [0],
+                                    "orderable": false,
+                                },
+                            ],
+                            "processing": true,
+                            "serverSide": true,
+                            "dom": 'Btlipr',
+                            "scrollX": true,
+                            "pageLength": 100,
+                            "language": {
+                                url: "/static/datatables/es_ES.json"
+                            },
+                            "ajax": {
+                                "url": "/importacion_maritima/source_logs/",
+                                'type': 'GET',
+                                "data": function (d) {
+                                    return $.extend({}, d, {
+                                        "id": row[0][0], 'numero': row[0][3]
+                                    });
+                                }
+                            },
+                            "rowCallback": function (row, data, index) {
+                                // data[3] es la columna 'Acción' => Created / Updated / Deleted
+                                var accion = data[3].toLowerCase();
 
-            if (accion === 'create') {
-                $(row).addClass('table-success');
-            } else if (accion === 'update') {
-                $(row).addClass('table-warning');
-            } else if (accion === 'delete') {
-                $(row).addClass('table-danger');
-            }
-        }
-    });
-        } else {
-            alert('Debe seleccionar al menos un registro');
-        }
+                                // Limpiar clases anteriores
+                                $(row).removeClass('table-success table-warning table-danger');
 
+                                if (accion === 'create') {
+                                    $(row).addClass('table-success');
+                                } else if (accion === 'update') {
+                                    $(row).addClass('table-warning');
+                                } else if (accion === 'delete') {
+                                    $(row).addClass('table-danger');
+                                }
+                            }
+                        });
+                    } else {
+                        alert('Debe seleccionar al menos un registro');
+                    }
+                }});
 }

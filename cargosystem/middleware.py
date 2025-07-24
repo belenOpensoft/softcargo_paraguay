@@ -123,12 +123,8 @@ DEPENDIENTES_MODAL = {
         }
 
     ],
-    '/get_data_embarque/': [
-        {
-            'ruta': '/get_data_documentos/',
-            'formulario': 'documentosForm',
-            'modulo': 'embarques',
-        }
+    '/master-detail/': [
+
     ],
 }
 
@@ -137,10 +133,13 @@ RUTAS_BLOQUEO_MODAL = {
         'formulario': 'seguimientoForm',
         'modulo': 'seguimientos'
     },
-
-    '/get_data_embarque/': {
+    '/master-detail/': {
         'formulario': 'form_modal_embarque',
-        'modulo': 'embarques'
+        'modulo': 'dinamico'
+    },
+    '/house-detail/': {
+        'formulario': 'editHouseForm',
+        'modulo': 'dinamico'
     },
 }
 
@@ -153,6 +152,94 @@ class BloqueoModalMiddleware:
 
         if request.user.is_authenticated and request.method == 'GET':
             ruta_actual = request.path
+
+            # Verificar si es una master-detail genérica con prefijo
+            if ruta_actual.endswith('/master-detail/') and 'id' in request.GET:
+                referencia = request.GET.get("id")
+                try:
+                    int(referencia)
+                except ValueError:
+                    referencia = None
+
+                if referencia:
+                    partes = ruta_actual.strip('/').split('/')
+                    modulo = partes[0] if len(partes) >= 2 else 'operaciones'
+
+                    formulario = 'editForm'
+                    expiracion = now() + timedelta(minutes=5)
+
+                    # Buscar bloqueo existente
+                    bloqueo = BloqueoEdicion.objects.filter(
+                        referencia=referencia,
+                        formulario=formulario,
+                        fecha_expiracion__gt=now(),
+                        activo=True,
+                        modulo=modulo
+                    ).exclude(usuario=request.user).first()
+
+                    if bloqueo:
+                        tiempo_restante = bloqueo.fecha_expiracion - now()
+                        minutos = int(tiempo_restante.total_seconds() // 60)
+                        segundos = int(tiempo_restante.total_seconds() % 60)
+                        request._bloqueo_info = {
+                            'bloqueado': True,
+                            'usuario': bloqueo.usuario.username,
+                            'mensaje': f'Este registro está siendo editado por {bloqueo.usuario.username}. '
+                                       f'Podrás editarlo en aproximadamente {minutos} min {segundos} seg.'
+                        }
+                    else:
+                        BloqueoEdicion.objects.create(
+                            referencia=referencia,
+                            formulario=formulario,
+                            fecha_expiracion=expiracion,
+                            activo=True,
+                            usuario=request.user,
+                            modulo=modulo
+                        )
+
+            #para los directos
+            if ruta_actual.endswith('/house-detail/') and 'id' in request.GET:
+                referencia = request.GET.get("id")
+                try:
+                    int(referencia)
+                except ValueError:
+                    referencia = None
+
+                if referencia:
+                    partes = ruta_actual.strip('/').split('/')
+                    modulo = partes[0] if len(partes) >= 2 else 'operaciones'
+
+                    formulario = 'editHouseForm'
+                    expiracion = now() + timedelta(minutes=5)
+
+                    # Buscar bloqueo existente
+                    bloqueo = BloqueoEdicion.objects.filter(
+                        referencia=referencia,
+                        formulario=formulario,
+                        fecha_expiracion__gt=now(),
+                        activo=True,
+                        modulo=modulo
+                    ).exclude(usuario=request.user).first()
+
+                    if bloqueo:
+                        tiempo_restante = bloqueo.fecha_expiracion - now()
+                        minutos = int(tiempo_restante.total_seconds() // 60)
+                        segundos = int(tiempo_restante.total_seconds() % 60)
+                        request._bloqueo_info = {
+                            'bloqueado': True,
+                            'usuario': bloqueo.usuario.username,
+                            'mensaje': f'Este registro está siendo editado por {bloqueo.usuario.username}. '
+                                       f'Podrás editarlo en aproximadamente {minutos} min {segundos} seg.'
+                        }
+                    else:
+                        BloqueoEdicion.objects.create(
+                            referencia=referencia,
+                            formulario=formulario,
+                            fecha_expiracion=expiracion,
+                            activo=True,
+                            usuario=request.user,
+                            modulo=modulo
+                        )
 
             # 1. Verificar si es una ruta principal
             for ruta_base, config in RUTAS_BLOQUEO_MODAL.items():
@@ -293,4 +380,5 @@ class BloqueoModalMiddleware:
             return JsonResponse(data)
 
         return response
+
 

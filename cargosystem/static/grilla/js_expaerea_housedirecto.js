@@ -282,7 +282,7 @@ $(document).ready(function () {
                             },
                             {
                                 text: "Modificar",
-                                class: "btn btn-primary",
+                                class: "btn btn-primary boton-modificar-directo",
                                 style: "width:100px",
                                 click: function () {
                                     if (confirm('¿Confirma la acción de modificar el H B/L?')) {
@@ -299,6 +299,12 @@ $(document).ready(function () {
                     });
 
                     fillFormWithDataHouse(data);
+                                                if(data.bloqueado){
+                                alert(data.mensaje);
+                                $('.boton-modificar-directo').prop('disabled',true);
+                            } else{
+                                $('.boton-modificar-directo').prop('disabled',false);
+                            }
                 },
                 error: function (xhr, status, error) {
                     console.error("Error fetching data:", error);
@@ -443,71 +449,84 @@ $(document).ready(function () {
             }
         }
         if (row.length === 1) {
-            get_data_email(row, title, numero, id, master, gastos);
-            //$("#id_to").val(row[0][50]);
-            $("#emails_modal").dialog({
-                autoOpen: true,
-                open: function (event, ui) {
-                    $('#email_add_input').summernote('destroy');
-                    $('#email_add_input').summernote({
-                        placeholder: 'Ingrese su texto aqui',
-                        tabsize: 10,
-                        height: wHeight * 0.60,
-                        width: wWidth * 0.88,
-                        toolbar: [
-                            ['style', ['style']],
-                            ['font', ['bold', 'underline', 'clear']],
-                            ['color', ['color']],
-                            ['para', ['ul', 'ol', 'paragraph']],
-                            ['table', ['table']],
-                            ['insert', ['link', 'picture', 'video']],
-                            ['view', ['fullscreen', 'codeview']]
-                        ]
-                    });
-                    $('#email_add_input').focus();
-                },
-                modal: true,
-                title: title + " para el house N°: " + numero,
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Enviar",
-                        class: "btn btn-primary",
-                        style: "width:100px",
-                        click: function () {
-                            to = $("#id_to").val();
-                            cc = $("#id_cc").val();
-                            cco = $("#id_cco").val();
-                            subject = $("#id_subject").val();
-                            message = $("#email_add_input").summernote('code');
-                            from = $('#id_from').val();
-                            if(!confirm('¿Realmente desea ENVIAR el correo?')){
-                                return;
-                            }
-                            sendEmail(to, cc, cco, subject, message, title, numero,from);
-                            $(this).dialog("close");
+            let selectedRowN= localStorage.getItem('num_house_gasto');
+
+            $.ajax({
+                url: '/exportacion_aerea/house-detail/',
+                data: {id: selectedRowN},
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    get_data_email(row, title, numero, id, master, gastos);
+                    //$("#id_to").val(row[0][50]);
+                    $("#emails_modal").dialog({
+                        autoOpen: true,
+                        open: function (event, ui) {
+                            $('#email_add_input').summernote('destroy');
+                            $('#email_add_input').summernote({
+                                placeholder: 'Ingrese su texto aqui',
+                                tabsize: 10,
+                                height: wHeight * 0.60,
+                                width: wWidth * 0.88,
+                                toolbar: [
+                                    ['style', ['style']],
+                                    ['font', ['bold', 'underline', 'clear']],
+                                    ['color', ['color']],
+                                    ['para', ['ul', 'ol', 'paragraph']],
+                                    ['table', ['table']],
+                                    ['insert', ['link', 'picture', 'video']],
+                                    ['view', ['fullscreen', 'codeview']]
+                                ]
+                            });
+                            $('#email_add_input').focus();
                         },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                            $('#modalSeleccionEmail').dialog("close");
+                        modal: true,
+                        title: title + " para el house N°: " + numero,
+                        height: wHeight * 0.90,
+                        width: wWidth * 0.90,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Enviar",
+                                class: "btn btn-primary",
+                                style: "width:100px",
+                                click: function () {
+                                    to = $("#id_to").val();
+                                    cc = $("#id_cc").val();
+                                    cco = $("#id_cco").val();
+                                    subject = $("#id_subject").val();
+                                    message = $("#email_add_input").summernote('code');
+                                    from = $('#id_from').val();
+                                    if (!confirm('¿Realmente desea ENVIAR el correo?')) {
+                                        return;
+                                    }
+                                    sendEmail(to, cc, cco, subject, message, title, numero, from);
+                                    $(this).dialog("close");
+                                },
+                            }, {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                    $('#modalSeleccionEmail').dialog("close");
 
-                        },
-                    },],
-                beforeClose: function (event, ui) {
-                    //localStorage.removeItem('num_house_gasto');
-                    $('#table_add_im tbody tr').removeClass('table-secondary');
-                    $('#table_edit_im tbody tr').removeClass('table-secondary');
-                    $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
+                                },
+                            },],
+                        beforeClose: function (event, ui) {
+                            //localStorage.removeItem('num_house_gasto');
+                            $('#table_add_im tbody tr').removeClass('table-secondary');
+                            $('#table_edit_im tbody tr').removeClass('table-secondary');
+                            $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
 
 
+                        }
+                    })
                 }
-            })
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -730,76 +749,87 @@ function abrir_modal_mails_d(e) {
 }
 
 function get_datos_logs_h() {
+let selectedRowN = localStorage.getItem('num_house_gasto');
 
-    row = table.rows('.table-secondary').data();
-    console.log(row);
-        if (row.length === 1) {
-            $("#logs_modal").dialog({
-                autoOpen: true,
-                open: function () {
+            $.ajax({
+                url: '/exportacion_aerea/house-detail/',
+                data: {id: selectedRowN},
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    row = table.rows('.table-secondary').data();
+                    console.log(row);
+                    if (row.length === 1) {
+                        $("#logs_modal").dialog({
+                            autoOpen: true,
+                            open: function () {
 
-                },
-                modal: true,
-                title: "Log de interacciones para en el embarque N°: " + row[0][3],
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
-                class: 'modal fade',
-                buttons: [ {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    },],
-                beforeClose: function (event, ui) {
+                            },
+                            modal: true,
+                            title: "Log de interacciones para en el embarque N°: " + row[0][3],
+                            height: wHeight * 0.90,
+                            width: wWidth * 0.90,
+                            class: 'modal fade',
+                            buttons: [{
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                },
+                            },],
+                            beforeClose: function (event, ui) {
 
+                            }
+                        });
+                        $("#tabla_logs").dataTable().fnDestroy();
+                        table_logs = $('#tabla_logs').DataTable({
+                            "order": [[2, "desc"], [1, "desc"]],
+                            "columnDefs": [
+                                {
+                                    "targets": [0],
+                                    "orderable": false,
+                                },
+                            ],
+                            "processing": true,
+                            "serverSide": true,
+                            "dom": 'Btlipr',
+                            "scrollX": true,
+                            "pageLength": 100,
+                            "language": {
+                                url: "/static/datatables/es_ES.json"
+                            },
+                            "ajax": {
+                                "url": "/exportacion_aerea/source_logs/",
+                                'type': 'GET',
+                                "data": function (d) {
+                                    return $.extend({}, d, {
+                                        "id": row[0][0], 'numero': row[0][3]
+                                    });
+                                }
+                            },
+                            "rowCallback": function (row, data, index) {
+                                // data[3] es la columna 'Acción' => Created / Updated / Deleted
+                                var accion = data[3].toLowerCase();
+
+                                // Limpiar clases anteriores
+                                $(row).removeClass('table-success table-warning table-danger');
+
+                                if (accion === 'create') {
+                                    $(row).addClass('table-success');
+                                } else if (accion === 'update') {
+                                    $(row).addClass('table-warning');
+                                } else if (accion === 'delete') {
+                                    $(row).addClass('table-danger');
+                                }
+                            }
+                        });
+                    } else {
+                        alert('Debe seleccionar al menos un registro');
+                    }
                 }
             });
-            $("#tabla_logs").dataTable().fnDestroy();
-            table_logs = $('#tabla_logs').DataTable({
-        "order": [[2, "desc"], [1, "desc"]],
-        "columnDefs": [
-            {
-                "targets": [ 0 ],
-                "orderable": false,
-            },
-        ],
-        "processing": true,
-        "serverSide": true,
-        "dom": 'Btlipr',
-        "scrollX": true,
-        "pageLength": 100,
-        "language": {
-            url: "/static/datatables/es_ES.json"
-        },
-        "ajax": {
-            "url": "/exportacion_aerea/source_logs/",
-            'type': 'GET',
-            "data": function (d) {
-                return $.extend({}, d, {
-                    "id": row[0][0],'numero':row[0][3]
-                });
-            }
-        },
-        "rowCallback": function(row, data, index) {
-            // data[3] es la columna 'Acción' => Created / Updated / Deleted
-            var accion = data[3].toLowerCase();
-
-            // Limpiar clases anteriores
-            $(row).removeClass('table-success table-warning table-danger');
-
-            if (accion === 'create') {
-                $(row).addClass('table-success');
-            } else if (accion === 'update') {
-                $(row).addClass('table-warning');
-            } else if (accion === 'delete') {
-                $(row).addClass('table-danger');
-            }
-        }
-    });
-        } else {
-            alert('Debe seleccionar al menos un registro');
-        }
-
 }

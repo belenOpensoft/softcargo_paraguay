@@ -1,4 +1,16 @@
 /* INITIAL CONTROL PAGE */
+
+// $.ajax({
+//                 url: '/get_data_seguimiento/' + row[0][0] + '/',
+//                 type: 'GET',
+//                 success: function (data) {
+//                     if (data.bloqueado) {
+//                         alert(data.mensaje);
+//                         return;
+//                     }
+
+//trancar tambien gastos master
+
 var wWidth = $(window).width();
 var dWidth = wWidth * 0.40;
 var wHeight = $(window).height();
@@ -1463,7 +1475,8 @@ var expandedRow;
             data: { id: selectedRowId },
             method: 'GET',
             success: function (data) {
-                $("#edit_master_modal").dialog({
+
+                    $("#edit_master_modal").dialog({
                     autoOpen: true,
                     open: function (event, ui) {
                         var contentWidth = $('#edit_master_modal #edit_master_form').outerWidth(true);
@@ -1498,11 +1511,17 @@ var expandedRow;
                     }
                     }
                 });
+                    // Llenar el formulario con los datos
+                    fillFormWithData(data);
+                    //cargar tabla de houses
+                    cargar_hauses_master_edit();
 
-                // Llenar el formulario con los datos
-                fillFormWithData(data);
-                //cargar tabla de houses
-                cargar_hauses_master_edit();
+                    if(data.bloqueado){
+                        alert(data.mensaje);
+                        $('#modificar_master').prop('disabled',true);
+                    } else{
+                        $('#modificar_master').prop('disabled',false);
+                    }
             },
             error: function (xhr, status, error) {
                 console.error("Error fetching data:", error);
@@ -1876,72 +1895,83 @@ var expandedRow;
     //gastos master
     $('#gastos_btn_master').click(function () {
         $("#id_gasto_id_").val('');
+        let id = localStorage.getItem('id_master_editar');
         let selectedRowN = localStorage.getItem('numero_master_seleccionado');
 
         if (selectedRowN!=null) {
-        get_datos_gastos();
-            $('#gastos_form').trigger("reset");
-            $("#gastos_modal").dialog({
-                autoOpen: true,
-                open: function () {
-                document.getElementById('numero_gasto_master').value=selectedRowN;
-                },
-                modal: true,
-                title: "Gastos para el master N°: " + selectedRowN,
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Eliminar",
-                        class: "btn btn-danger",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                row = table_gastos.rows('.table-secondary').data();
-                                if (row.length === 1) {
-                                    miurl = "/importacion_maritima/eliminar_gasto_master/";
-                                    var toData = {
-                                        'id': row[0][0],
-                                        'csrfmiddlewaretoken': csrf_token,
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        url: miurl,
-                                        data: toData,
-                                        success: function (resultado) {
-                                            aux = resultado['resultado'];
-                                            if (aux === 'exito') {
-                                                $("#table_gastos").dataTable().fnDestroy();
-                                                get_datos_gastos();
-                                                alert('Eliminado correctamente');
-                                               // $('#gastos_btn_master').addClass('triggered').trigger('click');
-                                               // mostrarToast('¡Gasto eliminado correctamente!', 'success');
-                                            } else {
-                                                alert(aux);
-                                            }
+            $.ajax({
+                url: '/importacion_maritima/master-detail/',
+                data: { id: id },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    get_datos_gastos();
+                    $('#gastos_form').trigger("reset");
+                    $("#gastos_modal").dialog({
+                        autoOpen: true,
+                        open: function () {
+                            document.getElementById('numero_gasto_master').value = selectedRowN;
+                        },
+                        modal: true,
+                        title: "Gastos para el master N°: " + selectedRowN,
+                        height: wHeight * 0.90,
+                        width: wWidth * 0.90,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Eliminar",
+                                class: "btn btn-danger",
+                                style: "width:100px",
+                                click: function () {
+                                    if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
+                                        row = table_gastos.rows('.table-secondary').data();
+                                        if (row.length === 1) {
+                                            miurl = "/importacion_maritima/eliminar_gasto_master/";
+                                            var toData = {
+                                                'id': row[0][0],
+                                                'csrfmiddlewaretoken': csrf_token,
+                                            };
+                                            $.ajax({
+                                                type: "POST",
+                                                url: miurl,
+                                                data: toData,
+                                                success: function (resultado) {
+                                                    aux = resultado['resultado'];
+                                                    if (aux === 'exito') {
+                                                        $("#table_gastos").dataTable().fnDestroy();
+                                                        get_datos_gastos();
+                                                        alert('Eliminado correctamente');
+                                                        // $('#gastos_btn_master').addClass('triggered').trigger('click');
+                                                        // mostrarToast('¡Gasto eliminado correctamente!', 'success');
+                                                    } else {
+                                                        alert(aux);
+                                                    }
+                                                }
+                                            });
+                                        } else {
+                                            alert('Debe seleccionar un unico registro');
                                         }
-                                    });
-                                } else {
-                                    alert('Debe seleccionar un unico registro');
-                                }
-                            }
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    }],
-                beforeClose: function (event, ui) {
-                localStorage.removeItem('numero_master_seleccionado');
-                    // table.ajax.reload();
-                    // $("#tabla_gastos").dataTable().fnDestroy();
+                                    }
+                                },
+                            }, {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                },
+                            }],
+                        beforeClose: function (event, ui) {
+                            localStorage.removeItem('numero_master_seleccionado');
+                            // table.ajax.reload();
+                            // $("#tabla_gastos").dataTable().fnDestroy();
+                        }
+                    })
                 }
-            })
-
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -2363,34 +2393,49 @@ var expandedRow;
     //importar hijo desde seguimeintos edit master form
     var table_seg;
     $('#importar_hijo_edit_master').click(function () {
-    localStorage.setItem('lugar_importarhijo','editmaster');
-        importar_hijo_tabla();
+        let selectedRowN = localStorage.getItem('id_master_editar');
 
-        $("#importar_hijo_modal").dialog({
-            autoOpen: true,
-            open: function () {
+        if (selectedRowN!=null) {
+            $.ajax({
+                url: '/importacion_maritima/master-detail/',
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    localStorage.setItem('lugar_importarhijo', 'editmaster');
+                    importar_hijo_tabla();
 
-            },
-            modal: true,
-            title: "Importar hijo desde seguimientos",
-            height: wHeight * 0.90,
-            width: wWidth * 0.90,
-            class: 'modal fade',
-            buttons: [
-                {
-                    text: "Salir",
-                    class: "btn btn-dark",
-                    style: "width:100px",
-                    click: function () {
-                        $(this).dialog("close");
-                        $('#tabla_seguimiento_IH').DataTable().destroy();
-                    },
+                    $("#importar_hijo_modal").dialog({
+                        autoOpen: true,
+                        open: function () {
+
+                        },
+                        modal: true,
+                        title: "Importar hijo desde seguimientos",
+                        height: wHeight * 0.90,
+                        width: wWidth * 0.90,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                    $('#tabla_seguimiento_IH').DataTable().destroy();
+                                },
+                            }
+                        ],
+                        beforeClose: function (event, ui) {
+                            // Optional actions before closing
+                        }
+                    });
                 }
-            ],
-            beforeClose: function (event, ui) {
-                // Optional actions before closing
-            }
-        });
+            });
+        }
     });
     $('#filtrar_seguimientos').click(function () {
         var filtroNumero = $('#filtro_numero').val();
@@ -3321,74 +3366,86 @@ table_edit_im = $('#table_edit_im').DataTable({
     "initComplete": function() {
      //doble click modificar house en edit_master form
     $('#table_edit_im tbody').off('dblclick').on('dblclick', 'tr', function () {
-        var tr = $(this).closest('tr');
-        var row = table_edit_im.row(tr);
-        var rowData = row.data();
-
-        if (rowData) {
-            var selectedRowId = rowData[3];
-            localStorage.setItem('numero_embarque', selectedRowId);
-
+            let selectedRowN = localStorage.getItem('id_master_editar');
             $.ajax({
-            url: '/importacion_maritima/house-detail',
-            data: { id: selectedRowId },
-            method: 'GET',
-            success: function (data) {
-                $("#edit_house_modal").dialog({
-                    autoOpen: true,
-                    open: function (event, ui) {
-                    },
-                    modal: true,
-                    title: "Editar house",
-                     width: 'auto',
-                     height: 'auto',
-                     position: { my: "center", at: "center", of: window },
-                    buttons: [
-                        {
-                           text: "Salir",
-                           class: "btn btn-dark",
-                           style: "width:100px",
-                           click: function () {
-                               $(this).dialog("close");
-                           },
-                       },
-                       {
-                           text: "Modificar",
-                           class: "btn btn-primary",
-                           style: "width:100px",
-                           click: function () {
-                            if (confirm('¿Confirma la acción de modificar el H B/L?')) {
-                                $('#edit_house_form').trigger('submit'); // Dispara el evento submit del formulario
-                            }
-
-                           },
-                       },
-                    ],
-                    beforeClose: function (event, ui) {
-
+                url: '/importacion_maritima/master-detail/',
+                data: {id: selectedRowN},
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
                     }
+                    var tr = $(this).closest('tr');
+                    var row = table_edit_im.row(tr);
+                    var rowData = row.data();
 
-                });
+                    if (rowData) {
+                        var selectedRowId = rowData[3];
+                        localStorage.setItem('numero_embarque', selectedRowId);
 
-                fillFormWithDataHouse(data);
-            },
-            error: function (xhr, status, error) {
-                console.error("Error fetching data:", error);
-            }
-        });
-                    $('#cliente_addh_e').addClass('input-sobrepasar');
-                    $('#embarcador_addh_e').addClass('input-sobrepasar');
-                    $('#consignatario_addh_e').addClass('input-sobrepasar');
-                    $('#agente_addh_e').addClass('input-sobrepasar');
-                    $('#transportista_addh_e').addClass('input-sobrepasar');
-                    $('#armador_addh_e').addClass('input-sobrepasar');
-                    $('#agecompras_addh_e').addClass('input-sobrepasar');
-                    $('#ageventas_addh_e').addClass('input-sobrepasar');
-                    $('#deposito_addh_e').addClass('input-sobrepasar');
-                    $('#vendedor_addh_e').addClass('input-sobrepasar');
-        }else{
-        alert('Seleccione una fila.');
-        }
+                        $.ajax({
+                            url: '/importacion_maritima/house-detail',
+                            data: {id: selectedRowId},
+                            method: 'GET',
+                            success: function (data) {
+                                $("#edit_house_modal").dialog({
+                                    autoOpen: true,
+                                    open: function (event, ui) {
+                                    },
+                                    modal: true,
+                                    title: "Editar house",
+                                    width: 'auto',
+                                    height: 'auto',
+                                    position: {my: "center", at: "center", of: window},
+                                    buttons: [
+                                        {
+                                            text: "Salir",
+                                            class: "btn btn-dark",
+                                            style: "width:100px",
+                                            click: function () {
+                                                $(this).dialog("close");
+                                            },
+                                        },
+                                        {
+                                            text: "Modificar",
+                                            class: "btn btn-primary",
+                                            style: "width:100px",
+                                            click: function () {
+                                                if (confirm('¿Confirma la acción de modificar el H B/L?')) {
+                                                    $('#edit_house_form').trigger('submit'); // Dispara el evento submit del formulario
+                                                }
+
+                                            },
+                                        },
+                                    ],
+                                    beforeClose: function (event, ui) {
+
+                                    }
+
+                                });
+
+                                fillFormWithDataHouse(data);
+                            },
+                            error: function (xhr, status, error) {
+                                console.error("Error fetching data:", error);
+                            }
+                        });
+                        $('#cliente_addh_e').addClass('input-sobrepasar');
+                        $('#embarcador_addh_e').addClass('input-sobrepasar');
+                        $('#consignatario_addh_e').addClass('input-sobrepasar');
+                        $('#agente_addh_e').addClass('input-sobrepasar');
+                        $('#transportista_addh_e').addClass('input-sobrepasar');
+                        $('#armador_addh_e').addClass('input-sobrepasar');
+                        $('#agecompras_addh_e').addClass('input-sobrepasar');
+                        $('#ageventas_addh_e').addClass('input-sobrepasar');
+                        $('#deposito_addh_e').addClass('input-sobrepasar');
+                        $('#vendedor_addh_e').addClass('input-sobrepasar');
+                    } else {
+                        alert('Seleccione una fila.');
+                    }
+                }
+            });
     });
     $('#table_edit_im tbody').off('click').on('click', 'tr', function (event) {
     event.stopPropagation();
@@ -4006,74 +4063,95 @@ function guardar_archivo_importado(data) {
 
 //eliminar houses de un master
 function eliminar_house(){
-    if(localStorage.getItem('lugar_importarhijo')==='editmaster'){
-         if (confirm('¿Confirma eliminar seleccionado?')) {
-       let row = table_edit_im.rows('.table-secondary').data();
-        if (row.length === 1) {
-            let master = localStorage.getItem('master_editar');
-            eliminar_agregado(master,row[0][0]);
+        let tabla = localStorage.getItem('tabla_origen');
+        let selectedRowN,url;
 
+        if (tabla.includes('tabla_house_directo')){
+         selectedRowN= localStorage.getItem('num_house_gasto');
+         url='house-detail/';
+        }else{
+         selectedRowN= localStorage.getItem('id_master_editar');
+         url='master-detail/';
+        }
 
-            miurl = "/importacion_maritima/eliminar_house/";
-            var toData = {
-                'id': row[0][3],
-                'csrfmiddlewaretoken': csrf_token,
-            };
             $.ajax({
-                type: "POST",
-                url: miurl,
-                data: toData,
-                success: function (resultado) {
-                    aux = resultado['resultado'];
-                    if (aux === 'exito') {
-                    //actualizar dependiendo de si es la tabla de editar master o de addmaster
-                        $('#table_edit_im').DataTable().destroy();
-                        cargar_hauses_master_edit();
-                        alert('Eliminado correctamente');
+                url: '/importacion_maritima/'+url,
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    if (localStorage.getItem('lugar_importarhijo') === 'editmaster') {
+                        if (confirm('¿Confirma eliminar seleccionado?')) {
+                            let row = table_edit_im.rows('.table-secondary').data();
+                            if (row.length === 1) {
+                                let master = localStorage.getItem('master_editar');
+                                eliminar_agregado(master, row[0][0]);
+
+
+                                miurl = "/importacion_maritima/eliminar_house/";
+                                var toData = {
+                                    'id': row[0][3],
+                                    'csrfmiddlewaretoken': csrf_token,
+                                };
+                                $.ajax({
+                                    type: "POST",
+                                    url: miurl,
+                                    data: toData,
+                                    success: function (resultado) {
+                                        aux = resultado['resultado'];
+                                        if (aux === 'exito') {
+                                            //actualizar dependiendo de si es la tabla de editar master o de addmaster
+                                            $('#table_edit_im').DataTable().destroy();
+                                            cargar_hauses_master_edit();
+                                            alert('Eliminado correctamente');
+                                        } else {
+                                            alert(aux);
+                                        }
+                                    }
+                                });
+                            } else {
+                                alert('Debe seleccionar un unico registro');
+                            }
+                        }
+                    } else if (localStorage.getItem('lugar_importarhijo') === 'addmaster') {
+                        if (confirm('¿Confirma eliminar seleccionado?')) {
+                            let row = table_add_im.rows('.table-secondary').data();
+                            if (row.length === 1) {
+                                miurl = "/importacion_maritima/eliminar_house/";
+                                var toData = {
+                                    'id': row[0][3],
+                                    'csrfmiddlewaretoken': csrf_token,
+                                };
+                                $.ajax({
+                                    type: "POST",
+                                    url: miurl,
+                                    data: toData,
+                                    success: function (resultado) {
+                                        aux = resultado['resultado'];
+                                        if (aux === 'exito') {
+                                            let master = localStorage.getItem('master_editar');
+                                            eliminar_agregado(master, row[0][0]);
+                                            //actualizar dependiendo de si es la tabla de editar master o de addmaster
+                                            $('#table_add_im').DataTable().destroy();
+                                            cargar_hauses_master();
+                                            alert('Eliminado correctamente');
+                                        } else {
+                                            alert(aux);
+                                        }
+                                    }
+                                });
+                            } else {
+                                alert('Debe seleccionar un unico registro');
+                            }
+                        }
                     } else {
-                        alert(aux);
+                        alert('ocurrio error con lugar_importarhijo');
                     }
                 }
             });
-        } else {
-            alert('Debe seleccionar un unico registro');
-        }
-    }
-    }else if(localStorage.getItem('lugar_importarhijo')==='addmaster'){
-         if (confirm('¿Confirma eliminar seleccionado?')) {
-      let row = table_add_im.rows('.table-secondary').data();
-        if (row.length === 1) {
-            miurl = "/importacion_maritima/eliminar_house/";
-            var toData = {
-                'id': row[0][3],
-                'csrfmiddlewaretoken': csrf_token,
-            };
-            $.ajax({
-                type: "POST",
-                url: miurl,
-                data: toData,
-                success: function (resultado) {
-                    aux = resultado['resultado'];
-                    if (aux === 'exito') {
-                    let master = localStorage.getItem('master_editar');
-                    eliminar_agregado(master,row[0][0]);
-                    //actualizar dependiendo de si es la tabla de editar master o de addmaster
-                        $('#table_add_im').DataTable().destroy();
-                        cargar_hauses_master();
-                        alert('Eliminado correctamente');
-                    } else {
-                        alert(aux);
-                    }
-                }
-            });
-        } else {
-            alert('Debe seleccionar un unico registro');
-        }
-    }
-    }else{
-    alert('ocurrio error con lugar_importarhijo');
-    }
-
 
 }
 function eliminar_agregado(master,id_house){
@@ -4239,90 +4317,112 @@ function get_datos_gastos_house() {
     });
 }
 function gastos_btn_h_click(){
-        $("#id_gasto_id_house").val('');
-        let selectedRowId = localStorage.getItem('id_house_gasto');
-        let selectedRowN = localStorage.getItem('num_house_gasto');
-        let consignatario_code;
-        if ($.fn.dataTable.isDataTable('#table_edit_im')) {
-            consignatario_code = $('#table_edit_im').DataTable().row('.table-secondary').data()[21];
-        } else {
-            console.log($('#tabla_house_directo').DataTable().row('.table-secondary').data());
-            consignatario_code = $('#tabla_house_directo').DataTable().row('.table-secondary').data()[21];
-        }
-        if (selectedRowN!=null) {
-            get_datos_gastos_house();
-            $('#gastos_form_house').trigger("reset");
-            $("#id_socio_h").val(consignatario_code);
-            $("#gastos_modal_house").dialog({
-                autoOpen: true,
-                open: function () {
-                document.getElementById('numero_gasto_house').value=selectedRowN;
-                },
-                modal: true,
-                title: "Gastos para el House N°: " + selectedRowN,
-                height: wHeight * 0.70 ,
-                width: wWidth * 0.70,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Eliminar",
-                        class: "btn btn-danger",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                row = table_gastos.rows('.table-secondary').data();
-                                if (row.length === 1) {
-                                    miurl = "/importacion_maritima/eliminar_gasto_house/";
-                                    var toData = {
-                                        'id': row[0][0],
-                                        'csrfmiddlewaretoken': csrf_token,
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        url: miurl,
-                                        data: toData,
-                                        success: function (resultado) {
-                                            aux = resultado['resultado'];
-                                            if (aux === 'exito') {
-                                                $("#table_gastos_house").dataTable().fnDestroy();
-                                                get_datos_gastos_house();
-                                                alert('Eliminado correctamente');
-                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
-                                                }
+        let tabla = localStorage.getItem('tabla_origen');
+        let selectedRowN,url;
 
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
-                                                }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
-                                                }
+        if (tabla.includes('tabla_house_directo')){
+         selectedRowN= localStorage.getItem('num_house_gasto');
+         url='house-detail/';
+        }else{
+         selectedRowN= localStorage.getItem('id_master_editar');
+         url='master-detail/';
+        }
+
+            $.ajax({
+                url: '/importacion_maritima/'+url,
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    $("#id_gasto_id_house").val('');
+                    let selectedRowId = localStorage.getItem('id_house_gasto');
+                    let selectedRowN = localStorage.getItem('num_house_gasto');
+                    let consignatario_code;
+                    if ($.fn.dataTable.isDataTable('#table_edit_im')) {
+                        consignatario_code = $('#table_edit_im').DataTable().row('.table-secondary').data()[21];
+                    } else {
+                        consignatario_code = $('#tabla_house_directo').DataTable().row('.table-secondary').data()[21];
+                    }
+                    if (selectedRowN != null) {
+                        get_datos_gastos_house();
+                        $('#gastos_form_house').trigger("reset");
+                        $("#id_socio_h").val(consignatario_code);
+                        $("#gastos_modal_house").dialog({
+                            autoOpen: true,
+                            open: function () {
+                                document.getElementById('numero_gasto_house').value = selectedRowN;
+                            },
+                            modal: true,
+                            title: "Gastos para el House N°: " + selectedRowN,
+                            height: wHeight * 0.70,
+                            width: wWidth * 0.70,
+                            class: 'modal fade',
+                            buttons: [
+                                {
+                                    text: "Eliminar",
+                                    class: "btn btn-danger",
+                                    style: "width:100px",
+                                    click: function () {
+                                        if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
+                                            row = table_gastos.rows('.table-secondary').data();
+                                            if (row.length === 1) {
+                                                miurl = "/importacion_maritima/eliminar_gasto_house/";
+                                                var toData = {
+                                                    'id': row[0][0],
+                                                    'csrfmiddlewaretoken': csrf_token,
+                                                };
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: miurl,
+                                                    data: toData,
+                                                    success: function (resultado) {
+                                                        aux = resultado['resultado'];
+                                                        if (aux === 'exito') {
+                                                            $("#table_gastos_house").dataTable().fnDestroy();
+                                                            get_datos_gastos_house();
+                                                            alert('Eliminado correctamente');
+                                                            if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                                $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                            }
+
+                                                            if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                                                $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                            }
+                                                            if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                                $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                            }
+                                                        } else {
+                                                            alert(aux);
+                                                        }
+                                                    }
+                                                });
                                             } else {
-                                                alert(aux);
+                                                alert('Debe seleccionar un unico registro');
                                             }
                                         }
-                                    });
-                                } else {
-                                    alert('Debe seleccionar un unico registro');
-                                }
+                                    },
+                                }, {
+                                    text: "Salir",
+                                    class: "btn btn-dark",
+                                    style: "width:100px",
+                                    click: function () {
+                                        $(this).dialog("close");
+                                    },
+                                }],
+                            beforeClose: function (event, ui) {
+                                $("#tabla_gastos").dataTable().fnDestroy();
                             }
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    }],
-                beforeClose: function (event, ui) {
-                $("#tabla_gastos").dataTable().fnDestroy();
-                }
-            })
+                        })
 
-        } else {
-            alert('Debe seleccionar al menos un registro');
-        }
+                    } else {
+                        alert('Debe seleccionar al menos un registro');
+                    }
+
+                }
+            });
 }
 
 //rutas house
@@ -4350,87 +4450,109 @@ function get_datos_rutas_house() {
     get_datos_seguimiento_rutas(numero);
 }
 function rutas_btn_h_click(){
-  $("#id_house_ruta").val('');
-        let selectedRowId = localStorage.getItem('id_house_gasto');
-        let selectedRowN = localStorage.getItem('num_house_gasto');
-        if (selectedRowN!=null) {
-        get_datos_rutas_house();
-            $('#rutas_form_house').trigger("reset");
-            $("#rutas_modal_house").dialog({
-                autoOpen: true,
-                open: function () {
-                document.getElementById('id_ruta_id').value=selectedRowN;
-                },
-                modal: true,
-                title: "Rutas para el House N°: " + selectedRowN,
-                height: 'auto',
-                width: 'auto',
-                position: { my: "top", at: "top+20", of: window },
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Eliminar",
-                        class: "btn btn-danger",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                var row = $('#tabla_rutas_house').DataTable().rows('.table-secondary').data();
-                                if (row.length === 1) {
-                                    miurl = "/importacion_maritima/eliminar_ruta_house/";
-                                    var toData = {
-                                        'id': row[0][0],
-                                        'csrfmiddlewaretoken': csrf_token,
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        url: miurl,
-                                        data: toData,
-                                        success: function (resultado) {
-                                            aux = resultado['resultado'];
-                                            if (aux === 'exito') {
-                                                $("#tabla_rutas_house").dataTable().fnDestroy();
-                                                get_datos_rutas_house();
-                                                alert('Eliminado correctamente');
-                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
-                                                }
+        let tabla = localStorage.getItem('tabla_origen');
+        let selectedRowN,url;
 
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
-                                                }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
-                                                }
+        if (tabla.includes('tabla_house_directo')){
+         selectedRowN= localStorage.getItem('num_house_gasto');
+         url='house-detail/';
+        }else{
+         selectedRowN= localStorage.getItem('id_master_editar');
+         url='master-detail/';
+        }
+
+            $.ajax({
+                url: '/importacion_maritima/'+url,
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    $("#id_house_ruta").val('');
+                    let selectedRowId = localStorage.getItem('id_house_gasto');
+                    let selectedRowN = localStorage.getItem('num_house_gasto');
+                    if (selectedRowN != null) {
+                        get_datos_rutas_house();
+                        $('#rutas_form_house').trigger("reset");
+                        $("#rutas_modal_house").dialog({
+                            autoOpen: true,
+                            open: function () {
+                                document.getElementById('id_ruta_id').value = selectedRowN;
+                            },
+                            modal: true,
+                            title: "Rutas para el House N°: " + selectedRowN,
+                            height: 'auto',
+                            width: 'auto',
+                            position: {my: "top", at: "top+20", of: window},
+                            class: 'modal fade',
+                            buttons: [
+                                {
+                                    text: "Eliminar",
+                                    class: "btn btn-danger",
+                                    style: "width:100px",
+                                    click: function () {
+                                        if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
+                                            var row = $('#tabla_rutas_house').DataTable().rows('.table-secondary').data();
+                                            if (row.length === 1) {
+                                                miurl = "/importacion_maritima/eliminar_ruta_house/";
+                                                var toData = {
+                                                    'id': row[0][0],
+                                                    'csrfmiddlewaretoken': csrf_token,
+                                                };
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: miurl,
+                                                    data: toData,
+                                                    success: function (resultado) {
+                                                        aux = resultado['resultado'];
+                                                        if (aux === 'exito') {
+                                                            $("#tabla_rutas_house").dataTable().fnDestroy();
+                                                            get_datos_rutas_house();
+                                                            alert('Eliminado correctamente');
+                                                            if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                                $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                            }
+
+                                                            if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                                                $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                            }
+                                                            if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                                $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                            }
+                                                        } else {
+                                                            alert(aux);
+                                                        }
+                                                    }
+                                                });
                                             } else {
-                                                alert(aux);
+                                                alert('Debe seleccionar un unico registro');
                                             }
                                         }
-                                    });
-                                } else {
-                                    alert('Debe seleccionar un unico registro');
-                                }
-                            }
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    }],
-                beforeClose: function (event, ui) {
-               // localStorage.removeItem('num_house_gasto');
-                 $("#table_rutas_house").dataTable().fnDestroy();
+                                    },
+                                }, {
+                                    text: "Salir",
+                                    class: "btn btn-dark",
+                                    style: "width:100px",
+                                    click: function () {
+                                        $(this).dialog("close");
+                                    },
+                                }],
+                            beforeClose: function (event, ui) {
+                                // localStorage.removeItem('num_house_gasto');
+                                $("#table_rutas_house").dataTable().fnDestroy();
 //                 $('#table_add_im tbody tr').removeClass('table-secondary');
 //                $('#table_edit_im tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo_im tbody tr').removeClass('table-secondary');
-                }
-            })
+                            }
+                        })
 
-        } else {
-            alert('Debe seleccionar al menos un registro');
-        }
+                    } else {
+                        alert('Debe seleccionar al menos un registro');
+                    }
+                }
+            });
 }
 function get_datos_seguimiento_rutas(numero) {
     $.ajax({
@@ -4488,87 +4610,109 @@ function get_datos_envases_house(){
     });
 }
 function envases_btn_h_click(){
-$("#id_envase_id").val('');
-        let selectedRowId = localStorage.getItem('id_house_gasto');
-        let selectedRowN = localStorage.getItem('num_house_gasto');
+        let tabla = localStorage.getItem('tabla_origen');
+        let selectedRowN,url;
 
-        if (selectedRowN!=null) {
-        get_datos_envases_house();
-            $('#envases_form_house').trigger("reset");
-            $("#envases_modal_house").dialog({
-                autoOpen: true,
-                open: function () {
-                document.getElementById('numero_envase').value=selectedRowN;
-                },
-                modal: true,
-                title: "Envases para el House N°: " + selectedRowN,
-                height: wHeight * 0.90,
-                width: wWidth * 0.70,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Eliminar",
-                        class: "btn btn-danger",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma eliminar el seleccionado?')) {
-                                var row = $('#tabla_envases_house').DataTable().rows('.table-secondary').data();
-                                if (row.length === 1) {
-                                    miurl = "/importacion_maritima/eliminar_envases_house/";
-                                    var toData = {
-                                        'id': row[0][0],
-                                        'csrfmiddlewaretoken': csrf_token,
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        url: miurl,
-                                        data: toData,
-                                        success: function (resultado) {
-                                            aux = resultado['resultado'];
-                                            if (aux === 'exito') {
-                                                $("#tabla_envases_house").dataTable().fnDestroy();
-                                                get_datos_envases_house();
-                                                alert('Eliminado correctamente');
-                                                 if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
-                                                }
+        if (tabla.includes('tabla_house_directo')){
+         selectedRowN= localStorage.getItem('num_house_gasto');
+         url='house-detail/';
+        }else{
+         selectedRowN= localStorage.getItem('id_master_editar');
+         url='master-detail/';
+        }
 
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
-                                                }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
-                                                }
+            $.ajax({
+                url: '/importacion_maritima/'+url,
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    $("#id_envase_id").val('');
+                    let selectedRowId = localStorage.getItem('id_house_gasto');
+                    let selectedRowN = localStorage.getItem('num_house_gasto');
+
+                    if (selectedRowN != null) {
+                        get_datos_envases_house();
+                        $('#envases_form_house').trigger("reset");
+                        $("#envases_modal_house").dialog({
+                            autoOpen: true,
+                            open: function () {
+                                document.getElementById('numero_envase').value = selectedRowN;
+                            },
+                            modal: true,
+                            title: "Envases para el House N°: " + selectedRowN,
+                            height: wHeight * 0.90,
+                            width: wWidth * 0.70,
+                            class: 'modal fade',
+                            buttons: [
+                                {
+                                    text: "Eliminar",
+                                    class: "btn btn-danger",
+                                    style: "width:100px",
+                                    click: function () {
+                                        if (confirm('¿Confirma eliminar el seleccionado?')) {
+                                            var row = $('#tabla_envases_house').DataTable().rows('.table-secondary').data();
+                                            if (row.length === 1) {
+                                                miurl = "/importacion_maritima/eliminar_envases_house/";
+                                                var toData = {
+                                                    'id': row[0][0],
+                                                    'csrfmiddlewaretoken': csrf_token,
+                                                };
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: miurl,
+                                                    data: toData,
+                                                    success: function (resultado) {
+                                                        aux = resultado['resultado'];
+                                                        if (aux === 'exito') {
+                                                            $("#tabla_envases_house").dataTable().fnDestroy();
+                                                            get_datos_envases_house();
+                                                            alert('Eliminado correctamente');
+                                                            if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                                $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                            }
+
+                                                            if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                                                $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                            }
+                                                            if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                                $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                            }
+                                                        } else {
+                                                            alert(aux);
+                                                        }
+                                                    }
+                                                });
                                             } else {
-                                                alert(aux);
+                                                alert('Debe seleccionar un unico registro');
                                             }
                                         }
-                                    });
-                                } else {
-                                    alert('Debe seleccionar un unico registro');
-                                }
-                            }
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    }],
-                beforeClose: function (event, ui) {
-                //localStorage.removeItem('num_house_gasto');
-                   $("#tabla_envases_house").dataTable().fnDestroy();
+                                    },
+                                }, {
+                                    text: "Salir",
+                                    class: "btn btn-dark",
+                                    style: "width:100px",
+                                    click: function () {
+                                        $(this).dialog("close");
+                                    },
+                                }],
+                            beforeClose: function (event, ui) {
+                                //localStorage.removeItem('num_house_gasto');
+                                $("#tabla_envases_house").dataTable().fnDestroy();
 //                 $('#table_add_im tbody tr').removeClass('table-secondary');
 //                $('#table_edit_im tbody tr').removeClass('table-secondary');
 //                $('#'#tabla_house_directo' tbody tr').removeClass('table-secondary');
+                            }
+                        })
+                        get_sugerencias_envases(selectedRowN);
+                    } else {
+                        alert('Debe seleccionar al menos un registro');
+                    }
                 }
-            })
-            get_sugerencias_envases(selectedRowN);
-        } else {
-            alert('Debe seleccionar al menos un registro');
-        }
+            });
 }
 function get_sugerencias_envases(numero) {
 
@@ -4639,87 +4783,109 @@ function get_datos_embarques_house(){
     });
 }
 function embarques_btn_h_click(){
-$("#id_embarque_id").val('');
-        let selectedRowId = localStorage.getItem('id_house_gasto');
-        let selectedRowN = localStorage.getItem('num_house_gasto');
+        let tabla = localStorage.getItem('tabla_origen');
+        let selectedRowN,url;
 
-        if (selectedRowN!=null) {
-         get_datos_embarques_house();
-            $('#embarques_form_house').trigger("reset");
-            $("#embarques_modal_house").dialog({
-                autoOpen: true,
-                open: function () {
-                document.getElementById('numero_embarque').value=selectedRowN;
-                },
-                modal: true,
-                title: "Embarques para el House N°: " + selectedRowN,
-                height: wHeight * 0.60,
-                width: wWidth * 0.70,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Eliminar",
-                        class: "btn btn-danger",
-                        style: "width:100px",
-                        click: function () {
-                            if (confirm('¿Confirma eliminar el embarque seleccionado?')) {
-                                var row = $('#tabla_embarques_house').DataTable().rows('.table-secondary').data();
-                                if (row.length === 1) {
-                                    miurl = "/importacion_maritima/eliminar_embarques_house/";
-                                    var toData = {
-                                        'id': row[0][0],
-                                        'csrfmiddlewaretoken': csrf_token,
-                                    };
-                                    $.ajax({
-                                        type: "POST",
-                                        url: miurl,
-                                        data: toData,
-                                        success: function (resultado) {
-                                            aux = resultado['resultado'];
-                                            if (aux === 'exito') {
-                                                $("#tabla_embarques_house").dataTable().fnDestroy();
-                                                get_datos_embarques_house();
-                                                alert('Eliminado correctamente');
-                                                if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
-                                                }
+        if (tabla.includes('tabla_house_directo')){
+         selectedRowN= localStorage.getItem('num_house_gasto');
+         url='house-detail/';
+        }else{
+         selectedRowN= localStorage.getItem('id_master_editar');
+         url='master-detail/';
+        }
 
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
-                                                }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
-                                                }
+            $.ajax({
+                url: '/importacion_maritima/'+url,
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    $("#id_embarque_id").val('');
+                    let selectedRowId = localStorage.getItem('id_house_gasto');
+                    let selectedRowN = localStorage.getItem('num_house_gasto');
+
+                    if (selectedRowN != null) {
+                        get_datos_embarques_house();
+                        $('#embarques_form_house').trigger("reset");
+                        $("#embarques_modal_house").dialog({
+                            autoOpen: true,
+                            open: function () {
+                                document.getElementById('numero_embarque').value = selectedRowN;
+                            },
+                            modal: true,
+                            title: "Embarques para el House N°: " + selectedRowN,
+                            height: wHeight * 0.60,
+                            width: wWidth * 0.70,
+                            class: 'modal fade',
+                            buttons: [
+                                {
+                                    text: "Eliminar",
+                                    class: "btn btn-danger",
+                                    style: "width:100px",
+                                    click: function () {
+                                        if (confirm('¿Confirma eliminar el embarque seleccionado?')) {
+                                            var row = $('#tabla_embarques_house').DataTable().rows('.table-secondary').data();
+                                            if (row.length === 1) {
+                                                miurl = "/importacion_maritima/eliminar_embarques_house/";
+                                                var toData = {
+                                                    'id': row[0][0],
+                                                    'csrfmiddlewaretoken': csrf_token,
+                                                };
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: miurl,
+                                                    data: toData,
+                                                    success: function (resultado) {
+                                                        aux = resultado['resultado'];
+                                                        if (aux === 'exito') {
+                                                            $("#tabla_embarques_house").dataTable().fnDestroy();
+                                                            get_datos_embarques_house();
+                                                            alert('Eliminado correctamente');
+                                                            if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                                $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                            }
+
+                                                            if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                                                $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                            }
+                                                            if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                                $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                            }
+                                                        } else {
+                                                            alert(aux);
+                                                        }
+                                                    }
+                                                });
                                             } else {
-                                                alert(aux);
+                                                alert('Debe seleccionar un unico registro');
                                             }
                                         }
-                                    });
-                                } else {
-                                    alert('Debe seleccionar un unico registro');
-                                }
-                            }
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    }],
-                beforeClose: function (event, ui) {
-                //localStorage.removeItem('num_house_gasto');
-                 $("#tabla_embarques_house").dataTable().fnDestroy();
+                                    },
+                                }, {
+                                    text: "Salir",
+                                    class: "btn btn-dark",
+                                    style: "width:100px",
+                                    click: function () {
+                                        $(this).dialog("close");
+                                    },
+                                }],
+                            beforeClose: function (event, ui) {
+                                //localStorage.removeItem('num_house_gasto');
+                                $("#tabla_embarques_house").dataTable().fnDestroy();
 //                 $('#table_add_im tbody tr').removeClass('table-secondary');
 //                $('#table_edit_im tbody tr').removeClass('table-secondary');
 //                $('#'#tabla_house_directo_im' tbody tr').removeClass('table-secondary');
-                }
-            })
+                            }
+                        })
 
-        } else {
-            alert('Debe seleccionar al menos un registro');
-        }
+                    } else {
+                        alert('Debe seleccionar al menos un registro');
+                    }
+                }
+            });
 }
 
 //acciones mails house
@@ -4778,69 +4944,83 @@ $('.email').click(function () {
             }
         }
         if (row.length === 1) {
-            get_data_email(row,title,numero,id,transportista,master,gastos,directo);
-            //$("#id_to").val(row[0][50]);
-            $("#emails_modal").dialog({
-                autoOpen: true,
-                open: function (event, ui) {
-                    $('#email_add_input').summernote('destroy');
-                    $('#email_add_input').summernote({
-                        placeholder: 'Ingrese su texto aqui',
-                        tabsize: 10,
-                        height: wHeight * 0.60,
-                        width: wWidth * 0.88,
-                        toolbar: [
-                            ['style', ['style']],
-                            ['font', ['bold', 'underline', 'clear']],
-                            ['color', ['color']],
-                            ['para', ['ul', 'ol', 'paragraph']],
-                            ['table', ['table']],
-                            ['insert', ['link', 'picture', 'video']],
-                            ['view', ['fullscreen', 'codeview']]
-                        ]
-                    });
-                    $('#email_add_input').focus();
-                },
-                modal: true,
-                title:   title  + " para el house N°: " + numero,
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Enviar",
-                        class: "btn btn-primary",
-                        style: "width:100px",
-                        click: function () {
-                            to = $("#id_to").val();
-                            cc = $("#id_cc").val();
-                            cco = $("#id_cco").val();
-                            subject = $("#id_subject").val();
-                            message = $("#email_add_input").summernote('code');
-                            from = $('#id_from').val();
-                            if(!confirm('¿Realmente desea ENVIAR el correo?')){
-                                return;
-                            }
-                            sendEmail(to,cc,cco,subject,message,title,numero,from);
-                            $(this).dialog("close");
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                            $('#modalSeleccionEmail').dialog("close");
 
+         let selectedRowN= localStorage.getItem('id_master_editar');
+
+            $.ajax({
+                url: '/importacion_maritima/master-detail/',
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    get_data_email(row, title, numero, id, transportista, master, gastos, directo);
+                    //$("#id_to").val(row[0][50]);
+                    $("#emails_modal").dialog({
+                        autoOpen: true,
+                        open: function (event, ui) {
+                            $('#email_add_input').summernote('destroy');
+                            $('#email_add_input').summernote({
+                                placeholder: 'Ingrese su texto aqui',
+                                tabsize: 10,
+                                height: wHeight * 0.60,
+                                width: wWidth * 0.88,
+                                toolbar: [
+                                    ['style', ['style']],
+                                    ['font', ['bold', 'underline', 'clear']],
+                                    ['color', ['color']],
+                                    ['para', ['ul', 'ol', 'paragraph']],
+                                    ['table', ['table']],
+                                    ['insert', ['link', 'picture', 'video']],
+                                    ['view', ['fullscreen', 'codeview']]
+                                ]
+                            });
+                            $('#email_add_input').focus();
                         },
-                    },],
-                beforeClose: function (event, ui) {
-                //localStorage.removeItem('num_house_gasto');
+                        modal: true,
+                        title: title + " para el house N°: " + numero,
+                        height: wHeight * 0.90,
+                        width: wWidth * 0.90,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Enviar",
+                                class: "btn btn-primary",
+                                style: "width:100px",
+                                click: function () {
+                                    to = $("#id_to").val();
+                                    cc = $("#id_cc").val();
+                                    cco = $("#id_cco").val();
+                                    subject = $("#id_subject").val();
+                                    message = $("#email_add_input").summernote('code');
+                                    from = $('#id_from').val();
+                                    if (!confirm('¿Realmente desea ENVIAR el correo?')) {
+                                        return;
+                                    }
+                                    sendEmail(to, cc, cco, subject, message, title, numero, from);
+                                    $(this).dialog("close");
+                                },
+                            }, {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                    $('#modalSeleccionEmail').dialog("close");
+
+                                },
+                            },],
+                        beforeClose: function (event, ui) {
+                            //localStorage.removeItem('num_house_gasto');
 //                $('#table_add_im tbody tr').removeClass('table-secondary');
 //                $('#table_edit_im tbody tr').removeClass('table-secondary');
 //                $('#'#tabla_house_directo_im' tbody tr').removeClass('table-secondary');
+                        }
+                    })
                 }
-            })
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -5023,159 +5203,203 @@ let lugar=localStorage.getItem('lugar');
 
 //agregar archivo house
 function archivos_btn_h_click(){
- $("#tabla_archivos").dataTable().fnDestroy();
-    row = table.rows('.table-secondary').data();
-    get_datos_archivos();
+        let tabla = localStorage.getItem('tabla_origen');
+        let selectedRowN,url;
 
-        $("#archivos_modal").dialog({
-            autoOpen: true,
-            open: function (event, ui) {
+        if (tabla.includes('tabla_house_directo')){
+         selectedRowN= localStorage.getItem('num_house_gasto');
+         url='house-detail/';
+        }else{
+         selectedRowN= localStorage.getItem('id_master_editar');
+         url='master-detail/';
+        }
 
-            },
-            modal: true,
-            title: "Archivos para el House N°: " + localStorage.getItem('num_house_gasto') ,
-            height: wHeight * 0.70,
-            width: wWidth * 0.70,
-            class: 'modal fade',
-            buttons: [
-                {
-                    text: "Descargar",
-                    class: "btn btn-dark",
-                    style: "width:100px",
-                    click: function () {
-                        if (confirm('¿Confirma descargar el archivo seleccionado?')) {
-                            var url = '/importacion_maritima/descargar_archivo/' + localStorage.getItem('id_archivo');  // Ruta de la vista que devuelve el archivo
-                            window.open(url, '_blank');
-                        }
-                    },
-                },{
-                    text: "Eliminar",
-                    class: "btn btn-danger",
-                    style: "width:100px",
-                    click: function () {
-                        if (confirm('¿Confirma eliminar archivo?')) {
-                            if (localStorage.getItem('id_archivo')) {
-                                miurl = "/importacion_maritima/eliminar_archivo/";
-                                var toData = {
-                                    'id': localStorage.getItem('id_archivo'),
-                                    'csrfmiddlewaretoken': csrf_token,
-                                };
-                                $.ajax({
-                                    type: "POST",
-                                    url: miurl,
-                                    data: toData,
-                                    success: function (resultado) {
-                                        aux = resultado['resultado'];
-                                        if (aux == 'exito') {
-                                            var idx = table.cell('.table-secondary', 0).index();
-                                            $("#tabla_archivos tr.selected").removeClass('selected');
-                                            $('#tabla_archivos').DataTable().ajax.reload(null, false);
-                                                 if ($.fn.DataTable.isDataTable('#table_add_im')) {
-                                                    $('#table_add_im').DataTable().ajax.reload(null, false);
-                                                }
+            $.ajax({
+                url: '/importacion_maritima/'+url,
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    $("#tabla_archivos").dataTable().fnDestroy();
+                    row = table.rows('.table-secondary').data();
+                    get_datos_archivos();
 
-                                                if ($.fn.DataTable.isDataTable('#table_edit_im')) {
-                                                    $('#table_edit_im').DataTable().ajax.reload(null, false);
+                    $("#archivos_modal").dialog({
+                        autoOpen: true,
+                        open: function (event, ui) {
+
+                        },
+                        modal: true,
+                        title: "Archivos para el House N°: " + localStorage.getItem('num_house_gasto'),
+                        height: wHeight * 0.70,
+                        width: wWidth * 0.70,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Descargar",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    if (confirm('¿Confirma descargar el archivo seleccionado?')) {
+                                        var url = '/importacion_maritima/descargar_archivo/' + localStorage.getItem('id_archivo');  // Ruta de la vista que devuelve el archivo
+                                        window.open(url, '_blank');
+                                    }
+                                },
+                            }, {
+                                text: "Eliminar",
+                                class: "btn btn-danger",
+                                style: "width:100px",
+                                click: function () {
+                                    if (confirm('¿Confirma eliminar archivo?')) {
+                                        if (localStorage.getItem('id_archivo')) {
+                                            miurl = "/importacion_maritima/eliminar_archivo/";
+                                            var toData = {
+                                                'id': localStorage.getItem('id_archivo'),
+                                                'csrfmiddlewaretoken': csrf_token,
+                                            };
+                                            $.ajax({
+                                                type: "POST",
+                                                url: miurl,
+                                                data: toData,
+                                                success: function (resultado) {
+                                                    aux = resultado['resultado'];
+                                                    if (aux == 'exito') {
+                                                        var idx = table.cell('.table-secondary', 0).index();
+                                                        $("#tabla_archivos tr.selected").removeClass('selected');
+                                                        $('#tabla_archivos').DataTable().ajax.reload(null, false);
+                                                        if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                            $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                        }
+
+                                                        if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                                            $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                        }
+                                                        if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                            $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                        }
+                                                    } else {
+                                                        alert(aux);
+                                                    }
                                                 }
-                                                if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
-                                                    $('#tabla_house_directo').DataTable().ajax.reload(null, false);
-                                                }
+                                            });
                                         } else {
-                                            alert(aux);
+                                            alert('Debe seleccionar un unico registro');
                                         }
                                     }
-                                });
-                            } else {
-                                alert('Debe seleccionar un unico registro');
-                            }
-                        }
-                    },
-                },
-                {
-                    text: "Cerrar",
-                    class: "btn btn-info",
-                    style: "width:100px",
-                    click: function () {
-                        $(this).dialog("close");
-                    },
-                },
-            ],
-            beforeClose: function (event, ui) {
-                // table.ajax.reload();
-                $("#tabla_archivos").dataTable().fnDestroy();
+                                },
+                            },
+                            {
+                                text: "Cerrar",
+                                class: "btn btn-info",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                },
+                            },
+                        ],
+                        beforeClose: function (event, ui) {
+                            // table.ajax.reload();
+                            $("#tabla_archivos").dataTable().fnDestroy();
 //                $('#table_add_im tbody tr').removeClass('table-secondary');
 //                $('#table_edit_im tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directotbody tr').removeClass('table-secondary');
-            }
-        })
+                        }
+                    })
+                }
+            });
 }
 
 
 //imprimir caratula house
 function pdf_btn_h_click(){
-let selectedRowN = localStorage.getItem('num_house_gasto');
-        $("#pdf_add_input").html('');
-        $('#pdf_add_input').summernote('destroy');
+        let tabla = localStorage.getItem('tabla_origen');
+        let selectedRowN,url;
 
-        if (selectedRowN!=null) {
-        get_datos_pdf();
-            $("#pdf_modal").dialog({
-                autoOpen: true,
-                open: function (event, ui) {
+        if (tabla.includes('tabla_house_directo')){
+         selectedRowN= localStorage.getItem('num_house_gasto');
+         url='house-detail/';
+        }else{
+         selectedRowN= localStorage.getItem('id_master_editar');
+         url='master-detail/';
+        }
+
+            $.ajax({
+                url: '/importacion_maritima/'+url,
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    let selectedRowN = localStorage.getItem('num_house_gasto');
+                    $("#pdf_add_input").html('');
                     $('#pdf_add_input').summernote('destroy');
 
-                    $('#pdf_add_input').summernote({
-                        placeholder: '',
-                        title: 'PDF con el detalle del seguimiento',
-                        tabsize: 10,
-                        fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Merriweather'],
-                        height: wHeight * 0.65,
-                        width: wWidth * 0.55,
-                        toolbar: [
-                            ['style', ['style']],
-                            ['font', ['bold', 'underline', 'clear']],
-                            ['color', ['color']],
-                            ['para', ['ul', 'ol', 'paragraph']],
-                            ['table', ['table']],
-                            ['insert', ['link', 'picture', 'video']],
-                            ['view', ['fullscreen', 'codeview']]
-                        ]
-                    });
-                },
-                modal: true,
-                title: "Carátula del house N°: " + selectedRowN,
-                height: wHeight * 0.70,
-                width: wWidth * 0.60,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        // text:"Imprimir",
-                        html: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">\n' +
-                            '  <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>\n' +
-                            '  <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>\n' +
-                            '</svg> Imprimir',
-                        class: "btn btn-warning ",
-                        style: "width:100px",
-                        icons: {primary: "bi bi-star"},
-                        click: function () {
-                            imprimirPDF();
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    },
-                ],
-                beforeClose: function (event, ui) {
-                    // table.ajax.reload();
+                    if (selectedRowN != null) {
+                        get_datos_pdf();
+                        $("#pdf_modal").dialog({
+                            autoOpen: true,
+                            open: function (event, ui) {
+                                $('#pdf_add_input').summernote('destroy');
+
+                                $('#pdf_add_input').summernote({
+                                    placeholder: '',
+                                    title: 'PDF con el detalle del seguimiento',
+                                    tabsize: 10,
+                                    fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Merriweather'],
+                                    height: wHeight * 0.65,
+                                    width: wWidth * 0.55,
+                                    toolbar: [
+                                        ['style', ['style']],
+                                        ['font', ['bold', 'underline', 'clear']],
+                                        ['color', ['color']],
+                                        ['para', ['ul', 'ol', 'paragraph']],
+                                        ['table', ['table']],
+                                        ['insert', ['link', 'picture', 'video']],
+                                        ['view', ['fullscreen', 'codeview']]
+                                    ]
+                                });
+                            },
+                            modal: true,
+                            title: "Carátula del house N°: " + selectedRowN,
+                            height: wHeight * 0.70,
+                            width: wWidth * 0.60,
+                            class: 'modal fade',
+                            buttons: [
+                                {
+                                    // text:"Imprimir",
+                                    html: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">\n' +
+                                        '  <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>\n' +
+                                        '  <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>\n' +
+                                        '</svg> Imprimir',
+                                    class: "btn btn-warning ",
+                                    style: "width:100px",
+                                    icons: {primary: "bi bi-star"},
+                                    click: function () {
+                                        imprimirPDF();
+                                    },
+                                }, {
+                                    text: "Salir",
+                                    class: "btn btn-dark",
+                                    style: "width:100px",
+                                    click: function () {
+                                        $(this).dialog("close");
+                                    },
+                                },
+                            ],
+                            beforeClose: function (event, ui) {
+                                // table.ajax.reload();
+                            }
+                        })
+                    } else {
+                        alert('Debe seleccionar al menos un registro');
+                    }
                 }
-            })
-        } else {
-            alert('Debe seleccionar al menos un registro');
-        }
+            });
 }
 function get_datos_pdf() {
     let selectedRowN = localStorage.getItem('num_house_gasto');
@@ -5248,38 +5472,60 @@ function acumulados(master, callback) {
 
 //notas para el house
 function notas_house() {
-    let selectedRowN = localStorage.getItem('num_house_gasto');
-    const wHeight = $(window).height();
-    const wWidth = $(window).width();
-            $("#notas_modal").dialog({
-                autoOpen: true,
-                open: function (event, ui) {
-                cargar_notas(selectedRowN);
-                },
-                modal: true,
-                title: "Notas para el House N°: " + selectedRowN,
-                height: wHeight * 0.90,
-                width: wWidth * 0.70,
-                class: 'modal fade',
-                       buttons: [
-                    {
-                        text: "Cancelar",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        }
+        let tabla = localStorage.getItem('tabla_origen');
+        let selectedRowN,url;
+
+        if (tabla.includes('tabla_house_directo')){
+         selectedRowNM= localStorage.getItem('num_house_gasto');
+         url='house-detail/';
+        }else{
+         selectedRowNM= localStorage.getItem('id_master_editar');
+         url='master-detail/';
+        }
+
+            $.ajax({
+                url: '/importacion_maritima/'+url,
+                data: { id: selectedRowNM },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
                     }
-                ],
-                beforeClose: function (event, ui) {
-                // localStorage.removeItem('num_house_gasto');
-                 $('#notas_table').DataTable().destroy();
-                 $("#notas_form").trigger("reset");
+                    let selectedRowN = localStorage.getItem('num_house_gasto');
+                    const wHeight = $(window).height();
+                    const wWidth = $(window).width();
+                    $("#notas_modal").dialog({
+                        autoOpen: true,
+                        open: function (event, ui) {
+                            cargar_notas(selectedRowN);
+                        },
+                        modal: true,
+                        title: "Notas para el House N°: " + selectedRowN,
+                        height: wHeight * 0.90,
+                        width: wWidth * 0.70,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Cancelar",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                }
+                            }
+                        ],
+                        beforeClose: function (event, ui) {
+                            // localStorage.removeItem('num_house_gasto');
+                            $('#notas_table').DataTable().destroy();
+                            $("#notas_form").trigger("reset");
 //                 $('#table_add_im tbody tr').removeClass('table-secondary');
 //                $('#table_edit_im tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directotbody tr').removeClass('table-secondary');
+                        }
+                    })
                 }
-            })
+            });
 }
 function cargar_notas(numero) {
     $('#notas_table').DataTable({
@@ -5409,108 +5655,129 @@ function eliminarNota(id) {
 
 //facturacion preventa
 function cargar_gastos_factura(callback){
-    let numero = localStorage.getItem('num_house_gasto');
+        let tabla = localStorage.getItem('tabla_origen');
+        let selectedRowN,url;
 
-    $("#facturar_table").dataTable().fnDestroy();
-    let tabla_factura = $('#facturar_table').DataTable({
-        info: false,
-        lengthChange: false ,
-        "order": [[1, "desc"], [1, "desc"]],
-        "processing": true,
-        "serverSide": true,
-        "pageLength": 10,
-        "language": {
-            url: "/static/datatables/es_ES.json"
-        },
-        "ajax": {
-            "url": "/importacion_maritima/source_gastos_house_preventa/",
-            'type': 'GET',
-            "data": function (d) {
-                return $.extend({}, d, {
-                    "numero": numero,
-                });
-            }
-        },
-        "columns": [
-            {
-                "data": 1,    // Concepto - `data[1]`
-                "title": "Concepto"
-            },
-            {
-                "data": 6,    // Tipo - `data[6]`
-                "title": "Tipo"
-            },
-            {
-                "data": null,
-                "title": "Cantidad",
-                "render": function(data, type, row) {
-                    let precio = parseFloat(row[3]) || 0;
-                    let costo = parseFloat(row[4]) || 0;
-
-                    if (precio !== 0) {
-                        return precio.toFixed(2);
-                    } else if (costo !== 0) {
-                        return costo.toFixed(2);
-                    } else {
-                        return "0.00";
-                    }
-                }
-            },
-            {
-                "data": null,
-                "title": "Facturar a..",
-                "render": function() {
-                    return "S/I";
-                }
-            },
-            {
-                "data": 2,    // Moneda - `data[2]`
-                "title": "Moneda"
-            },
-            {
-                "data": 8,    // Arbitraje - `data[8]`
-                "title": "Arbitraje"
-            },
-             {
-                "data": 5,
-                "title": "Detalle"
-            },
-
-            {
-                "data": null, // Columna 7 - Valor por defecto "false"
-                "render": function() {
-                    return 'S/I';
-                }
-            },
-
-        ],
-        rowCallback: function(row, data) {
-            // Remover clases anteriores si hay
-            $(row).removeClass('fila-rojo fila-amarillo');
-
-            const color = data[17];
-            if (color === 'ROJO') {
-                $(row).addClass('fila-rojo');
-            } else if (color === 'AMARILLO') {
-                $(row).addClass('fila-amarillo');
-            }
-
-            // Evento para resaltar fila seleccionada
-            $(row).off('click').on('click', function () {
-                $('#facturar_table tbody tr').removeClass('table-secondary');
-                $(this).addClass('table-secondary');
-
-                const valorColumna7 = $(row).find('td').eq(7).text().trim();
-                $('#concepto_detalle').prop('checked', valorColumna7 !== 'S/I');
-            });
+        if (tabla.includes('tabla_house_directo')){
+         selectedRowN= localStorage.getItem('num_house_gasto');
+         url='house-detail/';
+        }else{
+         selectedRowN= localStorage.getItem('id_master_editar');
+         url='master-detail/';
         }
 
-    });
+            $.ajax({
+                url: '/importacion_maritima/'+url,
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    let numero = localStorage.getItem('num_house_gasto');
 
-    setTimeout(function() {
-        callback();
-    }, 2000);
+                    $("#facturar_table").dataTable().fnDestroy();
+                    let tabla_factura = $('#facturar_table').DataTable({
+                        info: false,
+                        lengthChange: false,
+                        "order": [[1, "desc"], [1, "desc"]],
+                        "processing": true,
+                        "serverSide": true,
+                        "pageLength": 10,
+                        "language": {
+                            url: "/static/datatables/es_ES.json"
+                        },
+                        "ajax": {
+                            "url": "/importacion_maritima/source_gastos_house_preventa/",
+                            'type': 'GET',
+                            "data": function (d) {
+                                return $.extend({}, d, {
+                                    "numero": numero,
+                                });
+                            }
+                        },
+                        "columns": [
+                            {
+                                "data": 1,    // Concepto - `data[1]`
+                                "title": "Concepto"
+                            },
+                            {
+                                "data": 6,    // Tipo - `data[6]`
+                                "title": "Tipo"
+                            },
+                            {
+                                "data": null,
+                                "title": "Cantidad",
+                                "render": function (data, type, row) {
+                                    let precio = parseFloat(row[3]) || 0;
+                                    let costo = parseFloat(row[4]) || 0;
 
+                                    if (precio !== 0) {
+                                        return precio.toFixed(2);
+                                    } else if (costo !== 0) {
+                                        return costo.toFixed(2);
+                                    } else {
+                                        return "0.00";
+                                    }
+                                }
+                            },
+                            {
+                                "data": null,
+                                "title": "Facturar a..",
+                                "render": function () {
+                                    return "S/I";
+                                }
+                            },
+                            {
+                                "data": 2,    // Moneda - `data[2]`
+                                "title": "Moneda"
+                            },
+                            {
+                                "data": 8,    // Arbitraje - `data[8]`
+                                "title": "Arbitraje"
+                            },
+                            {
+                                "data": 5,
+                                "title": "Detalle"
+                            },
+
+                            {
+                                "data": null, // Columna 7 - Valor por defecto "false"
+                                "render": function () {
+                                    return 'S/I';
+                                }
+                            },
+
+                        ],
+                        rowCallback: function (row, data) {
+                            // Remover clases anteriores si hay
+                            $(row).removeClass('fila-rojo fila-amarillo');
+
+                            const color = data[17];
+                            if (color === 'ROJO') {
+                                $(row).addClass('fila-rojo');
+                            } else if (color === 'AMARILLO') {
+                                $(row).addClass('fila-amarillo');
+                            }
+
+                            // Evento para resaltar fila seleccionada
+                            $(row).off('click').on('click', function () {
+                                $('#facturar_table tbody tr').removeClass('table-secondary');
+                                $(this).addClass('table-secondary');
+
+                                const valorColumna7 = $(row).find('td').eq(7).text().trim();
+                                $('#concepto_detalle').prop('checked', valorColumna7 !== 'S/I');
+                            });
+                        }
+
+                    });
+
+                    setTimeout(function () {
+                        callback();
+                    }, 2000);
+                }
+            });
 }
 function sumar_ingresos() {
     let totalIngresos = 0;
@@ -5627,75 +5894,95 @@ function abrir_modal_mails(e){
 
 //mostrar logs
 function get_datos_logs() {
+        let tabla = localStorage.getItem('tabla_origen');
+        let selectedRowN,url;
 
-    row = table_edit_im.rows('.table-secondary').data();
-        if (row.length === 1) {
-            $("#logs_modal").dialog({
-                autoOpen: true,
-                open: function () {
+        if (tabla.includes('tabla_house_directo')){
+         selectedRowN= localStorage.getItem('num_house_gasto');
+         url='house-detail/';
+        }else{
+         selectedRowN= localStorage.getItem('id_master_editar');
+         url='master-detail/';
+        }
 
-                },
-                modal: true,
-                title: "Log de interacciones para en el embarque N°: " + row[0][3],
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
-                class: 'modal fade',
-                buttons: [ {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    },],
-                beforeClose: function (event, ui) {
+            $.ajax({
+                url: '/importacion_maritima/'+url,
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    row = table_edit_im.rows('.table-secondary').data();
+                    if (row.length === 1) {
+                        $("#logs_modal").dialog({
+                            autoOpen: true,
+                            open: function () {
 
+                            },
+                            modal: true,
+                            title: "Log de interacciones para en el embarque N°: " + row[0][3],
+                            height: wHeight * 0.90,
+                            width: wWidth * 0.90,
+                            class: 'modal fade',
+                            buttons: [{
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                },
+                            },],
+                            beforeClose: function (event, ui) {
+
+                            }
+                        });
+                        $("#tabla_logs").dataTable().fnDestroy();
+                        table_logs = $('#tabla_logs').DataTable({
+                            "order": [[2, "desc"], [1, "desc"]],
+                            "columnDefs": [
+                                {
+                                    "targets": [0],
+                                    "orderable": false,
+                                },
+                            ],
+                            "processing": true,
+                            "serverSide": true,
+                            "dom": 'Btlipr',
+                            "scrollX": true,
+                            "pageLength": 100,
+                            "language": {
+                                url: "/static/datatables/es_ES.json"
+                            },
+                            "ajax": {
+                                "url": "/importacion_maritima/source_logs/",
+                                'type': 'GET',
+                                "data": function (d) {
+                                    return $.extend({}, d, {
+                                        "id": row[0][0], 'numero': row[0][3]
+                                    });
+                                }
+                            },
+                            "rowCallback": function (row, data, index) {
+                                // data[3] es la columna 'Acción' => Created / Updated / Deleted
+                                var accion = data[3].toLowerCase();
+
+                                // Limpiar clases anteriores
+                                $(row).removeClass('table-success table-warning table-danger');
+
+                                if (accion === 'create') {
+                                    $(row).addClass('table-success');
+                                } else if (accion === 'update') {
+                                    $(row).addClass('table-warning');
+                                } else if (accion === 'delete') {
+                                    $(row).addClass('table-danger');
+                                }
+                            }
+                        });
+                    } else {
+                        alert('Debe seleccionar al menos un registro');
+                    }
                 }
             });
-            $("#tabla_logs").dataTable().fnDestroy();
-            table_logs = $('#tabla_logs').DataTable({
-        "order": [[2, "desc"], [1, "desc"]],
-        "columnDefs": [
-            {
-                "targets": [ 0 ],
-                "orderable": false,
-            },
-        ],
-        "processing": true,
-        "serverSide": true,
-        "dom": 'Btlipr',
-        "scrollX": true,
-        "pageLength": 100,
-        "language": {
-            url: "/static/datatables/es_ES.json"
-        },
-        "ajax": {
-            "url": "/importacion_maritima/source_logs/",
-            'type': 'GET',
-            "data": function (d) {
-                return $.extend({}, d, {
-                    "id": row[0][0],'numero':row[0][3]
-                });
-            }
-        },
-        "rowCallback": function(row, data, index) {
-            // data[3] es la columna 'Acción' => Created / Updated / Deleted
-            var accion = data[3].toLowerCase();
-
-            // Limpiar clases anteriores
-            $(row).removeClass('table-success table-warning table-danger');
-
-            if (accion === 'create') {
-                $(row).addClass('table-success');
-            } else if (accion === 'update') {
-                $(row).addClass('table-warning');
-            } else if (accion === 'delete') {
-                $(row).addClass('table-danger');
-            }
-        }
-    });
-        } else {
-            alert('Debe seleccionar al menos un registro');
-        }
-
 }
