@@ -21,34 +21,16 @@
 }
 
 /* Submenu oculto inicialmente */
+/* Por defecto, submenu cerrado */
 .submenu {
-    color: white;
-    max-height: 0; /* Altura inicial cero para ocultar */
-    overflow: hidden; /* Evitar mostrar contenido desbordado */
-    transition: max-height 0.4s ease-in-out; /* Animación de altura */
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out;
 }
 
-/* Mostrar el submenú cuando se hace hover sobre el sidebar-link */
-.sidebar-item.has-submenu:hover .submenu {
-    color: white;
-    max-height: 500px; /* Altura suficiente para mostrar los enlaces del submenú */
-}
-
-/* Cambiar el color de los submenu-link a blanco solo cuando se hace hover sobre el sidebar-link */
-.sidebar-item.has-submenu:hover .submenu-link {
-    color: white;
-}
-
-/* Cambiar también el color del sidebar-link y el ícono a blanco al hacer hover */
-.sidebar-item.has-submenu:hover .sidebar-link,
-.sidebar-item.has-submenu:hover .custom-icon {
-    color: white;
-    fill: white;
-}
-
-/* Efecto hover en los submenu-link: oscurecer un poco */
-.sidebar-item.has-submenu:hover .submenu-link:hover {
-    color: #cccccc; /* Un tono de blanco más oscuro para resaltar el hover */
+/* Cuando tiene la clase "active", mostrar submenu */
+.sidebar-item.active .submenu {
+    max-height: 500px;
 }
 </style>
 
@@ -199,7 +181,7 @@
             <li class="sidebar-item">
                 <a href="#" class="sidebar-link" data-bs-toggle="collapse" onclick="toggle_collapse_menu('auth1', this)" >
                     <i class="fa fa-puzzle-piece pe-2"></i>
-                    {{ request.session.rol|filtro_menu|capfirst }}
+                    {{ rol_pestana|filtro_menu|capfirst }}
                 </a>
 <!--                <ul id="auth1" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">-->
 <!--                   {% for modulo in request.session.roles %}-->
@@ -236,7 +218,8 @@
                 </a>
                 <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                     <li class="sidebar-item">
-                        <a href="#" class="sidebar-link">Cambio clave</a>
+                                <a href="{% url 'cambiar_clave' %}" class="sidebar-link">Cambio clave</a>
+
                     </li>
                     <li class="sidebar-item">
                         <a href="{% url 'vista_logout' %}" class="sidebar-link">Salir</a>

@@ -89,6 +89,12 @@ MIDDLEWARE = [
     'cargosystem.middleware.BloqueoModalMiddleware'
 ]
 
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'cargosystem.validators.CustomPasswordValidator',
+    },
+]
+
 
 ROOT_URLCONF = 'cargosystem.urls'
 
@@ -205,8 +211,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 EMAIL_HOST = 's109.nty.uy'
-EMAIL_HOST_USER = 'opensoft@oceanlinkgroup.com'
-EMAIL_HOST_PASSWORD = 'W}}WN-~bn=Bl'
+# EMAIL_HOST_USER = 'opensoft@oceanlinkgroup.com'
+EMAIL_HOST_USER = 'belen.albano@opensoft.com.uy'
+EMAIL_HOST_PASSWORD = '6EPCuBByz8zS'
+# EMAIL_HOST_PASSWORD = 'W}}WN-~bn=Bl'
 EMAIL_PORT = 465
 DEFAULT_FROM_EMAIL = 'opensoft@oceanlinkgroup.com'
 

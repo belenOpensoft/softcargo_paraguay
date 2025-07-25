@@ -5,6 +5,8 @@ from login.views.correos import source_correo, correos
 from login.views.home import home_view
 from login.views.login import login_view, select_rol, logout_view, cambiar_modulo
 from django.conf.urls.static import static
+from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +28,11 @@ urlpatterns = [
     path('login/seleccionarol/<str:rol>', select_rol, name="vista_roles"),
     path('cambiar_modulo/<str:modulo>/', cambiar_modulo, name="vista_cambiar_modulo"),
     path('correos/', correos, name='vista_correos'),
-    path('source_correos/', source_correo, name='source_correos')
+    path('source_correos/', source_correo, name='source_correos'),
+    path('cambiar_clave/', PasswordChangeView.as_view(template_name='cambiar_clave.html',success_url='/clave_cambiada/'),name='cambiar_clave'),
+    path('clave_cambiada/', PasswordChangeDoneView.as_view(template_name='clave_cambiada.html'), name='clave_cambiada'),
+
+
+
 ] + static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
 

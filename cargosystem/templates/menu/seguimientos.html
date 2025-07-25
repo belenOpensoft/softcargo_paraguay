@@ -40,7 +40,7 @@
             <li class="sidebar-item">
                 <a href="#" class="sidebar-link" data-bs-toggle="collapse" onclick="toggle_collapse_menu('auth1', this)" >
                     <i class="fa fa-puzzle-piece pe-2"></i>
-                    {{ request.session.rol|filtro_menu|capfirst }}
+                    {{ rol_pestana|filtro_menu|capfirst }}
                 </a>
                 <ul id="auth1" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                     {% for modulo in request.session.roles %}
@@ -67,7 +67,8 @@
                         </a>
                         <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                             <li class="sidebar-item">
-                                <a href="#" class="sidebar-link">Cambio clave</a>
+                                <a href="{% url 'cambiar_clave' %}" class="sidebar-link">Cambio clave</a>
+
                             </li>
                             <li class="sidebar-item">
                                 <a href="{% url 'vista_logout' %}" class="sidebar-link">Salir</a>

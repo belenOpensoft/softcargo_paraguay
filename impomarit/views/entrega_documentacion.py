@@ -242,7 +242,10 @@ def entrega_documentacion_general_old(request):
     })
 
 def entrega_documentacion_general(request):
-    form_busqueda = GenerarDocumentoForm(request.GET or None)
+    form_data = request.GET.copy()
+    form_data.pop('rol', None)
+    form_busqueda = GenerarDocumentoForm(form_data or None)
+
     form_modal = EntregaDocumentacionForm()
     resultados = []
     resultado_seleccionado = None

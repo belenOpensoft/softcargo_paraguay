@@ -231,6 +231,27 @@
             });
         }
         </script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const items = document.querySelectorAll('.sidebar-item.has-submenu');
+
+            items.forEach(item => {
+                const link = item.querySelector('.sidebar-link');
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    item.classList.toggle('active');
+
+                    // Opcional: cerrar otros menús
+                    items.forEach(other => {
+                        if (other !== item) {
+                            other.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        });
+        </script>
+
         {% endblock js_datatables_block %}
 
         {% block script %} {% endblock script %}
