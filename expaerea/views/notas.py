@@ -11,21 +11,32 @@ from impomarit.forms import NotasForm
 
 @login_required(login_url='/login')
 def source(request):
-    # Verificación de solicitud AJAX en Django 4.2
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
     if is_ajax:
         numero = request.GET.get('numero')
         if numero:
-            notas_list = Faxes.objects.filter(numero=numero).values('id', 'fecha', 'notas', 'asunto', 'tipo','notas')
+            notas_queryset = Faxes.objects.filter(numero=numero).values('id', 'fecha', 'asunto', 'tipo', 'notas')
         else:
-            notas_list = Faxes.objects.all().values('id', 'fecha', 'asunto', 'tipo','notas')
+            notas_queryset = Faxes.objects.all().values('id', 'fecha', 'asunto', 'tipo', 'notas')
 
-        response_data = {"data": list(notas_list)}
-        return JsonResponse(response_data)
+        # Procesar resultados
+        notas_list = []
+        for nota in notas_queryset:
+            fecha = str(nota['fecha'])[:10] if nota['fecha'] else ''
+            asunto = (nota['asunto'] or '')[:40]
+            notas_list.append({
+                'id': nota['id'],
+                'fecha': fecha,
+                'asunto': asunto,
+                'tipo': nota['tipo'],
+                'notas': nota['notas'],
+            })
+
+        return JsonResponse({"data": notas_list})
 
     # Renderiza la plantilla cuando no es una solicitud AJAX
-    return render(request, 'notas.html')  # Ajusta 'notas.html' con el nombre de tu plantilla real
+    return render(request, 'notas.html')
 
 
 def guardar_notas(request):

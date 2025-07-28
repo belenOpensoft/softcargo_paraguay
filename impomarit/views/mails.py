@@ -1290,10 +1290,13 @@ def formatear_linea(titulo, valor, alinear_derecha=None, ancho_total=110, ancho_
     """
 
 
-def formatear_caratula(titulo, valor):
+def formatear_caratula_old(titulo, valor):
     return f"<div style='font-family: Courier New, monospace; font-size: 11.5px; line-height: 1;'>{titulo}: {valor}</div>"
 
 
+def formatear_caratula(titulo, valor):
+    valor = valor or 'S/I'
+    return f"<div style='font-family: Courier New, monospace; font-size: 11.5px; line-height: 1;'>{titulo}: {valor}</div>"
 
 
 

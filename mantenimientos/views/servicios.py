@@ -205,7 +205,7 @@ def modificar_servicio(request, id_servicio):
                     return HttpResponseRedirect('/servicios')
                 else:
                     messages.error(request, 'Formulario invalido, intente nuevamente.')
-                    return HttpResponseRedirect('/modificar_servicio')
+                    return HttpResponseRedirect('/servicios')
 
             return render(request, "servicios/modificar.html", ctx)
         else:

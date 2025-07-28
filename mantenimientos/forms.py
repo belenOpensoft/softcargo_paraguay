@@ -47,7 +47,7 @@ class edit_ciudad_form(forms.Form):
         self.fields['pais'].choices = [('', 'Seleccione un país')] + [(pais.nombre, pais.nombre) for pais in Paises.objects.all()]
 
 class add_vendedor_form(forms.Form):
-    codigo = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 5}, ),max_length=5, required=True, label="Código")
+    #codigo = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 5}, ),max_length=5, required=True, label="Código")
     nombre = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 25, }),label="Nombre", max_length=25)
     direccion = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 300, }),label="Direccion", max_length=300)
     telefono = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 50, }),label="Teléfono", max_length=50)
@@ -73,7 +73,7 @@ class add_vendedor_form(forms.Form):
 
 
 class edit_vendedor_form(forms.Form):
-    codigo = forms.CharField(widget=forms.TextInput(
+    codigo = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 5}, ), max_length=5,
                              required=True, label="Código")
     nombre = forms.CharField(
@@ -341,7 +341,7 @@ class add_banco_form(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 15, }),
         label="Nombre", max_length=15)
     edi = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 3}, ), max_length=3,
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 3}, ), max_length=3,
                           required=False, label="Código EDI")
     pais = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control', 'autocomplete': 'off', 'id': 'pais-select'}),
@@ -349,8 +349,8 @@ class add_banco_form(forms.Form):
         required=False
     )
     rut = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 15}, ), max_length=15,
-                          required=True, label="R.U.T.")
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 15}, ), max_length=15,
+                          required=False, label="R.U.T.")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -365,7 +365,7 @@ class edit_banco_form(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 15, }),
         label="Nombre", max_length=15)
     edi = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 3}, ), max_length=3,
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 3}, ), max_length=3,
                           required=False, label="Código EDI")
     pais = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control', 'autocomplete': 'off', 'id': 'pais-select'}),
@@ -373,8 +373,8 @@ class edit_banco_form(forms.Form):
         required=False
     )
     rut = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 15}, ), max_length=15,
-                          required=True, label="R.U.T.")
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 15}, ), max_length=15,
+                          required=False, label="R.U.T.")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -441,7 +441,7 @@ class edit_pais_form(forms.Form):
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 3}, ), required=True,
                               label="Cod. ISO3166.")
     edi = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 3}, ), max_length=3,
+        attrs={'class': 'form-control', "autocomplete": "off",'max_length': 3}, ), max_length=3,
                           required=False, label="Código EDI")
 
 class add_moneda_form(forms.Form):
@@ -460,7 +460,7 @@ class add_moneda_form(forms.Form):
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 1}, ), required=True,
                                 label="Solicitar?", choices = choice_SN)
     alias = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 3}), label="Alias.",
+        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 3,'required':False}), label="Alias.",
         max_length=3)
     valorminimo = forms.DecimalField(widget=forms.NumberInput(
         attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4}, ), max_digits=12,
@@ -494,7 +494,7 @@ class edit_moneda_form(forms.Form):
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 1}, ), required=True,
                                 label="Solicitar?", choices = choice_SN )
     alias = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 3}), label="Alias.",
+        widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 3,'required':False}), label="Alias.",
         max_length=3)
     valorminimo = forms.DecimalField(widget=forms.NumberInput(
         attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4}, ), max_digits=12,
@@ -549,9 +549,9 @@ class edit_buque_form(forms.Form):
         attrs={'class': 'form-control', "autocomplete": "off", 'max_length': 50, 'required': True, }),
         label="Nombre", max_length=50)
     bandera = forms.ModelChoiceField(queryset=Paises.objects.all().order_by('nombre'), widget=forms.Select(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True, }), label="Bandera", required=True)
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': False, }), label="Bandera", required=False)
     observaciones = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True, 'max_length': 50}, ), required=True,
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'max_length': 50}, ), required=False,
         label="Observaciones", max_length=50)
 
 
@@ -919,9 +919,7 @@ class edit_servicio_form(forms.Form):
         ('S', 'SÍ'),
         ('N', 'NO'),
     ]
-    codigo = forms.IntegerField(widget=forms.NumberInput(
-        attrs={'class': 'form-control', "autocomplete": "off", 'required': True,'readonly': True}, ), required=True,
-                                label="Código")
+
     nombre = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', "autocomplete": "off", }),
         label="Nombre")

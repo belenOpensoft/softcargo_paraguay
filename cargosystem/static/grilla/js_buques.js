@@ -8,17 +8,17 @@ $(document).ready(function()
     {
         var contador = 1;
 
-        $('#tabla_buque tfoot th').each( function () {
-            var title = $(this).text();
-            if(title != ''){
-                $(this).html( '<input type="text" class="form-control" id="buscoid_' + contador + '" type="text" placeholder="Buscar '+title+'"  autocomplete="off" />' );
-                contador++;
-            }else{
-                var aux2 = 'Borrar';
-                $(this).html( '<button class="btn" title="Borrar filtros" id="clear" ><span class="glyphicon glyphicon-erase"></span></button> ' );
+        $('#tabla_buque tfoot th').each(function(index) {
+            let title = $('#tabla_buque thead th').eq(index).text();
+
+            if (index === 0) {
+                // Si es la primera columna, colocar el botón de limpiar filtros
+                $(this).html('<button class="btn btn-danger" title="Borrar filtros" id="clear"><span class="glyphicon glyphicon-erase"></span> Limpiar</button>');
+            } else if (title !== '') {
+                // Agregar inputs de búsqueda en las demás columnas
+                $(this).html('<input type="text" class="form-control filter-input" autocomplete="off" id="buscoid_' + index + '" placeholder="Buscar ' + title + '" />');
             }
         });
-
         table = $('#tabla_buque').DataTable( {
              "stateSave": true,
              dom: 'Btlipr',
@@ -100,19 +100,42 @@ $(document).ready(function()
                 url: "/static/datatables/es_ES.json"
             },
             initComplete: function() {
-//                  $(".dataTables_length select").addClass("form-control");
-                  var api = this.api();
-                  // Apply the search
-                  api.columns().every(function() {
-                    var that = this;
-                    $('input', this.footer()).on('keyup change', function() {
-                      if (that.search() !== this.value) {
-                        that
-                          .search(this.value)
-                          .draw();
-                      }
+  let api = this.api();
+
+                    // Cargar estado guardado
+                    let state = table.state.loaded();
+                    if (state) {
+                        // Restaurar filtros en los inputs y aplicar clase si tienen valor
+                        api.columns().every(function(index) {
+                            let colState = state.columns[index];
+                            if (colState && colState.search.search) {
+                                let input = $('#buscoid_' + index);
+                                input.val(colState.search.search); // Restaurar valor
+                                if (colState.search.search.trim() !== "") {
+                                    input.addClass("is-invalid"); // Agregar clase roja si hay filtro
+                                }
+                            }
+                        });
+                    }
+
+                    // Evento para resaltar inputs cuando tienen contenido
+                    $(document).on("input", ".filter-input", function() {
+                        if ($(this).val().trim() !== "") {
+                            $(this).addClass("is-invalid"); // Se pone en rojo
+                        } else {
+                            $(this).removeClass("is-invalid"); // Se quita el rojo si se vacía
+                        }
                     });
-                  });
+
+                    // Agregar funcionalidad de filtrado
+                    api.columns().every(function() {
+                        let that = this;
+                        $('input', this.footer()).on('keyup change', function() {
+                            if (that.search() !== this.value) {
+                                that.search(this.value).draw();
+                            }
+                        });
+                    });
                 },
                 "drawCallback": function( settings ) {
 

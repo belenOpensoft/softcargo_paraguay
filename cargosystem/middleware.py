@@ -28,7 +28,7 @@ class RolRedirectMiddleware:
 
         # Solo aplica si es un redirect
         if isinstance(response, HttpResponseRedirect):
-            rol_header = request.headers.get('X-Rol-Activo')
+            rol_header = request.headers.get('X-Rol-Activo') or request.session.get('rol_activo')
             if not rol_header:
                 return response
 
@@ -43,6 +43,25 @@ class RolRedirectMiddleware:
                 return HttpResponseRedirect(new_url)
 
         return response
+
+class RolActivoMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Buscar rol en header, POST o GET
+        rol_header = (
+            request.headers.get('X-Rol-Activo') or
+            request.POST.get('rol_oculto_header') or
+            request.GET.get('rol')
+        )
+
+        # Guardarlo en sesión si existe
+        if rol_header:
+            request.session['rol_activo'] = rol_header
+
+        return self.get_response(request)
+
 
 DEPENDIENTES_MODAL = {
     '/get_data_seguimiento/': [

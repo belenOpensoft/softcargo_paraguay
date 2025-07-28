@@ -68,7 +68,7 @@ $(document).ready(function () {
         "scrollY": wHeight * 0.60,
         "columnDefs": [
             {
-                "targets": [0],
+                "targets": [0], //boton de mas
                 "className": 'details-control',
                 "orderable": false,
                 "data": null,
@@ -78,29 +78,67 @@ $(document).ready(function () {
                 }
             },
             {
-                "targets": [1],
+                "targets": [1], //numero
                 "className": 'derecha archivos',
             },
             {
-                "targets": [2],
+                "targets": [2], //modo
 
             },
             {
                 "targets": [3],
+                "render": function (data, type, row, meta) {
+                    return row[55]; // Toma el índice 5 para la columna 6
+                }
             },
             {
                 "targets": [4],
+                "render": function (data, type, row, meta) {
+                    return row[56]; // Toma el índice 5 para la columna 6
+                }
             },
             {
                 "targets": [5],
+                "render": function (data, type, row, meta) {
+                    return row[57]; // Toma el índice 5 para la columna 6
+                }
             },
             {
                 "targets": [6],
+                "render": function (data, type, row, meta) {
+                    return row[25]; // Toma el índice 5 para la columna 6
+                }
             },
             {
                 "targets": [7],
+                "render": function (data, type, row, meta) {
+                    return row[26]; // Toma el índice 5 para la columna 6
+                }
             },
-
+            {
+                "targets": [8],
+                "render": function (data, type, row, meta) {
+                    return row[10]; // Toma el índice 5 para la columna 6
+                }
+            },
+            {
+                "targets": [9],
+                "render": function (data, type, row, meta) {
+                    return row[11]; // Toma el índice 5 para la columna 6
+                }
+            },
+            {
+                "targets": [10],
+                "render": function (data, type, row, meta) {
+                    return row[4]; // Toma el índice 5 para la columna 6
+                }
+            },
+            {
+                "targets": [11],
+                "render": function (data, type, row, meta) {
+                    return row[5]; // Toma el índice 5 para la columna 6
+                }
+            },
         ],
         "order": [[1, "desc"],],
         "processing": true,
@@ -3742,7 +3780,7 @@ function cargar_notas(numero) {
             dataSrc: 'data'
         },
         columns: [
-            { data: 'id' },
+            { data: 'id','visible':false },
             { data: 'fecha' },
             { data: 'asunto' },
             { data: 'tipo' },
@@ -3758,8 +3796,8 @@ function cargar_notas(numero) {
         rowCallback: function(row, data) {
             // Configura el evento de doble clic para cada fila
             $(row).off('dblclick').on('dblclick', function() {
-
-                $("#notas_add_input").val(data.notas);          // ID del registro
+                console.log(data.notas);
+                $("#notas_add_input").val(data.notas);
                 $("#id_fecha_notas").val(formatDateToYYYYMMDD(data.fecha));
                 $("#id_nota").val(data.id);      // Notas
                 $("#id_asunto").val(data.asunto);    // Asunto
@@ -3773,6 +3811,13 @@ function cargar_notas(numero) {
 
         }
     });
+}
+function cancelar_nota() {
+    const form = document.getElementById('notas_form');
+    form.reset(); // limpia los campos
+    document.getElementById('id_nota').value = ''; // limpia id oculto
+    document.getElementById('guardar_nota').innerHTML = 'Agregar Nota'; // reinicia texto del botón
+
 }
 function agregar_nota(event) {
     event.preventDefault();

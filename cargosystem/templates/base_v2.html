@@ -154,8 +154,13 @@
                 }else if(modulo2=='estados_cuenta_compras'){
                     $('#modulo_nombre').html('ESTADOS DE CUENTA - COMPRAS');
                 }
+                else{
+                        $('#modulo_nombre').html(modulo2.replace(/_/g, ' ').toUpperCase());
 
-            }
+                }
+                }else{
+                    $('#modulo_nombre').html(modulo.replace(/_/g, ' ').toUpperCase());
+                }
 
             var alerts = document.querySelectorAll(".alert");
             // Itera a través de los elementos y oculta cada uno después de 5 segundos

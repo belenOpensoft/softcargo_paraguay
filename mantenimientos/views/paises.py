@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
+from django.db.models import Q
 
 from mantenimientos.forms import add_pais_form, edit_pais_form
 from mantenimientos.models import Paises
@@ -35,7 +36,7 @@ columns_table = {
 }
 param_busqueda = {
     1: 'nombre__icontains',
-    2: 'continente__icontains',
+    2: 'continente',
     3: 'iata__icontains',
     4: 'idinternacional__icontains',
     5: 'cuit__icontains',
@@ -139,7 +140,7 @@ def get_order(request, columns):
         raise TypeError(e)
 
 
-def get_argumentos_busqueda(**kwargs):
+def get_argumentos_busqueda_old(**kwargs):
     try:
         result = {}
         for row in kwargs:
@@ -149,13 +150,57 @@ def get_argumentos_busqueda(**kwargs):
     except Exception as e:
         raise TypeError(e)
 
+def get_argumentos_busqueda(**kwargs):
+    try:
+        result = {}
+
+        continente_map = {
+            '1': 'Sudamérica',
+            '2': 'Norteamérica',
+            '3': 'Centroamérica',
+            '4': 'Europa',
+            '5': 'Asia',
+            '6': 'África',
+            '7': 'Oceanía'
+        }
+
+        for row in kwargs:
+            valor = kwargs[row].strip()
+            if not valor:
+                continue
+
+            if int(row) == 2:  # Columna continente
+                valor_normalizado = normalizar(valor)
+                coincidencias = [
+                    k for k, v in continente_map.items()
+                    if valor_normalizado in normalizar(v)
+                ]
+                if coincidencias:
+                    result['continente__in'] = coincidencias
+            else:
+                campo = param_busqueda[int(row)]
+                result[campo] = valor
+
+        return result
+    except Exception as e:
+        raise TypeError(f"Error en get_argumentos_busqueda: {e}")
+
+
+import unicodedata
+
+def normalizar(texto):
+    return ''.join(
+        c for c in unicodedata.normalize('NFKD', texto)
+        if not unicodedata.combining(c)
+    ).lower()
+
 
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
 
 @login_required(login_url="/")
-def agregar_pais(request):
+def agregar_pais_old(request):
     try:
         if request.user.has_perms(["mantenimientos.add_paises", ]):
             ctx = {'form': add_pais_form(),'title_page': 'Agregar pais'}
@@ -178,6 +223,44 @@ def agregar_pais(request):
             return render(request, "paises/agregar.html", ctx)
         else:
             raise TypeError('No tiene permisos para realizar esta accion.')
+    except Exception as e:
+        messages.error(request, str(e))
+        return HttpResponseRedirect("/paises")
+
+
+@login_required(login_url="/")
+def agregar_pais(request):
+    try:
+        if request.user.has_perms(["mantenimientos.add_paises", ]):
+
+            ctx = {'form': add_pais_form(), 'title_page': 'Agregar país'}
+            if request.method == 'POST':
+                form = add_pais_form(request.POST)
+                if form.is_valid():
+                    nombre = form.cleaned_data['nombre']
+                    idinternacional = form.cleaned_data['idinternacional']
+
+                    if Paises.objects.filter(Q(nombre__iexact=nombre) | Q(idinternacional__iexact=idinternacional)).exists():
+                        messages.error(request, 'Ya existe un país con ese nombre o código internacional.')
+                        return HttpResponseRedirect('/agregar_pais')
+
+                    pais = Paises(
+                        nombre=nombre,
+                        continente=int(form.cleaned_data['continente']),
+                        iata=form.cleaned_data['iata'],
+                        idinternacional=idinternacional,
+                        cuit=form.cleaned_data['cuit'],
+                        edi=form.cleaned_data['edi']
+                    )
+                    pais.save()
+                    messages.success(request, 'País agregado con éxito.')
+                    return HttpResponseRedirect('/paises')
+                else:
+                    messages.error(request, 'Formulario inválido, intente nuevamente.')
+                    return HttpResponseRedirect('/agregar_pais')
+            return render(request, "paises/agregar.html", ctx)
+        else:
+            raise TypeError('No tiene permisos para realizar esta acción.')
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect("/paises")

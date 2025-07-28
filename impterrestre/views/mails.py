@@ -146,10 +146,10 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += "<br><b>Resumen del viaje:</b><br><br>"
         texto += formatear_linea("Origen", str(origen.nombre) if origen else "S/I")
         texto += formatear_linea("Destino", str(destino) if destino else "S/I")
-        texto += formatear_linea("Vuelo/Viaje", str(row.vapor) if row.vapor else "S/I")
-        texto += formatear_linea("Viaje", str(row.viaje) if row.viaje else "S/I")
-        texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
-        texto += formatear_linea("Llegada", format_fecha(row.fecha_retiro))
+        #texto += formatear_linea("Vuelo/Viaje", str(row.vapor) if row.vapor else "S/I")
+        #texto += formatear_linea("Viaje", str(row.viaje) if row.viaje else "S/I")
+        texto += formatear_linea("Salida", row.etd.strftime("%d/%m/%Y") if row.etd is not None else "S/I")
+        texto += formatear_linea("Llegada", row.eta.strftime("%d/%m/%Y") if row.eta is not None else "S/I")
 
         return texto, resultado
 
@@ -262,19 +262,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("Estimated delivery date", eta)
 
-        loading = 'S/I'
-        discharge = 'S/I'
 
-        if embarque.loading is not None:
-            ciudad_l = Ciudades.objects.filter(codigo=embarque.loading).first()
-            loading = ciudad_l.nombre
-        if embarque.discharge is not None:
-            ciudad_d = Ciudades.objects.filter(codigo=embarque.discharge).first()
-            discharge = ciudad_d.nombre
-
-        texto += formatear_linea("Port of loading", loading)
-
-        texto += formatear_linea("Port of discharge", discharge)
 
         texto += "<br>"
 
@@ -313,6 +301,8 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("Currency", currency.nombre)
 
         texto += "<br>"
+
+        return texto, resultado
 
     elif title == 'Instruccion de embarque':
         # embarcador = Clientes.objects.get(codigo=embarque.embarcador)
@@ -381,18 +371,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += formatear_linea("Referencia interna", f"{seguimiento.numero}/{row.numero}")
         texto += formatear_linea("Posición", row.posicion)
         texto += formatear_linea("Recepción estimada de mercadería", llegada)
-        loading = 'S/I'
-        discharge = 'S/I'
 
-        if embarque.loading is not None:
-            ciudad_l = Ciudades.objects.filter(codigo=embarque.loading).first()
-            loading = ciudad_l.nombre
-        if embarque.discharge is not None:
-            ciudad_d = Ciudades.objects.filter(codigo=embarque.discharge).first()
-            discharge = ciudad_d.nombre
-
-        texto += formatear_linea("Puerto de carga", loading)
-        texto += formatear_linea("Puerto de descarga", discharge)
 
         texto += "<br>"
         for m in mercaderia:
@@ -932,10 +911,10 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("Teléfono", telefono or "")
 
-        texto += formatear_linea("Viaje", conex.viaje or "")
+        texto += formatear_linea("Viaje", conex.viaje if conex else 'S/I')
 
-        if isinstance(conex.llegada, datetime):
-            texto += formatear_linea("Llegada", conex.llegada.strftime("%d/%m/%Y"))
+        if row and isinstance(row.eta, datetime):
+            texto += formatear_linea("Llegada", row.eta.strftime("%d/%m/%Y"))
 
         texto += formatear_linea("Posición", row.posicion or "")
 
@@ -1026,6 +1005,8 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += "DETALLE DE DESCONSOLIDACION<br><br>"
         return texto, resultado
+
+    return texto, resultado
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:

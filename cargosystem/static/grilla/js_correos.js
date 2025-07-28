@@ -25,13 +25,13 @@ $(document).ready(function()
             "rowCallback": function(row, data, index) {
                 var modulo = data[11];
 
-                // Limpiar clases anteriores de la primera celda solamente
-                $('td:eq(0)', row).removeClass('bg-success bg-primary text-white');
+                // Limpiar clases anteriores solo en la columna 7
+                $('td:eq(7)', row).removeClass('bg-success bg-primary bg-opacity-75 text-white bg-success-light bg-primary-light');
 
                 if (modulo === 'SG') {
-                    $('td:eq(0)', row).addClass('bg-success text-white');
+                    $('td:eq(7)', row).addClass('bg-success-light text-dark'); // verde claro
                 } else if (modulo) {
-                    $('td:eq(0)', row).addClass('bg-primary text-white');
+                    $('td:eq(7)', row).addClass('bg-primary-light text-dark'); // azul claro
                 }
             },
              "columnDefs": [

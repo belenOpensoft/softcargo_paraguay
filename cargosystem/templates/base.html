@@ -2,35 +2,37 @@
 {% load static %}
 
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        {% block js_datatables_block %}
-            <!-- CSS -->
-        <link href="{% static 'css/arreglos.css' %}" rel="stylesheet">
-        <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" id="bootstrap-css">
-        <link href="{% static 'css/menu.css' %}" rel="stylesheet" id="base-css">
-        <script src="{% static 'js/ae360af17e.js' %}" crossorigin="anonymous"></script>
-        <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
-        <script src="{% static 'js/bootstrap.min.js' %}"></script>
-        <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-select.min.css' %}">
-        <script src="{% static 'bootstrap/js/bootstrap-select.min.js' %}"></script>
-        <script src="{% static 'js/html2pdf.bundle.min.js' %}"></script>
+<head>
+    <meta charset="UTF-8">
+    {% block js_datatables_block %}
+    <!-- CSS -->
+    <link href="{% static 'css/arreglos.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" id="bootstrap-css">
+    <link href="{% static 'css/menu.css' %}" rel="stylesheet" id="base-css">
+    <script src="{% static 'js/ae360af17e.js' %}" crossorigin="anonymous"></script>
+    <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-select.min.css' %}">
+    <script src="{% static 'bootstrap/js/bootstrap-select.min.js' %}"></script>
+    <script src="{% static 'js/html2pdf.bundle.min.js' %}"></script>
 
-        <style>
-          .modal-dialog:not(.modal-fullscreen) .modal-body {
-              max-height: calc(100vh - 225px);
-              overflow-y: auto;
-          }
+    <style>
+        .modal-dialog:not(.modal-fullscreen) .modal-body {
+            max-height: calc(100vh - 225px);
+            overflow-y: auto;
+        }
+
         #gastos_form_house {
-        font-size:12px !important;
+            font-size: 12px !important;
         }
+
         #gastos_form_house .form-control {
-        font-size:10px !important;
+            font-size: 10px !important;
         }
-        </style>
-        <script>
-                //usa ren varias pestañas
+    </style>
+    <script>
+        //usa ren varias pestañas
         function setRolActivo(rol) {
             sessionStorage.setItem('rol_activo', rol);
         }
@@ -42,7 +44,7 @@
         // En cada AJAX, mandar el rol activo como header
         $(document).ready(function () {
             $.ajaxSetup({
-                beforeSend: function(xhr) {
+                beforeSend: function (xhr) {
                     const rol = sessionStorage.getItem('rol_activo');
                     if (rol) {
                         xhr.setRequestHeader('X-Rol-Activo', rol);
@@ -50,17 +52,18 @@
                 }
             });
         });
+
         function cambiarRol(modulo, baseUrl) {
-        setRolActivo(modulo);
+            setRolActivo(modulo);
 
-        // Verifica si ya hay parámetros en la URL
-        var url = baseUrl.includes('?') ? baseUrl + '&rol=' + encodeURIComponent(modulo)
-                                        : baseUrl + '?rol=' + encodeURIComponent(modulo);
+            // Verifica si ya hay parámetros en la URL
+            var url = baseUrl.includes('?') ? baseUrl + '&rol=' + encodeURIComponent(modulo)
+                : baseUrl + '?rol=' + encodeURIComponent(modulo);
 
-        window.location.href = url;
-    }
+            window.location.href = url;
+        }
 
-    function redirectConRol(urlBase) {
+        function redirectConRol(urlBase) {
             const rol = sessionStorage.getItem('rol_activo');
             if (!rol) {
                 window.location.replace(urlBase);
@@ -80,86 +83,106 @@
 
         }
 
-        </script>
-        <script>
+    </script>
+    <script>
 
 
         document.addEventListener("DOMContentLoaded", function () {
 
             let path = window.location.pathname;
             let partes = path.split('/').filter(p => p);
-            let modulo= partes.length >= 1 ? partes[0] : null;
-            let modulo2= partes.length >= 1 ? partes[1] : null;
-            if(modulo=='exportacion_aerea'){
+            let modulo = partes.length >= 1 ? partes[0] : null;
+            let modulo2 = partes.length >= 1 ? partes[1] : null;
+            if (modulo == 'exportacion_aerea') {
                 $('#modulo_nombre').html('EXPORTACIÓN AÉREA');
-            }else if(modulo=='exportacion_maritima'){
+            }
+            else if (modulo == 'exportacion_maritima') {
                 $('#modulo_nombre').html('EXPORTACIÓN MARÍTIMA');
-            }else if(modulo=='exportacion_terrestre'){
+            }
+            else if (modulo == 'exportacion_terrestre') {
                 $('#modulo_nombre').html('EXPORTACIÓN TERRESTRE');
-            }else if(modulo=='importacion_maritima'){
+            }
+            else if (modulo == 'importacion_maritima') {
                 $('#modulo_nombre').html('IMPORTACIÓN MARÍTIMA');
-            }else if(modulo=='importacion_aerea'){
+            }
+            else if (modulo == 'importacion_aerea') {
                 $('#modulo_nombre').html('IMPORTACIÓN AÉREA');
-            }else if(modulo=='importacion_terrestre'){
+            }
+            else if (modulo == 'importacion_terrestre') {
                 $('#modulo_nombre').html('IMPORTACIÓN TERRESTRE');
-            }else if(modulo=='admin_cont'){
-                if(modulo2=='facturacion'){
+            }
+            else if (modulo == 'admin_cont') {
+                if (modulo2 == 'facturacion') {
                     $('#modulo_nombre').html('FACTURACIÓN');
-                }else if(modulo2=='proveedores_gastos'){
+                } else if (modulo2 == 'proveedores_gastos') {
                     $('#modulo_nombre').html('PROVEEDORES Y GASTOS');
-                }else if(modulo2=='cobranza'){
+                } else if (modulo2 == 'cobranza') {
                     $('#modulo_nombre').html('COBRANZA');
-                }else if(modulo2=='orden_pago'){
+                } else if (modulo2 == 'orden_pago') {
                     $('#modulo_nombre').html('ORDEN DE PAGO');
-                }else if(modulo2=='editar_consultar_pagos'){
+                } else if (modulo2 == 'editar_consultar_pagos') {
                     $('#modulo_nombre').html('EDITAR Y CONSULTAR ORDENES DE PAGO');
-                }else if(modulo2=='editar_consultar_ventas'){
+                } else if (modulo2 == 'editar_consultar_ventas') {
                     $('#modulo_nombre').html('EDITAR Y CONSULTAR VENTAS');
-                }else if(modulo2=='editar_consultar_compras'){
+                } else if (modulo2 == 'editar_consultar_compras') {
                     $('#modulo_nombre').html('EDITAR Y CONSULTAR COMPRAS');
-                }else if(modulo2=='editar_consultar_cobranzas'){
+                } else if (modulo2 == 'editar_consultar_cobranzas') {
                     $('#modulo_nombre').html('EDITAR Y CONSULTAR COBRANZAS');
-                }else if(modulo2=='ingresar_asientos'){
+                } else if (modulo2 == 'ingresar_asientos') {
                     $('#modulo_nombre').html('INGRESAR ASIENTOS');
-                }else if(modulo2=='modificar_asientos'){
+                } else if (modulo2 == 'modificar_asientos') {
                     $('#modulo_nombre').html('MODIFICAR Y CONSULTAR ASIENTOS');
-                }else if(modulo2=='movimientos_bancarios'){
+                } else if (modulo2 == 'movimientos_bancarios') {
                     $('#modulo_nombre').html('MOVIMIENTOS BANCARIOS');
-                }else if(modulo2=='movimientos_caja'){
+                } else if (modulo2 == 'movimientos_caja') {
                     $('#modulo_nombre').html('MOVIMIENTOS DE CAJA');
-                }else if(modulo2=='ingresar_buscar_cheques'){
+                } else if (modulo2 == 'ingresar_buscar_cheques') {
                     $('#modulo_nombre').html('INGRESAR / BUSCAR CHEQUES');
-                }else if(modulo2=='bajar_cheques'){
+                } else if (modulo2 == 'bajar_cheques') {
                     $('#modulo_nombre').html('BAJAR CHEQUES A BANCO');
                 }
             }
-            else if(modulo=='consultas_administrativas'){
-                if(modulo2=='subdiario_ventas'){
+            else if (modulo == 'consultas_administrativas') {
+                if (modulo2 == 'subdiario_ventas') {
                     $('#modulo_nombre').html('SUBDIARIO DE VENTAS');
-                }else if(modulo2=='balance_cobrar'){
+                } else if (modulo2 == 'balance_cobrar') {
                     $('#modulo_nombre').html('BALANCE DE COBROS');
-                }else if(modulo2=='reporte_cobranzas'){
+                }
+                else if (modulo2 == 'reporte_cobranzas') {
                     $('#modulo_nombre').html('REPORTE DE COBROS');
-                }else if(modulo2=='antiguedad_saldos'){
+                }
+                else if (modulo2 == 'antiguedad_saldos') {
                     $('#modulo_nombre').html('ANTIGUEDAD DE SALDOS - VENTAS');
-                }else if(modulo2=='estados_cuenta'){
+                }
+                else if (modulo2 == 'estados_cuenta') {
                     $('#modulo_nombre').html('ESTADOS DE CUENTA - VENTAS');
-                }else if(modulo2=='subdiario_compras'){
+                }
+                else if (modulo2 == 'subdiario_compras') {
                     $('#modulo_nombre').html('SUBDIARIO DE COMPRAS');
-                }else if(modulo2=='balance_pagos'){
+                }
+                else if (modulo2 == 'balance_pagos') {
                     $('#modulo_nombre').html('BALANCE DE PAGOS');
-                }else if(modulo2=='antiguedad_saldos_compras'){
+                }
+                else if (modulo2 == 'antiguedad_saldos_compras') {
                     $('#modulo_nombre').html('ANTIGUEDAD DE SALDOS - COMPRAS');
-                }else if(modulo2=='estados_cuenta_compras'){
+                }
+                else if (modulo2 == 'estados_cuenta_compras') {
                     $('#modulo_nombre').html('ESTADOS DE CUENTA - COMPRAS');
                 }
+                else{
+                        $('#modulo_nombre').html(modulo.replace(/_/g, ' ').toUpperCase());
+
+                }
+            }
+            else{
+                    $('#modulo_nombre').html(modulo.replace(/_/g, ' ').toUpperCase());
 
             }
 
             var alerts = document.querySelectorAll(".alert");
             // Itera a través de los elementos y oculta cada uno después de 5 segundos
-            alerts.forEach(function(alertElement) {
-                setTimeout(function() {
+            alerts.forEach(function (alertElement) {
+                setTimeout(function () {
                     alertElement.style.display = "none";
                 }, 5000);
             });
@@ -176,11 +199,12 @@
         function setCookieToggle() {
             aux = getCookie('toggle');
             if (aux == null) {
-                 document.cookie = 'toggle=true'; // Establecer la cookie con el valor booleano "true"
+                document.cookie = 'toggle=true'; // Establecer la cookie con el valor booleano "true"
             } else {
                 deleteCookie('toggle');
             }
         }
+
         function deleteCookie(cookieName) {
             // Establece la fecha de caducidad en el pasado
             const pastDate = new Date(0);
@@ -191,6 +215,7 @@
             // También puedes especificar el dominio si es necesario
             // document.cookie = cookieName + "=; expires=" + pastDate.toUTCString() + "; path=/; domain=example.com";
         }
+
         function getCookie(cookieName) {
             const name = cookieName + "=";
             const decodedCookie = decodeURIComponent(document.cookie);
@@ -208,17 +233,18 @@
 
             return null; // Devuelve null si la cookie no se encuentra
         }
+
         function imprimirPDF() {
             var contenido = $('#pdf_add_input').summernote('code');
             var elemento = document.createElement('div');
             elemento.innerHTML = contenido;
 
             var opt = {
-                margin:       0.1,
-                filename:     'documento.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                margin: 0.1,
+                filename: 'documento.pdf',
+                image: {type: 'jpeg', quality: 0.98},
+                html2canvas: {scale: 2},
+                jsPDF: {unit: 'in', format: 'a4', orientation: 'portrait'}
             };
 
             html2pdf().set(opt).from(elemento).outputPdf('bloburl').then(function (url) {
@@ -229,8 +255,8 @@
                 };
             });
         }
-        </script>
-        <script>
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
             const items = document.querySelectorAll('.sidebar-item.has-submenu');
 
@@ -249,60 +275,60 @@
                 });
             });
         });
-        </script>
+    </script>
 
-        {% endblock js_datatables_block %}
+    {% endblock js_datatables_block %}
 
-        {% block script %} {% endblock script %}
-        {% block css %} {% endblock css %}
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{% block title_page %}Cargo System {% endblock title_page %}</title>
-    </head>
-    <body id="body">
-
-
-        {% block menu %}
-            {% with "menu/"|add:rol_pestana|add:".html" as template %}
-                   <div class="wrapper" style="position: relative;z-index: 1;">
-                <!-- Sidebar -->
-                    {% include template %}
-                <!-- Main Component -->
-                    <div class="main">
-                        <nav class="navbar navbar-expand px-3 border-bottom">
+    {% block script %} {% endblock script %}
+    {% block css %} {% endblock css %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title_page %}Cargo System {% endblock title_page %}</title>
+</head>
+<body id="body">
 
 
-                            <!-- Button for sidebar toggle -->
-                            <button class="btn" type="button" onclick="return setCookieToggle();" id="btntoggle" data-bs-theme="dark">
-                                <i class="fa-solid fa-bars"></i>
-                            </button>
-                                <h5 class="text-center flex-grow-1" id="modulo_nombre"></h5>
+{% block menu %}
+{% with "menu/"|add:rol_pestana|add:".html" as template %}
+<div class="wrapper" style="position: relative;z-index: 1;">
+    <!-- Sidebar -->
+    {% include template %}
+    <!-- Main Component -->
+    <div class="main">
+        <nav class="navbar navbar-expand px-3 border-bottom">
 
-                        </nav>
-                        <main class="content px-3 py-2">
-                            <div class="container-fluid">
-                                <div class="mb-3">
-                                   {% block contenido %}
-                                         <div style="display: flex;justify-content: center;align-items: center;height: 20vh;">
-                                            <img src="{% static 'images/oceanlink.png' %}" alt="">
-                                        </div>
-                                      <br>
-                                    {% endblock contenido %}
-                                    <br>
-                                    {% for message in messages %}
-                                        <div class="alert alert-sm {{ message.tags }} alert-dismissible" role="alert">
-                                            {{ message }}
-                                        </div>
-                                    {% endfor %}
 
-                                </div>
-                            </div>
-                        </main>
+            <!-- Button for sidebar toggle -->
+            <button class="btn" type="button" onclick="return setCookieToggle();" id="btntoggle" data-bs-theme="dark">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <h5 class="text-center flex-grow-1" id="modulo_nombre"></h5>
+
+        </nav>
+        <main class="content px-3 py-2">
+            <div class="container-fluid">
+                <div class="mb-3">
+                    {% block contenido %}
+                    <div style="display: flex;justify-content: center;align-items: center;height: 20vh;">
+                        <img src="{% static 'images/oceanlink.png' %}" alt="">
                     </div>
+                    <br>
+                    {% endblock contenido %}
+                    <br>
+                    {% for message in messages %}
+                    <div class="alert alert-sm {{ message.tags }} alert-dismissible" role="alert">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+
                 </div>
-            {% endwith %}
-        {% endblock menu %}
-        <br>
-    <script>
+            </div>
+        </main>
+    </div>
+</div>
+{% endwith %}
+{% endblock menu %}
+<br>
+<script>
     function agregarRolActivoALinks() {
         const rol = getRolActivo();
         if (!rol) return;
@@ -323,9 +349,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', agregarRolActivoALinks);
-    </script>
-    <script src="{% static 'js/script.js' %}"></script>
-    <script src="{% static 'grilla/js_controlador_sidemenu.js' %}"></script>
-    </body>
+</script>
+<script src="{% static 'js/script.js' %}"></script>
+<script src="{% static 'grilla/js_controlador_sidemenu.js' %}"></script>
+</body>
 
 </html>

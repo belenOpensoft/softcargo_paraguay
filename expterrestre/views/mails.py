@@ -13,6 +13,7 @@ from expterrestre.models import VEmbarqueaereo, ExpterraCargaaerea, ExpterraEnva
     ExpterraEmbarqueaereo, ExpterraConexaerea
 from impomarit.views.mails import formatear_linea
 from impterrestre.models import ImpterraEnvases
+from login.models import AccountEmail
 from mantenimientos.views.bancos import is_ajax
 from mantenimientos.models import Productos, Clientes, Servicios, Vapores, Ciudades
 from seguimientos.models import VGrillaSeguimientos
@@ -84,8 +85,6 @@ def get_data_email_op(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
-
-
 def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimiento,gastos,embarque,master,gastos_boolean):
     if row2 is not None:
         merca = []
@@ -118,7 +117,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += "<br><b>Datos del transbordo:</b><br>"
         texto += formatear_linea("Viaje", str(row.viaje) if row.viaje else "S/I")
-        texto += formatear_linea("Llegada estimada", format_fecha(row.fecha_retiro))
+        texto += formatear_linea("Llegada estimada", format_fecha(row.eta))
         # origen y destino nombre entero
         origen = Ciudades.objects.filter(codigo=row.origen).first()
         destino = Ciudades.objects.filter(codigo=row.destino).first()
@@ -139,10 +138,10 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         texto += "<br><b>Resumen del transbordo:</b><br>"
         texto += formatear_linea("Origen", str(origen.nombre) if origen else "S/I")
         texto += formatear_linea("Destino", str(destino.nombre) if destino else "S/I")
-        texto += formatear_linea("Vapor/Vuelo", str(row.vapor) if row.vapor else "S/I")
-        texto += formatear_linea("Viaje", str(row.viaje) if row.viaje else "S/I")
-        texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
-        texto += formatear_linea("Llegada", format_fecha(row.fecha_retiro))
+        #texto += formatear_linea("Vapor/Vuelo", str(row.vapor) if row.vapor else "S/I")
+        #texto += formatear_linea("Viaje", str(row.viaje) if row.viaje else "S/I")
+        texto += formatear_linea("Salida", format_fecha(row.etd))
+        texto += formatear_linea("Llegada", format_fecha(row.eta))
 
         return texto, resultado
     elif title == 'Novedades sobre la carga':
@@ -205,9 +204,9 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += formatear_linea("Posición", str(row.posicion) if row.posicion else "S/I")
 
-        texto += formatear_linea("Salida", format_fecha(row.fecha_embarque))
+        texto += formatear_linea("Salida", format_fecha(row.etd))
 
-        texto += formatear_linea("Llegada", format_fecha(row.fecha_retiro))
+        texto += formatear_linea("Llegada", format_fecha(row.eta))
         # origen y destino nombre entero
         origen = Ciudades.objects.filter(codigo=row.origen).first()
         destino = Ciudades.objects.filter(codigo=row.destino).first()
@@ -764,8 +763,6 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
 
         return texto, resultado
-
-
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:

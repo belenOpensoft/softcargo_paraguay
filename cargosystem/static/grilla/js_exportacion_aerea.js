@@ -2775,7 +2775,7 @@ let csrftoken = getCookie2('csrftoken');
 table_add_ea = $('#table_add_ea').DataTable({
     "stateSave": true,
     "info":false,
-    "dom": 'Btlipr',
+    "dom": 'Btipr',
     "bAutoWidth": false,
     "scrollX": true,
     "scrollY": wHeight * 0.60,
@@ -3195,7 +3195,7 @@ let csrftoken = getCookie2('csrftoken');
 table_edit_ea = $('#table_edit_ea').DataTable({
     "info":false,
     "stateSave": true,
-    "dom": 'Btlipr',
+    "dom": 'Btipr',
     "bAutoWidth": false,
     "scrollX": true,
     "scrollY": wHeight * 0.60,
@@ -5569,7 +5569,8 @@ function cargar_notas(numero) {
             dataSrc: 'data'
         },
         columns: [
-            { data: 'id' },
+            { data: 'id','visible':false },
+
             { data: 'fecha' },
             { data: 'asunto' },
             { data: 'tipo' },
@@ -5600,6 +5601,13 @@ function cargar_notas(numero) {
 
         }
     });
+}
+function cancelar_nota() {
+    const form = document.getElementById('notas_form');
+    form.reset(); // limpia los campos
+    document.getElementById('id_nota').value = ''; // limpia id oculto
+    document.getElementById('guardar_nota').innerHTML = 'Agregar Nota'; // reinicia texto del botón
+
 }
 function agregar_nota(event) {
     event.preventDefault();

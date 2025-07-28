@@ -1671,6 +1671,7 @@ class VGrillaSeguimientos(models.Model):
     emailim = models.CharField(db_column='emailIM', max_length=500, blank=True, null=True)  # Field name made lowercase.
     emailia = models.CharField(db_column='emailIA', max_length=500, blank=True, null=True)  # Field name made lowercase.
     emailit = models.CharField(db_column='emailIT', max_length=500, blank=True, null=True)  # Field name made lowercase.
+    buque_viaje = models.CharField(db_column='buque_viaje', max_length=500, blank=True, null=True)  # Field name made lowercase.
 
     def __str__(self, ):
         return self.modo + ' - ' + str(self.numero)

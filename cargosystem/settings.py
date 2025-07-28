@@ -86,7 +86,8 @@ MIDDLEWARE = [
     'administracion_contabilidad.middleware.VerificarArbitrajeMiddleware',
     'cargosystem.middleware.RolPorPestanaMiddleware',
     'cargosystem.middleware.RolRedirectMiddleware',
-    'cargosystem.middleware.BloqueoModalMiddleware'
+    'cargosystem.middleware.BloqueoModalMiddleware',
+    'cargosystem.middleware.RolActivoMiddleware'
 ]
 
 AUTH_PASSWORD_VALIDATORS = [

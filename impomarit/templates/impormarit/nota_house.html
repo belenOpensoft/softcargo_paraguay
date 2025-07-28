@@ -27,7 +27,9 @@
             <label for="{{ form_notas.notas.id_for_label }}">{{ form_notas.notas.label }}</label>
             {{ form_notas.notas }}
         </div>
-            <button class="btn btn-primary" id="guardar_nota" onclick="agregar_nota(event)">Agregar Nota</button>
+            <button class="btn btn-primary mt-2" id="guardar_nota" onclick="agregar_nota(event)">Agregar Nota</button>
+            <button type="button" class="btn btn-secondary mt-2" onclick="cancelar_nota()">Cancelar</button>
+
     </form>
     </div>
 

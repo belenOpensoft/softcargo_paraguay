@@ -145,7 +145,8 @@ def agregar_vendedor(request):
                 form = add_vendedor_form(request.POST)
                 if form.is_valid():
                     vendedor = Vendedores()
-                    vendedor.codigo = form.cleaned_data['codigo']
+                    ultimo_codigo = Vendedores.objects.order_by('-codigo').values_list('codigo', flat=True).first()
+                    vendedor.codigo = ultimo_codigo + 1
                     vendedor.nombre = form.cleaned_data['nombre']
                     vendedor.direccion = form.cleaned_data['direccion']
                     vendedor.telefono = form.cleaned_data['telefono']

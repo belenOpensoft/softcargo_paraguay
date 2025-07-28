@@ -1,4 +1,5 @@
 {% extends 'base_form.html' %}
+{% load static %}
 
 {% block formulario %}
 
@@ -34,6 +35,8 @@
         <button type="submit" class="btn btn-primary">Agregar</button>
         <a href="/ciudades" class="btn btn-dark" onclick="return(confirm('¿Esta seguro de cancelar?'))">Cancelar</a>
     </form>
+    <script src="{% static 'grilla/general_mantenimientos.js' %}"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Mapa para almacenar ID internacional de cada país

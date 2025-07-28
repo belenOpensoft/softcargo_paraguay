@@ -16,6 +16,7 @@ from seguimientos.models import VGrillaSeguimientos as Seguimiento, Seguimiento 
     Attachhijo, Serviceaereo, Conexaerea, Faxes
 from auditlog.models import LogEntry
 from django.contrib.contenttypes.models import ContentType
+from django.utils.dateformat import format
 
 @login_required(login_url='/')
 def grilla_seguimientos(request):
@@ -61,23 +62,33 @@ def grilla_seguimientos(request):
 param_busqueda = {
     1: 'numero__icontains',
     2: 'modo__icontains',
-    3: 'cliente__icontains',
-    4: 'origen__icontains',
-    5: 'destino__icontains',
-    6: 'fecha__icontains',
-    7: 'status__icontains',
+    3: 'eta__icontains',
+    4: 'etd__icontains',
+    5: 'buque_viaje__icontains',   # si lo definiste como campo en la vista
+    6: 'awb__icontains',
+    7: 'hawb__icontains',
+    8: 'Embarcador__icontains',
+    9: 'consignatario__icontains',
+    10: 'origen_text__icontains',   # si usás descripción, si no, 'origen'
+    11: 'destino_text__icontains',  # idem
 }
+
 """ TABLA PUERTO """
 columns_table = {
-    0: 'id',
+    0: 'id',  # acciones (no usado en búsquedas)
     1: 'numero',
     2: 'modo',
-    3: 'cliente',
-    4: 'origen',
-    5: 'destino',
-    6: 'fecha',
-    7: 'status',
+    3: 'eta',
+    4: 'etd',
+    5: 'buque_viaje',  # o 'vapor' si no usás alias
+    6: 'awb',
+    7: 'hawb',
+    8: 'Embarcador',
+    9: 'consignatario',
+    10: 'origen_text',
+    11: 'destino_text',
 }
+
 
 
 def source_seguimientos(request):
@@ -91,6 +102,10 @@ def source_seguimientos(request):
             '5': request.GET['columns[5][search][value]'],
             '6': request.GET['columns[6][search][value]'],
             '7': request.GET['columns[7][search][value]'],
+            '8': request.GET['columns[8][search][value]'],
+            '9': request.GET['columns[9][search][value]'],
+            '10': request.GET['columns[10][search][value]'],
+            '11': request.GET['columns[11][search][value]'],
         }
         """PROCESO FILTRO Y ORDEN BY"""
         filtro = get_argumentos_busqueda(**args)
@@ -211,17 +226,17 @@ def get_data(registros_filtrados):
             registro_json.append(str(registro.id))
             registro_json.append('' if registro.numero is None else str(registro.numero))
             registro_json.append('' if registro.modo is None else str(registro.modo))
-            registro_json.append('' if registro.cliente is None else str(registro.cliente))
-            registro_json.append('' if registro.origen is None else str(registro.origen))
-            registro_json.append('' if registro.destino is None else str(registro.destino))
+            registro_json.append('' if registro.cliente is None else str(registro.cliente)) #3
+            registro_json.append('' if registro.origen is None else str(registro.origen))#4
+            registro_json.append('' if registro.destino is None else str(registro.destino))#5
             registro_json.append('' if registro.fecha is None else str(registro.fecha)[:10])
             registro_json.append('' if registro.status is None else str(registro.status))
             """ EXTRAS """
             registro_json.append('' if registro.notas is None else str(registro.notas))
             """ PRIMER COLUMNA """
             registro_json.append('' if registro.cliente is None else str(registro.cliente))
-            registro_json.append('' if registro.embarcador is None else str(registro.embarcador))
-            registro_json.append('' if registro.consignatario is None else str(registro.consignatario))
+            registro_json.append('' if registro.embarcador is None else str(registro.embarcador)) #10
+            registro_json.append('' if registro.consignatario is None else str(registro.consignatario)) #11
             registro_json.append('' if registro.notificar is None else str(registro.notificar))
             registro_json.append('' if registro.agente is None else str(registro.agente))
             registro_json.append('' if registro.transportista is None else str(registro.transportista))
@@ -242,11 +257,11 @@ def get_data(registros_filtrados):
             except:
                 nombre_vapor = registro.vapor
 
-            registro_json.append('' if nombre_vapor is None else str(nombre_vapor))
+            registro_json.append('' if nombre_vapor is None else str(nombre_vapor)) #23
 
-            registro_json.append('' if registro.viaje is None else str(registro.viaje))
-            registro_json.append('' if registro.awb is None else str(registro.awb))
-            registro_json.append('' if registro.hawb is None else str(registro.hawb))
+            registro_json.append('' if registro.viaje is None else str(registro.viaje)) #24
+            registro_json.append('' if registro.awb is None else str(registro.awb)) #25
+            registro_json.append('' if registro.hawb is None else str(registro.hawb)) #26
             registro_json.append('' if registro.operacion is None else str(registro.operacion))
             registro_json.append('' if registro.refcliente is None else str(registro.refcliente))
             """ TERCER COLUMNA """
@@ -318,6 +333,11 @@ def get_data(registros_filtrados):
 
             registro_json.append(llave)
             registro_json.append(registro.cliente_codigo)
+            registro_json.append('' if registro.etd is None else str(registro.etd)[:10]) #55
+            registro_json.append('' if registro.eta is None else str(registro.eta)[:10]) #56
+            registro_json.append('' if registro.buque_viaje is None else str(registro.buque_viaje)) #57
+
+
             data.append(registro_json)
         return data
     except Exception as e:
@@ -371,22 +391,34 @@ def is_ajax(request):
         messages.error(request, e)
 
 
-def source(request):
 
+def source(request):
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
     if is_ajax:
         numero = request.GET.get('numero')
         if numero:
-            notas_list = Faxes.objects.filter(numero=numero).values('id', 'fecha', 'asunto', 'tipo','notas')
+            notas_queryset = Faxes.objects.filter(numero=numero).values('id', 'fecha', 'asunto', 'tipo', 'notas')
         else:
-            notas_list = Faxes.objects.all().values('id', 'fecha', 'asunto', 'tipo','notas')
+            notas_queryset = Faxes.objects.all().values('id', 'fecha', 'asunto', 'tipo', 'notas')
 
-        response_data = {"data": list(notas_list)}
-        return JsonResponse(response_data)
+        # Procesar resultados
+        notas_list = []
+        for nota in notas_queryset:
+            fecha = str(nota['fecha'])[:10] if nota['fecha'] else ''
+            asunto = (nota['asunto'] or '')[:40]
+            notas_list.append({
+                'id': nota['id'],
+                'fecha': fecha,
+                'asunto': asunto,
+                'tipo': nota['tipo'],
+                'notas': nota['notas'],
+            })
+
+        return JsonResponse({"data": notas_list})
 
     # Renderiza la plantilla cuando no es una solicitud AJAX
-    return render(request, 'notas.html')  # Ajusta 'notas.html' con el nombre de tu plantilla real
+    return render(request, 'notas.html')
 
 def guardar_notas(request):
     resultado = {}
