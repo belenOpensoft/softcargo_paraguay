@@ -2794,13 +2794,13 @@ table_add_ea = $('#table_add_ea').DataTable({
     {
         "targets": [1],
         "render": function (data, type, row, meta) {
-            return row[21]; // Toma el índice 5 para la columna 6
+            return row[19]; //seguimiento
         }
     },
     {
         "targets": [2],
             "render": function (data, type, row, meta) {
-            return row[22]; // Toma el índice 5 para la columna 6
+            return row[21]; // etd
         }
     },
     {
@@ -2812,60 +2812,43 @@ table_add_ea = $('#table_add_ea').DataTable({
         "targets": [4],
         "className": 'derecha',
         "render": function (data, type, row, meta) {
-            return row[19]; // Toma el índice 22 para la columna 4
+            return row[25]; //vuelo
         }
     },
     {
         "targets": [5],
         "render": function (data, type, row, meta) {
-            return row[4]; // Toma el índice 4 para la columna 5
+            return row[10]; // Toma el índice 4 para la columna 5
         }
     },
     {
         "targets": [6],
         "render": function (data, type, row, meta) {
-            return row[5]; // Toma el índice 5 para la columna 6
+            return row[11]; // Toma el índice 5 para la columna 6
         }
     },
     {
         "targets": [7],
         "render": function (data, type, row, meta) {
-            return row[6]; // Toma el índice 6 para la columna 7
+            return row[28]; // embarcador
         }
     },
     {
         "targets": [8],
         "render": function (data, type, row, meta) {
-            return row[7]; // Toma el índice 7 para la columna 8
+            return row[27]; // Toma el índice 7 para la columna 8
         }
     },
     {
         "targets": [9],
         "render": function (data, type, row, meta) {
-            return row[8]; // Toma el índice 8 para la columna 9
-        }
-    },
-    {
-        "targets": [10],
-        "render": function (data, type, row, meta) {
-            return row[9]; // Toma el índice 9 para la columna 10
-        }
-    },
-    {
-        "targets": [11],
-        "render": function (data, type, row, meta) {
-            return row[10]; // Toma el índice 10 para la columna 11
-        }
-    },
-    {
-        "targets": [12],
-        "render": function (data, type, row, meta) {
-            return row[11]; // Toma el índice 11 para la columna 12
+            return row[26]; // Toma el índice 8 para la columna 9
         }
     },
 
 
 ],
+
     "order": [[0, "desc"]],
     "processing": true,
     "serverSide": true,
@@ -2901,7 +2884,7 @@ table_add_ea = $('#table_add_ea').DataTable({
         "url": "/static/datatables/es_ES.json"
     },
     "rowCallback": function (row, data) {
-        $('td:eq(3)', row).html('');
+        $('td:eq(1)', row).html('');
             let texto = ''
             if (data[12] > 0) {
             //archivo
@@ -2939,7 +2922,7 @@ table_add_ea = $('#table_add_ea').DataTable({
                 '</svg>';
 
             }
-            $('td:eq(3)', row).html(texto + " " + data[19]);
+            $('td:eq(1)', row).html(texto + " " + data[19]);
 
         },
     "initComplete": function() {
@@ -3214,13 +3197,13 @@ table_edit_ea = $('#table_edit_ea').DataTable({
     {
         "targets": [1],
         "render": function (data, type, row, meta) {
-            return row[21]; // Toma el índice 5 para la columna 6
+            return row[19]; //seguimiento
         }
     },
     {
         "targets": [2],
             "render": function (data, type, row, meta) {
-            return row[22]; // Toma el índice 5 para la columna 6
+            return row[21]; // etd
         }
     },
     {
@@ -3232,55 +3215,37 @@ table_edit_ea = $('#table_edit_ea').DataTable({
         "targets": [4],
         "className": 'derecha',
         "render": function (data, type, row, meta) {
-            return row[19]; // Toma el índice 22 para la columna 4
+            return row[25]; //vuelo
         }
     },
     {
         "targets": [5],
         "render": function (data, type, row, meta) {
-            return row[4]; // Toma el índice 4 para la columna 5
+            return row[10]; // Toma el índice 4 para la columna 5
         }
     },
     {
         "targets": [6],
         "render": function (data, type, row, meta) {
-            return row[5]; // Toma el índice 5 para la columna 6
+            return row[11]; // Toma el índice 5 para la columna 6
         }
     },
     {
         "targets": [7],
         "render": function (data, type, row, meta) {
-            return row[6]; // Toma el índice 6 para la columna 7
+            return row[28]; // embarcador
         }
     },
     {
         "targets": [8],
         "render": function (data, type, row, meta) {
-            return row[7]; // Toma el índice 7 para la columna 8
+            return row[27]; // Toma el índice 7 para la columna 8
         }
     },
     {
         "targets": [9],
         "render": function (data, type, row, meta) {
-            return row[8]; // Toma el índice 8 para la columna 9
-        }
-    },
-    {
-        "targets": [10],
-        "render": function (data, type, row, meta) {
-            return row[9]; // Toma el índice 9 para la columna 10
-        }
-    },
-    {
-        "targets": [11],
-        "render": function (data, type, row, meta) {
-            return row[10]; // Toma el índice 10 para la columna 11
-        }
-    },
-    {
-        "targets": [12],
-        "render": function (data, type, row, meta) {
-            return row[11]; // Toma el índice 11 para la columna 12
+            return row[26]; // Toma el índice 8 para la columna 9
         }
     },
 
@@ -3320,7 +3285,7 @@ table_edit_ea = $('#table_edit_ea').DataTable({
         "url": "/static/datatables/es_ES.json"
     },
     "rowCallback": function (row, data) {
-        $('td:eq(3)', row).html('');
+        $('td:eq(1)', row).html('');
             let texto = ''
             if (data[12] > 0) {
             //archivo
@@ -3358,7 +3323,7 @@ table_edit_ea = $('#table_edit_ea').DataTable({
             '</svg>';
 
                 }
-            $('td:eq(3)', row).html(texto + " " + data[19]);
+            $('td:eq(1)', row).html(texto + " " + data[19]);
 
         },
     "initComplete": function() {
@@ -3374,7 +3339,7 @@ table_edit_ea = $('#table_edit_ea').DataTable({
                         alert(data.mensaje);
                         return;
                     }
-                    var tr = $(this).closest('tr');
+                    var tr = $('#table_edit_ea tbody').closest('tr');
                     var row = table_edit_ea.row(tr);
                     var rowData = row.data();
 

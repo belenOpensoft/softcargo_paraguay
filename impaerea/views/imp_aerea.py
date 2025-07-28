@@ -318,6 +318,64 @@ def source_embarque_aereo(request):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
+from django.db.models import Count
+
+def get_data_embarque_aereo_new(registros_filtrados):
+    try:
+        data = []
+
+        # Preagregados por número
+        archivos_dict = dict(ImportAttachhijo.objects.values('numero').annotate(c=Count('id')).values_list('numero', 'c'))
+        embarques_dict = dict(ImportCargaaerea.objects.values('numero').annotate(c=Count('id')).values_list('numero', 'c'))
+        gastos_dict = dict(ImportServiceaereo.objects.values('numero').annotate(c=Count('id')).values_list('numero', 'c'))
+        rutas_dict = dict(ImportConexaerea.objects.values('numero').annotate(c=Count('id')).values_list('numero', 'c'))
+        notas_dict = dict(ImportFaxes.objects.values('numero').annotate(c=Count('id')).values_list('numero', 'c'))
+
+        for registro in registros_filtrados:
+            registro_json = []
+            registro_json.append(str(registro.numero or ''))  # Número
+            registro_json.append(str(registro.fecha_embarque)[:10] if registro.fecha_embarque else '')
+            registro_json.append(str(registro.fecha_retiro)[:10] if registro.fecha_retiro else '')
+            registro_json.append(str(registro.numero or ''))
+            registro_json.append(str(registro.consignatario or ''))
+            registro_json.append(str(registro.origen or ''))
+            registro_json.append(str(registro.destino or ''))
+            registro_json.append(str(registro.status or ''))
+            registro_json.append(str(registro.posicion or ''))
+            registro_json.append(str(registro.operacion or ''))
+            registro_json.append(str(registro.awb or ''))
+            registro_json.append(str(registro.hawb or ''))
+            registro_json.append(str(registro.notificar_agente)[:10] if registro.notificar_agente else '')
+            registro_json.append(str(registro.notificar_cliente)[:10] if registro.notificar_cliente else '')
+
+            numero = registro.numero
+            registro_json.append(archivos_dict.get(numero, 0))
+            registro_json.append(embarques_dict.get(numero, 0))
+            registro_json.append(0)  # envases
+            registro_json.append(gastos_dict.get(numero, 0))
+            registro_json.append(rutas_dict.get(numero, 0))
+            registro_json.append(notas_dict.get(numero, 0))
+
+            registro_json.append(registro.consignatario_id)
+            registro_json.append(registro.seguimiento)
+
+            registro_json.append(bool(registro.aplicable and registro.aplicable != 0))
+            registro_json.append(registro.consignatario_codigo)
+
+            registro_json.append(str(registro.etd)[:10] if registro.etd else '')
+            registro_json.append(str(registro.eta)[:10] if registro.eta else '')
+            registro_json.append(registro.etd.strftime('%d/%m/%Y') if registro.etd else '')
+            registro_json.append(registro.eta.strftime('%d/%m/%Y') if registro.eta else '')
+
+            data.append(registro_json)
+
+        return data
+
+    except Exception as e:
+        raise TypeError(e)
+
+
+
 def get_data_embarque_aereo(registros_filtrados):
     try:
         data = []
@@ -342,13 +400,17 @@ def get_data_embarque_aereo(registros_filtrados):
             embarques = ImportCargaaerea.objects.filter(numero=registro.numero).count()
             #envases = ImportEnvases.objects.filter(numero=registro.numero).count()
             gastos = ImportServiceaereo.objects.filter(numero=registro.numero).count()
-            rutas = ImportConexaerea.objects.filter(numero=registro.numero).count()
+            rutas = ImportConexaerea.objects.filter(numero=registro.numero)
+            vuelo = ''
+            for r in rutas:
+                if r.destino == registro.destino:
+                    vuelo += ' ' + r.vuelo
             notas = ImportFaxes.objects.filter(numero=registro.numero).count()
             registro_json.append(archivos)
             registro_json.append(embarques)
             registro_json.append(0)
             registro_json.append(gastos)
-            registro_json.append(rutas)
+            registro_json.append(rutas.count())
             registro_json.append(notas)
             registro_json.append(registro.consignatario_id)
             registro_json.append(registro.seguimiento) #21
@@ -362,6 +424,9 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append('' if registro.eta is None else str(registro.eta)[:10])  #25
             registro_json.append('' if registro.etd is None else str(registro.etd.strftime('%d/%m/%Y')))  #26
             registro_json.append('' if registro.eta is None else str(registro.eta.strftime('%d/%m/%Y')))  #27
+            registro_json.append(vuelo)
+            registro_json.append('' if registro.agente is None else str(registro.agente))  # 29
+            registro_json.append('' if registro.transportista is None else str(registro.transportista))  # 30
             data.append(registro_json)
         return data
     except Exception as e:
@@ -430,8 +495,15 @@ def source_embarque_consolidado(request):
 
             # Mapeo de columnas
             columnas = [
-                'id', 'etd', 'eta', 'numero', 'seguimiento', 'consignatario', 'origen', 'destino',
-                'status', 'posicion', 'operacion', 'awb', 'hawb', 'vapor', 'notificar_agente', 'notificar_cliente'
+                'seguimiento',  # 1 - N° Seguimiento
+                'etd',  # 2 - ETD
+                'numero',  # 3 - N° Embarque
+                'vuelo',  # 4 - Vapor
+                'awb',  # 5 - Master
+                'hawb',  # 6 - House
+                'consignatario',  # 7 - Embarcador
+                'transportista',  # 8 - Transportista
+                'agente',  # 9 - Agente
             ]
 
             filtros = {}

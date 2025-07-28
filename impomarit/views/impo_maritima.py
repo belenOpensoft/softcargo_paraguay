@@ -411,6 +411,9 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append('' if registro.eta is None else str(registro.eta)[:10])  #25
             registro_json.append('' if registro.etd is None else str(registro.etd.strftime('%d/%m/%Y')))  #26
             registro_json.append('' if registro.eta is None else str(registro.eta.strftime('%d/%m/%Y')))  #27
+            registro_json.append('' if registro.agente is None else str(registro.agente))  # 28
+            registro_json.append('' if registro.transportista is None else str(registro.transportista))  # 29
+
             data.append(registro_json)
         return data
     except Exception as e:
@@ -425,8 +428,15 @@ def source_embarque_consolidado(request):
 
         # Mapeo de columnas
         columnas = [
-            'id', 'etd', 'eta', 'numero','seguimiento', 'consignatario', 'origen', 'destino',
-            'status', 'posicion', 'operacion', 'awb', 'hawb', 'vapor', 'notificar_agente', 'notificar_cliente'
+            'seguimiento',  # 1 - N° Seguimiento
+            'etd',  # 2 - ETD
+            'numero',  # 3 - N° Embarque
+            'vapor',  # 4 - Vapor
+            'awb',  # 5 - Master
+            'hawb',  # 6 - House
+            'consignatario',  # 7 - Embarcador
+            'transportista',  # 8 - Transportista
+            'agente',  # 9 - Agente
         ]
 
 

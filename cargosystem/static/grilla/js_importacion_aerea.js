@@ -2575,13 +2575,13 @@ table_add_ia = $('#table_add_ia').DataTable({
     {
         "targets": [1],
         "render": function (data, type, row, meta) {
-            return row[24]; // Toma el índice 5 para la columna 6
+            return row[21]; // seguimiento
         }
     },
     {
         "targets": [2],
             "render": function (data, type, row, meta) {
-            return row[25]; // Toma el índice 5 para la columna 6
+            return row[25]; // eta
         }
     },
     {
@@ -2593,59 +2593,42 @@ table_add_ia = $('#table_add_ia').DataTable({
         "targets": [4],
         "className": 'derecha',
         "render": function (data, type, row, meta) {
-            return row[21]; // Toma el índice 22 para la columna 4
+            return row[28];  //vuelo
         }
     },
     {
         "targets": [5],
         "render": function (data, type, row, meta) {
-            return row[4]; // Toma el índice 4 para la columna 5
+            return row[10]; // cliente
         }
     },
-    {
+            {
         "targets": [6],
         "render": function (data, type, row, meta) {
-            return row[5]; // Toma el índice 5 para la columna 6
+            return row[11]; // cliente
         }
     },
-    {
+                   {
         "targets": [7],
         "render": function (data, type, row, meta) {
-            return row[6]; // Toma el índice 6 para la columna 7
+            return row[4]; // cliente
         }
     },
     {
         "targets": [8],
         "render": function (data, type, row, meta) {
-            return row[7]; // Toma el índice 7 para la columna 8
+            return row[30]; // Transportisa
         }
     },
     {
         "targets": [9],
         "render": function (data, type, row, meta) {
-            return row[8]; // Toma el índice 8 para la columna 9
-        }
-    },
-    {
-        "targets": [10],
-        "render": function (data, type, row, meta) {
-            return row[9]; // Toma el índice 9 para la columna 10
-        }
-    },
-    {
-        "targets": [11],
-        "render": function (data, type, row, meta) {
-            return row[10]; // Toma el índice 10 para la columna 11
-        }
-    },
-    {
-        "targets": [12],
-        "render": function (data, type, row, meta) {
-            return row[11]; // Toma el índice 11 para la columna 12
+            return row[29]; //agente
         }
     },
 
 ],
+
     "order": [[0, "desc"]],
     "processing": true,
     "serverSide": true,
@@ -2681,7 +2664,7 @@ table_add_ia = $('#table_add_ia').DataTable({
         "url": "/static/datatables/es_ES.json"
     },
     "rowCallback": function (row, data) {
-        $('td:eq(3)', row).html('');
+        $('td:eq(1)', row).html('');
             let texto = ''
             if (data[14] > 0) {
             //archivo
@@ -2720,7 +2703,7 @@ table_add_ia = $('#table_add_ia').DataTable({
 
                 }
 
-            $('td:eq(3)', row).html(texto + " " + data[21]);
+            $('td:eq(1)', row).html(texto + " " + data[21]);
 
         },
     "initComplete": function() {
@@ -2989,13 +2972,13 @@ table_edit_ia = $('#table_edit_ia').DataTable({
     {
         "targets": [1],
         "render": function (data, type, row, meta) {
-            return row[24]; // Toma el índice 5 para la columna 6
+            return row[21]; // seguimiento
         }
     },
     {
         "targets": [2],
             "render": function (data, type, row, meta) {
-            return row[25]; // Toma el índice 5 para la columna 6
+            return row[25]; // eta
         }
     },
     {
@@ -3007,55 +2990,37 @@ table_edit_ia = $('#table_edit_ia').DataTable({
         "targets": [4],
         "className": 'derecha',
         "render": function (data, type, row, meta) {
-            return row[21]; // Toma el índice 22 para la columna 4
+            return row[28];  //vuelo
         }
     },
     {
         "targets": [5],
         "render": function (data, type, row, meta) {
-            return row[4]; // Toma el índice 4 para la columna 5
+            return row[10]; // cliente
         }
     },
-    {
+            {
         "targets": [6],
         "render": function (data, type, row, meta) {
-            return row[5]; // Toma el índice 5 para la columna 6
+            return row[11]; // cliente
         }
     },
-    {
+                   {
         "targets": [7],
         "render": function (data, type, row, meta) {
-            return row[6]; // Toma el índice 6 para la columna 7
+            return row[4]; // cliente
         }
     },
     {
         "targets": [8],
         "render": function (data, type, row, meta) {
-            return row[7]; // Toma el índice 7 para la columna 8
+            return row[30]; // Transportisa
         }
     },
     {
         "targets": [9],
         "render": function (data, type, row, meta) {
-            return row[8]; // Toma el índice 8 para la columna 9
-        }
-    },
-    {
-        "targets": [10],
-        "render": function (data, type, row, meta) {
-            return row[9]; // Toma el índice 9 para la columna 10
-        }
-    },
-    {
-        "targets": [11],
-        "render": function (data, type, row, meta) {
-            return row[10]; // Toma el índice 10 para la columna 11
-        }
-    },
-    {
-        "targets": [12],
-        "render": function (data, type, row, meta) {
-            return row[11]; // Toma el índice 11 para la columna 12
+            return row[29]; //agente
         }
     },
 
@@ -3095,7 +3060,9 @@ table_edit_ia = $('#table_edit_ia').DataTable({
         "url": "/static/datatables/es_ES.json"
     },
     "rowCallback": function (row, data) {
-        $('td:eq(3)', row).html('');
+                console.log(data);
+
+        $('td:eq(1)', row).html('');
             let texto = ''
             if (data[14] > 0) {
             //archivo
@@ -3142,7 +3109,7 @@ table_edit_ia = $('#table_edit_ia').DataTable({
                         '                    </svg>';
 
                 }
-            $('td:eq(3)', row).html(texto + " " + data[21]);
+            $('td:eq(1)', row).html(texto + " " + data[21]);
 
         },
     "initComplete": function() {
@@ -3159,7 +3126,7 @@ table_edit_ia = $('#table_edit_ia').DataTable({
                     alert(data.mensaje);
                     return;
                 }
-                var tr = $(this).closest('tr');
+                var tr = $('#table_edit_ia tbody').closest('tr');
                 var row = table_edit_ia.row(tr);
                 var rowData = row.data();
 

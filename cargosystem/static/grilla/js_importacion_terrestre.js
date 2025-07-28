@@ -3191,7 +3191,7 @@ table_edit_it = $('#table_edit_it').DataTable({
                         alert(data.mensaje);
                         return;
                     }
-                    var tr = $(this).closest('tr');
+                    var tr = $('#table_edit_it tbody').closest('tr');
                     var row = table_edit_it.row(tr);
                     var rowData = row.data();
 

@@ -344,14 +344,17 @@ def get_data_embarque_aereo(registros_filtrados):
             embarques = ExportCargaaerea.objects.filter(numero=registro.numero).count()
             #envases = ImportEnvases.objects.filter(numero=registro.numero).count()
             gastos = ExportServiceaereo.objects.filter(numero=registro.numero).count()
-            rutas = ExportConexaerea.objects.filter(numero=registro.numero).count()
+            rutas = ExportConexaerea.objects.filter(numero=registro.numero)
             notas = ExportFaxes.objects.filter(numero=registro.numero).count()
-
+            vuelo = ''
+            for r in rutas:
+                if r.destino == registro.destino:
+                    vuelo += ' ' + r.vuelo
             registro_json.append(archivos)
             registro_json.append(embarques)
             registro_json.append(0)
             registro_json.append(gastos)
-            registro_json.append(rutas)
+            registro_json.append(rutas.count())
             registro_json.append(notas)
             registro_json.append(registro.consignatario_id)
             registro_json.append(registro.seguimiento) #19
@@ -360,6 +363,10 @@ def get_data_embarque_aereo(registros_filtrados):
             registro_json.append('' if registro.eta is None else str(registro.eta)[:10])  #22
             registro_json.append('' if registro.etd is None else str(registro.etd.strftime('%d/%m/%Y')))  #23
             registro_json.append('' if registro.eta is None else str(registro.eta.strftime('%d/%m/%Y')))  #24
+            registro_json.append(vuelo)#25
+            registro_json.append('' if registro.agente is None else str(registro.agente))  # 26
+            registro_json.append('' if registro.transportista is None else str(registro.transportista))  # 27
+            registro_json.append('' if registro.embarcador is None else str(registro.embarcador))  # 28
             data.append(registro_json)
         return data
     except Exception as e:
@@ -427,8 +434,15 @@ def source_embarque_consolidado(request):
 
         # Mapeo de columnas
         columnas = [
-            'id', 'etd', 'eta', 'numero', 'seguimiento', 'consignatario', 'origen', 'destino',
-            'status', 'posicion', 'operacion', 'awb', 'hawb', 'vapor', 'notificar_agente', 'notificar_cliente'
+            'seguimiento',  # 1 - N° Seguimiento
+            'etd',  # 2 - ETD
+            'numero',  # 3 - N° Embarque
+            'vuelo',  # 4 - Vapor
+            'awb',  # 5 - Master
+            'hawb',  # 6 - House
+            'embarcador',  # 7 - Embarcador
+            'transportista',  # 8 - Transportista
+            'agente',  # 9 - Agente
         ]
 
         filtros = {}

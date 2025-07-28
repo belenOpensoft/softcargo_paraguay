@@ -2766,7 +2766,7 @@ let csrftoken = getCookie2('csrftoken');
 table_add_im = $('#table_add_im').DataTable({
     "stateSave": true,
     "info":false,
-    "dom": 'Btlipr',
+    "dom": 'Btipr',
     "bAutoWidth": false,
     "scrollX": true,
     "scrollY": wHeight * 0.60,
@@ -2785,81 +2785,59 @@ table_add_im = $('#table_add_im').DataTable({
     {
         "targets": [1],
         "render": function (data, type, row, meta) {
-            return row[24]; // Toma el índice 5 para la columna 6
+            return row[22]; // seguimiento
         }
     },
     {
         "targets": [2],
             "render": function (data, type, row, meta) {
-            return row[25]; // Toma el índice 5 para la columna 6
+            return row[25]; // eta
         }
     },
     {
         "targets": [3],
         "visible": false,
-        "className": 'derecha',
+        "className": 'derecha', // numero
     },
     {
         "targets": [4],
         "className": 'derecha',
         "render": function (data, type, row, meta) {
-            return row[22]; // Toma el índice 22 para la columna 4
+            return row[12]; //vapor
         }
     },
     {
         "targets": [5],
         "render": function (data, type, row, meta) {
-            return row[4]; // Toma el índice 4 para la columna 5
+            return row[10]; // master
         }
     },
     {
         "targets": [6],
         "render": function (data, type, row, meta) {
-            return row[5]; // Toma el índice 5 para la columna 6
+            return row[11]; // house
         }
     },
     {
         "targets": [7],
         "render": function (data, type, row, meta) {
-            return row[6]; // Toma el índice 6 para la columna 7
+            return row[4]; // consignatario
         }
     },
     {
         "targets": [8],
         "render": function (data, type, row, meta) {
-            return row[7]; // Toma el índice 7 para la columna 8
+            return row[29]; // transportista
         }
     },
     {
         "targets": [9],
         "render": function (data, type, row, meta) {
-            return row[8]; // Toma el índice 8 para la columna 9
+            return row[28]; // agente
         }
     },
-    {
-        "targets": [10],
-        "render": function (data, type, row, meta) {
-            return row[9]; // Toma el índice 9 para la columna 10
-        }
-    },
-    {
-        "targets": [11],
-        "render": function (data, type, row, meta) {
-            return row[10]; // Toma el índice 10 para la columna 11
-        }
-    },
-    {
-        "targets": [12],
-        "render": function (data, type, row, meta) {
-            return row[11]; // Toma el índice 11 para la columna 12
-        }
-    },
-    {
-        "targets": [13],
-        "render": function (data, type, row, meta) {
-            return row[12]; // Toma el índice 12 para la columna 13
-        }
-    },
+
+
 ],
     "order": [[0, "desc"]],
     "processing": true,
@@ -2896,7 +2874,7 @@ table_add_im = $('#table_add_im').DataTable({
         "url": "/static/datatables/es_ES.json"
     },
     "rowCallback": function (row, data) {
-        $('td:eq(3)', row).html('');
+        $('td:eq(1)', row).html('');
             let texto = ''
             if (data[15] > 0) {
             //archivo
@@ -2942,7 +2920,7 @@ table_add_im = $('#table_add_im').DataTable({
 
                 }
 
-            $('td:eq(3)', row).html(texto + " " + data[22]);
+            $('td:eq(1)', row).html(texto + " " + data[22]);
 
         },
     "initComplete": function() {
@@ -3183,7 +3161,7 @@ let master = localStorage.getItem('master_editar');
 let csrftoken = getCookie2('csrftoken');
 table_edit_im = $('#table_edit_im').DataTable({
     "stateSave": true,
-    "dom": 'Btlipr',
+    "dom": 'Btipr',
     "info":false,
     "bAutoWidth": false,
     "scrollX": true,
@@ -3203,81 +3181,58 @@ table_edit_im = $('#table_edit_im').DataTable({
     {
         "targets": [1],
         "render": function (data, type, row, meta) {
-            return row[24]; // Toma el índice 5 para la columna 6
+            return row[22]; // seguimiento
         }
     },
     {
         "targets": [2],
             "render": function (data, type, row, meta) {
-            return row[25]; // Toma el índice 5 para la columna 6
+            return row[25]; // eta
         }
     },
     {
         "targets": [3],
         "visible": false,
-        "className": 'derecha',
+        "className": 'derecha', // numero
     },
     {
         "targets": [4],
         "className": 'derecha',
         "render": function (data, type, row, meta) {
-            return row[22]; // Toma el índice 22 para la columna 4
+            return row[12]; //vapor
         }
     },
     {
         "targets": [5],
         "render": function (data, type, row, meta) {
-            return row[4]; // Toma el índice 4 para la columna 5
+            return row[10]; // master
         }
     },
     {
         "targets": [6],
         "render": function (data, type, row, meta) {
-            return row[5]; // Toma el índice 5 para la columna 6
+            return row[11]; // house
         }
     },
     {
         "targets": [7],
         "render": function (data, type, row, meta) {
-            return row[6]; // Toma el índice 6 para la columna 7
+            return row[4]; // consignatario
         }
     },
     {
         "targets": [8],
         "render": function (data, type, row, meta) {
-            return row[7]; // Toma el índice 7 para la columna 8
+            return row[29]; // transportista
         }
     },
     {
         "targets": [9],
         "render": function (data, type, row, meta) {
-            return row[8]; // Toma el índice 8 para la columna 9
+            return row[28]; // agente
         }
     },
-    {
-        "targets": [10],
-        "render": function (data, type, row, meta) {
-            return row[9]; // Toma el índice 9 para la columna 10
-        }
-    },
-    {
-        "targets": [11],
-        "render": function (data, type, row, meta) {
-            return row[10]; // Toma el índice 10 para la columna 11
-        }
-    },
-    {
-        "targets": [12],
-        "render": function (data, type, row, meta) {
-            return row[11]; // Toma el índice 11 para la columna 12
-        }
-    },
-    {
-        "targets": [13],
-        "render": function (data, type, row, meta) {
-            return row[12]; // Toma el índice 12 para la columna 13
-        }
-    },
+
 
 ],
     "order": [[0, "desc"]],
@@ -3315,7 +3270,7 @@ table_edit_im = $('#table_edit_im').DataTable({
         "url": "/static/datatables/es_ES.json"
     },
     "rowCallback": function (row, data) {
-        $('td:eq(3)', row).html(''); //cambiar esto por 3 en todos
+        $('td:eq(1)', row).html(''); //cambiar esto por 3 en todos
             let texto = ''
             if (data[15] > 0) {
             //archivo
@@ -3360,7 +3315,7 @@ table_edit_im = $('#table_edit_im').DataTable({
             '</svg>';
 
                 }
-            $('td:eq(3)', row).html(texto + " " + data[22]);
+            $('td:eq(1)', row).html(texto + " " + data[22]);
 
         },
     "initComplete": function() {
@@ -3376,7 +3331,7 @@ table_edit_im = $('#table_edit_im').DataTable({
                         alert(data.mensaje);
                         return;
                     }
-                    var tr = $(this).closest('tr');
+                    var tr = $('#table_edit_im tbody').closest('tr');
                     var row = table_edit_im.row(tr);
                     var rowData = row.data();
 

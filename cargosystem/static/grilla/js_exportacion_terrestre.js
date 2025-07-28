@@ -3200,7 +3200,7 @@ table_edit_et = $('#table_edit_et').DataTable({
                         alert(data.mensaje);
                         return;
                     }
-                    var tr = $(this).closest('tr');
+                    var tr = $('#table_edit_et tbody').closest('tr');
                     var row = table_edit_et.row(tr);
                     var rowData = row.data();
 
