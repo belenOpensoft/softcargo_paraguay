@@ -150,10 +150,10 @@ $('#tabla_expomarit tfoot th').each(function(index) {
             },
 
             {
-                "targets": [2],
+                "targets": [3],
             },
             {
-                "targets": [3],
+                "targets": [2],
                 "className": 'text-primary',
 
                 render: function (data, type, row, meta) {
@@ -166,32 +166,18 @@ $('#tabla_expomarit tfoot th').each(function(index) {
                 return data;
             }
             },
-            {
-                "targets": [4],
-            },
-            {
-                "targets": [5],
-            },
-            {
+           {
                 "targets": [6],
-            },
-            {
-                "targets": [7],
-            },
-            {
-                "targets": [8],
-            },
-            {
-                "targets": [9],
-            },
-            {
-                "targets": [10],
-            },
-            {
-                "targets": [11],
-            },
-            {
-                "targets": [12],
+
+                render: function (data, type, row, meta) {
+                if (type === 'display' && data) {
+                    const partes = data.split(';');
+                    if (partes.length <= 4) return data;
+                    const visibles = partes.slice(0, 4).join(';') + ';...';
+                    return `<span title="${data}">${visibles}</span>`;
+                }
+                return data;
+            }
             },
 
         ],

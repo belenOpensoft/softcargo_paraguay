@@ -137,35 +137,27 @@ def house_importacion_maritima(request):
 
 param_busqueda = {
     1: 'numero__icontains',
-    2: 'llegada__icontains',
-    3: 'seguimientos__icontains',
-    4: 'transportista__icontains',
+    2: 'seguimientos__icontains',
+    3: 'llegada__icontains',
+    4: 'vapor__icontains',
     5: 'awb__icontains',
-    6: 'agente__icontains',
-    7: 'consignatario__icontains',
-    8: 'armador__icontains',
-    9: 'vapor__icontains',
-    10: 'origen__icontains',
-    11: 'destino__icontains',
-    12: 'status__icontains',
+    6: 'hawbs__icontains',         # nuevo campo agregado por subquery
+    7: 'embarcador__icontains',
+    8: 'transportista__icontains',
+    9: 'agente__icontains',
 }
-
 columns_table = {
-    0: 'numero',
+    0: 'id',              # acciones (no visible pero requerido por DataTables)
     1: 'numero',
-    2: 'llegada',
-    3: 'seguimientos',
-    4: 'transportista',
+    2: 'seguimientos',
+    3: 'llegada',
+    4: 'vapor',
     5: 'awb',
-    6: 'agente',
-    7: 'consignatario',
-    8: 'armador',
-    9: 'vapor',
-    10: 'origen',
-    11: 'destino',
-    12: 'status',
+    6: 'hawbs',
+    7: 'embarcador',
+    8: 'transportista',
+    9: 'agente',
 }
-
 def source_importacion_master(request):
     if is_ajax(request):
         """ BUSCO ORDEN """
@@ -178,10 +170,7 @@ def source_importacion_master(request):
             '6': request.GET['columns[6][search][value]'],
             '7': request.GET['columns[7][search][value]'],
             '8': request.GET['columns[8][search][value]'],
-            '9': request.GET['columns[9][search][value]'],
-            '10': request.GET['columns[10][search][value]'],
-            '11': request.GET['columns[11][search][value]'],
-            '12': request.GET['columns[12][search][value]'],
+
         }
         filtro = get_argumentos_busqueda(**args)
 
@@ -226,18 +215,14 @@ def get_data(registros_filtrados):
             registro_json = []
             registro_json.append(str(registro.numero))
             registro_json.append('' if registro.numero is None else str(registro.numero))
-            registro_json.append('' if registro.llegada is None else str(registro.llegada)[:10])
             registro_json.append('' if registro.seguimientos is None else str(registro.seguimientos))
-
-            registro_json.append('' if registro.transportista is None else str(registro.transportista))
-            registro_json.append('' if registro.awb is None else str(registro.awb))
-            registro_json.append('' if registro.agente is None else str(registro.agente))
-            registro_json.append('' if registro.embarcador is None else str(registro.embarcador))
-            registro_json.append('' if registro.armador is None else str(registro.armador))
+            registro_json.append('' if registro.llegada is None else str(registro.llegada)[:10])
             registro_json.append('' if registro.vapor is None else str(registro.vapor))
-            registro_json.append('' if registro.origen is None else str(registro.origen))
-            registro_json.append('' if registro.destino is None else str(registro.destino))
-            registro_json.append('' if registro.status is None else str(registro.status))
+            registro_json.append('' if registro.awb is None else str(registro.awb))
+            registro_json.append('' if registro.hawbs is None else str(registro.hawbs))
+            registro_json.append('' if registro.embarcador is None else str(registro.embarcador))
+            registro_json.append('' if registro.transportista is None else str(registro.transportista))
+            registro_json.append('' if registro.agente is None else str(registro.agente))
             # rutas = Conexaerea.objects.filter(numero=registro.numero).annotate(num_archivos=Count('id')).values('num_archivos').first()
             # archivos = Attachhijo.objects.filter(numero=registro.numero).count()
             # embarques = Cargaaerea.objects.filter(numero=registro.numero).count()

@@ -154,10 +154,10 @@ $(document).ready(function () {
             },
 
             {
-                "targets": [2],
+                "targets": [3],
             },
             {
-                "targets": [3],
+                "targets": [2],
                 "className": 'text-primary',
 
                 render: function (data, type, row, meta) {
@@ -171,23 +171,17 @@ $(document).ready(function () {
             }
             },
             {
-                "targets": [4],
-            },
-            {
                 "targets": [5],
-            },
-            {
-                "targets": [6],
-            },
-            {
-                "targets": [7],
-            },
-            {
-                "targets": [8],
-            },
-            {
-                "targets": [9],
-            },
+                render: function (data, type, row, meta) {
+                if (type === 'display' && data) {
+                    const partes = data.split(';');
+                    if (partes.length <= 4) return data;
+                    const visibles = partes.slice(0, 4).join(';') + ';...';
+                    return `<span title="${data}">${visibles}</span>`;
+                }
+                return data;
+            }
+            }
 
 
         ],
@@ -1440,7 +1434,7 @@ function aplicable_volumen(volumen){
                 expandedRow.node().classList.remove('shown');
             }
             var rowData = row.data();
-            var selectedRowId = rowData[5];
+            var selectedRowId = rowData[4];
 
             $.ajax({
                 url: '/exportacion_aerea/source_embarque_aereo/',
@@ -1452,7 +1446,8 @@ function aplicable_volumen(volumen){
                     'X-CSRFToken': csrf_token
                 },
                 success: function (response) {
-                    row.child(format(response.data)).show();
+                    row.child(
+                        format(response.data)).show();
                     tr.addClass('shown');
                     expandedRow = row;
                 },
