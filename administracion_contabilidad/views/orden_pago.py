@@ -256,8 +256,8 @@ def obtener_imputables(request):
         total = float(r.total or 0)
         saldo = float(r.saldo or 0)
 
-        arbitraje = float(arbitraje)
-        paridad = float(paridad)
+        arbitraje = float(arbitraje) if arbitraje else 0
+        paridad = float(paridad) if paridad else 0
 
         total_convertido = convertir_monto(total, int(r.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
         saldo_convertido = convertir_monto(saldo, int(r.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
@@ -840,7 +840,7 @@ def guardar_impuorden(request):
                                 "documento": item['nroboleta'],
                                 "importe": item['imputado'],
                                 "detalle_fac": movim.mdetalle if movim.mdetalle else "S/I",
-                                "cambio": movim.marbitraje if movim.marbitraje else 0,
+                                "cambio": float(movim.marbitraje) if movim.marbitraje else 0,
                                 "posicion": posicion
                             })
 

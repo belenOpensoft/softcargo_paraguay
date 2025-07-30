@@ -396,7 +396,8 @@ def get_data_embarque_aereo(registros_filtrados):
             vuelo = ''
             for r in rutas:
                 if r.destino == registro.destino:
-                    vuelo += ' ' + r.vuelo
+                    vuelo += ' ' + str(r.vuelo or '') if r.vuelo is not None else ''
+
             notas = ImportFaxes.objects.filter(numero=registro.numero).count()
             registro_json.append(archivos)
             registro_json.append(embarques)
@@ -487,6 +488,7 @@ def source_embarque_consolidado(request):
 
             # Mapeo de columnas
             columnas = [
+            '',
                 'seguimiento',  # 1 - N° Seguimiento
                 'etd',  # 2 - ETD
                 'numero',  # 3 - N° Embarque

@@ -579,7 +579,7 @@ $(document).ready(function () {
                             $(".alert").delay(4000).slideUp(200, function () {
                                 $(this).alert('close');
                             });
-                            $("#tabla_gastos").dataTable().fnDestroy();
+                            //$("#tabla_gastos").dataTable().fnDestroy();
                             $("#ingresar_gasto").html('Agregar');
                             $('#gastos_btn').addClass('triggered').trigger('click');
                             $("#id_gasto_id").val('');
@@ -1287,6 +1287,14 @@ $(document).ready(function () {
                 class: 'modal fade',
                 buttons: [
                     {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        },
+                    },
+                    {
                         text: "Guardar",
                         class: "btn btn-primary",
                         style: "width:100px",
@@ -1316,13 +1324,6 @@ $(document).ready(function () {
                             });
                             $(this).dialog("close");
 
-                        },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
                         },
                     }],
                 beforeClose: function (event, ui) {
@@ -2148,6 +2149,7 @@ $(document).ready(function () {
                     },
                 }],
             beforeClose: function (event, ui) {
+                $("#id_id").val('');
                 // table.ajax.reload();
             }
         })
@@ -2529,7 +2531,7 @@ $(document).ready(function () {
     },
     minLength: 2,
     select: function (event, ui) {
-        $(this).attr('data-id', ui.item['codigo']);  // Guarda el ID si es un item de la lista
+        $(this).attr('data-id', ui.item['label']);  // Guarda el ID si es un item de la lista
             $(this).attr('data-label', ui.item['label']);
             $(this).css({
                 "border-color": "#3D9A37",
@@ -2553,7 +2555,7 @@ $(document).ready(function () {
                     },
                     success: function (data) {
                         if (data.success) {
-                            input.attr('data-id', data.id);
+                            input.attr('data-id', valorIngresado);
                             input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
                         } else {
                             alert("No se pudo guardar el vapor.");
@@ -2982,7 +2984,7 @@ function get_datos_seguimiento_old(id, modo = '') {
             }
             if (datos['vapor'] !== null) {
                 $("#vapor_add").val(datos['vapor'])
-                $("#vapor_add").attr('data-id', datos['vapor_codigo']);
+                $("#vapor_add").attr('data-id', datos['vapor']);
                 $("#vapor_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
             }
             if (datos['loading'] !== null && datos['loading'] !== 0) {

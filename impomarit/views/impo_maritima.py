@@ -407,8 +407,9 @@ def source_embarque_consolidado(request):
 
         # Mapeo de columnas
         columnas = [
+            '',  # 1 - N° Seguimiento
             'seguimiento',  # 1 - N° Seguimiento
-            'etd',  # 2 - ETD
+            'eta',  # 2 - ETD
             'numero',  # 3 - N° Embarque
             'vapor',  # 4 - Vapor
             'awb',  # 5 - Master

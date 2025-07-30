@@ -3325,6 +3325,8 @@ table_edit_ea = $('#table_edit_ea').DataTable({
      //doble click modificar house en edit_master form
     $('#table_edit_ea tbody').off('dblclick').on('dblclick', 'tr', function () {
         let selectedRowN = localStorage.getItem('id_master_editar');
+        let selected = this;
+
             $.ajax({
                 url: '/exportacion_aerea/master-detail/',
                 data: {id: selectedRowN},
@@ -3334,7 +3336,7 @@ table_edit_ea = $('#table_edit_ea').DataTable({
                         alert(data.mensaje);
                         return;
                     }
-                    var tr = $('#table_edit_ea tbody').closest('tr');
+                    var tr = $(selected).closest('tr');
                     var row = table_edit_ea.row(tr);
                     var rowData = row.data();
 

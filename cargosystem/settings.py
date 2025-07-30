@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',
     'login',
     'mantenimientos',
     'seguimientos',
@@ -142,12 +143,12 @@ DATABASES = {
         #'NAME': 'cargosystem_prod',
         'NAME': 'cargosystem',
         # 'NAME': 'cargo',
-        'USER': 'sistemas',
-        #'USER': 'root',
+        #'USER': 'sistemas',
+        'USER': 'root',
         'PASSWORD': 'Rincon@1956',
         # 'PASSWORD': 'PassCargo2023',
-        'HOST': 'opensoft.uy',
-        #'HOST': 'localhost',
+        #'HOST': 'opensoft.uy',
+        'HOST': 'localhost',
         'PORT': '3306',
         "OPTIONS": {
             'init_command': "SET default_storage_engine='INNODB'; SET sql_mode='STRICT_TRANS_TABLES'",
@@ -190,6 +191,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CRONJOBS = [
+    ('*/2 * * * *', 'softcargo.cargosystem.cron.liberar_bloqueos_expirados'),  # cada 2 minutos
+]
 
 STATICFILES_DIRS = (
     os.path.join(RUTA_PROYECTO, 'static'),

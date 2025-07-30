@@ -3308,6 +3308,7 @@ table_edit_im = $('#table_edit_im').DataTable({
     "initComplete": function() {
      //doble click modificar house en edit_master form
     $('#table_edit_im tbody').off('dblclick').on('dblclick', 'tr', function () {
+        let selected = this;
             let selectedRowN = localStorage.getItem('id_master_editar');
             $.ajax({
                 url: '/importacion_maritima/master-detail/',
@@ -3318,7 +3319,7 @@ table_edit_im = $('#table_edit_im').DataTable({
                         alert(data.mensaje);
                         return;
                     }
-                    var tr = $('#table_edit_im tbody').closest('tr');
+                    var tr = $(selected).closest('tr');
                     var row = table_edit_im.row(tr);
                     var rowData = row.data();
 

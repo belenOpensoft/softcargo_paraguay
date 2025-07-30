@@ -3190,6 +3190,7 @@ table_edit_et = $('#table_edit_et').DataTable({
      //doble click modificar house en edit_master form
     $('#table_edit_et tbody').off('dblclick').on('dblclick', 'tr', function () {
         let selectedRowN = localStorage.getItem('id_master_editar');
+        let selected = this;
 
             $.ajax({
                 url: '/exportacion_terrestre/master-detail/',
@@ -3200,7 +3201,7 @@ table_edit_et = $('#table_edit_et').DataTable({
                         alert(data.mensaje);
                         return;
                     }
-                    var tr = $('#table_edit_et tbody').closest('tr');
+                    var tr = $(selected).closest('tr');
                     var row = table_edit_et.row(tr);
                     var rowData = row.data();
 

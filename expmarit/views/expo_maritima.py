@@ -373,6 +373,7 @@ def source_embarque_consolidado(request):
 
         # Mapeo de columnas
         columnas = [
+        '',
             'seguimiento',  # 1 - N° Seguimiento
             'etd',  # 2 - ETD
             'numero',  # 3 - N° Embarque

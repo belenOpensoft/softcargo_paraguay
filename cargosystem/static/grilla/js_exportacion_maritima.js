@@ -3222,6 +3222,7 @@ table_edit_em = $('#table_edit_em').DataTable({
     $('#table_edit_em tbody').off('dblclick').on('dblclick', 'tr', function () {
 
     let id = localStorage.getItem('id_master_editar');
+        let selected = this;
 
             $.ajax({
                 url: '/exportacion_maritima/master-detail/',
@@ -3232,7 +3233,7 @@ table_edit_em = $('#table_edit_em').DataTable({
                         alert(data.mensaje);
                         return;
                     }
-                    var tr = $('#table_edit_em tbody').closest('tr');
+                    var tr = $(selected).closest('tr');
                     var row = table_edit_em.row(tr);
                     var rowData = row.data();
 

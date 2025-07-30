@@ -67,7 +67,7 @@ param_busqueda = {
     5: 'buque_viaje__icontains',   # si lo definiste como campo en la vista
     6: 'awb__icontains',
     7: 'hawb__icontains',
-    8: 'Embarcador__icontains',
+    8: 'embarcador__icontains',
     9: 'consignatario__icontains',
     10: 'origen_text__icontains',   # si usás descripción, si no, 'origen'
     11: 'destino_text__icontains',  # idem
@@ -83,7 +83,7 @@ columns_table = {
     5: 'buque_viaje',  # o 'vapor' si no usás alias
     6: 'awb',
     7: 'hawb',
-    8: 'Embarcador',
+    8: 'embarcador',
     9: 'consignatario',
     10: 'origen_text',
     11: 'destino_text',
