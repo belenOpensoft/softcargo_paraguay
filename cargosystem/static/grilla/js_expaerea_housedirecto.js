@@ -269,6 +269,11 @@ $(document).ready(function () {
                         ],
                         beforeClose: function (event, ui) {
                             localStorage.removeItem('lugar');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                         }
 
                     });
@@ -496,7 +501,11 @@ $(document).ready(function () {
                             $('#table_add_im tbody tr').removeClass('table-secondary');
                             $('#table_edit_im tbody tr').removeClass('table-secondary');
                             $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
-
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
 
                         }
                     })
@@ -757,7 +766,11 @@ let selectedRowN = localStorage.getItem('num_house_gasto');
                                 },
                             },],
                             beforeClose: function (event, ui) {
-
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             }
                         });
                         $("#tabla_logs").dataTable().fnDestroy();

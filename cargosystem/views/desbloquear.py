@@ -12,43 +12,43 @@ from impomarit.models import BloqueoEdicion
 def desbloquear(request):
     numero_embarque = request.POST.get('numero_embarque', '').strip()
     numero_master = request.POST.get('numero_master', '').strip()
+    id_seguimiento = request.POST.get('id_seguimiento', '').strip()
     ruta_actual = request.POST.get('ruta', '').strip()
 
     # Extraer módulo de la ruta
     partes = ruta_actual.strip('/').split('/')
-    modulo = partes[0] if len(partes) >= 2 else 'operaciones'
+    modulo = partes[0] if len(partes) >= 2 else None
 
-    if not modulo or (not numero_embarque and not numero_master):
+    if not numero_master and not numero_master and not id_seguimiento:
         return JsonResponse({'status': 'error', 'message': 'Parámetros faltantes'})
 
     desbloqueados = 0
 
-    if numero_embarque:
-        bloqueo = BloqueoEdicion.objects.filter(
+    if numero_embarque and modulo:
+        desbloqueados += BloqueoEdicion.objects.filter(
             referencia=numero_embarque,
-            formulario='embarque',
             fecha_expiracion__gt=now(),
             activo=True,
             modulo=modulo,
             usuario=request.user
-        ).first()
-        if bloqueo:
-            bloqueo.activo = False
-            bloqueo.save()
-            desbloqueados += 1
+        ).update(activo=False)
 
-    if numero_master:
-        bloqueo = BloqueoEdicion.objects.filter(
+    if numero_master and modulo:
+        desbloqueados += BloqueoEdicion.objects.filter(
             referencia=numero_master,
-            formulario='master',
             fecha_expiracion__gt=now(),
             activo=True,
             modulo=modulo,
             usuario=request.user
-        ).first()
-        if bloqueo:
-            bloqueo.activo = False
-            bloqueo.save()
-            desbloqueados += 1
+        ).update(activo=False)
+
+    if id_seguimiento and not modulo:
+        desbloqueados += BloqueoEdicion.objects.filter(
+            referencia=id_seguimiento,
+            fecha_expiracion__gt=now(),
+            activo=True,
+            modulo='seguimientos',
+            usuario=request.user
+        ).update(activo=False) # desbloqueo todos los bloqueos asociados al seguimiento
 
     return JsonResponse({'status': 'ok', 'desbloqueados': desbloqueados})

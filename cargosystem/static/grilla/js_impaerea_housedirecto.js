@@ -279,6 +279,11 @@ $('#buscadorEmailsHouse').on('keyup', function () {
                                 ],
                                 beforeClose: function (event, ui) {
                                 localStorage.removeItem('lugar');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                                 }
 
                             });
@@ -530,6 +535,11 @@ if (!$('#id_awbhijo').val()) {
                             $('#table_add_im tbody tr').removeClass('table-secondary');
                             $('#table_edit_im tbody tr').removeClass('table-secondary');
                             $('#tabla_house_directo_ia tbody tr').removeClass('table-secondary');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                         }
                     })
                 }
@@ -766,7 +776,11 @@ let selectedRowN = localStorage.getItem('num_house_gasto');
                                 },
                             },],
                             beforeClose: function (event, ui) {
-
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             }
                         });
                         $("#tabla_logs").dataTable().fnDestroy();
@@ -857,7 +871,14 @@ function abrir_aplicable_h(){
                                         $(this).dialog("close");
                                     }
                                 }
-                            ]
+                            ],
+                        beforeClose: function (event, ui) {
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
+                        }
                         });
                     } else {
                         alert('Debe seleccionar un único registro');

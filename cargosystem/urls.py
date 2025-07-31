@@ -1,13 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
 from cargosystem import settings
-from cargosystem.desbloquear import desbloquear
+from cargosystem.views.desbloquear import desbloquear
 from login.views.correos import source_correo, correos
 from login.views.home import home_view
 from login.views.login import login_view, select_rol, logout_view, cambiar_modulo
 from django.conf.urls.static import static
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),

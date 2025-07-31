@@ -269,6 +269,11 @@ $(document).ready(function () {
                                 ],
                                 beforeClose: function (event, ui) {
                                 localStorage.removeItem('lugar');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                                 }
 
                             });
@@ -526,6 +531,11 @@ $(document).ready(function () {
                             $('#table_add_im tbody tr').removeClass('table-secondary');
                             $('#table_edit_im tbody tr').removeClass('table-secondary');
                             $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                         }
                     })
                 }
@@ -764,7 +774,11 @@ function get_datos_logs_h() {
                                 },
                             },],
                             beforeClose: function (event, ui) {
-
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             }
                         });
                         $("#tabla_logs").dataTable().fnDestroy();

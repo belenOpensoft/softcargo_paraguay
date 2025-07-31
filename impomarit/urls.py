@@ -7,7 +7,7 @@ from impomarit.views.entrega_documentacion import entrega_documentacion_general,
 from impomarit.views.envases import source_envases, eliminar_envase, guardar_envases, add_envase_importado
 from impomarit.views.gastos import add_gasto_master, source_gastos, eliminar_gasto_master, source_gastos_house, \
     eliminar_gasto_house, add_gasto_house, add_gasto_importado, source_gastos_house_preventa
-from impomarit.views.house import add_house, add_house_impmarit, edit_house_function, house_detail, \
+from impomarit.views.house import add_house_impmarit, edit_house_function, house_detail, \
     get_name_by_id_vendedores, source_seguimientos_importado, add_house_importado, source_gastos_importado, \
     eliminar_house, source_envases_importado, source_rutas_importado, source_embarque_id, source_seguimiento_id, \
     generar_posicion, source_embarque_importado, source_archivos_importado
@@ -21,7 +21,6 @@ from impomarit.views.notas import source, guardar_notas, eliminar_nota
 from impomarit.views.pdf import get_datos_caratula
 from impomarit.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado, \
     datos_embarque_ruta
-from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [

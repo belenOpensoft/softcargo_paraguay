@@ -1376,6 +1376,11 @@ var expandedRow;
                         },
                     ],
                     beforeClose: function (event, ui) {
+                                                    try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                         localStorage.removeItem('fecha_editada_master');
                         localStorage.removeItem('id_master_editar');
                         localStorage.removeItem('num_house_gasto');
@@ -1383,6 +1388,7 @@ var expandedRow;
                     if ($.fn.dataTable.isDataTable('#tabla_importaerea')) {
                         $('#tabla_importaerea').DataTable().ajax.reload(null, false);
                     }
+
                     }
                 });
 
@@ -1840,7 +1846,11 @@ var expandedRow;
                             }],
                         beforeClose: function (event, ui) {
                             localStorage.removeItem('numero_master_seleccionado');
-                            // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             // $("#tabla_gastos").dataTable().fnDestroy();
                         }
                     })
@@ -2746,6 +2756,7 @@ table_add_ia = $('#table_add_ia').DataTable({
                     ],
                     beforeClose: function (event, ui) {
                     localStorage.removeItem('fecha_editada_house');
+
                     }
 
                 });
@@ -4106,7 +4117,11 @@ function gastos_btn_h_click(){
                                 },
                             }],
                         beforeClose: function (event, ui) {
-                            // localStorage.removeItem('num_house_gasto');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
 //                $('#table_add_ia tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ia tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo_ia tbody tr').removeClass('table-secondary');
@@ -4239,11 +4254,16 @@ function rutas_btn_h_click(){
                                 },
                             }],
                         beforeClose: function (event, ui) {
-                            // localStorage.removeItem('num_house_gasto');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             $("#table_rutas_house").dataTable().fnDestroy();
 //                 $('#table_add_ia tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ia tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo_ia tbody tr').removeClass('table-secondary');
+
                         }
                     })
 
@@ -4412,7 +4432,11 @@ function embarques_btn_h_click(){
                                 },
                             }],
                         beforeClose: function (event, ui) {
-                            // localStorage.removeItem('num_house_gasto');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             $("#tabla_embarques_house").dataTable().fnDestroy();
 //                 $('#table_add_ia tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ia tbody tr').removeClass('table-secondary');
@@ -4841,7 +4865,11 @@ function archivos_btn_h_click(){
                         },
                     ],
                     beforeClose: function (event, ui) {
-                        // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                         $("#tabla_archivos").dataTable().fnDestroy();
 //                $('#table_add_ia tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ia tbody tr').removeClass('table-secondary');
@@ -4932,7 +4960,11 @@ function pdf_btn_h_click(){
                             },
                         ],
                         beforeClose: function (event, ui) {
-                            // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                         }
                     })
                 } else {
@@ -5056,7 +5088,11 @@ function notas_house() {
                         }
                     ],
                     beforeClose: function (event, ui) {
-                        //localStorage.removeItem('num_house_gasto');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                         $('#notas_table').DataTable().destroy();
                         $("#notas_form").trigger("reset");
 //                 $('#table_add_ia tbody tr').removeClass('table-secondary');
@@ -5610,7 +5646,14 @@ function abrir_aplicable(){
                                     $(this).dialog("close");
                                 }
                             }
-                        ]
+                        ],
+                        beforeClose: function (event, ui) {
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
+                        }
                     });
                 } else {
                     alert('Debe seleccionar un único registro');

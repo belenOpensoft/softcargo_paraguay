@@ -256,6 +256,42 @@
             });
         });
         </script>
+        <script>
+function desbloquearDatos() {
+    const numero_embarque = localStorage.getItem('num_house_gasto') || "";
+    const numero_master = localStorage.getItem('id_master_editar') || "";
+    const id_seguimiento = localStorage.getItem('id_seguimiento_seleccionado') || "";
+    const ruta_actual = window.location.pathname;
+
+    if (!numero_embarque && !numero_master && !id_seguimiento) {
+        console.log("🔒 No hay datos para desbloquear.");
+        return;
+    }
+
+    $.ajax({
+        url: "/desbloquear/",
+        type: "POST",
+        data: {
+            numero_embarque,
+            numero_master,
+            id_seguimiento,
+            ruta: ruta_actual,
+            csrfmiddlewaretoken: csrf_token
+        },
+        success: function (res) {
+            console.log("🔓 Desbloqueo exitoso:", res);
+        },
+        error: function (xhr, status, error) {
+            console.error("❌ Error desbloqueando:", error);
+        },
+
+    });
+}
+
+
+
+
+    </script>
 
         {% endblock js_datatables_block %}
 

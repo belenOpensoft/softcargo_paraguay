@@ -362,6 +362,7 @@ $(document).ready(function () {
             row_number = row[1];
             setCookie(row_selected);
             table.$('tr.table-secondary').removeClass('table-secondary');
+            localStorage.setItem('id_seguimiento_seleccionado',row[0]);
             $(this).addClass('table-secondary');
         }
     });
@@ -782,6 +783,12 @@ $(document).ready(function () {
                             // localStorage.removeItem('num_house_gasto');
                             $('#notas_table').DataTable().destroy();
                             $("#notas_form").trigger("reset");
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
+
             //                 $('#table_add_im tbody tr').removeClass('table-secondary');
             //                $('#table_edit_im tbody tr').removeClass('table-secondary');
             //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
@@ -912,7 +919,11 @@ $(document).ready(function () {
                                 },
                             },],
                         beforeClose: function (event, ui) {
-                            // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }// table.ajax.reload();
                         }
                     })
                 }
@@ -987,7 +998,11 @@ $(document).ready(function () {
                     },
                 ],
                 beforeClose: function (event, ui) {
-                    // table.ajax.reload();
+                                                try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                 }
             })
 
@@ -1110,7 +1125,11 @@ $(document).ready(function () {
                             },
                         ],
                         beforeClose: function (event, ui) {
-                            // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             $("#tabla_archivos").dataTable().fnDestroy();
                         }
                     })
@@ -1327,7 +1346,11 @@ $(document).ready(function () {
                         },
                     }],
                 beforeClose: function (event, ui) {
-                    // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                 }
             })
             });
@@ -1410,7 +1433,11 @@ $(document).ready(function () {
                     },
                 }],
             beforeClose: function (event, ui) {
-                // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
 
             }
         })
@@ -1492,7 +1519,11 @@ $(document).ready(function () {
                         },
                     }],
                 beforeClose: function (event, ui) {
-                    // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
 
                 }
             })
@@ -1577,6 +1608,11 @@ $(document).ready(function () {
                                 },
                             }],
                         beforeClose: function (event, ui) {
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             const $ciaInput = $("#id_cia");
 
                             // Solo destruimos si estaba inicializado
@@ -1666,7 +1702,11 @@ $(document).ready(function () {
                         },
                     },],
                 beforeClose: function (event, ui) {
-
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                 }
             })
                 }
@@ -1747,8 +1787,11 @@ $(document).ready(function () {
                             },
                         }],
                     beforeClose: function (event, ui) {
-                        // table.ajax.reload();
-                        // $("#tabla_gastos").dataTable().fnDestroy();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                     }
                 })
             }
@@ -1937,7 +1980,14 @@ $(document).ready(function () {
                                     $(this).dialog("close");
                                 }
                             }
-                        ]
+                        ],
+                        beforeClose: function (event, ui) {
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
+                        }
                     });
                 }
             });
@@ -2049,7 +2099,11 @@ $(document).ready(function () {
                                 },
                             }],
                         beforeClose: function (event, ui) {
-                            // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             $("#tabla_embarques").dataTable().fnDestroy();
                         }
                     })
@@ -2150,7 +2204,11 @@ $(document).ready(function () {
                 }],
             beforeClose: function (event, ui) {
                 $("#id_id").val('');
-                // table.ajax.reload();
+                try {
+                    desbloquearDatos();
+                } catch (error) {
+                    console.error("⚠️ Error en desbloquearDatos:", error);
+                }
             }
         })
     });

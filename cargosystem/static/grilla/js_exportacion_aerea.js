@@ -1507,6 +1507,11 @@ function aplicable_volumen(volumen){
                         },
                     ],
                     beforeClose: function (event, ui) {
+                                                    try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                         localStorage.removeItem('fecha_editada_master');
                         localStorage.removeItem('id_master_editar');
                         localStorage.removeItem('num_house_gasto');
@@ -1514,6 +1519,7 @@ function aplicable_volumen(volumen){
                     if ($.fn.dataTable.isDataTable('#tabla_exportaerea')) {
                         $('#tabla_exportaerea').DataTable().ajax.reload(null, false);
                     }
+
                     }
                 });
 
@@ -1992,7 +1998,11 @@ function aplicable_volumen(volumen){
                             }],
                         beforeClose: function (event, ui) {
                             localStorage.removeItem('numero_master_seleccionado');
-                            // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             // $("#tabla_gastos").dataTable().fnDestroy();
                         }
                     })
@@ -4607,7 +4617,11 @@ let tabla = localStorage.getItem('tabla_origen');
                             beforeClose: function (event, ui) {
                                 //localStorage.removeItem('num_house_gasto');
                                 $("#table_rutas_master").dataTable().fnDestroy();
-//                 $('#table_add_ea tbody tr').removeClass('table-secondary');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
 //                $('#table_edit_ea tbody tr').removeClass('table-secondary');
 //                $('#tabla_house_directo_ea tbody tr').removeClass('table-secondary');
                             }
@@ -4774,7 +4788,11 @@ let tabla = localStorage.getItem('tabla_origen');
                                     },
                                 }],
                             beforeClose: function (event, ui) {
-                                //localStorage.removeItem('num_house_gasto');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                                 $("#tabla_embarques_house").dataTable().fnDestroy();
 //                 $('#table_add_ea tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ea tbody tr').removeClass('table-secondary');
@@ -5177,7 +5195,11 @@ let tabla = localStorage.getItem('tabla_origen');
                             },
                         ],
                         beforeClose: function (event, ui) {
-                            // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             $("#tabla_archivos").dataTable().fnDestroy();
 //                $('#table_add_ea tbody tr').removeClass('table-secondary');
 //                $('#table_edit_ea tbody tr').removeClass('table-secondary');
@@ -5268,7 +5290,11 @@ let tabla = localStorage.getItem('tabla_origen');
                                 },
                             ],
                             beforeClose: function (event, ui) {
-                                // table.ajax.reload();
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             }
                         })
                     } else {
@@ -5512,7 +5538,11 @@ let tabla = localStorage.getItem('tabla_origen');
                             }
                         ],
                         beforeClose: function (event, ui) {
-                            //localStorage.removeItem('num_house_gasto');
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
                             $('#notas_table').DataTable().destroy();
                             $("#notas_form").trigger("reset");
 //                 $('#table_add_ea tbody tr').removeClass('table-secondary');
