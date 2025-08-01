@@ -1469,7 +1469,7 @@ $(document).ready(function () {
                             if (confirm('¿Confirma clonar el seguimiento?')) {
                                 if (row.length === 1) {
                                     let formData = $("#clonar_form").serializeArray();
-                                    let data = JSON.stringify(formData);
+                                    let dataForm = JSON.stringify(formData);
                                     $.ajax({
                                         url: '/get_data_seguimiento/' + row[0][0] + '/',
                                         type: 'GET',
@@ -1482,7 +1482,7 @@ $(document).ready(function () {
                                             miurl = "/clonar_seguimiento/";
                                             var toData = {
                                                 'id': row[0][0],
-                                                'data': data,
+                                                'data': dataForm,
                                                 'csrfmiddlewaretoken': csrf_token,
                                             };
                                             $.ajax({

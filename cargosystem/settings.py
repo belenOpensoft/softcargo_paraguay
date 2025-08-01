@@ -192,7 +192,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRONJOBS = [
-    ('*/2 * * * *', 'softcargo.cargosystem.cron.liberar_bloqueos_expirados'),  # cada 2 minutos
+    ('*/2 * * * *', 'cargosystem.cron.liberar_bloqueos_expirados'),  # cada 2 minutos
 ]
 
 STATICFILES_DIRS = (

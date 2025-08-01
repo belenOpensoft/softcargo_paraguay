@@ -52,3 +52,19 @@ def desbloquear(request):
         ).update(activo=False) # desbloqueo todos los bloqueos asociados al seguimiento
 
     return JsonResponse({'status': 'ok', 'desbloqueados': desbloqueados})
+
+def desbloquear_modulo_usuario(request):
+    if request.method == "POST":
+        modulo = request.POST.get("modulo")
+        if not modulo:
+            return JsonResponse({"error": "Módulo no especificado"}, status=400)
+
+        desbloqueados = BloqueoEdicion.objects.filter(
+            usuario=request.user,
+            modulo=modulo,
+            activo=True,
+            fecha_expiracion__gt=now()
+        ).update(activo=False)
+
+        return JsonResponse({"ok": True, "desbloqueados": desbloqueados})
+    return JsonResponse({"error": "Método no permitido"}, status=405)

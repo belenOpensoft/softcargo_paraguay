@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from cargosystem import settings
-from cargosystem.views.desbloquear import desbloquear
+from cargosystem.views.desbloquear import desbloquear, desbloquear_modulo_usuario
 from login.views.correos import source_correo, correos
 from login.views.home import home_view
 from login.views.login import login_view, select_rol, logout_view, cambiar_modulo
@@ -30,6 +30,7 @@ urlpatterns = [
     path('correos/', correos, name='vista_correos'),
     path('source_correos/', source_correo, name='source_correos'),
     path('desbloquear/', desbloquear, name='desbloquear'),
+    path('desbloquear_usuario_modulo/', desbloquear_modulo_usuario, name='desbloquear_usuario_modulo'),
     path('cambiar_clave/', PasswordChangeView.as_view(template_name='cambiar_clave.html',success_url='/clave_cambiada/'),name='cambiar_clave'),
     path('clave_cambiada/', PasswordChangeDoneView.as_view(template_name='clave_cambiada.html'), name='clave_cambiada'),
 
