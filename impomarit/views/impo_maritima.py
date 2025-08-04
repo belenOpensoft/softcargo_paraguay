@@ -216,6 +216,7 @@ def source_importacion_master(request):
             '6': request.GET['columns[6][search][value]'],
             '7': request.GET['columns[7][search][value]'],
             '8': request.GET['columns[8][search][value]'],
+            '9': request.GET['columns[9][search][value]'],
 
         }
         filtro = get_argumentos_busqueda(**args)

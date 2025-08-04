@@ -106,24 +106,22 @@ param_busqueda = {
     1: 'numero__icontains',
     2: 'seguimientos__icontains',
     3: 'llegada__icontains',
-    4: 'vapor__icontains',
-    5: 'awb__icontains',
-    6: 'hawbs__icontains',
-    7: 'embarcador__icontains',
-    8: 'transportista__icontains',
-    9: 'agente__icontains',
+    4: 'awb__icontains',
+    5: 'hawbs__icontains',
+    6: 'embarcador__icontains',
+    7: 'transportista__icontains',
+    8: 'agente__icontains',
 }
 columns_table = {
     0: 'id',              # columna oculta para acciones
     1: 'numero',
     2: 'seguimientos',
     3: 'llegada',
-    4: 'vapor',
-    5: 'awb',
-    6: 'hawbs',
-    7: 'embarcador',
-    8: 'transportista',
-    9: 'agente',
+    4: 'awb',
+    5: 'hawbs',
+    6: 'embarcador',
+    7: 'transportista',
+    8: 'agente',
 }
 
 
@@ -138,6 +136,7 @@ def source_importacion_master(request):
             '5': request.GET['columns[5][search][value]'],
             '6': request.GET['columns[6][search][value]'],
             '7': request.GET['columns[7][search][value]'],
+            '8': request.GET['columns[8][search][value]'],
         }
         filtro = get_argumentos_busqueda(**args)
 
