@@ -215,7 +215,28 @@
         </div>
       </div>
 
+    <div class="d-flex justify-content-end mb-2">
+          <button type="button" class="btn btn-warning" id="nota_credito_clonar"
+                  onclick="abrirDialogoNotaCredito()">
+            Hacer Nota de Crédito
+          </button>
+      </div>
+
+
     </div>
   </form>
+
+
+
 </div>
 
+  <div id="notaCreditoDialog" style="display:none;">
+    <form id="nota_credito_form">
+        <label for="numero_nota">Número de Nota de Crédito:</label>
+        <input type="number" id="numero_nota" class="form-control form-control-sm" required>
+        <label for="arbitraje_cambio">Arbitraje/Cambio:</label>
+        <input type="number" id="arbitraje_cambio" class="form-control form-control-sm" required>
+      <button type="submit" class="d-none"></button>
+    </form>
+
+</div>

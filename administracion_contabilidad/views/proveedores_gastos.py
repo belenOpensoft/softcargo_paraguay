@@ -176,17 +176,18 @@ def procesar_factura_proveedor(request):
                     nombre_mov = 'FACTURA'
 
                 if int(tipo)==41 and facturas_imputadas:
-                    for fac in facturas_imputadas:
+                    for fac_i in facturas_imputadas:
 
                         impuc=Impucompras()
                         impuc.autogen=str(autogenerado)
                         impuc.cliente=codigo_cliente
-                        impuc.monto=fac.get('monto_imputado')
-                        impuc.autofac=fac.get('autogenerado')
+                        impuc.monto=fac_i.get('monto_imputado')
+                        impuc.autofac=fac_i.get('autogenerado')
                         impuc.save()
 
-                        fac=Movims.objects.filter(mautogen=fac.get('autogenerado'),mtipo=40).first()
-                        fac.msaldo=fac.msaldo - float(fac.get('monto_imputado'))
+                        fac=Movims.objects.filter(mautogen=fac_i.get('autogenerado'),mtipo=40).first()
+                        # fac.msaldo=fac.msaldo - float(fac_i.get('monto_imputado'))
+                        fac.msaldo = (float(fac.msaldo) if fac.msaldo else 0) - float(fac_i.get('monto_imputado'))
                         fac.save()
 
                 detalle_asiento = detalle1 + '-' + serie + '-' + str(prefijo) + '-' + str(numero) + '-' + cliente.empresa

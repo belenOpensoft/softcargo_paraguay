@@ -6,7 +6,9 @@ from operator import or_
 from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms import model_to_dict
 from django.shortcuts import render
+from django.views.decorators.http import require_POST
 from reportlab.lib.validators import isNumber
 
 from administracion_contabilidad.views.facturacion_electronica import Uruware
@@ -23,7 +25,7 @@ from impterrestre.models import ImpterraEmbarqueaereo, ImpterraCargaaerea, VEmba
 from mantenimientos.models import Clientes, Servicios, Monedas, Vapores
 from administracion_contabilidad.forms import Factura, RegistroCargaForm, VentasDetalleTabla
 from administracion_contabilidad.models import Boleta, Asientos, Movims, Infofactura, \
-    VistaGastosPreventa, Dolar, Factudif, VPreventas, VistaVentas
+    VistaGastosPreventa, Dolar, Factudif, VPreventas, VistaVentas, Impuvtas
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from datetime import datetime
 from django.db import transaction
@@ -254,7 +256,7 @@ def generar_autogenerado(tipo, hora, fecha, numero):
     return autogenerado
 
 
-def procesar_factura_old(request):
+def procesar_factura(request):
     try:
         with transaction.atomic():
 
@@ -269,9 +271,14 @@ def procesar_factura_old(request):
                 preventa = json.loads(request.POST.get('preventa'))
                 registro_carga_raw = request.POST.get('registroCarga')
                 registro_carga = json.loads(registro_carga_raw) if registro_carga_raw else {}
-
+                autogenerado = generar_autogenerado(tipo, hora, fecha, numero)
+                facturas_json = request.POST.get('facturas_imputadas')
+                if facturas_json:
+                    facturas_imputadas = json.loads(facturas_json)
+                else:
+                    facturas_imputadas = []
                 if preventa:
-                    autogenerado=preventa.get('autogenerado')
+                    numero_preventa=preventa.get('autogenerado')
                     master=preventa.get('master')
                     house=preventa.get('house')
                     posicion=preventa.get('posicion')
@@ -288,14 +295,13 @@ def procesar_factura_old(request):
                     transportista = llegasale=consignatario = commodity= None
                     vuelo = master=house=origen=destino=wr=None
 
-                    reg=Factudif.objects.filter(znumero=autogenerado)
+                    reg=Factudif.objects.filter(znumero=numero_preventa)
 
                     for r in reg:
                         r.zfacturado='S'
                         r.save()
 
                 else:
-                    autogenerado = generar_autogenerado(tipo, hora, fecha, numero)
                     if registro_carga:
                         kilos = float(registro_carga.get('peso') or 0)
                         volumen = float(registro_carga.get('volumen') or 0)
@@ -391,6 +397,19 @@ def procesar_factura_old(request):
                     detalle1 = 'VTA/CRED'
                     tipo_asiento = 'V'
                     nombre_mov = 'FACTURA'
+
+                if int(tipo)==21 and facturas_imputadas:
+                    for fac_i in facturas_imputadas:
+                        impuc = Impuvtas()
+                        impuc.autogen = str(autogenerado)
+                        impuc.cliente = codigo_cliente
+                        impuc.monto = fac_i.get('monto_imputado')
+                        impuc.autofac = fac_i.get('autogenerado')
+                        impuc.save()
+
+                        fac = Movims.objects.filter(mautogen=fac_i.get('autogenerado'), mtipo=20).first()
+                        fac.msaldo = (float(fac.msaldo) if fac.msaldo else 0) - float(fac_i.get('monto_imputado'))
+                        fac.save()
 
                # detalle_asiento = detalle1 + serie + str(prefijo) + str(numero) + cliente.empresa
                 detalle_asiento = detalle1 + '-' + serie + '-' + str(prefijo) + '-' + str(numero) + '-' + cliente.empresa
@@ -548,12 +567,15 @@ def procesar_factura_old(request):
                     crear_asiento(asiento_vector)
                     movimiento_num = aux
 
+                    if preventa:
+                        gastos_detalle_marcar(preventa.get('autogenerado'),autogenerado)
+
                 return JsonResponse({'success':True})
             return None
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
 
-def procesar_factura(request):
+def procesar_factura_old(request):
     try:
         with transaction.atomic():
 
@@ -1618,5 +1640,135 @@ def get_datos_embarque(request):
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
+@require_POST
+def hacer_nota_credito(request):
+    numero_nc = request.POST.get("numero")
+    arbitraje = request.POST.get("arbitraje")
+    autogenerado_factura = request.POST.get("autogenerado")
 
+    if Movims.objects.filter(mboleta=numero_nc, mtipo=21).exists():
+        return JsonResponse({"mensaje": "Ese número ya existe para una Nota de Crédito."}, status=400)
 
+    try:
+        with transaction.atomic():
+            nuevos_movims = []
+            nuevos_boleta = []
+            nuevos_asientos = []
+
+            hora = datetime.now().strftime('%H%M%S%f')
+            fecha = datetime.now().strftime('%Y-%m-%d')
+
+            nuevo_autogenerado = generar_autogenerado(21, hora, fecha, numero_nc)
+            # Clonar BOLETA
+            for bol in Boleta.objects.filter(autogenerado=autogenerado_factura):
+                data = model_to_dict(bol)
+                data.pop('id', None)
+                data.update({
+                    'autogenerado': nuevo_autogenerado,
+                    'tipo': 21,
+                    'numero': numero_nc,
+                    'cambio': arbitraje,
+                    'fecha': datetime.now(),
+                    'vto': datetime.now(),
+                })
+                nuevos_boleta.append(Boleta(**data))
+            # Clonar MOVIMS
+            for mov in Movims.objects.filter(mautogen=autogenerado_factura):
+                data = model_to_dict(mov)
+                data.pop('id', None)
+                data.update({
+                    'mautogen': nuevo_autogenerado,
+                    'mtipo': 21,
+                    'mnombremov': 'NOTA CRED.',
+                    'mboleta': numero_nc,
+                    'marbitraje': arbitraje,
+                    'mfechamov': datetime.now(),
+                    'mvtomov': datetime.now(),
+                    'mdetalle': f"Nota de credito de factura {mov.mboleta} - {mov.mnombre}",
+                })
+                nuevos_movims.append(Movims(**data))
+
+            # Clonar ASIENTOS
+            for asiento in Asientos.objects.filter(autogenerado=autogenerado_factura):
+                data = model_to_dict(asiento)
+                data.pop('id', None)
+
+                data.update({
+                    'autogenerado': nuevo_autogenerado,
+                    'asiento': generar_numero(),
+                    'detalle': f"NC-{asiento.detalle}",
+                    'tipo': 'V',
+                    'cambio': arbitraje,
+                    'documento': numero_nc,
+                    'fecha': datetime.now(),
+                    'vto': datetime.now(),
+                })
+                nuevos_asientos.append(Asientos(**data))
+
+            fac = Movims.objects.filter(mautogen=autogenerado_factura, mtipo=20).first()
+
+            impuc = Impuvtas()
+            impuc.autogen = str(nuevo_autogenerado)
+            impuc.autofac = autogenerado_factura
+            impuc.cliente = fac.mcliente
+            impuc.monto = fac.mtotal
+            impuc.save()
+
+            fac.msaldo = 0
+            fac.save()
+
+            # Guardar clones
+            Movims.objects.bulk_create(nuevos_movims)
+            Boleta.objects.bulk_create(nuevos_boleta)
+            Asientos.objects.bulk_create(nuevos_asientos)
+
+        return JsonResponse({"mensaje": "Nota de crédito creada con éxito."})
+    except Exception as e:
+        return JsonResponse({"mensaje": f"Error al crear nota de crédito: {str(e)}"}, status=500)
+
+def cargar_pendientes_imputacion_venta(request):
+    try:
+        nrocliente = request.GET.get('nrocliente', None)
+
+        if not nrocliente:
+            return JsonResponse({'error': 'Debe proporcionar un nrocliente'}, status=400)
+
+        # Agrupar por autogenerado y obtener la fecha más reciente
+        agrupados = (VistaVentas.objects
+                     .filter(nrocliente=nrocliente, tipo='FACTURA')
+                     .exclude(saldo=0)
+                     .values('autogenerado')
+                     .annotate(fecha_max=Max('fecha')))
+
+        # Obtener todos los registros que coinciden con autogenerado y fecha
+        registros = VistaVentas.objects.filter(
+            reduce(
+                or_,
+                [Q(autogenerado=row['autogenerado'], fecha=row['fecha_max']) for row in agrupados]
+            )
+        )
+
+        # Eliminar posibles duplicados por autogenerado
+        vista_unicos = {}
+        for registro in registros:
+            if registro.autogenerado not in vista_unicos:
+                vista_unicos[registro.autogenerado] = registro
+
+        data = []
+        for registro in vista_unicos.values():
+            data.append({
+                'autogenerado': registro.autogenerado,
+                'vto': registro.fecha.strftime('%Y-%m-%d') if registro.fecha else '',
+                'emision': registro.fecha.strftime('%Y-%m-%d') if registro.fecha else '',
+                'num_completo': registro.num_completo,
+                'total': float(registro.total) if registro.total else 0,
+                'saldo': float(registro.saldo) if registro.saldo else 0,
+                'imputado': 0,
+                'tipo_cambio': float(registro.tipo_cambio) if registro.tipo_cambio else 0,
+                'detalle': registro.detalle if registro.detalle else '',
+            })
+
+        return JsonResponse({'data': data}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

@@ -6,21 +6,22 @@
     <form id="arbitrajeForm">
         <div class="container-fluid" style="font-size: 0.8rem;">
             <div class="row mb-2">
-                <div class="form-group col-sm-6 mb-1">
-                    <label for="valor_pizarra" class="mb-1">Pizarra</label>
-                    <input type="number" id="valor_pizarra" class="form-control form-control-sm">
-                </div>
+<!--                <div class="form-group col-sm-6 mb-1">-->
+<!--                    <label for="valor_pizarra" class="mb-1">Pizarra</label>-->
+<!--                    <input type="number" id="valor_pizarra" class="form-control form-control-sm">-->
+<!--                </div>-->
                 <div class="form-group col-sm-6 mb-1">
                     <label for="valor_arbitraje" class="mb-1">Arbitraje</label>
                     <input type="number" id="valor_arbitraje" class="form-control form-control-sm">
                 </div>
-            </div>
-
-            <div class="row mb-2">
                 <div class="form-group col-sm-6 mb-1">
                     <label for="valor_paridad" class="mb-1">Paridad</label>
                     <input type="number" id="valor_paridad" class="form-control form-control-sm">
                 </div>
+            </div>
+
+            <div class="row mb-2">
+
                 <div class="form-group col-sm-6 mb-1">
                     <label for="moneda_select" class="mb-1">Moneda</label>
                     <select id="moneda_select" class="form-control form-control-sm">
@@ -32,20 +33,48 @@
                         <option value="6">FRANCO SUIZO</option>
                     </select>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="form-group col-sm-6 mb-1">
+                                <div class="form-group col-sm-6 mb-1">
                     <label for="fecha_arbi" class="mb-1">Fecha</label>
                     <input type="date" id="fecha_arbi" class="form-control form-control-sm">
                 </div>
             </div>
+
         </div>
+        <button type="submit" class="d-none"></button>
     </form>
 </div>
 
     <script>
     $(document).ready(function () {
+        $('#arbitrajeForm').on('submit', function (e) {
+                e.preventDefault();  // Evita recarga de página
+
+                let datos = {
+                    arbDolar: parseFloat($('#valor_arbitraje').val()) || 0,
+                    parDolar: parseFloat($('#valor_paridad').val()) || 0,
+                    tipoMoneda: $('#moneda_select').val(),
+                    pizDolar: 0,
+                    fecha: $('#fecha_arbi').val()
+                };
+
+                $.ajax({
+                    url: "/admin_cont/guardar_arbitraje/",
+                    method: "POST",
+                    headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                    data: datos,
+                    success: function (response) {
+                        if (response.status === "Registro guardado correctamente.") {
+                            window.location.href = cambiarModuloUrl;
+                        } else {
+                            alert(response.status);
+                        }
+                    },
+                    error: function () {
+                        alert("Error al guardar el arbitraje.");
+                    }
+                });
+            });
+
         $("#arbitraje_modal").dialog({
             modal: true,
             title: "Debe cargar el arbitraje del día de hoy",
@@ -64,7 +93,7 @@
                             arbDolar: parseFloat($('#valor_arbitraje').val()) || 0,
                             parDolar: parseFloat($('#valor_paridad').val()) || 0,
                             tipoMoneda: $('#moneda_select').val(),
-                            pizDolar: parseFloat($('#valor_pizarra').val()) || 0,
+                            pizDolar: 0,
                             fecha: $('#fecha_arbi').val()
                         };
 

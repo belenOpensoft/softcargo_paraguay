@@ -193,7 +193,7 @@ def buscar_ordenes_por_boleta_ventas(request):
                         'nro_documento': mv.mboleta if hasattr(mv, 'mboleta') else '',
                         'fecha': mv.mfechamov.strftime('%Y-%m-%d') if mv.mfechamov else '',
                         'monto': mv.mtotal,
-                        'tipo': 'COBRO',
+                        'tipo': mv.mnombremov,
                     })
 
         return JsonResponse({'resultados': data})

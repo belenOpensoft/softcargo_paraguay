@@ -18,7 +18,7 @@ from administracion_contabilidad.views.cobranza import cobranza_view, source_cob
 from administracion_contabilidad.views.facturacion import facturacion_view, buscar_clientes, buscar_cliente, \
     buscar_item_v, buscar_items_v, procesar_factura, source_facturacion, source_infofactura, \
     cargar_preventa_infofactura, source_infofactura_cliente, cargar_preventa_infofactura_multiple, guardar_arbitraje, \
-    get_datos_embarque
+    get_datos_embarque, hacer_nota_credito, cargar_pendientes_imputacion_venta
 from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
 from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos, reimprimir_asiento
@@ -43,6 +43,8 @@ from login.views.login import verificar_arbitraje
 
 urlpatterns = [
     path('facturacion/', facturacion_view, name='facturacion'),
+    path('hacer_nota_credito/', hacer_nota_credito, name='hacer_nota_credito'),
+    path('cargar_pendientes_imputacion_venta/', cargar_pendientes_imputacion_venta, name='cargar_pendientes_imputacion_venta'),
     path('source_facturacion/', source_facturacion, name="source_facturacion"),
     path('buscar_cliente/', buscar_cliente, name='buscar_cliente'),
     path('buscar_clientes/', buscar_clientes, name='buscar_clientes'),

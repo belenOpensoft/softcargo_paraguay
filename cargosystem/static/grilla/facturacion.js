@@ -673,12 +673,141 @@ $(document).ready(function () {
             position: {my: "center top", at: "center top+20", of: window},
             autoOpen: true,
         });
+
     });
 
     $("#tabla_facturas tbody").on("click", "tr", function () {
         $("#tabla_facturas tbody tr").removeClass("table-secondary");
         $(this).addClass("table-secondary");
     });
+
+    //formulario de nueva nota de credito
+    $('#nota_credito_form').on('submit', function (e) {
+        e.preventDefault();
+        let numero = $('#numero_nota').val();
+        let arbitraje_cambio = $('#arbitraje_cambio').val();
+        let autogenerado = $('#autogen_detalle_venta').val();
+        if(numero==null || arbitraje_cambio==null || autogenerado == null){
+            alert('Ingrese Numero y Cambio.');
+            return;
+        }
+        $.post("/admin_cont/hacer_nota_credito/", {
+            numero: numero,
+            arbitraje: arbitraje_cambio,
+            autogenerado: autogenerado,
+            csrfmiddlewaretoken: csrf_token
+        }, function(resp) {
+            alert(resp.mensaje);
+            $('#notaCreditoDialog').dialog("close");
+            //location.reload();
+        });
+    });
+
+    //imputacion de notas de credito:
+
+    $("#impucompra_nota").dialog({
+        autoOpen: false,
+        resizable: false,
+        draggable: true,
+        width: "auto",
+        height: "auto",
+        maxWidth: $(window).width() * 0.90,
+        minWidth: 600,
+        maxHeight: $(window).height() * 0.90,
+        modal: true,
+        position: { my: "center", at: "center", of: window },
+        open: function () {
+            resetModal("#impucompra_nota");
+            $(this).dialog("option", "width", "auto");
+            $(this).dialog("option", "height", "auto");
+            $(this).dialog("option", "position", { my: "center", at: "center", of: window });
+        },
+         buttons: [
+        {
+            class: "btn btn-primary btn-sm",
+            text: "Cerrar y finalizar factura",
+            click: function() {
+                procesar_factura_nota();
+                $(this).dialog("close");
+            }
+        }
+    ],
+    });
+
+    $("#tabla-impucompra tbody").on("click", "tr", function () {
+        $(this).toggleClass("table-secondary");
+        actualizarMonto();
+    });
+    //boton de imputar
+    $("#btn-imputar").on("click", function () {
+        let montoDisponible = parseFloat($("#monto-imputar").val()) || 0;
+        let saldoRestante = montoDisponible;
+
+        // Recuperar el localStorage actual para no sobrescribir
+        let facturasGuardadas = JSON.parse(localStorage.getItem("facturas_impuvta")) || [];
+
+        // Recorremos solo las filas seleccionadas
+        $("#tabla-impucompra tbody tr.table-secondary").each(function () {
+            let idFactura = $(this).find("td:nth-child(1)").text().trim(); // ID autogenerado (columna oculta)
+            let saldoFactura = parseFloat($(this).find("td:nth-child(6)").text().replace(",", ".")) || 0; // Columna 5
+            let montoImputado = 0;
+
+            if (saldoRestante > 0) {
+                if (saldoRestante >= saldoFactura) {
+                    montoImputado = saldoFactura;
+                    saldoRestante -= saldoFactura;
+                    saldoFactura = 0; // La factura queda totalmente imputada
+                } else {
+                    montoImputado = saldoRestante;
+                    saldoFactura -= saldoRestante;
+                    saldoRestante = 0; // Ya no hay saldo disponible
+                }
+
+                // Guardar el monto imputado en la celda de la columna 7 y aplicar color de fondo
+                let celdaImputado = $(this).find("td:nth-child(7)");
+                celdaImputado.text(montoImputado.toFixed(2));
+                celdaImputado.css("background-color", "#fcec3f"); // Aplicar color amarillo
+
+                // Guardar la factura imputada en el array, evitando duplicados
+                let facturaExistente = facturasGuardadas.find(f => f.autogenerado === idFactura);
+                if (facturaExistente) {
+                    facturaExistente.monto_imputado = montoImputado.toFixed(2);
+                } else {
+                    facturasGuardadas.push({
+                        autogenerado: idFactura,
+                        monto_imputado: montoImputado.toFixed(2),
+                    });
+                }
+
+                // Actualizar la celda de saldo restante en la columna 5
+                $(this).find("td:nth-child(6)").text(saldoFactura.toFixed(2));
+
+                // Quitar la clase `table-secondary` después de imputar
+                $(this).removeClass("table-secondary");
+            }
+        });
+
+        // Guardar el saldo restante en localStorage
+        localStorage.setItem("saldo_nota_credito_venta", saldoRestante.toFixed(2));
+
+        // Guardar las facturas imputadas en localStorage sin sobrescribir los datos previos
+        localStorage.setItem("facturas_impuvta", JSON.stringify(facturasGuardadas));
+
+        // Actualizar el monto a imputar con el saldo restante
+        $("#monto-imputar").val(saldoRestante.toFixed(2));
+
+        // Deshabilitar el botón si ya no hay saldo disponible
+        $("#btn-imputar").prop("disabled", saldoRestante === 0);
+
+        actualizarImputado();
+
+    });
+
+    $("#cerrar-modal").on("click", function () {
+        $("#impucompra_nota").dialog("close");
+    });
+
+
 });
 
 /* INITIAL CONTROL PAGE */
@@ -2115,27 +2244,37 @@ function rellenar_tabla() {
 }
 
 function procesar_factura() {
-
-        let pendienteEncontrado = false;
-
-        $('#itemTable tbody tr').each(function () {
-            // Antes: columna 7 (index 6)
-            const estado = $(this).find('td:nth-child(9)').text().trim();  // Ahora es la 8.ª columna (estado)
-            if (estado.toUpperCase() === 'PENDIENTE') {
-                pendienteEncontrado = true;
-                return false; // cortar el .each
-            }
-        });
-
-        if (pendienteEncontrado) {
-            let total = $('#id_total').val();
-            localStorage.setItem("precio_item_imputar", total);
-            $("#modal-embarque").dialog("open");
-            return; // cortar la función, no continuar con el procesamiento
+    let tipo = $('#id_tipo').val();
+    if(tipo==21){
+        if(confirm('¿Desea imputar esta Nota?')){
+            $("#impucompra_nota").dialog('open');
+            let cliente = $('#clienteTable tbody tr td').eq(0).text();
+            $('#monto-imputar').val( $('#id_total').val());
+            localStorage.removeItem('facturas_impuvta');
+            cargar_facturas_imputacion(cliente);
+            return;
         }
+    }
+
+    let pendienteEncontrado = false;
+
+    $('#itemTable tbody tr').each(function () {
+        // Antes: columna 7 (index 6)
+        const estado = $(this).find('td:nth-child(9)').text().trim();  // Ahora es la 8.ª columna (estado)
+        if (estado.toUpperCase() === 'PENDIENTE') {
+            pendienteEncontrado = true;
+            return false; // cortar el .each
+        }
+    });
+
+    if (pendienteEncontrado) {
+        let total = $('#id_total').val();
+        localStorage.setItem("precio_item_imputar", total);
+        $("#modal-embarque").dialog("open");
+        return; // cortar la función, no continuar con el procesamiento
+    }
 
     if (confirm('¿Está seguro de que desea facturar?')) {
-
 
         let tipoFac = $('#id_tipo').val();
         let serie = $('#id_serie').val();
@@ -2193,6 +2332,8 @@ function procesar_factura() {
                 paridad: paridad,
                 imputar: imputar,
                 moneda: moneda,
+                saldo_nota_cred: localStorage.getItem('saldo_nota_credito_venta') || null,
+                facturas_imputadas:localStorage.getItem('facturas_impuvta') || "[]",
                 clienteData: JSON.stringify(clienteData),
                 items: JSON.stringify(items),
                 total: total,
@@ -2213,6 +2354,150 @@ function procesar_factura() {
                 paridad: paridad,
                 imputar: imputar,
                 moneda: moneda,
+                saldo_nota_cred: localStorage.getItem('saldo_nota_credito_venta') || null,
+                facturas_imputadas:localStorage.getItem('facturas_impuvta') || "[]",
+                clienteData: JSON.stringify(clienteData),
+                items: JSON.stringify(items),
+                total: total,
+                iva: iva,
+                neto: neto,
+                preventa: 0,
+            }
+        }
+
+        $.ajax({
+            url: "/admin_cont/procesar_factura/",
+            dataType: 'json',
+            type: 'POST',
+            data: data,
+            headers: {'X-CSRFToken': csrf_token},
+            success: function (data) {
+                if (data.success) {
+                    $('#facturaM').dialog('close');
+                    $('#facturaForm').trigger('reset');
+
+                    total = 0;
+                    iva = 0;
+                    neto = 0;
+                    table_fac.ajax.reload();
+                } else {
+                    alert('ocurrió un error');
+                }
+
+                //window.location.reload();
+            },
+            error: function (xhr) {
+                console.error('Error al facturar:', xhr);
+                alert('Error al procesar la factura');
+            }
+        });
+
+    }
+}
+
+function procesar_factura_nota() {
+    console.log('entra');
+
+    let pendienteEncontrado = false;
+
+    $('#itemTable tbody tr').each(function () {
+        // Antes: columna 7 (index 6)
+        const estado = $(this).find('td:nth-child(9)').text().trim();  // Ahora es la 8.ª columna (estado)
+        if (estado.toUpperCase() === 'PENDIENTE') {
+            pendienteEncontrado = true;
+            return false; // cortar el .each
+        }
+    });
+
+    if (pendienteEncontrado) {
+        let total = $('#id_total').val();
+        localStorage.setItem("precio_item_imputar", total);
+        $("#modal-embarque").dialog("open");
+        return; // cortar la función, no continuar con el procesamiento
+    }
+
+    if (confirm('¿Está seguro de que desea facturar?')) {
+
+        let tipoFac = $('#id_tipo').val();
+        let serie = $('#id_serie').val();
+        let prefijo = $('#id_prefijo').val();
+        let numero = $('#id_numero').val();
+        let cliente = $('#cliente').val();
+        let fecha = $('#id_fecha').val();
+        let paridad = $('#id_paridad').val();
+        let arbitraje = $('#id_arbitraje').val();
+        let imputar = $('#id_imputar').val();
+        let moneda = $('#id_moneda select').val();
+        let clienteData = {
+            codigo: $('#clienteTable tbody tr td').eq(0).text(),
+            empresa: $('#clienteTable tbody tr td').eq(1).text(),
+            rut: $('#clienteTable tbody tr td').eq(2).text(),
+            direccion: $('#clienteTable tbody tr td').eq(3).text(),
+            localidad: $('#clienteTable tbody tr td').eq(4).text(),
+            telefono: $('#clienteTable tbody tr td').eq(5).text()
+        };
+        let items = [];
+        $('#itemTable tbody tr').each(function () {
+            const tds = $(this).children('td'); // Incluye todos, incluso ocultos
+            //console.log("Columnas:", tds.length, tds.map((i, td) => `(${i}) ${$(td).text().trim()}`).get());
+
+            const itemData = {
+                id: tds.eq(0).text().trim(),           // Id (oculto)
+                item: tds.eq(1).text().trim(),         // Item
+                descripcion: tds.eq(2).text().trim(),  // Descripción
+                precio: parseFloat(tds.eq(3).text().trim()),       // Precio base
+                precio_iva: parseFloat(tds.eq(4).text().trim()),   // IVA calculado
+                total: parseFloat(tds.eq(5).text().trim()),        // Total (precio + IVA)
+                iva: tds.eq(6).text().trim(),           // % IVA
+                cuenta: tds.eq(7).text().trim(),        // Cuenta contable
+                estado: tds.eq(8).text().trim(),        // Estado (PENDIENTE / NO IMPUTABLE)
+                embarque: tds.eq(9).text().trim(),      // Embarque
+                posicion: tds.eq(10).text().trim(),     // Posición
+                socio: tds.eq(11).text().trim()         // Socio Comercial
+            };
+
+            items.push(itemData);
+        });
+
+        let preventa = JSON.parse(localStorage.getItem('preventa')) || [];
+        let data = [];
+        if (preventa != null) {
+            data = {
+                csrfmiddlewaretoken: csrf_token,
+                fecha: fecha,
+                tipoFac: tipoFac,
+                serie: serie,
+                prefijo: prefijo,
+                numero: numero,
+                cliente: cliente,
+                arbitraje: arbitraje,
+                paridad: paridad,
+                imputar: imputar,
+                moneda: moneda,
+                saldo_nota_cred: localStorage.getItem('saldo_nota_credito_venta') || null,
+                facturas_imputadas:localStorage.getItem('facturas_impuvta') || "[]",
+                clienteData: JSON.stringify(clienteData),
+                items: JSON.stringify(items),
+                total: total,
+                iva: iva,
+                neto: neto,
+                preventa: JSON.stringify(preventa),
+            }
+        } else {
+            data = {
+                csrfmiddlewaretoken: csrf_token,
+                fecha: fecha,
+                tipoFac: tipoFac,
+                serie: serie,
+                prefijo: prefijo,
+                numero: numero,
+                cliente: cliente,
+                arbitraje: arbitraje,
+                paridad: paridad,
+                imputar: imputar,
+                moneda: moneda,
+                saldo_nota_cred: localStorage.getItem('saldo_nota_credito_venta') || null,
+                facturas_imputadas:localStorage.getItem('facturas_impuvta') || "[]",
                 clienteData: JSON.stringify(clienteData),
                 items: JSON.stringify(items),
                 total: total,
@@ -2288,6 +2573,7 @@ function procesar_complementarios() {
 }
 
 function procesar_factura_finalizada(datos_complementarios) {
+
     if (confirm('¿Está seguro de que desea facturar?')) {
         let tipoFac = $('#id_tipo').val();
         let serie = $('#id_serie').val();
@@ -2348,6 +2634,7 @@ function procesar_factura_finalizada(datos_complementarios) {
                 paridad: paridad,
                 imputar: imputar,
                 moneda: moneda,
+                facturas_imputadas:localStorage.getItem('facturas_impuvta') || "[]",
                 clienteData: JSON.stringify(clienteData),
                 items: JSON.stringify(items),
                 total: total,
@@ -2368,6 +2655,7 @@ function procesar_factura_finalizada(datos_complementarios) {
                 paridad: paridad,
                 imputar: imputar,
                 moneda: moneda,
+                facturas_imputadas:localStorage.getItem('facturas_impuvta') || "[]",
                 clienteData: JSON.stringify(clienteData),
                 items: JSON.stringify(items),
                 total: total,
@@ -2457,6 +2745,11 @@ function buscar_gastos(autogenerado) {
                 $('#id_posicion_venta').val(data.posicion);
                 $('#id_observaciones').val(data.observaciones);
                 $('#id_cae').val(data.cae);
+                if(data.tipo.includes('FACTURA')){
+                    $('#nota_credito_clonar').prop('disabled',false);
+                }else{
+                    $('#nota_credito_clonar').prop('disabled',true);
+                }
 
 
                 if (data.items && data.items.length > 0) {
@@ -2534,4 +2827,119 @@ function buscar_ordenes(cliente, numero, autogenerado) {
 
 function cerrar_modal_preventa() {
     $('#preventa_modal').dialog('close');
+}
+
+function abrirDialogoNotaCredito() {
+    let autogenerado= $('#autogen_detalle_venta').val()
+    $('#nota_credito_form').trigger('reset');
+    $('#notaCreditoDialog').dialog({
+        modal: true,
+        title: "Crear Nota de Crédito a partir de esta factura",
+        buttons: {
+            "Cancelar": function() {
+                $(this).dialog("close");
+            },
+            "Confirmar": function() {
+                let numero = $('#numero_nota').val();
+                let arbitraje_cambio = $('#arbitraje_cambio').val();
+                if(numero==null || arbitraje_cambio==null || autogenerado == null){
+                    alert('Ingrese Numero y Cambio.');
+                    return;
+                }
+                $.post("/admin_cont/hacer_nota_credito/", {
+                    numero: numero,
+                    arbitraje: arbitraje_cambio,
+                    autogenerado: autogenerado,
+                    csrfmiddlewaretoken: csrf_token
+                }, function(resp) {
+                    alert(resp.mensaje);
+                    //location.reload();
+                });
+                $(this).dialog("close");
+            },
+
+        },
+        open: function () {
+            const buttons = $(this).parent().find(".ui-dialog-buttonpane button");
+            buttons.eq(1).addClass("btn btn-sm btn-primary"); // Confirmar
+            buttons.eq(0).addClass("btn btn-sm btn-dark");    // Cancelar
+        }
+    });
+}
+
+function cargar_facturas_imputacion(nrocliente) {
+    $.ajax({
+        url: "/admin_cont/cargar_pendientes_imputacion_venta/",
+        type: "GET",
+        data: { nrocliente: nrocliente },
+        success: function (response) {
+            let tbody = $("#tabla-impucompra tbody");
+            tbody.empty();
+
+            response.data.forEach(item => {
+                let fila = `
+                    <tr data-id="${item.autogenerado}">
+                        <td style="display: none;">${item.autogenerado}</td>
+                        <td>${item.vto}</td>
+                        <td>${item.emision}</td>
+                        <td>${item.num_completo}</td>
+                        <td>${item.total.toFixed(2)}</td>
+                        <td>${item.saldo.toFixed(2)}</td>
+                        <td>${item.imputado.toFixed(2)}</td>
+                        <td>${item.tipo_cambio.toFixed(2)}</td>
+                        <td>${item.detalle}</td>
+                    </tr>
+                `;
+                tbody.append(fila);
+            });
+        },
+        error: function (xhr) {
+            alert("Error al cargar las facturas: " + xhr.responseJSON.error);
+        }
+    });
+}
+function actualizarMonto() {
+        let total = 0;
+        $("#tabla-impucompra tbody tr.table-secondary").each(function () {
+            let monto = parseFloat($(this).find("td:nth-child(6)").text().replace(",", ".")) || 0;
+            total += monto;
+        });
+
+        $("#se-imputaran").val(total.toFixed(2));
+
+        $("#btn-imputar").prop("disabled", total === 0);
+    }
+function actualizarImputado() {
+    let totalImputado = 0;
+
+    // Recorre solo las filas que tienen un imputado mayor a 0
+    $("#tabla-impucompra tbody tr").each(function () {
+        let celdaImputado = $(this).find("td:nth-child(7)");
+        let monto = parseFloat(celdaImputado.text().replace(",", ".")) || 0;
+
+        if (monto > 0) {
+            totalImputado += monto;
+            celdaImputado.css("background-color", "#fcec3f"); // Mantener el color amarillo
+        }
+    });
+
+    // Actualiza el input `#se-imputaran` con el total imputado
+    $("#se-imputaran").val(totalImputado.toFixed(2));
+}
+function resetModal(modalId) {
+    const modal = $(modalId);
+
+    // Reinicia el formulario
+    modal.find("form").each(function () {
+        this.reset();
+    });
+
+    // Limpia tablas
+    modal.find("table").each(function () {
+        if ($.fn.DataTable.isDataTable(this)) {
+            $(this).DataTable().clear().draw();
+        } else {
+            $(this).find("tbody").empty();
+        }
+    });
 }
