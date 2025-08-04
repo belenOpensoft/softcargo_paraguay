@@ -943,6 +943,10 @@ function cargar_preventas(){
                     },
                     headers: {'X-CSRFToken': csrf_token},
                     success: function (response) {
+                        if (response.bloqueo) {
+                            alert(response.bloqueo.mensaje);
+                            return;
+                        }
                         let preventa = response.data_preventa;
                         let gastos = response.data;
 

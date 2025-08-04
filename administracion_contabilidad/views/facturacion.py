@@ -31,9 +31,10 @@ from datetime import datetime
 from django.db import transaction
 from django.db.models import F, Max, Q
 from impomarit.models import VGastosHouse, Envases, Cargaaerea, Embarqueaereo, VEmbarqueaereo as IM, Reservas, \
-    Serviceaereo
+    Serviceaereo, BloqueoEdicion
 from decimal import Decimal
 from administracion_contabilidad.forms import pdfForm
+from django.utils.timezone import now, timedelta
 
 param_busqueda = {
     1: 'autogenerado__icontains',
@@ -1109,6 +1110,46 @@ def cargar_preventa_infofactura(request):
         start = int(request.GET.get('start', 0))
         length = int(request.GET.get('length', 10))
 
+        operativas = {
+            'IM':'importacion_maritima',
+            'IA':'importacion_aerea',
+            'IT':'importacion_terrestre',
+            'EM':'exportacion_maritima',
+            'EA':'exportacion_aerea',
+            'ET':'exportacion_terrestre',
+        }
+
+        modelo_operativa = {
+            'IM': Embarqueaereo,
+            'IA': ImportEmbarqueaereo,
+            'IT': ImpterraEmbarqueaereo,
+            'EM': ExpmaritEmbarqueaereo,
+            'EA': ExportEmbarqueaereo,
+            'ET': ExpterraEmbarqueaereo
+        }
+        modelo_reserva = {
+            'IM': Reservas,
+            'IA': ImportReservas,
+            'IT': ImpterraReservas,
+            'EM': ExpmaritReservas,
+            'EA': ExportReservas,
+            'ET': ExpterraReservas
+        }
+
+        modulo = operativas[clase]
+        modelo = modelo_operativa[clase]
+        modelo_r= modelo_reserva[clase]
+        embarque = modelo.objects.filter(numero=referencia).first() if modelo else None
+
+        if embarque:
+            posicion = embarque.posicion
+
+        if posicion:
+            reserva= modelo_r.objects.filter(posicion=posicion).first() if modelo_r else None
+            numero_reserva=reserva.numero if reserva else None
+
+        bloqueo_info = verificar_bloqueo_edicion(referencia, numero_reserva, modulo, request.user)
+
         try:
             prev = VPreventas.objects.get(znumero=preventa)
 
@@ -1240,12 +1281,43 @@ def cargar_preventa_infofactura(request):
                 "data_preventa": data_preventa,
             }
 
+            if bloqueo_info:
+                data['bloqueo'] = bloqueo_info
+
             return JsonResponse(data, safe=False)
 
         except VPreventas.DoesNotExist:
             return JsonResponse({'error': 'Infofactura no encontrada'}, safe=False)
         except Clientes.DoesNotExist:
             return JsonResponse({'error': 'Cliente no encontrado'}, safe=False)
+    return None
+
+
+def verificar_bloqueo_edicion(referencia, numero_reserva, modulo, usuario):
+    """
+    Verifica si la referencia o su madre están bloqueadas por otro usuario.
+    Retorna un diccionario con el mensaje de bloqueo o None si no hay bloqueo.
+    """
+    for ref in [numero_reserva, referencia]:
+        if not ref:
+            continue
+        bloqueo = BloqueoEdicion.objects.filter(
+            referencia=ref,
+            fecha_expiracion__gt=now(),
+            activo=True,
+            modulo=modulo
+        ).first()
+
+        if bloqueo:
+            tiempo_restante = bloqueo.fecha_expiracion - now()
+            minutos = int(tiempo_restante.total_seconds() // 60)
+            segundos = int(tiempo_restante.total_seconds() % 60)
+            return {
+                'bloqueado': True,
+                'usuario': bloqueo.usuario.username,
+                'mensaje': f'El embarque asociado a esta preventa está siendo editado por {bloqueo.usuario.username}. '
+                           f'Podrás facturar en aproximadamente {minutos} min {segundos} seg.'
+            }
     return None
 
 
