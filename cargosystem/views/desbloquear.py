@@ -1,4 +1,7 @@
 # views.py
+from urllib.parse import urlparse
+
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
@@ -53,18 +56,26 @@ def desbloquear(request):
 
     return JsonResponse({'status': 'ok', 'desbloqueados': desbloqueados})
 
-def desbloquear_modulo_usuario(request):
-    if request.method == "POST":
-        modulo = request.POST.get("modulo")
-        if not modulo:
-            return JsonResponse({"error": "Módulo no especificado"}, status=400)
+def desbloquear_modulo_usuario(ruta_actual,user_id):
 
-        desbloqueados = BloqueoEdicion.objects.filter(
-            usuario=request.user,
-            modulo=modulo,
-            activo=True,
-            fecha_expiracion__gt=now()
-        ).update(activo=False)
+    user_id = int(user_id)
+    ruta = urlparse(ruta_actual).path  # → /importacion_maritima/masters/
+    partes = ruta.strip('/').split('/')  # → ['importacion_maritima', 'masters']
 
-        return JsonResponse({"ok": True, "desbloqueados": desbloqueados})
-    return JsonResponse({"error": "Método no permitido"}, status=405)
+    modulo = partes[0] if len(partes) >= 1 else 'seguimientos'
+
+    print('modulo', modulo)
+    print('partes', partes)
+    print('user id', user_id)
+    print('ruta actual', ruta_actual)
+
+    desbloqueados = BloqueoEdicion.objects.filter(
+        usuario=User.objects.get(id=user_id),
+        modulo=modulo,
+        activo=True,
+        fecha_expiracion__gt=now()
+    )
+
+    print(desbloqueados.query)
+    desbloqueados.update(activo=False)
+    return JsonResponse({"ok": True})

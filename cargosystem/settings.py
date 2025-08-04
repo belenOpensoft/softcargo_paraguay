@@ -53,8 +53,36 @@ INSTALLED_APPS = [
     'impterrestre',
     'administracion_contabilidad',
     'consultas_administrativas',
-    'expterrestre'
+    'expterrestre',
+    'channels',
 ]
+
+# Configura ASGI como entrada principal
+ASGI_APPLICATION = "cargosystem.asgi.application"
+
+# Configura Redis como layer para canales
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': { 'class': 'logging.StreamHandler' },
+#     },
+#     'root': {
+#         'handlers': ['console'],
+#         'level': 'DEBUG',
+#     },
+# }
+
+
 CSRF_COOKIE_SECURE = False
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_CONFIGS = {

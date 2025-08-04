@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head><title>WebSocket Test</title></head>
+<body>
+    <textarea id="chat-log" cols="100" rows="10" readonly></textarea><br>
+    <input id="chat-message-input" type="text" size="100">
+    <button onclick="sendMessage()">Enviar</button>
+    <button onclick="disconnectSocket()">Desconectar</button>
+
+    <script>
+        const current_url = window.location.href;
+        const curren_user = "{{ request.user.id }}";
+        const chatSocket = new WebSocket("ws://" + window.location.hostname + `:8002/ws/chat/?from_url=${encodeURIComponent(current_url)}&current_user=${encodeURIComponent(curren_user)}`);
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log(data);
+            document.getElementById("chat-log").value += (data.message + "\n");
+            if (data.type === "message") {
+                document.getElementById("chat-log").value += (data.message + "\n");
+
+            } else if (data.type === "event") {
+                if (data.event === "connected") {
+                    console.log("🟢 Otra pestaña se conectó.");
+                } else if (data.event === "disconnected") {
+                    alert("⚠️ Otra pestaña se desconectó.");
+
+                }
+            }
+        };
+
+        function sendMessage() {
+            const input = document.getElementById("chat-message-input");
+            const message = input.value;
+            chatSocket.send(JSON.stringify({ 'message': message }));
+            input.value = '';
+        }
+        function disconnectSocket() {
+            if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                chatSocket.close();
+                console.log("🔌 WebSocket desconectado manualmente");
+            }
+        }
+
+    </script>
+</body>
+</html>
