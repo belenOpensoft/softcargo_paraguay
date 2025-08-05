@@ -23,6 +23,7 @@ def grilla_seguimientos(request):
     try:
         if request.user.has_perms(["seguimientos.view_seguimiento", ]):
             opciones_busqueda = {
+                'numero__icontains': 'SEGUIMIENTO',
                 'cliente__icontains': 'CLIENTE',
                 'embarcador__icontains': 'EMBARCADOR',
                 'consignatario__icontains': 'CONSIGNATARIO',

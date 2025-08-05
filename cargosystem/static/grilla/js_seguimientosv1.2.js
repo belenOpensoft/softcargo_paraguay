@@ -88,13 +88,13 @@ $(document).ready(function () {
             {
                 "targets": [3],
                 "render": function (data, type, row, meta) {
-                    return row[55]; // Toma el índice 5 para la columna 6
+                    return row[56]; // Toma el índice 5 para la columna 6
                 }
             },
             {
                 "targets": [4],
                 "render": function (data, type, row, meta) {
-                    return row[56]; // Toma el índice 5 para la columna 6
+                    return row[55]; // Toma el índice 5 para la columna 6
                 }
             },
             {
@@ -2179,7 +2179,7 @@ $(document).ready(function () {
                                             alert("!Seguimiento MODIFICADO con exito¡");
                                         }
                                         table.ajax.reload();
-                                        $(this).dialog("close");
+                                        $('#impo_marit_modal').dialog("close");
                                     } else {
                                         alert(resultado['resultado']);
                                         //console.log(resultado['resultado']);
@@ -2943,218 +2943,6 @@ function get_datos_cronologia(id,callback) {
             callback(true);
         }
 
-    });
-}
-function get_datos_seguimiento_old(id, modo = '') {
-    $("#id_originales").val("S");
-    $.ajax({
-        url: '/get_data_seguimiento/' + id + '/',
-        type: 'GET',
-        async: false,
-        success: function (data) {
-            var datos = data;
-            // Establece los valores en los campos del formulario
-            if (datos['fecha'] !== null) {
-                $("#id_fecha").val(datos['fecha']);
-            }
-            if (datos['loadingdate'] !== null) {
-                $("#id_loadingdate").val(datos['loadingdate']);
-            }
-            if (datos['vencimiento'] !== null) {
-                $("#id_vencimiento").val(datos['vencimiento']);
-            }
-            if (datos['cliente'] !== null && datos['cliente'] !== 0) {
-                $("#cliente_add").val(datos['cliente'])
-                $("#cliente_add").attr('data-id', datos['cliente_codigo']);
-                $("#cliente_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['deposito'] !== null && datos['deposito'] !== 0) {
-                $("#deposito_add").val(datos['deposito'])
-                $("#deposito_add").attr('data-id', datos['deposito_codigo']);
-                $("#deposito_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['embarcador'] !== null && datos['embarcador'] !== 0) {
-                $("#embarcador_add").val(datos['embarcador'])
-                $("#embarcador_add").attr('data-id', datos['embarcador_codigo']);
-                $("#embarcador_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['consignatario'] !== null && datos['consignatario'] !== 0) {
-                $("#consignatario_add").val(datos['consignatario'])
-                $("#consignatario_add").attr('data-id', datos['consignatario_codigo']);
-                $("#consignatario_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['notificar'] !== null && datos['notificar'] !== 0) {
-                $("#notificar_add").val(datos['notificar'])
-                $("#notificar_add").attr('data-id', datos['notificar_codigo']);
-                $("#notificar_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['agente'] !== null && datos['agente'] !== 0) {
-                $("#agente_add").val(datos['agente'])
-                $("#agente_add").attr('data-id', datos['agente_codigo']);
-                $("#agente_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['transportista'] !== null && datos['transportista'] !== 0) {
-                $("#transportista_add").val(datos['transportista'])
-                $("#transportista_add").attr('data-id', datos['transportista_codigo']);
-                $("#transportista_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['armador'] !== null && datos['armador'] !== 0) {
-                $("#armador_add").val(datos['armador'])
-                $("#armador_add").attr('data-id', datos['armador_codigo']);
-                $("#armador_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['agecompras'] !== null && datos['agecompras'] !== 0) {
-                $("#agecompras_add").val(datos['agecompras'])
-                $("#agecompras_add").attr('data-id', datos['agecompras_codigo']);
-                $("#agecompras_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['ageventas'] !== null && datos['ageventas'] !== 0) {
-                $("#ageventas_add").val(datos['ageventas'])
-                $("#ageventas_add").attr('data-id', datos['ageventas_codigo']);
-                $("#ageventas_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['origen'] !== null && datos['origen'] !== 0) {
-                $("#origen_add").val(datos['origen_text'])
-                $("#origen_add").attr('data-id', datos['origen']);
-                $("#origen_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['destino'] !== null && datos['destino'] !== 0) {
-                $("#destino_add").val(datos['destino_text'])
-                $("#destino_add").attr('data-id', datos['destino']);
-                $("#destino_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['operacion'] !== '') {
-                if (datos['operacion'] !== null) {
-                    $("#id_operacion_seg").val(datos['operacion']);
-                }
-                $("#id_operacion_seg").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['moneda'] !== '') {
-                if (datos['moneda'] !== null) {
-                    $("#id_moneda").val(datos['moneda'])
-                }
-                $("#id_moneda").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['vendedor'] !== null && datos['vendedor'] !== 0) {
-                $("#vendedor_add").val(datos['vendedor'])
-                $("#vendedor_add").attr('data-id', datos['vendedor_codigo']);
-                $("#vendedor_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['vapor'] !== null) {
-                $("#vapor_add").val(datos['vapor'])
-                $("#vapor_add").attr('data-id', datos['vapor']);
-                $("#vapor_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['loading'] !== null && datos['loading'] !== 0) {
-                $("#loading_add").val(datos['loading'])
-                $("#loading_add").attr('data-id', datos['loading_codigo']);
-                $("#loading_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['discharge'] !== null && datos['discharge'] !== 0) {
-                $("#discharge_add").val(datos['discharge'])
-                $("#discharge_add").attr('data-id', datos['discharge_codigo']);
-                $("#discharge_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['proyecto'] !== null && datos['proyecto'] !== 0) {
-                $("#proyecto_add").val(datos['proyecto'])
-                $("#proyecto_add").attr('data-id', datos['proyecto_codigo']);
-                $("#proyecto_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['actividad'] !== null && datos['actividad'] !== 0) {
-                $("#actividad_add").val(datos['actividad'])
-                $("#actividad_add").attr('data-id', datos['actividad_codigo']);
-                $("#actividad_add").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-
-            if (datos['desposito'] !== '') {
-                if (datos['desposito'] !== null) {
-                    $("#id_desposito").val(datos['desposito'])
-                }
-                $("#id_desposito").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['status'] !== '') {
-                if (datos['status'] !== null) {
-                    $("#id_status").val(datos['status'])
-                }
-                $("#id_status").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['pago'] !== '') {
-                if (datos['pago'] !== null) {
-                    $("#id_pago").val(datos['pago'])
-                }
-                $("#id_pago").css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.07rem #3D9A37'});
-            }
-            if (datos['discharge'] !== null) {
-                $("#discharge_add").val(datos['discharge'])
-            }
-            if (datos['awb'] !== null) {
-                $("#id_awb").val(datos['awb'])
-            }
-            if (datos['hawb'] !== null) {
-                $("#id_hawb").val(datos['hawb'])
-            }
-            if (datos['wreceipt'] !== null) {
-                $("#id_wreceipt").val(datos['wreceipt'])
-            }
-            if (datos['valor'] !== null) {
-                $("#id_valor").val(datos['valor'])
-            }
-            if (datos['notas'] !== null) {
-                $("#notas_seguimiento").val(datos['notas'])
-            }
-            if (datos['posicion'] !== null) {
-                $("#id_posicion").val(datos['posicion'])
-            }
-            if (datos['arbitraje'] !== null) {
-                $("#id_arbitraje").val(datos['arbitraje'])
-            }
-            if (datos['viaje'] !== null) {
-                $("#id_viaje").val(datos['viaje'])
-            }
-            if (datos['ubicacion'] !== null) {
-                $("#id_ubicacion").val(datos['ubicacion'])
-            }
-            if (datos['booking'] !== null) {
-                $("#id_booking").val(datos['booking'])
-            }
-            if (datos['trackid'] !== null) {
-                $("#id_trackid").val(datos['trackid'])
-            }
-            if (datos['diasalmacenaje'] !== null) {
-                $("#id_diasalmacenaje").val(datos['diasalmacenaje'])
-            }
-            if (datos['demora'] !== null) {
-                $("#id_demora").val(datos['demora'])
-            }
-            if (datos['id'] !== null) {
-                $("#id_id").val(datos['id'])
-            }
-            if (datos['modo'] !== null) {
-                $("#id_modo").val(datos['modo'])
-            }
-            if (datos['refcliente'] !== null) {
-                $("#id_refcliente").val(datos['refcliente'])
-            }
-            if (datos['refproveedor'] !== null) {
-                $("#id_refproveedor").val(datos['refproveedor'])
-            }
-            if (datos['terminos'] !== null) {
-                $("#terminos").val(datos['terminos'])
-            }
-            if (datos['volumen'] !== null) {
-                $("#id_volumen_seg").val(datos['volumen'])
-            }
-            if (datos['trafico'] !== null) {
-                $("#id_trafico_seg").val(datos['trafico'])
-            }
-            if (datos['contratotra'] !== null) {
-                $("#id_contratotra").val(datos['contratotra'])
-            }
-            return datos;
-        },
-        error: function (xhr, status, error) {
-            alert(error);
-        }
     });
 }
 function get_datos_seguimiento(id,callback) {
