@@ -92,17 +92,34 @@
             let partes = path.split('/').filter(p => p);
             let modulo= partes.length >= 1 ? partes[0] : null;
             let modulo2= partes.length >= 1 ? partes[1] : null;
+            let valor;
+            if(modulo2.includes('directo')){
+               valor=modulo2.split('_');
+               valor = valor[1];
+            }else if(modulo2.includes('calendario')||modulo2.includes('entrega_documentacion_general')){
+            valor='';
+            modulo='';
+            }
+            else{
+                valor=modulo2;
+            }
             if(modulo=='exportacion_aerea'){
                 $('#modulo_nombre').html('EXPORTACIÓN AÉREA');
+                $('#modulo_nombre_2').html(valor.toUpperCase());
             }else if(modulo=='exportacion_maritima'){
+                $('#modulo_nombre_2').html(valor.toUpperCase());
                 $('#modulo_nombre').html('EXPORTACIÓN MARÍTIMA');
             }else if(modulo=='exportacion_terrestre'){
+                $('#modulo_nombre_2').html(valor.toUpperCase());
                 $('#modulo_nombre').html('EXPORTACIÓN TERRESTRE');
             }else if(modulo=='importacion_maritima'){
+                $('#modulo_nombre_2').html(valor.toUpperCase());
                 $('#modulo_nombre').html('IMPORTACIÓN MARÍTIMA');
             }else if(modulo=='importacion_aerea'){
+                $('#modulo_nombre_2').html(valor.toUpperCase());
                 $('#modulo_nombre').html('IMPORTACIÓN AÉREA');
             }else if(modulo=='importacion_terrestre'){
+                $('#modulo_nombre_2').html(valor.toUpperCase());
                 $('#modulo_nombre').html('IMPORTACIÓN TERRESTRE');
             }else if(modulo=='admin_cont'){
                 if(modulo2=='facturacion'){
@@ -291,7 +308,6 @@
     </script>
     <script>
         const current_url = window.location.href;
-        console.log(current_url);
         const curren_user = "{{ request.user.id }}";
         const chatSocket = new WebSocket("ws://" + window.location.hostname + `:8002/ws/chat/?from_url=${encodeURIComponent(current_url)}&current_user=${encodeURIComponent(curren_user)}`);
 
@@ -349,7 +365,11 @@
                             <button class="btn" type="button" onclick="return setCookieToggle();" id="btntoggle" data-bs-theme="dark">
                                 <i class="fa-solid fa-bars"></i>
                             </button>
-                                <h5 class="text-center flex-grow-1" id="modulo_nombre"></h5>
+                            <div class="mx-auto text-center d-flex flex-column justify-content-center align-items-center">
+                                <h5 id="modulo_nombre" class="mb-0"></h5>
+                                <h6 id="modulo_nombre_2" class="text-primary"></h6>
+                            </div>
+
                         </nav>
                         <main class="content px-3 py-2">
                             <div class="container-fluid">

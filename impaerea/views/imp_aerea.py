@@ -757,7 +757,8 @@ def buscar_registros(request):
         house = request.POST.get("house", "")
         consignatario = request.POST.get("consignatario", "")
         transportista = request.POST.get("transportista", "")
-
+        origen = request.POST.get("origen", "")
+        posicion = request.POST.get("posicion", "")
         if reserva:
             resultados = Master.objects.filter(numero=reserva).values_list("awb", flat=True)
         else:
@@ -775,7 +776,10 @@ def buscar_registros(request):
                 resultados = resultados.filter(consignatario__icontains=consignatario)
             if transportista:
                 resultados = resultados.filter(transportista__icontains=transportista)
-
+            if posicion:
+                resultados = resultados.filter(posicion__icontains=posicion)
+            if origen:
+                resultados = resultados.filter(origen__icontains=origen.upper())
             resultados = resultados.values_list("awb", flat=True)
 
         return JsonResponse({"resultados": list(resultados)}, safe=False)
