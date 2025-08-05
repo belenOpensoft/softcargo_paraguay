@@ -3,7 +3,7 @@ from django.http import HttpResponse
 
 from datetime import datetime
 
-from administracion_contabilidad.models import Asientos, Cuentas, Movims, Factudif
+from administracion_contabilidad.models import Asientos, Cuentas, Movims, Factudif, Dolar
 from consultas_administrativas.forms import LibroDiarioForm, FichaEmbarqueForm
 from expaerea.models import ExportEmbarqueaereo, ExportConexaerea
 from expmarit.models import ExpmaritEmbarqueaereo
@@ -70,9 +70,9 @@ def ficha_embarque(request):
 
                     #si tengo el embarque, traigo los movimientos asociados
                     if embarque:
-                        movimientos=Movims.objects.filter(mposicion=posicion)
+                        asientos = Asientos.objects.filter(posicion=posicion).values_list('autogenerado', flat=True)
                     else:
-                        movimientos=None
+                        asientos=None
                 else:
                     embarque=None
 
@@ -80,7 +80,8 @@ def ficha_embarque(request):
                 if posicion:
                     if not embarque: #si no hay embarque tampoco hay movimientos
                         #traigo los movimientos
-                        movimientos = Movims.objects.filter(mposicion=posicion)
+                        #movimientos = Movims.objects.filter(mposicion=posicion)
+                        asientos = Asientos.objects.filter(posicion=posicion).values_list('autogenerado', flat=True)
                         posicion_prefijo = posicion[:2]
 
                         if posicion_prefijo:
@@ -113,7 +114,7 @@ def ficha_embarque(request):
                         'origen':embarque.origen,
                         'destino':embarque.destino,
                         'vapor':embarque.vapor if operativa != 'importacion_aerea' and operativa != 'exportacion_aerea' else conex.ciavuelo if conex else 'S/I',
-                        'viaje':embarque.viaje if operativa != 'importacion_aera' and operativa != 'exportacion_aea' else conex.viaje if conex else 'S/I',
+                        'viaje':embarque.viaje if operativa != 'importacion_aerea' and operativa != 'exportacion_aerea' else conex.viaje if conex else 'S/I',
                         'embarcador':embarque.embarcador,
                         'agente':embarque.agente,
                         'status':embarque.status,
@@ -124,16 +125,35 @@ def ficha_embarque(request):
                 else:
                     return HttpResponse('No se encontro embarque')
 
+                if asientos:
+                    movimientos = Movims.objects.filter(mautogen__in=asientos)
+                    movimientos.query
+
                 if not movimientos:
                     return HttpResponse('No se encontraron movimientos')
 
                 if detallar_preventas:
-                    preventas = Factudif.objects.filter(zposicion=embarque.posicion)
+
+                    if posicion:
+                        preventas = Factudif.objects.filter(zposicion=posicion)
+                    elif master:
+                        preventas = Factudif.objects.filter(zmaster=master)
+                    elif seguimiento:
+                        preventas = Factudif.objects.filter(zseguimiento=seguimiento)
+                    elif house:
+                        preventas = Factudif.objects.filter(zhouse=house)
+                    else:
+                        preventas = None
 
                 for m in movimientos:
                     moneda = Monedas.objects.only('nombre').filter(codigo=m.mmoneda).first()
                     tipo = int(m.mtipo)
-                    monto = float(m.mtotal)
+                    monto = float(m.mmonto)
+
+                    if not expresar_moneda_nac:
+                        monto=convertir_monto(monto, m.mmoneda,2,m.marbitraje,m.mparidad)
+                    else:
+                        monto = convertir_monto(monto,m.mmoneda,1,m.marbitraje,m.mparidad)
 
                     if tipo in [20, 41, 25]:  # Venta, Nota crédito proveedor, Cobro
                         ingresos = monto
@@ -330,7 +350,13 @@ def convertir_monto(monto, origen, destino, arbitraje, paridad):
     1 = moneda nacional, 2 = dólar, otros = otras monedas (ej: euro)
     """
 
+
     try:
+        if arbitraje is None:
+            dolar = Dolar.objects.filter(ufecha__date=datetime.date.today()).first()
+            if dolar:
+                arbitraje = float(dolar.uvalor)
+
         if origen == destino or monto == 0:
             return round(monto, 2)
 

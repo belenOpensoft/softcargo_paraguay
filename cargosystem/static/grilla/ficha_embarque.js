@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
         houseInput.value = '';
         seguimientoInput.value = '';
 
+
         if (tipoSeleccionado === 'master') {
             masterInput.disabled = false;
         } else if (tipoSeleccionado === 'house') {
@@ -31,23 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
         radio.addEventListener('change', actualizarVisibilidadBusqueda);
     });
 
-    // Exclusividad entre posición, documento y seguimiento
-    [posicionInput, documentoInput].forEach(input => {
-        input.addEventListener('input', () => {
-            if (input.value !== '') {
-                [posicionInput, documentoInput].forEach(other => {
-                    if (other !== input) {
-                        other.disabled = true;
-                        other.value = '';
-                    }
-                });
-            } else {
-                [posicionInput, documentoInput].forEach(other => {
-                    other.disabled = false;
-                });
-            }
-        });
-    });
-
+    // masterInput.disabled = false;
     actualizarVisibilidadBusqueda();
 });

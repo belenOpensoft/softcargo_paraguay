@@ -680,12 +680,12 @@ class MayoresAnaliticosForm(forms.Form):
 #cargas
 class FichaEmbarqueForm(forms.Form):
     OPERATIVAS = [
-        ('import_maritimo', 'IMPORT MARÍTIMO'),
-        ('export_maritimo', 'EXPORT MARÍTIMO'),
-        ('import_aereo', 'IMP AÉREO'),
-        ('export_aereo', 'EXP AÉREO'),
-        ('import_terrestre', 'IMP TERRESTRE'),
-        ('export_terrestre', 'EXP TERRESTRE'),
+        ('importacion_maritima', 'IMPORT MARÍTIMO'),
+        ('exportacion_maritima', 'EXPORT MARÍTIMO'),
+        ('importacion_aerea', 'IMPORT AÉREO'),
+        ('exportacion_aerea', 'EXPORT AÉREO'),
+        ('importacion_terrestre', 'IMPORT TERRESTRE'),
+        ('exportacion_terrestre', 'EXPORT TERRESTRE'),
     ]
 
     operativa = forms.ChoiceField(
