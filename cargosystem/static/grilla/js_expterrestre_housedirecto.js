@@ -1,3 +1,6 @@
+
+let numeros = [];
+
 $(document).ready(function () {
   let contador = 0;
 //  $.ajax({
@@ -10,11 +13,11 @@ $(document).ready(function () {
 //        console.log('Error:', error);
 //    }
 //});
-        $(document).on("submit", "#searchForm", function(e) {
+       $(document).on("submit", "#searchFormDirecto", function(e) {
         e.preventDefault();
         let formData = $(this).serialize();
-        filtrar_tabla_master(formData, e);
-        $("#searchModal").dialog("close");
+        filtrar_tabla_houses(formData, e);
+        $("#searchModalDirecto").dialog("close");
     });
         $("#modalSeleccionEmailHouse11").dialog({
         autoOpen: false,
@@ -86,7 +89,9 @@ $('#buscadorEmailsHouse11').on('keyup', function () {
 
                 return $.extend({}, d, {
                     "buscar": buscar,
-                    "que_buscar": que_buscar
+                    "que_buscar": que_buscar,
+                    "numeros": JSON.stringify(numeros)
+
                 });
             }
         },
@@ -825,4 +830,49 @@ let selectedRowN = localStorage.getItem('num_house_gasto');
                     }
                 }
             });
+}
+
+function modal_buscar_directos(){
+$("#searchModalDirecto").dialog({
+        autoOpen: true,
+        modal: true,
+        width: 400,
+        buttons: [
+            {
+                text: "Buscar",
+                class: "btn btn-success",
+                click: function(e) {
+                    let formData = $("#searchFormDirecto").serialize();
+                    filtrar_tabla_houses(formData,e);
+                    $(this).dialog("close");
+                }
+            },
+            {
+                text: "Cerrar",
+                class: "btn btn-dark",
+                click: function() {
+                    $(this).dialog("close");
+                }
+            }
+        ]
+    });
+}
+
+function filtrar_tabla_houses(data, e) {
+    e.preventDefault();
+    $.ajax({
+        type: "POST",
+        url: '/exportacion_terrestre/buscar_registros_directos/',
+        data: $("#searchFormDirecto").serialize(),
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function(response) {
+            numeros = response.resultados;
+            table.ajax.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error("Error al obtener AWB:", error);
+        }
+    });
 }

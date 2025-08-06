@@ -13,7 +13,7 @@ from expmarit.views.house import add_house_impmarit, edit_house_function, house_
 from expmarit.views.expo_maritima import master_expo_maritima, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
     descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros, \
-    source_logs
+    source_logs, buscar_registros_directos
 from expmarit.views.master import master_detail, add_importacion_maritima, edit_master, get_name_by_id, \
     consultar_seguimientos
 
@@ -51,6 +51,7 @@ urlpatterns = [
     path(r'source_embarque_consolidado/', source_embarque_consolidado, name="source_embarque_consolidado"),
     path(r'source_gastos_house/', source_gastos_house, name="source_gastos_house"),
     path(r'source_gastos_house_preventa/', source_gastos_house_preventa, name="source_gastos_house_preventa"),
+    path('buscar_registros_directos/', buscar_registros_directos, name='buscar_registros_directos'),
 
     path(r'source_rutas_house/', source_rutas_house, name="source_rutas_house"),
     path(r'source_envases_house/', source_envases, name="source_envases_house"),

@@ -399,6 +399,10 @@ def source_embarque_consolidado(request):
             search_value = request.GET.get(f'columns[{index}][search][value]', '').strip()
             if search_value:
                 filtros[f"{column}__icontains"] = search_value
+        numeros_json = simplejson.loads(request.GET['numeros'])
+        if numeros_json:
+            filtros['numero__in'] = numeros_json
+
         if len(filtros) > 0:
             registros = VEmbarqueaereoDirecto.objects.filter(**filtros)
         else:
@@ -670,6 +674,39 @@ def buscar_registros(request):
             if origen:
                 resultados = resultados.filter(origen__icontains=origen.upper())
             resultados = resultados.values_list("awb", flat=True)
+
+        return JsonResponse({"resultados": list(resultados)}, safe=False)
+
+    return JsonResponse({"error": "Método no permitido"}, status=400)
+
+
+def buscar_registros_directos(request):
+    if request.method == "POST":
+        seguimiento = request.POST.get("seguimiento", "")
+        master = request.POST.get("master", "")
+        house = request.POST.get("house", "")
+        consignatario = request.POST.get("consignatario", "")
+        transportista = request.POST.get("transportista", "")
+        origen = request.POST.get("origen", "")
+        posicion = request.POST.get("posicion", "")
+
+        resultados = VEmbarqueaereoDirecto.objects.all()
+
+        if seguimiento:
+            resultados = resultados.filter(seguimiento__icontains=seguimiento)
+        if master:
+            resultados = resultados.filter(awb__icontains=master)
+        if house:
+            resultados = resultados.filter(hawb__icontains=house)
+        if consignatario:
+            resultados = resultados.filter(consignatario__icontains=consignatario)
+        if transportista:
+            resultados = resultados.filter(transportista__icontains=transportista)
+        if posicion:
+            resultados = resultados.filter(posicion__icontains=posicion)
+        if origen:
+            resultados = resultados.filter(origen__icontains=origen.upper())
+        resultados = resultados.values_list("numero", flat=True)
 
         return JsonResponse({"resultados": list(resultados)}, safe=False)
 

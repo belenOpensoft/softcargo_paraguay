@@ -363,59 +363,6 @@ def get_data_embarque_aereo(registros_filtrados):
     except Exception as e:
         raise TypeError(e)
 
-def source_embarque_consolidado_old(request):
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        start = int(request.GET.get('start', 0))
-        length = int(request.GET.get('length', 10))
-        draw = int(request.GET.get('draw', 1))
-
-        # Mapeo de columnas
-        columnas = [
-            'id', 'etd', 'eta', 'numero', 'seguimiento','consignatario', 'origen', 'destino',
-            'status', 'posicion', 'operacion', 'awb', 'hawb', 'vapor', 'notificar_agente', 'notificar_cliente'
-        ]
-
-        # Filtrar registros en base a la búsqueda
-        registros = VEmbarqueaereo.objects.filter(consolidado=1)
-
-        # Aplicar búsqueda por columna
-        for index, column in enumerate(columnas):
-            search_value = request.GET.get(f'columns[{index}][search][value]', '').strip()
-            if search_value:
-                filtros = {f"{column}__icontains": search_value}
-                registros = registros.filter(**filtros)
-
-        # Ordenar registros (aplicamos el orden enviado por DataTables)
-        order_column_index = int(request.GET.get('order[0][column]', 0))  # Índice de la columna
-        order_dir = request.GET.get('order[0][dir]', 'asc')  # Dirección del orden
-
-        if order_column_index < len(columnas):
-            order_column = columnas[order_column_index]  # Obtener el nombre de la columna
-            if order_dir == 'desc':
-                order_column = f"-{order_column}"  # Prefijar con '-' para orden descendente
-            registros = registros.order_by(order_column)
-
-        # Obtener el número total de registros y registros filtrados
-        total_records = VEmbarqueaereo.objects.filter(consolidado=1).count()
-        filtered_records = registros.count()
-
-        # Paginación
-        registros = registros[start:start + length]
-
-        # Preparar los datos
-        data = get_data_embarque_aereo(registros)
-
-        resultado = {
-            'draw': draw,
-            'recordsTotal': total_records,
-            'recordsFiltered': filtered_records,
-            'data': data
-        }
-
-        return JsonResponse(resultado)
-    else:
-        return JsonResponse({"error": "Invalid request"}, status=400)
-
 
 def source_embarque_consolidado(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -438,11 +385,17 @@ def source_embarque_consolidado(request):
         ]
 
         filtros = {}
+
         # Aplicar búsqueda por columna
         for index, column in enumerate(columnas):
             search_value = request.GET.get(f'columns[{index}][search][value]', '').strip()
             if search_value:
                 filtros[f"{column}__icontains"] = search_value
+
+        numeros_json = simplejson.loads(request.GET['numeros'])
+        if numeros_json:
+            filtros['numero__in'] = numeros_json
+
         if len(filtros) > 0:
             registros = VEmbarqueaereoDirecto.objects.filter(**filtros)
         else:
@@ -717,6 +670,39 @@ def buscar_registros(request):
         return JsonResponse({"resultados": list(resultados)}, safe=False)
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
+
+def buscar_registros_directos(request):
+    if request.method == "POST":
+        seguimiento = request.POST.get("seguimiento", "")
+        master = request.POST.get("master", "")
+        house = request.POST.get("house", "")
+        embarcador = request.POST.get("embarcador", "")
+        transportista = request.POST.get("transportista", "")
+        origen = request.POST.get("origen", "")
+        posicion = request.POST.get("posicion", "")
+
+        resultados = VEmbarqueaereoDirecto.objects.all()
+
+        if seguimiento:
+            resultados = resultados.filter(seguimiento__icontains=seguimiento)
+        if master:
+            resultados = resultados.filter(awb__icontains=master)
+        if house:
+            resultados = resultados.filter(hawb__icontains=house)
+        if embarcador:
+            resultados = resultados.filter(embarcador__icontains=embarcador)
+        if transportista:
+            resultados = resultados.filter(transportista__icontains=transportista)
+        if posicion:
+            resultados = resultados.filter(posicion__icontains=posicion)
+        if origen:
+            resultados = resultados.filter(origen__icontains=origen.upper())
+        resultados = resultados.values_list("numero", flat=True)
+
+        return JsonResponse({"resultados": list(resultados)}, safe=False)
+
+    return JsonResponse({"error": "Método no permitido"}, status=400)
+
 
 def source_logs(request):
     modelos_secundarios = [ExportConexaerea, ExportCargaaerea,ExportServiceaereo,ExportAttachhijo]

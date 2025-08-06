@@ -1,3 +1,10 @@
+<style>
+.btn-eliminar-hijo:hover {
+    background-color: #dc3545 !important;  /* rojo Bootstrap */
+    border-color: #dc3545 !important;
+    color: white !important;
+}
+</style>
 <nav class="navbar minavbar2 navbar-expand-lg navbar-light bg-primary" style="color:white;">
     <div class="container-fluid">
 <!--        <a class="navbar-brand text-white" href="#"></a>-->
@@ -11,6 +18,12 @@
                 <li class="nav-item">
                     <button type="button" class="btn btn-secondary" style="margin-top: 4px; margin-left: 10px;" id="nuevo_directo_importado">Importar House</button>
                 </li>
+                <li class="nav-item text-white">
+                    <button type="button" class="btn btn-outline-light btn-eliminar-hijo" style="margin-top: 4px;margin-left: 5px;" onclick="eliminar_house_directo()">
+                        Eliminar Hijo
+                    </button>
+                </li>
+
                   <li class="nav-item text-white">
                     <a class="nav-link text-white" onclick="gastos_btn_h_click()" href="#" id="gastos_btn_house" title="Gastos para el house">
                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16">
@@ -96,8 +109,13 @@
                     </ul>
                 </li>
 
-                <li class="nav-item">
-                    <button type="button" class="btn btn-danger" style="margin-top: 4px; margin-left: 10px;" onclick="eliminar_house_directo()" id="">Eliminar Hijo</button>
+                <li class="nav-item text-white" style="align-content: center;margin-left: 5px;margin-top: 2px;">
+                     <button type="button" class="btn btn-outline-light" onclick="modal_buscar_directos()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                        </svg>
+                        Buscar
+                    </button>
                 </li>
             </ul>
 
