@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
+
+from administracion_contabilidad.models import Boleta
 from expterrestre.models import ExpterraServireserva, VGastosMaster, VGastosHouse, ExpterraServiceaereo
 import json
 
@@ -147,13 +149,22 @@ def get_data_preventa(registros_filtrados):
             registro_json.append('' if registro.id_moneda is None else str(registro.id_moneda))
             registro_json.append('' if registro.id_socio is None else str(registro.id_socio))
             color = 'NINGUNO'
-            if registro.detalle is not None and registro.detalle !='S/I' and registro.detalle !='':
+            numero = 'S/I'
+            if registro.detalle is not None and registro.detalle != 'S/I' and registro.detalle != '':
                 color = 'AMARILLO'
-                se_cobro = Impuvtas.objects.filter(autofac=registro.detalle).exists()
-                if se_cobro:
+                se_facturo = Boleta.objects.filter(autogenerado=registro.detalle).exists()
+                if se_facturo:
                     color = 'ROJO'
+                    boleta = Boleta.objects.only('numero', 'serie', 'prefijo', 'cliente', 'fecha').filter(
+                        autogenerado=registro.detalle).first()
+                    fecha = boleta.fecha.strftime('%d/%m/%Y') if boleta.fecha is not None else None
+                    fecha = fecha if fecha is not None else 'S/I'
+                    numero = f"{boleta.serie}{boleta.prefijo}-{str(int(boleta.numero))}  ({fecha}) - {boleta.cliente}"
+
+
 
             registro_json.append(color)
+            registro_json.append(numero)
             data.append(registro_json)
         return data
     except Exception as e:

@@ -5728,16 +5728,21 @@ function cargar_gastos_factura(callback){
                             },
                             {
                                 "data": 5,
-                                "title": "Detalle"
+                                "title": "Detalle",
+                                'visible':false,
                             },
 
                             {
-                                "data": null, // Columna 7 - Valor por defecto "false"
+                                "data": null,
+                                'visible':false,
                                 "render": function () {
                                     return 'S/I';
                                 }
                             },
-
+                            {
+                                "data": 18,
+                                "title": "Factura"
+                            },
                         ],
                         rowCallback: function (row, data) {
                             // Remover clases anteriores si hay

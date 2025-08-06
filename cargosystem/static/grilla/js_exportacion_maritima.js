@@ -5622,14 +5622,20 @@ let tabla = localStorage.getItem('tabla_origen');
                             },
                             {
                                 "data": 5,
-                                "title": "Detalle"
+                                "title": "Detalle",
+                                'visible':false,
                             },
 
                             {
-                                "data": null, // Columna 7 - Valor por defecto "false"
+                                "data": null,
+                                'visible':false,
                                 "render": function () {
                                     return 'S/I';
                                 }
+                            },
+                            {
+                                "data": 18,
+                                "title": "Factura"
                             },
 
                         ],
