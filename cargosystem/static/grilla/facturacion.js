@@ -364,9 +364,9 @@ $(document).ready(function () {
         },
         initComplete: function () {
             var api = this.api();
-            api.columns().every(function () {
-                var that = this;
-                $('#tabla_facturas tfoot input.filter-input', this.footer()).on('keyup change', function () {
+            api.columns().every(function() {
+                let that = this;
+                $('input', this.footer()).on('keyup change', function() {
                     if (that.search() !== this.value) {
                         that.search(this.value).draw();
                     }
