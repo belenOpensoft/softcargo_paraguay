@@ -5822,6 +5822,22 @@ $("#searchModal").dialog({
             }
         ]
     });
+    $("#origen").autocomplete({
+        source: '/autocomplete_ciudades_codigo/',
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['id']);
+        },
+        change: function (event, ui) {
+            if (ui.item) {
+                $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+            } else {
+                //$(this).val('');
+                $(this).css({"border-color": "", 'box-shadow': ''});
+            }
+        }
+    });
+
 }
 function filtrar_tabla_master(data, e) {
     e.preventDefault();
