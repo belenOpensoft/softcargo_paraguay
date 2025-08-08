@@ -51,6 +51,13 @@ function facturar(){
     $("#facturar_modal").dialog({
         autoOpen: true,
         open: function (event, ui) {
+            if(tablaOrigen.includes('tabla_general')){
+                cargar_gastos_factura_general(function() {
+            sumar_ingresos_tabla();
+            asignar_costo_todos(event);
+
+        });
+            }
         cargar_gastos_factura(function() {
             sumar_ingresos_tabla();
             asignar_costo_todos(event);

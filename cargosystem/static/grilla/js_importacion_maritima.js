@@ -1403,7 +1403,7 @@ $(document).ready(function () {
     }
 });
         //ver mas
-var expandedRow;
+    var expandedRow;
     $('#tabla_importmarit tbody').on('click', 'td.details-control', function () {
         var tr = $(this).closest('tr');
         var row = table.row(tr);
@@ -1525,7 +1525,7 @@ var expandedRow;
     }
 });
     $('#tabla_importmarit tbody').on('dblclick', 'tr', function() {
-            var tr = $(this).closest('tr');
+        var tr = $(this).closest('tr');
         var row = table.row(tr);
         var rowData = row.data();
 
@@ -4912,6 +4912,7 @@ $('.email').click(function () {
                 directo=true;
             }
         }
+
         if (row.length === 1) {
 
          let selectedRowN= localStorage.getItem('id_master_editar');
@@ -5450,7 +5451,7 @@ function acumulados(master, callback) {
 //notas para el house
 function notas_house() {
         let tabla = localStorage.getItem('tabla_origen');
-        let selectedRowN,url;
+        let selectedRowNM,url;
 
         if (tabla.includes('tabla_house_directo')){
          selectedRowNM= localStorage.getItem('num_house_gasto');
