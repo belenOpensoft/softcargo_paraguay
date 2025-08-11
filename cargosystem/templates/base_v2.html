@@ -316,6 +316,7 @@
         const current_url = window.location.href;
         const curren_user = "{{ request.user.id }}";
         const chatSocket = new WebSocket("ws://" + window.location.hostname + `:8002/ws/chat/?from_url=${encodeURIComponent(current_url)}&current_user=${encodeURIComponent(curren_user)}`);
+        // const chatSocket = new WebSocket("wss://" + window.location.hostname + `/ws/chat/?from_url=${encodeURIComponent(current_url)}&current_user=${encodeURIComponent(curren_user)}`);
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);

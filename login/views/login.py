@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import numpy as np
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
