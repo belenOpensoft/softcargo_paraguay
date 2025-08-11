@@ -1,4 +1,6 @@
 import os
+from django.urls import reverse
+from urllib.parse import urlencode
 
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -154,95 +156,11 @@ def generar_entrega_documentacion_pdf_old(request):
         c.save()
         return response
 
-def entrega_documentacion_general_old(request):
-    form_busqueda = GenerarDocumentoForm(request.GET or None)
-    form_modal = EntregaDocumentacionForm()
-    resultados = []
-    resultado_seleccionado = None
-    busqueda_realizada=False
-
-    # 🔐 Evitamos errores si no hay datos
-    cliente_data = {
-        'nombre': '',
-        'direccion': '',
-        'ciudad': '',
-        'telefono': ''
-    }
-    despachante_data = {
-        'nombre': '',
-        'direccion': '',
-        'ciudad': '',
-        'telefono': ''
-    }
-
-    if form_busqueda.is_valid():
-        seguimiento = form_busqueda.cleaned_data.get('seguimiento')
-        operativa = form_busqueda.cleaned_data.get('operativa')
-        embarque = None
-        busqueda_realizada=True
-
-        if operativa == 'IT':
-            embarque = ImpterraEmbarqueaereo
-        elif operativa == 'IA':
-            embarque = ImportEmbarqueaereo
-        elif operativa == 'IM':
-            embarque = Embarqueaereo
-        else:
-            return JsonResponse({'success': False, 'error': 'No coincide la operativa'})
-
-        resultados = embarque.objects.filter(seguimiento=seguimiento)
-
-        if resultados.exists():
-            resultado = resultados.first()
-            resultado_seleccionado = resultado
-
-            cliente = Clientes.objects.filter(codigo=resultado.consignatario).first() if resultado.consignatario else None
-            embarcador = Clientes.objects.filter(codigo=resultado.embarcador).first() if resultado.embarcador else None
-            despachante = Clientes.objects.filter(codigo=resultado.despachante).first() if resultado.despachante else None
-
-            consignatario = cliente.empresa if cliente else 'S/I'
-            rut = cliente.ruc if cliente else 'S/I'
-            emb = embarcador.empresa if embarcador else 'S/I'
-
-            initial_data = {
-                'cliente': consignatario,
-                'embarcador': emb,
-                'orden': resultado.ordencliente,
-                'rut': rut,
-                'modo': operativa,
-                'mbl_awb': resultado.awb,
-                'origen': resultado.origen,
-                'destino': resultado.destino,
-                'posicion': resultado.posicion,
-                'entregar_a': 'cliente',
-            }
-            cliente_data = {
-                'nombre': consignatario,
-                'direccion': cliente.direccion if cliente else '',
-                'ciudad': cliente.ciudad if cliente else '',
-                'telefono': cliente.telefono if cliente else '',
-            }
-            despachante_data = {
-                'nombre': despachante.empresa if despachante else '',
-                'direccion': despachante.direccion if despachante else '',
-                'ciudad': despachante.ciudad if despachante else '',
-                'telefono': despachante.telefono if despachante else '',
-            }
-
-            form_modal = EntregaDocumentacionForm(initial=initial_data)
-
-    return render(request, 'impormarit/entrega_documentacion_general.html', {
-        'form': form_busqueda,
-        'form_modal': form_modal,
-        'resultados': resultados,
-        'resultado': resultado_seleccionado,
-        'cliente_data': cliente_data,
-        'despachante_data': despachante_data,
-        'busqueda_realizada': busqueda_realizada,
-    })
 
 def entrega_documentacion_general(request):
     form_data = request.GET.copy()
+    rol = request.GET.get('rol', request.rol_pestana)
+
     form_data.pop('rol', None)
     form_busqueda = GenerarDocumentoForm(form_data or None)
 
@@ -324,6 +242,7 @@ def entrega_documentacion_general(request):
         'cliente_data': cliente_data,
         'despachante_data': despachante_data,
         'busqueda_realizada': busqueda_realizada,
+        'rol': rol,
     })
 
 

@@ -1626,6 +1626,8 @@ function cargar_gastos_factura_general(callback){
                                 $(row).addClass('fila-rojo');
                             } else if (color === 'AMARILLO') {
                                 $(row).addClass('fila-amarillo');
+                            } else if(color === 'VERDE'){
+                                $(row).addClass('fila-verde');
                             }
 
                             // Evento para resaltar fila seleccionada

@@ -20,6 +20,7 @@
   <div id="generarDocumento" class="border rounded p-3 bg-light" style="width: 100%; max-width: 400px; font-size: 0.85rem;">
     <form method="get" id="generarDocumentoForm" action="{% url 'entrega_documentacion_general' %}">
       {% csrf_token %}
+                <input type="hidden" name="rol" value="{{ request.rol_pestana }}">
 
       <!-- Campo Seguimiento -->
       <div class="mb-2">

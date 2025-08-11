@@ -34,6 +34,7 @@
             {% csrf_token %}
        <input type="hidden" name="selected_columns" id="selected_columns">
             <div class="row">
+                <input type="hidden" name="rol" value="{{ request.rol_pestana }}">
                 <div class="col-md-4">
                     {{ form.desde.label_tag }}
                     {{ form.desde }}

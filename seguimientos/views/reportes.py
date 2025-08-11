@@ -1,6 +1,7 @@
 import io
 import json
 import sys
+from audioop import reverse
 from decimal import Decimal
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 
@@ -30,7 +31,7 @@ import  datetime
 from io import BytesIO
 
 
-def reportes_seguimiento(request):
+def reportes_seguimiento_old(request):
     try:
         if request.user.has_perms(["seguimientos.download_report", ]):
             ctx = {'form': reporte_seguimiento_form(),
@@ -100,6 +101,84 @@ def reportes_seguimiento(request):
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect("/")
+def reportes_seguimiento(request):
+    try:
+        if request.user.has_perms(["seguimientos.download_report", ]):
+            rol = request.POST.get('rol') or request.GET.get('rol') or getattr(request, 'rol_pestana', None)
+
+            ctx = {
+                'form': reporte_seguimiento_form(),
+                'title_page': 'Reporte de seguimientos',
+                'rol': rol
+            }
+
+            if request.method == 'POST':
+                form = reporte_seguimiento_form(request.POST)
+                if form.is_valid():
+                    orden = []
+                    desde = form.cleaned_data['desde']
+                    hasta = form.cleaned_data['hasta']
+                    modo = form.cleaned_data['modo']
+                    operacion = form.cleaned_data['operacion']
+                    vendedor = form.cleaned_data['vendedor']
+                    tipo_de_operacion = form.cleaned_data['tipo_de_operacion']
+                    origen = form.cleaned_data['origen']
+                    destino = form.cleaned_data['destino']
+                    status = form.cleaned_data['status']
+                    buque = form.cleaned_data['buque']
+                    cliente = form.cleaned_data['cliente']
+                    embarcador = form.cleaned_data['embarcador']
+                    consignatario = form.cleaned_data['consignatario']
+
+                    if form.cleaned_data['filtro1']:
+                        orden.append(form.cleaned_data['filtro1'])
+                    if form.cleaned_data['filtro2']:
+                        orden.append(form.cleaned_data['filtro2'])
+                    if form.cleaned_data['filtro3']:
+                        orden.append(form.cleaned_data['filtro3'])
+                    if len(orden) == 0:
+                        orden.append('fecha')
+
+                    filtro = {}
+                    if desde:
+                        filtro['fecha__gte'] = desde
+                    if hasta:
+                        filtro['fecha__lte'] = hasta
+                    if modo:
+                        filtro['modo__icontains'] = modo.upper()
+                    if operacion:
+                        filtro['operacion__icontains'] = operacion.upper()
+                    if vendedor:
+                        filtro['vendedor_codigo'] = vendedor.codigo
+                    if tipo_de_operacion:
+                        filtro['operacion'] = tipo_de_operacion
+                    if origen:
+                        filtro['origen'] = origen.codigo
+                    if destino:
+                        filtro['destino'] = destino.codigo
+                    if status:
+                        filtro['status'] = status
+                    if buque:
+                        filtro['vapor_codigo'] = buque.codigo
+                    if cliente:
+                        filtro['cliente_codigo'] = cliente.codigo
+                    if embarcador:
+                        filtro['embarcador_codigo'] = embarcador.codigo
+                    if consignatario:
+                        filtro['consignatario_codigo'] = consignatario.codigo
+
+                    resultados = VGrillaSeguimientos.objects.filter(**filtro).order_by(*orden)
+                    if resultados.count() > 0:
+                        return genero_xls_seguimientos(resultados, desde, hasta)
+                    else:
+                        messages.info(request, 'No se encontraron resultados para la busqueda')
+            return render(request, "seguimientos/reportes.html", ctx)
+        else:
+            raise TypeError('No tiene permisos para realizar esta accion.')
+    except Exception as e:
+        messages.error(request, str(e))
+        return HttpResponseRedirect("/")
+
 
 def genero_xls_seguimientos(resultados,desde,hasta):
     try:
@@ -592,7 +671,7 @@ def descargar_hawb_operativas_old(request,row_id,draft=None,asagreed=None):
         print(traceback.format_exc())
         raise Http404(f"Error: {str(e)}")
 
-def reportes_operativas(request):
+def reportes_operativas_old(request):
     try:
         if request.user.has_perms(["operativas.download_report", ]):
             ctx = {'form': reporte_operativas_form(),
@@ -671,6 +750,108 @@ def reportes_operativas(request):
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect("/")
+
+def reportes_operativas(request):
+    try:
+        if not request.user.has_perms(["operativas.download_report"]):
+            raise TypeError('No tiene permisos para realizar esta accion.')
+
+        rol = request.POST.get('rol') or request.GET.get('rol') or getattr(request, 'rol_pestana', None)
+
+        ctx = {
+            'form': reporte_operativas_form(),
+            'title_page': 'Reporte de operativas',
+            'rol': rol,  # --> para el hidden
+        }
+
+        if request.method == 'POST':
+            form = reporte_operativas_form(request.POST)
+            if form.is_valid():
+                # rol otra vez por si vino en POST
+                rol = request.POST.get('rol') or request.GET.get('rol') or getattr(request, 'rol_pestana', None)
+
+                selected_columns = request.POST.get('selected_columns')
+                if selected_columns:
+                    selected_columns = json.loads(selected_columns)
+
+                orden = []
+                desde = form.cleaned_data['desde'].strftime('%Y-%m-%d')
+                hasta = form.cleaned_data['hasta'].strftime('%Y-%m-%d')
+                modo = form.cleaned_data['modo']
+                operacion = form.cleaned_data['operacion']
+                vendedor = form.cleaned_data['vendedor']
+                tipo_de_operacion = form.cleaned_data['tipo_de_operacion']
+                origen = form.cleaned_data['origen']
+                destino = form.cleaned_data['destino']
+                status = form.cleaned_data['status']
+                cliente = form.cleaned_data['cliente']
+                embarcador = form.cleaned_data['embarcador']
+                consignatario = form.cleaned_data['consignatario']
+                transportista = form.cleaned_data['transportista']
+
+                if form.cleaned_data['filtro1']:
+                    orden.append(form.cleaned_data['filtro1'])
+                if form.cleaned_data['filtro2']:
+                    orden.append(form.cleaned_data['filtro2'])
+                if form.cleaned_data['filtro3']:
+                    orden.append(form.cleaned_data['filtro3'])
+                if not orden:
+                    orden.append('-fecha')
+
+                filtro, filtro2 = {}, {}
+                if desde:
+                    filtro['eta__gte'] = desde
+                    filtro2['eta__gte'] = desde
+                if hasta:
+                    filtro['eta__lte'] = hasta
+                    filtro2['eta__lte'] = hasta
+                if modo:
+                    filtro['modo'] = modo
+                    filtro2['tipo'] = modo
+                if operacion:
+                    filtro['tipo_operacion'] = operacion
+                    filtro2['operacion'] = operacion
+                if vendedor:
+                    filtro['nrovendedor'] = vendedor.codigo
+                if tipo_de_operacion:
+                    filtro['operacion'] = tipo_de_operacion
+                if origen:
+                    filtro['origen'] = origen.codigo
+                if destino:
+                    filtro['destino'] = destino.codigo
+                if status:
+                    filtro['status'] = status
+                if cliente:
+                    filtro['nrocliente'] = cliente.codigo
+                if embarcador:
+                    filtro['nroembarcador'] = embarcador.codigo
+                if consignatario:
+                    filtro['nroconsignatario'] = consignatario.codigo
+                if transportista:
+                    filtro['nrotransportista'] = transportista.codigo
+
+                resultados = VistaOperativas.objects.filter(**filtro).order_by(*orden)
+                gastos = VistaOperativasGastos.objects.filter(**filtro2).order_by('-fecha')
+
+                if resultados.exists():
+                    # Esto devuelve un HttpResponse (xlsx). No redirijas.
+                    return genero_xls_operativas(resultados, desde, hasta, selected_columns, gastos)
+
+                messages.info(request, 'No se encontraron resultados para la búsqueda')
+
+            # si POST inválido, re-render con el form y rol
+            ctx['form'] = form
+
+        return render(request, "seguimientos/reportes_op.html", ctx)
+
+    except Exception as e:
+        messages.error(request, str(e))
+        # si vas a redirigir, preservá el rol vos (no esperes al middleware)
+        base = reverse('reportes_operativas')  # ajusta al nombre de tu url
+        if rol := (request.POST.get('rol') or request.GET.get('rol') or getattr(request, 'rol_pestana', None)):
+            return HttpResponseRedirect(f"{base}?rol={rol}")
+        return HttpResponseRedirect(base)
+
 
 def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
     try:

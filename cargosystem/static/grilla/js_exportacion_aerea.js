@@ -5798,6 +5798,8 @@ let tabla = localStorage.getItem('tabla_origen');
                                 $(row).addClass('fila-rojo');
                             } else if (color === 'AMARILLO') {
                                 $(row).addClass('fila-amarillo');
+                            } else if(color === 'VERDE'){
+                                $(row).addClass('fila-verde');
                             }
                             // Agregar el evento de clic para resaltar la fila seleccionada
                             $(row).off('click').on('click', function () {

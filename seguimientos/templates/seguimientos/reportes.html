@@ -7,6 +7,8 @@
             {% csrf_token %}
             <div class="row">
                 <div class="col-md-4">
+                <input type="hidden" name="rol" value="{{ request.rol_pestana }}">
+
                     {{ form.desde.label_tag }}
                     {{ form.desde }}
                 </div>

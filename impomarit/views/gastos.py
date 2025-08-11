@@ -116,7 +116,9 @@ def get_data_preventa(registros_filtrados):
                     fecha = boleta.fecha.strftime('%d/%m/%Y') if boleta.fecha is not None else None
                     fecha = fecha if fecha is not None else 'S/I'
                     numero = f"{boleta.serie}{boleta.prefijo}-{str(int(boleta.numero))}  ({fecha}) - {boleta.cliente}"
-
+                    se_cobro = Impuvtas.objects.filter(autofac=registro.detalle).exists()
+                    if se_cobro:
+                        color = 'VERDE'
 
             registro_json.append(color)
             registro_json.append(numero)

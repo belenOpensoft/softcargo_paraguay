@@ -53,6 +53,7 @@ def source_gastos(request):
         data_json = 'fail'
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
+
 def source_gastos_house_preventa(request):
     if is_ajax(request):
         """ BUSCO ORDEN """
@@ -167,6 +168,10 @@ def get_data_preventa(registros_filtrados):
                     fecha = boleta.fecha.strftime('%d/%m/%Y') if boleta.fecha is not None else None
                     fecha = fecha if fecha is not None else 'S/I'
                     numero = f"{boleta.serie}{boleta.prefijo}-{str(int(boleta.numero))}  ({fecha}) - {boleta.cliente}"
+
+                    se_cobro = Impuvtas.objects.filter(autofac=registro.detalle).exists()
+                    if se_cobro:
+                        color = 'VERDE'
 
 
 

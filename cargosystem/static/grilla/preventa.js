@@ -61,7 +61,6 @@ function facturar(){
         cargar_gastos_factura(function() {
             sumar_ingresos_tabla();
             asignar_costo_todos(event);
-
         });
         },
         position: {
