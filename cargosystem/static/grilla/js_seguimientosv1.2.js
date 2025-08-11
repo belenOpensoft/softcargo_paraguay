@@ -2851,7 +2851,6 @@ function get_datos_cronologia(id,callback) {
         type: 'GET',
         async: false,
         success: function (data) {
-
             if (data.bloqueado) {
                 alert(data.mensaje);
                 callback(false);

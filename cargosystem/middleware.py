@@ -334,7 +334,8 @@ class BloqueoModalMiddleware:
                         bloqueo_actual = BloqueoEdicion.objects.filter(
                             referencia=referencia,
                             formulario=dep['formulario'],
-                            fecha_expiracion__gt=now()
+                            fecha_expiracion__gt=now(),
+                            activo=True
                         ).exclude(usuario=request.user).first()
 
                         if bloqueo_actual:

@@ -459,7 +459,7 @@ def get_data_email(request):
                 refcliente = row.refcliente if row.refcliente else "S/I"
 
                 resultado[
-                    'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {row.embarque} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vapor/vuelo: {vapor}; Ord. Cliente: {refcliente}'
+                    'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {row.numero} - CS: {row.embarque} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vapor/vuelo: {vapor}; Ord. Cliente: {refcliente}'
 
                 # Fecha formateada
 
@@ -951,11 +951,9 @@ def get_data_email(request):
 
 
 
-
-
                 # Datos generales
 
-                texto += formatear_linea("Embarque", str(row.embarque) if row.embarque is not None else "S/I")
+                texto += formatear_linea("Embarque", str(row.numero) if row.numero is not None else "S/I")
 
                 texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
 
