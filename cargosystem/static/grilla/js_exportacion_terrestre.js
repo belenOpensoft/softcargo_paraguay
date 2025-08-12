@@ -5726,16 +5726,16 @@ function filtrar_tabla_master(data, e) {
         success: function(response) {
             console.log(response);
             let awbList = response.resultados;
-            if (awbList && awbList.length > 0) {
-                // Eliminar duplicados y construir la regex
-                let uniqueAwbs = [...new Set(awbList)];
-                awbRegex = uniqueAwbs.map(function(item) {
-                    return '.*' + $.trim(item) + '.*';
-                }).join('|');
-                awbRegex=uniqueAwbs;
-            } else {
-                awbRegex = "";
-            }
+            // if (awbList && awbList.length > 0) {
+            //     // Eliminar duplicados y construir la regex
+            //     let uniqueAwbs = [...new Set(awbList)];
+            //     awbRegex = uniqueAwbs.map(function(item) {
+            //         return '.*' + $.trim(item) + '.*';
+            //     }).join('|');
+            //     awbRegex=uniqueAwbs;
+            // } else {
+            //     awbRegex = "";
+            // }
             // Recargar la tabla para enviar el nuevo parámetro al servidor
             table.ajax.reload();
         },

@@ -141,9 +141,20 @@ def source_importacion_master(request):
         }
         filtro = get_argumentos_busqueda(**args)
 
-        awb_filter_json = simplejson.loads(request.GET['awb_filter'])
-        if awb_filter_json:
-            regex = '|'.join(awb_filter_json)
+        # awb_filter_json = simplejson.loads(request.GET['awb_filter'])
+        # if awb_filter_json:
+        #     regex = '|'.join(awb_filter_json)
+        #     filtro['awb__regex'] = regex
+
+        partes = request.path.strip('/').split('/')
+        modulo = partes[0] if partes else 'operaciones'
+
+        # leer filtro desde sesión (no from GET)
+        awb_filters = request.session.get("awb_filters", {})
+        awb_list = awb_filters.get(modulo, [])
+
+        if awb_list:
+            regex = '|'.join(awb_list)
             filtro['awb__regex'] = regex
 
         """PROCESO FILTRO Y ORDEN BY"""
@@ -392,9 +403,13 @@ def source_embarque_consolidado(request):
             if search_value:
                 filtros[f"{column}__icontains"] = search_value
 
-        numeros_json = simplejson.loads(request.GET['numeros'])
-        if numeros_json:
-            filtros['numero__in'] = numeros_json
+        partes = request.path.strip('/').split('/')
+        modulo = partes[0] if partes else 'operaciones'
+
+        directos_filters = request.session.get("directos_filters", {})
+        numeros_list = directos_filters.get(modulo, [])
+        if numeros_list:
+            filtros['numero__in'] = numeros_list
 
         if len(filtros) > 0:
             registros = VEmbarqueaereoDirecto.objects.filter(**filtros)
@@ -633,7 +648,7 @@ def modificar_fecha_retiro(request):
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
 
-def buscar_registros(request):
+def buscar_registros_old(request):
     if request.method == "POST":
         seguimiento = request.POST.get("seguimiento", "")
         embarque = request.POST.get("embarque", "")
@@ -671,7 +686,51 @@ def buscar_registros(request):
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
 
-def buscar_registros_directos(request):
+def buscar_registros(request):
+    if request.method == "POST":
+        seguimiento    = (request.POST.get("seguimiento") or "").strip()
+        embarque       = (request.POST.get("embarque") or "").strip()
+        reserva        = (request.POST.get("reserva") or "").strip()
+        master         = (request.POST.get("master") or "").strip()
+        house          = (request.POST.get("house") or "").strip()
+        embarcador  = (request.POST.get("embarcador") or "").strip()
+        transportista  = (request.POST.get("transportista") or "").strip()
+        origen         = (request.POST.get("origen") or "").strip()
+        posicion       = (request.POST.get("posicion") or "").strip()
+
+        if reserva:
+            resultados_qs = Master.objects.filter(numero=reserva).values_list("awb", flat=True)
+        else:
+            resultados_qs = VEmbarqueaereo.objects.all()
+            if seguimiento:   resultados_qs = resultados_qs.filter(seguimiento__icontains=seguimiento)
+            if embarque:      resultados_qs = resultados_qs.filter(numero__icontains=embarque)
+            if master:        resultados_qs = resultados_qs.filter(awb__icontains=master)
+            if house:         resultados_qs = resultados_qs.filter(hawb__icontains=house)
+            if embarcador: resultados_qs = resultados_qs.filter(embarcador__icontains=embarcador)
+            if transportista: resultados_qs = resultados_qs.filter(transportista__icontains=transportista)
+            if posicion:      resultados_qs = resultados_qs.filter(posicion__icontains=posicion)
+            if origen:        resultados_qs = resultados_qs.filter(origen__icontains=origen.upper())
+            resultados_qs = resultados_qs.values_list("awb", flat=True)
+
+        # normalizar/deduplicar y convertir a lista (para sesión)
+        awb_list = list({(awb or "").strip() for awb in resultados_qs if awb})
+
+        # módulo desde la ruta (/importacion_maritima/buscar_registros/ -> "importacion_maritima")
+        partes = request.path.strip('/').split('/')
+        modulo = partes[0] if partes else 'operaciones'
+
+        # guardar en sesión, namespaced por módulo
+        filters = request.session.get("awb_filters", {})
+        filters[modulo] = awb_list
+        request.session["awb_filters"] = filters
+        request.session.modified = True
+
+        return JsonResponse({"resultados": awb_list}, safe=False)
+
+    return JsonResponse({"error": "Método no permitido"}, status=400)
+
+
+def buscar_registros_directos_old(request):
     if request.method == "POST":
         seguimiento = request.POST.get("seguimiento", "")
         master = request.POST.get("master", "")
@@ -703,6 +762,42 @@ def buscar_registros_directos(request):
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
 
+def buscar_registros_directos(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido"}, status=400)
+
+    seguimiento    = (request.POST.get("seguimiento") or "").strip()
+    master         = (request.POST.get("master") or "").strip()
+    house          = (request.POST.get("house") or "").strip()
+    embarcador  = (request.POST.get("embarcador") or "").strip()
+    transportista  = (request.POST.get("transportista") or "").strip()
+    origen         = (request.POST.get("origen") or "").strip()
+    posicion       = (request.POST.get("posicion") or "").strip()
+
+    qs = VEmbarqueaereoDirecto.objects.all()
+    if seguimiento:   qs = qs.filter(seguimiento__icontains=seguimiento)
+    if master:        qs = qs.filter(awb__icontains=master)
+    if house:         qs = qs.filter(hawb__icontains=house)
+    if embarcador: qs = qs.filter(embarcador__icontains=embarcador)
+    if transportista: qs = qs.filter(transportista__icontains=transportista)
+    if posicion:      qs = qs.filter(posicion__icontains=posicion)
+    if origen:        qs = qs.filter(origen__icontains=origen.upper())
+
+    # Tomamos los NÚMEROS (no AWB) y deduplicamos
+    numeros_list = list(set(qs.values_list("numero", flat=True)))
+
+    # Namespace por módulo (primer segmento de la ruta)
+    partes = request.path.strip('/').split('/')
+    modulo = partes[0] if partes else 'operaciones'
+
+    # Guardar en sesión bajo otra key para no pisar AWB
+    directos_filters = request.session.get("directos_filters", {})
+    directos_filters[modulo] = numeros_list
+    request.session["directos_filters"] = directos_filters
+    request.session.modified = True
+
+    # Podés devolver la lista (si tu front la usa) o solo métricas
+    return JsonResponse({"resultados": numeros_list, "count": len(numeros_list)}, safe=False)
 
 def source_logs(request):
     modelos_secundarios = [ExportConexaerea, ExportCargaaerea,ExportServiceaereo,ExportAttachhijo]

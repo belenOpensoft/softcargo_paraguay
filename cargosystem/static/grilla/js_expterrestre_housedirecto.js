@@ -883,7 +883,7 @@ function filtrar_tabla_houses(data, e) {
             'X-CSRFToken': csrf_token
         },
         success: function(response) {
-            numeros = response.resultados;
+            // numeros = response.resultados;
             table.ajax.reload();
         },
         error: function(xhr, status, error) {
