@@ -189,15 +189,22 @@ def source_embarques_general(request):
         start = int(request.GET['start'])
         length = int(request.GET['length'])
 
-        nums_raw = request.GET.get('numeros')
-        try:
-            numeros_json = json.loads(nums_raw) if nums_raw else []
-        except (TypeError, ValueError):
-            numeros_json = []
+        # nums_raw = request.GET.get('numeros')
+        # try:
+        #     numeros_json = json.loads(nums_raw) if nums_raw else []
+        # except (TypeError, ValueError):
+        #     numeros_json = []
+        #
+        # if numeros_json:  # solo si hay algo
+        #     filtro['numero__in'] = numeros_json
+        partes = request.path.strip('/').split('/')
+        modulo = partes[0] if partes else 'operaciones'
 
-        if numeros_json:  # solo si hay algo
-            filtro['numero__in'] = numeros_json
+        general_filters = request.session.get("general_filters", {})
+        numeros_list = general_filters.get(modulo, [])
 
+        if numeros_list:
+            filtro['numero__in'] = numeros_list
 
         end = start + length
         order = get_order(request, columns_table_general)
@@ -298,7 +305,7 @@ def get_data_general(registros_filtrados,mapa_reservas):
     except Exception as e:
         raise TypeError(e)
 
-def buscar_registros_general(request):
+def buscar_registros_general_old(request):
     if request.method != "POST":
         return JsonResponse({"error": "Método no permitido"}, status=400)
 
@@ -336,6 +343,46 @@ def buscar_registros_general(request):
 
     return JsonResponse({"resultados": list(resultados_qs)})
 
+def buscar_registros_general(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido"}, status=400)
+
+    seguimiento    = (request.POST.get("seguimiento") or "").strip()
+    master         = (request.POST.get("master") or "").strip()
+    house          = (request.POST.get("house") or "").strip()
+    consignatario  = (request.POST.get("consignatario") or "").strip()
+    transportista  = (request.POST.get("transportista") or "").strip()
+    origen         = (request.POST.get("origen") or "").strip()
+    posicion       = (request.POST.get("posicion") or "").strip()
+
+    q = Q()
+    if seguimiento:   q &= Q(seguimiento__icontains=seguimiento)
+    if master:        q &= Q(awb__icontains=master)
+    if house:         q &= Q(hawb__icontains=house)
+    if consignatario: q &= Q(consignatario__icontains=consignatario)
+    if transportista: q &= Q(transportista__icontains=transportista)
+    if posicion:      q &= Q(posicion__icontains=posicion)
+    if origen:        q &= Q(origen__icontains=origen)
+
+    # Query de números (enteros) en ambas vistas y unión sin duplicados
+    qs1 = VEmbarqueaereo.objects.filter(q).values_list("numero", flat=True)
+    qs2 = VEmbarqueaereoDirecto.objects.filter(q).values_list("numero", flat=True)
+    resultados_qs = qs1.union(qs2)
+
+    # A lista (serializable) y sin None
+    numeros_list = [n for n in resultados_qs if n is not None]
+
+    # Módulo por primer segmento de la ruta (ej: "importacion_maritima")
+    partes = request.path.strip('/').split('/')
+    modulo = partes[0] if partes else 'operaciones'
+
+    # Guardar en sesión bajo un namespace propio para “general”
+    general_filters = request.session.get("general_filters", {})
+    general_filters[modulo] = numeros_list
+    request.session["general_filters"] = general_filters
+    request.session.modified = True
+
+    return JsonResponse({"resultados": numeros_list, "count": len(numeros_list)}, safe=False)
 
 #grilla de embarques general
 

@@ -1798,8 +1798,8 @@ function filtrar_tabla_general(data, e) {
             'X-CSRFToken': csrf_token
         },
         success: function(response) {
-            numeros_general = response.resultados;
-            console.log(numeros_general);
+            // numeros_general = response.resultados;
+            // console.log(numeros_general);
             table_general.ajax.reload();
         },
         error: function(xhr, status, error) {
