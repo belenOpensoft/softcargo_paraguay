@@ -1,6 +1,13 @@
 {% extends 'base_table_v2.html' %}
 {% load static %}
 {% block contenido %}
+<style>
+  .table-vertical-scroll {
+    max-height: 50vh;   /* o 400px, ajustá a tu gusto */
+    overflow-y: auto;
+  }
+  .table-vertical-scroll table { margin-bottom: 0; } /* evita espacio extra */
+</style>
 <title>Ficha Embarque Individual</title>
 <link rel="stylesheet" type="text/css" href="{% static 'css/administracion/administracion.css' %}">
 <form method="post" id="formFichaEmbarque">
@@ -45,7 +52,6 @@
         {{ form.posicion }}
 
 
-        <button type="submit" class="btn btn-primary btn-sm mt-3">Buscar</button>
 
         <div class="form-check mt-3">
           {{ form.detallar_preventas }} <label class="form-check-label" for="id_detallar_preventas">Detallar preventas</label>
@@ -61,8 +67,19 @@
 
       <!-- DERECHA: Botones -->
       <div class="col-md-4 d-flex flex-column justify-content-start gap-2">
-        <button type="submit" name="accion" value="imprimir" class="btn btn-danger btn-block">Imprimir</button>
-        <button type="submit" name="accion" value="excel" class="btn btn-success btn-block">Exportar a Excel</button>
+        <button type="submit" class="btn btn-primary btn-block">Buscar</button>
+        <button type="submit" name="accion" value="imprimir"
+                class="btn btn-danger btn-block"
+                {% if not puede_exportar %}disabled{% endif %}>
+          Imprimir
+        </button>
+
+        <button type="submit" name="accion" value="excel"
+                class="btn btn-success btn-block"
+                {% if not puede_exportar %}disabled{% endif %}>
+          Exportar a Excel
+        </button>
+
       </div>
     </div>
   </div>
@@ -84,11 +101,13 @@
   </div>
   <div class="row mb-2">
     <div class="col-md-3"><strong>Interno:</strong> {{ interno }}</div>
-    <div class="col-md-9"><strong>Detalle:</strong> {{ detalle }}</div>
+    <div class="col-md-3"><strong>Seguimiento:</strong> {{ seguimiento }}</div>
+    <div class="col-md-3"><strong>Posicion:</strong> {{ posicion }}</div>
+    <div class="col-md-3"><strong>Detalle:</strong> {{ detalle }}</div>
   </div>
 
   <!-- TABLA DE RESULTADOS -->
-  <div class="table-responsive mt-3">
+  <div class="table-responsive mt-3 table-vertical-scroll">
     <table class="table table-bordered table-sm">
       <thead class="thead-dark">
         <tr>
@@ -103,27 +122,40 @@
         </tr>
       </thead>
       <tbody>
-        {% for fila in resultados %}
-        <tr>
-          <td>{{ fila.tipo }}</td>
-          <td>{{ fila.numero }}</td>
-          <td>{{ fila.fecha }}</td>
-          <td>{{ fila.socio }}</td>
-          <td class="text-right">{{ fila.ingresos }}</td>
-          <td class="text-right">{{ fila.egresos }}</td>
-          <td>{{ fila.detalle }}</td>
-          <td>{{ fila.moneda }}</td>
-        </tr>
-        {% endfor %}
+        {% if resultados and resultados|length > 0 %}
+          {% for fila in resultados %}
+          <tr>
+            <td>{{ fila.tipo }}</td>
+            <td>{{ fila.numero }}</td>
+            <td>{{ fila.fecha }}</td>
+            <td>{{ fila.socio }}</td>
+            <td class="text-end">{{ fila.ingresos }}</td>
+            <td class="text-end">{{ fila.egresos }}</td>
+            <td>{{ fila.detalle }}</td>
+            <td>{{ fila.moneda }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" class="text-center text-muted">
+              {{ error_msg|default:"No hay movimientos para mostrar." }}
+            </td>
+          </tr>
+        {% endif %}
       </tbody>
+
     </table>
   </div>
 
   <div class="row mt-2">
-    <div class="col-md-4"><strong>Total Ingresos:</strong> {{ total_ingresos }}</div>
-    <div class="col-md-4"><strong>Total Egresos:</strong> {{ total_egresos }}</div>
-    <div class="col-md-4"><strong>Rentabilidad Fiscal:</strong> {{ rentabilidad }}</div>
+    <div class="col-md-3"><strong>Total Ingresos:</strong> {{ total_ingresos }}</div>
+    <div class="col-md-3"><strong>Total Egresos:</strong> {{ total_egresos }}</div>
+    <div class="col-md-3"><strong>Rentabilidad Fiscal:</strong> {{ rentabilidad }}</div>
+    {% if detallar_preventas %}
+    <div class="col-md-3"><strong>Total Preventa:</strong> {{ total_preventa }}</div>
+  {% endif %}
   </div>
+
 </div>
 
     <script src="{% static 'grilla/ficha_embarque.js' %}"></script>
