@@ -101,8 +101,7 @@ def get_data_email(request):
 
                 fecha_actual = datetime.datetime.now()
 
-                resultado['asunto'] = 'Ref.: ' + str(row.embarque) + \
-                                      '/ CS: ' + str(row.numero) + '- H B/L: ' + str(row.hawb) + '- Shipper: '
+                resultado['asunto'] = 'Ref.: ' + str(row.numero) + '- H B/L: ' + str(row.hawb) + '- Shipper: '
 
                 fecha_formateada = fecha_actual.strftime(
                     f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y'
@@ -459,7 +458,7 @@ def get_data_email(request):
                 refcliente = row.refcliente if row.refcliente else "S/I"
 
                 resultado[
-                    'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {row.numero} - CS: {row.embarque} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vapor/vuelo: {vapor}; Ord. Cliente: {refcliente}'
+                    'asunto'] = f'NOTIFICACION DE LLEGADA DE CARGA - Ref.: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vapor/vuelo: {vapor}; Ord. Cliente: {refcliente}'
 
                 # Fecha formateada
 
@@ -647,7 +646,7 @@ def get_data_email(request):
 
                 resultado['asunto'] = (
 
-                    f'Ref.: {row.numero} - CS: {row.embarque} - HB/l: {row.hawb} - Ship: {row.embarcador}'
+                    f'Ref.: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador}'
 
                 )
 
@@ -938,7 +937,7 @@ def get_data_email(request):
 
                 fecha_actual = datetime.datetime.now()
 
-                resultado['asunto'] = 'Ref.: ' + str(row.numero) + '/ CS: ' + (str(row.embarque) if row.embarque else '') + '- Shipper: ' + str(row.embarcador) + '; Consignee: ' + str(row.consignatario)
+                resultado['asunto'] = 'Ref.: ' + str(row.numero) + '- Shipper: ' + str(row.embarcador) + '; Consignee: ' + str(row.consignatario)
 
                 fecha_formateada = fecha_actual.strftime(
 

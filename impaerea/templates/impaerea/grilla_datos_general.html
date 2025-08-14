@@ -1,0 +1,130 @@
+{% extends 'base_table_v2.html' %}
+
+{% load static %}
+
+{% block title_page %}Importacion Aerea Embarques{% endblock title_page %}
+
+{% block script_table %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/select2.min.css'  %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/importacion_maritima/importacion_maritima.css'  %}">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<style>
+    #tabla_seguimiento_IH tr.highlighted {
+    background-color: #ffc107;
+}
+
+#tabla_seguimiento_IH tr.highlighted input[type="checkbox"] {
+    background-color: #ffc107;
+}
+</style>
+{% endblock script_table %}
+
+{% block table_datatable %}
+
+<!--    BOTONES -->
+<nav class="navbar minavbar navbar-expand-lg navbar-light bg-primary" style="color:white;">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll"
+                aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+
+                  <li class="nav-item text-white" style="align-content: center;">
+                     <button type="button" class="btn btn-outline-light" onclick="modal_buscar_general()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                        </svg>
+                        Buscar
+                    </button>
+                </li>
+
+            </ul>
+
+        </div>
+    </div>
+</nav>
+
+
+
+    <table id="tabla_general_ia" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th width="4%">Tipo</th>
+            <th class="text-right">Seguimientos</th>
+            <th class="text-right">ETA</th>
+            <th class="text-left">Vuelo</th>
+            <th class="text-left">Master</th>
+            <th class="text-left">Houses</th>
+            <th class="text-left">Consignatario</th>
+            <th class="text-left">Transportista</th>
+            <th class="text-left">Agente</th>
+            <th class="text-left">Posicion</th>
+            <th class="text-left d-none">N° Embarque</th>
+            <th class="text-left d-none">N° Reserva</th>
+            <th class="text-left d-none">id madre</th>
+
+        </tr>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+          <tr>
+            <th>Tipo</th>                    <!-- index 0 -->
+            <th class="text-right">Seguimientos</th> <!-- index 1, aunque esté oculto -->
+            <th class="text-right">ETA</th>      <!-- index 2 -->
+            <th class="text-left">Vuelo</th>     <!-- index 3 -->
+            <th class="text-left">Master</th>    <!-- index 4 -->
+            <th class="text-left">Houses</th>    <!-- index 5 -->
+            <th class="text-left">Consignatario</th><!-- index 6 -->
+            <th class="text-left">Transportista</th> <!-- index 7 -->
+            <th class="text-left">Agente</th>    <!-- index 8 -->
+            <th class="text-left">Posicion</th>  <!-- index 9 -->
+            <th class="text-left d-none">N° Embarque</th> <!-- index 10, oculto -->
+            <th class="text-left d-none">N° Reserva</th>  <!-- index 11, oculto -->
+            <th class="text-left d-none">id madre</th>
+
+          </tr>
+        </tfoot>
+    </table>
+    <div id="toast-container" class="mx-auto text-center">
+      <!-- Aquí se mostrarán los mensajes -->
+    </div>
+
+{% load static %}
+
+{% include 'impaerea/add_master.html' %}
+{% include 'impaerea/add_house.html' %}
+{% include 'impaerea/edit_master.html' %}
+{% include 'impaerea/edit_house.html' %}
+{% include 'impaerea/edit_house_general.html' %}
+{% include 'impaerea/gastos_master.html' %}
+{% include 'impaerea/gastos_house.html' %}
+{% include 'impaerea/importar_house.html' %}
+{% include 'impaerea/rutas_house.html' %}
+{% include 'impaerea/emails_house.html' %}
+{% include 'impaerea/archivos.html' %}
+{% include 'impaerea/embarques_house.html' %}
+{% include 'impaerea/pdf.html' %}
+{% include 'impaerea/nota_house.html' %}
+{% include 'impaerea/buscar_general.html' %}
+{% include 'impaerea/aplicables.html' %}
+{% include 'facturar.html' %}
+{% include 'seguimientos/modales/logs.html' %}
+
+{% endblock table_datatable %}
+
+
+{% block script_datatable %}
+    <script src="{% static 'grilla/js_importacion_aerea.js' %}"></script>
+    <script src="{% static 'grilla/js_importacion_aerea_general.js' %}"></script>
+    <script src="{% static 'grilla/preventa.js' %}"></script>
+    <script src="{% static 'js/select2.min.js' %}"></script>
+    <script src="{% static 'js/select2/es.js'  %}"></script>
+    <script>
+       var csrf_token = '{{ csrf_token }}';
+    </script>
+{% endblock script_datatable %}

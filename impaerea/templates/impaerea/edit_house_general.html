@@ -1,0 +1,279 @@
+<style>
+    #table_house_style td{
+    text-align:end;
+    }
+    #table_house_style td input,#table_house_style td select{
+    width:200px;
+    padding:4px;
+    }
+     #table_house_style td{
+    width:90px;
+    padding:4px;
+    font-size:12px;
+     }
+    #table_house_style input,
+    #table_house_style select,
+    #table_house_style textarea {
+        font-size: 14px !important;
+    }
+</style>
+<style>
+    .minavbar2{
+     border-radius: 10px;
+    margin-top: 1%;
+    height: 40px;
+    }
+</style>
+<div id="edit_house_modal_general" style="display: none;" tabindex="-1">
+    <nav class="navbar minavbar2 navbar-expand-lg navbar-light bg-primary" style="color:white;">
+    <div class="container-fluid">
+<!--        <a class="navbar-brand text-white" href="#"></a>-->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll"
+                aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+
+                  <li class="nav-item text-white">
+                    <a class="nav-link text-white" onclick="gastos_btn_h_click_general()" href="#" id="gastos_btn_house" title="Gastos para el house">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16">
+                          <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73l.348.086z"/>
+                        </svg>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" onclick="rutas_btn_h_click_general()" id="rutas_btn_house" title="Rutas para el house">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
+                          <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
+                          <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                        </svg>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                <a class="nav-link text-white" href="#" onclick="abrir_modal_mails_d_general(event)" role="button" title="Mensajes para el house">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-envelope-check" viewBox="0 0 16 16">
+                        <path d="M2 2a2 2 0 0 0-2 2v8.01A2 2 0 0 0 2 14h5.5a.5.5 0 0 0 0-1H2a1 1 0 0 1-.966-.741l5.64-3.471L8 9.583l7-4.2V8.5a.5.5 0 0 0 1 0V4a2 2 0 0 0-2-2zm3.708 6.208L1 11.105V5.383zM1 4.217V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v.217l-7 4.2z"/>
+                        <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                    </svg>
+                </a>
+            </li>
+
+
+                  <li class="nav-item">
+                    <a class="nav-link text-white" onclick="embarques_btn_h_click_general()" id="embarques_btn_house" href="#" title="Embarque para el house">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-truck" viewBox="0 0 16 16">
+                          <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5zm1.294 7.456A2 2 0 0 1 4.732 11h5.536a2 2 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456M12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>
+                        </svg>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" onclick="pdf_btn_h_click_general()" id="pdf_btn_house" href="#" title="Imprimir carátula">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-file-earmark-pdf" viewBox="0 0 16 16">
+                          <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                          <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.697 19.697 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029zm1.379-1.901c-.166.076-.32.156-.459.238-.328.194-.541.383-.647.547-.094.145-.096.25-.04.361.01.022.02.036.026.044a.266.266 0 0 0 .035-.012c.137-.056.355-.235.635-.572a8.18 8.18 0 0 0 .45-.606zm1.64-1.33a12.71 12.71 0 0 1 1.01-.193 11.744 11.744 0 0 1-.51-.858 20.801 20.801 0 0 1-.5 1.05zm2.446.45c.15.163.296.3.435.41.24.19.407.253.498.256a.107.107 0 0 0 .07-.015.307.307 0 0 0 .094-.125.436.436 0 0 0 .059-.2.095.095 0 0 0-.026-.063c-.052-.062-.2-.152-.518-.209a3.876 3.876 0 0 0-.612-.053zM8.078 7.8a6.7 6.7 0 0 0 .2-.828c.031-.188.043-.343.038-.465a.613.613 0 0 0-.032-.198.517.517 0 0 0-.145.04c-.087.035-.158.106-.196.283-.04.192-.03.469.046.822.024.111.054.227.09.346z"/>
+                        </svg>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" id="archivos_btn_house" onclick="archivos_btn_h_click_general()" href="#" title="Archivos del seguimiento">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-filetype-docx" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M14 4.5V11h-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5Zm-6.839 9.688v-.522a1.54 1.54 0 0 0-.117-.641.861.861 0 0 0-.322-.387.862.862 0 0 0-.469-.129.868.868 0 0 0-.471.13.868.868 0 0 0-.32.386 1.54 1.54 0 0 0-.117.641v.522c0 .256.04.47.117.641a.868.868 0 0 0 .32.387.883.883 0 0 0 .471.126.877.877 0 0 0 .469-.126.861.861 0 0 0 .322-.386 1.55 1.55 0 0 0 .117-.642Zm.803-.516v.513c0 .375-.068.7-.205.973a1.47 1.47 0 0 1-.589.627c-.254.144-.56.216-.917.216a1.86 1.86 0 0 1-.92-.216 1.463 1.463 0 0 1-.589-.627 2.151 2.151 0 0 1-.205-.973v-.513c0-.379.069-.704.205-.975.137-.274.333-.483.59-.627.257-.147.564-.22.92-.22.357 0 .662.073.916.22.256.146.452.356.59.63.136.271.204.595.204.972ZM1 15.925v-3.999h1.459c.406 0 .741.078 1.005.235.264.156.46.382.589.68.13.296.196.655.196 1.074 0 .422-.065.784-.196 1.084-.131.301-.33.53-.595.689-.264.158-.597.237-.999.237H1Zm1.354-3.354H1.79v2.707h.563c.185 0 .346-.028.483-.082a.8.8 0 0 0 .334-.252c.088-.114.153-.254.196-.422a2.3 2.3 0 0 0 .068-.592c0-.3-.04-.552-.118-.753a.89.89 0 0 0-.354-.454c-.158-.102-.361-.152-.61-.152Zm6.756 1.116c0-.248.034-.46.103-.633a.868.868 0 0 1 .301-.398.814.814 0 0 1 .475-.138c.15 0 .283.032.398.097a.7.7 0 0 1 .273.26.85.85 0 0 1 .12.381h.765v-.073a1.33 1.33 0 0 0-.466-.964 1.44 1.44 0 0 0-.49-.272 1.836 1.836 0 0 0-.606-.097c-.355 0-.66.074-.911.223-.25.148-.44.359-.571.633-.131.273-.197.6-.197.978v.498c0 .379.065.704.194.976.13.271.321.48.571.627.25.144.555.216.914.216.293 0 .555-.054.785-.164.23-.11.414-.26.551-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.765a.8.8 0 0 1-.117.364.699.699 0 0 1-.273.248.874.874 0 0 1-.401.088.845.845 0 0 1-.478-.131.834.834 0 0 1-.298-.393 1.7 1.7 0 0 1-.103-.627v-.495Zm5.092-1.76h.894l-1.275 2.006 1.254 1.992h-.908l-.85-1.415h-.035l-.852 1.415h-.862l1.24-2.015-1.228-1.984h.932l.832 1.439h.035l.823-1.439Z"/>
+                        </svg>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" onclick="notas_house_general()" id="notas_btn" href="#" title="Notas para el seguimiento">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">
+                          <path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>
+                        </svg>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" id="logs_btn" onclick="get_datos_logs_general()" href="#" title="Historial del seguimiento">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
+                      <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
+                      <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+                      <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+                    </svg>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" onclick="facturar()" id="facturar_btn" href="#" title="Facturar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-cash-coin" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M11 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8m5-4a5 5 0 1 1-10 0 5 5 0 0 1 10 0"/>
+                      <path d="M9.438 11.944c.047.596.518 1.06 1.363 1.116v.44h.375v-.443c.875-.061 1.386-.529 1.386-1.207 0-.618-.39-.936-1.09-1.1l-.296-.07v-1.2c.376.043.614.248.671.532h.658c-.047-.575-.54-1.024-1.329-1.073V8.5h-.375v.45c-.747.073-1.255.522-1.255 1.158 0 .562.378.92 1.007 1.066l.248.061v1.272c-.384-.058-.639-.27-.696-.563h-.668zm1.36-1.354c-.369-.085-.569-.26-.569-.522 0-.294.216-.514.572-.578v1.1zm.432.746c.449.104.655.272.655.569 0 .339-.257.571-.709.614v-1.195z"/>
+                      <path d="M1 0a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h4.083q.088-.517.258-1H3a2 2 0 0 0-2-2V3a2 2 0 0 0 2-2h10a2 2 0 0 0 2 2v3.528c.38.34.717.728 1 1.154V1a1 1 0 0 0-1-1z"/>
+                      <path d="M9.998 5.083 10 5a2 2 0 1 0-3.132 1.65 6 6 0 0 1 3.13-1.567"/>
+                    </svg>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" onclick="abrir_aplicable_general()" title="Calculo de aplicable">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-coin" viewBox="0 0 16 16">
+                      <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                      <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
+                    </svg>
+                    </a>
+                </li>
+                <li class="nav-item text-white">
+                    <button type="button" class="btn btn-outline-light btn-eliminar-hijo" style="margin-top: 4px;margin-left: 5px;" onclick="eliminar_house_general()">
+                        Eliminar Hijo
+                    </button>
+                </li>
+
+            </ul>
+
+        </div>
+    </div>
+</nav>
+    <!-- Modal de selección de aviso para HOUSE (email2) -->
+<div id="modalSeleccionEmailHouse_general" style="display:none;overflow:hidden;" title="Seleccionar aviso House">
+    <input type="text" id="buscadorEmailsHouse_general" class="form-control mb-2" placeholder="Buscar aviso..." style="width: 100%;">
+    <div style="max-height: 300px; overflow-y: auto;">
+        <table class="table table-hover table-striped table-sm" style="margin:0;">
+            <tbody id="listaEmailsHouse_general">
+                <tr class="email3" data-id="NLC" data-tt="Aviso de embarque"><td>Aviso de embarque</td></tr>
+                <tr class="email3" data-id="DES" data-tt="Aviso de desconsolidacion" data-to="1"><td>Aviso de desconsolidacion</td></tr>
+                <tr class="email3" data-id="NLC" data-tt="Instruccion de embarque"><td>Instrucción de embarque</td></tr>
+                <tr class="email3" data-id="NLC" data-tt="Liberacion"><td>Liberación</td></tr>
+                <tr class="email3" data-id="AEM" data-tt="Novedades sobre la carga"><td>Novedades sobre la carga</td></tr>
+                <tr class="email3" data-id="NLC" data-tt="Notificacion cambio de linea"><td>Notificación cambio de línea</td></tr>
+                <tr class="email3" data-id="NLC" data-tt="Notificación de llegada de carga"><td>Notificación de llegada de carga</td></tr>
+                <tr class="email3" data-id="NLC" data-tt="Notificación de transbordo de carga"><td>Notificación de transbordo de carga</td></tr>
+                <tr class="email3" data-id="NLC" data-tt="Orden de facturacion"><td>Orden de facturación</td></tr>
+                <tr class="email3" data-id="NLC" data-tt="Release documentacion"><td>Release documentacion</td></tr>
+                <tr class="email3" data-id="TOP" data-tt="Routing Order"><td>Routing Order</td></tr>
+                <tr class="email3" data-id="NLC" data-tt="Shipping instruction"><td>Shipping Instruction</td></tr>
+                <tr class="email3" data-id="TOP" data-to="0" data-tt="Traspaso a operaciones"><td>Traspaso a operaciones</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+    <form id="edit_house_form_general" method="POST">
+    {% csrf_token %}
+    <table id="table_house_style" class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
+
+        <tbody>
+            <tr>
+                <td>{{ form_edit_house_general.cliente.label }}</td>
+               <td> {{ form_edit_house_general.cliente_i }}
+                {{ form_edit_house_general.cliente }}</td>
+
+                <td>{{ form_edit_house_general.consignatario.label }}</td>
+               <td> {{ form_edit_house_general.consignatario_i }}
+                {{ form_edit_house_general.consignatario }}</td>
+
+                <td >{{ form_edit_house_general.agente.label }}</td>
+              <td>  {{ form_edit_house_general.agente_i }}
+                {{ form_edit_house_general.agente }}</td>
+
+                <td>{{ form_edit_house_general.vendedor.label }}</td>
+               <td> {{ form_edit_house_general.vendedor_i }}
+                {{ form_edit_house_general.vendedor }}</td>
+
+            </tr>
+
+            <tr>
+                <td>{{ form_edit_house_general.origen.label }}</td>
+                <td>{{ form_edit_house_general.origen }}</td>
+
+                <td >{{ form_edit_house_general.destino.label }}</td>
+                <td>{{ form_edit_house_general.destino }}</td>
+
+                <td >{{ form_edit_house_general.loading.label }}</td>
+                <td>{{ form_edit_house_general.loading }}</td>
+
+                <td >{{ form_edit_house_general.discharge.label }}</td>
+                <td>{{ form_edit_house_general.discharge }}</td>
+
+            </tr>
+            <tr>
+                <td >{{ form_edit_house_general.awb.label }}</td>
+                <td>{{ form_edit_house_general.awb }}</td>
+                <td >{{ form_edit_house_general.house.label }}</td>
+                <td>{{ form_edit_house_general.house }}</td>
+
+                <td >{{ form_edit_house_general.operacion.label }}</td>
+                <td>{{ form_edit_house_general.operacion }}</td>
+
+                <td >{{ form_edit_house_general.posicion_h.label }}</td>
+                <td>{{ form_edit_house_general.posicion_h }}</td>
+
+            </tr>
+            <tr>
+                 <td >{{ form_edit_house_general.pago.label }}</td>
+                <td>{{ form_edit_house_general.pago }}</td>
+
+                <td >{{ form_edit_house_general.moneda.label }}</td>
+                <td>{{ form_edit_house_general.moneda }}</td>
+
+                <td >{{ form_edit_house_general.arbitraje.label }}</td>
+                <td>{{ form_edit_house_general.arbitraje }}</td>
+
+                 <td >{{ form_edit_house_general.demora.label }}</td>
+                <td>{{ form_edit_house_general.demora }}</td>
+            </tr>
+
+            <tr>
+                <td >{{ form_edit_house_general.embarcador.label }}</td>
+               <td> {{ form_edit_house_general.embarcador_i }}
+                {{ form_edit_house_general.embarcador }}</td>
+
+                <td >{{ form_edit_house_general.transportista.label }}</td>
+                <td>{{ form_edit_house_general.transportista_i }}
+                {{ form_edit_house_general.transportista }}</td>
+
+                <td >{{ form_edit_house_general.vapor.label }}</td>
+                <td>{{ form_edit_house_general.vapor }}</td>
+
+                <td >{{ form_edit_house_general.viaje.label }}</td>
+                <td>{{ form_edit_house_general.viaje }}</td>
+            </tr>
+            <tr>
+                <td >{{ form_edit_house_general.armador.label }}</td>
+               <td> {{ form_edit_house_general.armador_i }}
+                {{ form_edit_house_general.armador }}</td>
+
+
+                <td >{{ form_edit_house_general.agecompras.label }}</td>
+               <td> {{ form_edit_house_general.agcompras_i }}
+                {{ form_edit_house_general.agecompras }}</td>
+
+                <td >{{ form_edit_house_general.ageventas.label }}</td>
+              <td>  {{ form_edit_house_general.agventas_i }}
+                {{ form_edit_house_general.ageventas }}</td>
+
+            </tr>
+            <tr>
+                <td >{{ form_edit_house_general.notificar_cliente.label }}</td>
+                <td>{{ form_edit_house_general.notificar_cliente }}</td>
+
+                <td >{{ form_edit_house_general.notificar_agente.label }}</td>
+                <td>{{ form_edit_house_general.notificar_agente }}</td>
+
+            <td >{{ form_edit_house_general.eta.label }}</td>
+            <td>{{ form_edit_house_general.eta }}</td>
+
+            <td >{{ form_edit_house_general.etd.label }}</td>
+            <td>{{ form_edit_house_general.etd }}</td>
+            </tr>
+            <tr>
+
+
+                <td >{{ form_edit_house_general.status_h.label }}</td>
+                <td>{{ form_edit_house_general.status_h }}</td>
+
+                <td >{{ form_edit_house_general.wreceipt.label }}</td>
+                <td>{{ form_edit_house_general.wreceipt }}</td>
+
+
+            </tr>
+
+            </tbody>
+    </table>
+
+
+</form>
+</div>

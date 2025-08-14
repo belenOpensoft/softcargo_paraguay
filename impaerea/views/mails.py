@@ -111,8 +111,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
         if title == 'Notificación de transbordo de carga':
             fecha_actual = datetime.now()
 
-            resultado['asunto'] = 'Ref.: ' + str(row.referencia) + \
-                                  '/ CS: ' + str(row.seguimiento) + '- H B/L: ' + str(row.hawb) + '- Shipper: '
+            resultado['asunto'] = 'Ref.: ' + str(row.seguimiento) +  '- H B/L: ' + str(row.hawb) + '- Shipper: '
 
             fecha_formateada = fecha_actual.strftime(
                 f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y'
@@ -162,9 +161,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             fecha_actual = datetime.now()
 
-            resultado['asunto'] = 'Ref.: ' + str(row.referencia) + \
-         \
-                                      ' / CS: ' + str(row.seguimiento) + ' - Shipper: ' + str(row.embarcador) + \
+            resultado['asunto'] = 'Ref.: ' + str(row.seguimiento) + ' - Shipper: ' + str(row.embarcador) + \
          \
                                       '; Consignee: ' + str(row.consignatario)
 
@@ -242,9 +239,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             fecha_actual = datetime.now()
 
-            resultado['asunto'] = 'Ref.: ' + str(row.referencia) + \
-     \
-                                  ' / CS: ' + str(row.seguimiento) + ' - Shipper: ' + str(row.embarcador) + \
+            resultado['asunto'] = 'Ref.: ' + str(row.seguimiento) +  ' - Shipper: ' + str(row.embarcador) + \
      \
                                   '; Consignee: ' + str(row.consignatario)
 
@@ -333,7 +328,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             resultado['asunto'] = (
 
-                f' Ref.: {embarque.numero} - CS: {row.seguimiento} - '
+                f' Ref.: {row.seguimiento} -'
     
                 f'HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vuelo: {vapor}; Ord. Cliente: {refcliente}'
 
@@ -742,7 +737,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             resultado['asunto'] = (
 
-                f'Ref.: {row.seguimiento} - CS: {row.numero} - HB/l: {row.hawb} - Ship: {row.embarcador}'
+                f'Ref.: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador}'
 
 
             )

@@ -10,7 +10,8 @@ from impaerea.views.house import add_house, add_house_impmarit, edit_house_funct
 from impaerea.views.imp_aerea import master_importacion_maritima, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
     descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros, \
-    source_logs, get_datos_aplicables, guardar_aplicable, buscar_registros_directos
+    source_logs, get_datos_aplicables, guardar_aplicable, buscar_registros_directos, source_embarques_general, \
+    buscar_registros_general, embarques_importacion_aerea
 from impaerea.views.mails import get_data_email_op
 from impaerea.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
 from impaerea.views.notas import source, guardar_notas, eliminar_nota
@@ -82,6 +83,9 @@ urlpatterns = [
     path('source_logs/', source_logs, name="source_logs"),
     path('get_datos_aplicables/', get_datos_aplicables, name='get_datos_aplicables'),
     path('guardar_aplicable/', guardar_aplicable, name='guardar_aplicable'),
+    path('source_embarques_general/', source_embarques_general, name='source_embarques_general'),
+    path('buscar_registros_general/', buscar_registros_general, name='buscar_registros_general'),
+    path('embarques/', embarques_importacion_aerea, name='embarques'),
 ]
 
 
