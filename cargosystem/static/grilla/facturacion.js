@@ -90,6 +90,67 @@ $(document).ready(function () {
         }
     });
 
+    // // Debounce + abort de requests previas
+    // let xhrCliente = null;
+    //
+    // $("#cliente").autocomplete({
+    //   minLength: 2,
+    //   delay: 300,                  // reduce el “spamming” de requests
+    //   appendTo: "#facturaM",
+    //   source: function(request, response) {
+    //     // abortar la búsqueda anterior
+    //     if (xhrCliente && xhrCliente.readyState !== 4) {
+    //       xhrCliente.abort();
+    //     }
+    //     xhrCliente = $.ajax({
+    //       url: "/admin_cont/buscar_cliente/",   // ← con “/” final para evitar 301
+    //       type: "GET",
+    //       dataType: "json",
+    //       timeout: 7000,                        // no dejar colgada la pestaña
+    //       data: { term: request.term },
+    //       success: function(data) {
+    //         response($.map(data, function(item) {
+    //           return {
+    //             label: item.empresa + " — " + (item.ruc || ""),
+    //             value: item.empresa,
+    //             id:    item.codigo
+    //           };
+    //         }));
+    //       },
+    //       error: function(xhr, status) {
+    //         if (status !== "abort") {
+    //           console.error("Autocomplete cliente error:", status);
+    //           response([]); // vaciar sugerencias en error
+    //         }
+    //       }
+    //     });
+    //   },
+    //   select: function(event, ui) {
+    //     $("#cliente").data("selected-id", ui.item.id);
+    //     // cargar ficha del cliente (cuidá también la barra final)
+    //     $.ajax({
+    //       url: "/admin_cont/buscar_clientes/",
+    //       type: "GET",
+    //       dataType: "json",
+    //       data: { id: ui.item.id },
+    //       success: function(cliente) {
+    //         const row = `
+    //           <tr id="cliente-${ui.item.id}">
+    //             <td class="d-none">${cliente.codigo}</td>
+    //             <td>${cliente.empresa}</td>
+    //             <td>${cliente.ruc || ""}</td>
+    //             <td>${cliente.direccion || ""}</td>
+    //             <td>${cliente.localidad || ""}</td>
+    //             <td>${cliente.telefono || ""}</td>
+    //           </tr>`;
+    //         $("#clienteTable tbody").html(row);
+    //         $("#clienteTable").show();
+    //       }
+    //     });
+    //   }
+    // });
+
+
     // Autocomplete para el input "item"
     $('#item').autocomplete({
         source: function (request, response) {
@@ -317,9 +378,12 @@ $(document).ready(function () {
         "columnDefs": [
             {
                 "targets": 0,  // Columna 0 (se mantiene pero oculta su contenido)
-                "className": "invisible-column",
+                "className": "",
                 "searchable": false,
                 "visible": true,
+               render: function (data, type, row) {
+                    return `<span class="badge bg-warning text-dark">${row[0] ?? ''}</span>`;
+                }
             },
             {
                 "targets": 1,  // Oculta completamente la columna 1
@@ -330,6 +394,10 @@ $(document).ready(function () {
                 "targets": 2,  // Asignamos la columna de fecha
                 "type": "date-iso", // Indica que esta columna es de tipo fecha
                 "orderable": true // Habilita el ordenamiento
+            },
+            {
+                "targets": [6,7,8],
+                "className": "text-end",
             }
         ],
         "columns": [
@@ -348,7 +416,7 @@ $(document).ready(function () {
         "order": [[2, "desc"]],
         "processing": true,
         "serverSide": true,
-        "pageLength": 10,
+        "pageLength": 100,
         "ajax": {
             "url": "/admin_cont/source_facturacion/",
             'type': 'GET',
@@ -366,7 +434,7 @@ $(document).ready(function () {
             var api = this.api();
             api.columns().every(function() {
                 let that = this;
-                $('input', this.footer()).on('keyup change', function() {
+                $('.input', this.footer()).on('keyup change', function() {
                     if (that.search() !== this.value) {
                         that.search(this.value).draw();
                     }
@@ -842,6 +910,9 @@ function abrir_modalfactura() {
         open: function() {
             // 🔹 Ajustar el tamaño dinámicamente según el contenido
         },
+        beforeClose: function (){
+        window.location.reload();
+        }
     }).prev('.ui-dialog-titlebar').remove();
     cargar_arbitraje();
 

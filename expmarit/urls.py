@@ -13,7 +13,8 @@ from expmarit.views.house import add_house_impmarit, edit_house_function, house_
 from expmarit.views.expo_maritima import master_expo_maritima, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
     descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros, \
-    source_logs, buscar_registros_directos
+    source_logs, buscar_registros_directos, buscar_registros_general, embarques_exportacion_maritima, \
+    source_embarques_general
 from expmarit.views.master import master_detail, add_importacion_maritima, edit_master, get_name_by_id, \
     consultar_seguimientos
 
@@ -91,7 +92,9 @@ urlpatterns = [
     path('get_name_by_id_vendedor/', get_name_by_id_vendedores, name='get_name_by_id_vendedor'),
     path('source_seguimientos_modo/<str:modo>/', source_seguimientos_modo, name="source_seguimientos_modo"),
     path('source_logs/', source_logs, name="source_logs"),
-
+    path('buscar_registros_general/', buscar_registros_general, name='buscar_registros_general'),
+    path('embarques/', embarques_exportacion_maritima, name='embarques'),
+    path('source_embarques_general/', source_embarques_general, name='source_embarques_general'),
 ]
 
 

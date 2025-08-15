@@ -157,16 +157,17 @@ $('#tabla_expoterrestre tfoot th').each(function(index) {
             {
                 "targets": [3],
                 "className": 'text-primary',
-
                 render: function (data, type, row, meta) {
-                if (type === 'display' && data) {
-                    const partes = data.split(';');
-                    if (partes.length <= 3) return data;
-                    const visibles = partes.slice(0, 3).join(';') + ';...';
-                    return `<span title="${data}">${visibles}</span>`;
+                    if (type === 'display' && data) {
+                        const partes = data.split(';');
+                        if (partes.length <= 3) {
+                            return `<span class="badge bg-primary text-light">${data}</span>`;
+                        }
+                        const visibles = partes.slice(0, 3).join(';') + ';...';
+                        return `<span class="badge bg-primary text-light" title="${data}">${visibles}</span>`;
+                    }
+                    return data;
                 }
-                return data;
-            }
             },
             {
                 "targets": [4],

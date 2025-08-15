@@ -1,11 +1,11 @@
-let table_general_ia;
+let table_general_em;
 let numeros_general=[];
 $(document).ready(function () {
     $(document).on("click", "#clear", function() {
         awbRegex = '';
         $(".filter-input").val("").trigger("keyup");
         $(".filter-input").removeClass("is-invalid");
-        table_general_ia.ajax.reload();
+        table_general_em.ajax.reload();
     });
 
     // Evento para resaltar los inputs cuando tienen contenido
@@ -18,7 +18,7 @@ $(document).ready(function () {
     });
 
     // tabla general master
-    table_general_ia = $('#tabla_general_ia').DataTable({
+    table_general_em = $('#tabla_general_em').DataTable({
         "stateSave": true,
         "dom": 'Btlipr',
         "scrollX": true,
@@ -44,7 +44,7 @@ $(document).ready(function () {
         "serverSide": true,
         "pageLength": 100,
         "ajax": {
-            "url": "/importacion_aerea/source_embarques_general",
+            "url": "/exportacion_maritima/source_embarques_general",
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
@@ -59,7 +59,7 @@ $(document).ready(function () {
         initComplete: function () {
             let api = this.api();
 
-            let state = table_general_ia.state.loaded();
+            let state = table_general_em.state.loaded();
             if (state) {
                 api.columns().every(function(index) {
                     let colState = state.columns[index];
@@ -104,8 +104,17 @@ $(document).ready(function () {
             texto += '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-truck" viewBox="0 0 16 16">\n' +
                          '<path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5zm1.294 7.456A2 2 0 0 1 4.732 11h5.536a2 2 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456M12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>\n' +
                          '</svg>';
+
+
             }
             if (data[14] > 0) {
+            //envase
+                texto += ' <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16"' +
+                            '><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.' +
+                            '961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16' +
+                            ' 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/> </svg>';
+            }
+            if (data[15] > 0) {
             //gastos
                 texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16"' +
                     '><path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.18' +
@@ -113,14 +122,14 @@ $(document).ready(function () {
                     '661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05z' +
                     'm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73l.348.086z"/>sss</svg>';
             }
-            if (data[15] > 0) {
+            if (data[16] > 0) {
             //rutas
                 texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">\n' +
                     '<path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>\n' +
                     '<path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>\n' +
                     '</svg>';
             }
-            if (data[16] > 0) {
+            if (data[17] > 0) {
     //notas
             texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">\n' +
             '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
@@ -132,24 +141,24 @@ $(document).ready(function () {
         },
     });
 
-    table_general_ia.columns().iterator('column', function (ctx, idx) {
-        table_general_ia.column(idx).nodes().to$().addClass('columna-acciones');
+    table_general_em.columns().iterator('column', function (ctx, idx) {
+        table_general_em.column(idx).nodes().to$().addClass('columna-acciones');
     });
 
-    table_general_ia.on('draw', function () {
+    table_general_em.on('draw', function () {
         // Evento tras redibujado
     });
 
-    $(table_general_ia.table().container()).on('keyup', 'tfoot input', function () {
+    $(table_general_em.table().container()).on('keyup', 'tfoot input', function () {
         $(this).addClass('is-invalid');
-        table_general_ia
+        table_general_em
             .column($(this).data('index'))
             .search(this.value)
             .draw();
     });
 
-    $('#tabla_general_ia tfoot th').each(function(index) {
-        let title = $('#tabla_general_ia thead th').eq(index).text();
+    $('#tabla_general_em tfoot th').each(function(index) {
+        let title = $('#tabla_general_em thead th').eq(index).text();
 
         if (index === 0) {
             $(this).html('<button class="btn btn-danger" title="Borrar filtros" id="clear"><span class="glyphicon glyphicon-erase"></span> Limpiar</button>');
@@ -158,26 +167,27 @@ $(document).ready(function () {
         }
     });
 
-    $('#tabla_general_ia tbody').on('click', 'tr', function (event) {
+    $('#tabla_general_em tbody').on('click', 'tr', function (event) {
         event.stopPropagation();
 
         if (!$(this).hasClass('table-secondary')) {
-            $('#tabla_general_ia tbody tr').removeClass('table-secondary');
+            $('#tabla_general_em tbody tr').removeClass('table-secondary');
             $(this).addClass('table-secondary');
         }
     });
 
-    $('#tabla_general_ia tbody').on('dblclick', 'tr', function() {
+    $('#tabla_general_em tbody').on('dblclick', 'tr', function() {
         var tr = $(this).closest('tr');
-        var row = table_general_ia.row(tr);
+        var row = table_general_em.row(tr);
         var rowData = row.data();
+
         if (rowData) {
             var numero_embarque = rowData[10];
             var numero_reserva = rowData[11];
             var id_embarque = rowData[0];
             var id_master = rowData[12];
             var master = rowData[4];
-            localStorage.setItem('tabla_origen', 'tabla_general_ia');
+            localStorage.setItem('tabla_origen', 'tabla_general_em');
 
             if (id_master && numero_reserva) {
                 localStorage.setItem('id_master_editar', id_master);
@@ -193,11 +203,13 @@ $(document).ready(function () {
     });
 
     $('#edit_house_form_general').submit(function(e){
-        console.log('submit');
         e.preventDefault();
-        var numero = localStorage.getItem('numero_embarque');
+        if(document.getElementById('arbitraje_house_e_general').value<0||document.getElementById('dias_demora_e_general').value<0){
+    alert('No se admiten valores negativos en los campos numéricos.')
+    }else{
+        var numero = localStorage.getItem('num_house_gasto');
         var formData = $(this).serialize();
-        $('#edit_house_form_general').attr('action', '/importacion_aerea/edit_house/' + numero + '/');
+        $('#edit_house_form_general').attr('action', '/exportacion_maritima/edit_house/' + numero + '/');
 
         $.ajax({
             url: $(this).attr('action'),
@@ -214,7 +226,7 @@ $(document).ready(function () {
                         localStorage.removeItem('fecha_editada_house');
                         }
                     }
-                    table_general_ia.ajax.reload(null, false);
+                    table_general_em.ajax.reload(null, false);
 
                   $('#edit_house_modal_general').dialog('close');
                 } else {
@@ -225,6 +237,7 @@ $(document).ready(function () {
                 alert('Error en la solicitud: ' + error);
             }
         });
+        }
     });
 
     $('#fecha_retiro_e_general').on('change', function() {
@@ -523,7 +536,7 @@ $(document).ready(function () {
 
 
             $.ajax({
-                url: '/importacion_aerea/house-detail/',
+                url: '/exportacion_maritima/house-detail/',
                 data: {id: selectedRowN},
                 type: 'GET',
                 success: function (data) {
@@ -589,9 +602,9 @@ $(document).ready(function () {
                             },],
                         beforeClose: function (event, ui) {
                             //localStorage.removeItem('num_house_gasto');
-                            $('#table_add_ia tbody tr').removeClass('table-secondary');
-                            $('#table_edit_ia tbody tr').removeClass('table-secondary');
-                            $('#tabla_house_directo_ia tbody tr').removeClass('table-secondary');
+                            $('#table_add_im tbody tr').removeClass('table-secondary');
+                            $('#table_edit_im tbody tr').removeClass('table-secondary');
+                            $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                             try {
                                 desbloquearDatos();
                             } catch (error) {
@@ -640,7 +653,7 @@ function editar_madre(){
 
     if (selectedRowId !== null) {
         $.ajax({
-            url: '/importacion_aerea/master-detail',
+            url: '/exportacion_maritima/master-detail',
             data: { id: selectedRowId },
             method: 'GET',
             success: function (data) {
@@ -709,7 +722,7 @@ function editar_madre(){
 
 function editar_directo(selectedRowId) {
     $.ajax({
-        url: '/importacion_aerea/house-detail',
+        url: '/exportacion_maritima/house-detail',
         data: {id: selectedRowId},
         method: 'GET',
         success: function (data) {
@@ -760,6 +773,7 @@ function editar_directo(selectedRowId) {
 }
 
 function fillFormWithDataHouseGeneral(data) {
+    // Campos visibles (nombres)
     $('#transportista_addh_e_general').val(!data.transportista_e || data.transportista_e === 0 ? '' : getNameById(data.transportista_e));
     $('#agente_addh_e_general').val(!data.agente_e || data.agente_e === 0 ? '' : getNameById(data.agente_e));
     $('#consignatario_addh_e_general').val(!data.consignatario_e || data.consignatario_e === 0 ? '' : getNameById(data.consignatario_e));
@@ -770,6 +784,7 @@ function fillFormWithDataHouseGeneral(data) {
     $('#agecompras_addh_e_general').val(!data.agcompras_e || data.agcompras_e === 0 ? '' : getNameById(data.agcompras_e));
     $('#ageventas_addh_e_general').val(!data.agventas_e || data.agventas_e === 0 ? '' : getNameById(data.agventas_e));
 
+    // Inputs ocultos (ids)
     $('#armador_ih_e_general').val(data.armador_e);
     $('#transportista_ih_e_general').val(data.transportista_e);
     $('#agente_ih_e_general').val(data.agente_e);
@@ -780,6 +795,7 @@ function fillFormWithDataHouseGeneral(data) {
     $('#agcompras_ih_e_general').val(data.agcompras_e);
     $('#agventas_ih_e_general').val(data.agventas_e);
 
+    // Otros datos
     $('#origen_addh_e_general').val(data.origen_e);
     $('#destino_addh_e_general').val(data.destino_e);
     $('#loading_addh_e_general').val(data.loading_e);
@@ -799,7 +815,6 @@ function fillFormWithDataHouseGeneral(data) {
     $('#posicion_gh_e_general').val(data.posicion_e);
     $('#operacion_editar_general').val(data.operacion_e);
 
-    $('#notificar_cliente_e_general').val(data.notifcliente_e ? formatDateToYYYYMMDD(data.notifcliente_e) : '');
     $('#eta_e_general').val(data.eta_e ? formatDateToYYYYMMDD(data.eta_e) : '');
     $('#etd_e_general').val(data.etd_e ? formatDateToYYYYMMDD(data.etd_e) : '');
 }
@@ -821,7 +836,7 @@ function eliminar_house_general(){
 
                         let id = localStorage.getItem('num_house_gasto');
                         if (id) {
-                            miurl = "/importacion_aerea/eliminar_house/";
+                            miurl = "/exportacion_maritima/eliminar_house/";
                             var toData = {
                                 'id': id,
                                 'csrfmiddlewaretoken': csrf_token,
@@ -833,7 +848,7 @@ function eliminar_house_general(){
                                 success: function (resultado) {
                                     aux = resultado['resultado'];
                                     if (aux === 'exito') {
-                                        $('#tabla_general_im').DataTable().ajax.reload(null, false);
+                                        $('#tabla_general_em').DataTable().ajax.reload(null, false);
                                         alert('Eliminado correctamente');
                                     } else {
                                         alert(aux);
@@ -856,7 +871,7 @@ function gastos_btn_h_click_general(){
 
 
             $.ajax({
-                url: '/importacion_aerea/'+url,
+                url: '/exportacion_maritima/'+url,
                 data: { id: selectedRowN },
                 type: 'GET',
                 success: function (data) {
@@ -896,7 +911,7 @@ function gastos_btn_h_click_general(){
                                         if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
                                             row = table_gastos.rows('.table-secondary').data();
                                             if (row.length === 1) {
-                                                miurl = "/importacion_aerea/eliminar_gasto_house/";
+                                                miurl = "/exportacion_maritima/eliminar_gasto_house/";
                                                 var toData = {
                                                     'id': row[0][0],
                                                     'csrfmiddlewaretoken': csrf_token,
@@ -963,7 +978,7 @@ function rutas_btn_h_click_general(){
          url='house-detail/';
 
             $.ajax({
-                url: '/importacion_aerea/'+url,
+                url: '/exportacion_maritima/'+url,
                 data: { id: selectedRowN },
                 type: 'GET',
                 success: function (data) {
@@ -997,7 +1012,7 @@ function rutas_btn_h_click_general(){
                                         if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
                                             var row = $('#tabla_rutas_house').DataTable().rows('.table-secondary').data();
                                             if (row.length === 1) {
-                                                miurl = "/importacion_aerea/eliminar_ruta_house/";
+                                                miurl = "/exportacion_maritima/eliminar_ruta_house/";
                                                 var toData = {
                                                     'id': row[0][0],
                                                     'csrfmiddlewaretoken': csrf_token,
@@ -1059,13 +1074,116 @@ function rutas_btn_h_click_general(){
                 }
             });
 }
+function envases_btn_h_click_general(){
+        let selectedRowN,url;
+
+         selectedRowN= localStorage.getItem('num_house_gasto');
+         url='house-detail/';
+
+            $.ajax({
+                url: '/exportacion_maritima/'+url,
+                data: { id: selectedRowN },
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    $("#id_envase_id").val('');
+                    let selectedRowId = localStorage.getItem('id_house_gasto');
+                    let selectedRowN = localStorage.getItem('num_house_gasto');
+
+                    if (selectedRowN != null) {
+                        get_datos_envases_house();
+                        $('#envases_form_house').trigger("reset");
+                        $("#envases_modal_house").dialog({
+                            autoOpen: true,
+                            open: function () {
+                                document.getElementById('numero_envase').value = selectedRowN;
+                            },
+                            modal: true,
+                            title: "Envases para el House N°: " + selectedRowN,
+                            height: wHeight * 0.90,
+                            width: wWidth * 0.70,
+                            class: 'modal fade',
+                            buttons: [
+                                {
+                                    text: "Eliminar",
+                                    class: "btn btn-danger",
+                                    style: "width:100px",
+                                    click: function () {
+                                        if (confirm('¿Confirma eliminar el seleccionado?')) {
+                                            var row = $('#tabla_envases_house').DataTable().rows('.table-secondary').data();
+                                            if (row.length === 1) {
+                                                miurl = "/exportacion_maritima/eliminar_envases_house/";
+                                                var toData = {
+                                                    'id': row[0][0],
+                                                    'csrfmiddlewaretoken': csrf_token,
+                                                };
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: miurl,
+                                                    data: toData,
+                                                    success: function (resultado) {
+                                                        aux = resultado['resultado'];
+                                                        if (aux === 'exito') {
+                                                            $("#tabla_envases_house").dataTable().fnDestroy();
+                                                            get_datos_envases_house();
+                                                            alert('Eliminado correctamente');
+                                                            if ($.fn.DataTable.isDataTable('#table_add_im')) {
+                                                                $('#table_add_im').DataTable().ajax.reload(null, false);
+                                                            }
+
+                                                            if ($.fn.DataTable.isDataTable('#table_edit_im')) {
+                                                                $('#table_edit_im').DataTable().ajax.reload(null, false);
+                                                            }
+                                                            if ($.fn.DataTable.isDataTable('#tabla_house_directo')) {
+                                                                $('#tabla_house_directo').DataTable().ajax.reload(null, false);
+                                                            }
+                                                        } else {
+                                                            alert(aux);
+                                                        }
+                                                    }
+                                                });
+                                            } else {
+                                                alert('Debe seleccionar un unico registro');
+                                            }
+                                        }
+                                    },
+                                }, {
+                                    text: "Salir",
+                                    class: "btn btn-dark",
+                                    style: "width:100px",
+                                    click: function () {
+                                        $(this).dialog("close");
+                                    },
+                                }],
+                            beforeClose: function (event, ui) {
+                            try {
+                                desbloquearDatos();
+                            } catch (error) {
+                                console.error("⚠️ Error en desbloquearDatos:", error);
+                            }
+                                $("#tabla_envases_house").dataTable().fnDestroy();
+//                 $('#table_add_im tbody tr').removeClass('table-secondary');
+//                $('#table_edit_im tbody tr').removeClass('table-secondary');
+//                $('#'#tabla_house_directo' tbody tr').removeClass('table-secondary');
+                            }
+                        })
+                        get_sugerencias_envases(selectedRowN);
+                    } else {
+                        alert('Debe seleccionar al menos un registro');
+                    }
+                }
+            });
+}
 function embarques_btn_h_click_general(){
         let selectedRowN,url;
 
          selectedRowN= localStorage.getItem('num_house_gasto');
          url='house-detail/';
             $.ajax({
-                url: '/importacion_aerea/'+url,
+                url: '/exportacion_maritima/'+url,
                 data: { id: selectedRowN },
                 type: 'GET',
                 success: function (data) {
@@ -1099,7 +1217,7 @@ function embarques_btn_h_click_general(){
                                         if (confirm('¿Confirma eliminar el embarque seleccionado?')) {
                                             var row = $('#tabla_embarques_house').DataTable().rows('.table-secondary').data();
                                             if (row.length === 1) {
-                                                miurl = "/importacion_aerea/eliminar_embarques_house/";
+                                                miurl = "/exportacion_maritima/eliminar_embarques_house/";
                                                 var toData = {
                                                     'id': row[0][0],
                                                     'csrfmiddlewaretoken': csrf_token,
@@ -1167,7 +1285,7 @@ function archivos_btn_h_click_general(){
          selectedRowN= localStorage.getItem('num_house_gasto');
          url='house-detail/';
             $.ajax({
-                url: '/importacion_aerea/'+url,
+                url: '/exportacion_maritima/'+url,
                 data: { id: selectedRowN },
                 type: 'GET',
                 success: function (data) {
@@ -1196,7 +1314,7 @@ function archivos_btn_h_click_general(){
                                 style: "width:100px",
                                 click: function () {
                                     if (confirm('¿Confirma descargar el archivo seleccionado?')) {
-                                        var url = '/importacion_aerea/descargar_archivo/' + localStorage.getItem('id_archivo');  // Ruta de la vista que devuelve el archivo
+                                        var url = '/exportacion_maritima/descargar_archivo/' + localStorage.getItem('id_archivo');  // Ruta de la vista que devuelve el archivo
                                         window.open(url, '_blank');
                                     }
                                 },
@@ -1207,7 +1325,7 @@ function archivos_btn_h_click_general(){
                                 click: function () {
                                     if (confirm('¿Confirma eliminar archivo?')) {
                                         if (localStorage.getItem('id_archivo')) {
-                                            miurl = "/importacion_aerea/eliminar_archivo/";
+                                            miurl = "/exportacion_maritima/eliminar_archivo/";
                                             var toData = {
                                                 'id': localStorage.getItem('id_archivo'),
                                                 'csrfmiddlewaretoken': csrf_token,
@@ -1272,7 +1390,7 @@ function pdf_btn_h_click_general(){
          url='house-detail/';
 
             $.ajax({
-                url: '/importacion_aerea/'+url,
+                url: '/exportacion_maritima/'+url,
                 data: { id: selectedRowN },
                 type: 'GET',
                 success: function (data) {
@@ -1357,7 +1475,7 @@ function notas_house_general() {
          url='house-detail/';
 
             $.ajax({
-                url: '/importacion_aerea/'+url,
+                url: '/exportacion_maritima/'+url,
                 data: { id: selectedRowNM },
                 type: 'GET',
                 success: function (data) {
@@ -1411,7 +1529,7 @@ function cargar_gastos_factura_general(callback){
          url='house-detail/';
 
             $.ajax({
-                url: '/importacion_aerea/'+url,
+                url: '/exportacion_maritima/'+url,
                 data: { id: selectedRowN },
                 type: 'GET',
                 success: function (data) {
@@ -1433,7 +1551,7 @@ function cargar_gastos_factura_general(callback){
                             url: "/static/datatables/es_ES.json"
                         },
                         "ajax": {
-                            "url": "/importacion_aerea/source_gastos_house_preventa/",
+                            "url": "/exportacion_maritima/source_gastos_house_preventa/",
                             'type': 'GET',
                             "data": function (d) {
                                 return $.extend({}, d, {
@@ -1551,7 +1669,7 @@ function get_datos_logs_general() {
          url='house-detail/';
 
             $.ajax({
-                url: '/importacion_aerea/'+url,
+                url: '/exportacion_maritima/'+url,
                 data: { id: selectedRowN },
                 type: 'GET',
                 success: function (data) {
@@ -1600,7 +1718,7 @@ function get_datos_logs_general() {
                                 url: "/static/datatables/es_ES.json"
                             },
                             "ajax": {
-                                "url": "/importacion_aerea/source_logs/",
+                                "url": "/exportacion_maritima/source_logs/",
                                 'type': 'GET',
                                 "data": function (d) {
                                     return $.extend({}, d, {
@@ -1629,64 +1747,6 @@ function get_datos_logs_general() {
                     }
                 }
             });
-}
-function abrir_aplicable_general(){
-    let tabla = localStorage.getItem('tabla_origen');
-        let selectedRowN,url;
-
-         selectedRowN= localStorage.getItem('num_house_gasto');
-         url='house-detail/';
-
-            $.ajax({
-            url: '/importacion_aerea/'+url,
-            data: {id: selectedRowN},
-            type: 'GET',
-            success: function (data) {
-                if (data.bloqueado) {
-                    alert(data.mensaje);
-                    return;
-                }
-
-                if (row.length === 1) {
-                    $('#form_aplicable').trigger("reset");
-                    cargar_datos_aplicables(selectedRowN);
-                    $("#aplicable_modal").dialog({
-                        autoOpen: true,
-                        modal: true,
-                        title: "Editar datos aplicables del embarque N°: " + selectedRowN,
-                        height: 'auto',
-                        width: wWidth * 0.50,
-                        buttons: [
-                            {
-                                text: "Guardar",
-                                class: "btn btn-primary",
-                                click: function () {
-                                    guardar_aplicable(selectedRowN);
-                                    table_edit_ia.ajax.reload();
-                                    $(this).dialog("close");
-                                }
-                            },
-                            {
-                                text: "Cancelar",
-                                class: "btn btn-dark",
-                                click: function () {
-                                    $(this).dialog("close");
-                                }
-                            }
-                        ],
-                        beforeClose: function (event, ui) {
-                            try {
-                                desbloquearDatos();
-                            } catch (error) {
-                                console.error("⚠️ Error en desbloquearDatos:", error);
-                            }
-                        }
-                    });
-                } else {
-                    alert('Debe seleccionar un único registro');
-                }
-            }
-        });
 }
 function modal_buscar_general(){
 $("#searchModalGeneral").dialog({
@@ -1732,7 +1792,7 @@ function filtrar_tabla_general(data, e) {
     e.preventDefault();
     $.ajax({
         type: "POST",
-        url: '/importacion_aerea/buscar_registros_general/',
+        url: '/exportacion_maritima/buscar_registros_general/',
         data: $("#searchFormGeneral").serialize(),
         headers: {
             'X-CSRFToken': csrf_token
@@ -1740,7 +1800,7 @@ function filtrar_tabla_general(data, e) {
         success: function(response) {
             // numeros_general = response.resultados;
             // console.log(numeros_general);
-            table_general_ia.ajax.reload();
+            table_general_em.ajax.reload();
         },
         error: function(xhr, status, error) {
             console.error("Error al obtener AWB:", error);

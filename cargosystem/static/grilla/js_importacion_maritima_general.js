@@ -30,7 +30,7 @@ $(document).ready(function () {
                 "orderable": false,
                 "defaultContent": '',
                 render: function (data, type, row) {
-                    return `<span class="text-primary">${row[19] ?? ''}</span>`;
+                    return `<span class="badge bg-primary text-light">${row[19] ?? ''}</span>`;
                 }
             },
 

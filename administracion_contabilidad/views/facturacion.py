@@ -58,10 +58,52 @@ columns_table = {
     7: 'iva',
     8: 'total',
 }
-
-
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
 
 def source_facturacion(request):
+    args = {str(i): request.GET.get(f'columns[{i}][search][value]', '') for i in range(1,9)}
+    filtro = get_argumentos_busqueda(**args)
+
+    start  = int(request.GET['start'])
+    length = int(request.GET['length'])
+    buscar = request.GET.get('buscar', '')
+    que_buscar = request.GET.get('que_buscar', '')
+
+    if buscar:
+        filtro[que_buscar] = buscar
+
+    order = get_order(request, columns_table)  # p.ej. ['cliente', '-fecha']
+
+    base = VistaVentas.objects.filter(**filtro)
+
+    # 1 fila por autogenerado (fecha más reciente; si empata, pk más alta)
+    qs = (base
+          .annotate(rn=Window(
+              expression=RowNumber(),
+              partition_by=[F('autogenerado')],
+              order_by=[F('fecha').desc(), F('pk').desc()],
+          ))
+          .filter(rn=1))
+
+    if order:
+        qs = qs.order_by(*order)
+
+    # conteos
+    total_all = VistaVentas.objects.values('autogenerado').distinct().count()
+    total_filtered = base.values('autogenerado').distinct().count()
+
+    page = list(qs[start:start+length])
+
+    return JsonResponse({
+        'data': get_data(page),
+        'length': length,
+        'draw': request.GET['draw'],
+        'recordsTotal': total_all,
+        'recordsFiltered': total_filtered,
+    })
+
+def source_facturacion_old(request):
     args = {
         '1': request.GET['columns[1][search][value]'],
         '2': request.GET['columns[2][search][value]'],
@@ -131,7 +173,7 @@ def get_data(registros_filtrados):
         data = []
         for registro in registros_filtrados:
             registro_json = []
-            registro_json.append(str('v'))
+            registro_json.append(str(registro.tipo))
             registro_json.append('' if registro.autogenerado is None else str(registro.autogenerado))
             registro_json.append('' if registro.fecha is None else registro.fecha.strftime('%Y-%m-%d'))
             registro_json.append('' if registro.num_completo is None else str(registro.num_completo))
@@ -1798,7 +1840,7 @@ def hacer_nota_credito(request):
     except Exception as e:
         return JsonResponse({"mensaje": f"Error al crear nota de crédito: {str(e)}"}, status=500)
 
-def cargar_pendientes_imputacion_venta(request):
+def cargar_pendientes_imputacion_venta_old(request):
     try:
         nrocliente = request.GET.get('nrocliente', None)
 
@@ -1838,6 +1880,55 @@ def cargar_pendientes_imputacion_venta(request):
                 'imputado': 0,
                 'tipo_cambio': float(registro.tipo_cambio) if registro.tipo_cambio else 0,
                 'detalle': registro.detalle if registro.detalle else '',
+            })
+
+        return JsonResponse({'data': data}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+from django.http import JsonResponse
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
+
+def cargar_pendientes_imputacion_venta(request):
+    try:
+        nrocliente = request.GET.get('nrocliente')
+        if not nrocliente:
+            return JsonResponse({'error': 'Debe proporcionar un nrocliente'}, status=400)
+
+        # Base: solo FACTURA, con saldo pendiente
+        base = (VistaVentas.objects
+                .filter(nrocliente=nrocliente, tipo='FACTURA')
+                .exclude(saldo=0))
+
+        # Fila más reciente por autogenerado (desempate por pk)
+        qs = (base
+              .annotate(
+                  rn=Window(
+                      expression=RowNumber(),
+                      partition_by=[F('autogenerado')],
+                      order_by=[F('fecha').desc(), F('pk').desc()],
+                  )
+              )
+              .filter(rn=1)
+              .values('autogenerado', 'fecha', 'num_completo',
+                      'total', 'saldo', 'tipo_cambio', 'detalle'))
+
+        data = []
+        for r in qs:
+            fecha = r['fecha'].strftime('%Y-%m-%d') if r['fecha'] else ''
+            data.append({
+                'autogenerado': r['autogenerado'],
+                'vto': fecha,                # si tenés otro campo de vencimiento, cámbialo aquí
+                'emision': fecha,
+                'num_completo': r['num_completo'] or '',
+                'total': float(r['total'] or 0),
+                'saldo': float(r['saldo'] or 0),
+                'imputado': 0,
+                'tipo_cambio': float(r['tipo_cambio'] or 0),
+                'detalle': r['detalle'] or '',
             })
 
         return JsonResponse({'data': data}, safe=False)

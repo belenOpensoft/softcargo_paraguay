@@ -142,9 +142,12 @@ $(document).ready(function () {
         "columnDefs": [
             {
                 "targets": 0,  // Columna 0 (se mantiene pero oculta su contenido)
-                "className": "invisible-column",
+                "className": "",
                 "searchable": false,
                 "visible": true,
+               render: function (data, type, row) {
+                    return `<span class="badge bg-warning text-dark">${row[0] ?? ''}</span>`;
+                }
             },
             {
                 "targets": 1,  // Oculta completamente la columna 1
@@ -155,6 +158,10 @@ $(document).ready(function () {
                 "targets": 2,  // Asignamos la columna de fecha
                 "type": "date-iso", // Indica que esta columna es de tipo fecha
                 "orderable": true // Habilita el ordenamiento
+            },
+                        {
+                "targets": [6,7,8],
+                "className": "text-end",
             }
         ],
         "columns": [
@@ -175,7 +182,7 @@ $(document).ready(function () {
             var api = this.api();
             api.columns().every(function () {
                 var that = this;
-                $('input', this.footer()).on('keyup change', function () {
+                $('.filter-input', this.footer()).on('keyup change', function () {
                     if (that.search() !== this.value) {
                         that.search(this.value).draw();
                     }
@@ -340,6 +347,7 @@ function abrir_cobranza() {
             localStorage.removeItem('medios_pago');
             resetModal("#dialog-form");
             resetModal("#paymentModal");
+            window.location.reload();
         },
         buttons: [
             {

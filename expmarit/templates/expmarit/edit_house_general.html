@@ -25,6 +25,7 @@
     }
 </style>
 
+
 <div id="edit_house_modal_general" style="display: none;" tabindex="-1">
         <nav class="navbar minavbar2 navbar-expand-lg navbar-light bg-primary" style="color:white;">
     <div class="container-fluid">
@@ -65,6 +66,13 @@
                     <a class="nav-link text-white" onclick="embarques_btn_h_click_general()" id="embarques_btn_house" href="#" title="Embarque para el house">
                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-truck" viewBox="0 0 16 16">
                           <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5zm1.294 7.456A2 2 0 0 1 4.732 11h5.536a2 2 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456M12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>
+                        </svg>
+                    </a>
+                </li>
+                  <li class="nav-item">
+                    <a class="nav-link text-white" onclick="envases_btn_h_click_general()" id="envases_btn_house" href="#" title="Envases para el house">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
+                          <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
                         </svg>
                     </a>
                 </li>
@@ -109,15 +117,6 @@
                     </svg>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" onclick="abrir_aplicable_general()" title="Calculo de aplicable">
-                       <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-coin" viewBox="0 0 16 16">
-                      <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>
-                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                      <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
-                    </svg>
-                    </a>
-                </li>
                 <li class="nav-item text-white">
                     <button type="button" class="btn btn-outline-light btn-eliminar-hijo" style="margin-top: 4px;margin-left: 5px;" onclick="eliminar_house_general()">
                         Eliminar Hijo
@@ -154,99 +153,124 @@
 </div>
 <form id="edit_house_form_general" method="POST">
     {% csrf_token %}
-<table id="table_house_style" class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
+    <table id="table_house_style" class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
 
-    <tbody>
-        <tr>
-            <td>{{ form_edit_house_general.cliente.label }}</td>
-           <td> {{ form_edit_house_general.cliente_i }}
-            {{ form_edit_house_general.cliente }}</td>
+        <tbody>
+            <tr>
+                <td>{{ form_edit_house_general.cliente.label }}</td>
+               <td> {{ form_edit_house_general.cliente_i }}
+                {{ form_edit_house_general.cliente }}</td>
 
-            <td>{{ form_edit_house_general.consignatario.label }}</td>
-           <td> {{ form_edit_house_general.consignatario_i }}
-            {{ form_edit_house_general.consignatario }}</td>
+                <td>{{ form_edit_house_general.consignatario.label }}</td>
+               <td> {{ form_edit_house_general.consignatario_i }}
+                {{ form_edit_house_general.consignatario }}</td>
 
-            <td >{{ form_edit_house_general.agente.label }}</td>
-          <td>  {{ form_edit_house_general.agente_i }}
-            {{ form_edit_house_general.agente }}</td>
+                <td >{{ form_edit_house_general.agente.label }}</td>
+              <td>  {{ form_edit_house_general.agente_i }}
+                {{ form_edit_house_general.agente }}</td>
 
-            <td>{{ form_edit_house_general.vendedor.label }}</td>
-           <td> {{ form_edit_house_general.vendedor_i }}
-            {{ form_edit_house_general.vendedor }}</td>
-        </tr>
+                <td>{{ form_edit_house_general.vendedor.label }}</td>
+               <td> {{ form_edit_house_general.vendedor_i }}
+                {{ form_edit_house_general.vendedor }}</td>
 
-        <tr>
-            <td>{{ form_edit_house_general.origen.label }}</td>
-            <td>{{ form_edit_house_general.origen }}</td>
+            </tr>
 
-            <td >{{ form_edit_house_general.destino.label }}</td>
-            <td>{{ form_edit_house_general.destino }}</td>
+            <tr>
+                <td>{{ form_edit_house_general.origen.label }}</td>
+                <td>{{ form_edit_house_general.origen }}</td>
 
-            <td >{{ form_edit_house_general.embarcador.label }}</td>
-           <td> {{ form_edit_house_general.embarcador_i }}
-            {{ form_edit_house_general.embarcador }}</td>
+                <td >{{ form_edit_house_general.destino.label }}</td>
+                <td>{{ form_edit_house_general.destino }}</td>
 
-            <td >{{ form_edit_house_general.transportista.label }}</td>
-            <td>{{ form_edit_house_general.transportista_i }}
-            {{ form_edit_house_general.transportista }}</td>
-        </tr>
+                <td >{{ form_edit_house_general.loading.label }}</td>
+                <td>{{ form_edit_house_general.loading }}</td>
 
-        <tr>
-            <td >{{ form_edit_house_general.awb.label }}</td>
-            <td>{{ form_edit_house_general.awb }}</td>
+                <td >{{ form_edit_house_general.discharge.label }}</td>
+                <td>{{ form_edit_house_general.discharge }}</td>
 
-            <td >{{ form_edit_house_general.house.label }}</td>
-            <td>{{ form_edit_house_general.house }}</td>
+            </tr>
+            <tr>
+                <td >{{ form_edit_house_general.awb.label }}</td>
+                <td>{{ form_edit_house_general.awb }}</td>
+                <td >{{ form_edit_house_general.house.label }}</td>
+                <td>{{ form_edit_house_general.house }}</td>
 
-            <td >{{ form_edit_house_general.operacion.label }}</td>
-            <td>{{ form_edit_house_general.operacion }}</td>
+                <td >{{ form_edit_house_general.operacion.label }}</td>
+                <td>{{ form_edit_house_general.operacion }}</td>
 
-            <td >{{ form_edit_house_general.posicion_h.label }}</td>
-            <td>{{ form_edit_house_general.posicion_h }}</td>
-        </tr>
+                <td >{{ form_edit_house_general.posicion_h.label }}</td>
+                <td>{{ form_edit_house_general.posicion_h }}</td>
 
-        <tr>
-            <td >{{ form_edit_house_general.pago.label }}</td>
-            <td>{{ form_edit_house_general.pago }}</td>
+            </tr>
+            <tr>
+                 <td >{{ form_edit_house_general.pago.label }}</td>
+                <td>{{ form_edit_house_general.pago }}</td>
 
-            <td >{{ form_edit_house_general.moneda.label }}</td>
-            <td>{{ form_edit_house_general.moneda }}</td>
+                <td >{{ form_edit_house_general.moneda.label }}</td>
+                <td>{{ form_edit_house_general.moneda }}</td>
 
-            <td >{{ form_edit_house_general.arbitraje.label }}</td>
-            <td>{{ form_edit_house_general.arbitraje }}</td>
-            <td >{{ form_edit_house_general.status_h.label }}</td>
-            <td>{{ form_edit_house_general.status_h }}</td>
-        </tr>
+                <td >{{ form_edit_house_general.arbitraje.label }}</td>
+                <td>{{ form_edit_house_general.arbitraje }}</td>
 
-        <tr>
-            <td >{{ form_edit_house_general.notificar_cliente.label }}</td>
-            <td>{{ form_edit_house_general.notificar_cliente }}</td>
+                 <td >{{ form_edit_house_general.demora.label }}</td>
+                <td>{{ form_edit_house_general.demora }}</td>
+            </tr>
 
-            <td >{{ form_edit_house_general.notificar_agente.label }}</td>
-            <td>{{ form_edit_house_general.notificar_agente }}</td>
+            <tr>
+                <td >{{ form_edit_house_general.embarcador.label }}</td>
+               <td> {{ form_edit_house_general.embarcador_i }}
+                {{ form_edit_house_general.embarcador }}</td>
+
+                <td >{{ form_edit_house_general.transportista.label }}</td>
+                <td>{{ form_edit_house_general.transportista_i }}
+                {{ form_edit_house_general.transportista }}</td>
+
+                <td >{{ form_edit_house_general.vapor.label }}</td>
+                <td>{{ form_edit_house_general.vapor }}</td>
+
+                <td >{{ form_edit_house_general.viaje.label }}</td>
+                <td>{{ form_edit_house_general.viaje }}</td>
+            </tr>
+            <tr>
+                <td >{{ form_edit_house_general.armador.label }}</td>
+               <td> {{ form_edit_house_general.armador_i }}
+                {{ form_edit_house_general.armador }}</td>
+
+
+                <td >{{ form_edit_house_general.agecompras.label }}</td>
+               <td> {{ form_edit_house_general.agcompras_i }}
+                {{ form_edit_house_general.agecompras }}</td>
+
+                <td >{{ form_edit_house_general.ageventas.label }}</td>
+              <td>  {{ form_edit_house_general.agventas_i }}
+                {{ form_edit_house_general.ageventas }}</td>
+
+            </tr>
+            <tr>
 
             <td >{{ form_edit_house_general.eta.label }}</td>
             <td>{{ form_edit_house_general.eta }}</td>
 
             <td >{{ form_edit_house_general.etd.label }}</td>
             <td>{{ form_edit_house_general.etd }}</td>
-        </tr>
+            </tr>
+            <tr>
 
-        <tr>
-            <td >{{ form_edit_house_general.ageventas.label }}</td>
-           <td>  {{ form_edit_house_general.agventas_i }}
-            {{ form_edit_house_general.ageventas }}</td>
 
-           <td >{{ form_edit_house_general.agecompras.label }}</td>
-           <td> {{ form_edit_house_general.agcompras_i }}
-            {{ form_edit_house_general.agecompras }}</td>
+                <td >{{ form_edit_house_general.status_h.label }}</td>
+                <td>{{ form_edit_house_general.status_h }}</td>
 
-             <td >{{ form_edit_house_general.wreceipt.label }}</td>
-            <td>{{ form_edit_house_general.wreceipt }}</td>
+                <td >{{ form_edit_house_general.wreceipt.label }}</td>
+                <td>{{ form_edit_house_general.wreceipt }}</td>
 
-        </tr>
-    </tbody>
-</table>
+
+            </tr>
+
+            </tbody>
+    </table>
+
+
 </form>
 
 </div>
+

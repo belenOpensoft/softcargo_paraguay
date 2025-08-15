@@ -505,7 +505,7 @@ def get_data(registros_filtrados):
         data = []
         for registro in registros_filtrados:
             registro_json = []
-            registro_json.append(str('v'))
+            registro_json.append(registro.tipo)
             registro_json.append('' if registro.autogenerado is None else str(registro.autogenerado))
             registro_json.append('' if registro.fecha is None else registro.fecha.strftime('%Y-%m-%d'))
             registro_json.append('' if registro.num_completo is None else str(registro.num_completo))

@@ -438,17 +438,24 @@ $(document).ready(function() {
     "bAutoWidth": false,
     "scrollY": wHeight * 0.60,
     "columnDefs": [
-        {
-            "targets": 0,  // Columna 0 (se mantiene pero oculta su contenido)
-            "className": "invisible-column",
-            "searchable": false,
-            "visible":true,
-        },
+            {
+                "targets": 0,  // Columna 0 (se mantiene pero oculta su contenido)
+                "className": "",
+                "searchable": false,
+                "visible": true,
+               render: function (data, type, row) {
+                    return `<span class="badge bg-warning text-dark">${row[0] ?? ''}</span>`;
+                }
+            },
         {
             "targets": 1,  // Oculta completamente la columna 1
             "visible": false,
             "searchable": false
         },
+                    {
+                "targets": [6,7,8],
+                "className": "text-end",
+            },
         {
             "targets": 2,
             "type": "date-iso",
@@ -489,7 +496,7 @@ $(document).ready(function() {
             var api = this.api();
             api.columns().every(function () {
                 var that = this;
-                $('input', this.footer()).on('keyup change', function () {
+                $('.filter-input', this.footer()).on('keyup change', function () {
                     if (that.search() !== this.value) {
                         that.search(this.value).draw();
                     }
@@ -1238,6 +1245,7 @@ $("#proveedoresModal").dialog({
     },
     beforeClose: function(event, ui) {
         limpiarModalProveedor();
+        window.location.reload();
     }
 }).prev('.ui-dialog-titlebar').remove();
 cargar_arbitraje();
