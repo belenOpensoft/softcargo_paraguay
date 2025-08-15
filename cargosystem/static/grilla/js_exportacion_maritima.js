@@ -3414,7 +3414,8 @@ function importar_hijo_tabla(){
     }
 
 table_seg = $('#tabla_seguimiento_IH').DataTable({
-//        "stateSave": true,
+        "destroy": true,
+
         "dom": 'Btlipr',
         "scrollX": true,
         "bAutoWidth": false,
