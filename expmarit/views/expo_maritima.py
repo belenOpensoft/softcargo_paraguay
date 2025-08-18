@@ -840,11 +840,11 @@ def embarques_exportacion_maritima(request):
 param_busqueda_general = {
     0: 'numero',
     1: 'seguimiento__icontains',
-    2: 'eta__icontains',
+    2: 'etd__icontains',
     3: 'vapor__icontains',
     4: 'awb__icontains',
     5: 'hawb__icontains',
-    6: 'consignatario__icontains',
+    6: 'embarcador__icontains',
     7: 'transportista__icontains',
     8: 'agente__icontains',
     9: 'posicion__icontains',
@@ -855,11 +855,11 @@ param_busqueda_general = {
 columns_table_general = {
     0: 'numero',
     1: 'seguimiento',
-    2: 'eta',
+    2: 'etd',
     3: 'vapor',
     4: 'awb',
     5: 'hawb',
-    6: 'consignatario',
+    6: 'embarcador',
     7: 'transportista',
     8: 'agente',
     9: 'posicion',
@@ -966,11 +966,11 @@ def get_data_general(registros_filtrados,mapa_reservas):
             registro_json = []
             registro_json.append(str(registro.numero))
             registro_json.append('' if registro.seguimiento is None else str(registro.seguimiento))
-            registro_json.append('' if registro.eta is None else str(registro.eta)[:10])
+            registro_json.append('' if registro.etd is None else str(registro.etd)[:10])
             registro_json.append('' if registro.vapor is None else str(registro.vapor))
             registro_json.append('' if registro.awb is None else str(registro.awb))
             registro_json.append('' if registro.hawb is None else str(registro.hawb))
-            registro_json.append('' if registro.consignatario is None else str(registro.consignatario))
+            registro_json.append('' if registro.embarcador is None else str(registro.embarcador))
             registro_json.append('' if registro.transportista is None else str(registro.transportista))
             registro_json.append('' if registro.agente is None else str(registro.agente))
             registro_json.append('' if registro.posicion is None else str(registro.posicion))
@@ -1013,7 +1013,7 @@ def buscar_registros_general(request):
     seguimiento    = (request.POST.get("seguimiento") or "").strip()
     master         = (request.POST.get("master") or "").strip()
     house          = (request.POST.get("house") or "").strip()
-    consignatario  = (request.POST.get("consignatario") or "").strip()
+    embarcador  = (request.POST.get("embarcador") or "").strip()
     transportista  = (request.POST.get("transportista") or "").strip()
     origen         = (request.POST.get("origen") or "").strip()
     posicion       = (request.POST.get("posicion") or "").strip()
@@ -1022,7 +1022,7 @@ def buscar_registros_general(request):
     if seguimiento:   q &= Q(seguimiento__icontains=seguimiento)
     if master:        q &= Q(awb__icontains=master)
     if house:         q &= Q(hawb__icontains=house)
-    if consignatario: q &= Q(consignatario__icontains=consignatario)
+    if embarcador: q &= Q(embarcador__icontains=embarcador)
     if transportista: q &= Q(transportista__icontains=transportista)
     if posicion:      q &= Q(posicion__icontains=posicion)
     if origen:        q &= Q(origen__icontains=origen)
