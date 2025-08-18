@@ -3401,8 +3401,8 @@ function get_datos_gastos() {
                 "className": 'derecha',
             },
         ],"rowCallback": function (row, data) {
-                $(row).find('td:eq(3)').css('background-color', '#99cc99');
-                $(row).find('td:eq(4)').css('background-color', '#CC9393');
+                // $(row).find('td:eq(3)').css('background-color', '#99cc99');
+                // $(row).find('td:eq(4)').css('background-color', '#CC9393');
                 if (parseFloat(data[3]) > 0){
                     ingresos += parseFloat(data[3]);
                     diferencia += parseFloat(data[3]);

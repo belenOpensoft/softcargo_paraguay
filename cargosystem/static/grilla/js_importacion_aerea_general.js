@@ -637,7 +637,6 @@ $(document).ready(function () {
 
 function editar_madre(){
     let selectedRowId = localStorage.getItem('id_master_editar');
-
     if (selectedRowId !== null) {
         $.ajax({
             url: '/importacion_aerea/master-detail',
@@ -746,6 +745,7 @@ function editar_directo(selectedRowId) {
 
                 ],
                 beforeClose: function (event, ui) {
+                    desbloquearDatos();
                     localStorage.removeItem('fecha_editada_house');
                 }
 
@@ -1513,7 +1513,7 @@ function cargar_gastos_factura_general(callback){
                         ],
                         rowCallback: function (row, data) {
                             // Remover clases anteriores si hay
-                            $(row).removeClass('fila-rojo fila-amarillo');
+                            $(row).removeClass('fila-rojo fila-amarillo fila-verde');
 
                             const color = data[17];
                             if (color === 'ROJO') {

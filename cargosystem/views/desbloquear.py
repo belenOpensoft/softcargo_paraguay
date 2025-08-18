@@ -22,7 +22,7 @@ def desbloquear(request):
     partes = ruta_actual.strip('/').split('/')
     modulo = partes[0] if len(partes) >= 2 else None
 
-    if not numero_master and not numero_master and not id_seguimiento:
+    if not numero_master and not numero_embarque and not id_seguimiento:
         return JsonResponse({'status': 'error', 'message': 'Parámetros faltantes'})
 
     desbloqueados = 0

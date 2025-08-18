@@ -4075,8 +4075,8 @@ let numero=localStorage.getItem('numero_master_seleccionado');
                 "className": 'derecha',
             },
         ],"rowCallback": function (row, data) {
-                $(row).find('td:eq(3)').css('background-color', '#99cc99');
-                $(row).find('td:eq(4)').css('background-color', '#CC9393');
+                // $(row).find('td:eq(3)').css('background-color', '#99cc99');
+                // $(row).find('td:eq(4)').css('background-color', '#CC9393');
                 console.log(data[3]);
                 console.log(data[4]);
                 if (parseFloat(data[4]) > 0){
@@ -4138,9 +4138,29 @@ function get_datos_gastos_house() {
                 "targets": [11],
                 "className": 'derecha',
             },
+                        {
+                "targets": [0,5,6,8,9,10,11],
+                "visible": false,
+            },
+            {
+                "targets": [14],
+                "render": function (data, type, row) {
+                    return row[18];
+                }
+            },
         ],"rowCallback": function (row, data) {
-                $(row).find('td:eq(3)').css('background-color', '#99cc99');
-                $(row).find('td:eq(4)').css('background-color', '#CC9393');
+                $(row).removeClass('fila-rojo fila-amarillo fila-verde');
+
+                const color = data[17];
+                if (color === 'ROJO') {
+                    $(row).addClass('fila-rojo');
+                } else if (color === 'AMARILLO') {
+                    $(row).addClass('fila-amarillo');
+                } else if(color === 'VERDE'){
+                    $(row).addClass('fila-verde');
+                }
+                // $(row).find('td:eq(3)').css('background-color', '#99cc99');
+                // $(row).find('td:eq(4)').css('background-color', '#CC9393');
                 if (parseFloat(data[3]) > 0){
                     ingresos += parseFloat(data[3]);
                     diferencia += parseFloat(data[3]);
@@ -5612,7 +5632,7 @@ let tabla = localStorage.getItem('tabla_origen');
 
                         ],
                         rowCallback: function (row, data) {
-                            $(row).removeClass('fila-rojo fila-amarillo');
+                            $(row).removeClass('fila-rojo fila-amarillo fila-verde');
 
                             const color = data[17];
                             if (color === 'ROJO') {

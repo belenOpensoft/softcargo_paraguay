@@ -1631,7 +1631,7 @@ function cargar_gastos_factura_general(callback){
                         ],
                         rowCallback: function (row, data) {
                             // Remover clases anteriores si hay
-                            $(row).removeClass('fila-rojo fila-amarillo');
+                            $(row).removeClass('fila-rojo fila-amarillo fila-verde');
 
                             const color = data[17];
                             if (color === 'ROJO') {

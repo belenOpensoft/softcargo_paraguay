@@ -74,6 +74,7 @@ function facturar(){
         width: 'auto',
         class: 'modal fade',
         buttons: [
+
             {
                 text: "Cancelar",
                 class: "btn btn-dark",
@@ -81,15 +82,20 @@ function facturar(){
                 click: function () {
                     $(this).dialog("close");
                 }
-            }
+            },
+                        {
+                text: "Enviar Datos",
+                class: "btn btn-primary",
+                click: function () {
+                    enviarDatosTabla();
+                }
+            },
         ],
         beforeClose: function (event, ui) {
         // localStorage.removeItem('num_house_gasto');
          $('#facturar_table').DataTable().destroy();
          $("#facturar_form").trigger("reset");
-//                 $('#table_add_im tbody tr').removeClass('table-secondary');
-//                $('#table_edit_im tbody tr').removeClass('table-secondary');
-//                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+
         }
     })
 }
