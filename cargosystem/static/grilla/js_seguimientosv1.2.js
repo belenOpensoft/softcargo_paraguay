@@ -676,14 +676,13 @@ $(document).ready(function () {
 
     })
     $('#cancelar_gasto').click(function (event) {
-    event.preventDefault();
-
+        event.preventDefault();
         if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_gasto").html('Agregar');
             $("#tabla_gastos").dataTable().fnDestroy();
             $('#gastos_btn').addClass('triggered').trigger('click');
+            $("#id_gasto_id").val('');
         }
-
     })
     $('#cancelar_ruta').click(function (event) {
     event.preventDefault();
@@ -2723,6 +2722,22 @@ $(document).ready(function () {
         }
     }
 });
+
+
+    const campoPrecio = document.getElementById("id_importe");
+    const campoInformar = document.getElementById("id_pinformar");
+
+    campoInformar.addEventListener("keydown", function (event) {
+        if (event.key === "Tab" && !event.shiftKey) {
+            // Buscar valores
+            let valor = campoPrecio.value;
+
+            if (valor) {
+                campoInformar.value = valor;
+            }
+        }
+    });
+
 });
 
 function format(d) {
@@ -3399,6 +3414,10 @@ function get_datos_gastos() {
             {
                 "targets": [11],
                 "className": 'derecha',
+            },
+            {
+                "targets": [5,8,9,10],
+                "visible":false
             },
         ],"rowCallback": function (row, data) {
                 // $(row).find('td:eq(3)').css('background-color', '#99cc99');

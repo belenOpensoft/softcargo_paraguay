@@ -572,6 +572,9 @@ class gastosForm(BSModalModelForm):
         socios = [("0", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa'))
         self.fields['socio'].choices = socios
 
+        self.fields['secomparte'].widget = forms.HiddenInput()
+        self.fields['notomaprofit'].widget = forms.HiddenInput()
+
     CHOICES = [
         ('N','--------'),
         ('C', 'Compra'),
@@ -593,7 +596,7 @@ class gastosForm(BSModalModelForm):
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, }), label="Servicio", required=True)
     importe = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"required":True,'min': '0'}, ), max_digits=12,decimal_places=4, required=True, label="Importe",initial=0)
     pinformar = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"required":True,'min': '0'}, ), max_digits=12,decimal_places=4, required=True, label="A informar",initial=0)
-    arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"id":"id_arbitraje_id","required":False,'min': '0'}, ), max_digits=12,decimal_places=4, required=False, label="Arbitraje",initial=0)
+    arbitraje = forms.DecimalField(widget=forms.HiddenInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"id":"id_arbitraje_id","required":False,'min': '0'}, ), max_digits=12,decimal_places=4, required=False, label="Arbitraje",initial=0)
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13","id":"id_moneda_id"}),
                                required=True, label="Moneda", choices=(), initial='2')
     socio = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off",}),

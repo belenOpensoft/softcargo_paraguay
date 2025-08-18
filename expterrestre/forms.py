@@ -899,6 +899,19 @@ class gastosFormHouse(BSModalModelForm):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Actualizar'))
 
+        # en __init__, dentro del bucle de ocultos
+        ocultos_con_id = {
+            'numero': 'numero_gasto_house',  # 👈 acá le pongo el id que querés
+            'secomparte': 'id_secomparte_h',
+            'empresa': 'id_empresa_h',
+            'arbitraje': 'id_arbitraje_h',
+            'reembolsable': 'id_reembolsable_h',
+            'notomaprofit': 'id_notomaprofit_h',
+        }
+        for campo, el_id in ocultos_con_id.items():
+            if campo in self.fields:
+                self.fields[campo].widget = forms.HiddenInput(attrs={'id': el_id})
+
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
 
@@ -928,6 +941,14 @@ class gastosFormHouse(BSModalModelForm):
 
         socios = [("", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('id', 'empresa'))
         self.fields['socio'].choices = socios
+
+
+        # 🔹 Inicializar valores por defecto
+        self.fields['empresa'].initial = '0'
+        self.fields['arbitraje'].initial = 0
+        self.fields['reembolsable'].initial = 'N'
+        self.fields['secomparte'].initial = 'N'
+        self.fields['notomaprofit'].initial = '0'
 
     CHOICES = [
         ('C', 'Compra'),

@@ -2641,7 +2641,20 @@ var expandedRow;
       localStorage.setItem('id_archivo',datos_fila[0]);
     }
 });
+    const campoPrecio = document.getElementById("id_precio_h");
+    const campoCosto = document.getElementById("id_costo_h");
+    const campoInformar = document.getElementById("id_pinformar_h");
 
+    campoInformar.addEventListener("keydown", function (event) {
+        if (event.key === "Tab" && !event.shiftKey) {
+            // Buscar valores
+            let valor = campoPrecio.value || campoCosto.value;
+
+            if (valor) {
+                campoInformar.value = valor;
+            }
+        }
+    });
 
 });
 
