@@ -76,6 +76,7 @@ def editar_consultar_ventas(request):
     })
 
 def obtener_detalle_venta(request):
+    #esto esta trayendo mal nlos nombres de los items de las ventas
     autogenerado = request.GET.get('autogenerado')
 
     if not autogenerado:

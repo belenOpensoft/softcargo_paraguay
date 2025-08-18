@@ -289,6 +289,29 @@ def buscar_items_v(request):
 
     return JsonResponse({'error': 'Servicio no encontrado'}, status=404)
 
+def buscar_items_v_codigo(request):
+    if request.method == "GET":
+        servicio_id = request.GET.get("id")
+        servicio = Servicios.objects.filter(codigo=int(servicio_id or 0)).first()
+
+        if servicio:
+            iva_texto = "Exento" if servicio.tasa == "X" else "Básico" if servicio.tasa == "B" else "Desconocido"
+            embarque_texto = "Pendiente" if servicio.imputar == "S" else "No imputar" if servicio.imputar == "N" else "Desconocido"
+
+            data = {
+                'item': servicio.codigo,
+                'nombre': servicio.nombre,
+                'iva': iva_texto,
+                'cuenta': servicio.contable,
+                'embarque': embarque_texto,
+                'comp': servicio.activa,
+                'gasto': servicio.modo,
+                'imputar': servicio.imputar
+            }
+            return JsonResponse(data)
+
+    return JsonResponse({'error': 'Servicio no encontrado'}, status=404)
+
 
 def generar_autogenerado(tipo, hora, fecha, numero):
     fecha = fecha.replace('-', '')
@@ -408,7 +431,7 @@ def procesar_factura(request):
                 neto = request.POST.get('neto', 0)
                 iva = request.POST.get('iva', 0)
 
-                items_data = json.loads(request.POST.get('items'))
+                items_data = json.loads(request.POST.get('items')) #llega mal el codigo del item
 
                 tipo_mov = tipo
                 tipo_asiento = 'V'
@@ -977,7 +1000,7 @@ def gastos_detalle_marcar(numero_preventa,autogenerado):
             s.save()
 
     except Exception as e:
-        raise TypeError(str(e))
+        pass
 
 def generar_numero():
     # Obtener la fecha y hora actual
@@ -1195,7 +1218,14 @@ def cargar_preventa_infofactura(request):
         try:
             prev = VPreventas.objects.get(znumero=preventa)
 
-            gastos_raw = VistaGastosPreventa.objects.filter(numero=referencia,source=clase)
+            # gastos_raw = VistaGastosPreventa.objects.filter(numero=referencia,source=clase)
+
+            gastos_raw = VistaGastosPreventa.objects.filter(
+                numero=referencia,
+                source=clase
+            ).filter(
+                Q(detalle__isnull=True) | Q(detalle='') | Q(detalle='S/I')
+            )
 
             reg = Factudif.objects.filter(znumero=preventa)
 
@@ -1214,7 +1244,7 @@ def cargar_preventa_infofactura(request):
                     if g.id_servicio == num_servicio and (precio == monto_gasto or costo == monto_gasto):
                         ids_coincidentes.append(g.id)
 
-            gastos = VistaGastosPreventa.objects.filter(id__in=ids_coincidentes)
+            gastos = VistaGastosPreventa.objects.filter(id__in=ids_coincidentes,source=prev.zclase)
 
             total_gastos = gastos.count()
             gastos_paginated = gastos[start:start + length]
@@ -1231,6 +1261,7 @@ def cargar_preventa_infofactura(request):
                         'moneda': gasto.moneda,
                         'posicion': prev.zposicion,
                         'cuenta': gasto.cuenta,
+                        'codigo': gasto.id_servicio,
                     }
 
                     total_sin_iva += valor
@@ -1246,33 +1277,28 @@ def cargar_preventa_infofactura(request):
             try:
                 if clase == "IM":
                     embarque = Embarqueaereo.objects.get(numero=ref)
-                    cliente = Clientes.objects.get(codigo=embarque.cliente)
                     moneda = Monedas.objects.get(codigo=embarque.moneda).nombre
                 elif clase == "IA":
                     embarque = ImportEmbarqueaereo.objects.get(numero=ref)
-                    cliente = Clientes.objects.get(codigo=embarque.cliente)
                     moneda = embarque.moneda
                 elif clase == "EA":
                     embarque = ExportEmbarqueaereo.objects.get(numero=ref)
-                    cliente = Clientes.objects.get(codigo=embarque.cliente)
                     moneda = embarque.moneda
                 elif clase == "EM":
                     embarque = ExpmaritEmbarqueaereo.objects.get(numero=ref)
-                    cliente = Clientes.objects.get(codigo=embarque.cliente)
                     moneda = embarque.moneda
                 elif clase == "IT":
                     embarque = ImpterraEmbarqueaereo.objects.get(numero=ref)
-                    cliente = Clientes.objects.get(codigo=embarque.cliente)
                     moneda = embarque.moneda
                 elif clase == "ET":
                     embarque = ExpterraEmbarqueaereo.objects.get(numero=ref)
-                    cliente = Clientes.objects.get(codigo=embarque.cliente)
                     moneda = embarque.moneda
 
             except Embarqueaereo.DoesNotExist:
                 embarque=None
                 moneda = None
-                cliente = None
+
+            cliente = Clientes.objects.get(codigo=prev.zcliente)
 
             llegada_salida = (
                 prev.zllegasale.strftime('%Y-%m-%d') if prev.zllegasale else None

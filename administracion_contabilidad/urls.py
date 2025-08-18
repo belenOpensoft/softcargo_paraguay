@@ -18,7 +18,7 @@ from administracion_contabilidad.views.cobranza import cobranza_view, source_cob
 from administracion_contabilidad.views.facturacion import facturacion_view, buscar_clientes, buscar_cliente, \
     buscar_item_v, buscar_items_v, procesar_factura, source_facturacion, source_infofactura, \
     cargar_preventa_infofactura, source_infofactura_cliente, cargar_preventa_infofactura_multiple, guardar_arbitraje, \
-    get_datos_embarque, hacer_nota_credito, cargar_pendientes_imputacion_venta
+    get_datos_embarque, hacer_nota_credito, cargar_pendientes_imputacion_venta, buscar_items_v_codigo
 from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
 from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos, reimprimir_asiento
@@ -50,6 +50,7 @@ urlpatterns = [
     path('buscar_clientes/', buscar_clientes, name='buscar_clientes'),
     path('buscar_item_v/', buscar_item_v, name='buscar_item_v'),
     path('buscar_items_v/', buscar_items_v, name='buscar_items_v'),
+    path('buscar_items_v_codigo/', buscar_items_v_codigo, name='buscar_items_v_codigo'),
     path('proveedores_gastos/', proveedores_gastos_view, name='proveedores_gastos'),
     path('buscar_proveedor/', buscar_proveedor, name='buscar_proveedor'),
     path('buscar_proveedores/', buscar_proveedores, name='buscar_proveedores'),

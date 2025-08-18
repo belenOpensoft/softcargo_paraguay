@@ -1109,148 +1109,7 @@ function cargar_preventas(){
             }
             });
 }
-/*
-$('#preventa_table tbody').on('dblclick', 'tr', function () {
-    $('#pararesetear').trigger('reset');
-    $('#pararesetear2').trigger('reset');
-    let referencia = $(this).find('td').eq(8).text();
-    let clase = $(this).find('td').eq(7).text();
-    let preventa = $(this).find('td').eq(0).text();
 
-    $.ajax({
-        url: "/admin_cont/cargar_preventa_infofactura/",
-        method: 'POST',
-        data: {
-            'referencia': referencia,
-            'clase': clase,
-            'preventa': preventa
-        },
-        headers: {'X-CSRFToken': csrf_token},
-        success: function (response) {
-            let preventa = response.data_preventa;
-            let gastos = response.data;
-
-            localStorage.setItem('gastos_preventa', JSON.stringify(gastos));
-            localStorage.setItem('preventa', JSON.stringify(preventa));
-
-            // Asignar valores de preventa a los campos de la interfaz
-            $('#moneda').val(preventa.moneda);
-            $('#total_con_iva').val(preventa.total_con_iva);
-            $('#total_sin_iva').val(preventa.total_sin_iva);
-            $('#cliente_i').val(preventa.cliente_i);
-            $('#peso').val(preventa.peso);
-            $('#direccion').val(preventa.direccion);
-            $('#localidad').val(preventa.localidad);
-            $('#aplic').val(preventa.aplic);
-            $('#bultos').val(preventa.bultos);
-            $('#volumen').val(preventa.volumen);
-            $('#commodity').val(preventa.commodity);
-            $('#inconterms').val(preventa.inconterms);
-            $('#flete').val(preventa.flete);
-            $('#deposito').val(preventa.deposito);
-            $('#wr').val(preventa.wr);
-            $('#referencia').val(preventa.referencia);
-            $('#llegada_salida').val(preventa.llegada_salida);
-            $('#origen').val(preventa.origen);
-            $('#destino').val(preventa.destino);
-            $('#transportista').val(preventa.transportista);
-            $('#consignatario').val(preventa.consignatario);
-            $('#embarcador').val(preventa.embarcador);
-            $('#agente').val(preventa.agente);
-            $('#vuelo_vapor').val(preventa.vuelo_vapor);
-            $('#seguimiento').val(preventa.seguimiento);
-            $('#mawb_mbl_mcrt').val(preventa.mawb_mbl_mcrt);
-            $('#hawb_hbl_hcrt').val(preventa.hawb_hbl_hcrt);
-            $('#posicion').val(preventa.posicion);
-            $('#status').val(preventa.status);
-            $('#orden').val(preventa.orden);
-            $('#modo').val(preventa.modo);
-
-            // Configurar y cargar los datos en la tabla DataTables
-            if ($.fn.DataTable.isDataTable("#tabla_gastos_preventa_factura")) {
-                $('#tabla_gastos_preventa_factura').DataTable().clear().destroy();
-            }
-
-            $('#tabla_gastos_preventa_factura').DataTable({
-                info: false,        // Oculta "Mostrando X a Y de Z registros"
-                lengthChange: false,
-                data: gastos,
-                columns: [
-                    {data: 'descripcion', title: 'Descripcion'},
-                    {data: 'total', title: 'Total'},
-                    {data: 'iva', title: 'IVA'},
-                    {data: 'original', title: 'Original'},
-                    {data: 'moneda', title: 'Moneda'}
-                ],
-                paging: false,
-                searching: true,
-                ordering: true,
-                responsive: true,
-                language: {
-                    url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
-                },
-                "columnDefs": [
-                    {
-                        targets: 0,  // Primera columna: Descripcion
-                        className: "dt-body-left",  // Aplica una clase CSS para alinear a la izquierda
-                        render: function (data, type, row) {
-                            return data; // Puedes aplicar un formato o transformación aquí si es necesario
-                        }
-                    },
-                    {
-                        targets: 1,  // Segunda columna: Total
-                        className: "dt-body-right",  // Aplica una clase CSS para alinear a la derecha
-                        render: function (data, type, row) {
-                            // Ejemplo de formatear como moneda
-                            return '$' + parseFloat(data).toFixed(2);  // Si 'data' es el total, puedes formatearlo como moneda
-                        }
-                    },
-                    {
-                        targets: 2,  // Tercera columna: IVA
-                        className: "dt-body-center",  // Aplica una clase CSS para centrar el texto
-                        render: function (data, type, row) {
-                            return data;  // Se puede transformar el texto si es necesario
-                        }
-                    },
-                    {
-                        targets: 3,  // Cuarta columna: Original
-                        className: "dt-body-center",  // Aplica una clase CSS para centrar el texto
-                        render: function (data, type, row) {
-                            return data;  // Transformación si es necesario
-                        }
-                    },
-                    {
-                        targets: 4,  // Quinta columna: Moneda
-                        className: "dt-body-center",  // Aplica una clase CSS para centrar el texto
-                        render: function (data, type, row) {
-                            return data;  // Transformación si es necesario
-                        }
-                    }
-                ],
-            });
-
-        },
-        error: function () {
-            alert('Error al realizar la consulta.');
-        }
-    });
-});
-$('#preventa_table tbody').on('click', 'tr', function () {
-    let preventa = $(this).find('td').eq(0).text();
-    let clase = $(this).find('td').eq(7).text();
-
-    if ($(this).hasClass('table-secondary')) {
-        $(this).removeClass('table-secondary');
-        localStorage.removeItem('preventa_id', preventa);
-        localStorage.removeItem('preventa_clase', clase);
-    } else {
-        $('#preventa_table tbody tr.table-secondary').removeClass('table-secondary');
-        $(this).addClass('table-secondary');
-        localStorage.setItem('preventa_id', preventa);
-        localStorage.setItem('preventa_clase', clase);
-    }
-});
-*/
 function facturar_preventa() {
     $("#preventa_modal").dialog('close');
 
@@ -1285,54 +1144,13 @@ function facturar_preventa() {
     if (gastos.length > 0) {
         gastos.forEach(gasto => {
             const partes = gasto.descripcion.split(' - ');
-            const codigo = partes[0];
+            const codigo = gasto.codigo;
             const desc = partes[1] || '';
             agregarItem(desc, codigo, gasto.total, gasto.posicion);
         });
     }
 }
 
-function agregarItem_old(desc, codigo, precio,posicion=null) {
-    const item = desc;
-    const descripcion = desc;
-
-    if (item && descripcion && !isNaN(precio)) {
-        $.ajax({
-            url: "/admin_cont/buscar_items_v",
-            data: {id: codigo},
-            dataType: 'json',
-            success: servicio => {
-                const iva = servicio.iva;
-                const cuenta = servicio.cuenta;
-                const codigo = servicio.item;
-
-                let row = `
-                    <tr data-precio="${precio}" data-iva="${iva}" data-cuenta="${cuenta}">
-                        <td>${codigo}</td>
-                        <td>${descripcion}</td>
-                        <td>${precio.toFixed(2)}</td>
-                        <td>${iva}</td>
-                        <td>${cuenta}</td>`;
-                if (posicion !=null){
-                    row+= `<td>${posicion}</td>
-                    <td>${posicion}</td>`;
-                }
-                   row+= `</tr>`;
-
-                $('#itemTable tbody').append(row);
-                $('#itemTable').show();
-                $('#eliminarSeleccionados').show();
-                //limpiarCampos();
-                actualizarTotal();
-                $('#totales').show();
-            },
-            error: xhr => console.error('Error al obtener los detalles del item:', xhr)
-        });
-
-    } else {
-        alert('Por favor, completa todos los campos antes de agregar el item.');
-    }
-}
 
 function agregarItem(desc, codigo, precio, posicion = null) {
     const item = desc;
@@ -1342,15 +1160,14 @@ function agregarItem(desc, codigo, precio, posicion = null) {
 
     if (item && descripcion && !isNaN(precio)) {
         $.ajax({
-            url: "/admin_cont/buscar_items_v",
+            url: "/admin_cont/buscar_items_v_codigo",
             data: { id: codigo },
             dataType: 'json',
             success: servicio => {
                 const iva = servicio.iva;
                 const cuenta = servicio.cuenta;
                 const codigo = servicio.item;
-                const imputar = servicio.imputar || "";
-
+                const imputar = servicio.imputar || ""
 
                 itemCounter++;
                 const rowId = `item-${itemCounter}`;

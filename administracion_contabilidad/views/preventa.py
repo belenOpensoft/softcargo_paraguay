@@ -29,6 +29,7 @@ from impterrestre.models import VEmbarqueaereo as Vterrestre
 from expmarit.models import VEmbarqueaereo as Vexpmarit
 from expaerea.models import VEmbarqueaereo as Vexpaerea
 from expterrestre.models import VEmbarqueaereo as Vexpterrestre
+from django.db.models import Q, Case, When, IntegerField
 
 def generar_autogenerado(fecha_noseusa=None):
     fecha = datetime.now()
@@ -69,15 +70,63 @@ def guardar_infofactura(request):
             numero = infofactura.get_num()
 
             embarque = preventa_datos.get("referencia")
+            # ids = preventa_datos.get("items_ids")
+            # clase = posicion[:2]
+            #
+            # gastos = VistaGastosPreventa.objects.filter(
+            #     numero=embarque,
+            #     source=clase,
+            #     modo=tipo.capitalize()
+            # ).filter(
+            #     Q(detalle__isnull=True) | Q(detalle='S/I') | Q(detalle='')
+            # )
+            ids_raw = preventa_datos.get("items_ids", []) or []
+
+            # 1) Normalizar -> ints únicos
+            try:
+                ids_seleccionados = list({int(x) for x in ids_raw})
+            except (TypeError, ValueError):
+                return JsonResponse({'error': 'items_ids inválidos'}, status=400)
+
             clase = posicion[:2]
 
-            gastos = VistaGastosPreventa.objects.filter(
+            # Base (tu mismo filtro de siempre)
+            gastos_base = (VistaGastosPreventa.objects
+                           .filter(
                 numero=embarque,
                 source=clase,
                 modo=tipo.capitalize()
-            ).filter(
-                Q(detalle__isnull=True) | Q(detalle='S/I') | Q(detalle='')
             )
+                           .filter(Q(detalle__isnull=True) | Q(detalle='S/I') | Q(detalle=''))
+                           )
+
+            # 2) Si mandaron IDs, verificá pertenencia y filtrá por ellas
+            if ids_seleccionados:
+                # Verificación de pertenencia (opcional pero recomendable)
+                valid_count = VistaGastosPreventa.objects.filter(
+                    pk__in=ids_seleccionados,
+                    numero=embarque,
+                    source=clase,
+                    modo=tipo.capitalize()
+                ).count()
+
+                if valid_count != len(ids_seleccionados):
+                    return JsonResponse({'error': 'Algún ítem seleccionado no pertenece al embarque/clase/modo'},
+                                        status=400)
+
+                # 3) Aplicar filtro por pk__in
+                gastos = gastos_base.filter(pk__in=ids_seleccionados)
+
+                # 4) (Opcional) preservar el orden en que vinieron las IDs
+                orden_map = {pk: idx for idx, pk in enumerate(ids_seleccionados)}
+                case_expr = Case(
+                    *[When(pk=pk, then=idx) for pk, idx in orden_map.items()],
+                    output_field=IntegerField()
+                )
+                gastos = gastos.order_by(case_expr)
+            else:
+                # Sin selección explícita: mantenés tu comportamiento actual (todos los elegibles)
+                gastos = gastos_base
 
             for gasto in gastos:
                 nueva_infofactura = Factudif()

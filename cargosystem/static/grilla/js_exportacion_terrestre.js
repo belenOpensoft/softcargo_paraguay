@@ -5542,6 +5542,18 @@ let tabla = localStorage.getItem('tabla_origen');
                         },
                         "columns": [
                             {
+                                "data": null,
+                                "orderable": false,
+                                "className": 'dt-body-center',
+                                "render": function (data, type, row) {
+                                    const color = row[17]; // el valor que usas para determinar el color
+                                    if (color === 'ROJO' || color === 'AMARILLO' || color === 'VERDE') {
+                                        return ''; // no muestra checkbox
+                                    }
+                                    return `<input type="checkbox" class="fila-check" value="${row[0]}">`;
+                                }
+                            },
+                            {
                                 "data": 1,    // Concepto - `data[1]`
                                 "title": "Concepto"
                             },
