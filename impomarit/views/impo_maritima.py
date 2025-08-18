@@ -288,12 +288,12 @@ def get_data_general(registros_filtrados,mapa_reservas):
             gastos = Serviceaereo.objects.filter(numero=registro.numero).count()
             rutas = Conexaerea.objects.filter(numero=registro.numero).count()
             notas = Faxes.objects.filter(numero=registro.numero).count()
-            registro_json.append(archivos) #12
-            registro_json.append(embarques) #13
-            registro_json.append(envases) #14
-            registro_json.append(gastos) #15
-            registro_json.append(rutas) #16
-            registro_json.append(notas) #17
+            registro_json.append(archivos) #13
+            registro_json.append(embarques) #14
+            registro_json.append(envases) #15
+            registro_json.append(gastos) #16
+            registro_json.append(rutas) #17
+            registro_json.append(notas) #18
 
             if id_reserva:
                 registro_json.append('MASTER')
