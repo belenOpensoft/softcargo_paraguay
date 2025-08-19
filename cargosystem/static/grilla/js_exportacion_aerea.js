@@ -1604,7 +1604,20 @@ function aplicable_volumen(volumen){
                     $('#edit_master_modal').dialog('close');
 //                    $('#table_edit_ea').DataTable().destroy();
                 } else {
-                    alert('Error: ' + response.error_message);
+                    // mensaje general
+                    let msg = response.message || 'Error inesperado';
+
+                    // si hay errores de campos, los convierto a string legible
+                    if (response.errors) {
+                        let errores = JSON.parse(response.errors);
+                        let detalle = '';
+                        for (let campo in errores) {
+                            detalle += campo + ': ' + errores[campo][0].message + '\n';
+                        }
+                        msg += '\n\nDetalles:\n' + detalle;
+                    }
+
+                    alert(msg);
                 }
             },
             error: function (xhr, status, error) {
@@ -1831,11 +1844,12 @@ function aplicable_volumen(volumen){
     alert('No se admiten valores negativos en los campos numéricos.')
     }else{
         var numero = localStorage.getItem('numero_embarque');
+        // var numero = localStorage.getItem('numero_embarque');
         var formData = $(this).serialize();
         $('#edit_house_form').attr('action', '/exportacion_aerea/edit_house/' + numero + '/');
-        if(lugar==='edit_directo'){
-        formData += '&consolidado=1';
-        }
+        // if(lugar==='edit_directo'){
+        // formData += '&consolidado=1';
+        // }
 
         $.ajax({
             url: $(this).attr('action'),
@@ -1868,7 +1882,20 @@ function aplicable_volumen(volumen){
 
                   $('#edit_house_modal').dialog('close');
                 } else {
-                    alert('Error: ' + response.error_message);
+                    // mensaje general
+                    let msg = response.message || 'Error inesperado';
+
+                    // si hay errores de campos, los convierto a string legible
+                    if (response.errors) {
+                        let errores = JSON.parse(response.errors);
+                        let detalle = '';
+                        for (let campo in errores) {
+                            detalle += campo + ': ' + errores[campo][0].message + '\n';
+                        }
+                        msg += '\n\nDetalles:\n' + detalle;
+                    }
+
+                    alert(msg);
                 }
             },
             error: function (xhr, status, error) {

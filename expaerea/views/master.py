@@ -129,7 +129,7 @@ def master_detail(request):
                     'agente_e': master.agente,
                     'consignatario_e': master.consignatario,
                     'aduana_e': master.aduana,
-                    'tarifa_e': master.tarifa,
+                    'tarifa_e': master.tarifaawb,
                     'moneda_e': master.moneda,
                     'arbitraje_e': master.arbitraje,
                     'kilos_e': master.kilos,
@@ -383,7 +383,7 @@ def edit_master(request, id_master):
                 return JsonResponse({
                     'success': False,
                     'message': 'Formulario inválido.',
-                    'errors': form.errors
+                    'errors': form.errors.as_json()
                 })
         except Exception as e:
             messages.error(request, str(e))

@@ -187,6 +187,8 @@ $(document).ready(function () {
             } else {
                 localStorage.setItem('num_house_gasto', numero_embarque);
                 localStorage.setItem('id_house_gasto', id_embarque);
+                localStorage.setItem('numero_embarque', id_embarque);
+
                 editar_directo(numero_embarque);
             }
         }
@@ -218,7 +220,20 @@ $(document).ready(function () {
 
                   $('#edit_house_modal_general').dialog('close');
                 } else {
-                    alert('Error: ' + response.error_message);
+                    // mensaje general
+                    let msg = response.message || 'Error inesperado';
+
+                    // si hay errores de campos, los convierto a string legible
+                    if (response.errors) {
+                        let errores = JSON.parse(response.errors);
+                        let detalle = '';
+                        for (let campo in errores) {
+                            detalle += campo + ': ' + errores[campo][0].message + '\n';
+                        }
+                        msg += '\n\nDetalles:\n' + detalle;
+                    }
+
+                    alert(msg);
                 }
             },
             error: function (xhr, status, error) {

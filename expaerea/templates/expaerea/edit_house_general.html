@@ -109,15 +109,28 @@
                     </svg>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" onclick="abrir_aplicable_general()" title="Calculo de aplicable">
-                       <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-coin" viewBox="0 0 16 16">
-                      <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>
-                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                      <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
-                    </svg>
+                <li class="nav-item active dropdown" style="margin-right: 100px;">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="navbarScrollingDropdown2" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Acciones
                     </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
+                        <li>
+                            <a class="dropdown-item" TARGET="_blank" href="descargar_pdf/WayBill.pdf">DESCARGAR PLANTILLA GUIA</a>
+                            <a class="dropdown-item" onclick="descargar_hawb_general()" id="descargar_guia_house">DESCARGAR GUIA</a>
+                            <a class="dropdown-item" onclick="descargar_hawb_draft_general()" id="descargar_guia_draft_house">DESCARGAR GUIA DRAFT</a>
+                        </li>
+                    </ul>
                 </li>
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link text-white" onclick="abrir_aplicable_general()" title="Calculo de aplicable">-->
+<!--                       <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-coin" viewBox="0 0 16 16">-->
+<!--                      <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>-->
+<!--                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>-->
+<!--                      <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>-->
+<!--                    </svg>-->
+<!--                    </a>-->
+<!--                </li>-->
                 <li class="nav-item text-white">
                     <button type="button" class="btn btn-outline-light btn-eliminar-hijo" style="margin-top: 4px;margin-left: 5px;" onclick="eliminar_house_general()">
                         Eliminar Hijo
@@ -135,17 +148,12 @@
     <div style="max-height: 300px; overflow-y: auto;">
         <table class="table table-hover table-striped table-sm" style="margin:0;">
             <tbody id="listaEmailsHouse_general">
-                <tr class="email" data-id="NLC" data-tt="Aviso de embarque"><td>Aviso de embarque</td></tr>
-                <tr class="email" data-id="DES" data-tt="Aviso de desconsolidacion" data-to="1"><td>Aviso de desconsolidacion</td></tr>
-                <tr class="email" data-id="NLC" data-tt="Instruccion de embarque"><td>Instrucción de embarque</td></tr>
-                <tr class="email" data-id="NLC" data-tt="Liberacion"><td>Liberación</td></tr>
-                <tr class="email" data-id="NLC" data-tt="Notificacion cambio de linea"><td>Notificación cambio de línea</td></tr>
+                <tr class="email" data-id="DES" data-to="1" data-tt="Aviso de desconsolidacion"><td>Aviso de desconsolidacion</td></tr>
                 <tr class="email" data-id="NLC" data-tt="Notificación de llegada de carga"><td>Notificación de llegada de carga</td></tr>
                 <tr class="email" data-id="NLC" data-tt="Notificación de transbordo de carga"><td>Notificación de transbordo de carga</td></tr>
                 <tr class="email" data-id="AEM" data-tt="Novedades sobre la carga"><td>Novedades sobre la carga</td></tr>
                 <tr class="email" data-id="NLC" data-tt="Orden de facturacion"><td>Orden de facturación</td></tr>
                 <tr class="email" data-id="TOP" data-tt="Routing Order"><td>Routing Order</td></tr>
-                <tr class="email" data-id="NLC" data-tt="Shipping instruction"><td>Shipping Instruction</td></tr>
                 <tr class="email" data-id="TOP" data-to="0" data-tt="Traspaso a operaciones"><td>Traspaso a operaciones</td></tr>
             </tbody>
         </table>
@@ -155,7 +163,7 @@
     {% csrf_token %}
 <table id="table_house_style" class="table table-condensed table-sm form-control table-th" style="margin-top: 10px; margin-bottom: 10px; width:fit-content;" border="1">
 
-    <tbody>
+   <tbody>
         <tr>
             <td>{{ form_edit_house_general.cliente.label }}</td>
            <td> {{ form_edit_house_general.cliente_i }}
@@ -217,19 +225,6 @@
             <td>{{ form_edit_house_general.status_h }}</td>
         </tr>
 
-        <tr>
-            <td >{{ form_edit_house_general.notificar_cliente.label }}</td>
-            <td>{{ form_edit_house_general.notificar_cliente }}</td>
-
-            <td >{{ form_edit_house_general.notificar_agente.label }}</td>
-            <td>{{ form_edit_house_general.notificar_agente }}</td>
-
-            <td >{{ form_edit_house_general.eta.label }}</td>
-            <td>{{ form_edit_house_general.eta }}</td>
-
-            <td >{{ form_edit_house_general.etd.label }}</td>
-            <td>{{ form_edit_house_general.etd }}</td>
-        </tr>
 
         <tr>
             <td >{{ form_edit_house_general.ageventas.label }}</td>
@@ -244,8 +239,19 @@
             <td>{{ form_edit_house_general.wreceipt }}</td>
 
         </tr>
+
+           <tr>
+
+            <td >{{ form_edit_house_general.eta.label }}</td>
+            <td>{{ form_edit_house_general.eta }}</td>
+
+            <td >{{ form_edit_house_general.etd.label }}</td>
+            <td>{{ form_edit_house_general.etd }}</td>
+        </tr>
     </tbody>
 </table>
+
 </form>
+
 
 </div>

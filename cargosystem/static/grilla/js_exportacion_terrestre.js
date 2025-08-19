@@ -1406,7 +1406,20 @@ var expandedRow;
                     $('#edit_master_modal').dialog('close');
 //                    $('#table_edit_et').DataTable().destroy();
                 } else {
-                    alert('Error: ' + response.error_message);
+                    // mensaje general
+                    let msg = response.message || 'Error inesperado';
+
+                    // si hay errores de campos, los convierto a string legible
+                    if (response.errors) {
+                        let errores = JSON.parse(response.errors);
+                        let detalle = '';
+                        for (let campo in errores) {
+                            detalle += campo + ': ' + errores[campo][0].message + '\n';
+                        }
+                        msg += '\n\nDetalles:\n' + detalle;
+                    }
+
+                    alert(msg);
                 }
             },
             error: function (xhr, status, error) {
@@ -1665,7 +1678,20 @@ var expandedRow;
 
                   $('#edit_house_modal').dialog('close');
                 } else {
-                    alert('Error: ' + response.error_message);
+                    // mensaje general
+                    let msg = response.message || 'Error inesperado';
+
+                    // si hay errores de campos, los convierto a string legible
+                    if (response.errors) {
+                        let errores = JSON.parse(response.errors);
+                        let detalle = '';
+                        for (let campo in errores) {
+                            detalle += campo + ': ' + errores[campo][0].message + '\n';
+                        }
+                        msg += '\n\nDetalles:\n' + detalle;
+                    }
+
+                    alert(msg);
                 }
             },
             error: function (xhr, status, error) {

@@ -44,7 +44,7 @@ def add_importacion_maritima(request):
                 reserva.vapor = form.cleaned_data.get('vapor', "")  # Si vacío, asignar ""
                 reserva.viaje = form.cleaned_data.get('viaje', "")  # Si vacío, asignar ""
                 reserva.aduana = form.cleaned_data.get('aduana', "")  # Si vacío, asignar ""
-                reserva.tarifaawb = form.cleaned_data.get('tarifa', 0)  # Si vacío, asignar 0
+                reserva.tarifa = form.cleaned_data.get('tarifa', 0)  # Si vacío, asignar 0
                 reserva.moneda = form.cleaned_data.get('moneda', "")  # Si vacío, asignar ""
                 reserva.arbitraje = form.cleaned_data.get('arbitraje', "")  # Si vacío, asignar ""
                 # reserva.kilosmadre = form.cleaned_data.get('kilosmadre', 0)  # Si vacío, asignar 0
@@ -187,7 +187,7 @@ def edit_master_old(request, id_master):
             master.viaje = form.cleaned_data.get('viaje_e', 0) if form.cleaned_data.get('viaje_e') not in [None, ''] else 0
             master.aduana = form.cleaned_data.get('aduana_e', 'S/I')
             master.moneda = form.cleaned_data.get('moneda_e', "")
-            master.tarifaawb = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
+            master.tarifa = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
             master.arbitraje = form.cleaned_data.get('arbitraje_e', 0) if form.cleaned_data.get('arbitraje_e') not in [None, ''] else 0
             # master.bultosmadre = form.cleaned_data.get('bultosmadre_e', 0) if form.cleaned_data.get('bultosmadre_e') not in [None, ''] else 0
             # master.kilosmadre = form.cleaned_data.get('kilosmadre_e', 0) if form.cleaned_data.get('kilosmadre_e') not in [None, ''] else 0
@@ -260,7 +260,7 @@ def edit_master(request, id_master):
                 master.viaje = form.cleaned_data.get('viaje_e', 0) if form.cleaned_data.get('viaje_e') not in [None, ''] else 0
                 master.aduana = form.cleaned_data.get('aduana_e', 'S/I')
                 master.moneda = form.cleaned_data.get('moneda_e', "")
-                master.tarifaawb = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
+                master.tarifa = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
                 master.arbitraje = form.cleaned_data.get('arbitraje_e', 0) if form.cleaned_data.get('arbitraje_e') not in [None, ''] else 0
                 master.trafico = form.cleaned_data.get('trafico_e', 0) if form.cleaned_data.get('trafico_e') not in [None, ''] else 0
                 master.cotizacion = form.cleaned_data.get('cotizacion_e', 0) if form.cleaned_data.get('cotizacion_e') not in [None, ''] else 0

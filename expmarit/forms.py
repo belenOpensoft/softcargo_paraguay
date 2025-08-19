@@ -241,10 +241,9 @@ class edit_form(BSModalModelForm):
     label = "Posición"
         )
 
-    tarifa_e = forms.CharField(
-        widget=forms.TextInput(
-            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
-        max_length=20,
+    tarifa_e = forms.DecimalField(
+        widget=forms.NumberInput(
+            attrs={'class': 'form-control'}),
         required=False,  # No obligatorio
         label="Tarifa"
     )
@@ -471,6 +470,8 @@ class add_house(BSModalModelForm):
                 'id': 'posicion_gh'
             }
         ),
+        label='Posición'
+
     )
     agente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'agente_addh', 'required':False}))
     transportista = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'transportista_addh', 'required':False}))
@@ -677,7 +678,9 @@ class edit_house(BSModalModelForm):
         label='ETA', required=False)
     posicion_h = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', 'autocomplete': 'off', 'required': True, 'name': 'posicion_h', 'maxlength': 20,
-               'readonly': True, 'id': 'posicion_gh_e'}))
+               'readonly': True, 'id': 'posicion_gh_e'}),
+        label='Posición'
+    )
 
     agente = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control input-sobrepasar', 'id': 'agente_addh_e', 'required': False}),required=False)
@@ -1355,7 +1358,9 @@ class edit_house_general(BSModalModelForm):
         label='ETA', required=False)
     posicion_h = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', 'autocomplete': 'off', 'required': True, 'name': 'posicion_h',
-               'maxlength': 20, 'readonly': True, 'id': 'posicion_gh_e_general'}))
+               'maxlength': 20, 'readonly': True, 'id': 'posicion_gh_e_general'}),
+        label='Posición'
+    )
 
     agente = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control input-sobrepasar', 'id': 'agente_addh_e_general', 'required': False}),

@@ -240,10 +240,9 @@ class edit_form(BSModalModelForm):
     label = "Posición"
         )
 
-    tarifa_e = forms.CharField(
-        widget=forms.TextInput(
-            attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20, 'type': 'number'}),
-        max_length=20,
+    tarifa_e = forms.DecimalField(
+        widget=forms.NumberInput(
+            attrs={'class': 'form-control'}),
         required=False,  # No obligatorio
         label="Tarifa"
     )
@@ -456,6 +455,7 @@ class add_house(BSModalModelForm):
                 'id': 'posicion_gh'
             }
         ),
+        label='Posición'
     )
     agente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'agente_addh', 'required':False}))
     transportista = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control input-sobrepasar','id':'transportista_addh', 'required':False}))
@@ -642,7 +642,9 @@ class edit_house(BSModalModelForm):
         label='ETA', required=False)
     posicion_h = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', 'autocomplete': 'off', 'required': True, 'name': 'posicion_h', 'maxlength': 20,
-               'readonly': True, 'id': 'posicion_gh_e'}))
+               'readonly': True, 'id': 'posicion_gh_e'}),
+        label='Posición'
+    )
 
     agente = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control input-sobrepasar', 'id': 'agente_addh_e', 'required': False}))
@@ -1173,3 +1175,144 @@ class embarquesFormHouse(BSModalModelForm):
         widget=forms.RadioSelect(attrs={'style':'width:50px;'}),
     )
     tarifafija = forms.BooleanField(label="Tarifa fija")
+
+class edit_house_general(BSModalModelForm):
+    class Meta:
+        model = ExportEmbarqueaereo
+        fields = [
+            'origen',
+            'destino',
+            'moneda',
+            'operacion',
+            'arbitraje',
+            'wreceipt',
+        ]
+
+        labels = {
+            'wreceipt': 'WR',
+            'pago': 'Pago flete',
+            'diasalmacenaje': 'Dias de almacenaje',
+            'demora': 'Dias de demora',
+        }
+
+        widgets = {
+            'pago': forms.NumberInput(attrs={'id': 'pago_house_e_general'}),
+            'arbitraje': forms.NumberInput(attrs={'id': 'arbitraje_house_e_general'}),
+            'wreceipt': forms.TextInput(attrs={'id': 'wreceipt_he_general'}),
+            'operacion': forms.TextInput(attrs={'id': 'operacion_he_general'}),
+            'modo': forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+            self.fields[field].widget.attrs['attr'] = 'data-id'
+            if field == 'moneda':
+                monedas = [("", "---"), ] + list(
+                    Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
+                self.fields[field].choices = monedas
+
+    choice_op = (("", "---"),
+                 ("IMPORTACION", "IMPORTACION"),
+                 ("EXPORTACION", "EXPORTACION"),
+                 ("IMPORTACION LCL", "IMPORTACION LCL"),
+                 ("IMPORTACION FCL", "IMPORTACION FCL"),
+                 ("IMPORTACION PART CONT.", "IMPORTACION PART CONT."),
+                 ("TRANSITO FCL", "TRANSITO FCL"),
+                 ("IMPORTACION CONSOLIDADA", "IMPORTACION CONSOLIDADA"),
+                 ("REEMBARCO", "REEMBARCO"),
+                 ("TRANSITO", "TRANSITO"),
+                 ("TRASLADO", "TRASLADO"),
+                 ("MUESTRA", "MUESTRA"),
+                 )
+
+    # primer columna
+    pago = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control','id':'id_pago_general', "autocomplete": "off", 'required': False, 'max_length': 1,"style":"width:100%;"},),required=True,label="Pago",choices=(("","-------"),("C","Collect"),("P","Prepaid")))
+
+    awb = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'id_awbhijo_e_general'}), label='Master')
+    cliente = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'cliente_addh_e_general', 'required': False}), required=False)
+    house = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'house_addh_e_general', 'required': False}),
+        required=False)
+    embarcador = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'embarcador_addh_e_general', 'required': False}), required=False)
+    vendedor = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'vendedor_addh_e_general', 'required': False}), required=False,
+                               label='Vendedor')
+    consignatario = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'consignatario_addh_e_general', 'required': False}), required=False)
+    etd = forms.DateField(
+        widget=forms.DateInput(attrs={'class': 'form-control', 'id': 'etd_e_general', 'type': 'date'}),
+        label='ETD', required=False)
+    eta = forms.DateField(
+        widget=forms.DateInput(attrs={'class': 'form-control', 'id': 'eta_e_general', 'type': 'date'}),
+        label='ETA', required=False)
+    posicion_h = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control', 'autocomplete': 'off', 'required': True, 'name': 'posicion_h', 'maxlength': 20,
+               'readonly': True, 'id': 'posicion_gh_e_general'}),
+        label='Posición'
+    )
+
+    agente = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'agente_addh_e_general', 'required': False}))
+    transportista = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'transportista_addh_e_general', 'required': False}))
+
+    agecompras = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'agecompras_addh_e_general', 'required': False}), required=False,
+                                 label='Ag.Compras')
+    ageventas = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control input-sobrepasar', 'id': 'ageventas_addh_e_general', 'required': False}), required=False,
+                                label='Ag.Ventas')
+
+    # segunda columna
+    origen = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'origen_addh_e_general'}))
+    destino = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'destino_addh_e_general'}))
+    operacion = forms.ChoiceField(
+        widget=forms.Select(attrs={"autocomplete": "off", 'required': False, 'id': 'operacion_editar_general'}), required=False,
+        label="Operacion", choices=choice_op, initial='')
+    moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': False, 'id': 'moneda_e_general'}),
+                               required=False, label="Moneda", choices=(), initial='')
+
+    # tercer columna
+    demora = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'maxlength': 20, 'type': 'number',
+               'id': 'dias_demora_e_general'}), max_length=20, required=False, label="Días de demora",initial=0)
+    status_h = forms.ChoiceField(widget=forms.Select(
+        attrs={'class': 'form-control', "autocomplete": "off", 'required': False, 'maxlength': 1, "style": "width:100%;",
+               'name': 'status_h_e','id':'status_h_e_general'}), required=False, label="Estado", choices=choice_status)
+    trafico = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'trafico_addh_e_general', 'required': False}),
+        required=False,initial=0)
+
+    # inputs
+    transportista_i = forms.CharField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
+               'id': 'transportista_ih_e_general', 'name': 'transportista_ih'}), required=False)
+    vendedor_i = forms.CharField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
+               'id': 'vendedor_ih_e_general', 'name': 'vendedor_ih'}), required=False)
+    agente_i = forms.CharField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', 'style': 'width: 50px; margin-right:2px;', 'readonly': 'readonly',
+               'id': 'agente_ih_e_general', 'name': 'agente_ih'}), required=False)
+    consignatario_i = forms.CharField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
+               'id': 'consignatario_ih_e_general', 'name': 'consignatario_ih'}), required=False)
+    cliente_i = forms.CharField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
+               'id': 'cliente_ih_e_general', 'name': 'cliente_ih'}), required=False)
+    agventas_i = forms.CharField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
+               'id': 'agventas_ih_e_general', 'name': 'agventas_ih'}), required=False)
+    agcompras_i = forms.CharField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
+               'id': 'agcompras_ih_e_general', 'name': 'agcompras_ih'}), required=False)
+    embarcador_i = forms.CharField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
+               'id': 'embarcador_ih_e_general', 'name': 'embarcador_ih'}), required=False)
+    deposito_i = forms.CharField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
+               'id': 'deposito_ih_e_general', 'name': 'deposito_ih'}), required=False)

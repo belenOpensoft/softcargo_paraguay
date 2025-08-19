@@ -41,7 +41,7 @@ def add_importacion_maritima(request):
                 reserva.numero = reserva.get_number()
                 reserva.awb = form.cleaned_data.get('awb', "")  # Si vacío, asignar ""
                 reserva.aduana = form.cleaned_data.get('aduana', "")  # Si vacío, asignar ""
-                reserva.tarifaawb = form.cleaned_data.get('tarifa', 0)  # Si vacío, asignar 0
+                reserva.tarifa = form.cleaned_data.get('tarifa', 0)  # Si vacío, asignar 0
                 reserva.moneda = form.cleaned_data.get('moneda', "")  # Si vacío, asignar ""
                 reserva.arbitraje = form.cleaned_data.get('arbitraje', "")  # Si vacío, asignar ""
                 reserva.kilos = form.cleaned_data.get('kilos', 0)  # Si vacío, asignar 0
@@ -178,7 +178,7 @@ def edit_master_old(request, id_master):
 
                 master.aduana = form.cleaned_data.get('aduana_e', 'S/I')
                 master.moneda = form.cleaned_data.get('moneda_e', "")
-                master.tarifaawb = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
+                master.tarifa = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
                 master.arbitraje = form.cleaned_data.get('arbitraje_e', 0) if form.cleaned_data.get('arbitraje_e') not in [None, ''] else 0
                 master.kilos = form.cleaned_data.get('kilos', 0)  # Si vacío, asignar 0
                 master.volumen = form.cleaned_data.get('volumen', 0)  # Si vacío, asignar 0
@@ -219,7 +219,7 @@ def edit_master_old(request, id_master):
                 return JsonResponse({
                     'success': False,
                     'message': 'Formulario inválido.',
-                    'errors': form.errors  # Mostrar los errores del formulario
+                    'errors': form.errors.as_json()  # Mostrar los errores del formulario
                 })
         except Exception as e:
             messages.error(request, str(e))
@@ -263,7 +263,7 @@ def edit_master(request, id_master):
 
                     master.aduana = form.cleaned_data.get('aduana_e', 'S/I')
                     master.moneda = form.cleaned_data.get('moneda_e', "")
-                    master.tarifaawb = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
+                    master.tarifa = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
                     master.arbitraje = form.cleaned_data.get('arbitraje_e', 0) if form.cleaned_data.get('arbitraje_e') not in [None, ''] else 0
                     master.kilos = form.cleaned_data.get('kilos', 0)
                     master.volumen = form.cleaned_data.get('volumen', 0)
@@ -320,7 +320,7 @@ def edit_master(request, id_master):
                     return JsonResponse({
                         'success': False,
                         'message': 'Formulario inválido.',
-                        'errors': form.errors
+                        'errors': form.errors.as_json()
                     })
             except Exception as e:
                 messages.error(request, str(e))

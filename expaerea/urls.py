@@ -11,7 +11,8 @@ from expaerea.views.house import add_house_impmarit, edit_house_function, house_
 from expaerea.views.exp_aerea import master_expo_aerea, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
     descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros, \
-    source_logs, buscar_registros_directos
+    source_logs, buscar_registros_directos, source_embarques_general, buscar_registros_general, \
+    embarques_exportacion_aerea
 from expaerea.views.master import master_detail, add_importacion_maritima, edit_master, get_name_by_id, \
     consultar_seguimientos
 
@@ -20,6 +21,7 @@ from expaerea.views.notas import source, guardar_notas, eliminar_nota
 from expaerea.views.pdf import get_datos_caratula
 from expaerea.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado, \
     datos_embarque_ruta, source_rutas_master, eliminar_ruta_master, guardar_ruta_master, datos_embarque_ruta_master
+from impaerea.views.imp_aerea import embarques_importacion_aerea
 
 from notificaciones.views.correos import envio_notificacion_seguimiento
 from seguimientos.views.reportes import descargar_awb_operativas, descargar_hawb_operativas, editar_hawb, guardar_hawb, \
@@ -103,6 +105,9 @@ urlpatterns = [
     path('guardar_hawb/<int:row_id>/', guardar_hawb, name='guardar_hawb'),
     path('guardar_awb/<int:row_id>/', guardar_awb, name='guardar_awb'),
 
+    path('source_embarques_general/', source_embarques_general, name='source_embarques_general'),
+    path('buscar_registros_general/', buscar_registros_general, name='buscar_registros_general'),
+    path('embarques/', embarques_exportacion_aerea, name='embarques'),
 ]
 
 
