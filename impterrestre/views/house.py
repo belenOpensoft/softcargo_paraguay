@@ -5,7 +5,7 @@ from impterrestre.models import ImpterraEmbarqueaereo, ImpterraCargaaerea, Impte
 from mantenimientos.models import Vendedores
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.contrib import messages
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from impterrestre.forms import add_house, edit_house
 from seguimientos.models import Seguimiento, Serviceaereo, Envases, Conexaerea, Cargaaerea, Attachhijo
 import re
@@ -568,30 +568,49 @@ def eliminar_house(request):
     resultado = {}
     try:
         id = request.POST['id']
-        embarque=ImpterraEmbarqueaereo.objects.filter(numero=id).first()
-        embarque.trackid=id
-        embarque.save()
-        """
-        ImpterraEmbarqueaereo.objects.get(numero=id).delete()
-        ImpterraCargaaerea.objects.filter(numero=id).delete()
-        ImpterraConexaerea.objects.filter(numero=id).delete()
-        ImpterraServiceaereo.objects.filter(numero=id).delete()
-        ImpterraEnvases.objects.filter(numero=id).delete()
-        """
-        seguimiento = Seguimiento.objects.filter(numero=embarque.seguimiento).first()
-        if embarque:
-            if seguimiento:
-                seguimiento.embarque=None
-                seguimiento.posicion=None
-                seguimiento.save()
+
+        with transaction.atomic():
+            embarque = ImpterraEmbarqueaereo.objects.filter(numero=id).first()
+            if not embarque:
+                return JsonResponse({'resultado': 'No se encontró el embarque'}, status=404)
+
+            # guardamos el nro de seguimiento antes de limpiar
+            seguimiento_num = embarque.seguimiento
+
+            # limpiar campos en el embarque
+            embarque.seguimiento = None
+            embarque.posicion = 'S/I'
+            embarque.consignatario = 0
+            embarque.embarcador = 0
+            embarque.agente = 0
+            embarque.notificante = 0
+            embarque.despachante = 0
+            embarque.save()
+
+            # limpiar seguimiento si existe
+            if seguimiento_num:
+                seguimiento = Seguimiento.objects.filter(numero=seguimiento_num).first()
+                if seguimiento:
+                    seguimiento.embarque = None
+                    seguimiento.posicion = 'S/I'
+                    seguimiento.save()
+
+            # borrar registros relacionados
+            ImpterraEmbarqueaereo.objects.filter(numero=id).delete()
+            ImpterraCargaaerea.objects.filter(numero=id).delete()
+            ImpterraConexaerea.objects.filter(numero=id).delete()
+            ImpterraServiceaereo.objects.filter(numero=id).delete()
+            ImpterraEnvases.objects.filter(numero=id).delete()
+
         resultado['resultado'] = 'exito'
-    except IntegrityError as e:
+
+    except IntegrityError:
         resultado['resultado'] = 'Error de integridad, intente nuevamente.'
     except Exception as e:
         resultado['resultado'] = str(e)
-    data_json = json.dumps(resultado)
-    mimetype = "application/json"
-    return HttpResponse(data_json, mimetype)
+
+    return JsonResponse(resultado)
+
 
 def source_embarque_id(request):
     try:

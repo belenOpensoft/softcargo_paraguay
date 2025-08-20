@@ -193,6 +193,8 @@ $(document).ready(function () {
                 localStorage.setItem('id_master_editar', id_master);
                 localStorage.setItem('master_editar', master);
                 localStorage.setItem('numero_master_seleccionado', numero_reserva);
+                localStorage.setItem('lugar_importarhijo', 'editmaster')
+
                 editar_madre();
             } else {
                 localStorage.setItem('num_house_gasto', numero_embarque);

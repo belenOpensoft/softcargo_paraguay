@@ -197,7 +197,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += "<br><b>Datos del embarque:</b><br>"
 
-        texto += formatear_linea("Embarque", str(row_number) if row_number else "S/I")
+        texto += formatear_linea("Embarque", str(row.seguimiento) if row.seguimiento else "S/I")
 
         texto += formatear_linea("Posición", str(row.posicion) if row.posicion else "S/I")
 

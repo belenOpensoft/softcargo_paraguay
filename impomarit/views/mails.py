@@ -195,7 +195,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             # origen y destino nombre entero
             origen = Ciudades.objects.filter(codigo=row.origen).first()
             destino = Ciudades.objects.filter(codigo=row.destino).first()
-            texto += formatear_linea("Embarque", str(row_number) if row_number is not None else "S/I")
+            texto += formatear_linea("Embarque", str(row.seguimiento) if row.seguimiento is not None else "S/I")
 
             texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
 

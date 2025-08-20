@@ -193,6 +193,7 @@ $(document).ready(function () {
                 localStorage.setItem('id_master_editar', id_master);
                 localStorage.setItem('master_editar', master);
                 localStorage.setItem('numero_master_seleccionado', numero_reserva);
+                localStorage.setItem('lugar_importarhijo', 'editmaster')
                 editar_madre();
             } else {
                 localStorage.setItem('num_house_gasto', numero_embarque);
@@ -863,7 +864,7 @@ function eliminar_house_general(){
                                 success: function (resultado) {
                                     aux = resultado['resultado'];
                                     if (aux === 'exito') {
-                                        $('#tabla_general_im').DataTable().ajax.reload(null, false);
+                                        table_general.ajax.reload(null, false);
                                         alert('Eliminado correctamente');
                                     } else {
                                         alert(aux);
