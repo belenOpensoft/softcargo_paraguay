@@ -698,6 +698,7 @@ def guardar_seguimiento(request):
 
         resultado['resultado'] = 'exito'
         resultado['numero'] = str(registro.numero)
+        resultado['id'] = str(registro.id)
         resultado['tipo'] = tiporeg
 
     except IntegrityError as e:

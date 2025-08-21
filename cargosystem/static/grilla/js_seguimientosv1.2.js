@@ -1,3 +1,4 @@
+
 // INICIO CONTROL PAGINA
 var wWidth = $(window).width();
 var dWidth = wWidth * 0.40;
@@ -17,7 +18,7 @@ var row_selected_envase = 0;
 var row_selected_embarque = 0;
 var row_selected_archivo = 0;
 var row_selected_ruta = 0;
-var row_number = 0;
+// var row_number = 0;
 var row_id = 0;
 var row_number_embarque = 0;
 var row_number_archivo = 0;
@@ -38,6 +39,8 @@ var archivos_adjuntos = {};
 var buscar = '';
 var que_buscar = '';
 // FIN DATOS
+
+
 
 $(document).ready(function () {
 
@@ -275,7 +278,7 @@ $(document).ready(function () {
                 }
             $('td:eq(1)', row).html(texto + " " +  data[1] + " ");
             if (data[0] === row_selected) {
-                row_number = data[1];
+                window.row_number = data[1];
                 row_id = data[0];
                 $(row).addClass('table-secondary');
             }
@@ -359,7 +362,7 @@ $(document).ready(function () {
         } else {
             var row = table.row($(this).closest('tr')).data();
             row_selected = row[0];
-            row_number = row[1];
+            window.row_number = row[1];
             setCookie(row_selected);
             table.$('tr.table-secondary').removeClass('table-secondary');
             localStorage.setItem('id_seguimiento_seleccionado',row[0]);
@@ -467,8 +470,11 @@ $(document).ready(function () {
                 let formData = $("#envases_form").serializeArray();
                 let data = JSON.stringify(formData);
                 miurl = "/guardar_envases/";
+                const numero = (window.wizardMode && window.wizCtx && window.wizCtx.numero)
+                  ? window.wizCtx.numero
+                  : row[0][1];
                 var toData = {
-                    'numero': row[0][1],
+                    'numero': numero,
                     'data': data,
                     'csrfmiddlewaretoken': csrf_token,
                 };
@@ -477,21 +483,37 @@ $(document).ready(function () {
                     url: miurl,
                     data: toData,
                     async: false,
+                    // SUCCESS de tu AJAX de guardar envase:
                     success: function (resultado) {
-                        if (resultado['resultado'] === 'exito') {
-                            mostrarToast('¡Envase guardado con exito!', 'success');
-                            $(".alert").delay(4000).slideUp(200, function () {
-                                $(this).alert('close');
-                            });
-                            $("#tabla_envases").dataTable().fnDestroy();
-                            $("#ingresar_envase").html('Agregar');
-                            $('#envases_btn').addClass('triggered').trigger('click');
-                            $("#id_envase_id").val('');
-                            table.ajax.reload();
+                      if (resultado['resultado'] === 'exito') {
+
+                        if (window.wizardMode) {
+                          // ✅ wizard: no cierres ni destruyas el modal; no re-abrir via botón
+                          $('#envases_form')[0].reset();
+                          mostrarToast('¡Envase guardado con éxito!', 'success');
+
+                          try { $('#tabla_envases').DataTable().ajax.reload(null, false); } catch(e){}
+                          try { table.ajax.reload(null, false); } catch(e){}
+
+                          // avisar al wizard y refrescar la barra (si Envases es último → se verá "Finalizar")
+                          $(document).trigger('envases:guardado');
+                          refreshCurrentToolbar();
+
                         } else {
-                            alert(resultado['resultado']);
+                          // 🔁 comportamiento legacy fuera del wizard (lo que ya hacías)
+                          $('#ingresar_envase').html('Agregar');
+                          $("#tabla_envases").dataTable().fnDestroy();
+                          $('#envases_btn').addClass('triggered').trigger('click'); // reabría el modal
+                          $("#id_envase_id").val && $("#id_envase_id").val('');
+                          table.ajax.reload();
+                          mostrarToast('¡Envase guardado con éxito!', 'success');
                         }
+
+                      } else {
+                        alert(resultado['resultado']);
+                      }
                     }
+
                 });
             }else{
             const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
@@ -514,33 +536,59 @@ $(document).ready(function () {
                 let formData = $("#rutas_form").serializeArray();
                 let data = JSON.stringify(formData);
                 miurl = "/guardar_ruta/";
+                const numero = (window.wizardMode && window.wizCtx && window.wizCtx.numero)
+                  ? window.wizCtx.numero
+                  : row[0][1];
+
                 var toData = {
-                    'numero': row[0][1],
-                    'data': data,
-                    'csrfmiddlewaretoken': csrf_token,
+                  numero: numero,
+                  data: data,
+                  csrfmiddlewaretoken: csrf_token,
                 };
+
                 $.ajax({
                     type: "POST",
                     url: miurl,
                     data: toData,
                     async: false,
                     success: function (resultado) {
-                        if (resultado['resultado'] === 'exito') {
-                            $('#rutas_form')[0].reset();
-                            mostrarToast('¡Ruta guardado con exito!', 'success');
-                            $(".alert").delay(4000).slideUp(200, function () {
-                                $(this).alert('close');
-                            });
-                            $("#tabla_rutas").dataTable().fnDestroy();
-                            $("#ingresar_ruta").html('Agregar');
-                            $('#rutas_btn').addClass('triggered').trigger('click');
-                            $("#id_ruta_id").val('');
-                            table.ajax.reload();
-                            $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
-                        } else {
-                            alert(resultado['resultado']);
-                        }
-                    }
+    if (resultado['resultado'] === 'exito') {
+
+      if (window.wizardMode) {
+        // ✅ Comportamiento SOLO cuando viene del wizard:
+        $('#rutas_form')[0].reset();                 // limpiar el form si querés cargar otra
+        mostrarToast('¡Ruta guardada con éxito!', 'success');
+        $(".alert").delay(4000).slideUp(200, function () { $(this).alert('close'); });
+
+        // refrescá tus tablas sin destruir/recrear el modal
+        try { $('#tabla_rutas').DataTable().ajax.reload(null, false); } catch(e){}
+        try { table.ajax.reload(null, false); } catch(e){}
+
+        // limpiá estilos de validación si aplica
+        $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
+        $("#id_ruta_id").val('');
+
+        // 🔔 Notificar al wizard y refrescar la barra (para mostrar "Finalizar")
+        $(document).trigger('rutas:guardada');
+        refreshCurrentToolbar();  // asegura que se vea "Finalizar" si Rutas es el último paso
+
+      } else {
+        // 🔁 Tu comportamiento actual (fuera del wizard) — lo dejamos igual:
+        $('#rutas_form')[0].reset();
+        mostrarToast('¡Ruta guardado con exito!', 'success');
+        $(".alert").delay(4000).slideUp(200, function () { $(this).alert('close'); });
+        $("#tabla_rutas").dataTable().fnDestroy();
+        $("#ingresar_ruta").html('Agregar');
+        $('#rutas_btn').addClass('triggered').trigger('click'); // reabre modal de rutas
+        $("#id_ruta_id").val('');
+        table.ajax.reload();
+        $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
+      }
+
+    } else {
+      alert(resultado['resultado']);
+    }
+  }
                 });
             }else{
             const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
@@ -564,8 +612,11 @@ $(document).ready(function () {
                 let formData = $("#gastos_form").serializeArray();
                 let data = JSON.stringify(formData);
                 miurl = "/guardar_gasto/";
+                const numero = (window.wizardMode && window.wizCtx && window.wizCtx.numero)
+                  ? window.wizCtx.numero
+                  : row[0][1];
                 var toData = {
-                    'numero': row[0][1],
+                    'numero': numero,
                     'data': data,
                     'csrfmiddlewaretoken': csrf_token,
                 };
@@ -575,22 +626,36 @@ $(document).ready(function () {
                     data: toData,
                     async: false,
                     success: function (resultado) {
-                        if (resultado['resultado'] === 'exito') {
-                            mostrarToast('¡Gasto guardado con exito!', 'success');
-                            $(".alert").delay(4000).slideUp(200, function () {
-                                $(this).alert('close');
-                            });
-                            //$("#tabla_gastos").dataTable().fnDestroy();
-                            $("#ingresar_gasto").html('Agregar');
-                            $('#gastos_btn').addClass('triggered').trigger('click');
-                            $("#id_gasto_id").val('');
-                            $('#tabla_gastos').DataTable().ajax.reload();
-                            $('#tabla_seguimiento').DataTable().ajax.reload();
-                            //setear de nuevo el socio comercial por defecto
-                            $('#id_socio').val(row[0][54]);
+                      if (resultado['resultado'] === 'exito') {
+                        mostrarToast('¡Gasto guardado con éxito!', 'success');
+                        $(".alert").delay(4000).slideUp(200, function () { $(this).alert('close'); });
+
+                        if (window.wizardMode) {
+                          // ✅ En wizard: NO destruir DataTables ni reabrir el modal
+                          try { $('#tabla_gastos').DataTable().ajax.reload(null, false); } catch(e){}
+                          try { $('#tabla_seguimiento').DataTable().ajax.reload(null, false); } catch(e){}
+                          try { table.ajax.reload(null, false); } catch(e){}
+
+                          $("#ingresar_gasto").html('Agregar');
+                          $("#id_gasto_id").val('');
+                          $('#gastos_form')[0].reset();
+
+                          // 🔔 Notificar al wizard y refrescar la barra
+                          $(document).trigger('gastos:guardado');
+                          refreshCurrentToolbar();
+
                         } else {
-                            alert(resultado['resultado']);
+                          // 🔁 Flujo legacy fuera del wizard (tu comportamiento actual)
+                          $("#ingresar_gasto").html('Agregar');
+                          $('#gastos_btn').addClass('triggered').trigger('click'); // reabrir por botón
+                            $('#id_socio').val(row[0][54]);
+                          $("#id_gasto_id").val('');
+                          try { $('#tabla_gastos').DataTable().ajax.reload(null, false); } catch(e){}
+                          try { $('#tabla_seguimiento').DataTable().ajax.reload(null, false); } catch(e){}
                         }
+                      } else {
+                        alert(resultado['resultado']);
+                      }
                     }
                 });
             }else{
@@ -619,9 +684,12 @@ $(document).ready(function () {
                 let data = JSON.stringify(formData);
                 let data_extra = JSON.stringify(formDataExtra);
                 miurl = "/guardar_embarques/";
-                localStorage.setItem('numero_embarque',row[0][1]);
+                const numero = (window.wizardMode && window.wizCtx && window.wizCtx.numero)
+                  ? window.wizCtx.numero
+                  : row[0][1];
+                localStorage.setItem('numero_embarque',numero);
                 var toData = {
-                    'numero': row[0][1],
+                    'numero': numero,
                     'data': data,
                     'data_extra': data_extra,
                     'csrfmiddlewaretoken': csrf_token,
@@ -632,26 +700,31 @@ $(document).ready(function () {
                     data: toData,
                     async: false,
                     success: function (resultado) {
+      mostrarToast('¡Embarque guardado con exito!', 'success');
+      $(".alert").delay(4000).slideUp(200, function () { $(this).alert('close'); });
 
-                            mostrarToast('¡Embarque guardado con exito!', 'success');
-                            $(".alert").delay(4000).slideUp(200, function () {
-                                $(this).alert('close');
-                            });
-                            $("#tabla_embarques").dataTable().fnDestroy();
-                            $("#ingresar_embarque").html('Agregar');
-                            $('#embarques_btn').addClass('triggered').trigger('click');
-                            $('#id_embarque_id').val("");
-                           // $('#tabla_embarques').DataTable().ajax.reload();
-                            table.ajax.reload(function(json) {
-                                // Callback function to handle the response data
+      if (window.wizardMode) {
+        // ✅ En wizard: NO destruir ni re-abrir el modal
+        try { $('#tabla_embarques').DataTable().ajax.reload(null, false); } catch(e){}
+        try { table.ajax.reload(null, false); } catch(e){}
+        $('#embarques_form')[0].reset();
+        $('#id_embarque_id').val && $('#id_embarque_id').val("");
 
+        // avisar al wizard y refrescar la barra (si es el último paso → “Finalizar”)
+        $(document).trigger('embarques:guardado');
+        refreshCurrentToolbar();
 
-                            });
+      } else {
+        // 🔁 Flujo legacy fuera del wizard (lo que ya hacías)
+        try { $("#tabla_embarques").dataTable().fnDestroy(); } catch(e){}
+        $("#ingresar_embarque").html('Agregar');
+        $('#embarques_btn').addClass('triggered').trigger('click'); // reabría el modal
+        $('#id_embarque_id').val("");
+        try { table.ajax.reload(function (json) {}); } catch(e){}
+      }
 
-                            //alert(resultado['resultado']);
-                            console.log(resultado['resultado']);
-
-                    }
+      console.log(resultado['resultado']);
+    }
                 });
             }else{
             const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
@@ -886,7 +959,7 @@ $(document).ready(function () {
                             $('#email_add_input').focus();
                         },
                         modal: true,
-                        title: title + " para el seguimiento N°: " + row_number,
+                        title: title + " para el seguimiento N°: " + window.row_number,
                         height: wHeight * 0.90,
                         width: wWidth * 0.90,
                         class: 'modal fade',
@@ -905,7 +978,7 @@ $(document).ready(function () {
                                     if (!confirm('¿Realmente desea ENVIAR el correo?')) {
                                         return;
                                     }
-                                    sendEmail(to, cc, cco, subject, message, title, row_number, from);
+                                    sendEmail(to, cc, cco, subject, message, title, window.row_number, from);
                                     $(this).dialog("close");
                                 },
                             }, {
@@ -1440,7 +1513,7 @@ $(document).ready(function () {
 
             }
         })
-        get_sugerencias_envases(row_number);
+        get_sugerencias_envases(window.row_number);
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -1559,7 +1632,7 @@ $(document).ready(function () {
                         title: "Ingreso de datos para transbordos en el seguimiento N°: " + row[0][1],
                         height: 'auto',
                         width: 'auto',
-                        position: { my: "top", at: "top+20", of: window },
+                        position: { my: "center", at: "center", of: window },
                         class: 'modal fade',
                         buttons: [
                             {
@@ -1967,7 +2040,7 @@ $(document).ready(function () {
                                 text: "Guardar",
                                 class: "btn btn-primary",
                                 click: function () {
-                                    guardar_aplicable(row_number);
+                                    guardar_aplicable(window.row_number);
                                     table.ajax.reload();
                                     $(this).dialog("close");
                                 }
@@ -2112,7 +2185,7 @@ $(document).ready(function () {
             alert('Debe seleccionar al menos un registro');
         }
     });
-    $('.nuevo_seguimiento ').click(function (event,boton_guardar=true) {
+    $('.nuevo_seguimiento_old ').click(function (event,boton_guardar=true) {
         tipo_seguimiento = this.getAttribute('data-tp');
         var titulo = this.getAttribute('data-tt');
         var tipo = this.getAttribute('data-tipo');
@@ -2121,7 +2194,7 @@ $(document).ready(function () {
             $('#impo_marit_form').trigger("reset");
             $('.form-control').css({"border-color": "", 'box-shadow': ''});
         } else {
-            var titulo = "Modificar seguimiento de " + titulo + " N° " + row_number;
+            var titulo = "Modificar seguimiento de " + titulo + " N° " + window.row_number;
             $('.nuevo_seguimiento').removeClass('triggered');
         }
         $("#impo_marit_modal").dialog({
@@ -2211,6 +2284,164 @@ $(document).ready(function () {
             }
         })
     });
+
+    $('.nuevo_seguimiento').click(function (event,boton_guardar=true) {
+        tipo_seguimiento = this.getAttribute('data-tp');
+        var titulo = this.getAttribute('data-tt');
+        var tipo = this.getAttribute('data-tipo');
+        var esCreacion=false;
+        if (!event.target.classList.contains('triggered')) {
+            esCreacion=true;
+            var titulo = "Nuevo seguimiento de " + titulo;
+            $('#impo_marit_form').trigger("reset");
+            $('.form-control').css({"border-color": "", 'box-shadow': ''});
+        } else {
+            esCreacion=false;
+            var titulo = "Modificar seguimiento de " + titulo + " N° " + window.row_number;
+            $('.nuevo_seguimiento').removeClass('triggered');
+        }
+
+        $("#impo_marit_modal").dialog({
+            autoOpen: true,
+            open: function () {
+              $('#id_modo').val(tipo);
+              $(".btn-guardar-seguimiento").prop("disabled", !boton_guardar);
+
+              if (esCreacion) {
+      // ✅ CREACIÓN → activar wizard
+      window.wizardMode = true;
+      window.wizardStep = 0;
+      firstStepSaved = false;
+
+      // si ya sabés el modo ahora, lo dejás en contexto
+      window.wizCtx = window.wizCtx || {};
+      window.wizCtx.modo = $('#id_modo').val() || null;
+
+      // adjuntar barra a ESTA instancia del diálogo
+      setTimeout(() => attachWizardToolbarToDialog($(this)), 0);
+
+      // evitar cierres accidentales
+      $(this).dialog('option','closeOnEscape', false);
+      $('.ui-widget-overlay').off('click'); // por si lo habías atado antes
+    } else {
+      // ✅ EDICIÓN → asegurar que NO quede nada del wizard viejo
+      // limpia barra, flags, etc. y re-habilita cierre normal
+      if (typeof wizardReset === 'function') {
+        wizardReset({ restoreRowNumber: true }); // o false, como prefieras
+      } else {
+        window.wizardMode = false;
+      }
+      $(this).dialog('option','closeOnEscape', true);
+      // (no toques overlay aquí; por defecto jQuery UI no cierra al click)
+    }
+            },
+            modal: true,
+            title: titulo,
+            height: wHeight * 0.95,
+            width: wWidth * 0.75,
+            class: 'modal fade',
+            buttons: [
+                {
+                    text: "Guardar",
+                    class: "btn btn-primary btn-guardar-seguimiento",
+                    style: "width:100px",
+                    click: function () {
+                        var form = $('#impo_marit_form');
+                        var formData = new FormData(form[0]);
+                        if (form[0].checkValidity()) {
+                            // let formData = $("#impo_marit_form").serializeArray();
+
+                            $("#impo_marit_form").find(':input').each(function () {
+                                var dataId = $(this).data('id');
+                                var value = $(this).val();
+                                var name = $(this).attr('name');
+                                formData[name] = [value, dataId];
+                            });
+                           let data = JSON.stringify(formData);
+                            miurl = "/guardar_seguimiento/";
+                            var toData = {
+                                'tipo': tipo,
+                                'form': data,
+                                'csrfmiddlewaretoken': csrf_token,
+                            };
+                            $.ajax({
+                                type: "POST",
+                                url: miurl,
+                                data: toData,
+                                async: false,
+                                success: function (resultado) {
+            if (resultado['resultado'] !== 'exito') {
+              alert(resultado['resultado']);
+              $(document).trigger('seguimiento:error', resultado['resultado']);
+              return;
+            }
+
+            table.ajax.reload();
+
+            if (resultado['tipo'] === 'nuevo') {
+              mostrarToast("¡Seguimiento GUARDADO con éxito!", 'success');
+              alert('Número de seguimiento: ' + resultado['numero']);
+
+              if (window.wizardMode) {
+                // ✅ Sólo si el wizard está activo, actualizamos contexto y disparamos evento
+                window.wizCtx.id     = resultado['id']     || null;
+                window.wizCtx.numero = resultado['numero'] || null;
+                window.wizCtx.modo   = $('#id_modo').val() || window.wizCtx.modo || null;
+
+                firstStepSaved = true;
+
+                // Disparar UNA sola vez este evento (sacá el duplicado de abajo)
+                $(document).trigger('seguimiento:guardado', {
+                  id: window.wizCtx.id,
+                  numero: window.wizCtx.numero,
+                  modo: window.wizCtx.modo
+                });
+
+                refreshCurrentToolbar();
+                // OJO: no cierres el modal aquí si vas a usar “Siguiente”
+              } else {
+                // Flujo tradicional (edición o creacion sin wizard)
+                $('#impo_marit_modal').dialog("close");
+              }
+            } else {
+              // edición
+              alert("¡Seguimiento MODIFICADO con éxito!");
+              $('#impo_marit_modal').dialog("close");
+            }
+          },
+                                error: function (e) {
+                                    alert(e);
+                                    $(document).trigger('seguimiento:error', e); // NUEVO
+                                }
+                            });
+
+                        } else {
+                            var isValid = document.querySelector('#impo_marit_form').reportValidity();
+                        }
+                    },
+                }, {
+                    text: "Salir",
+                    class: "btn btn-dark",
+                    style: "width:100px",
+                    click: function () {
+                        $(this).dialog("close");
+                        if (window.wizardMode && typeof wizardReset === 'function') {
+                          wizardReset({ restoreRowNumber: true });
+                        }
+                    },
+                }],
+            beforeClose: function (event, ui) {
+                $("#id_id").val('');
+                try {
+                    desbloquearDatos();
+                } catch (error) {
+                    console.error("⚠️ Error en desbloquearDatos:", error);
+                }
+            }
+        })
+    });
+
+
     /* FIN MODALES */
 
     // ESCONDER MENSAJES
@@ -3192,7 +3423,7 @@ function get_datos_envases() {
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
-                    "numero": row_number,
+                    "numero": window.row_number,
                 });
             }
         }, "columnDefs": [
@@ -3225,7 +3456,7 @@ function get_datos_rutas() {
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
-                    "numero": row_number,
+                    "numero": window.row_number,
                 });
             }
         }, "columnDefs": [
@@ -3242,7 +3473,7 @@ function get_datos_rutas() {
         ]
     });
 
-    get_datos_seguimiento_rutas(row_number);
+    get_datos_seguimiento_rutas(window.row_number);
 }
 function get_datos_seguimiento_rutas(numero) {
     $.ajax({
@@ -3300,7 +3531,7 @@ function get_datos_logs() {
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
-                    "id": row[0][0],'numero':row_number
+                    "id": row[0][0],'numero':window.row_number
                 });
             }
         },
@@ -3336,7 +3567,7 @@ function get_datos_embarques() {
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
-                    "numero": row_number,
+                    "numero": window.row_number,
                 });
             }
         }, "columnDefs": [
@@ -3386,7 +3617,7 @@ function get_datos_gastos() {
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
-                    "numero": row_number,
+                    "numero": window.row_number,
                 });
             }
         }, "columnDefs": [
@@ -3488,7 +3719,7 @@ function get_datos_archivos() {
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
-                    "numero": row_number,
+                    "numero": window.row_number,
                 });
             }
         }, "columnDefs": [
@@ -3540,7 +3771,7 @@ function get_data_email(row,title,row_number,transportista,master,gastos,directo
     let miurl = "/get_data_email/";
     var toData = {
         'title': title,
-        'row_number': row_number,
+        'window': window.row_number,
         'csrfmiddlewaretoken': csrf_token,
         'transportista':transportista,
         'master':master,
@@ -3856,14 +4087,23 @@ function guardar_aplicable(numero) {
             'X-CSRFToken': csrf_token
         },
         success: function (resp) {
-            if (resp.status === 'ok') {
-                alert('Datos guardados correctamente.');
-                // o mostrarToast('Guardado', 'success');
-                $('#aplicable_modal').dialog('close');
-            } else {
-                alert('Error: ' + resp.mensaje);
-            }
-        },
+      if (resp.status === 'ok') {
+        // ✅ notificación y refrescos
+        try { mostrarToast('¡Datos aplicables guardados!', 'success'); } catch(e) { alert('Datos guardados correctamente.'); }
+        try { table.ajax.reload(null, false); } catch(e){}
+
+        if (window.wizardMode) {
+          // 👉 en wizard: NO cerrar; avisar y refrescar la botonera
+          $(document).trigger('aplicable:guardado');
+          if (typeof refreshCurrentToolbar === 'function') refreshCurrentToolbar();
+        } else {
+          // 👉 flujo normal
+          $('#aplicable_modal').dialog('close');
+        }
+      } else {
+        alert('Error: ' + (resp.mensaje || 'No se pudo guardar.'));
+      }
+    },
         error: function (xhr) {
             alert('Error en el servidor: ' + xhr.status);
         }

@@ -11,6 +11,48 @@
 
 {% block table_datatable %}
 
+<style>
+ /* Más alto y con espacio “reservado” a la derecha para los botones */
+.ui-dialog .ui-dialog-titlebar{
+  position: relative;
+  min-height: 64px;          /* subí a 72/80px si querés más alto */
+  padding: .6rem .9rem;
+  padding-right: 380px;       /* reserva espacio para la toolbar */
+  display: flex;
+  align-items: center;
+}
+
+/* Título a la izquierda, dejamos que ocupe el resto */
+.ui-dialog .ui-dialog-titlebar .ui-dialog-title{
+  flex: 1 1 auto;
+  margin-right: .5rem;
+  font-size: 1.05rem;
+}
+
+/* Toolbar pegada a la derecha, centrada verticalmente, sin saltos de línea */
+.ui-dialog .ui-dialog-titlebar .wiz-toolbar{
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: .5rem;
+  flex-wrap: nowrap;   /* <- evita que “Salir” baje de línea */
+  white-space: nowrap; /* <- y que el texto se corte */
+}
+
+/* Botones grandecitos (si no usás btn-lg) */
+.ui-dialog .ui-dialog-titlebar .wiz-toolbar .btn{
+  padding: .6rem 1.1rem;
+  font-size: 1rem;
+  line-height: 1.1;
+  border-radius: .5rem;
+}
+
+/* Opcional: ocultar la “X” del diálogo cuando estás en modo wizard */
+.ui-dialog.wiz-on .ui-dialog-titlebar-close{ display: none !important; }
+
+</style>
 <!--    BOTONES -->
 {% include 'seguimientos/menu.html' %}
 
@@ -80,8 +122,38 @@
 
 
 {% block script_datatable %}
+<script>
+
+// --- row_number seguro (redirige a wizCtx cuando hay wizard) ---
+(function(){
+  let _rowNumber = null; // valor "legacy" cuando no hay wizard
+
+  Object.defineProperty(window, 'row_number', {
+    configurable: true,
+    enumerable: true,
+    get(){
+      if (window.wizardMode && window.wizCtx && window.wizCtx.numero) {
+        return window.wizCtx.numero;
+      }
+      return _rowNumber;
+    },
+    set(v){
+      if (window.wizardMode) {
+        console.warn('[row_number] set ignorado (wizard activo):', v);
+        return;
+      }
+      _rowNumber = v;
+    }
+  });
+
+  // opcionales por si querés manipular el legacy directo:
+  window._setRowNumberLegacy = v => { _rowNumber = v; };
+  window._getRowNumberLegacy = () => _rowNumber;
+})();
+</script>
 
     <script src="{% static 'grilla/js_seguimientosv1.2.js' %}"></script>
+    <script src="{% static 'grilla/js_wizzard_seguimientos.js' %}"></script>
     <script src="{% static 'js/select2.min.js' %}"></script>
     <script>
        var csrf_token = '{{ csrf_token }}';
