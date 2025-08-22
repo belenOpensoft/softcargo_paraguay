@@ -3,12 +3,13 @@ from copy import deepcopy
 import simplejson as simplejson
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.datetime_safe import datetime
 from datetime import datetime
 
+from impomarit.models import Embarqueaereo
 from mantenimientos.models import Vapores
 from seguimientos.forms import NotasForm, seguimientoForm, cronologiaForm, envasesForm, embarquesForm, gastosForm, \
     pdfForm, archivosForm, rutasForm, emailsForm, clonarForm,aplicableForm
@@ -709,6 +710,32 @@ def guardar_seguimiento(request):
     return HttpResponse(json.dumps(resultado), content_type="application/json")
 
 
+def eliminar_seguimiento_old(request):
+    resultado = {}
+    try:
+        id = request.POST['id']
+        seguimiento = SeguimientoReal.objects.get(id=id)
+        numero = seguimiento.numero  # Obtener el número antes de borrar el seguimiento
+        seguimiento.nroreferedi=numero
+        # Eliminar registros relacionados
+        #Cargaaerea.objects.filter(numero=numero).delete()
+        #Conexaerea.objects.filter(numero=numero).delete()
+        #Serviceaereo.objects.filter(numero=numero).delete()
+        #Envases.objects.filter(numero=numero).delete()
+
+        # Eliminar el seguimiento
+        seguimiento.save()
+        resultado['resultado'] = 'exito'
+
+    except IntegrityError:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except SeguimientoReal.DoesNotExist:
+        resultado['resultado'] = 'El seguimiento no existe.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+
+    return HttpResponse(json.dumps(resultado), content_type="application/json")
+
 def eliminar_seguimiento(request):
     resultado = {}
     try:
@@ -734,6 +761,53 @@ def eliminar_seguimiento(request):
         resultado['resultado'] = str(e)
 
     return HttpResponse(json.dumps(resultado), content_type="application/json")
+
+def eliminar_house(request):
+    resultado = {}
+    try:
+        id = request.POST['id']
+
+        with transaction.atomic():
+            seguimiento = SeguimientoReal.objects.get(id=id)
+            numero = seguimiento.numero  # Obtener el número antes de borrar el seguimiento
+
+            # limpiar campos en el embarque
+            seguimiento.embarque = None
+            seguimiento.posicion = 'S/I'
+            seguimiento.awb = 'S/I'
+            seguimiento.haw = 'S/I'
+            seguimiento.consignatario = 0
+            seguimiento.embarcador = 0
+            seguimiento.agente = 0
+            seguimiento.notificante = 0
+            seguimiento.agcompras = 0
+            seguimiento.agventas = 0
+            seguimiento.vendedor = 0
+            seguimiento.despachante = 0
+            seguimiento.etd = None
+            seguimiento.eta = None
+            seguimiento.origen = '???'
+            seguimiento.destino = '???'
+            seguimiento.loading = '???'
+            seguimiento.discharge = '???'
+            seguimiento.save()
+
+
+            # borrar registros relacionados
+            Embarqueaereo.objects.filter(numero=numero).delete()
+            Cargaaerea.objects.filter(numero=numero).delete()
+            Conexaerea.objects.filter(numero=numero).delete()
+            Envases.objects.filter(numero=numero).delete()
+            Serviceaereo.objects.filter(numero=numero).delete()
+
+        resultado['resultado'] = 'exito'
+
+    except IntegrityError:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = str(e)
+
+    return JsonResponse(resultado)
 
 
 def clonar_seguimiento(request):

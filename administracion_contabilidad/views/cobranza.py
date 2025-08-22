@@ -16,6 +16,7 @@ from administracion_contabilidad.views.facturacion import generar_numero, modifi
 from administracion_contabilidad.views.orden_pago import convertir_monto
 from administracion_contabilidad.views.preventa import generar_autogenerado
 from impomarit.views.mails import formatear_linea
+from login.models import AccountEmail
 from mantenimientos.models import Clientes, Monedas
 
 from collections import defaultdict
@@ -189,7 +190,7 @@ def get_argumentos_busqueda(**kwargs):
         raise TypeError(e)
 
 
-def source_facturas_pendientes(request):
+def source_facturas_pendientes_old(request):
     try:
         start = int(request.GET.get('start', 0))
         length = int(request.GET.get('length', 10))
@@ -253,6 +254,85 @@ def source_facturas_pendientes(request):
     except Exception as e:
         return JsonResponse({'error': str(e)})
 
+def source_facturas_pendientes(request):
+    try:
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        cliente = int(request.GET.get('cliente'))
+        moneda_objetivo = request.GET.get('moneda')
+
+        # Filtrar registros por cliente
+        pendientes = Movims.objects.filter(mcliente=cliente).exclude(msaldo=0)
+
+        # Paginación
+        total_registros = pendientes.count()
+        pendientes = pendientes[start:start + length]
+
+        # Convertir los resultados en lista de diccionarios
+        data = []
+        for pendiente in pendientes:
+            try:
+                moneda_nombre = Monedas.objects.get(codigo=pendiente.mmoneda).nombre
+            except ObjectDoesNotExist:
+                moneda_nombre = "Desconocida"
+
+            total = float(pendiente.mtotal or 0)
+            saldo = float(pendiente.msaldo or 0)
+
+            arbitraje = float(pendiente.marbitraje or 0)
+            paridad = float(pendiente.mparidad or 0)
+
+            total_convertido = convertir_monto(total, int(pendiente.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+            saldo_convertido = convertir_monto(saldo, int(pendiente.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+
+            nro_completo = ""
+            if pendiente.mserie and pendiente.mprefijo and pendiente.mboleta:
+                s = str(pendiente.mserie)
+                p = str(pendiente.mprefijo)
+
+                tz = len(s) - len(s.rstrip('0'))
+                lz = len(p) - len(p.lstrip('0'))
+
+                sep = '0' * max(0, 3 - (tz + lz))
+
+                nro_completo = f"{s}{sep}{p}-{pendiente.mboleta}"
+
+
+            total_convertido = - total_convertido if pendiente.mtipo in [40,45,21,23] else total_convertido
+            saldo_convertido = - saldo_convertido if pendiente.mtipo in [40,45,21,23] else saldo_convertido
+
+            source = 'VERDE' if pendiente.mtipo in [20,21,23,24,25] else 'AZUL'
+
+            data.append({
+                'id': pendiente.mautogen,
+                'vencimiento': pendiente.mfechamov.strftime('%d-%m-%Y') if pendiente.mfechamov is not None else '',
+                'emision': pendiente.mfechamov.strftime('%d-%m-%Y') if pendiente.mfechamov is not None else '',
+                'documento': nro_completo,
+                'total': total_convertido,
+                'saldo': saldo_convertido,
+                'imputado': 0 ,
+                'tipo_cambio': arbitraje,
+                'embarque': pendiente.mposicion,
+                'detalle': pendiente.mdetalle,
+                'posicion': pendiente.mposicion,
+                'moneda': moneda_nombre,
+                'paridad': paridad,
+                'tipo_doc': pendiente.mnombremov,
+                'tipo': pendiente.mtipo,
+                'source': source,
+            })
+
+        return JsonResponse({
+            'draw': int(request.GET.get('draw', 1)),
+            'recordsTotal': total_registros,
+            'recordsFiltered': total_registros,
+            'data': data,
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
+
+
 def guardar_impuventa(request):
     try:
         with transaction.atomic():
@@ -277,7 +357,8 @@ def guardar_impuventa(request):
                     for item in imputaciones:
 
                         try:
-                            boleta = Boleta.objects.filter(numero=item['nroboleta']).order_by('-id').first()
+                            #nro = item['nroboleta'].split('-')[1]
+                            boleta = Boleta.objects.filter(autogenerado=item['nroboleta']).order_by('-id').first()
                         except Exception as _:
                             boleta = None
                             return JsonResponse({'status': 'Error: Boleta no encontrada.' })
@@ -722,6 +803,7 @@ def get_email_recibo_cobranza(request):
         nombre = f"{request.user.first_name} {request.user.last_name}"
         cliente = Clientes.objects.filter(codigo=cobro.mcliente).first()
         email_cliente = cliente.emailim if cliente and cliente.emailim else ""
+        moneda = Monedas.objects.filter(codigo=cobro.mmoneda).first()
 
         texto = ""
         texto += "<p style='font-family: Courier New, monospace; font-size: 14px; font-weight: bold;'>OCEANLINK LTDA</p>"
@@ -733,7 +815,7 @@ def get_email_recibo_cobranza(request):
         texto += '<br>'
         texto += formatear_linea("Cliente", cobro.mnombre or "S/I")
         texto += '<br><span style="display: block; border-top: 0.5pt solid #CCC; margin: 6px 0;"></span><br>'
-        texto += formatear_linea("Moneda", cobro.mmoneda)
+        texto += formatear_linea("Moneda", moneda.nombre)
         texto += formatear_linea("Cotización", cobro.mcambio)
         texto += formatear_linea("Monto a cobrar", cobro.mtotal)
         texto += formatear_linea("Detalle", cobro.mdetalle or "S/I")
@@ -793,12 +875,13 @@ def get_email_recibo_cobranza(request):
         texto += '<br><span style="display: block; border-top: 0.5pt solid #CCC; margin: 6px 0;"></span><br>'
 
         texto += f"<p style='font-family: Courier New, monospace; font-size: 12px;'>{monto_a_letras(cobro.mtotal, cobro.mmoneda)}</p>"
-
+        emails_disponibles = list(AccountEmail.objects.filter(user=request.user).values_list('email', flat=True))
         return JsonResponse({
             'resultado': 'exito',
             'mensaje': texto,
             'asunto': f"RECIBO DE COBRANZA - {cobro.mnombre}",
             'email_cliente': email_cliente,
+            'emails_disponibles': emails_disponibles
         })
 
     except Exception as e:

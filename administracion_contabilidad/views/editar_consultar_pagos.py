@@ -121,10 +121,22 @@ def obtener_detalle_pago_orden(request):
                 for impu in imputados:
                     boleta = Movims.objects.filter(mautogen=impu.autofac).first()
                     if boleta:
-                        num_completo = f"{boleta.mtipo} {boleta.mserie}{boleta.mprefijo}{boleta.mboleta}"
+                        nro_completo = ""
+                        if boleta.mserie and boleta.mprefijo and boleta.mboleta:
+                            s = str(boleta.mserie)
+                            p = str(boleta.mprefijo)
+                            n = str(boleta.mboleta)
+
+                            tz = len(s) - len(s.rstrip('0'))  # ceros al final de serie
+                            lz = len(p) - len(p.lstrip('0'))  # ceros al inicio de prefijo
+                            sep = '0' * max(0, 3 - (tz + lz))  # querés total 3 ceros en la unión
+
+                            tipo_txt = (str(boleta.mtipo).strip() + " ") if boleta.mtipo else ""
+                            nro_completo = f"{tipo_txt}{s}{sep}{p}-{n}"
+
                         data['imputados'].append({
                             'autogenerado': boleta.mautogen,
-                            'documento': num_completo,
+                            'documento': nro_completo,
                             'imputado': impu.monto,
                             'referencia': None,
                             'posicion': boleta.mposicion,

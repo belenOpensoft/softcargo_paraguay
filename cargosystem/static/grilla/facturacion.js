@@ -911,6 +911,7 @@ function abrir_modalfactura() {
             // 🔹 Ajustar el tamaño dinámicamente según el contenido
         },
         beforeClose: function (){
+
         window.location.reload();
         }
     }).prev('.ui-dialog-titlebar').remove();

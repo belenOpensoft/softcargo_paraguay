@@ -344,10 +344,13 @@ function abrir_cobranza() {
         minHeight: 200,
         beforeClose: function () {
             existe_cliente = false;
-            localStorage.removeItem('medios_pago');
             resetModal("#dialog-form");
             resetModal("#paymentModal");
+            localStorage.removeItem('medios_pago');
+            localStorage.removeItem('filasAfectadas');
+            localStorage.removeItem('historial');
             window.location.reload();
+
         },
         buttons: [
             {
@@ -591,18 +594,38 @@ function tabla_facturas_pendientes(cliente, moneda) {
             {data: 'id', visible: false}, // Oculto
             {data: 'vencimiento', },
             {data: 'emision', },
-            {data: 'documento'},
+              {
+                  data: 'documento',
+                  createdCell: function (td, cellData, rowData) {
+                    // limpiamos estilos previos por si la celda se reutiliza
+                    td.classList.remove('bg-success','bg-primary','text-white','doc-verde','doc-azul');
+
+                    // Opción A: usando clases de Bootstrap (bg-success / bg-primary)
+                    if (rowData.source === 'VERDE') {
+                      td.classList.add('bg-success','text-white');
+                    } else if (rowData.source === 'AZUL') {
+                      td.classList.add('bg-primary','text-white');
+                    }
+
+                    // ---- Opción B (si NO usás Bootstrap), comentá A y descomentá esto:
+                    // if (rowData.source === 'VERDE') {
+                    //   td.classList.add('doc-verde');
+                    // } else if (rowData.source === 'AZUL') {
+                    //   td.classList.add('doc-azul');
+                    // }
+                  }
+                },
             {data: 'total'},
             {data: 'saldo'},
             {data: 'imputado'},
             {data: 'tipo_cambio'},
-            {data: 'embarque', },   // OCULTO
+            {data: 'embarque', visible:false },   // OCULTO
             {data: 'detalle'},
             {data: 'posicion', },   // OCULTO
             {data: 'moneda'},
-            {data: 'paridad'},
+            {data: 'paridad' , visible: false},
             {data: 'tipo_doc', },   // OCULTO
-            {data: 'source', }      // OCULTO
+            {data: 'source', visible: false }      // OCULTO
         ],
         responsive: true,
         processing: true,
@@ -1027,10 +1050,12 @@ function cargar_datos_formadepago() {
     table.rows().nodes().each(function (node) {
         let imputado = parseFloat(table.cell(node, 6).data()) || 0;
 
-        if (imputado !== 0) {
-            let nroDocumento = table.cell(node, 3).data();
-            documentos += nroDocumento + ';';
-        }
+    if (imputado !== 0) {
+      let nroDocumento = table.cell(node, 3).data();
+      const [, parte] = String(nroDocumento).split('-', 2);
+      documentos += (parte ?? '').trim() + ';';
+    }
+
     });
 
     documentos = documentos.slice(0, -1);
@@ -1213,7 +1238,7 @@ function crear_impuventa_asiento_movimiento() {
 
     impuventa.forEach((item) => {
         imputaciones.push({
-            nroboleta: item.numero,
+            nroboleta: item.modo, //cambio hecho aca de numero
             imputado: item.imputado,
             saldo_imputado: item.nuevoSaldo
         });
@@ -1273,8 +1298,7 @@ function crear_impuventa_asiento_movimiento() {
         contentType: 'application/json',
         success: function (response) {
             if (response.status === 'exito') {
-                $('#dialog-form').dialog('close');
-                $('#paymentModal').dialog('close');
+
                 table.ajax.reload();
                 if(confirm('¿Desea enviar un email con el comprobante?')){
                     let autogenerado = response.autogenerado;
@@ -1282,9 +1306,14 @@ function crear_impuventa_asiento_movimiento() {
                         get_data_email(autogenerado);
                     }else{
                         alert('Algo salió mal.');
+                        $('#dialog-form').dialog('close');
+                        $('#paymentModal').dialog('close');
                     }
+                }else{
+                    $('#dialog-form').dialog('close');
+                    $('#paymentModal').dialog('close');
                 }
-                // Opcional: recargar una tabla o actualizar la UI
+
             } else {
                 alert(response.status);
             }
@@ -1654,16 +1683,21 @@ function buscar_detalle(autogenerado) {
 }
 
 function sendEmail(to, cc, cco, subject, message, title) {
+     let from = $('#id_from').val();
+    if (!confirm('¿Realmente desea ENVIAR el correo?')) {
+        return;
+    }
     let miurl = "/envio_notificacion/AD/";
     var toData = {
         'to': to,
         'cc': cc,
         'cco': cco,
         'subject': subject,
+        'from': from,
         'message': message,
         'tipo': title,
         'seguimiento': 0,
-        'archivos_adjuntos': JSON.stringify(archivos_adjuntos),
+        'archivos_adjuntos': JSON.stringify([]),
         'csrfmiddlewaretoken': csrf_token,
     };
     $.ajax({
@@ -1743,7 +1777,10 @@ function get_data_email(autogenerado) {
                     },
                 },],
             beforeClose: function (event, ui) {
-                // table.ajax.reload();
+                            localStorage.removeItem('medios_pago');
+            localStorage.removeItem('filasAfectadas');
+            localStorage.removeItem('historial');
+                    window.location.reload();
             }
         })
 
@@ -1759,6 +1796,17 @@ function get_data_email(autogenerado) {
                 $("#id_subject").val(resultado['asunto']);
                 $("#id_to").val(resultado['email_cliente']);
                 $("#email_add_input").summernote('code', resultado['mensaje']);
+                let selectEmails = document.getElementById("id_from");
+                if (selectEmails && resultado['emails_disponibles']) {
+                    selectEmails.innerHTML = "";
+
+                    resultado['emails_disponibles'].forEach(function(email) {
+                        let option = document.createElement("option");
+                        option.value = email;
+                        option.text = email;
+                        selectEmails.appendChild(option);
+                    });
+                }
             } else {
                 alert('Error: ' + resultado['detalle']);
             }

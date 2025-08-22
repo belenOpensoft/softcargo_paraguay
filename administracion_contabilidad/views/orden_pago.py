@@ -178,7 +178,7 @@ def buscar_proveedores(request):
     return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
 
 
-def obtener_imputables_old(request):
+def obtener_imputables_old_(request):
     proveedor_id = request.GET.get('codigo')
 
     # Obtener los parámetros de paginación
@@ -231,7 +231,80 @@ def obtener_imputables_old(request):
 
     return JsonResponse(response_data, safe=False)
 
+
 def obtener_imputables(request):
+    proveedor_id = request.GET.get('codigo')
+    moneda_objetivo = request.GET.get('moneda')
+    # Obtener los parámetros de paginación
+    start = int(request.GET.get('start', 0))  # Inicio de la página (offset)
+    length = int(request.GET.get('length', 5))  # Número de registros por página
+    # Filtrar los registros según el proveedor
+    registros_totales = Movims.objects.filter(mcliente=proveedor_id).exclude(msaldo=0)
+
+    filtrados=[]
+    for r in registros_totales:
+
+        try:
+            moneda_nombre = Monedas.objects.get(codigo=r.mmoneda).nombre if r.mmoneda in [1, 2, 3, 4, 5,6] else ''
+        except Monedas.DoesNotExist:
+            moneda_nombre = ''
+
+        total = float(r.mtotal or 0)
+        saldo = float(r.msaldo or 0)
+
+        arbitraje = float(r.marbitraje or 0)
+        paridad = float(r.mparidad or 0)
+
+        nro_completo = ""
+        if r.mserie and r.mprefijo and r.mboleta:
+            s = str(r.mserie)
+            p = str(r.mprefijo)
+
+            tz = len(s) - len(s.rstrip('0'))
+            lz = len(p) - len(p.lstrip('0'))
+
+            sep = '0' * max(0, 3 - (tz + lz))
+
+            nro_completo = f"{s}{sep}{p}-{r.mboleta}"
+
+        source = 'VERDE' if r.mtipo in [20,21,23,24,25] else 'AZUL'
+
+        total_convertido = convertir_monto(total, int(r.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+        saldo_convertido = convertir_monto(saldo, int(r.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+
+        total_convertido = total_convertido if r.mtipo in [40, 45, 21, 23] else - total_convertido
+        saldo_convertido = saldo_convertido if r.mtipo in [40, 45, 21, 23] else - saldo_convertido
+
+        filtrados.append({
+            'autogenerado': r.mautogen,
+            'fecha': r.mfechamov.strftime('%Y-%d-%m') if r.mfechamov else None,
+            'documento': nro_completo,
+            'total': total_convertido,
+            'monto': r.mmonto,
+            'iva': r.miva,
+            'tipo': r.mnombremov,
+            'moneda': moneda_nombre,
+            'saldo': saldo_convertido,
+            'imputado': 0,
+            'arbitraje': arbitraje,
+            'paridad': paridad,
+            'source': source,
+        })
+
+    registros = filtrados[start:start + length]
+
+
+    # Estructura de respuesta para DataTable
+    response_data = {
+        'draw': request.GET.get('draw', 0),
+        'recordsTotal': registros_totales.count(),
+        'recordsFiltered': len(filtrados),
+        'data': registros
+    }
+
+    return JsonResponse(response_data, safe=False)
+
+def obtener_imputables_old(request):
     proveedor_id = request.GET.get('codigo')
     moneda_objetivo = request.GET.get('moneda')
     # Obtener los parámetros de paginación
@@ -804,7 +877,6 @@ def guardar_anticipo_orden(request):
 def guardar_impuorden(request):
     try:
         with transaction.atomic():
-
             if request.method == 'POST':
                 body_unicode = request.body.decode('utf-8')
                 body_data = json.loads(body_unicode)
@@ -839,13 +911,13 @@ def guardar_impuorden(request):
 
                             facturas_list.append({
                                 "documento": item['nroboleta'],
-                                "importe": item['imputado'],
+                                "importe": abs(float(item['imputado'] or 0)),
                                 "detalle_fac": movim.mdetalle if movim.mdetalle else "S/I",
                                 "cambio": float(movim.marbitraje) if movim.marbitraje else 0,
                                 "posicion": posicion
                             })
 
-                            monto = float(item['imputado']) #if boleta.tipo == 20 else -float(item['imputado']) if boleta.tipo == 21  else 0
+                            monto = abs(float(item['imputado'] or 0)) #if boleta.tipo == 20 else -float(item['imputado']) if boleta.tipo == 21  else 0
                             impuordenes = Impuordenes()
                             impuordenes.autofac = boleta[0].autogenerado
                             impuordenes.numero = item['nroboleta']
@@ -858,7 +930,8 @@ def guardar_impuorden(request):
 
                             movimiento_fac=Movims.objects.filter(mautogen=boleta[0].autogenerado).first()
                             if movimiento_fac:
-                                movimiento_fac.msaldo=float(movimiento_fac.msaldo)-float(item['imputado'])
+                                # movimiento_fac.msaldo=float(movimiento_fac.msaldo)-float(item['imputado'])
+                                movimiento_fac.msaldo = float(movimiento_fac.msaldo) - abs(float(item['imputado']))
                                 movimiento_fac.save()
 
                         elif boleta.count() > 1:
@@ -1033,7 +1106,13 @@ def guardar_impuorden(request):
                     ])
                 }
 
-                return generar_orden_pago_pdf(pdf_data, request)
+                try:
+                    return generar_orden_pago_pdf(pdf_data, request)
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 'exito',
+                        'mensaje': f'No se pudo generar el PDF ({str(e)})'
+                    }, status=200)
             return None
     except Exception as e:
         return HttpResponse(
@@ -1320,7 +1399,7 @@ def generar_orden_pago_pdf(data,request):
         c.save()
         return response
     except Exception as e:
-        return JsonResponse({'error':str(e)})
+        raise RuntimeError(f"Error al generar PDF: {e}")
 
 def monto_a_letras(monto,moneda):
     try:

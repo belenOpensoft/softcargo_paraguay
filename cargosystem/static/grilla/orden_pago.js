@@ -377,9 +377,12 @@ function abrir_cobranza() {
         beforeClose: function () {
             existe_cliente = false;
             localStorage.removeItem('medios_pago');
+            localStorage.removeItem('filasAfectadas');
+            localStorage.removeItem('historial');
             resetModal("#dialog-form");
             resetModal("#paymentModal");
             window.location.reload();
+
         },
         buttons: [
             {
@@ -485,7 +488,7 @@ function abrir_forma_pago() {
 //llamar cuando se seleccione un cliente
 function tabla_facturas_pendientes(cliente,moneda) {
     if ($.fn.DataTable.isDataTable('#imputacionTablePagos')) {
-        $('#imputacionTablePagos').DataTable().reload(); // Destruye la tabla completamente
+        $('#imputacionTablePagos').DataTable().destroy(); // Destruye la tabla completamente
 
     }
 
@@ -504,7 +507,27 @@ function tabla_facturas_pendientes(cliente,moneda) {
         columns: [
             { data: 'autogenerado', visible: false }, // Oculto
             { data: 'fecha' },
-            { data: 'documento' },
+            {
+                  data: 'documento',
+                  createdCell: function (td, cellData, rowData) {
+                    // limpiamos estilos previos por si la celda se reutiliza
+                    td.classList.remove('bg-success','bg-primary','text-white','doc-verde','doc-azul');
+
+                    // Opción A: usando clases de Bootstrap (bg-success / bg-primary)
+                    if (rowData.source === 'VERDE') {
+                      td.classList.add('bg-success','text-white');
+                    } else if (rowData.source === 'AZUL') {
+                      td.classList.add('bg-primary','text-white');
+                    }
+
+                    // ---- Opción B (si NO usás Bootstrap), comentá A y descomentá esto:
+                    // if (rowData.source === 'VERDE') {
+                    //   td.classList.add('doc-verde');
+                    // } else if (rowData.source === 'AZUL') {
+                    //   td.classList.add('doc-azul');
+                    // }
+                  }
+                },
             { data: 'total' },
             { data: 'monto',visible: false },
             { data: 'iva',visible: false },
@@ -568,7 +591,7 @@ function tabla_facturas_pendientes(cliente,moneda) {
     });
     existe_cliente=true;
 
-    $('#imputarSeleccion').off('click').on('click', function () {
+    $('#imputarSeleccion_old').off('click').on('click', function () {
         const table = $('#imputacionTablePagos').DataTable();
         if (!existe_cliente) {
             alert('Seleccione un cliente para continuar');
@@ -583,22 +606,11 @@ function tabla_facturas_pendientes(cliente,moneda) {
         let saldoAFavor = 0; // Saldos negativos a favor
         let balance = 0;
 
-    //    // Validación inicial para acreedores
-    //    const esInvalida = data.some(row => row.source === 'acreedor' && row.tipo_doc !== 'FACTURA');
-    //    if (esInvalida) {
-    //        alert('No se puede imputar registros de acreedor que no sean del tipo "FACTURA".');
-    //        return;
-    //    }
-
-
-        // Validar si se seleccionaron filas
 
         if (seleccionadas.count() < 1) {
             alert('Debe seleccionar al menos una fila.');
-        console.log('entro');
             return;
         }
-        console.log('salio');
 
         if (importe <= 0) {
             alert('Digite un importe.');
@@ -797,6 +809,173 @@ function tabla_facturas_pendientes(cliente,moneda) {
         $('#abrirpago').prop('disabled', false);
         $('#deshacer').prop('disabled', false);
     });
+    $('#imputarSeleccion').off('click').on('click', function () {
+      const table = $('#imputacionTablePagos').DataTable();
+
+      if (!existe_cliente) {
+        alert('Seleccione un cliente para continuar');
+        return;
+      }
+
+      const seleccionadas = table.rows('.table-secondary');
+      if (seleccionadas.count() < 1) {
+        alert('Debe seleccionar al menos una fila.');
+        return;
+      }
+
+      let importe   = parseFloat($('#id_importe').val()) || 0; // dinero disponible original
+      let imputado  = parseFloat($('#a_imputar').val()) || 0;  // dinero disponible (campo a_imputar)
+      let balance   = 0;                                       // lo que se va imputando
+      let acumulado = 0;                                       // suma de saldos positivos (luego de compensar)
+
+      if (importe <= 0) {
+        alert('Digite un importe.');
+        return;
+      }
+      if (imputado === 0) {
+        alert('No hay más dinero disponible. Aumente el importe.');
+        return;
+      }
+
+      $('#id_importe').prop('readonly', true);
+
+      // --- helpers
+      const fmt = v => {
+        const n = Math.abs(v) < 0.0005 ? 0 : v;  // evita "-0.00"
+        return n.toFixed(2);
+      };
+
+      // --- snapshot original + arreglo de trabajo
+      const historial = [];
+      const items = [];
+
+      seleccionadas.nodes().each(function (node) {
+        const saldo = parseFloat(table.cell(node, 8).data()) || 0; // col 8 = saldo
+        const imp   = parseFloat(table.cell(node, 9).data()) || 0; // col 9 = imputado
+
+        historial.push({
+          modo: table.cell(node, 0).data(),
+          numero: table.cell(node, 2).data(),
+          saldoOriginal: fmt(saldo),
+          imputadoOriginal: fmt(imp)
+        });
+
+        items.push({
+          node,
+          saldo,
+          imp,
+          modo: table.cell(node, 0).data(),
+          numero: table.cell(node, 2).data(),
+          source: table.cell(node, 6).data()
+        });
+      });
+
+      // --- 1) Compensación entre negativos (crédito) y positivos (deuda)
+      (function compensarPosNeg() {
+        const pos = items.filter(x => x.saldo > 0);
+        const neg = items.filter(x => x.saldo < 0);
+
+        for (const n of neg) {
+          let credito = Math.abs(n.saldo); // cuánto crédito tengo
+          for (const p of pos) {
+            if (credito <= 0) break;
+            if (p.saldo <= 0) continue;
+
+            const c = Math.min(p.saldo, credito); // monto a compensar ahora
+            if (c <= 0) continue;
+
+            // aplicar a la deuda (positivo)
+            p.saldo -= c;
+            p.imp   += c;
+
+            // aplicar al crédito (negativo)
+            n.saldo += c; // sube hacia 0
+            n.imp   -= c; // imputado negativo (uso del crédito)
+
+            credito -= c;
+          }
+        }
+
+        // volcar nuevos valores a la tabla (solo pinta visual, no registra filasAfectadas aquí)
+        for (const it of items) {
+          table.cell(it.node, 8).data(fmt(it.saldo)); // saldo
+          table.cell(it.node, 9).data(fmt(it.imp));   // imputado
+          $(table.cell(it.node, 8).node()).css('background-color', '#fcec3f');
+          $(table.cell(it.node, 9).node()).css('background-color', '#fcec3f');
+        }
+      })();
+
+      // --- 2) Recalcular ACUMULADO (positivos) tras la compensación
+      acumulado = 0;
+      seleccionadas.nodes().each(function (node) {
+        const saldo = parseFloat(table.cell(node, 8).data()) || 0;
+        if (saldo > 0) acumulado += saldo;
+      });
+
+      // --- 3) Imputación con el dinero disponible (un solo flujo para ambos casos)
+      let restante = imputado; // usar el disponible actual del campo #a_imputar
+      seleccionadas.nodes().each(function (node) {
+        if (restante <= 0) return;
+
+        let saldo = parseFloat(table.cell(node, 8).data()) || 0;
+        let imp   = parseFloat(table.cell(node, 9).data()) || 0;
+
+        if (saldo > 0) {
+          const asignado = Math.min(saldo, restante);
+          saldo    -= asignado;
+          imp      += asignado;
+          restante -= asignado;
+          balance  += asignado;
+
+          table.cell(node, 8).data(fmt(saldo));
+          table.cell(node, 9).data(fmt(imp));
+
+          $(table.cell(node, 8).node()).css('background-color', '#fcec3f');
+          $(table.cell(node, 9).node()).css('background-color', '#fcec3f');
+        }
+      });
+
+      // --- 4) Construir filasAfectadas una sola vez (delta final vs historial)
+      const originalByNumero = new Map(historial.map(h => [h.numero, h]));
+      let filasAfectadas = [];
+
+      seleccionadas.nodes().each(function (node) {
+        const numero = table.cell(node, 2).data();
+        const orig   = originalByNumero.get(numero);
+        if (!orig) return;
+
+        const saldoFinal = parseFloat(table.cell(node, 8).data()) || 0;
+        const impFinal   = parseFloat(table.cell(node, 9).data()) || 0;
+
+        const deltaImp = impFinal - parseFloat(orig.imputadoOriginal);
+
+        // Solo registrar si cambió algo (evita duplicados)
+        if (Math.abs(deltaImp) >= 0.0005) {
+          filasAfectadas.push({
+            modo: table.cell(node, 0).data(),
+            numero,
+            nuevoSaldo: fmt(saldoFinal),
+            imputado: fmt(deltaImp),      // delta neto (puede ser negativo)
+            source: table.cell(node, 6).data()
+          });
+        }
+      });
+
+      // --- 5) Actualizar importes y estado final de UI
+      $('#a_imputar').val(restante.toFixed(2));
+      calcular_acumulado?.();
+      updateBalance?.();
+
+      // Guardar tracking
+      localStorage.setItem('filasAfectadas', JSON.stringify(filasAfectadas));
+      localStorage.setItem('historial', JSON.stringify(historial));
+
+      // Limpiar selección y habilitar acciones
+      seleccionadas.nodes().to$().removeClass('table-secondary');
+      $('#abrirpago').prop('disabled', false);
+      $('#deshacer').prop('disabled', false);
+});
+
     $('#deshacer').off('click').on('click', function () {
         const seleccionadas = table.rows('.table-secondary');
         if (seleccionadas.count() === 0) {
@@ -936,9 +1115,10 @@ let documentos = '';
 table.rows().nodes().each(function (node) {
     let imputado = parseFloat(table.cell(node, 9).data()) || 0;
 
-    if (imputado != 0) {
-        let nroDocumento = table.cell(node, 2).data();
-        documentos += nroDocumento + ';';
+    if (imputado !== 0) {
+      let nroDocumento = table.cell(node, 2).data();
+      const [, parte] = String(nroDocumento).split('-', 2);
+      documentos += (parte ?? '').trim() + ';';
     }
 });
 
@@ -1178,6 +1358,91 @@ let nuevaFila = {
 
 vector.asiento.push(nuevaFila);
 }
+$.ajax({
+  url: '/admin_cont/guardar_impuorden/',
+  method: 'POST',
+  headers: { 'X-CSRFToken': csrf_token },
+  data: JSON.stringify({ 'vector': vector }),
+  contentType: 'application/json',
+  xhrFields: { responseType: 'blob' },
+  success: function (blob, status, xhr) {
+    const contentType = (xhr.getResponseHeader('Content-Type') || '').toLowerCase();
+    const isPdf = contentType.includes('application/pdf') || (blob.type && blob.type.includes('application/pdf'));
+
+    function resetUI() {
+      $('#dialog-form').dialog('close');
+      $('#paymentModal').dialog('close');
+      $('#cobranzaForm').trigger('reset');
+      $('#paymentModal').find('input, select, textarea').val('');
+      $('#paymentModal').find('input:checkbox, input:radio').prop('checked', false);
+      $('#id_importe').prop('readonly', false);
+      $('#paymentModal').find('table').each(function () { $(this).find('tbody').empty(); });
+      $('#dialog-form').find('table').each(function () { $(this).find('tbody').empty(); });
+    }
+
+    if (isPdf) {
+      // Descarga PDF
+      const cd = xhr.getResponseHeader('Content-Disposition') || '';
+      const match = /filename\*?=(?:UTF-8''|")?([^;"']+)/i.exec(cd);
+      const filename = match ? decodeURIComponent(match[1]) : 'orden_pago.pdf';
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      resetUI();
+      return;
+    }
+
+    // No es PDF: intentar parsear JSON (éxito sin PDF o error lógico)
+    const reader = new FileReader();
+    reader.onload = function () {
+      const text = reader.result || '';
+      let json = null;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        alert('Respuesta no válida del servidor.\n' + (text.slice(0, 500) || ''));
+        console.error('Respuesta cruda:', text);
+        return;
+      }
+
+      const statusStr = (json.status || '').toString().toLowerCase();
+      const hasError = !!json.error || statusStr.startsWith('error');
+      const isOk = json.ok === true || statusStr === 'exito';
+
+      if (hasError) {
+        // Error lógico: NO cerramos ni reseteamos
+        alert(json.error || json.status || 'Ocurrió un error.');
+        console.error('Respuesta JSON (error):', json);
+        return;
+      }
+
+      if (isOk) {
+        // OP creada pero PDF falló (o respuesta de éxito sin PDF)
+        alert(json.mensaje || 'Orden creada. No se pudo generar el PDF en este momento.');
+        console.info('Respuesta JSON (éxito sin PDF):', json);
+        resetUI();
+        return;
+      }
+
+      // Caso inesperado
+      alert('Respuesta desconocida del servidor.');
+      console.warn('JSON desconocido:', json);
+    };
+    reader.readAsText(blob);
+  },
+  error: function (xhr, status, errorThrown) {
+    // Solo si el servidor devolvió 4xx/5xx
+    alert('Error HTTP: ' + xhr.status + ' - ' + (errorThrown || ''));
+    console.error('Respuesta error:', xhr.responseText);
+  }
+});
 
 /*
 $.ajax({
@@ -1202,68 +1467,68 @@ $.ajax({
         },
     });*/
 
-$.ajax({
-    url: '/admin_cont/guardar_impuorden/',
-    method: 'POST',
-    headers: { 'X-CSRFToken': csrf_token },
-    data: JSON.stringify({ 'vector': vector }),
-    contentType: 'application/json',
-    xhrFields: {
-        responseType: 'blob'  // necesario para manejar PDF o JSON en blob
-    },
-    success: function(blob, status, xhr) {
-        const contentType = xhr.getResponseHeader("Content-Type") || "";
-
-        // Si no es PDF, lo tratamos como texto y vemos si es JSON con error
-        if (!contentType.includes("application/pdf")) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                try {
-                    const result = reader.result;
-                    const json = JSON.parse(result);
-                    // Mostramos error personalizado
-                    alert(json.status || json.error || "Error desconocido");
-                    console.error("Respuesta JSON:", json);
-                } catch (e) {
-                    alert("Respuesta no válida del servidor:\n" + reader.result);
-                    console.error("Error al parsear JSON:", reader.result);
-                }
-            };
-            reader.readAsText(blob);
-            return;
-        }
-
-        // Es un PDF, se descarga
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "orden_pago.pdf";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-
-        $('#dialog-form').dialog('close');
-        $('#paymentModal').dialog('close');
-        $('#cobranzaForm').trigger('reset');
-        $('#paymentModal').find('input, select, textarea').val('');
-        $('#paymentModal').find('input:checkbox, input:radio').prop('checked', false);
-        $('#id_importe').prop('readonly', false);
-
-        $('#paymentModal').find('table').each(function() {
-            $(this).find('tbody').empty();
-        });
-        $('#dialog-form').find('table').each(function() {
-            $(this).find('tbody').empty();
-        });
-    },
-    error: function(xhr, status, errorThrown) {
-        // Esto solo se ejecuta si el servidor devuelve 4xx o 5xx
-        alert("Error HTTP: " + xhr.status + " - " + errorThrown);
-        console.error("Respuesta error:", xhr.responseText);
-    }
-});
-
+// $.ajax({
+//     url: '/admin_cont/guardar_impuorden/',
+//     method: 'POST',
+//     headers: { 'X-CSRFToken': csrf_token },
+//     data: JSON.stringify({ 'vector': vector }),
+//     contentType: 'application/json',
+//     xhrFields: {
+//         responseType: 'blob'  // necesario para manejar PDF o JSON en blob
+//     },
+//     success: function(blob, status, xhr) {
+//         const contentType = xhr.getResponseHeader("Content-Type") || "";
+//
+//         // Si no es PDF, lo tratamos como texto y vemos si es JSON con error
+//         if (!contentType.includes("application/pdf")) {
+//             const reader = new FileReader();
+//             reader.onload = function() {
+//                 try {
+//                     const result = reader.result;
+//                     const json = JSON.parse(result);
+//                     // Mostramos error personalizado
+//                     alert(json.status || json.error || "Error desconocido");
+//                     console.error("Respuesta JSON:", json);
+//                 } catch (e) {
+//                     alert("Respuesta no válida del servidor:\n" + reader.result);
+//                     console.error("Error al parsear JSON:", reader.result);
+//                 }
+//             };
+//             reader.readAsText(blob);
+//             return;
+//         }
+//
+//         // Es un PDF, se descarga
+//         const url = window.URL.createObjectURL(blob);
+//         const a = document.createElement('a');
+//         a.href = url;
+//         a.download = "orden_pago.pdf";
+//         document.body.appendChild(a);
+//         a.click();
+//         a.remove();
+//         window.URL.revokeObjectURL(url);
+//
+//         $('#dialog-form').dialog('close');
+//         $('#paymentModal').dialog('close');
+//         $('#cobranzaForm').trigger('reset');
+//         $('#paymentModal').find('input, select, textarea').val('');
+//         $('#paymentModal').find('input:checkbox, input:radio').prop('checked', false);
+//         $('#id_importe').prop('readonly', false);
+//
+//         $('#paymentModal').find('table').each(function() {
+//             $(this).find('tbody').empty();
+//         });
+//         $('#dialog-form').find('table').each(function() {
+//             $(this).find('tbody').empty();
+//         });
+//     },
+//     error: function(xhr, status, errorThrown) {
+//         // Esto solo se ejecuta si el servidor devuelve 4xx o 5xx
+//         alert("Error HTTP: " + xhr.status + " - " + errorThrown);
+//         console.error("Respuesta error:", xhr.responseText);
+//     }
+// });
+//
 
 
 }
