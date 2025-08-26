@@ -248,6 +248,7 @@ def buscar_clientes(request):
                 'direccion': cliente.direccion,
                 'localidad': cliente.localidad,
                 'telefono': cliente.telefono,
+                'pais': cliente.pais,
             }
             return JsonResponse(data)
 

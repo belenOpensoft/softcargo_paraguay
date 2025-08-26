@@ -43,8 +43,8 @@ def get_datos_caratula(request):
             texto += '<p style="text-align:right;font-size: 14px; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:20px;">'
             origen = MantenimientosCiudades.objects.filter(codigo=row.origen).first()
             destino = MantenimientosCiudades.objects.filter(codigo=row.destino).first()
-            texto += f'Origen: {origen.nombre or ""}<br>'
-            texto += f'Destino:  {destino.nombre or ""}</p><br>'
+            texto += f'Origen: {origen.nombre or "" if origen else ""}<br>'
+            texto += f'Destino:  {destino.nombre or "" if destino else ""}</p><br>'
 
             texto += formatear_caratula("Master", row.awb or "")
             texto += formatear_caratula("House", row.hawb or "")
@@ -127,27 +127,29 @@ def get_datos_caratula(request):
             movimiento = None
             if not aereo:
                 envases = Envases.objects.filter(numero=id)
-                for registro in envases:
-                    peso = f"{registro.peso:.3f}" if registro.peso else "0.000"
-                    volumen = f"{registro.volumen:.3f}" if registro.volumen else "0.000"
+                if envases:
+                    for registro in envases:
+                        peso = f"{registro.peso:.3f}" if registro.peso else "0.000"
+                        volumen = f"{registro.volumen:.3f}" if registro.volumen else "0.000"
 
-                    texto += (
-                        f"{int(registro.cantidad or 0)}x{registro.unidad.upper() if registro.unidad else ''} {registro.movimiento if registro.movimiento else 'S/I'} "
-                        f"{registro.tipo.upper() if registro.tipo else ''} "
-                        f"CNTR: {registro.nrocontenedor or ''} SEAL: {registro.precinto or ''} "
-                        f"WT: {peso} VOL: {volumen}<br>"
-                    )
-                    movimiento=registro.movimiento
+                        texto += (
+                            f"{int(registro.cantidad or 0)}x{registro.unidad.upper() if registro.unidad else ''} {registro.movimiento if registro.movimiento else 'S/I'} "
+                            f"{registro.tipo.upper() if registro.tipo else ''} "
+                            f"CNTR: {registro.nrocontenedor or ''} SEAL: {registro.precinto or ''} "
+                            f"WT: {peso} VOL: {volumen}<br>"
+                        )
+                        movimiento=registro.movimiento
 
             # Detalle de mercadería
             embarque = Cargaaerea.objects.filter(numero=id)
-            for e in embarque:
-                texto += formatear_caratula("Nro Bultos", f"{e.bultos} {e.tipo}") if movimiento is not None and movimiento == 'LCL/LCL' else formatear_caratula("Nro Bultos", f"{e.bultos}")
-                texto += formatear_caratula("Mercadería", e.producto.nombre if e.producto else '')
-                texto += '<br>'
-                texto += formatear_caratula("Peso", round(float(e.bruto or 0),2))
-                texto += formatear_caratula("Volumen", round(float(e.cbm or 0),2))
-                texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
+            if embarque:
+                for e in embarque:
+                    texto += formatear_caratula("Nro Bultos", f"{e.bultos} {e.tipo}") if movimiento is not None and movimiento == 'LCL/LCL' else formatear_caratula("Nro Bultos", f"{e.bultos}")
+                    texto += formatear_caratula("Mercadería", e.producto.nombre if e.producto else '')
+                    texto += '<br>'
+                    texto += formatear_caratula("Peso", round(float(e.bruto or 0),2))
+                    texto += formatear_caratula("Volumen", round(float(e.cbm or 0),2))
+                    texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             texto += formatear_caratula("Forma de pago", row.pago)
             texto += formatear_caratula("Vendedor", row.vendedor)

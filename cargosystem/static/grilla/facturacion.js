@@ -81,6 +81,7 @@ $(document).ready(function () {
                             <td>${cliente.direccion}</td>
                             <td>${cliente.localidad}</td>
                             <td>${cliente.telefono}</td>
+                            <td>${cliente.pais}</td>
                         </tr>`;
                     $('#clienteTable tbody').html(row);
                     $('#clienteTable').show();
@@ -2136,6 +2137,24 @@ function rellenar_tabla() {
     $("#modal-embarque").dialog("close");
 }
 
+function validarRucUyDeTabla() {
+    let selector = '#clienteTable', idxRuc = 2, idxPais = 6;
+  const tr = document.querySelector(`${selector} tbody tr`);
+  if (!tr) return false;
+
+  const tds = tr.children;
+  const ruc = (tds[idxRuc]?.textContent || '').trim();
+  const paisRaw = (tds[idxPais]?.textContent || '').trim();
+
+  const pais = paisRaw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const esUruguay = pais === 'uruguay' || pais.endsWith('uruguay') ||
+                    paisRaw.toUpperCase() === 'UY' || paisRaw.toUpperCase() === 'URY';
+
+  const rucEs12Digitos = /^\d{12}$/.test(ruc);
+
+  return esUruguay ? rucEs12Digitos : false;
+}
+
 function procesar_factura() {
     let tipo = $('#id_tipo').val();
     if(tipo==21){
@@ -2145,6 +2164,14 @@ function procesar_factura() {
             $('#monto-imputar').val( $('#id_total').val());
             localStorage.removeItem('facturas_impuvta');
             cargar_facturas_imputacion(cliente);
+            return;
+        }
+    }
+
+    if(!validarRucUyDeTabla()){
+        console.log(tipo);
+        if(tipo!=23 && tipo !=24){
+            alert('El cliente es del exterior, seleccione Eticket o Eticket N/C');
             return;
         }
     }

@@ -54,8 +54,8 @@ def get_datos_caratula(request):
             texto += '<p style="text-align:right;font-size: 14px; word-wrap: break-word; white-space: normal; max-width: 100%; margin-right:20px;">'
             origen = Ciudades.objects.filter(codigo=Vembarque.origen).first()
             destino = Ciudades.objects.filter(codigo=Vembarque.destino).first()
-            texto += f'Origen: {origen.nombre or ""}<br>'
-            texto += f'Destino:  {destino.nombre or ""}</p><br>'
+            texto += f'Origen: {origen.nombre or "" if origen else ""}<br>'
+            texto += f'Destino:  {destino.nombre or "" if destino else ""}</p><br>'
 
             # Primer bloque
             texto += formatear_caratula("Master", Vembarque.awb)
@@ -94,27 +94,28 @@ def get_datos_caratula(request):
 
             # Detalle de la carga
             embarques = ExportCargaaerea.objects.filter(numero=id)
-            for e in embarques:
-                volumen = ''
-                if e.medidas is not None:
-                    medidas = e.medidas.split('*')
-                else:
-                    medidas = None
+            if embarques:
+                for e in embarques:
+                    volumen = ''
+                    if e.medidas is not None:
+                        medidas = e.medidas.split('*')
+                    else:
+                        medidas = None
 
-                if medidas and len(medidas) == 3 and all(m.isdigit() for m in medidas):
-                    volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
-                else:
-                    volumen=0
+                    if medidas and len(medidas) == 3 and all(m.isdigit() for m in medidas):
+                        volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
+                    else:
+                        volumen=0
 
-                #texto += f"{e.cantidad}x{e.unidad} {e.tipo} CTER: {e.nrocontenedor} SEAL: {e.precinto} WT: {e.bruto} VOL: {volumen}<br>"
+                    #texto += f"{e.cantidad}x{e.unidad} {e.tipo} CTER: {e.nrocontenedor} SEAL: {e.precinto} WT: {e.bruto} VOL: {volumen}<br>"
 
-                #texto += formatear_caratula("Nro Contenedor", e.nrocontenedor)
-                texto += formatear_caratula("Nro Bultos", e.bultos)
-                texto += formatear_caratula("Mercaderia", e.producto.nombre)
-                texto += '<br>'
-                texto += formatear_caratula("Peso", round(float(e.bruto or 0),2))
-                texto += formatear_caratula("Volumen", round(volumen,2))
-                texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
+                    #texto += formatear_caratula("Nro Contenedor", e.nrocontenedor)
+                    texto += formatear_caratula("Nro Bultos", e.bultos)
+                    texto += formatear_caratula("Mercaderia", e.producto.nombre)
+                    texto += '<br>'
+                    texto += formatear_caratula("Peso", round(float(e.bruto or 0),2))
+                    texto += formatear_caratula("Volumen", round(volumen,2))
+                    texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             texto += formatear_caratula("Forma de pago", seguimiento.pago)
             texto += formatear_caratula("Vendedor", seguimiento.vendedor)

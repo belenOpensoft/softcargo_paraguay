@@ -34,8 +34,8 @@ class Factura(forms.Form):
         ('20', 'Factura'),
         ('22', 'Nota de débito'),
         ('21', 'Nota de crédito'),
-        ('23', 'eticket'),
-        ('24', 'eticket N/C'),
+        ('24', 'eticket'),
+        ('23', 'eticket N/C'),
     )
 
     tipo = forms.ChoiceField(
