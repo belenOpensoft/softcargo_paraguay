@@ -244,16 +244,33 @@ def obtener_imputables(request):
     filtrados=[]
     for r in registros_totales:
 
-        try:
-            moneda_nombre = Monedas.objects.get(codigo=r.mmoneda).nombre if r.mmoneda in [1, 2, 3, 4, 5,6] else ''
-        except Monedas.DoesNotExist:
-            moneda_nombre = ''
+        # try:
+        #     # moneda_nombre = Monedas.objects.get(codigo=r.mmoneda).nombre if r.mmoneda in [1, 2, 3, 4, 5,6] else ''
+        #     moneda_nombre = Monedas.objects.get(codigo=moneda_objetivo).nombre
+        # except Monedas.DoesNotExist:
+        #     moneda_nombre = ''
 
         total = float(r.mtotal or 0)
         saldo = float(r.msaldo or 0)
 
         arbitraje = float(r.marbitraje or 0)
         paridad = float(r.mparidad or 0)
+
+        try:
+
+            if arbitraje != 0:
+                total_convertido = convertir_monto(total, int(r.mmoneda or 0), int(moneda_objetivo or 0),
+                                                   arbitraje, paridad)
+                saldo_convertido = convertir_monto(saldo, int(r.mmoneda or 0), int(moneda_objetivo or 0),
+                                                   arbitraje, paridad)
+                moneda_nombre = Monedas.objects.get(codigo=moneda_objetivo).nombre
+            else:
+                total_convertido = total
+                saldo_convertido = saldo
+                moneda_nombre = Monedas.objects.get(codigo=r.mmoneda).nombre
+
+        except ObjectDoesNotExist:
+            moneda_nombre = "Desconocida"
 
         nro_completo = ""
         if r.mserie and r.mprefijo and r.mboleta:
@@ -269,8 +286,8 @@ def obtener_imputables(request):
 
         source = 'VERDE' if r.mtipo in [20,21,23,24,25] else 'AZUL'
 
-        total_convertido = convertir_monto(total, int(r.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
-        saldo_convertido = convertir_monto(saldo, int(r.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+        # total_convertido = convertir_monto(total, int(r.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+        # saldo_convertido = convertir_monto(saldo, int(r.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
 
         total_convertido = total_convertido if r.mtipo in [40, 45, 21, 23] else - total_convertido
         saldo_convertido = saldo_convertido if r.mtipo in [40, 45, 21, 23] else - saldo_convertido

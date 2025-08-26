@@ -565,7 +565,7 @@ class Cobranza(forms.Form):
     moneda = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
-        initial=2,
+        initial=2,to_field_name='codigo',
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
@@ -573,7 +573,7 @@ class Cobranza(forms.Form):
     moneda_efectivo = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
-        initial=2,
+        initial=2,to_field_name='codigo',
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
@@ -581,14 +581,14 @@ class Cobranza(forms.Form):
     moneda_transferencia = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
-        initial=2,
+        initial=2,to_field_name='codigo',
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
 
     moneda_deposito = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
-        label="Moneda",
+        label="Moneda",to_field_name='codigo',
         initial=2,
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
@@ -596,21 +596,21 @@ class Cobranza(forms.Form):
     moneda_cheque = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
-        initial=2,
+        initial=2,to_field_name='codigo',
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
     moneda_cheque_terceros = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
-        initial=2,
+        initial=2,to_field_name='codigo',
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
     moneda_otro = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
-        initial=2,
+        initial=2,to_field_name='codigo',
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
@@ -781,6 +781,8 @@ class Cobranza(forms.Form):
         self.fields['arbitraje'].initial = self.arbitraje_valor
         self.fields['paridad'].initial = self.paridad_valor
 
+
+
 class OrdenPago(forms.Form):
     serie = forms.CharField(
         max_length=1,
@@ -825,7 +827,7 @@ class OrdenPago(forms.Form):
     moneda = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
-        initial=2,
+        initial=2,to_field_name='codigo',
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
@@ -833,14 +835,14 @@ class OrdenPago(forms.Form):
     moneda_efectivo = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
-        initial=2,
+        initial=2,to_field_name='codigo',
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
 
     moneda_transferencia = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
-        label="Moneda",
+        label="Moneda",to_field_name='codigo',
         initial=2,
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
@@ -848,21 +850,21 @@ class OrdenPago(forms.Form):
 
     moneda_deposito = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
-        label="Moneda",
+        label="Moneda",to_field_name='codigo',
         initial=2,
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
     moneda_cheque = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
-        label="Moneda",
+        label="Moneda",to_field_name='codigo',
         initial=2,
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )
     moneda_cheque_terceros = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
-        label="Moneda",
+        label="Moneda",to_field_name='codigo',
         initial=2,
         widget=forms.Select(attrs={'class': 'form-control', 'disabled': 'disabled'}),
         error_messages={'required': 'Este campo es obligatorio'}
@@ -871,7 +873,7 @@ class OrdenPago(forms.Form):
     moneda_otro = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
         label="Moneda",
-        initial=2,
+        initial=2,to_field_name='codigo',
         widget=forms.Select(attrs={'class': 'form-control'}),
         error_messages={'required': 'Este campo es obligatorio'}
     )

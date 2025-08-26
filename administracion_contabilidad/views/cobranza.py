@@ -271,10 +271,7 @@ def source_facturas_pendientes(request):
         # Convertir los resultados en lista de diccionarios
         data = []
         for pendiente in pendientes:
-            try:
-                moneda_nombre = Monedas.objects.get(codigo=pendiente.mmoneda).nombre
-            except ObjectDoesNotExist:
-                moneda_nombre = "Desconocida"
+
 
             total = float(pendiente.mtotal or 0)
             saldo = float(pendiente.msaldo or 0)
@@ -282,8 +279,19 @@ def source_facturas_pendientes(request):
             arbitraje = float(pendiente.marbitraje or 0)
             paridad = float(pendiente.mparidad or 0)
 
-            total_convertido = convertir_monto(total, int(pendiente.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
-            saldo_convertido = convertir_monto(saldo, int(pendiente.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+            try:
+
+                if arbitraje !=0:
+                    total_convertido = convertir_monto(total, int(pendiente.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+                    saldo_convertido = convertir_monto(saldo, int(pendiente.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
+                    moneda_nombre = Monedas.objects.get(codigo=moneda_objetivo).nombre
+                else:
+                    total_convertido=total
+                    saldo_convertido=saldo
+                    moneda_nombre = Monedas.objects.get(codigo=pendiente.mmoneda).nombre
+
+            except ObjectDoesNotExist:
+                moneda_nombre = "Desconocida"
 
             nro_completo = ""
             if pendiente.mserie and pendiente.mprefijo and pendiente.mboleta:
