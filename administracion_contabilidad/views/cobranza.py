@@ -262,7 +262,7 @@ def source_facturas_pendientes(request):
         moneda_objetivo = request.GET.get('moneda')
 
         # Filtrar registros por cliente
-        pendientes = Movims.objects.filter(mcliente=cliente).exclude(msaldo=0)
+        pendientes = Movims.objects.filter(mcliente=cliente,mactivo='S').exclude(msaldo=0)
 
         # Paginación
         total_registros = pendientes.count()
@@ -715,6 +715,7 @@ def crear_movimiento(movimiento):
         lista.manoimpu = movimiento['anio']
         lista.mmonedaoriginal = movimiento['monedaoriginal']
         lista.marbitraje = movimiento['arbitraje']
+        lista.mactivo = 'S'
         lista.mmontooriginal = movimiento['montooriginal']
         lista.save()
 

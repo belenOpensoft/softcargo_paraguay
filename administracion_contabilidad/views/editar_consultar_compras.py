@@ -556,11 +556,14 @@ def anular_compra(request):
             asientos = Asientos.objects.filter(autogenerado=autogen)
 
             impus_deleted = impus.count()
-            movims_deleted = movims.count()
+            # movims_deleted = movims.count()
             asientos_deleted = asientos.count()
 
             impus.delete()
-            movims.delete()
+            for m in movims:
+                m.mactivo='N'
+                m.save()
+
             asientos.delete()
 
             return JsonResponse({
@@ -568,7 +571,6 @@ def anular_compra(request):
                 'message': 'Factura anulada correctamente',
                 'eliminados': {
                     'Impucompras': impus_deleted,
-                    'Movims': movims_deleted,
                     'Asientos': asientos_deleted
                 }
             })

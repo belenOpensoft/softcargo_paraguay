@@ -139,6 +139,8 @@ def crear_movimiento(movimiento):
         lista.mnombremov = movimiento['nombremov']
         lista.mautogen = movimiento['autogenerado']
         lista.marbitraje = movimiento['arbitraje']
+        lista.mactivo = 'S'
+
         lista.save()
 
     except Exception as e:

@@ -1089,6 +1089,7 @@ def crear_movimiento(movimiento):
         lista.mmonedaoriginal = movimiento['monedaoriginal']
         lista.marbitraje = movimiento['arbitraje']
         lista.mmontooriginal = movimiento['montooriginal']
+        lista.mactivo = 'S'
         lista.save()
 
     except Exception as e:

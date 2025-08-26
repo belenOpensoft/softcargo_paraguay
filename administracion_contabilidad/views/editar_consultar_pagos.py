@@ -329,7 +329,7 @@ def anular_pago(request):
                                 factura.save()
 
                 impus_deleted = impus.count()
-                movims_deleted = movims.count()
+                # movims_deleted = movims.count()
                 asientos_deleted = asientos.count()
 
                 if cheque.exists():
@@ -342,7 +342,9 @@ def anular_pago(request):
                     cheque.delete()
 
                 impus.delete()
-                movims.delete()
+                for m in movims:
+                    m.mactivo = 'N'
+                    m.save()
                 asientos.delete()
                 orden_pago.delete()
 
@@ -351,7 +353,6 @@ def anular_pago(request):
                     'message': 'Cobranza anulada correctamente',
                     'eliminados': {
                         'Impucompras': impus_deleted,
-                        'Movims': movims_deleted,
                         'Asientos': asientos_deleted
                     }
                 })

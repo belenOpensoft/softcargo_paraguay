@@ -334,19 +334,21 @@ def anular_cobranza(request):
                             factura.save()
 
             impus_deleted = impus.count()
-            movims_deleted = movims.count()
+            # movims_deleted = movims.count()
             asientos_deleted = asientos.count()
 
             impus.delete()
-            movims.delete()
+            # movims.delete()
             asientos.delete()
+            for m in movims:
+                m.mactivo='N'
+                m.save()
 
             return JsonResponse({
                 'success': True,
                 'message': 'Cobranza anulada correctamente',
                 'eliminados': {
                     'Impucompras': impus_deleted,
-                    'Movims': movims_deleted,
                     'Asientos': asientos_deleted
                 }
             })

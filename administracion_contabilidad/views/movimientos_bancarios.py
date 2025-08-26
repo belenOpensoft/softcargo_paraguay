@@ -283,6 +283,7 @@ def crear_movimiento(movimiento):
         lista.mdetalle = movimiento['detalle']
         lista.mnombremov = movimiento['nombremov']
         lista.mautogen = movimiento['autogenerado']
+        lista.mactivo = 'S'
         lista.marbitraje = movimiento['arbitraje']
         lista.save()
 

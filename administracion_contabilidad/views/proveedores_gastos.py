@@ -424,6 +424,7 @@ def crear_movimiento(movimiento):
         lista.manoimpu = movimiento['anio']
         lista.mmonedaoriginal = movimiento['monedaoriginal']
         lista.marbitraje = movimiento['arbitraje']
+        lista.mactivo = 'S'
         lista.mmontooriginal = movimiento['montooriginal']
         lista.save()
 

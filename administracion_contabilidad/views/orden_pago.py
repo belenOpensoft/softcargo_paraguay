@@ -239,7 +239,7 @@ def obtener_imputables(request):
     start = int(request.GET.get('start', 0))  # Inicio de la página (offset)
     length = int(request.GET.get('length', 5))  # Número de registros por página
     # Filtrar los registros según el proveedor
-    registros_totales = Movims.objects.filter(mcliente=proveedor_id).exclude(msaldo=0)
+    registros_totales = Movims.objects.filter(mcliente=proveedor_id,mactivo='S').exclude(msaldo=0)
 
     filtrados=[]
     for r in registros_totales:
@@ -654,6 +654,7 @@ def crear_movimiento(movimiento):
         lista.manoimpu = movimiento['anio']
         lista.mmonedaoriginal = movimiento['monedaoriginal']
         lista.marbitraje = movimiento['arbitraje']
+        lista.mactivo = 'S'
         lista.mmontooriginal = movimiento['montooriginal']
         lista.save()
 

@@ -490,10 +490,9 @@ def eliminar_preventa(request):
                 return JsonResponse({"resultado": "error", "mensaje": "ID no proporcionado"}, status=400)
 
             try:
-                infofactura = Infofactura.objects.get(id=preventa_id)
-                infofactura.delete()
+                Factudif.objects.filter(znumero=preventa_id).delete()
                 return JsonResponse({"resultado": "éxito", "mensaje": "Preventa eliminada correctamente"})
-            except Infofactura.DoesNotExist:
+            except Factudif.DoesNotExist:
                 return JsonResponse({"resultado": "error", "mensaje": "La preventa no existe"}, status=404)
 
         except Exception as e:
