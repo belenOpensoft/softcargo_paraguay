@@ -3771,7 +3771,7 @@ function get_data_email(row,title,row_number,transportista,master,gastos,directo
     let miurl = "/get_data_email/";
     var toData = {
         'title': title,
-        'window': window.row_number,
+        'row_number': window.row_number,
         'csrfmiddlewaretoken': csrf_token,
         'transportista':transportista,
         'master':master,

@@ -110,7 +110,8 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
         if title == 'Notificación de transbordo de carga':
             fecha_actual = datetime.now()
 
-            resultado['asunto'] = 'Ref.: ' + str(row.seguimiento) +  '- H B/L: ' + str(row.hawb) + '- Shipper: '
+            resultado['asunto'] = 'Ref.: ' + str(row.numero) + '- H B/L: ' + str(row.hawb) + '- Shipper: ' + str(
+                row.embarcador) + '- Consignee: ' + str(row.consignatario) + '- Vessel: '+str(vapor)
 
             fecha_formateada = fecha_actual.strftime(
                 f'{DIAS_SEMANA[fecha_actual.weekday()]}, %d de {MESES[fecha_actual.month - 1]} del %Y'

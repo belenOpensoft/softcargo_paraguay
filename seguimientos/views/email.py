@@ -101,8 +101,9 @@ def get_data_email(request):
 
                 fecha_actual = datetime.datetime.now()
 
-                resultado['asunto'] = 'Ref.: ' + str(row.numero) + '- H B/L: ' + str(row.hawb) + '- Shipper: '
-
+                resultado['asunto'] = 'Ref.: ' + str(row.numero) + '- H B/L: ' + str(row.hawb) + '- Shipper: '+str(row.embarcador)+'- Consignee: '+str(row.consignatario)
+                if row.modo == 'IMPORT MARITIMO' or row.modo == 'EXPORT MARITIMO':
+                    resultado['asunto'] += '- Vessel: '+str(row.vapor or '')
                 fecha_formateada = fecha_actual.strftime(
                     f'{dias_semana[fecha_actual.weekday()]}, %d de {meses[fecha_actual.month - 1]} del %Y'
                 )
