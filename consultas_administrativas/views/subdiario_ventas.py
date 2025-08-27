@@ -9,6 +9,7 @@ from django.shortcuts import render
 from administracion_contabilidad.models import Impuvtas, Movims
 from consultas_administrativas.forms import ReporteMovimientosForm
 from consultas_administrativas.models import VReporteSubdiarioVentas
+from impomarit.models import VistaOperativas
 
 
 def subdiario_ventas_old(request):
@@ -76,7 +77,10 @@ def subdiario_ventas(request):
 
             queryset = VReporteSubdiarioVentas.objects.filter(**filtros)
 
+
             cobros_factura = {}
+            seguimientos_facturas = {}
+            embarque=None
 
             for q in queryset:
                 impuvtas = Impuvtas.objects.filter(autofac=q.autogen_factura).only('autogen', 'monto')
@@ -97,6 +101,13 @@ def subdiario_ventas(request):
                         lista_cobros.append(cobro)
 
                     cobros_factura[q.autogen_factura] = lista_cobros
+
+                if q.posicion is not None and q.house is not None:
+                    embarque = VistaOperativas.objects.filter(posicion=q.posicion, house=q.house).only(
+                        'seguimiento').first()
+
+                if embarque:
+                    seguimientos_facturas[q.autogen_factura] = embarque.seguimiento
 
             for q in queryset:
                 cobros = cobros_factura.get(q.autogen_factura, [])
@@ -129,11 +140,12 @@ def subdiario_ventas(request):
 
             datos = []
             for q in queryset:
+                seguimiento = seguimientos_facturas.get(q.autogen_factura, None)
                 datos.append((
                     q.fecha, q.tipo, q.numero, q.nro_cliente, q.cliente, q.detalle, q.exento, q.gravado,
                     q.iva, q.total, q.tipo_cambio, q.paridad, q.referencia, q.cancelada,
                     q.posicion, q.cuenta, q.vendedor, q.vencimiento, q.cobro, q.tipo_cambio_cobro,
-                    q.moneda, q.rut, q.vapor, q.viaje, q.master, q.house, q.embarcador,
+                    q.moneda, q.rut, q.vapor, q.viaje,seguimiento, q.master, q.house, q.embarcador,
                     q.consignatario, q.flete, q.etd, q.eta, q.imputada, q.orden_cliente,
                     q.agente, q.origen, q.destino, q.operacion, q.movimiento, q.deposito, q.wr,
                     q.transportista, q.serie, q.prefijo
@@ -163,10 +175,11 @@ def generar_excel_subdiario_ventas(datos, fecha_desde, fecha_hasta,consolidar_do
             'Fecha', 'Tipo', 'Boleta', 'Cliente', 'Nombre', 'Detalle del movimiento', 'Exento', 'Gravado', 'I.V.A.',
             'Total', 'T. Cambio', 'Paridad', 'Referencia', 'Cancel.', 'Posición', 'Cuenta',
             'Vendedor', 'Vto.', 'Cobro', 'Tca. Cob.', 'Moneda Original', 'R.U.T.', 'Vapor',
-            'Viaje', 'Master', 'House', 'Embarcador', 'Consignatario', 'Flete', 'ETD', 'ETA', 'Imputada',
+            'Viaje', 'Seguimiento', 'Master', 'House', 'Embarcador', 'Consignatario', 'Flete', 'ETD', 'ETA', 'Imputada',
             'Orden cliente', 'Agente', 'Origen', 'Destino',
             'Operación', 'Movimiento', 'Depósito', 'WR', 'Transportista'
         ]
+
         worksheet.set_column(0, 0, 8)  # Fecha
         worksheet.set_column(17, 18, 8)  # Vto. y Cobro
         worksheet.set_column(29, 30, 8)  # ETD, ETA, Imputada

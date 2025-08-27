@@ -946,6 +946,7 @@ class VistaEventosCalendario(models.Model):
 
 class VistaOperativas(models.Model):
     modo = models.CharField(max_length=255, null=True)
+    posicion = models.CharField(max_length=255, null=True)
     tipo_operacion = models.CharField(max_length=255, null=True)
     numero = models.IntegerField(primary_key=True)
     nroarmador = models.CharField(max_length=255, null=True)
