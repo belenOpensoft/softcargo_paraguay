@@ -30,36 +30,38 @@ def mayores_analiticos(request):
             if cuenta:
                 if not consolidar_dolares and not consolidar_moneda_nac and moneda:
                     asientos= Asientos.objects.filter(
-                        fecha__gte=fecha_desde,
-                        fecha__lte=fecha_hasta,
+                        fecha__date__gte=fecha_desde,
+                        fecha__date__lte=fecha_hasta,
                         cuenta=cuenta.xcodigo,
                         moneda=moneda.codigo
                     )
                 else:
                     asientos= Asientos.objects.filter(
-                        fecha__gte=fecha_desde,
-                        fecha__lte=fecha_hasta,
+                        fecha__date__gte=fecha_desde,
+                        fecha__date__lte=fecha_hasta,
                         cuenta=cuenta.xcodigo,
                     )
             elif cuenta_desde and cuenta_hasta:
                 if not consolidar_dolares and not consolidar_moneda_nac and moneda:
                     asientos = Asientos.objects.filter(
-                        fecha__gte=fecha_desde,
-                        fecha__lte=fecha_hasta,
+                        fecha__date__gte=fecha_desde,
+                        fecha__date__lte=fecha_hasta,
                         cuenta__gte=cuenta_desde,
                         cuenta__lte=cuenta_hasta,
                         moneda=moneda.codigo
                     )
                 else:
                     asientos = Asientos.objects.filter(
-                        fecha__gte=fecha_desde,
-                        fecha__lte=fecha_hasta,
+                        fecha__date__gte=fecha_desde,
+                        fecha__date__lte=fecha_hasta,
                         cuenta__gte=cuenta_desde,
                         cuenta__lte=cuenta_hasta,
                     )
             else:
                 pass
                 #retornar error
+
+            saldo = calcular_saldo_anterior(cuenta.xcodigo,fecha_desde, consolidar_dolares=consolidar_dolares, consolidar_moneda_nac=consolidar_moneda_nac,moneda=moneda.codigo)
 
             return generar_excel_mayores_analiticos(
                 asientos,
@@ -70,7 +72,8 @@ def mayores_analiticos(request):
                 moneda,
                 consolidar_dolares,
                 consolidar_moneda_nac,
-                cuenta
+                cuenta,
+                saldo
             )
     else:
         form = MayoresAnaliticosForm()
@@ -80,9 +83,9 @@ def mayores_analiticos(request):
     return render(request, 'contabilidad_ca/mayores_analiticos.html', {'form': form})
 
 
-def generar_excel_mayores_analiticos(
+def generar_excel_mayores_analiticos_old(
     asientos, cuenta_desde, cuenta_hasta, fecha_desde, fecha_hasta,
-    moneda, consolidar_dolares, consolidar_moneda_nac, cuenta=None
+    moneda, consolidar_dolares, consolidar_moneda_nac, cuenta=None, saldo=None
 ):
     try:
         nombre_archivo = f"Mayores_Analiticos_{fecha_desde}_al_{fecha_hasta}.xlsx"
@@ -109,6 +112,10 @@ def generar_excel_mayores_analiticos(
         asientos = asientos.order_by('cuenta', 'fecha', 'asiento')
         cuenta_actual = None
 
+        total_debe = Decimal('0.00')
+        total_haber = Decimal('0.00')
+        ultimo_saldo = Decimal('0.00')
+
         for a in asientos:
             if cuenta_actual != a.cuenta:
                 cuenta_actual = a.cuenta
@@ -133,31 +140,54 @@ def generar_excel_mayores_analiticos(
                 monto = convertir_monto(monto, moneda_origen, 1, arbitraje, paridad)
 
             # Calcular debe y haber según tipo e imputación
+            # if a.tipo == 'Z':
+            #     debe = float(monto) if a.imputacion == 2 else 0.0
+            #     haber = float(monto) if a.imputacion == 1 else 0.0
+            # elif a.tipo == 'G':
+            #     debe = float(monto) if a.imputacion == 1 else 0.0
+            #     haber = float(monto) if a.imputacion == 2 else 0.0
+            # elif a.tipo == 'V':
+            #     debe = float(monto) if a.imputacion == 2 else 0.0
+            #     haber = float(monto) if a.imputacion == 1 else 0.0
+            # elif a.tipo == 'P':
+            #     debe = float(monto) if a.imputacion == 1 else 0.0
+            #     haber = float(monto) if a.imputacion == 2 else 0.0
+            # elif a.tipo in ['D', 'T', 'I']:
+            #     debe = float(monto) if a.imputacion == 1 else 0.0
+            #     haber = float(monto) if a.imputacion == 2 else 0.0
+            # elif a.tipo == 'C':
+            #     debe = float(monto) if a.imputacion == 2 else 0.0
+            #     haber = float(monto) if a.imputacion == 1 else 0.0
+            # elif a.tipo == 'B':
+            #     debe = float(monto) if a.imputacion == 1 else 0.0
+            #     haber = float(monto) if a.imputacion == 2 else 0.0
+            # else:
+            #     debe = haber = 0.0
+
+            haber=debe=0
+
             if a.tipo == 'Z':
-                debe = float(monto) if a.imputacion == 2 else 0.0
-                haber = float(monto) if a.imputacion == 1 else 0.0
+                debe = float(monto)
             elif a.tipo == 'G':
-                debe = float(monto) if a.imputacion == 1 else 0.0
-                haber = float(monto) if a.imputacion == 2 else 0.0
+                haber = float(monto)
             elif a.tipo == 'V':
-                debe = float(monto) if a.imputacion == 2 else 0.0
-                haber = float(monto) if a.imputacion == 1 else 0.0
+                debe = float(monto)
             elif a.tipo == 'P':
-                debe = float(monto) if a.imputacion == 1 else 0.0
-                haber = float(monto) if a.imputacion == 2 else 0.0
+                haber = float(monto)
             elif a.tipo in ['D', 'T', 'I']:
-                debe = float(monto) if a.imputacion == 1 else 0.0
-                haber = float(monto) if a.imputacion == 2 else 0.0
+                haber = float(monto)
             elif a.tipo == 'C':
-                debe = float(monto) if a.imputacion == 2 else 0.0
-                haber = float(monto) if a.imputacion == 1 else 0.0
+                haber = float(monto)
             elif a.tipo == 'B':
-                debe = float(monto) if a.imputacion == 1 else 0.0
-                haber = float(monto) if a.imputacion == 2 else 0.0
+                haber = float(monto)
             else:
                 debe = haber = 0.0
 
             saldos[cuenta_actual] += Decimal(debe) - Decimal(haber)
+            ultimo_saldo = saldos[cuenta_actual]
+
+            total_debe += Decimal(debe)
+            total_haber += Decimal(haber)
 
             moneda_nombre = Monedas.objects.filter(codigo=a.moneda).values_list('nombre', flat=True).first() or ''
 
@@ -177,6 +207,15 @@ def generar_excel_mayores_analiticos(
 
             row += 1
 
+        row += 1
+        worksheet.write(row, 0, "Neto periodo:", titulo_format)
+        worksheet.write(row, 8, float(ultimo_saldo), decimal_format)  # Columna saldo
+        row += 2
+        worksheet.write(row, 5, "TOTAL", encabezado_format)
+        worksheet.write(row, 6, float(total_debe), decimal_format)   # Total debe
+        worksheet.write(row, 7, float(total_haber), decimal_format)  # Total haber
+        worksheet.write(row, 8, float(ultimo_saldo), decimal_format) # Total saldo
+
         worksheet.set_column('A:P', 14)
         workbook.close()
         output.seek(0)
@@ -186,7 +225,155 @@ def generar_excel_mayores_analiticos(
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             headers={'Content-Disposition': f'attachment; filename="{nombre_archivo}"'}
         )
+    except Exception as e:
+        raise RuntimeError(f"Error al generar el Excel de mayores analíticos: {e}")
 
+def generar_excel_mayores_analiticos(
+    asientos, cuenta_desde, cuenta_hasta, fecha_desde, fecha_hasta,
+    moneda, consolidar_dolares, consolidar_moneda_nac, cuenta=None, saldo=None
+):
+    try:
+        nombre_archivo = f"Mayores_Analiticos_{fecha_desde}_al_{fecha_hasta}.xlsx"
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet("Mayores Analiticos")
+
+        # Formatos
+        titulo_format = workbook.add_format({'bold': True, 'align': 'left'})
+        encabezado_format = workbook.add_format({'bold': True, 'bg_color': '#d9d9d9', 'border': 1})
+        date_format = workbook.add_format({'num_format': 'dd-mm-yyyy'})
+        decimal_format = workbook.add_format({'num_format': '#,##0.00'})
+        normal_format = workbook.add_format({})
+
+        columnas = [
+            'Fecha', 'Asiento', 'Detalle', 'Moneda', 'Documento', 'T.C.',
+            'Debe', 'Haber', 'Saldo', 'Posicion', 'Monto Origen',
+            'Tipo', 'Socio comercial', 'Paridad', 'Cliente', 'Autogenerado'
+        ]
+
+        row = 0
+        saldos = {}
+        cuenta_actual = None
+
+        total_debe = Decimal('0.00')
+        total_haber = Decimal('0.00')
+        saldo_periodo = Decimal('0.00')   # saldo desde 0
+        ultimo_saldo = Decimal('0.00')    # saldo real con saldo anterior
+
+        asientos = asientos.order_by('cuenta', 'fecha', 'asiento')
+
+        for a in asientos:
+            if cuenta_actual != a.cuenta:
+                cuenta_actual = a.cuenta
+
+                # Inicializar con saldo anterior recibido
+                saldo_inicial = Decimal(saldo or 0)
+                saldos[cuenta_actual] = saldo_inicial
+                saldo_periodo = Decimal('0.00')
+
+                nombre_cuenta = cuenta.xnombre if cuenta else Cuentas.objects.get(xcodigo=a.cuenta).xnombre
+                worksheet.write(row, 0, f"Asientos desde {fecha_desde} a {fecha_hasta} - Cuenta: {a.cuenta} - {nombre_cuenta}", titulo_format)
+                row += 1
+
+                for col_num, header in enumerate(columnas):
+                    worksheet.write(row, col_num, header, encabezado_format)
+                row += 1
+
+                # Fila de saldo anterior
+                worksheet.write(row, 0, "Saldo anterior", titulo_format)
+                worksheet.write(row, 8, float(saldo_inicial), decimal_format)
+                row += 1
+
+            # ======= Lógica de cálculo =======
+            monto = Decimal(a.monto or 0)
+            arbitraje = Decimal(a.cambio or 1)
+            paridad = Decimal(a.paridad or 1)
+            moneda_origen = a.moneda
+
+            if consolidar_dolares:
+                monto = convertir_monto(monto, moneda_origen, 2, arbitraje, paridad)
+            elif consolidar_moneda_nac:
+                monto = convertir_monto(monto, moneda_origen, 1, arbitraje, paridad)
+
+            haber = debe = 0.0
+            if a.tipo == 'Z':
+                debe = float(monto)
+            elif a.tipo == 'C':
+                if a.imputacion == 1:
+                    debe = float(monto)
+                else:
+                    haber = float(monto)
+            elif a.tipo == 'G':
+                haber = float(monto)
+            elif a.tipo == 'V':
+                if 'DEV/' in a.detalle:
+                    haber = float(monto)
+                else:
+                    debe = float(monto)
+            elif a.tipo == 'P':
+                if 'DEV/' in a.detalle:
+                    debe = float(monto)
+                else:
+                    haber = float(monto)
+            elif a.tipo == 'B':
+                if a.imputacion==2:
+                    haber = float(monto)
+                else:
+                    debe = float(monto)
+            elif a.tipo in ['D', 'T', 'I']:
+                if a.imputacion == 1:
+                    debe = float(monto)
+                else:
+                    haber = float(monto)
+
+            saldos[cuenta_actual] += Decimal(debe) - Decimal(haber)  # saldo real
+            saldo_periodo        += Decimal(debe) - Decimal(haber)  # saldo desde 0
+            ultimo_saldo = saldos[cuenta_actual]
+
+            total_debe += Decimal(debe)
+            total_haber += Decimal(haber)
+
+            moneda_nombre = Monedas.objects.filter(codigo=a.moneda).values_list('nombre', flat=True).first() or ''
+
+            fila = [
+                a.fecha, a.asiento, a.detalle or '', moneda_nombre, a.documento or '', float(a.cambio or 0),
+                debe, haber, float(saldos[cuenta_actual]), a.posicion or '', float(a.monto or 0), a.tipo or '',
+                a.cliente or '', float(a.paridad or 0), a.cliente or '', a.autogenerado
+            ]
+
+            for col_num, valor in enumerate(fila):
+                if isinstance(valor, (datetime.date, datetime.datetime)):
+                    worksheet.write(row, col_num, valor, date_format)
+                elif isinstance(valor, (float, Decimal)):
+                    worksheet.write(row, col_num, valor, decimal_format)
+                else:
+                    worksheet.write(row, col_num, valor, normal_format)
+            row += 1
+
+        # ==== Totales y cierres ====
+        row += 1
+        worksheet.write(row, 0, "Neto período:", titulo_format)
+        worksheet.write(row, 8, float(saldo_periodo), decimal_format)
+
+        row += 1
+        worksheet.write(row, 0, "Saldo final:", titulo_format)
+        worksheet.write(row, 8, float(ultimo_saldo), decimal_format)
+
+        row += 2
+        worksheet.write(row, 5, "TOTAL", encabezado_format)
+        worksheet.write(row, 6, float(total_debe), decimal_format)
+        worksheet.write(row, 7, float(total_haber), decimal_format)
+        worksheet.write(row, 8, float(ultimo_saldo), decimal_format)
+
+        worksheet.set_column('A:P', 14)
+        workbook.close()
+        output.seek(0)
+
+        return HttpResponse(
+            output.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={'Content-Disposition': f'attachment; filename="{nombre_archivo}"'}
+        )
     except Exception as e:
         raise RuntimeError(f"Error al generar el Excel de mayores analíticos: {e}")
 
@@ -228,3 +415,67 @@ def convertir_monto(monto, origen, destino, arbitraje, paridad):
         return round(monto, 2)
     except Exception as e:
         return str(e)
+
+from decimal import Decimal
+import datetime
+
+def calcular_saldo_anterior(cuenta_codigo, fecha_desde, *, consolidar_dolares=False, consolidar_moneda_nac=False,moneda=None):
+    """
+    Devuelve el saldo anterior (Decimal) de una cuenta hasta justo ANTES de `fecha_desde`.
+    Usa la misma lógica de debe/haber por `tipo` que tu reporte.
+    """
+
+    qs = Asientos.objects.filter(cuenta=cuenta_codigo, fecha__date__lt=fecha_desde)
+    if moneda:
+        qs=qs.filter(moneda=moneda)
+
+    saldo = Decimal('0.00')
+
+    for a in qs:
+        monto = a.monto
+        arbitraje = a.cambio
+        paridad = a.paridad
+        moneda_origen = a.moneda
+
+        # Misma conversión que en tu excel
+        if consolidar_dolares:
+            monto = convertir_monto(monto, moneda_origen, 2, arbitraje, paridad)
+        elif consolidar_moneda_nac:
+            monto = convertir_monto(monto, moneda_origen, 1, arbitraje, paridad)
+
+        haber = debe = 0
+
+        if a.tipo == 'Z':
+            debe = float(monto)
+        elif a.tipo == 'G':
+            haber = float(monto)
+        elif a.tipo == 'V':
+            if 'DEV/' in a.detalle:
+                haber = float(monto)
+            else:
+                debe = float(monto)
+        elif a.tipo == 'P':
+            if 'DEV/' in a.detalle:
+                debe = float(monto)
+            else:
+                haber = float(monto)
+        elif a.tipo in ['D', 'T', 'I']:
+            if a.imputacion==1:
+                debe = float(monto)
+            else:
+                haber = float(monto)
+        elif a.tipo == 'C':
+            if a.imputacion == 1:
+                debe = float(monto)
+            else:
+                haber = float(monto)
+        elif a.tipo == 'B':
+            if a.imputacion == 2:
+                haber = float(monto)
+            else:
+                debe = float(monto)
+        else:
+            debe = haber = 0.0
+
+        saldo += Decimal(debe) - Decimal(haber)
+    return saldo

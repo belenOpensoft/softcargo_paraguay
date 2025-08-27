@@ -762,7 +762,7 @@ def eliminar_seguimiento(request):
 
     return HttpResponse(json.dumps(resultado), content_type="application/json")
 
-def eliminar_house(request):
+def eliminar_seguimiento_st(request):
     resultado = {}
     try:
         id = request.POST['id']
