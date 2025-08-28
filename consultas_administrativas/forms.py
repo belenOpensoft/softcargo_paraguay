@@ -727,3 +727,44 @@ class FichaEmbarqueForm(forms.Form):
         label="Expresar en moneda nacional",
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
+
+MESES = [
+    ("1", "Enero"), ("2", "Febrero"), ("3", "Marzo"), ("4", "Abril"),
+    ("5", "Mayo"), ("6", "Junio"), ("7", "Julio"), ("8", "Agosto"),
+    ("9", "Setiembre"), ("10", "Octubre"), ("11", "Noviembre"), ("12", "Diciembre"),
+]
+
+OPERATIVAS = [
+    ("imp_maritima", "Importación marítima"),
+    ("exp_maritima", "Exportación marítima"),
+    ("imp_aerea", "Importación aérea"),
+    ("exp_aerea", "Exportación aérea"),
+    ("imp_terrestre", "Importación terrestre"),
+    ("exp_terrestre", "Exportación terrestre"),
+]
+from django.utils import timezone
+def _anios_choices(desde=2015):
+    actual = timezone.now().year
+    return [(str(y), str(y)) for y in range(actual, desde - 1, -1)]
+
+class UtilidadMensualPosicionForm(forms.Form):
+    mes = forms.ChoiceField(choices=MESES, label="Mes", widget=forms.Select(attrs={"class": "form-control"}))
+    anio = forms.ChoiceField(choices=_anios_choices(), label="Año", widget=forms.Select(attrs={"class": "form-control"}))
+
+    operativa = forms.MultipleChoiceField(
+        choices=OPERATIVAS,
+        label="Operativas",
+        widget=forms.CheckboxSelectMultiple
+    )
+
+    moneda_nacional = forms.BooleanField(
+        required=False,
+        label="Expresar en moneda nacional",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
+    )
+
+    apertura_por_posicion = forms.BooleanField(
+        required=False,
+        label="Apertura de movimientos por posición",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
+    )

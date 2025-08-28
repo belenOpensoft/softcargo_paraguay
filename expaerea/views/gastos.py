@@ -7,6 +7,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 
 from administracion_contabilidad.models import Impuvtas, Boleta
+from consultas_administrativas.views.utilidad_mensual_posicion import normalizar_numero
 #from seguimientos.models import VGrillaServiceaereo as ServiceServiceaereo as ServiceaereoReal
 from expaerea.models import ExportServireserva, VGastosMaster, VGastosHouse, ExportServiceaereo
 import json
@@ -139,7 +140,7 @@ def get_data(registros_filtrados):
                         autogenerado=registro.detalle).first()
                     fecha = boleta.fecha.strftime('%d/%m/%Y') if boleta.fecha is not None else None
                     fecha = fecha if fecha is not None else 'S/I'
-                    numero = f"{boleta.serie}{boleta.prefijo}-{str(int(boleta.numero))}  ({fecha}) - {boleta.cliente}"
+                    numero = f"{boleta.serie}{boleta.prefijo}-{str(normalizar_numero(boleta.numero))}  ({fecha}) - {boleta.cliente}"
 
                     se_cobro = Impuvtas.objects.filter(autofac=registro.detalle).exists()
                     if se_cobro:
@@ -186,7 +187,7 @@ def get_data_preventa(registros_filtrados):
                         autogenerado=registro.detalle).first()
                     fecha = boleta.fecha.strftime('%d/%m/%Y') if boleta.fecha is not None else None
                     fecha = fecha if fecha is not None else 'S/I'
-                    numero = f"{boleta.serie}{boleta.prefijo}-{str(int(boleta.numero))}  ({fecha}) - {boleta.cliente}"
+                    numero = f"{boleta.serie}{boleta.prefijo}-{str(normalizar_numero(boleta.numero))}  ({fecha}) - {boleta.cliente}"
                     se_cobro = Impuvtas.objects.filter(autofac=registro.detalle).exists()
                     if se_cobro:
                         color = 'VERDE'

@@ -18,6 +18,7 @@ from consultas_administrativas.views.reporte_pagos import reporte_pagos
 from consultas_administrativas.views.subdiario_compras import subdiario_compras
 from consultas_administrativas.views.subdiario_ventas import subdiario_ventas
 from consultas_administrativas.views.balance_cobrar import balance_cobrar
+from consultas_administrativas.views.utilidad_mensual_posicion import utilidad_mensual_posicion
 
 urlpatterns = [
     #ventas
@@ -54,6 +55,7 @@ urlpatterns = [
 
     #cargas
     path('ficha_embarque/', ficha_embarque, name='ficha_embarque'),
+    path('utilidad_mensual_posicion/', utilidad_mensual_posicion, name='utilidad_mensual_posicion'),
 
     #cargas
 
