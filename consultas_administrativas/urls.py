@@ -1,5 +1,6 @@
 from django.urls import path
 
+from consultas_administrativas.views.balance_evolutivo import balance_evolutivo
 from consultas_administrativas.views.consulta_arbitrajes import consulta_arbitrajes
 from consultas_administrativas.views.antiguedad_saldos import antiguedad_saldos
 from consultas_administrativas.views.antiguedad_saldos_compras import antiguedad_saldos_compras
@@ -50,6 +51,7 @@ urlpatterns = [
     path('consulta_arbitrajes/', consulta_arbitrajes, name='consulta_arbitrajes'),
     path('libro_diario/', libro_diario, name='libro_diario'),
     path('mayores_analiticos/', mayores_analiticos, name='mayores_analiticos'),
+    path('balance_evolutivo/', balance_evolutivo, name='balance_evolutivo'),
 
     #contabilidad
 

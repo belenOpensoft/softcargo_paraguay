@@ -625,7 +625,22 @@ class LibroDiarioForm(forms.Form):
         choices=TIPO_CONSULTA_CHOICES,
         widget=forms.RadioSelect
     )
+class BalanceEvolutivoForm(forms.Form):
+    desde = forms.DateField(
+        label="Desde",
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
 
+    consolidar_moneda_nac = forms.BooleanField(
+        label="Consolidar Moneda Nacional",
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
+    )
+    consolidar_dolares = forms.BooleanField(
+        label="Consolidar Dólares",
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
+    )
 class MayoresAnaliticosForm(forms.Form):
 
     banco = forms.ModelChoiceField(
@@ -768,3 +783,4 @@ class UtilidadMensualPosicionForm(forms.Form):
         label="Apertura de movimientos por posición",
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
     )
+
