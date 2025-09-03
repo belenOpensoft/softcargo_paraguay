@@ -117,53 +117,48 @@
 </div>
 
 <script>
+$(document).ready(function() {
   function toggleSecciones() {
-    const tipo = document.querySelector('input[name="tipo_consulta"]:checked').value;
-    document.getElementById('seccion_individual').style.display = tipo === 'individual' ? 'block' : 'none';
-    document.getElementById('seccion_general').style.display = tipo === 'general' ? 'block' : 'none';
+    const tipo = $('input[name="tipo_consulta"]:checked').val();
+    $('#seccion_individual').toggle(tipo === 'individual');
+    $('#seccion_general').toggle(tipo === 'general');
   }
 
-  document.querySelectorAll('input[name="tipo_consulta"]').forEach(el => {
-    el.addEventListener('change', toggleSecciones);
+  $('input[name="tipo_consulta"]').on('change', toggleSecciones);
+
+  $('#formEstadoCuenta').on('submit', function () {
+    $('#generando-alerta').show();
+    setTimeout(() => $('#generando-alerta').hide(), 10000);
   });
 
-  const form = document.getElementById("formEstadoCuenta");
-
-  form.addEventListener("submit", function () {
-   $('#generando-alerta').show();
-
-  setTimeout(function () {
-      $('#generando-alerta').hide();
-  }, 10000);
-  });
-
-    $('#id_cliente').autocomplete({
+  $('#id_cliente').autocomplete({
     source: function(request, response) {
-        $.ajax({
-            url: "/admin_cont/buscar_proveedor",
-            dataType: 'json',
-            data: { term: request.term },
-            success: function(data) {
-                response(data.map(proveedor => ({
-                    label: proveedor.text,
-                    value: proveedor.text,
-                    codigo: proveedor.codigo
-                })));
-            },
-            error: xhr => console.error('Error al buscar proveedores:', xhr)
-        });
+      $.ajax({
+        url: "/admin_cont/buscar_proveedor/",
+        dataType: 'json',
+        data: { term: request.term },
+        success: function(data) {
+          console.log("Respuesta servidor:", data); // 👈 para debug
+          response(data.map(proveedor => ({
+            label: proveedor.text,
+            value: proveedor.text,
+            codigo: proveedor.codigo
+          })));
+        },
+        error: xhr => console.error('Error al buscar proveedores:', xhr.status, xhr.responseText)
+      });
     },
     minLength: 2,
     select: function(event, ui) {
-        const codigo = ui.item.codigo;
-        const nombre = ui.item.value;
-        $('#id_cliente').val(nombre);
-        $('#id_cliente_codigo').val(codigo);
+      $('#id_cliente').val(ui.item.value);
+      $('#id_cliente_codigo').val(ui.item.codigo);
     }
-    });
+  });
 
   // Ejecutar al cargar
   toggleSecciones();
+});
+
 </script>
 
 {% endblock contenido %}

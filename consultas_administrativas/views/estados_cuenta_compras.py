@@ -15,301 +15,6 @@ from mantenimientos.models import Clientes
 
 from datetime import date, datetime
 
-
-def estados_cuenta_sinop(request):
-    if request.method == 'POST':
-        form = EstadoCuentaForm(request.POST)
-        if form.is_valid():
-            tipo_consulta = form.cleaned_data['tipo_consulta']
-            fecha_desde = form.cleaned_data['fecha_desde']
-            fecha_hasta = form.cleaned_data['fecha_hasta']
-            moneda = form.cleaned_data['moneda']
-            consolidar_dolares = form.cleaned_data['consolidar_dolares']
-            consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
-
-            movimientos = Movims.objects.filter(
-                mfechamov__range=(fecha_desde, fecha_hasta),
-                mtipo__in=(20, 21, 24, 23, 25, 29)
-            ).only(
-                'mcliente', 'mfechamov', 'mnombre', 'mtotal', 'msaldo', 'mnombremov', 'mtipo',
-                'mserie', 'mboleta', 'mprefijo'
-            ).order_by('mcliente', 'mfechamov')
-
-            if tipo_consulta == 'individual':
-                cliente = form.cleaned_data['cliente']
-                if cliente:
-                    movimientos = movimientos.filter(nrocliente=cliente.codigo)
-
-                if form.cleaned_data['todas_las_monedas']:
-                    moneda_destino = None
-                elif consolidar_dolares:
-                    moneda_destino = 2
-                elif consolidar_moneda_nac:
-                    moneda_destino = 1
-                else:
-                    moneda_destino = moneda.codigo if moneda else None
-
-
-            else:  # GENERAL
-                filtro_tipo = form.cleaned_data['filtro_tipo']
-                omitir_saldos_cero = form.cleaned_data['omitir_saldos_cero']
-
-                # Filtro por tipo
-                if filtro_tipo == 'clientes':
-                    movimientos = movimientos.filter(tipo='cliente')
-                elif filtro_tipo == 'agentes':
-                    movimientos = movimientos.filter(tipo='agente')
-                elif filtro_tipo == 'transportistas':
-                    movimientos = movimientos.filter(tipo='transportista')
-                if moneda:
-                    movimientos = movimientos.filter(mmoneda=moneda.codigo)
-
-                datos = {}
-                for m in movimientos:
-                    asiento = Asientos.objects.filter(autogenerado=m.mautogen, imputacion=2).only('vto', 'posicion',
-                                                                                                  'cuenta').first()
-                    lista_movimientos = []
-                    datos_cliente = []
-
-                    cli = {
-                        'nombre': m.mnombre,
-                        'codigo': m.mcliente,
-                    }
-
-                    mov = {
-                        'fecha': m.mfechamov,
-                        'tipo': m.mnombremov,
-                        'numero_tipo': m.mtipo,
-                        'documento': str(m.mserie or '') + str(m.mprefijo or '') + str(m.mboleta or ''),
-                        'vencimiento': asiento.vto if asiento else None,
-                        'detalle': m.mdetalle,
-                        'total': m.mtotal,
-                        'saldo': m.msaldo,
-                        'posicion': asiento.posicion if asiento else None,
-                        'cuenta': asiento.cuenta if asiento else None,
-                    }
-                    lista_movimientos.append(mov)
-                    datos_cliente.append(cli)
-
-                    datos[m.mautogen] = {
-                        'datos_cliente': datos_cliente,
-                        'movimientos': lista_movimientos
-                    }
-
-                if omitir_saldos_cero:
-                    datos_filtrados = {}
-                    for autogen, info in datos.items():
-                        movimientos = info.get('movimientos', [])
-                        if any(Decimal(m.get('saldo') or 0) > 0 for m in movimientos):
-                            datos_filtrados[autogen] = info
-                    datos = datos_filtrados
-
-                moneda_destino = None
-                if consolidar_dolares:
-                    moneda_destino = 2
-                elif consolidar_moneda_nac:
-                    moneda_destino = 1
-
-            return generar_excel_estados_cuenta(
-                datos,
-                fecha_desde,
-                fecha_hasta,
-                moneda if moneda else None,
-                tipo_consulta,
-                consolidar_dolares, consolidar_moneda_nac
-            )
-    else:
-        form = EstadoCuentaForm()
-
-    return render(request, 'ventas_ca/estados_cuenta.html', {'form': form})
-
-def estados_cuenta_old(request):
-    if request.method == 'POST':
-        form = EstadoCuentaForm(request.POST)
-        if form.is_valid():
-            tipo_consulta = form.cleaned_data['tipo_consulta']
-            fecha_desde = form.cleaned_data['fecha_desde']
-            fecha_hasta = form.cleaned_data['fecha_hasta']
-            moneda = form.cleaned_data['moneda']
-            consolidar_dolares = form.cleaned_data['consolidar_dolares']
-            consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
-
-            # Tipos relevantes
-            tipos_mov = (20, 21, 24, 23, 25, 29)
-
-            movimientos = Movims.objects.filter(
-                mfechamov__range=(fecha_desde, fecha_hasta),
-                mtipo__in=tipos_mov
-            ).only(
-                'mcliente', 'mfechamov', 'mnombre', 'mtotal', 'msaldo', 'mnombremov',
-                'mtipo', 'mserie', 'mboleta', 'mprefijo', 'mautogen', 'mdetalle', 'mmoneda'
-            ).order_by('mcliente', 'mfechamov')
-
-            if tipo_consulta == 'individual':
-                cliente = form.cleaned_data['cliente']
-                if cliente:
-                    movimientos = movimientos.filter(nrocliente=cliente.codigo)
-
-                if form.cleaned_data['todas_las_monedas']:
-                    moneda_destino = None
-                elif consolidar_dolares:
-                    moneda_destino = 2
-                elif consolidar_moneda_nac:
-                    moneda_destino = 1
-                else:
-                    moneda_destino = moneda.codigo if moneda else None
-
-
-            else:  # GENERAL
-
-                filtro_tipo = form.cleaned_data['filtro_tipo']
-                omitir_saldos_cero = form.cleaned_data['omitir_saldos_cero']
-                clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado', 'tipo').order_by('empresa')
-                datos = {}
-                tipos_mov = (20, 21, 24, 23, 25, 29)
-
-                for cli in clientes:
-
-                    if filtro_tipo == 'clientes' and cli.tipo != 1:
-                        continue
-                    elif filtro_tipo == 'agentes' and cli.tipo != 6:
-                        continue
-                    elif filtro_tipo == 'transportistas' and cli.tipo != 5:
-                        continue
-
-                    cliente_id = cli.codigo
-
-                    if moneda:
-                        filtro_base = {
-                            'mmoneda': moneda.codigo,
-                            'mfechamov__lte': fecha_hasta,
-                            'mcliente': cliente_id,
-                            'mactivo': 'S',
-                            'mtipo__in': tipos_mov
-                        }
-
-                    else:
-
-                        filtro_base = {
-                            'mfechamov__lte': fecha_hasta,
-                            'mcliente': cliente_id,
-                            'mactivo': 'S',
-                            'mtipo__in': tipos_mov
-                        }
-
-                    if isinstance(cli.fechadenegado, datetime.datetime) and cli.tipo != 1:
-                        filtro_base['mfechamov__gt'] = cli.fechadenegado
-
-                    movimientos = Movims.objects.filter(**filtro_base).only(
-
-                        'mcliente', 'mfechamov', 'mnombre', 'mtotal', 'msaldo', 'mnombremov',
-
-                        'mtipo', 'mserie', 'mboleta', 'mprefijo', 'mautogen', 'mdetalle', 'mmoneda'
-
-                    ).order_by('mfechamov')
-
-                    if not movimientos.exists():
-                        continue
-                    autogen_list = movimientos.values_list('mautogen', flat=True).distinct()
-                    asientos = Asientos.objects.filter(
-                        autogenerado__in=autogen_list,
-                        imputacion=2
-                    ).only('autogenerado', 'vto', 'posicion', 'cuenta')
-                    asientos_dict = {a.autogenerado: a for a in asientos}
-                    datos[cliente_id] = {
-                        'datos_cliente': [{
-                            'nombre': cli.empresa,
-                            'codigo': cliente_id,
-                        }],
-                        'movimientos': []
-                    }
-                    for m in movimientos:
-                        asiento = asientos_dict.get(m.mautogen)
-
-                        datos[cliente_id]['movimientos'].append({
-                            'fecha': m.mfechamov,
-                            'tipo': m.mnombremov,
-                            'numero_tipo': m.mtipo,
-                            'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
-                            'vencimiento': asiento.vto if asiento else None,
-                            'detalle': m.mdetalle,
-                            'total': m.mtotal,
-                            'saldo': m.msaldo,
-                            'posicion': asiento.posicion if asiento else None,
-                            'cuenta': asiento.cuenta if asiento else None,
-                        })
-
-                if consolidar_dolares:
-                    moneda_destino = 2
-                elif consolidar_moneda_nac:
-                    moneda_destino = 1
-                else:
-                    moneda_destino = None
-
-            # Obtener todos los asientos relacionados en una sola query
-            autogen_list = movimientos.values_list('mautogen', flat=True).distinct()
-            asientos = Asientos.objects.filter(
-                autogenerado__in=autogen_list,
-                imputacion=2
-            ).only('autogenerado', 'vto', 'posicion', 'cuenta')
-
-            asientos_dict = {a.autogenerado: a for a in asientos}
-
-            # Agrupar movimientos por cliente
-            datos = {}
-            for m in movimientos:
-                cliente_id = m.mcliente
-                if cliente_id not in datos:
-                    datos[cliente_id] = {
-                        'datos_cliente': [{
-                            'nombre': m.mnombre,
-                            'codigo': cliente_id,
-                        }],
-                        'movimientos': []
-                    }
-
-                asiento = asientos_dict.get(m.mautogen)
-
-                mov = {
-                    'fecha': m.mfechamov,
-                    'tipo': m.mnombremov,
-                    'numero_tipo': m.mtipo,
-                    'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
-                    'vencimiento': asiento.vto if asiento else None,
-                    'detalle': m.mdetalle,
-                    'total': m.mtotal,
-                    'saldo': m.msaldo,
-                    'posicion': asiento.posicion if asiento else None,
-                    'cuenta': asiento.cuenta if asiento else None,
-                }
-
-                datos[cliente_id]['movimientos'].append(mov)
-
-            # Omitir saldos cero si corresponde
-            if tipo_consulta == 'general' and omitir_saldos_cero:
-                datos = {
-                    cli_id: info
-                    for cli_id, info in datos.items()
-                    if any(Decimal(m.get('saldo') or 0) > 0 for m in info['movimientos'])
-                }
-
-            # Generar Excel final
-            return generar_excel_estados_cuenta(
-                datos,
-                fecha_desde,
-                fecha_hasta,
-                moneda if moneda else None,
-                consolidar_dolares,
-                consolidar_moneda_nac
-            )
-    else:
-        form = EstadoCuentaForm()
-
-    return render(request, 'ventas_ca/estados_cuenta.html', {'form': form})
-
-
-
-
 def estados_cuenta_compras(request):
     if request.method == 'POST':
         form = EstadoCuentaForm(request.POST)
@@ -321,11 +26,12 @@ def estados_cuenta_compras(request):
             consolidar_dolares = form.cleaned_data['consolidar_dolares']
             consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
             omitir_saldos_cero = form.cleaned_data['omitir_saldos_cero']
-
+            cliente = None
             if tipo_consulta == 'individual':
-                datos = obtener_estado_individual(form, fecha_hasta, moneda)
+                cliente = form.cleaned_data['cliente_codigo']
+                datos = obtener_estado_individual(form,fecha_desde, fecha_hasta, moneda)
             else:
-                datos = obtener_estado_general(form, fecha_hasta, moneda)
+                datos = obtener_estado_general(form, fecha_desde,fecha_hasta, moneda)
 
             return generar_excel_estados_cuenta(
                 datos,
@@ -334,29 +40,40 @@ def estados_cuenta_compras(request):
                 moneda,
                 consolidar_dolares,
                 consolidar_moneda_nac,
-                omitir_saldos_cero
+                omitir_saldos_cero,
+                cliente
             )
     else:
         form = EstadoCuentaForm()
 
     return render(request, 'compras_ca/estados_cuenta.html', {'form': form})
 
-def obtener_estado_individual(form, fecha_hasta, moneda):
+def obtener_estado_individual(form,fecha_desde, fecha_hasta, moneda):
     cliente = form.cleaned_data['cliente_codigo']
     cliente_nombre = form.cleaned_data['cliente']
     todas_monedas = form.cleaned_data['todas_las_monedas']
+    tipos_mov = (40,41,45,42,26)
 
     if not cliente:
         return {}
+    cliente_ob=Clientes.objects.only('fechadenegado','tipo','socio').filter(codigo=cliente).first()
+    if not cliente_ob:
+        return {}
 
-    tipos_mov = (20, 21, 24, 23, 25, 29)
+    filtro_base = {
+            'mfechamov__lte': fecha_hasta,
+            'mfechamov__gte': fecha_desde,
+            'mcliente': cliente,
+            'mactivo': 'S',
+            'mtipo__in': tipos_mov
+        }
 
-    movimientos = Movims.objects.filter(
-        mcliente=cliente,
-        mfechamov__lte=fecha_hasta,
-        mactivo='S',
-        mtipo__in=tipos_mov
-    ).only(
+    if cliente_ob.tipo !=1 and cliente_ob.socio!='T':
+        if isinstance(cliente_ob.fechadenegado, datetime):
+            filtro_base['mfechamov__gt'] = cliente_ob.fechadenegado
+
+
+    movimientos = Movims.objects.filter(**filtro_base).only(
         'mcliente', 'mfechamov', 'mnombre', 'mtotal', 'msaldo', 'mnombremov',
         'mtipo', 'mserie', 'mboleta', 'mprefijo', 'mautogen', 'mdetalle', 'mmoneda'
     ).order_by('mfechamov')
@@ -382,51 +99,55 @@ def obtener_estado_individual(form, fecha_hasta, moneda):
     }
 
     for m in movimientos:
-        asiento = asientos_dict.get(m.mautogen)
-        datos[cliente]['movimientos'].append({
-            'fecha': m.mfechamov,
-            'tipo': m.mnombremov,
-            'numero_tipo': m.mtipo,
-            'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
-            'vencimiento': asiento.vto if asiento else None,
-            'detalle': m.mdetalle,
-            'total': m.mtotal,
-            'saldo': m.msaldo,
-            'posicion': asiento.posicion if asiento else None,
-            'cuenta': asiento.cuenta if asiento else None,
-        })
+        if m.mserie !='P':
+            asiento = asientos_dict.get(m.mautogen)
+            datos[cliente]['movimientos'].append({
+                'fecha': m.mfechamov,
+                'tipo': m.mnombremov,
+                'numero_tipo': m.mtipo,
+                'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
+                'vencimiento': asiento.vto if asiento else None,
+                'detalle': m.mdetalle,
+                'total': m.mtotal,
+                'saldo': m.msaldo,
+                'posicion': asiento.posicion if asiento else None,
+                'cuenta': asiento.cuenta if asiento else None,
+            })
 
     return datos
 
-def obtener_estado_general(form, fecha_hasta, moneda):
+def obtener_estado_general(form,fecha_desde, fecha_hasta, moneda):
     filtro_tipo = form.cleaned_data['filtro_tipo']
     omitir_saldos_cero = form.cleaned_data['omitir_saldos_cero']
-    tipos_mov = (20, 21, 24, 23, 25, 29)
+    todas_monedas = form.cleaned_data['todas_las_monedas']
+
+    tipos_mov = (40, 41, 45,42,26)
 
     clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado', 'tipo').order_by('empresa')
     datos = {}
 
     for cli in clientes:
-        if filtro_tipo == 'clientes' and cli.tipo != 1:
-            continue
-        elif filtro_tipo == 'agentes' and cli.tipo != 6:
-            continue
-        elif filtro_tipo == 'transportistas' and cli.tipo != 5:
-            continue
+        # if filtro_tipo == 'clientes' and cli.tipo != 1:
+        #     continue
+        # elif filtro_tipo == 'agentes' and cli.tipo != 6:
+        #     continue
+        # elif filtro_tipo == 'transportistas' and cli.tipo != 5:
+        #     continue
 
         cliente_id = cli.codigo
 
         filtro_base = {
             'mfechamov__lte': fecha_hasta,
+            'mfechamov__gte': fecha_desde,
             'mcliente': cliente_id,
             'mactivo': 'S',
             'mtipo__in': tipos_mov
         }
 
-        if moneda:
+        if not todas_monedas and moneda:
             filtro_base['mmoneda'] = moneda.codigo
 
-        if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1:
+        if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1 and cli.socio!='T':
             filtro_base['mfechamov__gt'] = cli.fechadenegado
 
         movimientos = Movims.objects.filter(**filtro_base).only(
@@ -453,28 +174,79 @@ def obtener_estado_general(form, fecha_hasta, moneda):
         }
 
         for m in movimientos:
-            asiento = asientos_dict.get(m.mautogen)
-            datos[cliente_id]['movimientos'].append({
-                'fecha': m.mfechamov,
-                'tipo': m.mnombremov,
-                'numero_tipo': m.mtipo,
-                'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
-                'vencimiento': asiento.vto if asiento else None,
-                'detalle': m.mdetalle,
-                'total': m.mtotal,
-                'saldo': m.msaldo,
-                'posicion': asiento.posicion if asiento else None,
-                'cuenta': asiento.cuenta if asiento else None,
-            })
+            if m.mserie != 'P':
+                asiento = asientos_dict.get(m.mautogen)
+                datos[cliente_id]['movimientos'].append({
+                    'fecha': m.mfechamov,
+                    'tipo': m.mnombremov,
+                    'numero_tipo': m.mtipo,
+                    'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
+                    'vencimiento': asiento.vto if asiento else None,
+                    'detalle': m.mdetalle,
+                    'total': m.mtotal,
+                    'saldo': m.msaldo,
+                    'posicion': asiento.posicion if asiento else None,
+                    'cuenta': asiento.cuenta if asiento else None,
+                })
 
 
     return datos
 
+def calcular_saldos_anteriores(fecha_desde, moneda=None, cliente_id=None):
+    """
+    Devuelve un diccionario con el saldo acumulado anterior a fecha_desde.
+    - Si cliente_id es None → devuelve todos los clientes.
+    - Si cliente_id está definido → devuelve solo ese cliente.
+    """
+    tipos_mov = (40, 41, 45,42,26)
+
+    clientes_qs = Clientes.objects.only('codigo', 'empresa', 'fechadenegado', 'tipo','socio').order_by('empresa')
+    if cliente_id:
+        clientes_qs = clientes_qs.filter(codigo=cliente_id)
+
+    saldos = {}
+    for cli in clientes_qs:
+        filtro_base = {
+            'mfechamov__lt': fecha_desde,
+            'mcliente': cli.codigo,
+            'mactivo': 'S',
+            'mtipo__in': tipos_mov
+        }
+
+        if moneda:
+            filtro_base['mmoneda'] = moneda.codigo
+
+        # Verificación de fecha de negado
+        if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1 and cli.socio!='T':
+            filtro_base['mfechamov__gt'] = cli.fechadenegado
+
+        movimientos = Movims.objects.filter(**filtro_base).only('mtipo', 'mtotal','mserie')
+
+        if not movimientos.exists():
+            continue
+
+        saldo = Decimal('0.00')
+        for m in movimientos:
+            if m.mserie !='P':
+                total = Decimal(m.mtotal or 0)
+                if m.mtipo in (41, 45):
+                    saldo += total
+                elif m.mtipo in(40,42,26):
+                    saldo -= total
+
+        if saldo != 0:
+            saldos[cli.codigo] = {
+                'saldo': saldo,
+                'nombre': cli.empresa
+            }
+
+    return saldos
 
 def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
                                   consolidar_dolares=False,
                                   consolidar_moneda_nac=False,
-                                  omitir_saldos_cero=False):
+                                  omitir_saldos_cero=False,
+                                  cliente=None):
     try:
         if consolidar_dolares:
             nombre_moneda = "DOLARES USA"
@@ -483,22 +255,55 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
         else:
             nombre_moneda = moneda.nombre.upper() if moneda else "TODAS LAS MONEDAS"
 
-        # Aplicar filtro de clientes con saldo final distinto de 0
+        # --- Calcular saldos anteriores por cliente ---
+        saldos_anteriores = calcular_saldos_anteriores(fecha_desde, moneda, cliente_id=cliente)
+
+        # --- Unificar todos los clientes ---
+        clientes_dict = {}
+
+        # clientes con movimientos
+        for cliente_id, info in datos.items():
+            cliente_id_int = int(cliente_id)  # 🔑 normalizamos la clave
+            cli = info['datos_cliente'][0]
+            saldo_anterior = saldos_anteriores.get(cliente_id_int, {}).get('saldo', Decimal('0.00'))
+            clientes_dict[cliente_id_int] = {
+                'codigo': int(cli.get('codigo')),   # por si viene string
+                'nombre': cli.get('nombre'),
+                'saldo_anterior': saldo_anterior,
+                'movimientos': info['movimientos']
+            }
+
+        # clientes solo con saldo anterior distinto de 0
+        for cliente_id, info in saldos_anteriores.items():
+            cliente_id_int = int(cliente_id)  # 🔑 normalizamos
+            if cliente_id_int not in clientes_dict and info['saldo'] != 0:
+                clientes_dict[cliente_id_int] = {
+                    'codigo': cliente_id_int,
+                    'nombre': info['nombre'],
+                    'saldo_anterior': info['saldo'],
+                    'movimientos': []
+                }
+
+        # --- Filtrado opcional de saldos en cero ---
         if omitir_saldos_cero:
-            datos_filtrados = {}
-            for cliente_id, info in datos.items():
-                saldo_final = Decimal('0.00')
+            clientes_filtrados = {}
+            for cliente_id, info in clientes_dict.items():
+                saldo_final = info['saldo_anterior']
                 for m in info['movimientos']:
                     tipo = m.get('numero_tipo')
                     total = Decimal(m.get('total') or 0)
-                    if tipo in (20, 23, 24, 29):  # Débito
+                    if tipo in (41, 45):
                         saldo_final += total
-                    elif tipo in (21, 25):       # Crédito
+                    elif tipo in (40,42,26):
                         saldo_final -= total
                 if saldo_final != 0:
-                    datos_filtrados[cliente_id] = info
-            datos = datos_filtrados
+                    clientes_filtrados[cliente_id] = info
+            clientes_dict = clientes_filtrados
 
+        # --- Ordenar clientes alfabéticamente por nombre ---
+        clientes_ordenados = sorted(clientes_dict.values(), key=lambda x: x['nombre'].lower())
+
+        # --- Crear Excel ---
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
         worksheet = workbook.add_worksheet("EstadoCuenta")
@@ -510,54 +315,72 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
         date_format = workbook.add_format({'num_format': 'dd/mm/yyyy', 'border': 1})
         text_format = workbook.add_format({'border': 1})
         bold_format = workbook.add_format({'bold': True, 'border': 1})
+        total_format = workbook.add_format({'bold': True, 'border': 1, 'bg_color': '#FFF2CC'})  # amarillo
 
         row = 0
         titulo = f"Cuentas a cobrar desde 0 a Z al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
         worksheet.merge_range(row, 0, row, 9, titulo, title_format)
         row += 2
 
-        headers = ['Fecha', 'Tipo', 'Documento', 'Vto.', 'Detalle', 'Debe', 'Haber', 'Saldo', 'Posición', 'Cta. Ventas']
+        headers = ['Fecha', 'Tipo', 'Documento', 'Vto.', 'Detalle',
+                   'Debe', 'Haber', 'Saldo', 'Posición', 'Cta. Ventas']
         worksheet.write_row(row, 0, headers, header_format)
         row += 1
 
-        for cliente_id, info in datos.items():
-            cli = info['datos_cliente'][0]
+        total_general = Decimal('0.00')
 
+        # --- Iterar clientes ya ordenados ---
+        for cli in clientes_ordenados:
             worksheet.write(row, 2, "1")
-            worksheet.write(row, 4, cli.get('codigo'), text_format)
-            worksheet.write(row, 5, cli.get('nombre'), text_format)
+            worksheet.write(row, 4, cli['codigo'], text_format)
+            worksheet.write(row, 5, cli['nombre'], text_format)
             row += 1
 
-            saldo_acumulado = Decimal('0.00')
+            saldo_acumulado = cli['saldo_anterior']
+            worksheet.write(row, 6, "Saldo anterior", bold_format)
+            worksheet.write(row, 7, float(saldo_acumulado), bold_format)
+            row += 1
 
-            for m in info['movimientos']:
-                tipo = m.get('numero_tipo')
-                total = Decimal(m.get('total') or 0)
-                debe = haber = Decimal('0.00')
+            if cli['movimientos']:
+                for m in cli['movimientos']:
+                    tipo = m.get('numero_tipo')
+                    total = Decimal(m.get('total') or 0)
+                    debe = haber = Decimal('0.00')
 
-                if tipo in [20, 23, 24, 29]:
-                    debe = total
-                elif tipo in [21, 25]:
-                    haber = total
+                    if tipo in (41, 45):
+                        debe = total
+                    elif tipo in (40,42,26):
+                        haber = total
 
-                saldo_acumulado += debe - haber
+                    saldo_acumulado += debe - haber
 
-                worksheet.write(row, 0, m.get('fecha'), date_format if isinstance(m.get('fecha'), datetime) else text_format)
-                worksheet.write(row, 1, m.get('tipo'), text_format)
-                worksheet.write(row, 2, m.get('documento'), text_format)
-                worksheet.write(row, 3, m.get('vencimiento'), date_format if isinstance(m.get('vencimiento'), datetime) else text_format)
-                worksheet.write(row, 4, m.get('detalle'), text_format)
-                worksheet.write(row, 5, float(debe), money_format)
-                worksheet.write(row, 6, float(haber), money_format)
-                worksheet.write(row, 7, float(saldo_acumulado), money_format)
-                worksheet.write(row, 8, m.get('posicion'), text_format)
-                worksheet.write(row, 9, m.get('cuenta'), text_format)
+                    worksheet.write(row, 0, m.get('fecha'),
+                                    date_format if isinstance(m.get('fecha'), datetime) else text_format)
+                    worksheet.write(row, 1, m.get('tipo'), text_format)
+                    worksheet.write(row, 2, m.get('documento'), text_format)
+                    worksheet.write(row, 3, m.get('vencimiento'),
+                                    date_format if isinstance(m.get('vencimiento'), datetime) else text_format)
+                    worksheet.write(row, 4, m.get('detalle') or "Sin movimientos en el período", text_format)
+                    worksheet.write(row, 5, float(debe), money_format)
+                    worksheet.write(row, 6, float(haber), money_format)
+                    worksheet.write(row, 7, float(saldo_acumulado), money_format)
+                    worksheet.write(row, 8, m.get('posicion'), text_format)
+                    worksheet.write(row, 9, m.get('cuenta'), text_format)
 
+                    row += 1
+            else:
+                worksheet.write(row, 4, "Sin movimientos en el período", text_format)
                 row += 1
 
             worksheet.write(row, 6, "Actual", bold_format)
             worksheet.write(row, 7, float(saldo_acumulado), bold_format)
             row += 2
+
+            total_general += saldo_acumulado
+
+        # --- Total general ---
+        worksheet.write(row, 6, "TOTAL GENERAL", total_format)
+        worksheet.write(row, 7, float(total_general), total_format)
 
         workbook.close()
         output.seek(0)
@@ -611,3 +434,5 @@ def convertir_monto(monto, origen, destino, arbitraje, paridad):
         return round(monto, 2)
     except Exception as e:
         return str(e)
+
+

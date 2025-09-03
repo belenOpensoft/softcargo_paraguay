@@ -44,13 +44,17 @@ def proveedores_gastos_view(request):
     return render(request, 'proveedores_gastos.html', {'form': form,'detalle':detalle})
 
 def buscar_proveedor(request):
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
-        query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
-        proveedores = Clientes.objects.filter(empresa__istartswith=query)[:10]  # Limitar resultados a 10
-        results = [{'id': proveedor.id,'codigo': proveedor.codigo, 'text': proveedor.empresa} for proveedor in proveedores]
+    if request.method == 'GET':
+        query = request.GET.get('term', '').strip()
+        proveedores = Clientes.objects.filter(empresa__icontains=query)[:10]
+        results = [
+            {'id': p.id, 'text': p.empresa, 'codigo': p.codigo}
+            for p in proveedores
+        ]
         return JsonResponse(results, safe=False)
 
-    return JsonResponse({'error': 'Solicitud inválida'}, status=400)
+    return JsonResponse({'error': 'Método inválido'}, status=405)
+
 
 def buscar_proveedores(request):
     if request.method == "GET":

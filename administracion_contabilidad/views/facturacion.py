@@ -226,6 +226,7 @@ def facturacion_view(request):
         return HttpResponseRedirect('/')
 
 def buscar_cliente(request):
+    #revisar
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
         query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
         clientes = Clientes.objects.filter(empresa__istartswith=query)[:10]  # Filtra por inicio y limita a 10 resultados

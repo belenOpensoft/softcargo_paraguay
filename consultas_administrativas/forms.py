@@ -189,7 +189,7 @@ class EstadoCuentaForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control form-control-sm'})
     )
-    cliente_codigo=forms.CharField(widget=forms.HiddenInput())
+    cliente_codigo=forms.CharField(widget=forms.HiddenInput(),required=False)
     todas_las_monedas = forms.BooleanField(
         required=False,
         label="Todas las monedas",

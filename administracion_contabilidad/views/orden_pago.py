@@ -153,11 +153,19 @@ def buscar_proveedor(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
         query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
         proveedores = Clientes.objects.filter(empresa__icontains=query)[:10]  # Limitar resultados a 10
-        results = [{'id': proveedor.id, 'text': proveedor.empresa} for proveedor in proveedores]
+        results = [{'id': proveedor.id, 'text': proveedor.empresa,'codigo': proveedor.codigo,} for proveedor in proveedores]
         return JsonResponse(results, safe=False)
 
     return JsonResponse({'error': 'Solicitud inválida'}, status=400)
 
+def buscar_proveedor_old(request):
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
+        query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
+        proveedores = Clientes.objects.filter(empresa__icontains=query)[:10]  # Limitar resultados a 10
+        results = [{'id': proveedor.id, 'text': proveedor.empresa} for proveedor in proveedores]
+        return JsonResponse(results, safe=False)
+
+    return JsonResponse({'error': 'Solicitud inválida'}, status=400)
 
 def buscar_proveedores(request):
     if request.method == "GET":

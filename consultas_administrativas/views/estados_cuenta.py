@@ -323,9 +323,9 @@ def estados_cuenta(request):
             omitir_saldos_cero = form.cleaned_data['omitir_saldos_cero']
 
             if tipo_consulta == 'individual':
-                datos = obtener_estado_individual(form, fecha_hasta, moneda)
+                datos = obtener_estado_individual(form,fecha_desde, fecha_hasta, moneda)
             else:
-                datos = obtener_estado_general(form, fecha_hasta, moneda)
+                datos = obtener_estado_general(form,fecha_desde, fecha_hasta, moneda)
 
             return generar_excel_estados_cuenta(
                 datos,
@@ -341,7 +341,7 @@ def estados_cuenta(request):
 
     return render(request, 'ventas_ca/estados_cuenta.html', {'form': form})
 
-def obtener_estado_individual(form, fecha_hasta, moneda):
+def obtener_estado_individual(form,fecha_desde, fecha_hasta, moneda):
     cliente = form.cleaned_data['cliente_codigo']
     cliente_nombre = form.cleaned_data['cliente']
     todas_monedas = form.cleaned_data['todas_las_monedas']
@@ -354,6 +354,7 @@ def obtener_estado_individual(form, fecha_hasta, moneda):
     movimientos = Movims.objects.filter(
         mcliente=cliente,
         mfechamov__lte=fecha_hasta,
+        mfechamov__gte=fecha_desde,
         mactivo='S',
         mtipo__in=tipos_mov
     ).only(
@@ -398,7 +399,7 @@ def obtener_estado_individual(form, fecha_hasta, moneda):
 
     return datos
 
-def obtener_estado_general(form, fecha_hasta, moneda):
+def obtener_estado_general(form,fecha_desde, fecha_hasta, moneda):
     filtro_tipo = form.cleaned_data['filtro_tipo']
     omitir_saldos_cero = form.cleaned_data['omitir_saldos_cero']
     tipos_mov = (20, 21, 24, 23, 25, 29)
@@ -418,6 +419,7 @@ def obtener_estado_general(form, fecha_hasta, moneda):
 
         filtro_base = {
             'mfechamov__lte': fecha_hasta,
+            'mfechamov__gte': fecha_desde,
             'mcliente': cliente_id,
             'mactivo': 'S',
             'mtipo__in': tipos_mov
