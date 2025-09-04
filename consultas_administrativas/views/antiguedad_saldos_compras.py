@@ -51,7 +51,6 @@ def antiguedad_saldos_compras(request):
     return render(request, 'compras_ca/antiguedad_saldos.html', {'form': form})
 
 
-
 def generar_excel_antiguedad(agrupado, fecha_base, rango, moneda=None):
     try:
         nombre_moneda = moneda.nombre.upper() if moneda else "TODAS LAS MONEDAS"

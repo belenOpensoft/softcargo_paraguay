@@ -15,30 +15,32 @@ from mantenimientos.models import Clientes
 
 from datetime import date, datetime
 
-
 def antiguedad_saldos_mixtas(request):
     if request.method == 'POST':
         form = AntiguedadSaldosForm(request.POST)
         if form.is_valid():
             moneda = form.cleaned_data['moneda']
-            base_calculo = form.cleaned_data['base_calculo']
+            base_calculo = form.cleaned_data['base_calculo']  # emision o vto
             rango = form.cleaned_data['rango']
             hoy = date.today()
 
+            # Traer todas las facturas (ventas + compras)
             facturas = VAntiguedadSaldos.objects.all()
             if moneda:
                 facturas = facturas.filter(moneda=moneda.codigo)
 
+            # Agregar saldo pendiente en cada factura
             for f in facturas:
                 f.saldo = f.saldo_pendiente
 
+            # Agrupar por cliente y rango de días
             agrupado = agrupar_antiguedad_saldos(
                 facturas,
                 base_calculo=base_calculo,
                 rango=rango
             )
 
-            return generar_excel_antiguedad(
+            return generar_excel_antiguedad_mixtas(
                 agrupado,
                 hoy,
                 rango,
@@ -48,17 +50,17 @@ def antiguedad_saldos_mixtas(request):
     else:
         form = AntiguedadSaldosForm()
 
-    return render(request, 'ventas_ca/antiguedad_saldos.html', {'form': form})
+    return render(request, 'agentes_ca/antiguedad_saldos.html', {'form': form})
 
 
-
-def generar_excel_antiguedad(agrupado, fecha_base, rango, moneda=None):
+def generar_excel_antiguedad_mixtas(agrupado, fecha_base, rango, moneda=None):
     try:
         nombre_moneda = moneda.nombre.upper() if moneda else "TODAS LAS MONEDAS"
-        nombre_archivo = f"Antiguedad_Saldos_{fecha_base.strftime('%Y%m%d')}.xlsx"
+        nombre_archivo = f"Antiguedad_Saldos_Mixtas_{fecha_base.strftime('%Y%m%d')}.xlsx"
+
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
-        worksheet = workbook.add_worksheet("Antigüedad")
+        ws = workbook.add_worksheet("Antigüedad Mixtas")
 
         # Formatos
         header_format = workbook.add_format({'bold': True, 'bg_color': '#d9d9d9', 'border': 1, 'align': 'center'})
@@ -68,10 +70,10 @@ def generar_excel_antiguedad(agrupado, fecha_base, rango, moneda=None):
         total_label_format = workbook.add_format({'bold': True, 'top': 2, 'border': 1})
 
         # Título
-        titulo = f'Antigüedad de Saldos al {fecha_base.strftime("%d/%m/%Y")} en {nombre_moneda}'
-        worksheet.merge_range('A1:G1', titulo)
+        titulo = f'Antigüedad de Saldos MIXTAS al {fecha_base.strftime("%d/%m/%Y")} en {nombre_moneda}'
+        ws.merge_range('A1:H1', titulo)
 
-        # Encabezados según rango elegido
+        # Encabezados según rango
         if rango == 'rango1':
             columnas = ['0-30', '31-60', '61-90', '91-120', '+120']
         elif rango == 'rango2':
@@ -79,12 +81,12 @@ def generar_excel_antiguedad(agrupado, fecha_base, rango, moneda=None):
         elif rango == 'rango3':
             columnas = ['0-30', '31-90', '91-180', '181-360', '+360']
         else:
-            raise ValueError("Rango de antigüedad no reconocido")
+            raise ValueError("Rango no reconocido")
 
         headers = ['Código', 'Cliente'] + columnas + ['Total']
-        worksheet.write_row(1, 0, headers, header_format)
+        ws.write_row(1, 0, headers, header_format)
 
-        # Datos por fila
+        # Cuerpo
         row = 2
         total_global = [Decimal('0.00')] * 5
 
@@ -93,27 +95,26 @@ def generar_excel_antiguedad(agrupado, fecha_base, rango, moneda=None):
             saldos = data['saldos']
             total_cliente = sum(saldos)
 
-            # Acumular totales generales
             for i in range(5):
                 total_global[i] += saldos[i]
 
-            worksheet.write(row, 0, codigo, text_format)
-            worksheet.write(row, 1, nombre, text_format)
+            ws.write(row, 0, codigo, text_format)
+            ws.write(row, 1, nombre, text_format)
             for i in range(5):
-                worksheet.write(row, i + 2, float(saldos[i]), money_format)
-            worksheet.write(row, 7, float(total_cliente), money_format)
+                ws.write(row, i + 2, float(saldos[i]), money_format)
+            ws.write(row, 7, float(total_cliente), money_format)
             row += 1
 
-        # Totales al final
-        worksheet.write(row, 1, 'TOTAL GENERAL', total_label_format)
+        # Totales
+        ws.write(row, 1, 'TOTAL GENERAL', total_label_format)
         for i in range(5):
-            worksheet.write(row, i + 2, float(total_global[i]), total_format)
-        worksheet.write(row, 7, float(sum(total_global)), total_format)
+            ws.write(row, i + 2, float(total_global[i]), total_format)
+        ws.write(row, 7, float(sum(total_global)), total_format)
 
-        # Ajuste de columnas
-        worksheet.set_column('A:A', 10)  # Código
-        worksheet.set_column('B:B', 40)  # Cliente
-        worksheet.set_column('C:H', 14)  # Rangos + Total
+        # Ajustes de columnas
+        ws.set_column('A:A', 10)
+        ws.set_column('B:B', 40)
+        ws.set_column('C:H', 14)
 
         workbook.close()
         output.seek(0)
@@ -123,9 +124,8 @@ def generar_excel_antiguedad(agrupado, fecha_base, rango, moneda=None):
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             headers={'Content-Disposition': f'attachment; filename="{nombre_archivo}"'}
         )
-
     except Exception as e:
-        raise RuntimeError(f"Error al generar el Excel de antigüedad: {e}")
+        raise RuntimeError(f"Error al generar el Excel de antigüedad mixtas: {e}")
 
 
 def agrupar_antiguedad_saldos(facturas, base_calculo='emision', rango='rango1'):
