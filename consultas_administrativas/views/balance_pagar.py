@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import io
 import time
 from collections import defaultdict
@@ -22,7 +22,7 @@ TIPOS = {
 }
 
 
-def balance_pagos(request):
+def balance_pagos_old(request):
     if request.method == 'POST':
         form = BalanceCuentasPagarForm(request.POST)
         if form.is_valid():
@@ -88,7 +88,7 @@ def balance_pagos(request):
 
     return render(request, 'compras_ca/balance_pagar.html', {'form': form})
 
-def balance_pagos_datos(request):
+def balance_pagos(request):
     if request.method == 'POST':
         form = BalanceCuentasPagarForm(request.POST)
         if form.is_valid():
@@ -97,56 +97,93 @@ def balance_pagos_datos(request):
             consolidar_dolares = form.cleaned_data['consolidar_dolares']
             consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
 
+            # Tipos de movimiento según la lógica de calcular_saldos_anteriores
+            tipos_mov = (40, 41, 45, 42, 26)
+
             nombres = {}
             socios = {}
             saldos = defaultdict(Decimal)
 
-            clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado','tipo').order_by('empresa')
-            clientes= clientes.filter(codigo=1515)
+            # Traemos socio para aplicar la misma regla de filtrado que en calcular_saldos_anteriores
+            clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado', 'tipo', 'socio').order_by('empresa')
+
             for cli in clientes:
                 cliente = cli.codigo
                 nombres[cliente] = cli.empresa
-                socios[cliente] = cli.tipo
-                #movimientos = Movims.objects.filter(mmoneda=2,mfechamov__lte=fecha_hasta,mfechamov__gte='2015-03-17',mcliente=cli.codigo).order_by('mfechamov','id')
-                if isinstance(cli.fechadenegado,datetime.datetime) and cli.tipo !=2:
-                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal','mmoneda','mcambio','marbitraje').filter(mmoneda=2,mfechamov__lte=fecha_hasta,mfechamov__gt=cli.fechadenegado, mcliente=cli.codigo,mactivo='S').order_by('mfechamov','id')
-                else:
-                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal','mmoneda','mcambio','marbitraje').filter(mmoneda=2,mfechamov__lte=fecha_hasta,mcliente=cli.codigo,mactivo='S').order_by('mfechamov','id')
+                socios[cliente] = getattr(cli, 'socio', None)
 
-                saldo=0
+                # Filtro base: hasta fecha_hasta inclusive, activo y por tipos
+                filtro_base = {
+                    'mcliente': cli.codigo,
+                    'mactivo': 'S',
+                    'mtipo__in': tipos_mov,
+                    'mfechamov__lte': fecha_hasta,
+                }
+
+                # Moneda (según form)
+                if moneda:
+                    filtro_base['mmoneda'] = moneda.codigo
+
+                # Ventana por fecha de negado, igual que en calcular_saldos_anteriores
+                if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1 and getattr(cli, 'socio', '') != 'T':
+                    filtro_base['mfechamov__gt'] = cli.fechadenegado
+
+                # Movimientos (incluimos mserie porque la lógica excluye 'P')
+                movimientos = (
+                    Movims.objects
+                    .only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje', 'mserie')
+                    .filter(**filtro_base)
+                    .order_by('mfechamov', 'id')
+                )
+
                 if movimientos.exists():
-                    #print( cli.empresa,': ',movimientos.count())
+                    saldo = Decimal('0.00')
                     for m in movimientos:
-                        cliente = cli.codigo
-                        nombres[cliente] = cli.empresa
-                        if m.mtipo == TIPOS['FP']:
-                            saldos[cliente] -= m.mtotal
-                        elif m.mtipo == TIPOS['NP']:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo == TIPOS['ND']:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo == TIPOS['RP']:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo not in TIPOS.values():
-                            print(f"No contabilizado: tipo={m.mtipo}, monto={m.mtotal}, cliente={cliente}")
+                        # Excluir "P" como en calcular_saldos_anteriores
+                        if getattr(m, 'mserie', None) == 'P':
+                            continue
 
-                        print('movimiento: ',m.mfechamov,' ', m.mtipo, 'monto: ',m.mtotal)
-                        print('saldo: ', saldos[cliente])
+                        total = Decimal(m.mtotal or 0)
+                        # Suma: 41 (NC proveedor?) y 45 (OP / recibos)
+                        if m.mtipo in (41, 45):
+                            saldo += total
+                        # Resta: 40 (factura), 42 (ND), 26 (otros cargos)
+                        elif m.mtipo in (40, 42, 26):
+                            saldo -= total
 
-                        #print(cli.empresa)
+                    if saldo != 0:
+                        # Último movimiento para traer arbitraje/paridad/fecha,
+                        # usando el mismo filtro_base (ya incluye moneda y ventana)
+                        movimiento = (
+                            Movims.objects
+                            .filter(**filtro_base)
+                            .order_by('-mfechamov', '-id')
+                            .first()
+                        )
 
-            for cliente, saldo in saldos.items():
-                if saldo !=0:
-                    print(f'Cliente: {nombres[cliente]} (#{cliente}) - Socio tipo: {socios[cliente]} - Saldo final: {saldo:.2f}')
+                        # Agregamos a la lista de resultados con el mismo formato original
+                        if 'resultados' not in locals():
+                            resultados = []
+                        resultados.append({
+                            "codigo": cliente,
+                            "nombre": nombres[cliente],
+                            "moneda": movimiento.mmoneda if movimiento else (moneda.codigo if moneda else None),
+                            "saldo": saldo,
+                            "arbitraje": movimiento.mcambio if movimiento else Decimal("1.0"),
+                            "paridad": movimiento.marbitraje if movimiento else Decimal("1.0"),
+                            "fecha": movimiento.mfechamov if movimiento else None
+                        })
 
-                # Generar Excel
-               #return generar_excel_balance_cobrar(queryset, fecha_hasta,moneda,consolidar_dolares,consolidar_moneda_nac)
+            # Si no hubo ningún cliente con saldo ≠ 0, aseguramos resultados
+            if 'resultados' not in locals():
+                resultados = []
+
+            return generar_excel_balance_pagar(resultados, fecha_hasta, moneda, consolidar_dolares, consolidar_moneda_nac)
 
     else:
         form = BalanceCuentasPagarForm()
 
     return render(request, 'compras_ca/balance_pagar.html', {'form': form})
-
 
 def generar_excel_balance_pagar(queryset, fecha_hasta, moneda, consolidar_dolares=False, consolidar_moneda_nac=False):
     try:
@@ -266,3 +303,61 @@ def convertir_monto(monto, origen, destino, arbitraje, paridad):
     except Exception as e:
         return str(e)
 
+def balance_pagos_datos(request):
+    if request.method == 'POST':
+        form = BalanceCuentasPagarForm(request.POST)
+        if form.is_valid():
+            fecha_hasta = form.cleaned_data['fecha_hasta']
+            moneda = form.cleaned_data['moneda']
+            consolidar_dolares = form.cleaned_data['consolidar_dolares']
+            consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
+
+            nombres = {}
+            socios = {}
+            saldos = defaultdict(Decimal)
+
+            clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado','tipo').order_by('empresa')
+            clientes= clientes.filter(codigo=1515)
+            for cli in clientes:
+                cliente = cli.codigo
+                nombres[cliente] = cli.empresa
+                socios[cliente] = cli.tipo
+                #movimientos = Movims.objects.filter(mmoneda=2,mfechamov__lte=fecha_hasta,mfechamov__gte='2015-03-17',mcliente=cli.codigo).order_by('mfechamov','id')
+                if isinstance(cli.fechadenegado,datetime.datetime) and cli.tipo !=2:
+                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal','mmoneda','mcambio','marbitraje').filter(mmoneda=2,mfechamov__lte=fecha_hasta,mfechamov__gt=cli.fechadenegado, mcliente=cli.codigo,mactivo='S').order_by('mfechamov','id')
+                else:
+                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal','mmoneda','mcambio','marbitraje').filter(mmoneda=2,mfechamov__lte=fecha_hasta,mcliente=cli.codigo,mactivo='S').order_by('mfechamov','id')
+
+                saldo=0
+                if movimientos.exists():
+                    #print( cli.empresa,': ',movimientos.count())
+                    for m in movimientos:
+                        cliente = cli.codigo
+                        nombres[cliente] = cli.empresa
+                        if m.mtipo == TIPOS['FP']:
+                            saldos[cliente] -= m.mtotal
+                        elif m.mtipo == TIPOS['NP']:
+                            saldos[cliente] += m.mtotal
+                        elif m.mtipo == TIPOS['ND']:
+                            saldos[cliente] += m.mtotal
+                        elif m.mtipo == TIPOS['RP']:
+                            saldos[cliente] += m.mtotal
+                        elif m.mtipo not in TIPOS.values():
+                            print(f"No contabilizado: tipo={m.mtipo}, monto={m.mtotal}, cliente={cliente}")
+
+                        print('movimiento: ',m.mfechamov,' ', m.mtipo, 'monto: ',m.mtotal)
+                        print('saldo: ', saldos[cliente])
+
+                        #print(cli.empresa)
+
+            for cliente, saldo in saldos.items():
+                if saldo !=0:
+                    print(f'Cliente: {nombres[cliente]} (#{cliente}) - Socio tipo: {socios[cliente]} - Saldo final: {saldo:.2f}')
+
+                # Generar Excel
+               #return generar_excel_balance_cobrar(queryset, fecha_hasta,moneda,consolidar_dolares,consolidar_moneda_nac)
+
+    else:
+        form = BalanceCuentasPagarForm()
+
+    return render(request, 'compras_ca/balance_pagar.html', {'form': form})

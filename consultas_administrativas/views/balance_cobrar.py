@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import io
 import time
 from collections import defaultdict
@@ -24,91 +24,8 @@ TIPOS = {
     'BO':24
 }
 
+
 def balance_cobrar_old(request):
-    if request.method == 'POST':
-        form = BalanceCuentasCobrarForm(request.POST)
-        if form.is_valid():
-            fecha_hasta = form.cleaned_data['fecha_hasta']
-            moneda = form.cleaned_data['moneda']
-            consolidar_dolares = form.cleaned_data['consolidar_dolares']
-            consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
-
-
-            if moneda and not consolidar_moneda_nac and not consolidar_dolares:
-                queryset = VCuentasCobrarBalance.objects.filter(fecha__lte=fecha_hasta,moneda=moneda.codigo)
-            else:
-                queryset = VCuentasCobrarBalance.objects.filter(fecha__lte=fecha_hasta)
-
-            # Generar Excel
-            return generar_excel_balance_cobrar(queryset, fecha_hasta,moneda,consolidar_dolares,consolidar_moneda_nac)
-
-    else:
-        form = BalanceCuentasCobrarForm()
-
-    return render(request, 'ventas_ca/balance_cobrar.html', {'form': form})
-
-def balance_cobrar_datos(request):
-    if request.method == 'POST':
-        form = BalanceCuentasCobrarForm(request.POST)
-        if form.is_valid():
-            fecha_hasta = form.cleaned_data['fecha_hasta']
-            moneda = form.cleaned_data['moneda']
-            consolidar_dolares = form.cleaned_data['consolidar_dolares']
-            consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
-
-            nombres = {}
-            socios = {}
-            saldos = defaultdict(Decimal)
-
-            clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado','tipo').order_by('empresa')
-            #clientes= clientes.filter(codigo=43)
-            for cli in clientes:
-                cliente = cli.codigo
-                nombres[cliente] = cli.empresa
-                socios[cliente] = cli.tipo
-                #movimientos = Movims.objects.filter(mmoneda=2,mfechamov__lte=fecha_hasta,mfechamov__gte='2015-03-17',mcliente=cli.codigo).order_by('mfechamov','id')
-                if isinstance(cli.fechadenegado,datetime.datetime) and cli.tipo !=1:
-                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal','mmoneda','mcambio','marbitraje').filter(mmoneda=2,mfechamov__lte=fecha_hasta,mfechamov__gt=cli.fechadenegado, mcliente=cli.codigo,mactivo='S').order_by('mfechamov','id')
-                else:
-                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal','mmoneda','mcambio','marbitraje').filter(mmoneda=2,mfechamov__lte=fecha_hasta,mcliente=cli.codigo,mactivo='S').order_by('mfechamov','id')
-
-                saldo=0
-                if movimientos.exists():
-                    #print( cli.empresa,': ',movimientos.count())
-                    for m in movimientos:
-                        cliente = cli.codigo
-                        nombres[cliente] = cli.empresa
-                        if m.mtipo == TIPOS['FC']:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo == TIPOS['NC']:
-                            saldos[cliente] -= m.mtotal
-                        elif m.mtipo == TIPOS['RC']:
-                            saldos[cliente] -= m.mtotal
-                        elif m.mtipo == TIPOS['BO']:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo == 29:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo not in TIPOS.values():
-                            pass
-                        #     print(f"No contabilizado: tipo={m.mtipo}, monto={m.mtotal}, cliente={cliente}")
-                        # print('movimiento: ',m.mfechamov,' ', m.mtipo, 'monto: ',m.mtotal)
-                        # print('saldo: ', saldos[cliente])
-
-                        print(cli.empresa)
-
-            for cliente, saldo in saldos.items():
-                if saldo !=0:
-                    print(f'Cliente: {nombres[cliente]} (#{cliente}) - Socio tipo: {socios[cliente]} - Saldo final: {saldo:.2f}')
-
-                # Generar Excel
-               #return generar_excel_balance_cobrar(queryset, fecha_hasta,moneda,consolidar_dolares,consolidar_moneda_nac)
-
-    else:
-        form = BalanceCuentasCobrarForm()
-
-    return render(request, 'ventas_ca/balance_cobrar.html', {'form': form})
-
-def balance_cobrar(request):
     if request.method == 'POST':
         form = BalanceCuentasCobrarForm(request.POST)
         if form.is_valid():
@@ -168,6 +85,96 @@ def balance_cobrar(request):
                         "paridad": movimiento.marbitraje if movimiento else Decimal("1.0"),
                         "fecha": movimiento.mfechamov if movimiento else None
                     })
+
+            return generar_excel_balance_cobrar(resultados, fecha_hasta, moneda, consolidar_dolares, consolidar_moneda_nac)
+
+    else:
+        form = BalanceCuentasCobrarForm()
+
+    return render(request, 'ventas_ca/balance_cobrar.html', {'form': form})
+
+def balance_cobrar(request):
+    if request.method == 'POST':
+        form = BalanceCuentasCobrarForm(request.POST)
+        if form.is_valid():
+            fecha_hasta = form.cleaned_data['fecha_hasta']
+            moneda = form.cleaned_data['moneda']
+            consolidar_dolares = form.cleaned_data['consolidar_dolares']
+            consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
+
+            # Tipos de movimiento según calcular_saldos_anteriores_ventas
+            tipos_mov = (20, 21, 23, 24, 25, 29)
+
+            nombres = {}
+            socios = {}
+            saldos = defaultdict(Decimal)
+
+            clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado', 'tipo', 'socio').order_by('empresa')
+
+            for cli in clientes:
+                cliente = cli.codigo
+                nombres[cliente] = cli.empresa
+                socios[cliente] = getattr(cli, 'socio', None)
+
+                # Filtro base
+                filtro_base = {
+                    'mcliente': cli.codigo,
+                    'mactivo': 'S',
+                    'mtipo__in': tipos_mov,
+                    'mfechamov__lte': fecha_hasta,
+                }
+
+                # Moneda
+                if moneda:
+                    filtro_base['mmoneda'] = moneda.codigo
+
+                # Ventana por fecha de negado (igual que en calcular_saldos_anteriores_ventas)
+                if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1:
+                    filtro_base['mfechamov__gt'] = cli.fechadenegado
+
+                movimientos = (
+                    Movims.objects
+                    .only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje')
+                    .filter(**filtro_base)
+                    .order_by('mfechamov', 'id')
+                )
+
+                if movimientos.exists():
+                    saldo = Decimal('0.00')
+                    for m in movimientos:
+                        total = Decimal(m.mtotal or 0)
+                        debe = haber = Decimal('0.00')
+
+                        if m.mtipo in (20, 24, 29):
+                            debe = total
+                        elif m.mtipo in (21, 25, 23):
+                            haber = total
+
+                        saldo += (debe - haber)
+
+                    if saldo != 0:
+                        # Último movimiento para arbitraje/paridad/fecha
+                        movimiento = (
+                            Movims.objects
+                            .filter(**filtro_base)
+                            .order_by('-mfechamov', '-id')
+                            .first()
+                        )
+
+                        if 'resultados' not in locals():
+                            resultados = []
+                        resultados.append({
+                            "codigo": cliente,
+                            "nombre": nombres[cliente],
+                            "moneda": movimiento.mmoneda if movimiento else (moneda.codigo if moneda else None),
+                            "saldo": saldo,
+                            "arbitraje": movimiento.mcambio if movimiento else Decimal("1.0"),
+                            "paridad": movimiento.marbitraje if movimiento else Decimal("1.0"),
+                            "fecha": movimiento.mfechamov if movimiento else None
+                        })
+
+            if 'resultados' not in locals():
+                resultados = []
 
             return generar_excel_balance_cobrar(resultados, fecha_hasta, moneda, consolidar_dolares, consolidar_moneda_nac)
 
