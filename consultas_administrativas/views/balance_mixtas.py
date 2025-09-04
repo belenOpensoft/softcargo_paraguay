@@ -14,101 +14,12 @@ from consultas_administrativas.forms import ReporteMovimientosForm, BalanceCuent
 from consultas_administrativas.models import VReporteSubdiarioVentas, VCuentasCobrarBalance
 from mantenimientos.models import Clientes
 
-TIPOS = {
-    'FC':20,
-    'FP':40,
-    'NC':21,
-    'NP':41,
-    'RP':45,
-    'RC':25,
-    'BO':24
-}
-
-def balance_cobrar_old(request):
-    if request.method == 'POST':
-        form = BalanceCuentasCobrarForm(request.POST)
-        if form.is_valid():
-            fecha_hasta = form.cleaned_data['fecha_hasta']
-            moneda = form.cleaned_data['moneda']
-            consolidar_dolares = form.cleaned_data['consolidar_dolares']
-            consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
+from decimal import Decimal
+from collections import defaultdict
+from datetime import datetime
 
 
-            if moneda and not consolidar_moneda_nac and not consolidar_dolares:
-                queryset = VCuentasCobrarBalance.objects.filter(fecha__lte=fecha_hasta,moneda=moneda.codigo)
-            else:
-                queryset = VCuentasCobrarBalance.objects.filter(fecha__lte=fecha_hasta)
-
-            # Generar Excel
-            return generar_excel_balance_cobrar(queryset, fecha_hasta,moneda,consolidar_dolares,consolidar_moneda_nac)
-
-    else:
-        form = BalanceCuentasCobrarForm()
-
-    return render(request, 'ventas_ca/balance_cobrar.html', {'form': form})
-
-def balance_cobrar_datos(request):
-    if request.method == 'POST':
-        form = BalanceCuentasCobrarForm(request.POST)
-        if form.is_valid():
-            fecha_hasta = form.cleaned_data['fecha_hasta']
-            moneda = form.cleaned_data['moneda']
-            consolidar_dolares = form.cleaned_data['consolidar_dolares']
-            consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
-
-            nombres = {}
-            socios = {}
-            saldos = defaultdict(Decimal)
-
-            clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado','tipo').order_by('empresa')
-            #clientes= clientes.filter(codigo=43)
-            for cli in clientes:
-                cliente = cli.codigo
-                nombres[cliente] = cli.empresa
-                socios[cliente] = cli.tipo
-                #movimientos = Movims.objects.filter(mmoneda=2,mfechamov__lte=fecha_hasta,mfechamov__gte='2015-03-17',mcliente=cli.codigo).order_by('mfechamov','id')
-                if isinstance(cli.fechadenegado,datetime.datetime) and cli.tipo !=1:
-                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal','mmoneda','mcambio','marbitraje').filter(mmoneda=2,mfechamov__lte=fecha_hasta,mfechamov__gt=cli.fechadenegado, mcliente=cli.codigo,mactivo='S').order_by('mfechamov','id')
-                else:
-                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal','mmoneda','mcambio','marbitraje').filter(mmoneda=2,mfechamov__lte=fecha_hasta,mcliente=cli.codigo,mactivo='S').order_by('mfechamov','id')
-
-                saldo=0
-                if movimientos.exists():
-                    #print( cli.empresa,': ',movimientos.count())
-                    for m in movimientos:
-                        cliente = cli.codigo
-                        nombres[cliente] = cli.empresa
-                        if m.mtipo == TIPOS['FC']:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo == TIPOS['NC']:
-                            saldos[cliente] -= m.mtotal
-                        elif m.mtipo == TIPOS['RC']:
-                            saldos[cliente] -= m.mtotal
-                        elif m.mtipo == TIPOS['BO']:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo == 29:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo not in TIPOS.values():
-                            pass
-                        #     print(f"No contabilizado: tipo={m.mtipo}, monto={m.mtotal}, cliente={cliente}")
-                        # print('movimiento: ',m.mfechamov,' ', m.mtipo, 'monto: ',m.mtotal)
-                        # print('saldo: ', saldos[cliente])
-
-                        print(cli.empresa)
-
-            for cliente, saldo in saldos.items():
-                if saldo !=0:
-                    print(f'Cliente: {nombres[cliente]} (#{cliente}) - Socio tipo: {socios[cliente]} - Saldo final: {saldo:.2f}')
-
-                # Generar Excel
-               #return generar_excel_balance_cobrar(queryset, fecha_hasta,moneda,consolidar_dolares,consolidar_moneda_nac)
-
-    else:
-        form = BalanceCuentasCobrarForm()
-
-    return render(request, 'ventas_ca/balance_cobrar.html', {'form': form})
-
-def balance_mixtas(request):
+def balance_mixtas_funciona(request):
     if request.method == 'POST':
         form = BalanceMixtasForm(request.POST)
         if form.is_valid():
@@ -117,66 +28,128 @@ def balance_mixtas(request):
             consolidar_dolares = form.cleaned_data['consolidar_dolares']
             consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
 
+            # Tipos de movimientos
+            tipos_ventas  = (20, 21, 23, 24, 25, 29)
+            tipos_compras = (40, 41, 45, 42, 26)
+
             nombres = {}
             socios = {}
             saldos = defaultdict(Decimal)
 
-            clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado', 'tipo').order_by('empresa')
+            clientes = Clientes.objects.only(
+                'codigo', 'empresa', 'fechadenegado', 'tipo', 'socio'
+            ).order_by('empresa')
 
             for cli in clientes:
                 cliente = cli.codigo
                 nombres[cliente] = cli.empresa
-                socios[cliente] = cli.tipo
+                socios[cliente] = getattr(cli, 'socio', None)
 
-                if isinstance(cli.fechadenegado, datetime.datetime) and cli.tipo != 1:
-                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje').filter(
-                        mmoneda=moneda.codigo, mfechamov__lte=fecha_hasta, mfechamov__gt=cli.fechadenegado,
-                        mcliente=cli.codigo, mactivo='S').order_by('mfechamov', 'id')
-                else:
-                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje').filter(
-                        mmoneda=moneda.codigo, mfechamov__lte=fecha_hasta, mcliente=cli.codigo, mactivo='S').order_by('mfechamov', 'id')
+                # ------------------- VENTAS -------------------
+                filtro_v = {
+                    'mcliente': cli.codigo,
+                    'mactivo': 'S',
+                    'mtipo__in': tipos_ventas,
+                    'mfechamov__lte': fecha_hasta,
+                }
+                if moneda:
+                    filtro_v['mmoneda'] = moneda.codigo
+                if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1:
+                    filtro_v['mfechamov__gt'] = cli.fechadenegado
 
-                if movimientos.exists():
-                    for m in movimientos:
-                        if m.mtipo == TIPOS['FC']:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo == TIPOS['NC']:
-                            saldos[cliente] -= m.mtotal
-                        elif m.mtipo == TIPOS['RC']:
-                            saldos[cliente] -= m.mtotal
-                        elif m.mtipo == TIPOS['BO']:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo == 29:
-                            saldos[cliente] += m.mtotal
+                movimientos_v = (
+                    Movims.objects
+                    .only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje')
+                    .filter(**filtro_v)
+                    .order_by('mfechamov', 'id')
+                )
 
-            resultados = []
-            for cliente, saldo in saldos.items():
+                saldo_v = Decimal('0.00')
+                if movimientos_v.exists():
+                    for m in movimientos_v:
+                        total = Decimal(m.mtotal or 0)
+                        if m.mtipo in (20, 24, 29):
+                            saldo_v += total
+                        elif m.mtipo in (21, 25, 23):
+                            saldo_v -= total
+
+                # ------------------- COMPRAS -------------------
+                filtro_c = {
+                    'mcliente': cli.codigo,
+                    'mactivo': 'S',
+                    'mtipo__in': tipos_compras,
+                    'mfechamov__lte': fecha_hasta,
+                }
+                if moneda:
+                    filtro_c['mmoneda'] = moneda.codigo
+                if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1 and getattr(cli, 'socio', '') != 'T':
+                    filtro_c['mfechamov__gt'] = cli.fechadenegado
+
+                movimientos_c = (
+                    Movims.objects
+                    .only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje', 'mserie')
+                    .filter(**filtro_c)
+                    .order_by('mfechamov', 'id')
+                )
+
+                saldo_c = Decimal('0.00')
+                if movimientos_c.exists():
+                    for m in movimientos_c:
+                        if getattr(m, 'mserie', None) == 'P':
+                            continue
+                        total = Decimal(m.mtotal or 0)
+                        if m.mtipo in (41, 45):
+                            saldo_c += total
+                        elif m.mtipo in (40, 42, 26):
+                            saldo_c -= total
+
+                # ------------------- SALDO MIXTO -------------------
+                saldo = saldo_v + saldo_c
+
                 if saldo != 0:
-                    movimiento = Movims.objects.filter(
-                        mcliente=cliente,
-                        mmoneda=moneda.codigo,
-                        mfechamov__lte=fecha_hasta,
-                        mactivo='S'
-                    ).order_by('-mfechamov').first()
+                    # Tomamos el último movimiento válido de cualquiera
+                    movimiento = (
+                        Movims.objects
+                        .filter(mcliente=cli.codigo, mactivo='S', mfechamov__lte=fecha_hasta)
+                        .order_by('-mfechamov', '-id')
+                        .first()
+                    )
+
+                    if 'resultados' not in locals():
+                        resultados = []
 
                     resultados.append({
                         "codigo": cliente,
                         "nombre": nombres[cliente],
-                        "moneda": movimiento.mmoneda if movimiento else None,
+                        "moneda": movimiento.mmoneda if movimiento else (moneda.codigo if moneda else None),
                         "saldo": saldo,
                         "arbitraje": movimiento.mcambio if movimiento else Decimal("1.0"),
                         "paridad": movimiento.marbitraje if movimiento else Decimal("1.0"),
                         "fecha": movimiento.mfechamov if movimiento else None
                     })
 
-            return generar_excel_balance_cobrar(resultados, fecha_hasta, moneda, consolidar_dolares, consolidar_moneda_nac)
+            if 'resultados' not in locals():
+                resultados = []
+
+            return generar_excel_balance_mixtas(
+                resultados, fecha_hasta, moneda,
+                consolidar_dolares, consolidar_moneda_nac
+            )
 
     else:
         form = BalanceMixtasForm()
 
     return render(request, 'agentes_ca/balance_mixtas.html', {'form': form})
 
-def generar_excel_balance_cobrar(queryset, fecha_hasta, moneda, consolidar_dolares=False, consolidar_moneda_nac=False):
+
+def generar_excel_balance_mixtas_funciona(queryset, fecha_hasta, moneda,
+                                 consolidar_dolares=False,
+                                 consolidar_moneda_nac=False):
+    """
+    Genera el Excel de Balance para MIXTAS (Ventas+Compras)
+    - queryset: lista de dicts con keys: codigo, nombre, saldo, moneda, arbitraje, paridad
+    - Usa convertir_monto(...) si hay consolidación de moneda
+    """
     try:
         if consolidar_dolares:
             nombre_moneda = "DOLARES USA"
@@ -189,72 +162,604 @@ def generar_excel_balance_cobrar(queryset, fecha_hasta, moneda, consolidar_dolar
             moneda_destino = None
 
         fecha_formateada = fecha_hasta.strftime('%d/%m/%Y')
-        titulo = f'Cuentas a cobrar al {fecha_formateada} - {nombre_moneda}'
-        nombre_archivo = f'Balance_Cuentas_Cobrar_{fecha_hasta}.xlsx'
+        titulo = f'Balance de Cuentas MIXTAS al {fecha_formateada} - {nombre_moneda}'
+        nombre_archivo = f'Balance_Cuentas_Mixtas_{fecha_hasta}.xlsx'
 
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
-        worksheet = workbook.add_worksheet("Balance")
+        ws = workbook.add_worksheet("Balance")
 
         # Formatos
-        header_format = workbook.add_format({'bold': True, 'bg_color': '#d9d9d9', 'border': 1, 'align': 'center'})
+        header_format = workbook.add_format({
+            'bold': True, 'bg_color': '#d9d9d9',
+            'border': 1, 'align': 'center'
+        })
         title_format = workbook.add_format({'bold': True, 'font_size': 12})
         money_format = workbook.add_format({'num_format': '#,##0.00', 'border': 1})
-        total_format = workbook.add_format({'bold': True, 'num_format': '#,##0.00', 'top': 2, 'border': 1})
+        total_format = workbook.add_format({
+            'bold': True, 'num_format': '#,##0.00',
+            'top': 2, 'border': 1
+        })
         total_label_format = workbook.add_format({'bold': True, 'top': 2, 'border': 1})
         text_format = workbook.add_format({'border': 1})
 
         # Título
-        worksheet.merge_range('A1:C1', titulo, title_format)
+        ws.merge_range('A1:C1', titulo, title_format)
 
         # Encabezados
-        encabezados = ['Código', 'Nombre', 'Saldo']
-        for col_num, encabezado in enumerate(encabezados):
-            worksheet.write(1, col_num, encabezado, header_format)
+        headers = ['Código', 'Nombre', 'Saldo']
+        for col, h in enumerate(headers):
+            ws.write(1, col, h, header_format)
 
         row = 2
         total_general = Decimal('0.00')
 
-        for obj in queryset:
-            # Acceso flexible a diccionario u objeto
+        # Orden por código ascendente (robusto ante str/int)
+        def _as_int(v):
+            try:
+                return int(v)
+            except Exception:
+                return float('inf')
+
+        queryset_sorted = sorted(
+            queryset,
+            key=lambda o: (
+                _as_int(o.get("codigo") if isinstance(o, dict)
+                        else getattr(o, "codigo", None)),
+                str(o.get("codigo") if isinstance(o, dict)
+                    else getattr(o, "codigo", ""))
+            )
+        )
+
+        for obj in queryset_sorted:
             get = obj.get if isinstance(obj, dict) else lambda k, default=None: getattr(obj, k, default)
 
             saldo = Decimal(get("saldo") or 0)
             moneda_origen = get("moneda")
-            arbitraje = get("arbitraje", Decimal('1'))
-            paridad = get("paridad", Decimal('1'))
+
+            arbitraje_val = get("arbitraje") or Decimal("1.0")
+            paridad_val = get("paridad") or Decimal("1.0")
+
+            arbitraje = Decimal(arbitraje_val)
+            paridad = Decimal(paridad_val)
 
             if moneda_destino and moneda_origen != moneda_destino:
                 saldo = convertir_monto(saldo, moneda_origen, moneda_destino, arbitraje, paridad)
 
-            worksheet.write(row, 0, get("codigo"), text_format)
-            worksheet.write(row, 1, get("nombre"), text_format)
-            worksheet.write(row, 2, float(saldo), money_format)
+            ws.write(row, 0, get("codigo"), text_format)
+            ws.write(row, 1, get("nombre"), text_format)
+            ws.write(row, 2, float(saldo), money_format)
 
             total_general += saldo
             row += 1
 
-        # Escribir el total al final
-        worksheet.write(row, 1, 'TOTAL GENERAL', total_label_format)
-        worksheet.write(row, 2, float(total_general), total_format)
+        # Total
+        ws.write(row, 1, 'TOTAL GENERAL', total_label_format)
+        ws.write(row, 2, float(total_general), total_format)
 
-        # Ajuste de ancho
-        worksheet.set_column('A:A', 10)  # Código
-        worksheet.set_column('B:B', 40)  # Nombre
-        worksheet.set_column('C:C', 18)  # Saldo
+        # Anchos de columna
+        ws.set_column('A:A', 10)
+        ws.set_column('B:B', 40)
+        ws.set_column('C:C', 18)
 
         workbook.close()
         output.seek(0)
 
-        response = HttpResponse(
+        resp = HttpResponse(
             output.read(),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
-        return response
+        resp['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+        return resp
 
     except Exception as e:
-        raise RuntimeError(f"Error al generar el Excel de balance: {e}")
+        raise RuntimeError(f"Error al generar el Excel de balance mixtas: {e}")
+
+
+def balance_mixtas_completo(request):
+    if request.method == 'POST':
+        form = BalanceMixtasForm(request.POST)
+        if form.is_valid():
+            fecha_hasta = form.cleaned_data['fecha_hasta']
+            moneda = form.cleaned_data['moneda']
+            consolidar_dolares = form.cleaned_data['consolidar_dolares']
+            consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
+
+            # Tipos de movimientos
+            tipos_ventas  = (20, 21, 23, 24, 25, 29)
+            tipos_compras = (40, 41, 45, 42, 26)
+
+            resultados = []
+
+            clientes = Clientes.objects.only(
+                'codigo', 'empresa', 'fechadenegado', 'tipo', 'socio'
+            ).order_by('empresa')
+
+            for cli in clientes:
+                cliente = cli.codigo
+                nombre_cli = cli.empresa
+
+                # ------------------- VENTAS -------------------
+                filtro_v = {
+                    'mcliente': cli.codigo,
+                    'mactivo': 'S',
+                    'mtipo__in': tipos_ventas,
+                    'mfechamov__lte': fecha_hasta,
+                }
+                if moneda:
+                    filtro_v['mmoneda'] = moneda.codigo
+                if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1:
+                    filtro_v['mfechamov__gt'] = cli.fechadenegado
+
+                movimientos_v = (
+                    Movims.objects
+                    .only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje')
+                    .filter(**filtro_v)
+                    .order_by('mfechamov', 'id')
+                )
+
+                # deudor: suma de TODOS los movimientos de ventas (20,21,23,24,25,29)
+                deudor = Decimal('0.00')
+                saldo_v = Decimal('0.00')
+                for m in movimientos_v:
+                    total = Decimal(m.mtotal or 0)
+                    deudor += total  # columna Deudor según tu definición
+                    # saldo ventas (debe - haber)
+                    if m.mtipo in (20, 24, 29):
+                        saldo_v += total
+                    elif m.mtipo in (21, 25, 23):
+                        saldo_v -= total
+
+                # ------------------- COMPRAS -------------------
+                filtro_c = {
+                    'mcliente': cli.codigo,
+                    'mactivo': 'S',
+                    'mtipo__in': tipos_compras,
+                    'mfechamov__lte': fecha_hasta,
+                }
+                if moneda:
+                    filtro_c['mmoneda'] = moneda.codigo
+                if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1 and getattr(cli, 'socio', '') != 'T':
+                    filtro_c['mfechamov__gt'] = cli.fechadenegado
+
+                movimientos_c = (
+                    Movims.objects
+                    .only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje', 'mserie')
+                    .filter(**filtro_c)
+                    .order_by('mfechamov', 'id')
+                )
+
+                # acreedor: suma de TODOS los movimientos de compras (40,41,45,42,26)
+                acreedor = Decimal('0.00')
+                saldo_c = Decimal('0.00')
+                for m in movimientos_c:
+                    # Para saldo se excluye 'P'; para columna acreedor mantenemos misma exclusión por consistencia
+                    if getattr(m, 'mserie', None) == 'P':
+                        continue
+                    total = Decimal(m.mtotal or 0)
+                    acreedor += total  # columna Acreedor según tu definición
+                    # saldo compras (debe - haber), excluyendo 'P'
+                    if m.mtipo in (41, 45):
+                        saldo_c += total
+                    elif m.mtipo in (40, 42, 26):
+                        saldo_c -= total
+
+                # ------------------- SALDO MIXTO -------------------
+                saldo = saldo_v + saldo_c
+
+                if saldo !=0:
+
+                    # Tomamos el último movimiento válido de cualquiera para moneda/cambios
+                    movimiento = (
+                        Movims.objects
+                        .filter(mcliente=cli.codigo, mactivo='S', mfechamov__lte=fecha_hasta)
+                        .order_by('-mfechamov', '-id')
+                        .first()
+                    )
+
+                    resultados.append({
+                        "codigo": cliente,
+                        "nombre": nombre_cli,
+                        "moneda": movimiento.mmoneda if movimiento else (moneda.codigo if moneda else None),
+                        "deudor": deudor,
+                        "acreedor": acreedor,
+                        "saldo": saldo,
+                        "arbitraje": (getattr(movimiento, 'mcambio', None) or Decimal("1.0")) if movimiento else Decimal("1.0"),
+                        "paridad": (getattr(movimiento, 'marbitraje', None) or Decimal("1.0")) if movimiento else Decimal("1.0"),
+                        "fecha": getattr(movimiento, 'mfechamov', None) if movimiento else None
+                    })
+
+            return generar_excel_balance_mixtas(
+                resultados, fecha_hasta, moneda,
+                consolidar_dolares, consolidar_moneda_nac
+            )
+
+    else:
+        form = BalanceMixtasForm()
+
+    return render(request, 'agentes_ca/balance_mixtas.html', {'form': form})
+
+
+def generar_excel_balance_mixtas_completo(queryset, fecha_hasta, moneda,
+                                 consolidar_dolares=False,
+                                 consolidar_moneda_nac=False):
+    """
+    Genera el Excel de Balance para MIXTAS (Ventas+Compras)
+    - queryset: lista de dicts con keys: codigo, nombre, deudor, acreedor, saldo, moneda, arbitraje, paridad
+    - Usa convertir_monto(...) si hay consolidación de moneda para las 3 columnas
+    """
+    try:
+        if consolidar_dolares:
+            nombre_moneda = "DOLARES USA"
+            moneda_destino = 2
+        elif consolidar_moneda_nac:
+            nombre_moneda = "MONEDA NACIONAL"
+            moneda_destino = 1
+        else:
+            nombre_moneda = moneda.nombre.upper() if moneda else "TODAS LAS MONEDAS"
+            moneda_destino = None
+
+        fecha_formateada = fecha_hasta.strftime('%d/%m/%Y')
+        titulo = f'Balance de Cuentas MIXTAS al {fecha_formateada} - {nombre_moneda}'
+        nombre_archivo = f'Balance_Cuentas_Mixtas_{fecha_hasta}.xlsx'
+
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        ws = workbook.add_worksheet("Balance")
+
+        # Formatos
+        header_format = workbook.add_format({
+            'bold': True, 'bg_color': '#d9d9d9',
+            'border': 1, 'align': 'center'
+        })
+        title_format = workbook.add_format({'bold': True, 'font_size': 12})
+        money_format = workbook.add_format({'num_format': '#,##0.00', 'border': 1})
+        total_format = workbook.add_format({
+            'bold': True, 'num_format': '#,##0.00',
+            'top': 2, 'border': 1
+        })
+        total_label_format = workbook.add_format({'bold': True, 'top': 2, 'border': 1})
+        text_format = workbook.add_format({'border': 1})
+
+        # Título
+        ws.merge_range('A1:E1', titulo, title_format)
+
+        # Encabezados
+        headers = ['Código', 'Nombre', 'Deudor', 'Acreedor', 'Saldo']
+        for col, h in enumerate(headers):
+            ws.write(1, col, h, header_format)
+
+        row = 2
+        total_deudor = Decimal('0.00')
+        total_acreedor = Decimal('0.00')
+        total_saldo = Decimal('0.00')
+
+        # Orden por código ascendente (robusto ante str/int)
+        def _as_int(v):
+            try:
+                return int(v)
+            except Exception:
+                return float('inf')
+
+        queryset_sorted = sorted(
+            queryset,
+            key=lambda o: (
+                _as_int(o.get("codigo") if isinstance(o, dict)
+                        else getattr(o, "codigo", None)),
+                str(o.get("codigo") if isinstance(o, dict)
+                    else getattr(o, "codigo", ""))
+            )
+        )
+
+        for obj in queryset_sorted:
+            get = obj.get if isinstance(obj, dict) else (lambda k, default=None: getattr(obj, k, default))
+
+            # Valores base
+            deudor   = Decimal(get("deudor")   or 0)
+            acreedor = Decimal(get("acreedor") or 0)
+            saldo    = Decimal(get("saldo")    or 0)
+
+            moneda_origen = get("moneda")
+            arbitraje = Decimal(get("arbitraje") or "1.0")
+            paridad   = Decimal(get("paridad")   or "1.0")
+
+            # Conversión si corresponde (por columna)
+            if moneda_destino and moneda_origen != moneda_destino:
+                deudor   = convertir_monto(deudor,   moneda_origen, moneda_destino, arbitraje, paridad)
+                acreedor = convertir_monto(acreedor, moneda_origen, moneda_destino, arbitraje, paridad)
+                saldo    = convertir_monto(saldo,    moneda_origen, moneda_destino, arbitraje, paridad)
+
+            # Escribir fila
+            ws.write(row, 0, get("codigo"), text_format)
+            ws.write(row, 1, get("nombre"), text_format)
+            ws.write(row, 2, float(deudor),   money_format)
+            ws.write(row, 3, float(acreedor), money_format)
+            ws.write(row, 4, float(saldo),    money_format)
+
+            total_deudor   += deudor
+            total_acreedor += acreedor
+            total_saldo    += saldo
+            row += 1
+
+        # Totales
+        ws.write(row, 1, 'TOTAL GENERAL', total_label_format)
+        ws.write(row, 2, float(total_deudor),   total_format)
+        ws.write(row, 3, float(total_acreedor), total_format)
+        ws.write(row, 4, float(total_saldo),    total_format)
+
+        # Anchos de columna
+        ws.set_column('A:A', 10)
+        ws.set_column('B:B', 40)
+        ws.set_column('C:E', 18)
+
+        workbook.close()
+        output.seek(0)
+
+        resp = HttpResponse(
+            output.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        resp['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+        return resp
+
+    except Exception as e:
+        raise RuntimeError(f"Error al generar el Excel de balance mixtas: {e}")
+
+
+from decimal import Decimal
+from collections import defaultdict
+from datetime import datetime
+import io
+import xlsxwriter
+from django.http import HttpResponse
+
+def balance_mixtas(request):
+    if request.method == 'POST':
+        form = BalanceMixtasForm(request.POST)
+        if form.is_valid():
+            fecha_hasta = form.cleaned_data['fecha_hasta']
+            moneda = form.cleaned_data['moneda']
+            consolidar_dolares = form.cleaned_data['consolidar_dolares']
+            consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
+
+            # Tipos de movimientos
+            tipos_ventas  = (20, 21, 23, 24, 25, 29)
+            tipos_compras = (40, 41, 45, 42, 26)
+
+            resultados = []
+
+            clientes = Clientes.objects.only(
+                'codigo', 'empresa', 'fechadenegado', 'tipo', 'socio'
+            ).order_by('empresa')
+
+            for cli in clientes:
+                cliente = cli.codigo
+                nombre_cli = cli.empresa
+
+                # ------------------- VENTAS -------------------
+                filtro_v = {
+                    'mcliente': cli.codigo,
+                    'mactivo': 'S',
+                    'mtipo__in': tipos_ventas,
+                    'mfechamov__lte': fecha_hasta,
+                }
+                if moneda:
+                    filtro_v['mmoneda'] = moneda.codigo
+                if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1:
+                    filtro_v['mfechamov__gt'] = cli.fechadenegado
+
+                movimientos_v = (
+                    Movims.objects
+                    .only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje')
+                    .filter(**filtro_v)
+                    .order_by('mfechamov', 'id')
+                )
+
+                # deudor_firmado: con el mismo signo que aporta al saldo
+                deudor_firmado = Decimal('0.00')
+                saldo_v = Decimal('0.00')
+                for m in movimientos_v:
+                    total = Decimal(m.mtotal or 0)
+                    if m.mtipo in (20, 24, 29):
+                        saldo_v += total
+                        deudor_firmado += total     # suma al saldo => positivo
+                    elif m.mtipo in (21, 25, 23):
+                        saldo_v -= total
+                        deudor_firmado -= total     # resta al saldo => negativo
+
+                # ------------------- COMPRAS -------------------
+                filtro_c = {
+                    'mcliente': cli.codigo,
+                    'mactivo': 'S',
+                    'mtipo__in': tipos_compras,
+                    'mfechamov__lte': fecha_hasta,
+                }
+                if moneda:
+                    filtro_c['mmoneda'] = moneda.codigo
+                if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1 and getattr(cli, 'socio', '') != 'T':
+                    filtro_c['mfechamov__gt'] = cli.fechadenegado
+
+                movimientos_c = (
+                    Movims.objects
+                    .only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje', 'mserie')
+                    .filter(**filtro_c)
+                    .order_by('mfechamov', 'id')
+                )
+
+                # acreedor_firmado: con el mismo signo que aporta al saldo (excluye 'P')
+                acreedor_firmado = Decimal('0.00')
+                saldo_c = Decimal('0.00')
+                for m in movimientos_c:
+                    if getattr(m, 'mserie', None) == 'P':
+                        continue
+                    total = Decimal(m.mtotal or 0)
+                    if m.mtipo in (41, 45):
+                        saldo_c += total
+                        acreedor_firmado += total   # suma al saldo => positivo
+                    elif m.mtipo in (40, 42, 26):
+                        saldo_c -= total
+                        acreedor_firmado -= total   # resta al saldo => negativo
+
+                # ------------------- SALDO MIXTO -------------------
+                saldo = saldo_v + saldo_c
+
+                # Mostrar solo si saldo ≠ 0 (manteniendo tu criterio previo)
+                if saldo != 0:
+                    movimiento = (
+                        Movims.objects
+                        .filter(mcliente=cli.codigo, mactivo='S', mfechamov__lte=fecha_hasta)
+                        .order_by('-mfechamov', '-id')
+                        .first()
+                    )
+
+                    resultados.append({
+                        "codigo": cliente,
+                        "nombre": nombre_cli,
+                        "moneda": movimiento.mmoneda if movimiento else (moneda.codigo if moneda else None),
+                        "deudor": deudor_firmado,
+                        "acreedor": acreedor_firmado,
+                        "saldo": saldo,
+                        "arbitraje": (getattr(movimiento, 'mcambio', None) or Decimal("1.0")) if movimiento else Decimal("1.0"),
+                        "paridad": (getattr(movimiento, 'marbitraje', None) or Decimal("1.0")) if movimiento else Decimal("1.0"),
+                        "fecha": getattr(movimiento, 'mfechamov', None) if movimiento else None
+                    })
+
+            return generar_excel_balance_mixtas(
+                resultados, fecha_hasta, moneda,
+                consolidar_dolares, consolidar_moneda_nac
+            )
+
+    else:
+        form = BalanceMixtasForm()
+
+    return render(request, 'agentes_ca/balance_mixtas.html', {'form': form})
+
+
+def generar_excel_balance_mixtas(queryset, fecha_hasta, moneda,
+                                 consolidar_dolares=False,
+                                 consolidar_moneda_nac=False):
+    """
+    Genera el Excel de Balance para MIXTAS (Ventas+Compras)
+    - queryset: lista de dicts con keys: codigo, nombre, deudor, acreedor, saldo, moneda, arbitraje, paridad
+    - Convierte moneda (si aplica) para las 3 columnas, preservando el signo.
+    """
+    try:
+        if consolidar_dolares:
+            nombre_moneda = "DOLARES USA"
+            moneda_destino = 2
+        elif consolidar_moneda_nac:
+            nombre_moneda = "MONEDA NACIONAL"
+            moneda_destino = 1
+        else:
+            nombre_moneda = moneda.nombre.upper() if moneda else "TODAS LAS MONEDAS"
+            moneda_destino = None
+
+        fecha_formateada = fecha_hasta.strftime('%d/%m/%Y')
+        titulo = f'Balance de Cuentas MIXTAS al {fecha_formateada} - {nombre_moneda}'
+        nombre_archivo = f'Balance_Cuentas_Mixtas_{fecha_hasta}.xlsx'
+
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        ws = workbook.add_worksheet("Balance")
+
+        # Formatos
+        header_format = workbook.add_format({'bold': True, 'bg_color': '#d9d9d9',
+                                             'border': 1, 'align': 'center'})
+        title_format = workbook.add_format({'bold': True, 'font_size': 12})
+        money_format = workbook.add_format({
+            'num_format': '#,##0.00;[Blue]-#,##0.00',
+            'border': 1
+        })
+        total_format = workbook.add_format({
+            'bold': True,
+            'num_format': '#,##0.00;[Blue]-#,##0.00',
+            'top': 2, 'border': 1
+        })
+
+        total_label_format = workbook.add_format({'bold': True, 'top': 2, 'border': 1})
+        text_format = workbook.add_format({'border': 1})
+
+        # Título
+        ws.merge_range('A1:E1', titulo, title_format)
+
+        # Encabezados
+        headers = ['Código', 'Nombre', 'Deudor', 'Acreedor', 'Saldo']
+        for col, h in enumerate(headers):
+            ws.write(1, col, h, header_format)
+
+        row = 2
+        total_deudor = Decimal('0.00')
+        total_acreedor = Decimal('0.00')
+        total_saldo = Decimal('0.00')
+
+        # Ordenar por código (ascendente, robusto)
+        def _as_int(v):
+            try:
+                return int(v)
+            except Exception:
+                return float('inf')
+
+        queryset_sorted = sorted(
+            queryset,
+            key=lambda o: (
+                _as_int(o.get("codigo") if isinstance(o, dict) else getattr(o, "codigo", None)),
+                str(o.get("codigo") if isinstance(o, dict) else getattr(o, "codigo", ""))
+            )
+        )
+
+        for obj in queryset_sorted:
+            get = obj.get if isinstance(obj, dict) else (lambda k, default=None: getattr(obj, k, default))
+
+            deudor   = Decimal(get("deudor")   or 0)
+            acreedor = Decimal(get("acreedor") or 0)
+            saldo    = Decimal(get("saldo")    or 0)
+
+            moneda_origen = get("moneda")
+            arbitraje = Decimal(get("arbitraje") or "1.0")
+            paridad   = Decimal(get("paridad")   or "1.0")
+
+            # Conversión (mantiene signo)
+            if moneda_destino and moneda_origen != moneda_destino:
+                deudor   = convertir_monto(deudor,   moneda_origen, moneda_destino, arbitraje, paridad)
+                acreedor = convertir_monto(acreedor, moneda_origen, moneda_destino, arbitraje, paridad)
+                saldo    = convertir_monto(saldo,    moneda_origen, moneda_destino, arbitraje, paridad)
+
+            # Escribir fila
+            ws.write(row, 0, get("codigo"), text_format)
+            ws.write(row, 1, get("nombre"), text_format)
+            ws.write(row, 2, float(deudor),   money_format)
+            ws.write(row, 3, float(acreedor), money_format)
+            ws.write(row, 4, float(saldo),    money_format)
+
+            total_deudor   += deudor
+            total_acreedor += acreedor
+            total_saldo    += saldo
+            row += 1
+
+        # Totales
+        ws.write(row, 1, 'TOTAL GENERAL', total_label_format)
+        ws.write(row, 2, float(total_deudor),   total_format)
+        ws.write(row, 3, float(total_acreedor), total_format)
+        ws.write(row, 4, float(total_saldo),    total_format)
+
+        # Anchos
+        ws.set_column('A:A', 10)
+        ws.set_column('B:B', 40)
+        ws.set_column('C:E', 18)
+
+        workbook.close()
+        output.seek(0)
+
+        return HttpResponse(
+            output.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={'Content-Disposition': f'attachment; filename="{nombre_archivo}"'}
+        )
+
+    except Exception as e:
+        raise RuntimeError(f"Error al generar el Excel de balance mixtas: {e}")
+
+
 
 def convertir_monto(monto, origen, destino, arbitraje, paridad):
     """
@@ -293,3 +798,6 @@ def convertir_monto(monto, origen, destino, arbitraje, paridad):
         return round(monto, 2)
     except Exception as e:
         return str(e)
+
+
+

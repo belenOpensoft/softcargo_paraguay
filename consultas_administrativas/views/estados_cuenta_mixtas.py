@@ -216,6 +216,7 @@ def obtener_estado_general(form, fecha_desde, fecha_hasta, moneda):
 
 from decimal import Decimal
 from datetime import datetime
+#poner color acreedor deudor
 
 def calcular_saldos_anteriores_mixto(fecha_desde, moneda=None, cliente_id=None):
     """
