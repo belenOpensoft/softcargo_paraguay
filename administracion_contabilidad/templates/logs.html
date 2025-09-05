@@ -1,0 +1,91 @@
+{% extends 'base_table_v2.html' %}
+{% load static %}
+{% block script_table %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/administracion/administracion.css'  %}">
+ <style>
+    .dt-nowrap { white-space: nowrap; }
+    .changes-list { margin-bottom: 0; padding-left: 1.25rem; }
+    .card-filter .form-group { margin-bottom: .5rem; }
+    tr.shown + tr td.child { background: #f9fbff; }
+  </style>
+{% endblock script_table %}
+
+
+{% block table_datatable %}
+<div class="container-fluid my-3">
+  <div class="d-flex align-items-center mb-3">
+    <h3 class="mb-0 text-dark"><strong>Log de acciones en el módulo de administración </strong></h3>
+  </div>
+
+<div class="card card-filter mb-3">
+  <div class="card-body">
+    <form id="filter-form" class="mb-0">
+      <div class="form-row align-items-end d-flex">
+        <div class="col-md-2 me-1">
+          <div class="form-group">
+            <label for="id_date_from">Desde</label>
+            {{ form.date_from }}
+          </div>
+        </div>
+        <div class="col-md-2 me-1">
+          <div class="form-group">
+            <label for="id_date_to">Hasta</label>
+            {{ form.date_to }}
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="id_user">Usuario</label>
+            {{ form.user }}
+          </div>
+        </div>
+
+      </div>
+              <div class="col-md-2 text-right align-items-end">
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary">Aplicar</button>
+            <button id="btn-clear" type="button" class="btn btn-outline-secondary me-1">Limpiar</button>
+          </div>
+            <button id="btn-excel" type="button" class="btn btn-success">Excel</button>
+        </div>
+    </form>
+  </div>
+</div>
+
+
+
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table id="tbl-audit" class="table table-striped table-bordered table-sm dt-responsive nowrap" style="width:100%;">
+          <thead class="thead-light">
+            <tr>
+              <th style="width: 1%;"></th>
+              <th>Factura</th>
+              <th>Tabla</th>
+              <th class="dt-nowrap">Fecha</th>
+              <th>Usuario</th>
+            </tr>
+          </thead>
+          <tbody><!-- server-side --></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock table_datatable %}
+{% block script_datatable %}
+<script src="{% static 'js/jquery-ui.min_last.js' %}"></script>
+<script src="{% static 'grilla/logs_administracion.js' %}"></script>
+
+<link rel="stylesheet" href="{% static 'jquery-ui/jquery-ui_last.css' %}">
+
+<script>
+    var csrf_token = "{{ csrf_token }}";
+</script>
+{% endblock script_datatable %}
+
+
+
+
+

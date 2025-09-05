@@ -3,6 +3,8 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
 import datetime
+
+from django.contrib.auth.models import User
 from django.forms import RadioSelect
 from mantenimientos.models import Monedas, Bancos
 from administracion_contabilidad.models import Dolar, Infofactura, Cuentas
@@ -2654,4 +2656,19 @@ class BajaChequesForm(forms.Form):
         label="Fecha Asiento",
         required=False,
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm', 'id': 'asentar_fecha'})
+    )
+
+
+class AuditLogFilterForm(forms.Form):
+    date_from = forms.DateField(
+        label="Desde", required=False,
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
+    date_to = forms.DateField(
+        label="Hasta", required=False,
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
+    user = forms.ModelChoiceField(
+        label="Usuario", required=False, queryset=User.objects.order_by("username"),
+        widget=forms.Select(attrs={"class": "form-control"})
     )

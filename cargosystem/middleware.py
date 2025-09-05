@@ -392,11 +392,27 @@ class BloqueoModalMiddleware:
         # Ejecutar la vista y capturar la respuesta
         response = self.get_response(request)
 
-        # Inyectar el estado de bloqueo si aplica
-        if isinstance(response, JsonResponse) and hasattr(request, '_bloqueo_info') and request._bloqueo_info:
-            data = json.loads(response.content.decode('utf-8'))
-            data.update(request._bloqueo_info)
-            return JsonResponse(data)
+        # # Inyectar el estado de bloqueo si aplica
+        # if isinstance(response, JsonResponse) and hasattr(request, '_bloqueo_info') and request._bloqueo_info:
+        #     data = json.loads(response.content.decode('utf-8'))
+        #     data.update(request._bloqueo_info)
+        #     return JsonResponse(data)
+
+        # Inyectar el estado de bloqueo si aplica (no tocar listas)
+        if isinstance(response, JsonResponse) and getattr(request, '_bloqueo_info', None):
+            try:
+                data = json.loads(response.content.decode('utf-8'))
+            except Exception:
+                return response  # si no puedo parsear, no toco nada
+
+            if isinstance(data, list):  # ⬅️ clave 1: si es lista (autocomplete), no tocar
+                return response
+
+            data.update(request._bloqueo_info)  # ⬅️ clave 2: comportamiento actual para dicts
+            new = JsonResponse(data, status=response.status_code)
+            for k, v in response.items():  # ⬅️ clave 3: preserva headers originales
+                new[k] = v
+            return new
 
         return response
 

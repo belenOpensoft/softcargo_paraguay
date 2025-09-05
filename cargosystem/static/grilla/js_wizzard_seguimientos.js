@@ -730,8 +730,8 @@ function wizardReset(opts = {}) {
   } catch(e){}
 
   // 4) LocalStorage u otras cachés temporales
-  try { localStorage.removeItem('id_seguimiento_seleccionado'); } catch(e){}
-  try { localStorage.removeItem('numero_embarque'); } catch(e){}
+  // try { localStorage.removeItem('id_seguimiento_seleccionado'); } catch(e){}
+  // try { localStorage.removeItem('numero_embarque'); } catch(e){}
 
   // 5) row_number (si usás el shim)
   //    - si querés que el sistema vuelva a usar el seleccionado en la grilla:
