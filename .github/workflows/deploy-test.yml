@@ -2,7 +2,7 @@ name: Deploy to Test Folder (rsync)
 
 on:
   push:
-    branches: [ "main" ]   # cámbialo si usás otra rama
+    branches: [ "**" ]   # cámbialo si usás otra rama
 
 jobs:
   deploy:
@@ -15,7 +15,7 @@ jobs:
         uses: burnett01/rsync-deployments@7.0.1
         with:
           switches: -avz --delete --exclude-from=".rsyncignore"
-          path: ./            # todo tu repo
+          path: ./
           remote_path: ${{ secrets.TARGET_DIR }}
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USER }}
