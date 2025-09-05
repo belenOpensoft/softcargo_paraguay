@@ -178,6 +178,7 @@ class seguimientoForm(BSModalModelForm):
         self.helper.form_id = 'update-form'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Actualizar'))
+        self.fields['arbitraje'].required = False
 
         for field_name, field in self.fields.items():
             # Verificar el tipo de widget para no sobreescribir
@@ -210,6 +211,12 @@ class seguimientoForm(BSModalModelForm):
                     clases_actuales += ' autocomplete-validable'
 
                 self.fields[nombre].widget.attrs['class'] = clases_actuales.strip()
+
+    def clean_arbitraje(self):
+        value = self.cleaned_data.get('arbitraje')
+        if not value:
+            return 1
+        return value
 
     choice_op = (("", ""),
                  ("IMPORTACION", "IMPORTACION"),
