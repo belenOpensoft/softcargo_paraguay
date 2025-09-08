@@ -1007,7 +1007,7 @@ def guardar_impuorden(request):
                                 'imputacion': 2,
                                 'modo': asiento['modo'],
                                 'tipo': 'G',
-                                'cuenta': asiento['cuenta'] if 'cuenta' in asiento and asiento['cuenta'] is not '' else None,
+                                'cuenta': asiento['cuenta'] if 'cuenta' in asiento and asiento['cuenta'] != '' else None,
                                 'documento': cobranza[0]['numero'],
                                 'vencimiento': fecha_obj,
                                 'pasado': 1,

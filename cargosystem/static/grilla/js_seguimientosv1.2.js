@@ -1,4 +1,3 @@
-
 // INICIO CONTROL PAGINA
 var wWidth = $(window).width();
 var dWidth = wWidth * 0.40;
@@ -41,18 +40,17 @@ var que_buscar = '';
 // FIN DATOS
 
 
-
 $(document).ready(function () {
 
 
-    setTimeout(function(){
+    setTimeout(function () {
         $('.navbar-collapse').collapse('hide');
     }, 5000);
 
     getCookie('row_selected_seguimiento');
     var contador = 0;
     /* DATATABLES */
-    $('#tabla_seguimiento tfoot th').each(function(index) {
+    $('#tabla_seguimiento tfoot th').each(function (index) {
         let title = $('#tabla_seguimiento thead th').eq(index).text();
 
         if (index === 0) {
@@ -160,14 +158,14 @@ $(document).ready(function () {
         "language": {
             url: "/static/datatables/es_ES.json"
         },
-            initComplete: function () {
+        initComplete: function () {
             let api = this.api();
 
             // Cargar estado guardado
             let state = table.state.loaded();
             if (state) {
                 // Restaurar filtros en los inputs y aplicar clase si tienen valor
-                api.columns().every(function(index) {
+                api.columns().every(function (index) {
                     let colState = state.columns[index];
                     if (colState && colState.search.search) {
                         let input = $('#buscoid_' + index);
@@ -180,7 +178,7 @@ $(document).ready(function () {
             }
 
             // Evento para resaltar inputs cuando tienen contenido
-            $(document).on("input", ".filter-input", function() {
+            $(document).on("input", ".filter-input", function () {
                 if ($(this).val().trim() !== "") {
                     $(this).addClass("is-invalid"); // Se pone en rojo
                 } else {
@@ -189,9 +187,9 @@ $(document).ready(function () {
             });
 
             // Agregar funcionalidad de filtrado
-            api.columns().every(function() {
+            api.columns().every(function () {
                 let that = this;
-                $('input', this.footer()).on('keyup change', function() {
+                $('input', this.footer()).on('keyup change', function () {
                     if (that.search() !== this.value) {
                         that.search(this.value).draw();
                     }
@@ -199,38 +197,38 @@ $(document).ready(function () {
             });
         },
         "rowCallback": function (row, data) {
-        $('td:eq(1)', row).html('');
+            $('td:eq(1)', row).html('');
             let texto = ''
             if (data[8].length > 0 && data[8] !== 'S/I') {
-            //notas
+                //notas
                 texto += '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">\n' +
-             '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
-             '</svg>';
+                    '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
+                    '</svg>';
 
             }
             if (data[44] > 0) {
-            //archivo
+                //archivo
                 texto += ' <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-filetype-docx" viewBox="0 0 16 16"' +
-                            '><path fill-rule="evenodd" d="M14 4.5V11h-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5Zm-6.839 9.688v-.522a1.54 1.54 0 0 0-.117-.641.861.861 0 0 0-.322-.387.862.862 0 0 0-.469-.129.868.868 0 0 0-.471.13.868.868 0 0 0-.32.386 1.54 1.54 0 0 0-.117.641v.522c0 .256.04.47.117.641a.868.868 0 0 0 .32.387.883.883 0 0 0 .471.126.877.877 0 0 0 .469-.126.861.861 0 0 0 .322-.386 1.55 1.55 0 0 0 .117-.642Zm.803-.516v.513c0 .375-.068.7-.205.973a1.47 1.47 0 0 1-.589.627c-.254.144-.56.216-.917.216a1.86 1.86 0 0 1-.92-.216 1.463 1.463 0 0 1-.589-.627 2.151 2.151 0 0 1-.205-.973v-.513c0-.379.069-.704.205-.975.137-.274.333-.483.59-.627.257-.147.564-.22.92-.22.357 0 .662.073.916.22.256.146.452.356.59.63.136.271.204.595.204.972ZM1 15.925v-3.999h1.459c.406 0 .741.078 1.005.235.264.156.46.382.589.68.13.296.196.655.196 1.074 0 .422-.065.784-.196 1.084-.131.301-.33.53-.595.689-.264.158-.597.237-.999.237H1Zm1.354-3.354H1.79v2.707h.563c.185 0 .346-.028.483-.082a.8.8 0 0 0 .334-.252c.088-.114.153-.254.196-.422a2.3 2.3 0 0 0 .068-.592c0-.3-.04-.552-.118-.753a.89.89 0 0 0-.354-.454c-.158-.102-.361-.152-.61-.152Zm6.756 1.116c0-.248.034-.46.103-.633a.868.868 0 0 1 .301-.398.814.814 0 0 1 .475-.138c.15 0 .283.032.398.097a.7.7 0 0 1 .273.26.85.85 0 0 1 .12.381h.765v-.073a1.33 1.33 0 0 0-.466-.964 1.44 1.44 0 0 0-.49-.272 1.836 1.836 0 0 0-.606-.097c-.355 0-.66.074-.911.223-.25.148-.44.359-.571.633-.131.273-.197.6-.197.978v.498c0 .379.065.704.194.976.13.271.321.48.571.627.25.144.555.216.914.216.293 0 .555-.054.785-.164.23-.11.414-.26.551-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.765a.8.8 0 0 1-.117.364.699.699 0 0 1-.273.248.874.874 0 0 1-.401.088.845.845 0 0 1-.478-.131.834.834 0 0 1-.298-.393 1.7 1.7 0 0 1-.103-.627v-.495Zm5.092-1.76h.894l-1.275 2.006 1.254 1.992h-.908l-.85-1.415h-.035l-.852 1.415h-.862l1.24-2.015-1.228-1.984h.932l.832 1.439h.035l.823-1.439Z"' +
-                            '/></svg>';
+                    '><path fill-rule="evenodd" d="M14 4.5V11h-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5Zm-6.839 9.688v-.522a1.54 1.54 0 0 0-.117-.641.861.861 0 0 0-.322-.387.862.862 0 0 0-.469-.129.868.868 0 0 0-.471.13.868.868 0 0 0-.32.386 1.54 1.54 0 0 0-.117.641v.522c0 .256.04.47.117.641a.868.868 0 0 0 .32.387.883.883 0 0 0 .471.126.877.877 0 0 0 .469-.126.861.861 0 0 0 .322-.386 1.55 1.55 0 0 0 .117-.642Zm.803-.516v.513c0 .375-.068.7-.205.973a1.47 1.47 0 0 1-.589.627c-.254.144-.56.216-.917.216a1.86 1.86 0 0 1-.92-.216 1.463 1.463 0 0 1-.589-.627 2.151 2.151 0 0 1-.205-.973v-.513c0-.379.069-.704.205-.975.137-.274.333-.483.59-.627.257-.147.564-.22.92-.22.357 0 .662.073.916.22.256.146.452.356.59.63.136.271.204.595.204.972ZM1 15.925v-3.999h1.459c.406 0 .741.078 1.005.235.264.156.46.382.589.68.13.296.196.655.196 1.074 0 .422-.065.784-.196 1.084-.131.301-.33.53-.595.689-.264.158-.597.237-.999.237H1Zm1.354-3.354H1.79v2.707h.563c.185 0 .346-.028.483-.082a.8.8 0 0 0 .334-.252c.088-.114.153-.254.196-.422a2.3 2.3 0 0 0 .068-.592c0-.3-.04-.552-.118-.753a.89.89 0 0 0-.354-.454c-.158-.102-.361-.152-.61-.152Zm6.756 1.116c0-.248.034-.46.103-.633a.868.868 0 0 1 .301-.398.814.814 0 0 1 .475-.138c.15 0 .283.032.398.097a.7.7 0 0 1 .273.26.85.85 0 0 1 .12.381h.765v-.073a1.33 1.33 0 0 0-.466-.964 1.44 1.44 0 0 0-.49-.272 1.836 1.836 0 0 0-.606-.097c-.355 0-.66.074-.911.223-.25.148-.44.359-.571.633-.131.273-.197.6-.197.978v.498c0 .379.065.704.194.976.13.271.321.48.571.627.25.144.555.216.914.216.293 0 .555-.054.785-.164.23-.11.414-.26.551-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.765a.8.8 0 0 1-.117.364.699.699 0 0 1-.273.248.874.874 0 0 1-.401.088.845.845 0 0 1-.478-.131.834.834 0 0 1-.298-.393 1.7 1.7 0 0 1-.103-.627v-.495Zm5.092-1.76h.894l-1.275 2.006 1.254 1.992h-.908l-.85-1.415h-.035l-.852 1.415h-.862l1.24-2.015-1.228-1.984h.932l.832 1.439h.035l.823-1.439Z"' +
+                    '/></svg>';
             }
             if (data[45] > 0) {
-            //embarque
-            texto += '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-truck" viewBox="0 0 16 16">\n' +
-                         '<path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5zm1.294 7.456A2 2 0 0 1 4.732 11h5.536a2 2 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456M12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>\n' +
-                         '</svg>';
+                //embarque
+                texto += '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-truck" viewBox="0 0 16 16">\n' +
+                    '<path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5zm1.294 7.456A2 2 0 0 1 4.732 11h5.536a2 2 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456M12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>\n' +
+                    '</svg>';
 
 
             }
             if (data[46] > 0) {
-            //envase
+                //envase
                 texto += ' <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16"' +
-                            '><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.' +
-                            '961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16' +
-                            ' 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/> </svg>';
+                    '><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.' +
+                    '961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16' +
+                    ' 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/> </svg>';
             }
             if (data[47] > 0) {
-            //gastos
+                //gastos
                 texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16"' +
                     '><path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.18' +
                     '7V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.' +
@@ -239,44 +237,44 @@ $(document).ready(function () {
             }
             if (data[48]) {
                 texto += ' <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-calendar3" viewBox="0 0 16 16"' +
-                            '><path d="M14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM1 3.857C1 3.384 1.448 3 2 3h12c.552 0 1 .384 1 .' +
-                            '857v10.286c0 .473-.448.857-1 .857H2c-.552 0-1-.384-1-.857V3.857z"/><path d="M6.5 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 ' +
-                            '0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 ' +
-                            '0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>';
+                    '><path d="M14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM1 3.857C1 3.384 1.448 3 2 3h12c.552 0 1 .384 1 .' +
+                    '857v10.286c0 .473-.448.857-1 .857H2c-.552 0-1-.384-1-.857V3.857z"/><path d="M6.5 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 ' +
+                    '0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 ' +
+                    '0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>';
             }
             if (data[51]) {
-            //historial
-            texto += '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">\n' +
-             '<path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>\n' +
-             '<path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>\n' +
-             '<path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>\n' +
-             '</svg>';
+                //historial
+                texto += '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">\n' +
+                    '<path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>\n' +
+                    '<path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>\n' +
+                    '<path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>\n' +
+                    '</svg>';
 
             }
             if (data[49]) {
-            //rutas
-            texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">\n' +
+                //rutas
+                texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">\n' +
                     '<path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>\n' +
                     '<path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>\n' +
                     '</svg>';
             }
             if (data[52] > 0) {
-    //notas
-            texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">\n' +
-            '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
-            '</svg>';
+                //notas
+                texto += '   <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-sticky" viewBox="0 0 16 16">\n' +
+                    '<path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>\n' +
+                    '</svg>';
 
-                }
+            }
             if (data[53]) {
-            //aplicable
-            texto += ' <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-coin" viewBox="0 0 16 16">\n' +
-                '                      <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>\n' +
-                '                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>\n' +
-                '                      <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>\n' +
-                '                    </svg>';
+                //aplicable
+                texto += ' <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-coin" viewBox="0 0 16 16">\n' +
+                    '                      <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>\n' +
+                    '                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>\n' +
+                    '                      <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>\n' +
+                    '                    </svg>';
 
-                }
-            $('td:eq(1)', row).html(texto + " " +  data[1] + " ");
+            }
+            $('td:eq(1)', row).html(texto + " " + data[1] + " ");
             if (data[0] === row_selected) {
                 window.row_number = data[1];
                 row_id = data[0];
@@ -284,14 +282,14 @@ $(document).ready(function () {
             }
         },
     });
-    $('#tabla_seguimiento tbody').on('dblclick', 'tr', function() {
-            // Remover selección previa y marcar esta fila como seleccionada
-            $('#tabla_seguimiento tbody tr').removeClass('table-secondary');
-            $(this).addClass('table-secondary');
-            // Ejecutar la misma lógica que el botón Editar
-            $('#editar_btn').trigger('click');
-        });
-    $('input.autocomplete').on('keydown', function(event) {
+    $('#tabla_seguimiento tbody').on('dblclick', 'tr', function () {
+        // Remover selección previa y marcar esta fila como seleccionada
+        $('#tabla_seguimiento tbody tr').removeClass('table-secondary');
+        $(this).addClass('table-secondary');
+        // Ejecutar la misma lógica que el botón Editar
+        $('#editar_btn').trigger('click');
+    });
+    $('input.autocomplete').on('keydown', function (event) {
         var keyCode = event.keyCode || event.which;
 
         if (keyCode === 13 || keyCode === 9) { // 'Enter' (13) o 'Tab' (9)
@@ -303,14 +301,14 @@ $(document).ready(function () {
         }
     });
     // Evento para limpiar todos los filtros
-    $(document).on("click", "#clear", function() {
-        awbRegex='';
+    $(document).on("click", "#clear", function () {
+        awbRegex = '';
         $(".filter-input").val("").trigger("keyup"); // Limpia los inputs y activa la búsqueda
         $(".filter-input").removeClass("is-invalid"); // Se quita el rojo si se vacía
         table.ajax.reload();
     });
     // Evento para resaltar los inputs cuando tienen contenido
-    $(document).on("input", ".filter-input", function() {
+    $(document).on("input", ".filter-input", function () {
         if ($(this).val().trim() !== "") {
             $(this).addClass("is-invalid"); // Se pone en rojo
         } else {
@@ -329,7 +327,7 @@ $(document).ready(function () {
             $("#tabla_seguimiento tr").removeClass("shown");
             if (row.child.isShown()) {
             } else {
-            console.log(row.data());
+                console.log(row.data());
                 row.child(format(row.data()), 'addinfowrapper').show();
                 tr.addClass('shown');
             }
@@ -349,12 +347,12 @@ $(document).ready(function () {
     });
     var state = table.state.loaded();
     $('#id_medidas, #id_bultos_embarque').on('change', function () {
-            let m = $('#id_medidas').val(); // Valor del primer input
-            let b = $('#id_bultos_embarque').val(); // Valor del segundo input
+        let m = $('#id_medidas').val(); // Valor del primer input
+        let b = $('#id_bultos_embarque').val(); // Valor del segundo input
 
-            let resultado = calcular_volumen(m,b)
-            $('#id_cbm').val(resultado); // Mostrar resultado en el div
-        });
+        let resultado = calcular_volumen(m, b)
+        $('#id_cbm').val(resultado); // Mostrar resultado en el div
+    });
 
     $('#tabla_seguimiento tbody').on('click', 'tr', function () {
         if ($(this).hasClass('table-secondary')) {
@@ -365,7 +363,7 @@ $(document).ready(function () {
             window.row_number = row[1];
             setCookie(row_selected);
             table.$('tr.table-secondary').removeClass('table-secondary');
-            localStorage.setItem('id_seguimiento_seleccionado',row[0]);
+            localStorage.setItem('id_seguimiento_seleccionado', row[0]);
             $(this).addClass('table-secondary');
         }
     });
@@ -458,77 +456,83 @@ $(document).ready(function () {
 
     /* FUNCIONES MODALES */
     $('#ingresar_envase').click(function (event) {
-    event.preventDefault();
-    if(document.getElementById('id_profit').value<0||document.getElementById('id_volumen').value<0||document.getElementById('id_precio').value<0||document.getElementById('id_peso').value<0||document.getElementById('id_cantidad').value<0||document.getElementById('id_bonifcli').value<0||document.getElementById('id_bultos').value<0||document.getElementById('id_tara').value<0){
-    alert('No se admiten valores negativos en los campos numéricos.')
-    }else{
-    if (confirm("¿Confirma guardar datos?")) {
-            var form = $('#envases_form');
-            var formData = new FormData(form[0]);
-            if (form[0].checkValidity()) {
-                row = table.rows('.table-secondary').data();
-                let formData = $("#envases_form").serializeArray();
-                let data = JSON.stringify(formData);
-                miurl = "/guardar_envases/";
-                const numero = (window.wizardMode && window.wizCtx && window.wizCtx.numero)
-                  ? window.wizCtx.numero
-                  : row[0][1];
-                var toData = {
-                    'numero': numero,
-                    'data': data,
-                    'csrfmiddlewaretoken': csrf_token,
-                };
-                $.ajax({
-                    type: "POST",
-                    url: miurl,
-                    data: toData,
-                    async: false,
-                    // SUCCESS de tu AJAX de guardar envase:
-                    success: function (resultado) {
-                      if (resultado['resultado'] === 'exito') {
+        event.preventDefault();
+        if (document.getElementById('id_profit').value < 0 || document.getElementById('id_volumen').value < 0 || document.getElementById('id_precio').value < 0 || document.getElementById('id_peso').value < 0 || document.getElementById('id_cantidad').value < 0 || document.getElementById('id_bonifcli').value < 0 || document.getElementById('id_bultos').value < 0 || document.getElementById('id_tara').value < 0) {
+            alert('No se admiten valores negativos en los campos numéricos.')
+        } else {
+            if (confirm("¿Confirma guardar datos?")) {
+                var form = $('#envases_form');
+                var formData = new FormData(form[0]);
+                if (form[0].checkValidity()) {
+                    row = table.rows('.table-secondary').data();
+                    let formData = $("#envases_form").serializeArray();
+                    let data = JSON.stringify(formData);
+                    miurl = "/guardar_envases/";
+                    const numero = (window.wizardMode && window.wizCtx && window.wizCtx.numero)
+                        ? window.wizCtx.numero
+                        : row[0][1];
+                    var toData = {
+                        'numero': numero,
+                        'data': data,
+                        'csrfmiddlewaretoken': csrf_token,
+                    };
+                    $.ajax({
+                        type: "POST",
+                        url: miurl,
+                        data: toData,
+                        async: false,
+                        // SUCCESS de tu AJAX de guardar envase:
+                        success: function (resultado) {
+                            if (resultado['resultado'] === 'exito') {
 
-                        if (window.wizardMode) {
-                          // ✅ wizard: no cierres ni destruyas el modal; no re-abrir via botón
-                          $('#envases_form')[0].reset();
-                          mostrarToast('¡Envase guardado con éxito!', 'success');
+                                if (window.wizardMode) {
+                                    // ✅ wizard: no cierres ni destruyas el modal; no re-abrir via botón
+                                    $('#envases_form')[0].reset();
+                                    mostrarToast('¡Envase guardado con éxito!', 'success');
 
-                          try { $('#tabla_envases').DataTable().ajax.reload(null, false); } catch(e){}
-                          try { table.ajax.reload(null, false); } catch(e){}
+                                    try {
+                                        $('#tabla_envases').DataTable().ajax.reload(null, false);
+                                    } catch (e) {
+                                    }
+                                    try {
+                                        table.ajax.reload(null, false);
+                                    } catch (e) {
+                                    }
 
-                          // avisar al wizard y refrescar la barra (si Envases es último → se verá "Finalizar")
-                          $(document).trigger('envases:guardado');
-                          refreshCurrentToolbar();
+                                    // avisar al wizard y refrescar la barra (si Envases es último → se verá "Finalizar")
+                                    $(document).trigger('envases:guardado');
+                                    refreshCurrentToolbar();
 
-                        } else {
-                          // 🔁 comportamiento legacy fuera del wizard (lo que ya hacías)
-                          $('#ingresar_envase').html('Agregar');
-                          $("#tabla_envases").dataTable().fnDestroy();
-                          $('#envases_btn').addClass('triggered').trigger('click'); // reabría el modal
-                          $("#id_envase_id").val && $("#id_envase_id").val('');
-                          table.ajax.reload();
-                          mostrarToast('¡Envase guardado con éxito!', 'success');
+                                } else {
+                                    // 🔁 comportamiento legacy fuera del wizard (lo que ya hacías)
+                                    $('#ingresar_envase').html('Agregar');
+                                    $("#tabla_envases").dataTable().fnDestroy();
+                                    $('#envases_btn').addClass('triggered').trigger('click'); // reabría el modal
+                                    $("#id_envase_id").val && $("#id_envase_id").val('');
+                                    table.ajax.reload();
+                                    mostrarToast('¡Envase guardado con éxito!', 'success');
+                                }
+
+                            } else {
+                                alert(resultado['resultado']);
+                            }
                         }
 
-                      } else {
-                        alert(resultado['resultado']);
-                      }
-                    }
+                    });
+                } else {
+                    const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+                    invalidFields.forEach(field => {
+                        console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+                    });
 
-                });
-            }else{
-            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
-            invalidFields.forEach(field => {
-                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
-            });
-
-            alert('Debe completar todos los campos.');
+                    alert('Debe completar todos los campos.');
+                }
+            }
         }
-        }
-    }
 
     });
     $('#ingresar_ruta').click(function (event) {
-    event.preventDefault();
+        event.preventDefault();
         if (confirm("¿Confirma guardar datos?")) {
             var form = $('#rutas_form');
             if (form[0].checkValidity()) {
@@ -537,13 +541,13 @@ $(document).ready(function () {
                 let data = JSON.stringify(formData);
                 miurl = "/guardar_ruta/";
                 const numero = (window.wizardMode && window.wizCtx && window.wizCtx.numero)
-                  ? window.wizCtx.numero
-                  : row[0][1];
+                    ? window.wizCtx.numero
+                    : row[0][1];
 
                 var toData = {
-                  numero: numero,
-                  data: data,
-                  csrfmiddlewaretoken: csrf_token,
+                    numero: numero,
+                    data: data,
+                    csrfmiddlewaretoken: csrf_token,
                 };
 
                 $.ajax({
@@ -552,195 +556,237 @@ $(document).ready(function () {
                     data: toData,
                     async: false,
                     success: function (resultado) {
-    if (resultado['resultado'] === 'exito') {
+                        if (resultado['resultado'] === 'exito') {
 
-      if (window.wizardMode) {
-        // ✅ Comportamiento SOLO cuando viene del wizard:
-        $('#rutas_form')[0].reset();                 // limpiar el form si querés cargar otra
-        mostrarToast('¡Ruta guardada con éxito!', 'success');
-        $(".alert").delay(4000).slideUp(200, function () { $(this).alert('close'); });
+                            if (window.wizardMode) {
+                                // ✅ Comportamiento SOLO cuando viene del wizard:
+                                $('#rutas_form')[0].reset();                 // limpiar el form si querés cargar otra
+                                mostrarToast('¡Ruta guardada con éxito!', 'success');
+                                $(".alert").delay(4000).slideUp(200, function () {
+                                    $(this).alert('close');
+                                });
 
-        // refrescá tus tablas sin destruir/recrear el modal
-        try { $('#tabla_rutas').DataTable().ajax.reload(null, false); } catch(e){}
-        try { table.ajax.reload(null, false); } catch(e){}
+                                // refrescá tus tablas sin destruir/recrear el modal
+                                try {
+                                    $('#tabla_rutas').DataTable().ajax.reload(null, false);
+                                } catch (e) {
+                                }
+                                try {
+                                    table.ajax.reload(null, false);
+                                } catch (e) {
+                                }
 
-        // limpiá estilos de validación si aplica
-        $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
-        $("#id_ruta_id").val('');
+                                // limpiá estilos de validación si aplica
+                                $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
+                                $("#id_ruta_id").val('');
 
-        // 🔔 Notificar al wizard y refrescar la barra (para mostrar "Finalizar")
-        $(document).trigger('rutas:guardada');
-        refreshCurrentToolbar();  // asegura que se vea "Finalizar" si Rutas es el último paso
+                                // 🔔 Notificar al wizard y refrescar la barra (para mostrar "Finalizar")
+                                $(document).trigger('rutas:guardada');
+                                refreshCurrentToolbar();  // asegura que se vea "Finalizar" si Rutas es el último paso
 
-      } else {
-        // 🔁 Tu comportamiento actual (fuera del wizard) — lo dejamos igual:
-        $('#rutas_form')[0].reset();
-        mostrarToast('¡Ruta guardado con exito!', 'success');
-        $(".alert").delay(4000).slideUp(200, function () { $(this).alert('close'); });
-        $("#tabla_rutas").dataTable().fnDestroy();
-        $("#ingresar_ruta").html('Agregar');
-        $('#rutas_btn').addClass('triggered').trigger('click'); // reabre modal de rutas
-        $("#id_ruta_id").val('');
-        table.ajax.reload();
-        $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
-      }
+                            } else {
+                                // 🔁 Tu comportamiento actual (fuera del wizard) — lo dejamos igual:
+                                $('#rutas_form')[0].reset();
+                                mostrarToast('¡Ruta guardado con exito!', 'success');
+                                $(".alert").delay(4000).slideUp(200, function () {
+                                    $(this).alert('close');
+                                });
+                                $("#tabla_rutas").dataTable().fnDestroy();
+                                $("#ingresar_ruta").html('Agregar');
+                                $('#rutas_btn').addClass('triggered').trigger('click'); // reabre modal de rutas
+                                $("#id_ruta_id").val('');
+                                table.ajax.reload();
+                                $("#id_origen, #id_destino").css({"border-color": "", 'box-shadow': ''});
+                            }
 
-    } else {
-      alert(resultado['resultado']);
-    }
-  }
+                        } else {
+                            alert(resultado['resultado']);
+                        }
+                    }
                 });
-            }else{
-            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
-            invalidFields.forEach(field => {
-                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
-            });
-            alert("Error: " + campo.validationMessage);
-        }
+            } else {
+                const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+                invalidFields.forEach(field => {
+                    console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+                });
+                alert("Error: " + campo.validationMessage);
+            }
         }
     });
     $('#ingresar_gasto').click(function (event) {
-    event.preventDefault();
-    if(document.getElementById('id_pinformar').value<0||document.getElementById('id_arbitraje').value<0||document.getElementById('id_precio').value<0){
-    alert('No se admiten valores negativos en los campos numéricos.')
-    }else{
-        if (confirm("¿Confirma guardar el gasto?")) {
-            var form = $('#gastos_form');
-            var formData = new FormData(form[0]);
-            if (form[0].checkValidity()) {
-                row = table.rows('.table-secondary').data();
-                let formData = $("#gastos_form").serializeArray();
-                let data = JSON.stringify(formData);
-                miurl = "/guardar_gasto/";
-                const numero = (window.wizardMode && window.wizCtx && window.wizCtx.numero)
-                  ? window.wizCtx.numero
-                  : row[0][1];
-                var toData = {
-                    'numero': numero,
-                    'data': data,
-                    'csrfmiddlewaretoken': csrf_token,
-                };
-                $.ajax({
-                    type: "POST",
-                    url: miurl,
-                    data: toData,
-                    async: false,
-                    success: function (resultado) {
-                      if (resultado['resultado'] === 'exito') {
-                        mostrarToast('¡Gasto guardado con éxito!', 'success');
-                        $(".alert").delay(4000).slideUp(200, function () { $(this).alert('close'); });
+        event.preventDefault();
+        if (document.getElementById('id_pinformar').value < 0 || document.getElementById('id_arbitraje').value < 0 || document.getElementById('id_precio').value < 0) {
+            alert('No se admiten valores negativos en los campos numéricos.')
+        } else {
+            if (confirm("¿Confirma guardar el gasto?")) {
+                var form = $('#gastos_form');
+                var formData = new FormData(form[0]);
+                if (form[0].checkValidity()) {
+                    row = table.rows('.table-secondary').data();
+                    let formData = $("#gastos_form").serializeArray();
+                    let data = JSON.stringify(formData);
+                    miurl = "/guardar_gasto/";
+                    const numero = (window.wizardMode && window.wizCtx && window.wizCtx.numero)
+                        ? window.wizCtx.numero
+                        : row[0][1];
+                    var toData = {
+                        'numero': numero,
+                        'data': data,
+                        'csrfmiddlewaretoken': csrf_token,
+                    };
+                    $.ajax({
+                        type: "POST",
+                        url: miurl,
+                        data: toData,
+                        async: false,
+                        success: function (resultado) {
+                            if (resultado['resultado'] === 'exito') {
+                                mostrarToast('¡Gasto guardado con éxito!', 'success');
+                                $(".alert").delay(4000).slideUp(200, function () {
+                                    $(this).alert('close');
+                                });
 
-                        if (window.wizardMode) {
-                          // ✅ En wizard: NO destruir DataTables ni reabrir el modal
-                          try { $('#tabla_gastos').DataTable().ajax.reload(null, false); } catch(e){}
-                          try { $('#tabla_seguimiento').DataTable().ajax.reload(null, false); } catch(e){}
-                          try { table.ajax.reload(null, false); } catch(e){}
+                                if (window.wizardMode) {
+                                    // ✅ En wizard: NO destruir DataTables ni reabrir el modal
+                                    try {
+                                        $('#tabla_gastos').DataTable().ajax.reload(null, false);
+                                    } catch (e) {
+                                    }
+                                    try {
+                                        $('#tabla_seguimiento').DataTable().ajax.reload(null, false);
+                                    } catch (e) {
+                                    }
+                                    try {
+                                        table.ajax.reload(null, false);
+                                    } catch (e) {
+                                    }
 
-                          $("#ingresar_gasto").html('Agregar');
-                          $("#id_gasto_id").val('');
-                          $('#gastos_form')[0].reset();
+                                    $("#ingresar_gasto").html('Agregar');
+                                    $("#id_gasto_id").val('');
+                                    $('#gastos_form')[0].reset();
 
-                          // 🔔 Notificar al wizard y refrescar la barra
-                          $(document).trigger('gastos:guardado');
-                          refreshCurrentToolbar();
+                                    // 🔔 Notificar al wizard y refrescar la barra
+                                    $(document).trigger('gastos:guardado');
+                                    refreshCurrentToolbar();
 
-                        } else {
-                          // 🔁 Flujo legacy fuera del wizard (tu comportamiento actual)
-                          $("#ingresar_gasto").html('Agregar');
-                          $('#gastos_btn').addClass('triggered').trigger('click'); // reabrir por botón
-                            $('#id_socio').val(row[0][54]);
-                          $("#id_gasto_id").val('');
-                          try { $('#tabla_gastos').DataTable().ajax.reload(null, false); } catch(e){}
-                          try { $('#tabla_seguimiento').DataTable().ajax.reload(null, false); } catch(e){}
+                                } else {
+                                    // 🔁 Flujo legacy fuera del wizard (tu comportamiento actual)
+                                    $("#ingresar_gasto").html('Agregar');
+                                    $('#gastos_btn').addClass('triggered').trigger('click'); // reabrir por botón
+                                    $('#id_socio').val(row[0][54]);
+                                    $("#id_gasto_id").val('');
+                                    try {
+                                        $('#tabla_gastos').DataTable().ajax.reload(null, false);
+                                    } catch (e) {
+                                    }
+                                    try {
+                                        $('#tabla_seguimiento').DataTable().ajax.reload(null, false);
+                                    } catch (e) {
+                                    }
+                                }
+                            } else {
+                                alert(resultado['resultado']);
+                            }
                         }
-                      } else {
-                        alert(resultado['resultado']);
-                      }
-                    }
-                });
-            }else{
-            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
-            invalidFields.forEach(field => {
-                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
-            });
+                    });
+                } else {
+                    const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+                    invalidFields.forEach(field => {
+                        console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+                    });
 
-            alert('Debe completar todos los campos.');
+                    alert('Debe completar todos los campos.');
+                }
+            }
         }
-        }
-    }
     });
     $('#ingresar_embarque').click(function (event) {
-    event.preventDefault();
-    if(document.getElementById('id_bruto_embarque').value<0||document.getElementById('id_cbm').value<0||document.getElementById('id_bruto_embarque').value<0){
-    alert('No se admiten valores negativos en los campos numéricos.')
-    }else{
-        if (confirm("¿Confirma guardar datos?")) {
-            var form = $('#embarques_form');
-            var formData = new FormData(form[0]);
-            if (form[0].checkValidity()) {
-                row = table.rows('.table-secondary').data();
-                let formData = $("#embarques_form").serializeArray();
-                let formDataExtra = $("#embarques_extra_form").serializeArray();
-                let data = JSON.stringify(formData);
-                let data_extra = JSON.stringify(formDataExtra);
-                miurl = "/guardar_embarques/";
-                const numero = (window.wizardMode && window.wizCtx && window.wizCtx.numero)
-                  ? window.wizCtx.numero
-                  : row[0][1];
-                localStorage.setItem('numero_embarque',numero);
-                var toData = {
-                    'numero': numero,
-                    'data': data,
-                    'data_extra': data_extra,
-                    'csrfmiddlewaretoken': csrf_token,
-                };
-                $.ajax({
-                    type: "POST",
-                    url: miurl,
-                    data: toData,
-                    async: false,
-                    success: function (resultado) {
-      mostrarToast('¡Embarque guardado con exito!', 'success');
-      $(".alert").delay(4000).slideUp(200, function () { $(this).alert('close'); });
+        event.preventDefault();
+        if (document.getElementById('id_bruto_embarque').value < 0 || document.getElementById('id_cbm').value < 0 || document.getElementById('id_bruto_embarque').value < 0) {
+            alert('No se admiten valores negativos en los campos numéricos.')
+        } else {
+            if (confirm("¿Confirma guardar datos?")) {
+                var form = $('#embarques_form');
+                var formData = new FormData(form[0]);
+                if (form[0].checkValidity()) {
+                    row = table.rows('.table-secondary').data();
+                    let formData = $("#embarques_form").serializeArray();
+                    let formDataExtra = $("#embarques_extra_form").serializeArray();
+                    let data = JSON.stringify(formData);
+                    let data_extra = JSON.stringify(formDataExtra);
+                    miurl = "/guardar_embarques/";
+                    const numero = (window.wizardMode && window.wizCtx && window.wizCtx.numero)
+                        ? window.wizCtx.numero
+                        : row[0][1];
+                    localStorage.setItem('numero_embarque', numero);
+                    var toData = {
+                        'numero': numero,
+                        'data': data,
+                        'data_extra': data_extra,
+                        'csrfmiddlewaretoken': csrf_token,
+                    };
+                    $.ajax({
+                        type: "POST",
+                        url: miurl,
+                        data: toData,
+                        async: false,
+                        success: function (resultado) {
+                            mostrarToast('¡Embarque guardado con exito!', 'success');
+                            $(".alert").delay(4000).slideUp(200, function () {
+                                $(this).alert('close');
+                            });
 
-      if (window.wizardMode) {
-        // ✅ En wizard: NO destruir ni re-abrir el modal
-        try { $('#tabla_embarques').DataTable().ajax.reload(null, false); } catch(e){}
-        try { table.ajax.reload(null, false); } catch(e){}
-        $('#embarques_form')[0].reset();
-        $('#id_embarque_id').val && $('#id_embarque_id').val("");
+                            if (window.wizardMode) {
+                                // ✅ En wizard: NO destruir ni re-abrir el modal
+                                try {
+                                    $('#tabla_embarques').DataTable().ajax.reload(null, false);
+                                } catch (e) {
+                                }
+                                try {
+                                    table.ajax.reload(null, false);
+                                } catch (e) {
+                                }
+                                $('#embarques_form')[0].reset();
+                                $('#id_embarque_id').val && $('#id_embarque_id').val("");
 
-        // avisar al wizard y refrescar la barra (si es el último paso → “Finalizar”)
-        $(document).trigger('embarques:guardado');
-        refreshCurrentToolbar();
+                                // avisar al wizard y refrescar la barra (si es el último paso → “Finalizar”)
+                                $(document).trigger('embarques:guardado');
+                                refreshCurrentToolbar();
 
-      } else {
-        // 🔁 Flujo legacy fuera del wizard (lo que ya hacías)
-        try { $("#tabla_embarques").dataTable().fnDestroy(); } catch(e){}
-        $("#ingresar_embarque").html('Agregar');
-        $('#embarques_btn').addClass('triggered').trigger('click'); // reabría el modal
-        $('#id_embarque_id').val("");
-        try { table.ajax.reload(function (json) {}); } catch(e){}
-      }
+                            } else {
+                                // 🔁 Flujo legacy fuera del wizard (lo que ya hacías)
+                                try {
+                                    $("#tabla_embarques").dataTable().fnDestroy();
+                                } catch (e) {
+                                }
+                                $("#ingresar_embarque").html('Agregar');
+                                $('#embarques_btn').addClass('triggered').trigger('click'); // reabría el modal
+                                $('#id_embarque_id').val("");
+                                try {
+                                    table.ajax.reload(function (json) {
+                                    });
+                                } catch (e) {
+                                }
+                            }
 
-      console.log(resultado['resultado']);
-    }
-                });
-            }else{
-            const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
-            invalidFields.forEach(field => {
-                console.log('Campo no válido:', field.name); // Muestra los campos no válidos
-            });
+                            console.log(resultado['resultado']);
+                        }
+                    });
+                } else {
+                    const invalidFields = form[0].querySelectorAll(':invalid'); // Selecciona los campos no válidos
+                    invalidFields.forEach(field => {
+                        console.log('Campo no válido:', field.name); // Muestra los campos no válidos
+                    });
 
-            alert('Debe completar todos los campos.');
+                    alert('Debe completar todos los campos.');
+                }
+            }
         }
-        }
-    }
     });
     $('#cancelar_envase').click(function (event) {
-    event.preventDefault();
+        event.preventDefault();
 
-    if (confirm('¿Desea cancelar la modificacion?')) {
+        if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_envase").html('Agregar');
             $("#tabla_envases").dataTable().fnDestroy();
             $('#envases_btn').addClass('triggered').trigger('click');
@@ -758,7 +804,7 @@ $(document).ready(function () {
         }
     })
     $('#cancelar_ruta').click(function (event) {
-    event.preventDefault();
+        event.preventDefault();
 
         if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_ruta").html('Agregar');
@@ -768,12 +814,12 @@ $(document).ready(function () {
 
     })
     $('#busqueda_manual').click(function () {
-        buscar =  $("#buscar").val();
-        que_buscar =  $("#que_buscar").val();
+        buscar = $("#buscar").val();
+        que_buscar = $("#que_buscar").val();
         table.ajax.reload();
     })
     $('#cancelar_embarque').click(function (event) {
-    event.preventDefault();
+        event.preventDefault();
 
         if (confirm('¿Desea cancelar la modificacion?')) {
             $("#ingresar_embarque").html('Agregar');
@@ -783,11 +829,11 @@ $(document).ready(function () {
 
     })
     $('#guardar_archivo').click(function (event) {
-    event.preventDefault();
+        event.preventDefault();
         if (confirm("¿Confirma guardar archivo?")) {
             row = table.rows('.table-secondary').data();
             var formData = new FormData(document.getElementById("archivos_form"));
-            formData.append('numero',row[0][1]);
+            formData.append('numero', row[0][1]);
             miurl = "/guardar_archivo/";
             $.ajax({
                 type: "POST",
@@ -795,7 +841,7 @@ $(document).ready(function () {
                 data: formData,
                 processData: false,
                 contentType: false,
-                async:false,
+                async: false,
                 success: function (resultado) {
                     if (resultado['resultado'] === 'exito') {
                         mostrarToast('¡Archivo guardado con exito!', 'success');
@@ -861,9 +907,9 @@ $(document).ready(function () {
                                 console.error("⚠️ Error en desbloquearDatos:", error);
                             }
 
-            //                 $('#table_add_im tbody tr').removeClass('table-secondary');
-            //                $('#table_edit_im tbody tr').removeClass('table-secondary');
-            //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
+                            //                 $('#table_add_im tbody tr').removeClass('table-secondary');
+                            //                $('#table_edit_im tbody tr').removeClass('table-secondary');
+                            //                $('#tabla_house_directo tbody tr').removeClass('table-secondary');
                         }
                     })
 
@@ -884,45 +930,45 @@ $(document).ready(function () {
         $('#email_add_input').summernote('destroy');
         $("#arhivos_adjuntos").html('');
         archivos_adjuntos = {};
-        let transportista=false;
-        let master=false;
+        let transportista = false;
+        let master = false;
         let gastos = false;
         let directo = false;
-        if(title=='Notificacion llegada de carga'){
-            if(confirm('¿Desea informar Máster?')){
-                master=true;
+        if (title == 'Notificacion llegada de carga') {
+            if (confirm('¿Desea informar Máster?')) {
+                master = true;
             }
-            if(confirm('¿Desea informar Gastos?')){
-                gastos=true;
-            }
-        }
-        if(title=='Aviso de embarque'){
-            if(confirm('¿Desea informar Transportista?')){
-                transportista=true;
-            }
-            if(confirm('¿Desea informar Máster?')){
-                master=true;
-            }
-            if(confirm('¿Desea informar Gastos?')){
-                gastos=true;
+            if (confirm('¿Desea informar Gastos?')) {
+                gastos = true;
             }
         }
-
-        if(title=='Instruccion de embarque'){
-            if(confirm('¿Desea informar Transportista?')){
-                transportista=true;
+        if (title == 'Aviso de embarque') {
+            if (confirm('¿Desea informar Transportista?')) {
+                transportista = true;
             }
-            if(confirm('¿Desea una instrucción Completa o Directa? Directa=Cancelar, Completa=Aceptar')){
-                directo=true;
+            if (confirm('¿Desea informar Máster?')) {
+                master = true;
+            }
+            if (confirm('¿Desea informar Gastos?')) {
+                gastos = true;
             }
         }
 
-                if(title=='Shipping instruction'){
-            if(confirm('¿Desea informar Transportista?')){
-                transportista=true;
+        if (title == 'Instruccion de embarque') {
+            if (confirm('¿Desea informar Transportista?')) {
+                transportista = true;
             }
-            if(confirm('¿Desea una instrucción Completa o Directa? Directa=Cancelar, Completa=Aceptar')){
-                directo=true;
+            if (confirm('¿Desea una instrucción Completa o Directa? Directa=Cancelar, Completa=Aceptar')) {
+                directo = true;
+            }
+        }
+
+        if (title == 'Shipping instruction') {
+            if (confirm('¿Desea informar Transportista?')) {
+                transportista = true;
+            }
+            if (confirm('¿Desea una instrucción Completa o Directa? Directa=Cancelar, Completa=Aceptar')) {
+                directo = true;
             }
         }
 
@@ -1020,63 +1066,63 @@ $(document).ready(function () {
                     }
                     get_datos_pdf();
                     $("#pdf_modal").dialog({
-                autoOpen: true,
-                open: function (event, ui) {
-                    $('#pdf_add_input').summernote('destroy');
+                        autoOpen: true,
+                        open: function (event, ui) {
+                            $('#pdf_add_input').summernote('destroy');
 
-                    $('#pdf_add_input').summernote({
-                        placeholder: '',
-                        title: 'PDF con el detalle del seguimiento',
-                        tabsize: 10,
-                        fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Merriweather'],
-                        height: wHeight * 0.90,
-                        width: wWidth * 0.88,
-                        toolbar: [
-                            ['style', ['style']],
-                            ['font', ['bold', 'underline', 'clear']],
-                            ['color', ['color']],
-                            ['para', ['ul', 'ol', 'paragraph']],
-                            ['table', ['table']],
-                            ['insert', ['link', 'picture', 'video']],
-                            ['view', ['fullscreen', 'codeview']]
-                        ]
-                    });
-                },
-                modal: true,
-                title: "Archivo para imprimir seguimiento N°: " + row[0][1],
-                height: wHeight * 0.70,
-                width: wWidth * 0.60,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        // text:"Imprimir",
-                        html: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">\n' +
-                            '  <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>\n' +
-                            '  <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>\n' +
-                            '</svg> Imprimir',
-                        class: "btn btn-warning ",
-                        style: "width:100px",
-                        icons: {primary: "bi bi-star"},
-                        click: function () {
-                            imprimirPDF();
+                            $('#pdf_add_input').summernote({
+                                placeholder: '',
+                                title: 'PDF con el detalle del seguimiento',
+                                tabsize: 10,
+                                fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Merriweather'],
+                                height: wHeight * 0.90,
+                                width: wWidth * 0.88,
+                                toolbar: [
+                                    ['style', ['style']],
+                                    ['font', ['bold', 'underline', 'clear']],
+                                    ['color', ['color']],
+                                    ['para', ['ul', 'ol', 'paragraph']],
+                                    ['table', ['table']],
+                                    ['insert', ['link', 'picture', 'video']],
+                                    ['view', ['fullscreen', 'codeview']]
+                                ]
+                            });
                         },
-                    }, {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
-                    },
-                ],
-                beforeClose: function (event, ui) {
-                                                try {
+                        modal: true,
+                        title: "Archivo para imprimir seguimiento N°: " + row[0][1],
+                        height: wHeight * 0.70,
+                        width: wWidth * 0.60,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                // text:"Imprimir",
+                                html: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">\n' +
+                                    '  <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>\n' +
+                                    '  <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>\n' +
+                                    '</svg> Imprimir',
+                                class: "btn btn-warning ",
+                                style: "width:100px",
+                                icons: {primary: "bi bi-star"},
+                                click: function () {
+                                    imprimirPDF();
+                                },
+                            }, {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                },
+                            },
+                        ],
+                        beforeClose: function (event, ui) {
+                            try {
                                 desbloquearDatos();
                             } catch (error) {
                                 console.error("⚠️ Error en desbloquearDatos:", error);
                             }
-                }
-            })
+                        }
+                    })
 
                 }
             });
@@ -1110,15 +1156,15 @@ $(document).ready(function () {
             title: 'Seleccione el tipo de aviso',
             open: function (event, ui) {
                 $(this).parent().css('overflow', 'hidden'); // Quita scroll del modal
-            $('#buscadorEmails').val('');
-            $("#listaEmails tr").show();
+                $('#buscadorEmails').val('');
+                $("#listaEmails tr").show();
             }
         });
     });
 
     $('#archivos_btn').click(function () {
         $("#tabla_archivos").dataTable().fnDestroy();
-       row = table.rows('.table-secondary').data();
+        row = table.rows('.table-secondary').data();
         if (row.length === 1) {
             $.ajax({
                 url: '/get_data_seguimiento/' + row[0][0] + '/',
@@ -1214,10 +1260,10 @@ $(document).ready(function () {
     }); //falta este
     $('#adjuntar_btn').click(function () {
         $("#tabla_archivos").dataTable().fnDestroy();
-               row = table.rows('.table-secondary').data();
+        row = table.rows('.table-secondary').data();
         if (row.length === 1) {
 
-        get_datos_archivos();
+            get_datos_archivos();
             $("#archivos_modal").dialog({
                 autoOpen: true,
                 open: function (event, ui) {
@@ -1238,9 +1284,9 @@ $(document).ready(function () {
                                 row = table_archivos.rows('.table-secondary').data();
                                 let nombre = row[0][2].split("/")[1];
                                 let id = row[0][0];
-                                if(id in archivos_adjuntos) {
+                                if (id in archivos_adjuntos) {
                                     alert('El archivo adjunto ya se encuentra seleccionado');
-                                }else{
+                                } else {
                                     archivos_adjuntos[id] = nombre;
                                     alert('¡Archivo adjuntado correctamente!');
                                     let archivoHTML = '<div class="archivo" id="' + id + '">' +
@@ -1253,7 +1299,7 @@ $(document).ready(function () {
                                 }
                             }
                         },
-                    },{
+                    }, {
                         text: "Descargar",
                         class: "btn btn-dark",
                         style: "width:100px",
@@ -1264,7 +1310,7 @@ $(document).ready(function () {
                                 window.open(url, '_blank');
                             }
                         },
-                    },{
+                    }, {
                         text: "Eliminar",
                         class: "btn btn-danger",
                         style: "width:100px",
@@ -1330,17 +1376,17 @@ $(document).ready(function () {
                 let boton_guardar = !datos.bloqueado;
 
                 nombre_form = 'Modificar'
-                if(tipo == 'IMPORT MARITIMO'){
+                if (tipo == 'IMPORT MARITIMO') {
                     $('#seguimiento_im').addClass('triggered').trigger('click', [boton_guardar]);
-                }else if(tipo === 'EXPORT MARITIMO'){
+                } else if (tipo === 'EXPORT MARITIMO') {
                     $('#seguimiento_em').addClass('triggered').trigger('click', [boton_guardar]);
-                }else if(tipo === 'IMPORT TERRESTRE'){
+                } else if (tipo === 'IMPORT TERRESTRE') {
                     $('#seguimiento_it').addClass('triggered').trigger('click', [boton_guardar]);
-                }else if(tipo === 'EXPORT TERRESTRE'){
+                } else if (tipo === 'EXPORT TERRESTRE') {
                     $('#seguimiento_et').addClass('triggered').trigger('click', [boton_guardar]);
-                }else if(tipo === 'EXPORT AEREO'){
+                } else if (tipo === 'EXPORT AEREO') {
                     $('#seguimiento_ea').addClass('triggered').trigger('click', [boton_guardar]);
-                }else if(tipo === 'IMPORT AEREO'){
+                } else if (tipo === 'IMPORT AEREO') {
                     $('#seguimiento_ia').addClass('triggered').trigger('click', [boton_guardar]);
                 }
 
@@ -1353,7 +1399,7 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
             let id = row[0][0];
-            if(confirm('¿Realmente desea cancelar el seguimiento: '+row[0][1]+'?')){
+            if (confirm('¿Realmente desea cancelar el seguimiento: ' + row[0][1] + '?')) {
                 eliminar_seguimiento(id);
             }
         } else {
@@ -1367,64 +1413,64 @@ $(document).ready(function () {
             get_datos_cronologia(row[0][0], function (ok) {
                 if (!ok) return;
                 $("#cronologia_modal").dialog({
-                autoOpen: true,
-                open: function () {
+                    autoOpen: true,
+                    open: function () {
 
-                },
-                modal: true,
-                title: "Fechas de cronologia para el seguimiento N°: " + row[0][1],
-                height: wHeight * 0.50,
-                width: wWidth * 0.40,
-                class: 'modal fade',
-                buttons: [
-                    {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
-                        },
                     },
-                    {
-                        text: "Guardar",
-                        class: "btn btn-primary",
-                        style: "width:100px",
-                        click: function () {
-
-                        let formData = $("#cronologia_form").serializeArray();
-                            let data = JSON.stringify(formData);
-                            miurl = "/guardar_cronologia/";
-                            var toData = {
-                                'id': row[0][0],
-                                'data': data,
-                                'csrfmiddlewaretoken': csrf_token,
-                            };
-                            $.ajax({
-                                type: "POST",
-                                url: miurl,
-                                data: toData,
-                                async: true,
-                                success: function (resultado) {
-                                    if (resultado['resultado'] === 'exito') {
-                                        mostrarToast("¡Cronologia guardada correctamente.!", 'success')
-                                        table.ajax.reload();
-                                    } else {
-                                        alert(resultado['resultado']);
-                                    }
-                                }
-                            });
-                            $(this).dialog("close");
-
+                    modal: true,
+                    title: "Fechas de cronologia para el seguimiento N°: " + row[0][1],
+                    height: wHeight * 0.50,
+                    width: wWidth * 0.40,
+                    class: 'modal fade',
+                    buttons: [
+                        {
+                            text: "Salir",
+                            class: "btn btn-dark",
+                            style: "width:100px",
+                            click: function () {
+                                $(this).dialog("close");
+                            },
                         },
-                    }],
-                beforeClose: function (event, ui) {
-                            try {
-                                desbloquearDatos();
-                            } catch (error) {
-                                console.error("⚠️ Error en desbloquearDatos:", error);
-                            }
-                }
-            })
+                        {
+                            text: "Guardar",
+                            class: "btn btn-primary",
+                            style: "width:100px",
+                            click: function () {
+
+                                let formData = $("#cronologia_form").serializeArray();
+                                let data = JSON.stringify(formData);
+                                miurl = "/guardar_cronologia/";
+                                var toData = {
+                                    'id': row[0][0],
+                                    'data': data,
+                                    'csrfmiddlewaretoken': csrf_token,
+                                };
+                                $.ajax({
+                                    type: "POST",
+                                    url: miurl,
+                                    data: toData,
+                                    async: true,
+                                    success: function (resultado) {
+                                        if (resultado['resultado'] === 'exito') {
+                                            mostrarToast("¡Cronologia guardada correctamente.!", 'success')
+                                            table.ajax.reload();
+                                        } else {
+                                            alert(resultado['resultado']);
+                                        }
+                                    }
+                                });
+                                $(this).dialog("close");
+
+                            },
+                        }],
+                    beforeClose: function (event, ui) {
+                        try {
+                            desbloquearDatos();
+                        } catch (error) {
+                            console.error("⚠️ Error en desbloquearDatos:", error);
+                        }
+                    }
+                })
             });
         } else {
             alert('Debe seleccionar al menos un registro');
@@ -1433,87 +1479,87 @@ $(document).ready(function () {
     $('#envases_btn').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
-        if(row[0][2]=='IMPORT AEREO'|| row[0][2]=='EXPORT AEREO'){
-        alert('No puede agregar envases a las operaciones aereas.');
-        return;
-        }
-        $.ajax({
-            url: '/get_data_seguimiento/' + row[0][0] + '/',
-            type: 'GET',
-            success: function (data) {
-                if (data.bloqueado) {
-                    alert(data.mensaje);
-                    return;
+            if (row[0][2] == 'IMPORT AEREO' || row[0][2] == 'EXPORT AEREO') {
+                alert('No puede agregar envases a las operaciones aereas.');
+                return;
+            }
+            $.ajax({
+                url: '/get_data_seguimiento/' + row[0][0] + '/',
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    get_datos_envases();
                 }
-                get_datos_envases();
-            }
-        });
-        $('#envases_form').trigger("reset");
+            });
+            $('#envases_form').trigger("reset");
 
-        $("#envases_modal").dialog({
-            autoOpen: true,
-            open: function () {
+            $("#envases_modal").dialog({
+                autoOpen: true,
+                open: function () {
 
-            },
-            modal: true,
-            title: "Envases para el seguimiento N°: " + row[0][1],
-            height: wHeight * 0.80,
-            width: wWidth * 0.80,
-            class: 'modal fade',
-            buttons: [
-                {
-                    text: "Eliminar",
-                    class: "btn btn-danger",
-                    style: "width:100px",
-                    click: function () {
-                        if (confirm('¿Confirma eliminar?')) {
-                            row = table_envases.rows('.table-secondary').data();
-                            if (row.length === 1) {
-                                miurl = "/eliminar_envase/";
-                                var toData = {
-                                    'id': row[0][0],
-                                    'csrfmiddlewaretoken': csrf_token,
-                                };
-                                $.ajax({
-                                    type: "POST",
-                                    url: miurl,
-                                    data: toData,
-                                    success: function (resultado) {
-                                        aux = resultado['resultado'];
-                                        if (aux == 'exito') {
-                                            var idx = table.cell('.table-secondary', 0).index();
-                                            table_envases.$("tr.table-secondary").removeClass('table-secondary');
-                                            table_envases.row(idx).remove().draw(true);
-                                            $('#tabla_seguimiento').DataTable().ajax.reload();
-                                            mostrarToast('¡Envase eliminado correctamente!', 'success');
-                                        } else {
-                                            alert(aux);
+                },
+                modal: true,
+                title: "Envases para el seguimiento N°: " + row[0][1],
+                height: wHeight * 0.80,
+                width: wWidth * 0.80,
+                class: 'modal fade',
+                buttons: [
+                    {
+                        text: "Eliminar",
+                        class: "btn btn-danger",
+                        style: "width:100px",
+                        click: function () {
+                            if (confirm('¿Confirma eliminar?')) {
+                                row = table_envases.rows('.table-secondary').data();
+                                if (row.length === 1) {
+                                    miurl = "/eliminar_envase/";
+                                    var toData = {
+                                        'id': row[0][0],
+                                        'csrfmiddlewaretoken': csrf_token,
+                                    };
+                                    $.ajax({
+                                        type: "POST",
+                                        url: miurl,
+                                        data: toData,
+                                        success: function (resultado) {
+                                            aux = resultado['resultado'];
+                                            if (aux == 'exito') {
+                                                var idx = table.cell('.table-secondary', 0).index();
+                                                table_envases.$("tr.table-secondary").removeClass('table-secondary');
+                                                table_envases.row(idx).remove().draw(true);
+                                                $('#tabla_seguimiento').DataTable().ajax.reload();
+                                                mostrarToast('¡Envase eliminado correctamente!', 'success');
+                                            } else {
+                                                alert(aux);
+                                            }
                                         }
-                                    }
-                                });
-                            } else {
-                                alert('Debe seleccionar un unico registro');
+                                    });
+                                } else {
+                                    alert('Debe seleccionar un unico registro');
+                                }
                             }
-                        }
-                    },
-                }, {
-                    text: "Salir",
-                    class: "btn btn-dark",
-                    style: "width:100px",
-                    click: function () {
-                        $(this).dialog("close");
-                    },
-                }],
-            beforeClose: function (event, ui) {
-                            try {
-                                desbloquearDatos();
-                            } catch (error) {
-                                console.error("⚠️ Error en desbloquearDatos:", error);
-                            }
+                        },
+                    }, {
+                        text: "Salir",
+                        class: "btn btn-dark",
+                        style: "width:100px",
+                        click: function () {
+                            $(this).dialog("close");
+                        },
+                    }],
+                beforeClose: function (event, ui) {
+                    try {
+                        desbloquearDatos();
+                    } catch (error) {
+                        console.error("⚠️ Error en desbloquearDatos:", error);
+                    }
 
-            }
-        })
-        get_sugerencias_envases(window.row_number);
+                }
+            })
+            get_sugerencias_envases(window.row_number);
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -1576,7 +1622,7 @@ $(document).ready(function () {
                                                 }
                                             });
                                         }
-                                     });
+                                    });
                                 } else {
                                     alert('Debe seleccionar un unico registro a clonar');
                                 }
@@ -1591,11 +1637,11 @@ $(document).ready(function () {
                         },
                     }],
                 beforeClose: function (event, ui) {
-                            try {
-                                desbloquearDatos();
-                            } catch (error) {
-                                console.error("⚠️ Error en desbloquearDatos:", error);
-                            }
+                    try {
+                        desbloquearDatos();
+                    } catch (error) {
+                        console.error("⚠️ Error en desbloquearDatos:", error);
+                    }
 
                 }
             })
@@ -1626,13 +1672,13 @@ $(document).ready(function () {
                     $("#rutas_modal").dialog({
                         autoOpen: true,
                         open: function () {
-                        $('#rutas_form')[0].reset();
+                            $('#rutas_form')[0].reset();
                         },
                         modal: true,
                         title: "Ingreso de datos para transbordos en el seguimiento N°: " + row[0][1],
                         height: 'auto',
                         width: 'auto',
-                        position: { my: "center", at: "center", of: window },
+                        position: {my: "center", at: "center", of: window},
                         class: 'modal fade',
                         buttons: [
                             {
@@ -1756,31 +1802,31 @@ $(document).ready(function () {
                     }
                     get_datos_logs();
                     $("#logs_modal").dialog({
-                autoOpen: true,
-                open: function () {
+                        autoOpen: true,
+                        open: function () {
 
-                },
-                modal: true,
-                title: "Log de interacciones para en el seguimiento N°: " + row[0][1],
-                height: wHeight * 0.90,
-                width: wWidth * 0.90,
-                class: 'modal fade',
-                buttons: [ {
-                        text: "Salir",
-                        class: "btn btn-dark",
-                        style: "width:100px",
-                        click: function () {
-                            $(this).dialog("close");
                         },
-                    },],
-                beforeClose: function (event, ui) {
+                        modal: true,
+                        title: "Log de interacciones para en el seguimiento N°: " + row[0][1],
+                        height: wHeight * 0.90,
+                        width: wWidth * 0.90,
+                        class: 'modal fade',
+                        buttons: [{
+                            text: "Salir",
+                            class: "btn btn-dark",
+                            style: "width:100px",
+                            click: function () {
+                                $(this).dialog("close");
+                            },
+                        },],
+                        beforeClose: function (event, ui) {
                             try {
                                 desbloquearDatos();
                             } catch (error) {
                                 console.error("⚠️ Error en desbloquearDatos:", error);
                             }
-                }
-            })
+                        }
+                    })
                 }
             });
 
@@ -1792,82 +1838,82 @@ $(document).ready(function () {
         row = table.rows('.table-secondary').data();
 
         if (row.length === 1) {
-        $.ajax({
-            url: '/get_data_seguimiento/' + row[0][0] + '/',
-            type: 'GET',
-            success: function (data) {
-                if (data.bloqueado) {
-                    alert(data.mensaje);
-                    return;
-                }
-                get_datos_gastos();
-                $('#gastos_form').trigger("reset");
-                $("#gastos_modal").dialog({
-                    autoOpen: true,
-                    open: function () {
-                        $('#id_socio').val(row[0][54]);
-                    },
-                    modal: true,
-                    title: "Gastos para el seguimiento N°: " + row[0][1],
-                    height: wHeight * 0.90,
-                    width: wWidth * 0.90,
-                    class: 'modal fade',
-                    buttons: [
-                        {
-                            text: "Eliminar",
-                            class: "btn btn-danger",
-                            style: "width:100px",
-                            click: function () {
-                                if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                    row_g = table_gastos.rows('.table-secondary').data();
-                                    if (row_g.length === 1) {
-                                        miurl = "/eliminar_gasto/";
-                                        var toData = {
-                                            'id': row_g[0][0],
-                                            'csrfmiddlewaretoken': csrf_token,
-                                        };
-                                        $.ajax({
-                                            type: "POST",
-                                            url: miurl,
-                                            data: toData,
-                                            success: function (resultado) {
-                                                aux = resultado['resultado'];
-                                                if (aux === 'exito') {
-                                                    $("#table_gastos").dataTable().fnDestroy();
-                                                    $('#gastos_btn').addClass('triggered').trigger('click');
-                                                    $('#tabla_seguimiento').DataTable().ajax.reload();
-                                                    mostrarToast('¡Gasto eliminado correctamente!', 'success');
-                                                    $('#id_socio').val(row[0][54]);
+            $.ajax({
+                url: '/get_data_seguimiento/' + row[0][0] + '/',
+                type: 'GET',
+                success: function (data) {
+                    if (data.bloqueado) {
+                        alert(data.mensaje);
+                        return;
+                    }
+                    get_datos_gastos();
+                    $('#gastos_form').trigger("reset");
+                    $("#gastos_modal").dialog({
+                        autoOpen: true,
+                        open: function () {
+                            $('#id_socio').val(row[0][54]);
+                        },
+                        modal: true,
+                        title: "Gastos para el seguimiento N°: " + row[0][1],
+                        height: wHeight * 0.90,
+                        width: wWidth * 0.90,
+                        class: 'modal fade',
+                        buttons: [
+                            {
+                                text: "Eliminar",
+                                class: "btn btn-danger",
+                                style: "width:100px",
+                                click: function () {
+                                    if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
+                                        row_g = table_gastos.rows('.table-secondary').data();
+                                        if (row_g.length === 1) {
+                                            miurl = "/eliminar_gasto/";
+                                            var toData = {
+                                                'id': row_g[0][0],
+                                                'csrfmiddlewaretoken': csrf_token,
+                                            };
+                                            $.ajax({
+                                                type: "POST",
+                                                url: miurl,
+                                                data: toData,
+                                                success: function (resultado) {
+                                                    aux = resultado['resultado'];
+                                                    if (aux === 'exito') {
+                                                        $("#table_gastos").dataTable().fnDestroy();
+                                                        $('#gastos_btn').addClass('triggered').trigger('click');
+                                                        $('#tabla_seguimiento').DataTable().ajax.reload();
+                                                        mostrarToast('¡Gasto eliminado correctamente!', 'success');
+                                                        $('#id_socio').val(row[0][54]);
 
-                                                } else {
-                                                    alert(aux);
+                                                    } else {
+                                                        alert(aux);
+                                                    }
                                                 }
-                                            }
-                                        });
+                                            });
 
-                                    } else {
-                                        alert('Debe seleccionar un unico registro');
+                                        } else {
+                                            alert('Debe seleccionar un unico registro');
+                                        }
                                     }
-                                }
-                            },
-                        }, {
-                            text: "Salir",
-                            class: "btn btn-dark",
-                            style: "width:100px",
-                            click: function () {
-                                $(this).dialog("close");
-                            },
-                        }],
-                    beforeClose: function (event, ui) {
+                                },
+                            }, {
+                                text: "Salir",
+                                class: "btn btn-dark",
+                                style: "width:100px",
+                                click: function () {
+                                    $(this).dialog("close");
+                                },
+                            }],
+                        beforeClose: function (event, ui) {
                             try {
                                 desbloquearDatos();
                             } catch (error) {
                                 console.error("⚠️ Error en desbloquearDatos:", error);
                             }
-                    }
-                })
-            }
-        });
+                        }
+                    })
+                }
+            });
         } else {
             alert('Debe seleccionar al menos un registro');
         }
@@ -1875,7 +1921,7 @@ $(document).ready(function () {
     $('#descargar_guia').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
-            if(row[0][2] == 'EXPORT AEREO'){
+            if (row[0][2] == 'EXPORT AEREO') {
                 $.ajax({
                     url: '/get_data_seguimiento/' + row[0][0] + '/',
                     type: 'GET',
@@ -1888,7 +1934,7 @@ $(document).ready(function () {
                         window.open('/descargar_awb_seguimientos/' + row[0][0], '_blank');
                     }
                 });
-            }else{
+            } else {
                 alert('La guias solo pueden ser asignadas a EXPORTACION AEREA');
             }
 
@@ -1899,7 +1945,7 @@ $(document).ready(function () {
     $('#descargar_guia_draft').click(function () {
         row = table.rows('.table-secondary').data();
         if (row.length === 1) {
-            if(row[0][2] == 'EXPORT AEREO'){
+            if (row[0][2] == 'EXPORT AEREO') {
                 $.ajax({
                     url: '/get_data_seguimiento/' + row[0][0] + '/',
                     type: 'GET',
@@ -1911,7 +1957,7 @@ $(document).ready(function () {
                         window.open('/descargar_awb_seguimientos_draft/' + row[0][0] + '/d', '_blank');
                     }
                 });
-            }else{
+            } else {
                 alert('La guias solo pueden ser asignadas a EXPORTACION AEREA');
             }
 
@@ -1949,27 +1995,27 @@ $(document).ready(function () {
     $('#tabla_gastos tbody').on('dblclick', 'tr', function () {
         var data = table_gastos.row(this).data();
         $("#id_gasto_id").val(data[0]);
-        if(data[3] > 0){
+        if (data[3] > 0) {
             $("#id_compra_venta").val('C');
             $("#id_importe").val(data[3]);
-        }else{
+        } else {
             $("#id_compra_venta").val('V');
             $("#id_importe").val(data[4]);
         }
         //$("#id_detalle").val(data[5]);
-        if(data[6] === 'Collect'){
+        if (data[6] === 'Collect') {
             $("#id_modo_id").val('C');
-        }else{
+        } else {
             $("#id_modo_id").val('P');
         }
         $("#id_tipogasto").val(data[7]);
         $("#id_arbitraje_id").val(data[8]);
-        if(data[9] === 'SI'){
-            $("#id_notomaprofit").prop("checked",true);
-        }else{
-            $("#id_notomaprofit").prop("checked",false);
+        if (data[9] === 'SI') {
+            $("#id_notomaprofit").prop("checked", true);
+        } else {
+            $("#id_notomaprofit").prop("checked", false);
         }
-        $("#id_secomparte").val(data[10].substr(0,1));
+        $("#id_secomparte").val(data[10].substr(0, 1));
         $("#id_pinformar").val(data[11]);
         $("#id_servicio").val(data[14]);
         $("#id_moneda_id").val(data[15]);
@@ -2015,7 +2061,7 @@ $(document).ready(function () {
 
         if (row.length === 1) {
 
-            if(row[0][2]=='IMPORT MARITIMO' || row[0][2]=='EXPORT MARITIMO'){
+            if (row[0][2] == 'IMPORT MARITIMO' || row[0][2] == 'EXPORT MARITIMO') {
                 alert('No puede asignar un aplicable a las operaciones maritimas.');
                 return;
             }
@@ -2185,7 +2231,7 @@ $(document).ready(function () {
             alert('Debe seleccionar al menos un registro');
         }
     });
-    $('.nuevo_seguimiento_old ').click(function (event,boton_guardar=true) {
+    $('.nuevo_seguimiento_old ').click(function (event, boton_guardar = true) {
         tipo_seguimiento = this.getAttribute('data-tp');
         var titulo = this.getAttribute('data-tt');
         var tipo = this.getAttribute('data-tipo');
@@ -2202,7 +2248,7 @@ $(document).ready(function () {
             open: function () {
                 $('#id_modo').val(tipo);
                 if (!boton_guardar) {
-                $(".btn-guardar-seguimiento").prop("disabled", true);
+                    $(".btn-guardar-seguimiento").prop("disabled", true);
                 } else {
                     $(".btn-guardar-seguimiento").prop("disabled", false);
                 }
@@ -2229,7 +2275,7 @@ $(document).ready(function () {
                                 var name = $(this).attr('name');
                                 formData[name] = [value, dataId];
                             });
-                           let data = JSON.stringify(formData);
+                            let data = JSON.stringify(formData);
                             miurl = "/guardar_seguimiento/";
                             var toData = {
                                 'tipo': tipo,
@@ -2285,18 +2331,18 @@ $(document).ready(function () {
         })
     });
 
-    $('.nuevo_seguimiento').click(function (event,boton_guardar=true) {
+    $('.nuevo_seguimiento').click(function (event, boton_guardar = true) {
         tipo_seguimiento = this.getAttribute('data-tp');
         var titulo = this.getAttribute('data-tt');
         var tipo = this.getAttribute('data-tipo');
-        var esCreacion=false;
+        var esCreacion = false;
         if (!event.target.classList.contains('triggered')) {
-            esCreacion=true;
+            esCreacion = true;
             var titulo = "Nuevo seguimiento de " + titulo;
             $('#impo_marit_form').trigger("reset");
             $('.form-control').css({"border-color": "", 'box-shadow': ''});
         } else {
-            esCreacion=false;
+            esCreacion = false;
             var titulo = "Modificar seguimiento de " + titulo + " N° " + window.row_number;
             $('.nuevo_seguimiento').removeClass('triggered');
         }
@@ -2304,36 +2350,36 @@ $(document).ready(function () {
         $("#impo_marit_modal").dialog({
             autoOpen: true,
             open: function () {
-              $('#id_modo').val(tipo);
-              $(".btn-guardar-seguimiento").prop("disabled", !boton_guardar);
+                $('#id_modo').val(tipo);
+                $(".btn-guardar-seguimiento").prop("disabled", !boton_guardar);
 
-              if (esCreacion) {
-      // ✅ CREACIÓN → activar wizard
-      window.wizardMode = true;
-      window.wizardStep = 0;
-      firstStepSaved = false;
+                if (esCreacion) {
+                    // ✅ CREACIÓN → activar wizard
+                    window.wizardMode = true;
+                    window.wizardStep = 0;
+                    firstStepSaved = false;
 
-      // si ya sabés el modo ahora, lo dejás en contexto
-      window.wizCtx = window.wizCtx || {};
-      window.wizCtx.modo = $('#id_modo').val() || null;
+                    // si ya sabés el modo ahora, lo dejás en contexto
+                    window.wizCtx = window.wizCtx || {};
+                    window.wizCtx.modo = $('#id_modo').val() || null;
 
-      // adjuntar barra a ESTA instancia del diálogo
-      setTimeout(() => attachWizardToolbarToDialog($(this)), 0);
+                    // adjuntar barra a ESTA instancia del diálogo
+                    setTimeout(() => attachWizardToolbarToDialog($(this)), 0);
 
-      // evitar cierres accidentales
-      $(this).dialog('option','closeOnEscape', false);
-      $('.ui-widget-overlay').off('click'); // por si lo habías atado antes
-    } else {
-      // ✅ EDICIÓN → asegurar que NO quede nada del wizard viejo
-      // limpia barra, flags, etc. y re-habilita cierre normal
-      if (typeof wizardReset === 'function') {
-        wizardReset({ restoreRowNumber: true }); // o false, como prefieras
-      } else {
-        window.wizardMode = false;
-      }
-      $(this).dialog('option','closeOnEscape', true);
-      // (no toques overlay aquí; por defecto jQuery UI no cierra al click)
-    }
+                    // evitar cierres accidentales
+                    $(this).dialog('option', 'closeOnEscape', false);
+                    $('.ui-widget-overlay').off('click'); // por si lo habías atado antes
+                } else {
+                    // ✅ EDICIÓN → asegurar que NO quede nada del wizard viejo
+                    // limpia barra, flags, etc. y re-habilita cierre normal
+                    if (typeof wizardReset === 'function') {
+                        wizardReset({restoreRowNumber: true}); // o false, como prefieras
+                    } else {
+                        window.wizardMode = false;
+                    }
+                    $(this).dialog('option', 'closeOnEscape', true);
+                    // (no toques overlay aquí; por defecto jQuery UI no cierra al click)
+                }
             },
             modal: true,
             title: titulo,
@@ -2357,7 +2403,7 @@ $(document).ready(function () {
                                 var name = $(this).attr('name');
                                 formData[name] = [value, dataId];
                             });
-                           let data = JSON.stringify(formData);
+                            let data = JSON.stringify(formData);
                             miurl = "/guardar_seguimiento/";
                             var toData = {
                                 'tipo': tipo,
@@ -2370,45 +2416,45 @@ $(document).ready(function () {
                                 data: toData,
                                 async: false,
                                 success: function (resultado) {
-            if (resultado['resultado'] !== 'exito') {
-              alert(resultado['resultado']);
-              $(document).trigger('seguimiento:error', resultado['resultado']);
-              return;
-            }
+                                    if (resultado['resultado'] !== 'exito') {
+                                        alert(resultado['resultado']);
+                                        $(document).trigger('seguimiento:error', resultado['resultado']);
+                                        return;
+                                    }
 
-            table.ajax.reload();
+                                    table.ajax.reload();
 
-            if (resultado['tipo'] === 'nuevo') {
-              mostrarToast("¡Seguimiento GUARDADO con éxito!", 'success');
-              alert('Número de seguimiento: ' + resultado['numero']);
+                                    if (resultado['tipo'] === 'nuevo') {
+                                        mostrarToast("¡Seguimiento GUARDADO con éxito!", 'success');
+                                        alert('Número de seguimiento: ' + resultado['numero']);
 
-              if (window.wizardMode) {
-                // ✅ Sólo si el wizard está activo, actualizamos contexto y disparamos evento
-                window.wizCtx.id     = resultado['id']     || null;
-                window.wizCtx.numero = resultado['numero'] || null;
-                window.wizCtx.modo   = $('#id_modo').val() || window.wizCtx.modo || null;
+                                        if (window.wizardMode) {
+                                            // ✅ Sólo si el wizard está activo, actualizamos contexto y disparamos evento
+                                            window.wizCtx.id = resultado['id'] || null;
+                                            window.wizCtx.numero = resultado['numero'] || null;
+                                            window.wizCtx.modo = $('#id_modo').val() || window.wizCtx.modo || null;
 
-                firstStepSaved = true;
+                                            firstStepSaved = true;
 
-                // Disparar UNA sola vez este evento (sacá el duplicado de abajo)
-                $(document).trigger('seguimiento:guardado', {
-                  id: window.wizCtx.id,
-                  numero: window.wizCtx.numero,
-                  modo: window.wizCtx.modo
-                });
+                                            // Disparar UNA sola vez este evento (sacá el duplicado de abajo)
+                                            $(document).trigger('seguimiento:guardado', {
+                                                id: window.wizCtx.id,
+                                                numero: window.wizCtx.numero,
+                                                modo: window.wizCtx.modo
+                                            });
 
-                refreshCurrentToolbar();
-                // OJO: no cierres el modal aquí si vas a usar “Siguiente”
-              } else {
-                // Flujo tradicional (edición o creacion sin wizard)
-                $('#impo_marit_modal').dialog("close");
-              }
-            } else {
-              // edición
-              alert("¡Seguimiento MODIFICADO con éxito!");
-              $('#impo_marit_modal').dialog("close");
-            }
-          },
+                                            refreshCurrentToolbar();
+                                            // OJO: no cierres el modal aquí si vas a usar “Siguiente”
+                                        } else {
+                                            // Flujo tradicional (edición o creacion sin wizard)
+                                            $('#impo_marit_modal').dialog("close");
+                                        }
+                                    } else {
+                                        // edición
+                                        alert("¡Seguimiento MODIFICADO con éxito!");
+                                        $('#impo_marit_modal').dialog("close");
+                                    }
+                                },
                                 error: function (e) {
                                     alert(e);
                                     $(document).trigger('seguimiento:error', e); // NUEVO
@@ -2426,7 +2472,7 @@ $(document).ready(function () {
                     click: function () {
                         $(this).dialog("close");
                         if (window.wizardMode && typeof wizardReset === 'function') {
-                          wizardReset({ restoreRowNumber: true });
+                            wizardReset({restoreRowNumber: true});
                         }
                     },
                 }],
@@ -2469,24 +2515,24 @@ $(document).ready(function () {
     // });
 
     $(".autocomplete-validable").on("blur", function () {
-    const input = $(this);
+        const input = $(this);
 
-    // Si se está forzando desde autocomplete.change, no limpiar
-    if (input.attr('data-forzando') === '1') return;
+        // Si se está forzando desde autocomplete.change, no limpiar
+        if (input.attr('data-forzando') === '1') return;
 
-    const inputVal = input.val().trim();
-    const expectedVal = input.attr('data-label') || '';
+        const inputVal = input.val().trim();
+        const expectedVal = input.attr('data-label') || '';
 
-    if (inputVal !== expectedVal) {
-        input.val('');
-        input.attr('data-id', '');
-        input.attr('data-label', '');
-        input.css({
-            "border-color": "",
-            "box-shadow": ""
-        });
-    }
-});
+        if (inputVal !== expectedVal) {
+            input.val('');
+            input.attr('data-id', '');
+            input.attr('data-label', '');
+            input.css({
+                "border-color": "",
+                "box-shadow": ""
+            });
+        }
+    });
 
 
     $("#cliente_add").autocomplete({
@@ -2814,52 +2860,52 @@ $(document).ready(function () {
     });
 
     $("#vapor_add").autocomplete({
-    source: function (request, response) {
-        $.getJSON('/autocomplete_vapores/', { term: request.term }, response);
-    },
-    minLength: 2,
-    select: function (event, ui) {
-        $(this).attr('data-id', ui.item['label']);  // Guarda el ID si es un item de la lista
+        source: function (request, response) {
+            $.getJSON('/autocomplete_vapores/', {term: request.term}, response);
+        },
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).attr('data-id', ui.item['label']);  // Guarda el ID si es un item de la lista
             $(this).attr('data-label', ui.item['label']);
             $(this).css({
                 "border-color": "#3D9A37",
                 "box-shadow": "0 0 0 0.1rem #3D9A37"
             });
-    },
-    change: function (event, ui) {
-        var input = $(this);
-        var valorIngresado = input.val();
+        },
+        change: function (event, ui) {
+            var input = $(this);
+            var valorIngresado = input.val();
 
-        if (ui.item) {
-            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-        } else {
-            if (valorIngresado.trim() !== '') {
-                $.ajax({
-                    url: '/agregar_buque/',
-                    method: 'POST',
-                    data: {
-                        nombre: valorIngresado,
-                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-                    },
-                    success: function (data) {
-                        if (data.success) {
-                            input.attr('data-id', valorIngresado);
-                            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-                        } else {
-                            alert("No se pudo guardar el vapor.");
-                        }
-                    },
-                    error: function () {
-                        alert("Error en la comunicación con el servidor.");
-                    }
-                });
+            if (ui.item) {
+                input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
             } else {
-                input.val('');
-                input.css({"border-color": "", 'box-shadow': ''});
+                if (valorIngresado.trim() !== '') {
+                    $.ajax({
+                        url: '/agregar_buque/',
+                        method: 'POST',
+                        data: {
+                            nombre: valorIngresado,
+                            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                input.attr('data-id', valorIngresado);
+                                input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                            } else {
+                                alert("No se pudo guardar el vapor.");
+                            }
+                        },
+                        error: function () {
+                            alert("Error en la comunicación con el servidor.");
+                        }
+                    });
+                } else {
+                    input.val('');
+                    input.css({"border-color": "", 'box-shadow': ''});
+                }
             }
         }
-    }
-});
+    });
 
     //autocomplete rutas
     $("#id_origen").autocomplete({
@@ -2905,54 +2951,54 @@ $(document).ready(function () {
     // FIN AUTOCOMPLETES
     //productos para el embarque
     $("#id_producto").autocomplete({
-    source: function (request, response) {
-        $.getJSON('/autocomplete_productos/', { term: request.term }, response);
-    },
-    minLength: 2,
-    select: function (event, ui) {
+        source: function (request, response) {
+            $.getJSON('/autocomplete_productos/', {term: request.term}, response);
+        },
+        minLength: 2,
+        select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
             $(this).attr('data-label', ui.item['label']);
             $(this).css({
                 "border-color": "#3D9A37",
                 "box-shadow": "0 0 0 0.1rem #3D9A37"
             });
-        $('#cod_producto').val(ui.item['id']);
-    },
-    change: function (event, ui) {
-        var input = $(this);
-        var valorIngresado = input.val();
+            $('#cod_producto').val(ui.item['id']);
+        },
+        change: function (event, ui) {
+            var input = $(this);
+            var valorIngresado = input.val();
 
-        if (ui.item) {
-            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-        } else {
-            if (valorIngresado.trim() !== '') {
-                $.ajax({
-                    url: '/agregar_producto/',
-                    method: 'POST',
-                    data: {
-                        nombre: valorIngresado,
-                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-                    },
-                    success: function (data) {
-                        if (data.success) {
-                            input.attr('data-id', data.id);
-                            $('#cod_producto').val(data.id);
-                            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-                        } else {
-                            alert("No se pudo guardar el vapor.");
-                        }
-                    },
-                    error: function () {
-                        alert("Error en la comunicación con el servidor.");
-                    }
-                });
+            if (ui.item) {
+                input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
             } else {
-                input.val('');
-                input.css({"border-color": "", 'box-shadow': ''});
+                if (valorIngresado.trim() !== '') {
+                    $.ajax({
+                        url: '/agregar_producto/',
+                        method: 'POST',
+                        data: {
+                            nombre: valorIngresado,
+                            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                input.attr('data-id', data.id);
+                                $('#cod_producto').val(data.id);
+                                input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                            } else {
+                                alert("No se pudo guardar el vapor.");
+                            }
+                        },
+                        error: function () {
+                            alert("Error en la comunicación con el servidor.");
+                        }
+                    });
+                } else {
+                    input.val('');
+                    input.css({"border-color": "", 'box-shadow': ''});
+                }
             }
         }
-    }
-});
+    });
 
 
     const campoPrecio = document.getElementById("id_importe");
@@ -2973,7 +3019,7 @@ $(document).ready(function () {
 
 function format(d) {
     // `d` is the original data object for the row
-    let aux= '<table class="table table-sm table-responsive   " cellpadding="5" cellspacing="0" border="0" style="padding-left:30px;">' +
+    let aux = '<table class="table table-sm table-responsive   " cellpadding="5" cellspacing="0" border="0" style="padding-left:30px;">' +
         '<tbody>' +
         '<tr>' +
         '<th class="derecha">Cliente:</th>' +
@@ -3076,12 +3122,14 @@ function format(d) {
         '</tbody>' +
         '</table>';
 
-        return aux;
+    return aux;
 }
+
 function setCookie(row_selected) {
     select_row = row_selected;
     document.cookie = 'row_selected_seguimiento' + "=" + select_row + "; path=/";
 }
+
 function getCookie(name) {
     var ca = document.cookie.split(';');
     for (var i = 0; i < ca.length; i++) {
@@ -3090,7 +3138,8 @@ function getCookie(name) {
     }
     return null;
 }
-function get_datos_cronologia(id,callback) {
+
+function get_datos_cronologia(id, callback) {
     $("#id_originales").val("S");
     $.ajax({
         url: '/get_data_cronologia/' + id + '/',
@@ -3190,13 +3239,14 @@ function get_datos_cronologia(id,callback) {
 
     });
 }
-function get_datos_seguimiento(id,callback) {
+
+function get_datos_seguimiento(id, callback) {
     $("#id_originales").val("S");
     $.ajax({
         url: '/get_data_seguimiento/' + id + '/',
         type: 'GET',
         success: function (datos) {
-            if(datos.bloqueado){
+            if (datos.bloqueado) {
                 alert(datos.mensaje);
             }
             if (datos['fecha'] !== null) {
@@ -3314,11 +3364,26 @@ function get_datos_seguimiento(id,callback) {
                 $("#discharge_add").css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
             }
 
-            if (datos['proyecto']) $("#proyecto_add").val(datos['proyecto']).attr('data-id', datos['proyecto_codigo']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
-            if (datos['actividad']) $("#actividad_add").val(datos['actividad']).attr('data-id', datos['actividad_codigo']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
-            if (datos['desposito']) $("#id_desposito").val(datos['desposito']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
-            if (datos['status']) $("#id_status").val(datos['status']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
-            if (datos['pago']) $("#id_pago").val(datos['pago']).css({"border-color": "#3D9A37", "box-shadow": "0 0 0 0.07rem #3D9A37"});
+            if (datos['proyecto']) $("#proyecto_add").val(datos['proyecto']).attr('data-id', datos['proyecto_codigo']).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.07rem #3D9A37"
+            });
+            if (datos['actividad']) $("#actividad_add").val(datos['actividad']).attr('data-id', datos['actividad_codigo']).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.07rem #3D9A37"
+            });
+            if (datos['desposito']) $("#id_desposito").val(datos['desposito']).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.07rem #3D9A37"
+            });
+            if (datos['status']) $("#id_status").val(datos['status']).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.07rem #3D9A37"
+            });
+            if (datos['pago']) $("#id_pago").val(datos['pago']).css({
+                "border-color": "#3D9A37",
+                "box-shadow": "0 0 0 0.07rem #3D9A37"
+            });
             if (datos['awb']) $("#id_awb").val(datos['awb']);
             if (datos['hawb']) $("#id_hawb").val(datos['hawb']);
             if (datos['wreceipt']) $("#id_wreceipt").val(datos['wreceipt']);
@@ -3353,25 +3418,26 @@ function get_datos_seguimiento(id,callback) {
 
 function eliminar_seguimiento_old(id) {
 
-miurl = "/eliminar_seguimiento/";
-            var toData = {
-                'id': id,
-                'csrfmiddlewaretoken': csrf_token,
-            };
-            $.ajax({
-                type: "POST",
-                url: miurl,
-                data: toData,
-                success: function (resultado) {
-                    let aux = resultado['resultado'];
-                    if (aux === 'exito') {
-                        table.ajax.reload();
-                    } else {
-                        alert(aux);
-                    }
-                }
-            });
+    miurl = "/eliminar_seguimiento/";
+    var toData = {
+        'id': id,
+        'csrfmiddlewaretoken': csrf_token,
+    };
+    $.ajax({
+        type: "POST",
+        url: miurl,
+        data: toData,
+        success: function (resultado) {
+            let aux = resultado['resultado'];
+            if (aux === 'exito') {
+                table.ajax.reload();
+            } else {
+                alert(aux);
+            }
+        }
+    });
 }
+
 function eliminar_seguimiento(id) {
     $.ajax({
         url: '/get_data_seguimiento/' + id + '/',
@@ -3441,6 +3507,7 @@ function get_datos_envases() {
     });
 
 }
+
 function get_datos_rutas() {
     $("#tabla_rutas").dataTable().fnDestroy();
     table_rutas = $('#tabla_rutas').DataTable({
@@ -3475,6 +3542,7 @@ function get_datos_rutas() {
 
     get_datos_seguimiento_rutas(window.row_number);
 }
+
 function get_datos_seguimiento_rutas(numero) {
     $.ajax({
         url: "/datos_seguimiento",  // Asegúrate de que esta URL coincida con tu Django URLConf
@@ -3507,6 +3575,7 @@ function get_datos_seguimiento_rutas(numero) {
         }
     });
 }
+
 function get_datos_logs() {
     row = table.rows('.table-secondary').data();
     $("#tabla_logs").dataTable().fnDestroy();
@@ -3514,7 +3583,7 @@ function get_datos_logs() {
         "order": [[2, "desc"], [1, "desc"]],
         "columnDefs": [
             {
-                "targets": [ 0 ],
+                "targets": [0],
                 "orderable": false,
             },
         ],
@@ -3531,11 +3600,11 @@ function get_datos_logs() {
             'type': 'GET',
             "data": function (d) {
                 return $.extend({}, d, {
-                    "id": row[0][0],'numero':window.row_number
+                    "id": row[0][0], 'numero': window.row_number
                 });
             }
         },
-        "rowCallback": function(row, data, index) {
+        "rowCallback": function (row, data, index) {
             // data[3] es la columna 'Acción' => Created / Updated / Deleted
             var accion = data[3].toLowerCase();
 
@@ -3553,6 +3622,7 @@ function get_datos_logs() {
     });
 
 }
+
 function get_datos_embarques() {
     table_embarques = $('#tabla_embarques').DataTable({
         "order": [[1, "desc"], [1, "desc"]],
@@ -3580,18 +3650,18 @@ function get_datos_embarques() {
                 render: function (data, type, row) {
                 }
             },
-        ],"initComplete": function(settings, json) {
+        ], "initComplete": function (settings, json) {
             $("#id_aplicable").val(json['data_extra']['aplicable']);
             $("#id_tarifaprofit").val(json['data_extra']['tarifaprofit']);
             $("#id_tarifaventa").val(json['data_extra']['tarifaventa']);
             $("#id_tarifacompra").val(json['data_extra']['tarifacompra']);
             $("#id_muestroflete").val(json['data_extra']['muestroflete']);
             $("#volumen").val(json['data_extra']['volumen']);
-            $("input[type='radio'][value='" + json['data_extra']['tomopeso']+ "'][id^='id_tomopeso_']").prop("checked", true);
-            $("input[type='radio'][value='" + json['data_extra']['tipobonifcli']+ "'][id^='id_tipobonifcli_']").prop("checked", true);
-            if(json['data_extra']['tarifafija'] == 'S'){
+            $("input[type='radio'][value='" + json['data_extra']['tomopeso'] + "'][id^='id_tomopeso_']").prop("checked", true);
+            $("input[type='radio'][value='" + json['data_extra']['tipobonifcli'] + "'][id^='id_tipobonifcli_']").prop("checked", true);
+            if (json['data_extra']['tarifafija'] == 'S') {
                 $("#id_tarifafija").prop("checked", true);
-            }else{
+            } else {
                 $("#id_tarifafija").prop("checked", false);
             }
 
@@ -3599,6 +3669,7 @@ function get_datos_embarques() {
     });
 
 }
+
 function get_datos_gastos() {
     ingresos = 0
     egresos = 0
@@ -3638,7 +3709,7 @@ function get_datos_gastos() {
             {
                 "targets": [4],
                 "className": 'derecha',
-            },{
+            }, {
                 "targets": [8],
                 "className": 'derecha',
             },
@@ -3647,27 +3718,28 @@ function get_datos_gastos() {
                 "className": 'derecha',
             },
             {
-                "targets": [5,8,9,10],
-                "visible":false
+                "targets": [5, 8, 9, 10],
+                "visible": false
             },
-        ],"rowCallback": function (row, data) {
-                // $(row).find('td:eq(3)').css('background-color', '#99cc99');
-                // $(row).find('td:eq(4)').css('background-color', '#CC9393');
-                if (parseFloat(data[3]) > 0){
-                    ingresos += parseFloat(data[3]);
-                    diferencia += parseFloat(data[3]);
-                }else{
-                    egresos += parseFloat(data[4]);
-                    diferencia -= parseFloat(data[3]);
-                }
-        },"initComplete": function( settings, json ) {
+        ], "rowCallback": function (row, data) {
+            // $(row).find('td:eq(3)').css('background-color', '#99cc99');
+            // $(row).find('td:eq(4)').css('background-color', '#CC9393');
+            if (parseFloat(data[3]) > 0) {
+                ingresos += parseFloat(data[3]);
+                diferencia += parseFloat(data[3]);
+            } else {
+                egresos += parseFloat(data[4]);
+                diferencia -= parseFloat(data[3]);
+            }
+        }, "initComplete": function (settings, json) {
             $('#gastos_ingresos').val(ingresos.toFixed(2));
             $('#gastos_egresos').val(egresos.toFixed(2));
-            $('#gastos_diferencia').val((ingresos-egresos).toFixed(2));
+            $('#gastos_diferencia').val((ingresos - egresos).toFixed(2));
         }
     });
 
 }
+
 function get_datos_pdf() {
     row = table.rows('.table-secondary').data();
     miurl = "/get_datos_caratula/";
@@ -3690,6 +3762,7 @@ function get_datos_pdf() {
         }
     });
 }
+
 function mostrarToast(mensaje, tipo) {
     var toast = $('<div class="toast toast-lg"  role="alert" aria-live="assertive" aria-atomic="true">')
         .addClass('bg-' + tipo + ' text-white')
@@ -3705,6 +3778,7 @@ function mostrarToast(mensaje, tipo) {
         toast.remove();
     }, 5000);
 }
+
 function get_datos_archivos() {
     table_archivos = $('#tabla_archivos').DataTable({
         "order": [[1, "desc"], [1, "desc"]],
@@ -3727,7 +3801,7 @@ function get_datos_archivos() {
                 "targets": [0],
                 "orderable": false,
                 "data": null,
-                "visible":false,
+                "visible": false,
                 "defaultContent": '',
                 render: function (data, type, row) {
                 }
@@ -3736,13 +3810,14 @@ function get_datos_archivos() {
     });
 
 }
-function sendEmail(to,cc,cco,subject,message,title,seguimiento,from) {
+
+function sendEmail(to, cc, cco, subject, message, title, seguimiento, from) {
     let miurl = "/envio_notificacion/SG/";
     var toData = {
         'to': to,
         'cc': cc,
         'cco': cco,
-        'from':from,
+        'from': from,
         'subject': subject,
         'message': message,
         'tipo': title,
@@ -3767,16 +3842,17 @@ function sendEmail(to,cc,cco,subject,message,title,seguimiento,from) {
 
 
 }
-function get_data_email(row,title,row_number,transportista,master,gastos,directo) {
+
+function get_data_email(row, title, row_number, transportista, master, gastos, directo) {
     let miurl = "/get_data_email/";
     var toData = {
         'title': title,
         'row_number': window.row_number,
         'csrfmiddlewaretoken': csrf_token,
-        'transportista':transportista,
-        'master':master,
-        'gastos':gastos,
-        'directo':directo,
+        'transportista': transportista,
+        'master': master,
+        'gastos': gastos,
+        'directo': directo,
     };
     $.ajax({
         type: "POST",
@@ -3792,9 +3868,9 @@ function get_data_email(row,title,row_number,transportista,master,gastos,directo
                 let asunto = resultado['asunto'].toLowerCase();
                 if (asunto.includes("traspaso a operaciones")) {
                     $("#id_to").val("customerservices@oceanlinkgroup.com;lucas.bocskor@oceanlinkgroup.com;ines.delafuente@oceanlinkgroup.com");
-                }else if(asunto.includes("orden de facturacion")){
+                } else if (asunto.includes("orden de facturacion")) {
                     $("#id_to").val("");
-                }else if(asunto.includes("instrucción de embarque") || asunto.includes("shipping instruction")){
+                } else if (asunto.includes("instrucción de embarque") || asunto.includes("shipping instruction")) {
                     $("#id_to").val(resultado['email_agente']);
                 } else {
                     $("#id_to").val(resultado['email_cliente']);
@@ -3803,7 +3879,7 @@ function get_data_email(row,title,row_number,transportista,master,gastos,directo
                 if (selectEmails && resultado['emails_disponibles']) {
                     selectEmails.innerHTML = "";
 
-                    resultado['emails_disponibles'].forEach(function(email) {
+                    resultado['emails_disponibles'].forEach(function (email) {
                         let option = document.createElement("option");
                         option.value = email;
                         option.text = email;
@@ -3816,29 +3892,31 @@ function get_data_email(row,title,row_number,transportista,master,gastos,directo
         }
     });
 }
+
 function eliminar_adjunto(id) {
-  // Eliminar el elemento del diccionario
-  if(confirm('¿Confirma eliminar archivo adjunto?')){
-      delete archivos_adjuntos[id];
-      // Eliminar el elemento HTML del DOM
-      var elementoHTML = document.getElementById(id);
-      if (elementoHTML) {
-        elementoHTML.remove();
-      }
-      mostrarToast('¡Adjunto eliminado con exito!', 'danger');
-  }
+    // Eliminar el elemento del diccionario
+    if (confirm('¿Confirma eliminar archivo adjunto?')) {
+        delete archivos_adjuntos[id];
+        // Eliminar el elemento HTML del DOM
+        var elementoHTML = document.getElementById(id);
+        if (elementoHTML) {
+            elementoHTML.remove();
+        }
+        mostrarToast('¡Adjunto eliminado con exito!', 'danger');
+    }
 }
 
-function calcular_volumen(medidas,bultos){
-    let volumen_aux=0;
-    let total=0;
-    if(medidas!=null && bultos!=null){
+function calcular_volumen(medidas, bultos) {
+    let volumen_aux = 0;
+    let total = 0;
+    if (medidas != null && bultos != null) {
         let medidasArray = medidas.split('*');
         volumen_aux = medidasArray.reduce((total, num) => total * parseFloat(num), 1);
-        total=volumen_aux*bultos;
+        total = volumen_aux * bultos;
     }
     return total;
 }
+
 function get_sugerencias_envases(numero) {
 
     if (numero.trim() === "") {
@@ -3849,7 +3927,7 @@ function get_sugerencias_envases(numero) {
     $.ajax({
         type: "GET",
         url: "get_sugerencias_envases/" + numero,
-        success: function(response) {
+        success: function (response) {
             if (response.status === "success") {
                 if (response.data.bultos !== null && response.data.bultos !== undefined && response.data.bultos !== "") {
                     $("#id_bultos").val(response.data.bultos);
@@ -3865,10 +3943,11 @@ function get_sugerencias_envases(numero) {
                 }
             }
         },
-        error: function() {
+        error: function () {
         }
     });
 }
+
 function cargar_notas(numero) {
     $('#notas_table').DataTable({
         destroy: true,  // Asegura que se destruya cualquier instancia anterior
@@ -3877,22 +3956,22 @@ function cargar_notas(numero) {
             dataSrc: 'data'
         },
         columns: [
-            { data: 'id','visible':false },
-            { data: 'fecha' },
-            { data: 'asunto' },
-            { data: 'tipo' },
+            {data: 'id', 'visible': false},
+            {data: 'fecha'},
+            {data: 'asunto'},
+            {data: 'tipo'},
             {
                 data: null,
-                render: function(data, type, row) {
+                render: function (data, type, row) {
                     return `
                         <button class="btn btn-danger" onclick="eliminarNota(${row.id})">Eliminar</button>
                     `;
                 }
             }
         ],
-        rowCallback: function(row, data) {
+        rowCallback: function (row, data) {
             // Configura el evento de doble clic para cada fila
-            $(row).off('dblclick').on('dblclick', function() {
+            $(row).off('dblclick').on('dblclick', function () {
                 console.log(data.notas);
                 $("#notas_add_input").val(data.notas);
                 $("#id_fecha_notas").val(formatDateToYYYYMMDD(data.fecha));
@@ -3909,6 +3988,7 @@ function cargar_notas(numero) {
         }
     });
 }
+
 function cancelar_nota() {
     const form = document.getElementById('notas_form');
     form.reset(); // limpia los campos
@@ -3916,6 +3996,7 @@ function cancelar_nota() {
     document.getElementById('guardar_nota').innerHTML = 'Agregar Nota'; // reinicia texto del botón
 
 }
+
 function agregar_nota(event) {
     event.preventDefault();
     // Convierte los datos del formulario en un JSON estructurado
@@ -3940,9 +4021,9 @@ function agregar_nota(event) {
         headers: {
             'X-CSRFToken': csrf_token
         },
-        success: function(response) {
+        success: function (response) {
             if (response.resultado === 'exito') {
-            $("#guardar_nota").html('Agregar');
+                $("#guardar_nota").html('Agregar');
                 alert("Notas guardadas exitosamente");
                 //$("#notas_modal").dialog("close");
                 $('#notas_table').DataTable().ajax.reload();
@@ -3953,11 +4034,12 @@ function agregar_nota(event) {
                 alert("Error al guardar las notas: " + response.errores);
             }
         },
-        error: function() {
+        error: function () {
             alert("Error en la solicitud");
         }
     });
 }
+
 function eliminarNota(id) {
     if (confirm("¿Desea eliminar esta nota?")) {
         $.ajax({
@@ -3967,7 +4049,7 @@ function eliminarNota(id) {
                 id: id,  // Corrige la clave `íd` a `id`
                 csrfmiddlewaretoken: csrf_token  // Asegúrate de incluir el token CSRF
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.resultado === 'exito') {
                     alert("Nota eliminada exitosamente");
                     $('#notas_table').DataTable().ajax.reload();
@@ -3976,7 +4058,7 @@ function eliminarNota(id) {
                     alert("Error al eliminar la nota");
                 }
             },
-            error: function() {
+            error: function () {
                 alert("Error en la solicitud");
             }
         });
@@ -4012,36 +4094,37 @@ function cargar_datos_aplicables(numero) {
         }
     });
 }
+
 function recalculo_embarques() {
     const coef = 166.67;
 
-        let tipo = null;
-        if ($('#id_tomopeso_ap_0').is(':checked')) {
-            tipo = '1';
-        } else if ($('#id_tomopeso_ap_1').is(':checked')) {
-            tipo = '2';
-        } else if ($('#id_tomopeso_ap_2').is(':checked')) {
-            tipo = '3';
-        }
+    let tipo = null;
+    if ($('#id_tomopeso_ap_0').is(':checked')) {
+        tipo = '1';
+    } else if ($('#id_tomopeso_ap_1').is(':checked')) {
+        tipo = '2';
+    } else if ($('#id_tomopeso_ap_2').is(':checked')) {
+        tipo = '3';
+    }
 
     const bruto = parseFloat($('#id_bruto_ap').val()) || 0;
     const volumen = parseFloat($('#id_volumen_ap').val()) || 0;
     const tarifa_venta = parseFloat($('#id_tarifaventa_ap').val()) || 0;
     //const tarifa_compra = parseFloat($('#id_tarifacompra_ap').val()) || 0;
-    let tarifa=tarifa_venta;
+    let tarifa = tarifa_venta;
 
     let aplicable = 0;
     let flete = 0;
 
     if (tipo === '1') {
-    $('#id_aplicable_ap').val(0);
-    $('#id_muestroflete_ap').val(0);
+        $('#id_aplicable_ap').val(0);
+        $('#id_muestroflete_ap').val(0);
         // Usar el bruto directamente
         aplicable = redondear_a_05_o_0(bruto);
         flete = aplicable * tarifa;
     } else if (tipo === '2') {
-            $('#id_aplicable_ap').val(0);
-    $('#id_muestroflete_ap').val(0);
+        $('#id_aplicable_ap').val(0);
+        $('#id_muestroflete_ap').val(0);
         // Calcular aplicable como volumen * coef
         aplicable = redondear_a_05_o_0(volumen * coef);
         flete = aplicable * tarifa;
@@ -4053,6 +4136,7 @@ function recalculo_embarques() {
     $('#id_aplicable_ap').val(aplicable.toFixed(2));
     $('#id_muestroflete_ap').val(flete ? flete.toFixed(2) : '');
 }
+
 function redondear_a_05_o_0(numero) {
     let redondeado = parseFloat(numero.toFixed(1));
     let decimal = redondeado - Math.floor(redondeado);
@@ -4065,6 +4149,7 @@ function redondear_a_05_o_0(numero) {
         return Math.ceil(redondeado);
     }
 }
+
 function guardar_aplicable(numero) {
     const data = {
         bruto: $('#id_bruto_ap').val(),
@@ -4087,28 +4172,36 @@ function guardar_aplicable(numero) {
             'X-CSRFToken': csrf_token
         },
         success: function (resp) {
-      if (resp.status === 'ok') {
-        // ✅ notificación y refrescos
-        try { mostrarToast('¡Datos aplicables guardados!', 'success'); } catch(e) { alert('Datos guardados correctamente.'); }
-        try { table.ajax.reload(null, false); } catch(e){}
+            if (resp.status === 'ok') {
+                // ✅ notificación y refrescos
+                try {
+                    mostrarToast('¡Datos aplicables guardados!', 'success');
+                } catch (e) {
+                    alert('Datos guardados correctamente.');
+                }
+                try {
+                    table.ajax.reload(null, false);
+                } catch (e) {
+                }
 
-        if (window.wizardMode) {
-          // 👉 en wizard: NO cerrar; avisar y refrescar la botonera
-          $(document).trigger('aplicable:guardado');
-          if (typeof refreshCurrentToolbar === 'function') refreshCurrentToolbar();
-        } else {
-          // 👉 flujo normal
-          $('#aplicable_modal').dialog('close');
-        }
-      } else {
-        alert('Error: ' + (resp.mensaje || 'No se pudo guardar.'));
-      }
-    },
+                if (window.wizardMode) {
+                    // 👉 en wizard: NO cerrar; avisar y refrescar la botonera
+                    $(document).trigger('aplicable:guardado');
+                    if (typeof refreshCurrentToolbar === 'function') refreshCurrentToolbar();
+                } else {
+                    // 👉 flujo normal
+                    $('#aplicable_modal').dialog('close');
+                }
+            } else {
+                alert('Error: ' + (resp.mensaje || 'No se pudo guardar.'));
+            }
+        },
         error: function (xhr) {
             alert('Error en el servidor: ' + xhr.status);
         }
     });
 }
+
 function formatDateToYYYYMMDD(isoDate) {
     // Asegúrate de que la fecha esté en formato ISO
     const date = new Date(isoDate);

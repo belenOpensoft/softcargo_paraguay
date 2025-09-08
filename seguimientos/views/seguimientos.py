@@ -17,7 +17,11 @@ from seguimientos.models import VGrillaSeguimientos as Seguimiento, Seguimiento 
     Attachhijo, Serviceaereo, Conexaerea, Faxes
 from auditlog.models import LogEntry
 from django.contrib.contenttypes.models import ContentType
-from django.utils.dateformat import format
+from django.http import HttpResponse
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError, DataError
+import json
+import simplejson
 
 @login_required(login_url='/')
 def grilla_seguimientos(request):
@@ -574,63 +578,7 @@ def guardar_cronologia(request):
     return HttpResponse(data_json, content_type="application/json")
 
 
-
 def guardar_seguimiento_old(request):
-    resultado = {}
-    try:
-        data = simplejson.loads(request.POST['form'])
-        tipo = request.POST['tipo']
-
-        if 'id' in data and data['id'][0] != '':
-            registro = SeguimientoReal.objects.get(id=data['id'][0])
-            tiporeg = 'modifica'
-        else:
-            registro = SeguimientoReal()
-            numero = SeguimientoReal.objects.all().values_list('numero').order_by('-numero')[:1][0][0]
-            registro.numero = numero + 1
-            tiporeg = 'nuevo'
-
-        campos = vars(registro)
-
-        for k, v in data.items():
-            for name in campos:
-                if name == k:
-                    if v[0] is not None and len(v[0]) > 0:
-                        if v[1] is not None:
-                            setattr(registro, name, v[1])
-                        else:
-                            if len(v[0]) > 0:
-                                setattr(registro, name, v[0])
-                    else:
-                        setattr(registro, name, None)
-                    continue
-        registro.modo = tipo
-        if 'id' in data and data['id'][0] != '':
-            registro.id = data['id'][0]
-            registro.save()
-        else:
-            registro.iniciales='S/I'
-            registro.recepcionado='N'
-            registro.tarifafija='N'
-            registro.multimodal='N'
-            registro.unidadpeso='K'
-            registro.unidadvolumen='B'
-            registro.tipobonifcli='P'
-            registro.editado='S/I'
-            registro.save()
-
-        resultado['resultado'] = 'exito'
-        resultado['numero'] = str(registro.numero)
-        resultado['tipo'] = tiporeg
-    except IntegrityError as e:
-        resultado['resultado'] = 'Error de integridad, intente nuevamente:. ' + str(e)
-    except Exception as e:
-        resultado['resultado'] = str(e)
-    data_json = json.dumps(resultado)
-    mimetype = "application/json"
-    return HttpResponse(data_json, mimetype)
-
-def guardar_seguimiento(request):
     resultado = {}
     try:
         data = simplejson.loads(request.POST['form'])
@@ -708,6 +656,115 @@ def guardar_seguimiento(request):
         resultado['resultado'] = str(e)
 
     return HttpResponse(json.dumps(resultado), content_type="application/json")
+
+
+
+def guardar_seguimiento(request):
+    resultado = {}
+    try:
+        data = simplejson.loads(request.POST['form'])
+        tipo = request.POST.get('tipo')
+
+        # ¿edito o creo?
+        if 'id' in data and data['id'][0]:
+            registro = SeguimientoReal.objects.get(id=data['id'][0])
+            tiporeg = 'modifica'
+        else:
+            hawb = (data.get('hawb') or [''])[0]
+            awb  = (data.get('awb')  or [''])[0]
+
+            if hawb and awb and SeguimientoReal.objects.filter(hawb=hawb, awb=awb).exists():
+                return HttpResponse(json.dumps({
+                    'resultado': f'Error: La combinación HAWB {hawb} y AWB {awb} ya fue ingresada previamente.',
+                    'field': 'hawb'
+                }), content_type="application/json")
+
+            if hawb and SeguimientoReal.objects.filter(hawb=hawb).exists():
+                return HttpResponse(json.dumps({
+                    'resultado': f'Error: El HAWB {hawb} ya fue ingresado previamente.',
+                    'field': 'hawb'
+                }), content_type="application/json")
+
+            if awb and SeguimientoReal.objects.filter(awb=awb).exists():
+                return HttpResponse(json.dumps({
+                    'resultado': f'Error: El AWB {awb} ya fue ingresado previamente.',
+                    'field': 'awb'
+                }), content_type="application/json")
+
+            registro = SeguimientoReal()
+            ultimo_num = SeguimientoReal.objects.values_list('numero', flat=True).order_by('-numero').first()
+            registro.numero = (ultimo_num + 1) if ultimo_num else 1
+            tiporeg = 'nuevo'
+
+        # nombres de campos del modelo (solo concretos, sin m2m ni reverse)
+        field_names = {f.name for f in registro._meta.get_fields() if not f.many_to_many and not f.one_to_many}
+
+        # asignar con detección de errores por campo
+        for k, v in data.items():
+            if k not in field_names:
+                continue
+            raw = v[1] if len(v) > 1 and v[1] is not None else (v[0] if v and v[0] is not None else None)
+            val = raw if (raw not in ("",)) else None
+            try:
+                setattr(registro, k, val)
+            except (ValidationError, ValueError, DataError) as e:
+                # devolver el campo y el mensaje
+                return HttpResponse(json.dumps({
+                    'resultado': f'Error en el campo "{k}": {str(e)}',
+                    'field': k,
+                    'detail': str(e)
+                }), content_type="application/json")
+
+        if 'id' in data and data['id'][0]:
+            registro.id = data['id'][0]
+
+        if tiporeg == 'nuevo':
+            # valores por defecto
+            registro.iniciales = registro.iniciales or 'S/I'
+            registro.recepcionado = registro.recepcionado or 'N'
+            registro.tarifafija = registro.tarifafija or 'N'
+            registro.multimodal = registro.multimodal or 'N'
+            registro.unidadpeso = registro.unidadpeso or 'K'
+            registro.unidadvolumen = registro.unidadvolumen or 'B'
+            registro.tipobonifcli = registro.tipobonifcli or 'P'
+            registro.editado = registro.editado or 'S/I'
+
+        try:
+            registro.full_clean()  # valida tipos/longitudes/validators de Django
+            registro.save()
+        except ValidationError as e:
+            # e.message_dict tiene por campo -> lista de errores
+            # devolvemos el primero útil
+            fld = next(iter(e.message_dict.keys()), None)
+            msg = '; '.join(e.message_dict.get(fld, [str(e)]))
+            return HttpResponse(json.dumps({
+                'resultado': f'Error en el campo "{fld}": {msg}' if fld else f'Error de validación: {msg}',
+                'field': fld,
+                'detail': e.message_dict
+            }), content_type="application/json")
+        except IntegrityError as e:
+            return HttpResponse(json.dumps({
+                'resultado': f'Error de integridad (BD). {str(e)}',
+                'field': None
+            }), content_type="application/json")
+        except DataError as e:
+            return HttpResponse(json.dumps({
+                'resultado': f'Error de datos: {str(e)}',
+                'field': None
+            }), content_type="application/json")
+
+        return HttpResponse(json.dumps({
+            'resultado': 'exito',
+            'numero': str(registro.numero),
+            'id': str(registro.id),
+            'tipo': tiporeg
+        }), content_type="application/json")
+
+    except Exception as e:
+        return HttpResponse(json.dumps({
+            'resultado': f'Error inesperado: {str(e)}',
+            'field': None
+        }), content_type="application/json")
 
 
 def eliminar_seguimiento_old(request):
