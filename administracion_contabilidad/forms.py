@@ -34,10 +34,9 @@ def get_paridad():
 class Factura(forms.Form):
     CHOICE_TIPO = (
         ('20', 'Factura'),
-        ('22', 'Nota de débito'),
         ('21', 'Nota de crédito'),
-        ('24', 'eticket'),
-        ('23', 'eticket N/C'),
+        ('24', 'E-Ticket'),
+        ('23', 'E-Ticket N/C'),
     )
 
     tipo = forms.ChoiceField(
@@ -90,6 +89,7 @@ class Factura(forms.Form):
 
     moneda = forms.ModelChoiceField(
         queryset=Monedas.objects.all(),
+        to_field_name='codigo',
         required=True,
         label="Moneda",
         initial=2,

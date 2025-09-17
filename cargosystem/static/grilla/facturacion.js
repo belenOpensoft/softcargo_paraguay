@@ -876,6 +876,65 @@ $(document).ready(function () {
         $("#impucompra_nota").dialog("close");
     });
 
+$('#reenviar_uruware').on('click', function () {
+    let autogenerado= $('#autogen_detalle_venta').val()
+        $.ajax({
+      url: "/admin_cont/refacturar_uruware/",
+      method: "POST",
+      data: {
+        csrfmiddlewaretoken: csrf_token,
+        autogenerado: autogenerado,
+      },
+      dataType: "json" // jQuery parsea resp a objeto
+    })
+      .done(function (resp) {
+          console.log(resp);
+          alert(resp.mensaje);
+
+        $('#modalFacturaDetalle').dialog("close");
+
+      })
+      .fail(function (xhr) {
+        let msg = "error";
+        try {
+          const r = JSON.parse(xhr.responseText);
+          if (r.mensaje) msg = r.mensaje;
+        } catch (e) {}
+        alert(msg);
+      })
+      .always(function (resp) {
+      });
+});
+
+$('#descargar_uruware').on('click', function () {
+    let autogenerado= $('#autogen_detalle_venta').val()
+
+    fetch("/admin_cont/descargar_pdf_uruware/", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrf_token // asegurate de tener csrf_token definido
+        },
+        body: new URLSearchParams({ autogenerado: autogenerado,csrfmiddlewaretoken: csrf_token,
+ })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Error al descargar el PDF");
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "descarga_"+autogenerado+".pdf"; // nombre de archivo en la descarga
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+        alert("Error: " + error.message);
+    });
+});
 
 });
 
@@ -2157,7 +2216,7 @@ function validarRucUyDeTabla() {
 
 function procesar_factura() {
     let tipo = $('#id_tipo').val();
-    if(tipo==21){
+    if(tipo==21 || tipo == 23){
         if(confirm('¿Desea imputar esta Nota?')){
             $("#impucompra_nota").dialog('open');
             let cliente = $('#clienteTable tbody tr td').eq(0).text();
@@ -2301,7 +2360,8 @@ function procesar_factura() {
                     neto = 0;
                     table_fac.ajax.reload();
                 } else {
-                    alert('ocurrió un error');
+                   const msg = data.mensaje || 'Ocurrió un error';
+                    alert(msg);
                 }
 
                 //window.location.reload();
@@ -2443,7 +2503,8 @@ function procesar_factura_nota() {
                     neto = 0;
                     table_fac.ajax.reload();
                 } else {
-                    alert('ocurrió un error');
+                    const msg = data.mensaje || 'Ocurrió un error';
+                    alert(msg);
                 }
 
                 //window.location.reload();
@@ -2605,7 +2666,8 @@ function procesar_factura_finalizada(datos_complementarios) {
                     neto = 0;
 
                 } else {
-                    alert('ocurrió un error');
+                    const msg = data.mensaje || 'Ocurrió un error';
+                    alert(msg);
                 }
                 //window.location.reload();
             },
@@ -2665,7 +2727,24 @@ function buscar_gastos(autogenerado) {
                 $('#id_posicion_venta').val(data.posicion);
                 $('#id_observaciones').val(data.observaciones);
                 $('#id_cae').val(data.cae);
-                if(data.tipo.includes('FACTURA')){
+                $('#id_cae').removeClass('is-valid is-invalid');
+
+                // validar si es número y existe
+                if (data.cae && !isNaN(data.cae)) {
+                    // correcto → verde (success)
+                    $('#id_cae').addClass('is-valid');
+                    $('#reenviar_uruware').prop('disabled',true);
+                    $('#descargar_uruware').prop('disabled',false);
+
+                } else {
+                    // error → rojo (danger)
+                    $('#id_cae').addClass('is-invalid');
+                    $('#reenviar_uruware').prop('disabled',false);
+                    $('#descargar_uruware').prop('disabled',true);
+
+                }
+                const tipo = data.tipo.trim().toUpperCase();
+                if (tipo === 'FACTURA' || tipo === 'E-TICKET') {
                     $('#nota_credito_clonar').prop('disabled',false);
                 }else{
                     $('#nota_credito_clonar').prop('disabled',true);
@@ -2766,15 +2845,46 @@ function abrirDialogoNotaCredito() {
                     alert('Ingrese Numero y Cambio.');
                     return;
                 }
-                $.post("/admin_cont/hacer_nota_credito/", {
+                // $.post("/admin_cont/hacer_nota_credito/", {
+                //     numero: numero,
+                //     arbitraje: arbitraje_cambio,
+                //     autogenerado: autogenerado,
+                //     csrfmiddlewaretoken: csrf_token
+                // }, function(resp) {
+                //     alert(resp.mensaje);
+                //     //location.reload();
+                // });
+                $.ajax({
+                  url: "/admin_cont/hacer_nota_credito/",
+                  method: "POST",
+                  data: {
                     numero: numero,
                     arbitraje: arbitraje_cambio,
                     autogenerado: autogenerado,
                     csrfmiddlewaretoken: csrf_token
-                }, function(resp) {
-                    alert(resp.mensaje);
-                    //location.reload();
-                });
+                  },
+                  dataType: "json" // jQuery parsea resp a objeto
+                })
+                  .done(function (resp) {
+                    if (resp.success) {
+                      alert(resp.mensaje || "OK");
+                    } else {
+                      alert(resp.mensaje || "Ocurrió un error.");
+                    }
+                $('#modalFacturaDetalle').dialog("close");
+
+                  })
+                  .fail(function (xhr) {
+                    let msg = "Ocurrió un error";
+                    try {
+                      const r = JSON.parse(xhr.responseText);
+                      if (r.mensaje) msg = r.mensaje;
+                    } catch (e) {}
+                    alert(msg);
+                  })
+                  .always(function () {
+                  });
+
                 $(this).dialog("close");
             },
 
@@ -2863,3 +2973,4 @@ function resetModal(modalId) {
         }
     });
 }
+

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CFE version="1.0" xmlns="http://cfe.dgi.gub.uy">
+  <eTck>
+    <Encabezado>
+      <IdDoc>
+        <TipoCFE>{{ tipo_cfe }}</TipoCFE>
+        <Serie>{{ serie }}</Serie>
+        <Nro>{{ numero }}</Nro>
+        <FchEmis>{{ fecha_emision }}</FchEmis>
+        <FmaPago>{{ forma_pago }}</FmaPago>
+      </IdDoc>
+      <Emisor>
+        <RUCEmisor>{{ ruc_emisor }}</RUCEmisor>
+        <RznSoc>{{ razon_social }}</RznSoc>
+        <CdgDGISucur>{{ codigo_sucursal }}</CdgDGISucur>
+        <DomFiscal>{{ domicilio }}</DomFiscal>
+        <Ciudad>{{ ciudad }}</Ciudad>
+        <Departamento>{{ departamento }}</Departamento>
+      </Emisor>
+      <Receptor>
+        <TipoDocRecep>{{ tipo_doc_receptor }}</TipoDocRecep>
+        <CodPaisRecep>{{ pais_codigo }}</CodPaisRecep>
+        <DocRecep>{{ documento_receptor }}</DocRecep>
+        <RznSocRecep>{{ razon_social_receptor }}</RznSocRecep>
+        <DirRecep>{{ direccion_receptor }}</DirRecep>
+        <CiudadRecep>{{ ciudad_receptor }}</CiudadRecep>
+        <PaisRecep>{{ pais_receptor }}</PaisRecep>
+      </Receptor>
+      <Totales>
+                <TpoMoneda>{{ moneda }}</TpoMoneda>
+        {% if tipo_cambio %}
+        <TpoCambio>{{ tipo_cambio }}</TpoCambio>
+        {% endif %}
+        {% if hay_items_exento == True %}
+            <MntNoGrv>{{ monto_exento }}</MntNoGrv>
+        {% endif %}
+        {% if hay_items_iva == True %}
+            <MntNetoIVATasaBasica>{{ neto_tasa_basica }}</MntNetoIVATasaBasica>
+        <IVATasaMin>10.000</IVATasaMin>
+            <IVATasaBasica>{{ iva_tasa_basica }}</IVATasaBasica>
+            <MntIVATasaBasica>{{ iva_monto_basica }}</MntIVATasaBasica>
+        {% endif %}
+        <MntTotal>{{ total }}</MntTotal>
+        <CantLinDet>{{ cantidad_items }}</CantLinDet>
+        <MntPagar>{{ monto_pagar }}</MntPagar>
+      </Totales>
+    </Encabezado>
+    <Detalle>
+      {% for item in items %}
+      <Item>
+        <NroLinDet>{{ item.nro }}</NroLinDet>
+        <IndFact>{{ item.ind_fact }}</IndFact>
+        <NomItem>{{ item.nombre }}</NomItem>
+        <Cantidad>{{ item.cantidad }}</Cantidad>
+        <UniMed>{{ item.unidad }}</UniMed>
+        <PrecioUnitario>{{ item.precio_unitario }}</PrecioUnitario>
+        <MontoItem>{{ item.monto }}</MontoItem>
+      </Item>
+      {% endfor %}
+    </Detalle>
+  </eTck>
+</CFE>

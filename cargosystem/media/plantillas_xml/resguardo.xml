@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CFE version="1.0" xmlns="http://cfe.dgi.gub.uy">
+  <eResg>
+    <Encabezado>
+      <IdDoc>
+        <TipoCFE>{{ tipo_cfe }}</TipoCFE>
+        <Serie>{{ serie }}</Serie>
+        <Nro>{{ numero }}</Nro>
+        <FchEmis>{{ fecha_emision }}</FchEmis>
+      </IdDoc>
+      <Emisor>
+        <RUCEmisor>{{ ruc_emisor }}</RUCEmisor>
+        <RznSoc>{{ razon_social }}</RznSoc>
+        <CdgDGISucur>{{ codigo_sucursal }}</CdgDGISucur>
+        <DomFiscal>{{ domicilio }}</DomFiscal>
+        <Ciudad>{{ ciudad }}</Ciudad>
+        <Departamento>{{ departamento }}</Departamento>
+      </Emisor>
+      <Receptor>
+        <TipoDocRecep>{{ tipo_doc_receptor }}</TipoDocRecep>
+        <CodPaisRecep>{{ pais_codigo }}</CodPaisRecep>
+        <DocRecep>{{ documento_receptor }}</DocRecep>
+        <RznSocRecep>{{ razon_social_receptor }}</RznSocRecep>
+        <PaisRecep>{{ pais_receptor }}</PaisRecep>
+      </Receptor>
+      <Totales>
+        <TpoMoneda>{{ moneda }}</TpoMoneda>
+        <MntTotRetenido>{{ monto_total_retenido }}</MntTotRetenido>
+        <CantLinDet>{{ cantidad_items }}</CantLinDet>
+        {% for ret in retenciones_totales %}
+        <RetencPercep>
+          <CodRet>{{ ret.codigo }}</CodRet>
+          <ValRetPerc>{{ ret.valor }}</ValRetPerc>
+        </RetencPercep>
+        {% endfor %}
+      </Totales>
+    </Encabezado>
+    <Detalle>
+        {{ detalle }}
+<!--      {% for item in items %}-->
+<!--      <Item>-->
+<!--        <NroLinDet>{{ item.nro }}</NroLinDet>-->
+<!--        {% for ret in item.retenciones %}-->
+<!--        <RetencPercep>-->
+<!--          <CodRet>{{ ret.codigo }}</CodRet>-->
+<!--          <Tasa>{{ ret.tasa }}</Tasa>-->
+<!--          <MntSujetoaRet>{{ ret.monto_sujeto }}</MntSujetoaRet>-->
+<!--          <ValRetPerc>{{ ret.valor }}</ValRetPerc>-->
+<!--        </RetencPercep>-->
+<!--        {% endfor %}-->
+<!--      </Item>-->
+<!--      {% endfor %}-->
+    </Detalle>
+  </eResg>
+</CFE>

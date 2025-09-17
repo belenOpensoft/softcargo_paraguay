@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CFE version="1.0" xmlns="http://cfe.dgi.gub.uy">
+  <eBoleta>
+    <Encabezado>
+      <IdDoc>
+        <TipoCFE>{{ tipo_cfe }}</TipoCFE>
+        <FchEmis>{{ fecha_emision }}</FchEmis>
+        <FmaPago>{{ forma_pago }}</FmaPago>
+      </IdDoc>
+      <Emisor>
+        <RUCEmisor>{{ ruc_emisor }}</RUCEmisor>
+        <RznSoc>{{ razon_social }}</RznSoc>
+        <CdgDGISucur>{{ codigo_sucursal }}</CdgDGISucur>
+        <DomFiscal>{{ domicilio }}</DomFiscal>
+        <Ciudad>{{ ciudad }}</Ciudad>
+        <Departamento>{{ departamento }}</Departamento>
+      </Emisor>
+      <Receptor>
+        <TipoDocRecep>{{ tipo_doc_receptor }}</TipoDocRecep>
+        <CodPaisRecep>{{ pais_codigo }}</CodPaisRecep>
+        <DocRecep>{{ documento_receptor }}</DocRecep>
+        <RznSocRecep>{{ razon_social_receptor }}</RznSocRecep>
+        <DirRecep>{{ direccion_receptor }}</DirRecep>
+        <CiudadRecep>{{ ciudad_receptor }}</CiudadRecep>
+        <PaisRecep>{{ pais_receptor }}</PaisRecep>
+      </Receptor>
+      <Totales>
+        <TpoMoneda>{{ moneda }}</TpoMoneda>
+        <MntNoGrv>{{ monto_no_gravado }}</MntNoGrv>
+        <MntTotal>{{ total }}</MntTotal>
+        <CantLinDet>{{ cantidad_items }}</CantLinDet>
+        <MntPagar>{{ monto_pagar }}</MntPagar>
+      </Totales>
+    </Encabezado>
+    <Detalle>
+        {{ detalle }}
+<!--      {% for item in items %}-->
+<!--      <Item>-->
+<!--        <NroLinDet>{{ item.nro }}</NroLinDet>-->
+<!--        <IndFact>{{ item.ind_fact }}</IndFact>-->
+<!--        <NomItem>{{ item.nombre }}</NomItem>-->
+<!--        <Cantidad>{{ item.cantidad }}</Cantidad>-->
+<!--        <UniMed>{{ item.unidad }}</UniMed>-->
+<!--        <PrecioUnitario>{{ item.precio_unitario }}</PrecioUnitario>-->
+<!--        <MontoItem>{{ item.monto }}</MontoItem>-->
+<!--      </Item>-->
+<!--      {% endfor %}-->
+    </Detalle>
+  </eBoleta>
+</CFE>

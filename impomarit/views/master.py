@@ -289,7 +289,7 @@ def edit_master(request, id_master):
                 master.status = form.cleaned_data.get('status_e', "")
                 master.posicion = form.cleaned_data.get('posicion_e', "")
                 master.operacion = form.cleaned_data.get('operacion_e', "")
-                master.deposito = form.cleaned_data.get('deposito_nro', "")
+                master.deposito = form.cleaned_data.get('deposito_nro') or None
                 master.awb = awb_nuevo
 
                 try:
@@ -313,7 +313,7 @@ def edit_master(request, id_master):
                                     house.vapor = vapor_nuevo
                                 house.save()
 
-                    nuevo_deposito = form.cleaned_data.get('deposito_nro', "")
+                    nuevo_deposito = form.cleaned_data.get('deposito_nro') or None
                     if nuevo_deposito not in [None, '']:
                         try:
                             houses = Embarqueaereo.objects.filter(awb=awb_nuevo)

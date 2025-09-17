@@ -8104,7 +8104,7 @@ class Migration(migrations.Migration):
                 ('fe_idcontrol', models.CharField(blank=True, max_length=50, null=True)),
                 ('recuperodegastos', models.CharField(blank=True, max_length=2, null=True)),
                 ('jurisdiccion', models.SmallIntegerField(blank=True, null=True)),
-                ('eticket', models.CharField(blank=True, max_length=1, null=True)),
+                ('eticket.xml', models.CharField(blank=True, max_length=1, null=True)),
             ],
             options={
                 'db_table': 'dataset_movims',

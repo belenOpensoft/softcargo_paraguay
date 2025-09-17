@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
+from administracion_contabilidad.views.facturacion_electronica.test_ucfe import main
+
 
 @login_required(login_url='/login/')
 def home_view_old(request):
@@ -18,6 +20,7 @@ def home_view_old(request):
 @login_required(login_url='/login/')
 def home_view(request):
     try:
+        main()
         if getattr(request, 'rol_pestana', None):
             return render(request, 'base.html')
         else:

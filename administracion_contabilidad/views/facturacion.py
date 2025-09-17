@@ -1,5 +1,7 @@
+import base64
 import json
 import re
+import uuid
 from functools import reduce
 from operator import or_
 
@@ -10,8 +12,9 @@ from django.forms import model_to_dict
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from reportlab.lib.validators import isNumber
+from zeep.helpers import serialize_object
 
-from administracion_contabilidad.views.facturacion_electronica import Uruware
+from administracion_contabilidad.views.facturacion_electronica.ucfe_client import UCFEClient
 from expaerea.models import ExportEmbarqueaereo, ExportCargaaerea, VEmbarqueaereo as EA, ExportReservas, \
     ExportServiceaereo
 from expmarit.models import ExpmaritEmbarqueaereo, ExpmaritCargaaerea, VEmbarqueaereo as EM, ExpmaritReservas, \
@@ -22,7 +25,7 @@ from impaerea.models import ImportEmbarqueaereo, ImportCargaaerea, VEmbarqueaere
     ImportReservas, ImportServiceaereo
 from impterrestre.models import ImpterraEmbarqueaereo, ImpterraCargaaerea, VEmbarqueaereo as IT, ImpterraReservas, \
     ImpterraServiceaereo
-from mantenimientos.models import Clientes, Servicios, Monedas, Vapores
+from mantenimientos.models import Clientes, Servicios, Monedas, Vapores, Ciudades, Paises
 from administracion_contabilidad.forms import Factura, RegistroCargaForm, VentasDetalleTabla
 from administracion_contabilidad.models import Boleta, Asientos, Movims, Infofactura, \
     VistaGastosPreventa, Dolar, Factudif, VPreventas, VistaVentas, Impuvtas
@@ -35,7 +38,9 @@ from impomarit.models import VGastosHouse, Envases, Cargaaerea, Embarqueaereo, V
 from decimal import Decimal
 from administracion_contabilidad.forms import pdfForm
 from django.utils.timezone import now, timedelta
-
+from django.http import JsonResponse
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
 param_busqueda = {
     1: 'autogenerado__icontains',
     2: 'fecha__icontains',
@@ -58,8 +63,7 @@ columns_table = {
     7: 'iva',
     8: 'total',
 }
-from django.db.models import F, Window
-from django.db.models.functions import RowNumber
+
 
 def source_facturacion(request):
     args = {str(i): request.GET.get(f'columns[{i}][search][value]', '') for i in range(1,9)}
@@ -466,8 +470,22 @@ def procesar_factura(request):
                     tipo_asiento = 'V'
                     nombre_mov = 'FACTURA'
 
-                if int(tipo)==21 and facturas_imputadas:
+                if int(tipo)==21 and facturas_imputadas or int(tipo)==23 and facturas_imputadas:
                     for fac_i in facturas_imputadas:
+                        fac = Movims.objects.filter(mautogen=fac_i.get('autogenerado')).first()
+
+                        if int(tipo)==21 and fac.mtipo!=20:
+                            return JsonResponse({
+                                "success": False,
+                                "mensaje": {'mensaje':'Seleccionó un E-ticket, debe seleccionar una factura para imputar esta Nota Credito.'},
+                            })
+
+                        if int(tipo)==23 and fac.mtipo!=24:
+                            return JsonResponse({
+                                "success": False,
+                                "mensaje": {'mensaje':'Seleccionó una Factura, debe seleccionar un E-ticket para imputar esta N/C E-ticket'},
+                            })
+
                         impuc = Impuvtas()
                         impuc.autogen = str(autogenerado)
                         impuc.cliente = codigo_cliente
@@ -475,7 +493,6 @@ def procesar_factura(request):
                         impuc.autofac = fac_i.get('autogenerado')
                         impuc.save()
 
-                        fac = Movims.objects.filter(mautogen=fac_i.get('autogenerado'), mtipo=20).first()
                         fac.msaldo = (float(fac.msaldo) if fac.msaldo else 0) - float(fac_i.get('monto_imputado'))
                         fac.save()
 
@@ -536,16 +553,19 @@ def procesar_factura(request):
                 }
                 crear_movimiento(movimiento)
                 crear_asiento(asiento_general)
-
+                mnt_neto_iva_basica = 0
+                exento = 0
                 for item_data in items_data:
                     aux = int(movimiento_num) + 1
                     precio = float(item_data.get('precio'))
                     coniva = 0
                     totaliva = 0
-                    if item_data.get('iva') == 'Basico':
+                    if item_data.get('iva') == 'Basico' or item_data.get('iva') == 'Básico':
+                        mnt_neto_iva_basica+=precio
                         coniva = precio * 1.22
                         totaliva = precio * 0.22
                     else:
+                        exento+=precio
                         coniva = precio
                         totaliva = 0
 
@@ -638,312 +658,26 @@ def procesar_factura(request):
                     if preventa:
                         gastos_detalle_marcar(preventa.get('autogenerado'),autogenerado)
 
-                return JsonResponse({'success':True})
-            return None
-    except Exception as e:
-        return JsonResponse({'status': 'Error: ' + str(e)})
+                resultado = facturar_uruware(
+                    numero, tipo, serie, moneda, cliente_data,
+                    precio_total, neto, iva, items_data, facturas_imputadas, fecha_obj,arbitraje,mnt_neto_iva_basica,exento,autogenerado
+                )
 
-def procesar_factura_old(request):
-    try:
-        with transaction.atomic():
-
-            if request.method == 'POST':
-
-                lista = Boleta.objects.last()
-                numero = int(lista.numero) + 1
-                hora = datetime.now().strftime('%H%M%S%f')
-                fecha = request.POST.get('fecha')
-                tipo = request.POST.get('tipoFac', 0)
-
-                preventa = json.loads(request.POST.get('preventa'))
-                registro_carga_raw = request.POST.get('registroCarga')
-                registro_carga = json.loads(registro_carga_raw) if registro_carga_raw else {}
-                autogenerado = generar_autogenerado(tipo, hora, fecha, numero)
-
-                if preventa:
-                    numero_preventa=preventa.get('autogenerado')
-                    master=preventa.get('master')
-                    house=preventa.get('house')
-                    posicion=preventa.get('posicion')
-                    kilos=preventa.get('kilos')
-                    bultos=preventa.get('bultos')
-                    terminos=preventa.get('incoterms')
-                    pagoflete=preventa.get('pago')
-                    origen=preventa.get('origen')
-                    destino=preventa.get('destino')
-                    seguimiento=preventa.get('seguimiento')
-                    referencia = None
-                    aplicable = None
-                    volumen = shipper=agente=detalle=None
-                    transportista = llegasale=consignatario = commodity= None
-                    vuelo = master=house=origen=destino=wr=None
-
-                    reg=Factudif.objects.filter(znumero=numero_preventa)
-
-                    for r in reg:
-                        r.zfacturado='S'
-                        r.save()
-
+                if resultado["success"]:
+                    return JsonResponse({
+                        "success": True,
+                        "mensaje": resultado["mensaje"],
+                        "ucfe_response": resultado.get("ucfe_response", {}),
+                    })
                 else:
-                    if registro_carga:
-                        kilos = float(registro_carga.get('peso') or 0)
-                        volumen = float(registro_carga.get('volumen') or 0)
-                        bultos = int(registro_carga.get('bultos') or 0)
-                        aplicable = float(registro_carga.get('aplicable')or 0)
-
-                        seguimiento = registro_carga.get('seguimiento', '')
-                        referencia = registro_carga.get('referencia', '')
-                        transportista = registro_carga.get('transportista_nro', '')
-                        vuelo = registro_carga.get('vuelo_vapor', '')
-                        master = registro_carga.get('mawb', '')
-                        house = registro_carga.get('hawb', '')
-                        origen = registro_carga.get('origen', '')
-                        destino = registro_carga.get('destino', '')
-                        llegasale = registro_carga.get('fecha_llegada_salida', None)
-                        consignatario = registro_carga.get('consignatario_nro', '')
-                        commodity = registro_carga.get('commodity', '')
-                        wr = registro_carga.get('wr', '')
-                        shipper = registro_carga.get('shipper_nro', '')
-                        terminos = registro_carga.get('incoterms', '')
-                        pagoflete = 'C' if registro_carga.get('pago', '') == 'COLLECT' else 'P'  if registro_carga.get('pago', '')=='PREPAID' else ''
-                        agente = registro_carga.get('agente_nro', '')
-                        posicion = registro_carga.get('posicion', '')
-                        detalle = registro_carga.get('observaciones', '')
-                    else:
-                        kilos = None
-                        volumen = None
-                        bultos = None
-                        aplicable = None
-
-                        seguimiento = None
-                        referencia = None
-                        transportista = None
-                        vuelo = None
-                        master = None
-                        house = None
-                        origen = None
-                        destino = None
-                        llegasale = None
-                        consignatario = None
-                        commodity = None
-                        wr = None
-                        shipper = None
-                        terminos = None
-                        pagoflete = None
-                        agente = None
-                        posicion = None
-                        detalle = None
-
-                serie = request.POST.get('serie', "")
-                prefijo = request.POST.get('prefijo', 0)
-                moneda = request.POST.get('moneda', "")
-                arbitraje = request.POST.get('arbitraje', 0)
-                paridad = request.POST.get('paridad', 0)
-                cliente_data = json.loads(request.POST.get('clienteData'))
-                codigo_cliente = cliente_data['codigo']
-                cliente = Clientes.objects.get(codigo=codigo_cliente)
-                fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
-
-                precio_total = request.POST.get('total', 0)
-                neto = request.POST.get('neto', 0)
-                iva = request.POST.get('iva', 0)
-
-                items_data = json.loads(request.POST.get('items'))
-
-                tipo_mov = tipo
-                tipo_asiento = 'V'
-                detalle1 = 'S/I'
-                detalle_mov = detalle  if registro_carga else 'S/I'
-                nombre_mov = ""
-                asiento = generar_numero()
-                movimiento_num = modificar_numero(asiento)
-
-                if int(tipo) == 23:
-                    detalle1 = 'e-NOT/CRED'
-                    nombre_mov = 'NOTACONTCRE'
-                elif int(tipo) == 24:
-                    detalle1 = 'e-VTA/CRED'
-                    tipo_asiento = 'V'
-                    nombre_mov = 'BOLETA'
-                elif int(tipo) == 11:
-                    detalle1 = 'DEV/CTDO'
-                    nombre_mov = 'DEVOLUCION'
-                elif int(tipo) == 21:
-                    detalle1 = 'NOT/CRED'
-                    tipo_asiento = 'V'
-                    nombre_mov = 'NOTA CRED.'
-                elif int(tipo) == 22:
-                    detalle1 = 'NOT/DEB'
-                    tipo_asiento = 'V'
-                    nombre_mov = 'NOTA DEB.'
-                elif int(tipo) == 20:
-                    detalle1 = 'VTA/CRED'
-                    tipo_asiento = 'V'
-                    nombre_mov = 'FACTURA'
-
-               # detalle_asiento = detalle1 + serie + str(prefijo) + str(numero) + cliente.empresa
-                detalle_asiento = detalle1 + '-' + serie + '-' + str(prefijo) + '-' + str(numero) + '-' + cliente.empresa
-
-
-                movimiento = {
-                    'tipo': tipo_mov,
-                    'fecha': fecha_obj,
-                    'boleta': numero,
-                    'monto': neto,
-                    'iva': iva,
-                    'total': precio_total,
-                    'saldo': precio_total,
-                    'moneda': moneda,
-                    'detalle': detalle_mov,
-                    'cliente': cliente.codigo,
-                    'nombre': cliente.empresa,
-                    'nombremov': nombre_mov,
-                    'cambio': arbitraje,
-                    'autogenerado': autogenerado,
-                    'serie': serie,
-                    'prefijo': prefijo,
-                    'posicion': posicion,
-                    'anio': fecha_obj.year,
-                    'mes': fecha_obj.month,
-                    'monedaoriginal': moneda,
-                    'montooriginal': precio_total,
-                    'arbitraje': arbitraje,
-                }
-                asiento_general = {
-                    'detalle': detalle_asiento,
-                    'asiento': asiento,
-                    'monto': precio_total,
-                    'moneda': moneda,
-                    'cambio': arbitraje,
-                    'conciliado': 'N',
-                    'clearing': fecha_obj,
-                    'fecha': fecha_obj,
-                    'imputacion': 1,
-                    'tipo': tipo_asiento,
-                    'cuenta': cliente.ctavta,
-                    'documento': str(numero),
-                    'vencimiento': fecha_obj,
-                    'pasado': 0,
-                    'autogenerado': autogenerado,
-                    'cliente': cliente.codigo,
-                    'banco': 'S/I',
-                    'centro': 'S/I',
-                    'mov': movimiento_num,
-                    'anio': fecha_obj.year,
-                    'mes': fecha_obj.month,
-                    'fechacheque': fecha_obj,
-                    'paridad': paridad,
-                    'posicion': 'S/I',
-                    'nroserv':None
-                }
-                crear_movimiento(movimiento)
-                crear_asiento(asiento_general)
-
-                for item_data in items_data:
-                    aux = int(movimiento_num) + 1
-                    precio = float(item_data.get('precio'))
-                    coniva = 0
-                    totaliva = 0
-                    if item_data.get('iva') == 'Basico':
-                        coniva = precio * 1.22
-                        totaliva = precio * 0.22
-                    else:
-                        coniva = precio
-                        totaliva = 0
-
-                    boleta = Boleta()
-                    numero = numero
-                    boleta.autogenerado = autogenerado
-                    boleta.tipo = tipo
-                    boleta.fecha = fecha
-                    boleta.vto = fecha
-                    boleta.tipofactura = serie
-                    boleta.serie = serie
-                    boleta.prefijo = prefijo
-                    boleta.numero = numero
-                    boleta.nrocliente = cliente.codigo
-                    boleta.cliente = cliente.empresa
-                    boleta.direccion = cliente.direccion
-                    boleta.direccion2 = cliente.direccion2
-                    boleta.localidad = cliente.localidad
-                    boleta.ciudad = cliente.ciudad
-                    boleta.pais = cliente.pais
-                    boleta.telefax = cliente.telefono
-                    boleta.ruc = cliente.ruc
-                    boleta.condiciones = 'S/I'
-                    boleta.corporativo = 'S/I'
-                    boleta.moneda = moneda
-                    boleta.cambio = arbitraje
-                    boleta.paridad = paridad
-                    boleta.tipocliente = 'RESPONSABLE INSCRIPTO'
-                    boleta.nroservicio = item_data.get('id')
-                    boleta.concepto = item_data.get('descripcion')
-                    boleta.precio = item_data.get('precio')
-                    boleta.iva = item_data.get('iva')
-                    boleta.cuenta = item_data.get('cuenta')
-                    boleta.monto = item_data.get('precio')
-                    boleta.totiva = totaliva
-                    boleta.total = coniva
-                    boleta.master=master
-                    boleta.house=house
-                    boleta.posicion=posicion
-                    boleta.kilos=kilos
-                    boleta.bultos=bultos
-                    boleta.terminos=terminos
-                    boleta.pagoflete=pagoflete
-                    boleta.origen=origen
-                    boleta.destino=destino
-                    boleta.seguimiento=seguimiento
-                    boleta.refer=referencia
-                    boleta.aplicable=aplicable
-                    boleta.vuelo=vuelo
-                    boleta.volumen=volumen
-                    boleta.detalle=detalle
-                    boleta.commodity=commodity
-                    boleta.consignatario=consignatario
-                    boleta.agente=agente
-                    boleta.llegasale=llegasale
-                    boleta.carrier=transportista
-                    boleta.wr=wr
-                    boleta.save()
-
-                    asiento_vector = {
-                        'detalle': detalle_asiento,
-                        'monto': item_data.get('precio'),
-                        'moneda': moneda,
-                        'cambio': arbitraje,
-                        'asiento': asiento,
-                        'conciliado': 'N',
-                        'clearing': fecha_obj,
-                        'fecha': fecha_obj,
-                        'imputacion': 2,
-                        'tipo': tipo_asiento,
-                        'cuenta': item_data.get('cuenta'),
-                        'documento': str(numero),
-                        'vencimiento': fecha_obj,
-                        'pasado': 0,
-                        'autogenerado': autogenerado,
-                        'cliente': cliente.codigo,
-                        'banco': 'S/I',
-                        'centro': 'S/I',
-                        'mov': aux,
-                        'anio': fecha_obj.year,
-                        'mes': fecha_obj.month,
-                        'fechacheque': fecha_obj,
-                        'paridad': paridad,
-                        'nroserv':item_data.get('id'),
-                        'posicion':posicion
-                    }
-                    crear_asiento(asiento_vector)
-                    movimiento_num = aux
-
-                    if preventa:
-                        gastos_detalle_marcar(preventa.get('autogenerado'),autogenerado)
-
-                return JsonResponse({'success':True})
+                    return JsonResponse({
+                        "success": False,
+                        "mensaje": resultado["mensaje"],
+                    })
             return None
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
+
 
 def gastos_detalle_marcar(numero_preventa,autogenerado):
     try:
@@ -1269,7 +1003,7 @@ def cargar_preventa_infofactura(request):
 
                     total_sin_iva += valor
 
-                    if gasto.iva == 'Basico':
+                    if gasto.iva == 'Basico' or gasto.iva == 'Básico':
                         total_con_iva += valor * Decimal('1.22')
                     else:
                         total_con_iva += valor
@@ -1427,7 +1161,7 @@ def cargar_preventa_infofactura_multiple(request):
                             'moneda': gasto.moneda,
                         }
                         total_sin_iva += gasto.precio
-                        if gasto.iva == 'Basico':
+                        if gasto.iva == 'Basico' or gasto.iva == 'Básico':
                             total_con_iva += gasto.precio * Decimal('1.22')
                         else:
                             total_con_iva += gasto.precio
@@ -1784,7 +1518,7 @@ def get_datos_embarque(request):
 
 
 @require_POST
-def hacer_nota_credito(request):
+def hacer_nota_credito_old(request):
     numero_nc = request.POST.get("numero")
     arbitraje = request.POST.get("arbitraje")
     autogenerado_factura = request.POST.get("autogenerado")
@@ -1869,57 +1603,7 @@ def hacer_nota_credito(request):
     except Exception as e:
         return JsonResponse({"mensaje": f"Error al crear nota de crédito: {str(e)}"}, status=500)
 
-def cargar_pendientes_imputacion_venta_old(request):
-    try:
-        nrocliente = request.GET.get('nrocliente', None)
 
-        if not nrocliente:
-            return JsonResponse({'error': 'Debe proporcionar un nrocliente'}, status=400)
-
-        # Agrupar por autogenerado y obtener la fecha más reciente
-        agrupados = (VistaVentas.objects
-                     .filter(nrocliente=nrocliente, tipo='FACTURA')
-                     .exclude(saldo=0)
-                     .values('autogenerado')
-                     .annotate(fecha_max=Max('fecha')))
-
-        # Obtener todos los registros que coinciden con autogenerado y fecha
-        registros = VistaVentas.objects.filter(
-            reduce(
-                or_,
-                [Q(autogenerado=row['autogenerado'], fecha=row['fecha_max']) for row in agrupados]
-            )
-        )
-
-        # Eliminar posibles duplicados por autogenerado
-        vista_unicos = {}
-        for registro in registros:
-            if registro.autogenerado not in vista_unicos:
-                vista_unicos[registro.autogenerado] = registro
-
-        data = []
-        for registro in vista_unicos.values():
-            data.append({
-                'autogenerado': registro.autogenerado,
-                'vto': registro.fecha.strftime('%Y-%m-%d') if registro.fecha else '',
-                'emision': registro.fecha.strftime('%Y-%m-%d') if registro.fecha else '',
-                'num_completo': registro.num_completo,
-                'total': float(registro.total) if registro.total else 0,
-                'saldo': float(registro.saldo) if registro.saldo else 0,
-                'imputado': 0,
-                'tipo_cambio': float(registro.tipo_cambio) if registro.tipo_cambio else 0,
-                'detalle': registro.detalle if registro.detalle else '',
-            })
-
-        return JsonResponse({'data': data}, safe=False)
-
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
-
-
-from django.http import JsonResponse
-from django.db.models import F, Window
-from django.db.models.functions import RowNumber
 
 def cargar_pendientes_imputacion_venta(request):
     try:
@@ -1929,7 +1613,7 @@ def cargar_pendientes_imputacion_venta(request):
 
         # Base: solo FACTURA, con saldo pendiente
         base = (VistaVentas.objects
-                .filter(nrocliente=nrocliente, tipo='FACTURA')
+                .filter(nrocliente=nrocliente, tipo__in=['FACTURA','E-TICKET'])
                 .exclude(saldo=0))
 
         # Fila más reciente por autogenerado (desempate por pk)
@@ -1964,3 +1648,640 @@ def cargar_pendientes_imputacion_venta(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+
+def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva,items_data,facturas_imputadas,fecha,arbitraje,mnto_neto,exento,autogen):
+        try:
+            tipo_cfe = None
+            if int(tipo) == 23:
+                # nc eticket
+                tipo_cfe = 102
+            elif int(tipo) == 24:
+                # eticket
+                tipo_cfe = 101
+            elif int(tipo) == 21:
+                # nc factura
+                tipo_cfe = 112
+            elif int(tipo) == 22:
+                tipo_cfe = 112
+            elif int(tipo) == 20:
+                # efactura
+                tipo_cfe = 111
+
+            moneda = int(moneda)
+            codigo_cliente = cliente_data['codigo']
+            cliente = Clientes.objects.filter(codigo=codigo_cliente).first()
+            ciudad = None
+            if cliente:
+                ciudad = Ciudades.objects.filter(codigo=cliente.ciudad).first()
+            #
+            data = {
+                "tipo_cfe": tipo_cfe,
+                "serie": serie,
+                "numero": numero,
+                "fecha_emision": fecha.strftime('%Y-%m-%d'),
+                "forma_pago": "2",
+                "ruc_emisor": "213971080016",
+                "razon_social": "Oceanlink LTDA",
+                "codigo_sucursal": "1",
+                "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
+                "ciudad": "Montevideo",
+                "departamento": "Montevideo",
+                "moneda": "UYU" if moneda and moneda == 1 else "USD" if moneda and moneda == 2 else "EUR" if moneda and moneda == 3 else "Error",
+                "neto_tasa_basica": mnto_neto,
+                "iva_tasa_basica": "22" ,
+                "iva_monto_basica": iva,
+                "total": precio_total,
+                "cantidad_items": len(items_data),
+                "monto_pagar": precio_total,
+                "monto_exento": Decimal(exento) if Decimal(exento) !=0 else '',
+                "tipo_cambio": arbitraje,
+                "hay_items_iva": False,
+                "hay_items_exento": False,
+                "tipo_doc_receptor": 2,
+                "pais_codigo": "UY",
+                "documento_receptor": cliente.ruc if cliente else '',
+                "razon_social_receptor": cliente.razonsocial if cliente else '',
+                "direccion_receptor": cliente.direccion if cliente else '',
+                "ciudad_receptor": ciudad.nombre if ciudad else 'Montevideo',
+                "pais_receptor": cliente.pais if cliente else '',
+            }
+            # data['exento'] = exento if exento else ''
+            items = []
+            for i, item in enumerate(items_data, start=1):
+
+                if item.get('iva') == 'Basico' or item.get('iva')=='Básico':
+                    data['hay_items_iva']=True
+                else:
+                    data['hay_items_exento']=True
+
+                items.append({
+                    "nro": i,
+                    "ind_fact": 3 if item.get('iva') == 'Basico' or item.get('iva')=='Básico' else 1,
+                    "nombre": item.get("descripcion"),
+                    "cantidad": 1,
+                    "unidad": "N/A",
+                    "precio_unitario": item.get("precio") ,
+                    "monto": item.get("precio"),
+                })
+
+            referencias = []
+            for i, fac in enumerate(facturas_imputadas, start=1):
+                factura = Movims.objects.filter(mautogen=fac.get('autogenerado')).first()
+                tipo_fac = 101 if factura.mtipo == 24  else 111 if factura.mtipo==20 else 'error'
+                referencias.append({
+                    "nro_linea": i,
+                    "tipo_doc": tipo_fac,
+                    "serie": factura.mserie if factura else '',
+                    "numero_cfe": factura.mboleta if factura else '',
+                    "fecha_cfe": factura.mfechamov.strftime('%Y-%m-%d') if factura else '' ,
+                })
+            # hacer el dict de las referencias cuando es nota d ecredito
+            ucfe = UCFEClient(
+                base_url="https://test.ucfe.com.uy/Inbox115/CfeService.svc",
+                usuario="213971080016",
+                rut="213971080016",
+                clave="9rtcl5NzMXlRHKU2PGtPUw==",
+                cod_comercio="OCEANL-394",
+                cod_terminal="FC-394",
+                wsdl_inbox="https://test.ucfe.com.uy/Inbox115/CfeService.svc?singleWsdl",
+                wsdl_query="https://test.ucfe.com.uy/Query116/WebServicesFE.svc?singleWsdl"
+            )
+            if ucfe.is_folio_free(tipo_cfe, serie, numero, "213971080016"):
+                xml = ucfe.render_xml(data, items,referencias)
+                uuid_val = str(uuid.uuid4())
+
+                resp_firma = ucfe.soap_solicitar_firma(
+                    xml,
+                    uuid_str=uuid_val,
+                    rut_emisor="213971080016",
+                    tipo_cfe=tipo_cfe,
+                    serie=serie,
+                    numero=numero
+                )
+                data_firma = serialize_object(resp_firma)
+                cae_num = data_firma["Resp"].get("IdCae")
+                boleta = Boleta.objects.filter(autogenerado=autogen)
+                for b in boleta:
+                    b.cae = cae_num
+                    b.save()
+
+                resp_post = ucfe.soap_obtener_cfe_emitido(
+                    rut="213971080016",
+                    tipo_cfe=tipo_cfe,
+                    serie=serie,
+                    numero=numero
+                )
+                data_post = serialize_object(resp_post)
+
+                # ucfe.test_obtener_pdf("213971080016",tipo_cfe,serie,numero)
+
+                if data_post:
+                    return {
+                        "success": True,
+                        "mensaje": f"CFE {tipo_cfe}-{serie}-{numero} registrado",
+                        "xml": xml,
+                        "ucfe_response": data_post,
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "mensaje": f"Error al enviar a DGI {tipo_cfe}-{serie}-{numero}",
+                        "xml": xml,
+                    }
+            else:
+                return {"success": False, "mensaje": "Número de folio no disponible"}
+
+        except Exception as e:
+            return {"success": False, "mensaje": str(e)}
+
+@require_POST
+def hacer_nota_credito(request):
+    numero_nc = request.POST.get("numero")
+    arbitraje = request.POST.get("arbitraje")
+    autogenerado_factura = request.POST.get("autogenerado")
+
+    fac = Movims.objects.filter(mautogen=autogenerado_factura).first()
+
+    tipo = fac.mtipo
+
+    tipo_nota = 21 if tipo == 20 else 23
+
+    if Movims.objects.filter(mboleta=numero_nc, mtipo=tipo_nota).exists():
+        return JsonResponse({"mensaje": "Ese número ya existe para una Nota de Crédito."}, status=400)
+
+    try:
+        with transaction.atomic():
+            nuevos_movims = []
+            nuevos_boleta = []
+            nuevos_asientos = []
+
+            hora = datetime.now().strftime('%H%M%S%f')
+            fecha = datetime.now().strftime('%Y-%m-%d')
+
+            nuevo_autogenerado = generar_autogenerado(tipo_nota, hora, fecha, numero_nc)
+            # Clonar BOLETA
+            for bol in Boleta.objects.filter(autogenerado=autogenerado_factura):
+                data = model_to_dict(bol)
+                data.pop('id', None)
+                data.update({
+                    'autogenerado': nuevo_autogenerado,
+                    'tipo': tipo_nota,
+                    'numero': numero_nc,
+                    'cambio': arbitraje,
+                    'fecha': datetime.now(),
+                    'vto': datetime.now(),
+                })
+                nuevos_boleta.append(Boleta(**data))
+            # Clonar MOVIMS
+            for mov in Movims.objects.filter(mautogen=autogenerado_factura):
+                data = model_to_dict(mov)
+                data.pop('id', None)
+                data.update({
+                    'mautogen': nuevo_autogenerado,
+                    'mtipo': tipo_nota,
+                    'mnombremov': 'NOTA CRED.',
+                    'mboleta': numero_nc,
+                    'marbitraje': arbitraje,
+                    'mfechamov': datetime.now(),
+                    'mvtomov': datetime.now(),
+                    'mdetalle': f"Nota de credito de factura {mov.mboleta} - {mov.mnombre}",
+                })
+                nuevos_movims.append(Movims(**data))
+
+            # Clonar ASIENTOS
+            for asiento in Asientos.objects.filter(autogenerado=autogenerado_factura):
+                data = model_to_dict(asiento)
+                data.pop('id', None)
+
+                data.update({
+                    'autogenerado': nuevo_autogenerado,
+                    'asiento': generar_numero(),
+                    'detalle': f"NC-{asiento.detalle}",
+                    'tipo': 'V',
+                    'cambio': arbitraje,
+                    'documento': numero_nc,
+                    'fecha': datetime.now(),
+                    'vto': datetime.now(),
+                })
+                nuevos_asientos.append(Asientos(**data))
+
+            impuc = Impuvtas()
+            impuc.autogen = str(nuevo_autogenerado)
+            impuc.autofac = autogenerado_factura
+            impuc.cliente = fac.mcliente
+            impuc.monto = fac.mtotal
+            impuc.save()
+
+            fac.msaldo = 0
+            fac.save()
+
+            # Guardar clones
+            Movims.objects.bulk_create(nuevos_movims)
+            Boleta.objects.bulk_create(nuevos_boleta)
+            Asientos.objects.bulk_create(nuevos_asientos)
+
+            nueva_nota = Movims.objects.filter(mautogen=nuevo_autogenerado).first()
+            boleta_nc=Boleta.objects.filter(autogenerado=nuevo_autogenerado)
+            monto_iva=0
+            monto_exento=0
+
+            for b in boleta_nc:
+                if b.iva == 'Basico' or b.iva == 'Básico':
+                    monto_iva += b.precio
+                else:
+                    monto_exento+=b.precio
+
+            monto_iva=round(monto_iva,2)
+            monto_exento=round(monto_exento,2)
+
+            facturar_uruware_nc_directa(numero_nc,tipo_nota,nueva_nota.mserie,nueva_nota.mmoneda,nueva_nota.mcliente,nueva_nota.mtotal,nueva_nota.mmonto,
+                                        nueva_nota.miva,nuevo_autogenerado,fac.mautogen,nueva_nota.mfechamov,nueva_nota.marbitraje,monto_iva,monto_exento)
+
+        return JsonResponse({"mensaje": "Nota de crédito creada con éxito."})
+    except Exception as e:
+        return JsonResponse({"mensaje": f"Error al crear nota de crédito: {str(e)}"}, status=500)
+
+def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, precio_total, neto, iva, nota_creada, factura_autogen,
+                     fecha, arbitraje, mnto_neto, exento):
+    try:
+        tipo_cfe = None
+        if int(tipo) == 23:
+            # nc eticket
+            tipo_cfe = 102
+        elif int(tipo) == 24:
+            # eticket
+            tipo_cfe = 101
+        elif int(tipo) == 21:
+            # nc factura
+            tipo_cfe = 112
+        elif int(tipo) == 22:
+            tipo_cfe = 112
+        elif int(tipo) == 20:
+            # efactura
+            tipo_cfe = 111
+
+        moneda = int(moneda)
+        cliente = Clientes.objects.filter(codigo=cliente_codigo).first()
+        ciudad = None
+        if cliente:
+            ciudad = Ciudades.objects.filter(codigo=cliente.ciudad).first()
+        #
+        items_nc = Boleta.objects.filter(autogenerado=nota_creada)
+
+        data = {
+            "tipo_cfe": tipo_cfe,
+            "serie": serie,
+            "numero": numero,
+            "fecha_emision": fecha.strftime('%Y-%m-%d'),
+            "forma_pago": "2",
+            "ruc_emisor": "213971080016",
+            "razon_social": "Oceanlink LTDA",
+            "codigo_sucursal": "1",
+            "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
+            "ciudad": "Montevideo",
+            "departamento": "Montevideo",
+            "moneda": "UYU" if moneda and moneda == 1 else "USD" if moneda and moneda == 2 else "EUR" if moneda and moneda == 3 else "Error",
+            "neto_tasa_basica": mnto_neto,
+            "iva_tasa_basica": "22",
+            "iva_monto_basica": iva,
+            "total": precio_total,
+            "cantidad_items": len(items_nc),
+            "monto_pagar": precio_total,
+            "monto_exento": Decimal(exento) if Decimal(exento) != 0 else '',
+            "tipo_cambio": arbitraje,
+            "hay_items_iva": False,
+            "hay_items_exento": False,
+            "tipo_doc_receptor": 2,
+            "pais_codigo": "UY",
+            "documento_receptor": cliente.ruc if cliente else '',
+            "razon_social_receptor": cliente.razonsocial if cliente else '',
+            "direccion_receptor": cliente.direccion if cliente else '',
+            "ciudad_receptor": ciudad.nombre if ciudad else 'Montevideo',
+            "pais_receptor": cliente.pais if cliente else '',
+            "es_extranjero": True if cliente.pais != 'Uruguay' else False,
+        }
+        # data['exento'] = exento if exento else ''
+
+        items = []
+        for i, item in enumerate(items_nc, start=1):
+
+            if item.iva == 'Basico' or item.iva == 'Básico':
+                data['hay_items_iva'] = True
+            else:
+                data['hay_items_exento'] = True
+
+            items.append({
+                "nro": i,
+                "ind_fact": 3 if item.iva == 'Basico' or item.iva == 'Básico' else 1,
+                "nombre": item.concepto,
+                "cantidad": 1,
+                "unidad": "N/A",
+                "precio_unitario": item.precio,
+                "monto": item.precio,
+            })
+
+        referencias = []
+        factura = Movims.objects.filter(mautogen=factura_autogen).first()
+        tipo_fac = 101 if factura.mtipo == 24 else 111 if factura.mtipo == 20 else 'error'
+        referencias.append({
+            "nro_linea": 1,
+            "tipo_doc": tipo_fac,
+            "serie": factura.mserie if factura else '',
+            "numero_cfe": factura.mboleta if factura else '',
+            "fecha_cfe": factura.mfechamov.strftime('%Y-%m-%d') if factura else '',
+        })
+        # hacer el dict de las referencias cuando es nota d ecredito
+        ucfe = UCFEClient(
+            base_url="https://test.ucfe.com.uy/Inbox115/CfeService.svc",
+            usuario="213971080016",
+            rut="213971080016",
+            clave="9rtcl5NzMXlRHKU2PGtPUw==",
+            cod_comercio="OCEANL-394",
+            cod_terminal="FC-394",
+            wsdl_inbox="https://test.ucfe.com.uy/Inbox115/CfeService.svc?singleWsdl",
+            wsdl_query="https://test.ucfe.com.uy/Query116/WebServicesFE.svc?singleWsdl"
+        )
+        if ucfe.is_folio_free(tipo_cfe, serie, numero, "213971080016"):
+            xml = ucfe.render_xml(data, items, referencias)
+            uuid_val = str(uuid.uuid4())
+
+            resp_firma = ucfe.soap_solicitar_firma(
+                xml,
+                uuid_str=uuid_val,
+                rut_emisor="213971080016",
+                tipo_cfe=tipo_cfe,
+                serie=serie,
+                numero=numero
+            )
+            data_firma = serialize_object(resp_firma)
+            cae_num = data_firma["Resp"].get("IdCae")
+
+            for b in items_nc:
+                b.cae=cae_num
+                b.save()
+
+
+            resp_post = ucfe.soap_obtener_cfe_emitido(
+                rut="213971080016",
+                tipo_cfe=tipo_cfe,
+                serie=serie,
+                numero=numero
+            )
+            data_post = serialize_object(resp_post)
+
+            # ucfe.test_obtener_pdf("213971080016", tipo_cfe, serie, numero)
+
+            if data_post:
+                return {
+                    "success": True,
+                    "mensaje": f"CFE {tipo_cfe}-{serie}-{numero} registrado",
+                    "xml": xml,
+                    "ucfe_response": data_post,
+                }
+            else:
+                return {
+                    "success": False,
+                    "mensaje": f"Error al enviar a DGI {tipo_cfe}-{serie}-{numero}",
+                    "xml": xml,
+                }
+        else:
+            return {"success": False, "mensaje": "Número de folio no disponible"}
+
+    except Exception as e:
+        return {"success": False, "mensaje": str(e)}
+
+def refacturar_uruware(request):
+    autogenerado = request.POST.get("autogenerado")
+    try:
+        factura = Movims.objects.filter(mautogen=autogenerado).first()
+        if not factura:
+            return JsonResponse({"success": False, "mensaje": "Factura no encontrada"})
+
+        tipo = factura.mtipo
+        moneda = factura.mmoneda
+        cliente_codigo=factura.mcliente
+        serie = factura.mserie
+        numero = factura.mboleta
+        fecha = factura.mfechamov
+        arbitraje = factura.marbitraje
+        iva = factura.miva
+        precio_total = factura.mtotal
+
+        tipo_cfe = None
+        if int(tipo) == 23:
+            # nc eticket
+            tipo_cfe = 102
+        elif int(tipo) == 24:
+            # eticket
+            tipo_cfe = 101
+        elif int(tipo) == 21:
+            # nc factura
+            tipo_cfe = 112
+        elif int(tipo) == 22:
+            tipo_cfe = 112
+        elif int(tipo) == 20:
+            # efactura
+            tipo_cfe = 111
+
+        asociadas = None
+        if tipo == 21 or tipo == 23:
+            #traer facturas asociadas
+            asociadas=Impuvtas.objects.filter(autogen=autogenerado)
+
+        moneda = int(moneda)
+        cliente = Clientes.objects.filter(codigo=cliente_codigo).first()
+        ciudad = None
+        if cliente:
+            ciudad = Ciudades.objects.filter(codigo=cliente.ciudad).first()
+        #
+        items_factura = Boleta.objects.filter(autogenerado=autogenerado)
+
+        monto_iva = 0
+        monto_exento = 0
+
+        for b in items_factura:
+            if b.iva == 'Basico' or b.iva=='Básico':
+                monto_iva += b.precio
+            else:
+                monto_exento += b.precio
+
+        data = {
+            "tipo_cfe": tipo_cfe,
+            "serie": serie,
+            "numero": numero,
+            "fecha_emision": fecha.strftime('%Y-%m-%d'),
+            "forma_pago": "2",
+            "ruc_emisor": "213971080016",
+            "razon_social": "Oceanlink LTDA",
+            "codigo_sucursal": "1",
+            "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
+            "ciudad": "Montevideo",
+            "departamento": "Montevideo",
+            "moneda": "UYU" if moneda and moneda == 1 else "USD" if moneda and moneda == 2 else "EUR" if moneda and moneda == 3 else "Error",
+            "neto_tasa_basica": round(monto_iva,2),
+            "iva_tasa_basica": "22",
+            "iva_monto_basica": round(iva,2),
+            "total": precio_total,
+            "cantidad_items": len(items_factura),
+            "monto_pagar": precio_total,
+            "monto_exento": round(Decimal(monto_exento),2) if Decimal(monto_exento) != 0 else '',
+            "tipo_cambio": arbitraje,
+            "hay_items_iva": False,
+            "hay_items_exento": False,
+            "tipo_doc_receptor": 2,
+            "pais_codigo": "UY",
+            "documento_receptor": cliente.ruc if cliente else '',
+            "razon_social_receptor": cliente.razonsocial if cliente else '',
+            "direccion_receptor": cliente.direccion if cliente else '',
+            "ciudad_receptor": ciudad.nombre if ciudad else 'Montevideo',
+            "pais_receptor": cliente.pais if cliente else '',
+            "es_extranjero": True if cliente.pais !='Uruguay' else False,
+        }
+        # data['exento'] = exento if exento else ''
+
+        items = []
+        for i, item in enumerate(items_factura, start=1):
+
+            if item.iva == 'Basico' or item.iva == 'Básico':
+                data['hay_items_iva'] = True
+            else:
+                data['hay_items_exento'] = True
+
+            items.append({
+                "nro": i,
+                "ind_fact": 3 if item.iva == 'Basico' or item.iva == 'Básico' else 1,
+                "nombre": item.concepto,
+                "cantidad": 1,
+                "unidad": "N/A",
+                "precio_unitario": item.precio,
+                "monto": item.precio,
+            })
+
+        referencias = []
+        if asociadas:
+            for f in asociadas:
+                factura = Movims.objects.filter(mautogen=f.autofac).first()
+                tipo_fac = 101 if factura.mtipo == 24 else 111 if factura.mtipo == 20 else 'error'
+                referencias.append({
+                    "nro_linea": 1,
+                    "tipo_doc": tipo_fac,
+                    "serie": factura.mserie if factura else '',
+                    "numero_cfe": factura.mboleta if factura else '',
+                    "fecha_cfe": factura.mfechamov.strftime('%Y-%m-%d') if factura else '',
+                })
+        # hacer el dict de las referencias cuando es nota d ecredito
+        ucfe = UCFEClient(
+            base_url="https://test.ucfe.com.uy/Inbox115/CfeService.svc",
+            usuario="213971080016",
+            rut="213971080016",
+            clave="9rtcl5NzMXlRHKU2PGtPUw==",
+            cod_comercio="OCEANL-394",
+            cod_terminal="FC-394",
+            wsdl_inbox="https://test.ucfe.com.uy/Inbox115/CfeService.svc?singleWsdl",
+            wsdl_query="https://test.ucfe.com.uy/Query116/WebServicesFE.svc?singleWsdl"
+        )
+        if ucfe.is_folio_free(tipo_cfe, serie, numero, "213971080016"):
+            xml = ucfe.render_xml(data, items, referencias)
+            uuid_val = str(uuid.uuid4())
+
+            resp_firma = ucfe.soap_solicitar_firma(
+                xml,
+                uuid_str=uuid_val,
+                rut_emisor="213971080016",
+                tipo_cfe=tipo_cfe,
+                serie=serie,
+                numero=numero
+            )
+            data_firma = serialize_object(resp_firma)
+            cae_num = data_firma["Resp"].get("IdCae")
+
+            for b in items_factura:
+                b.cae=cae_num
+                b.save()
+
+
+            resp_post = ucfe.soap_obtener_cfe_emitido(
+                rut="213971080016",
+                tipo_cfe=tipo_cfe,
+                serie=serie,
+                numero=numero
+            )
+            data_post = serialize_object(resp_post)
+
+            # ucfe.test_obtener_pdf("213971080016", tipo_cfe, serie, numero)
+
+            if data_post:
+                return JsonResponse({
+                    "success": True,
+                    "mensaje": f"CFE {serie}-{numero} registrado",
+                    "xml": xml,
+                    "ucfe_response": data_post,
+                })
+            else:
+                return JsonResponse({
+                    "success": False,
+                    "mensaje": f"Error al enviar a DGI {tipo_cfe}-{serie}-{numero}",
+                    "xml": xml,
+                })
+        else:
+            return JsonResponse({"success": False, "mensaje": "Número de folio no disponible"})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "mensaje": str(e)})
+
+def descargar_pdf_uruware(request):
+    autogenerado = request.POST.get("autogenerado")
+    try:
+        factura = Movims.objects.filter(mautogen=autogenerado).first()
+        if not factura:
+            return JsonResponse({"success": False, "mensaje": "Factura no encontrada"})
+
+        tipo = factura.mtipo
+        serie = factura.mserie
+        numero = factura.mboleta
+
+        tipo_cfe = None
+        if int(tipo) == 23:
+            tipo_cfe = 102
+        elif int(tipo) == 24:
+            tipo_cfe = 101
+        elif int(tipo) == 21 or int(tipo) == 22:
+            tipo_cfe = 112
+        elif int(tipo) == 20:
+            tipo_cfe = 111
+
+        ucfe = UCFEClient(
+            base_url="https://test.ucfe.com.uy/Inbox115/CfeService.svc",
+            usuario="213971080016",
+            rut="213971080016",
+            clave="9rtcl5NzMXlRHKU2PGtPUw==",
+            cod_comercio="OCEANL-394",
+            cod_terminal="FC-394",
+            wsdl_inbox="https://test.ucfe.com.uy/Inbox115/CfeService.svc?singleWsdl",
+            wsdl_query="https://test.ucfe.com.uy/Query116/WebServicesFE.svc?singleWsdl"
+        )
+
+        resp = ucfe.soap_query.service.ObtenerPdf(
+            rut="213971080016",
+            tipoCfe=tipo_cfe,
+            serieCfe=serie,
+            numeroCfe=numero
+        )
+
+        if not resp:
+            return JsonResponse({"success": False, "mensaje": "No se pudo obtener el PDF"})
+
+        # Caso 1: binario
+        if isinstance(resp, (bytes, bytearray)) and resp.startswith(b"%PDF"):
+            pdf_bytes = resp
+        else:
+            pdf_bytes = base64.b64decode(resp)
+
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response['Content-Disposition'] = f'attachment; filename="CFE_{tipo_cfe}_{serie}{numero}.pdf"'
+        return response
+
+    except Exception as e:
+        return JsonResponse({"success": False, "mensaje": str(e)})

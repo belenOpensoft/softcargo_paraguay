@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CFE version="1.0" xmlns="http://cfe.dgi.gub.uy">
+  <eRem>
+    <Encabezado>
+      <IdDoc>
+        <TipoCFE>{{ tipo_cfe }}</TipoCFE>
+        <Serie>{{ serie }}</Serie>
+        <Nro>{{ numero }}</Nro>
+        <FchEmis>{{ fecha_emision }}</FchEmis>
+        <TipoTraslado>{{ tipo_traslado }}</TipoTraslado>
+      </IdDoc>
+      <Emisor>
+        <RUCEmisor>{{ ruc_emisor }}</RUCEmisor>
+        <RznSoc>{{ razon_social }}</RznSoc>
+        <CdgDGISucur>{{ codigo_sucursal }}</CdgDGISucur>
+        <DomFiscal>{{ domicilio }}</DomFiscal>
+        <Ciudad>{{ ciudad }}</Ciudad>
+        <Departamento>{{ departamento }}</Departamento>
+      </Emisor>
+      <Receptor>
+        <TipoDocRecep>{{ tipo_doc_receptor }}</TipoDocRecep>
+        <CodPaisRecep>{{ pais_codigo }}</CodPaisRecep>
+        <DocRecep>{{ documento_receptor }}</DocRecep>
+        <RznSocRecep>{{ razon_social_receptor }}</RznSocRecep>
+        <DirRecep>{{ direccion_receptor }}</DirRecep>
+        <CiudadRecep>{{ ciudad_receptor }}</CiudadRecep>
+        <PaisRecep>{{ pais_receptor }}</PaisRecep>
+      </Receptor>
+      <Totales>
+        <CantLinDet>{{ cantidad_items }}</CantLinDet>
+      </Totales>
+    </Encabezado>
+    <Detalle>
+        {{ detalle }}
+<!--      {% for item in items %}-->
+<!--      <Item>-->
+<!--        <NroLinDet>{{ item.nro }}</NroLinDet>-->
+<!--        <IndFact>{{ item.ind_fact }}</IndFact>-->
+<!--        <NomItem>{{ item.nombre }}</NomItem>-->
+<!--        <Cantidad>{{ item.cantidad }}</Cantidad>-->
+<!--        <UniMed>{{ item.unidad }}</UniMed>-->
+<!--      </Item>-->
+<!--      {% endfor %}-->
+    </Detalle>
+    <Referencia>
+        {{ referencia }}
+<!--      {% for ref in referencias %}-->
+<!--      <Referencia>-->
+<!--        <NroLinRef>{{ ref.nro_linea }}</NroLinRef>-->
+<!--        <TpoDocRef>{{ ref.tipo_doc }}</TpoDocRef>-->
+<!--        <Serie>{{ ref.serie }}</Serie>-->
+<!--        <NroCFERef>{{ ref.numero_cfe }}</NroCFERef>-->
+<!--        <RazonRef>{{ ref.razon }}</RazonRef>-->
+<!--        <FechaCFEref>{{ ref.fecha_cfe }}</FechaCFEref>-->
+<!--      </Referencia>-->
+<!--      {% endfor %}-->
+    </Referencia>
+  </eRem>
+</CFE>

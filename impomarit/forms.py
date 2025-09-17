@@ -210,7 +210,7 @@ class add_form(BSModalModelForm):
     )
     deposito_nro = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
-               'id': 'deposito_master_nro_add', 'name': 'deposito_master_nro_add'}), required=False)
+               'id': 'deposito_master_nro_add', 'name': 'deposito_master_nro_add','required': False,}), required=False)
     def __init__(self, *args, **kwargs):
        # lista_clientes = Clientes.objects.none()
         super().__init__(*args, **kwargs)
@@ -385,7 +385,7 @@ class edit_form(BSModalModelForm):
     )
     deposito_nro = forms.CharField(widget=forms.HiddenInput(
         attrs={'class': 'form-control', 'style': 'width:50px; margin-right:2px;', 'readonly': 'readonly',
-               'id': 'deposito_master_nro', 'name': 'deposito_master_nro'}), required=False)
+               'id': 'deposito_master_nro', 'name': 'deposito_master_nro','required': False,}), required=False)
 
     def __init__(self, *args, **kwargs):
        # lista_clientes = Clientes.objects.none()
