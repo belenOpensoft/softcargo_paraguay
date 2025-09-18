@@ -43,6 +43,8 @@ from django.utils.timezone import now, timedelta
 from django.http import JsonResponse
 from django.db.models import F, Window
 from django.db.models.functions import RowNumber
+from xml.sax.saxutils import escape
+
 param_busqueda = {
     1: 'autogenerado__icontains',
     2: 'fecha__icontains',
@@ -1678,6 +1680,11 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                 # efactura
                 tipo_cfe = 111
 
+            if arbitraje is None or arbitraje == 0:
+                dolar_hoy = Dolar.objects.filter(ufecha__date=fecha).first()
+                if dolar_hoy:
+                    arbitraje = dolar_hoy.uvalor
+
             moneda = int(moneda)
             codigo_cliente = cliente_data['codigo']
             cliente = Clientes.objects.filter(codigo=codigo_cliente).first()
@@ -1716,6 +1723,8 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                 "ciudad_receptor": ciudad.nombre if ciudad else 'Montevideo',
                 "pais_receptor": cliente.pais if cliente else '',
             }
+            data = {k: escape(str(v)) if isinstance(v, str) else v for k, v in data.items()}
+
             # data['exento'] = exento if exento else ''
             items = []
             for i, item in enumerate(items_data, start=1):
@@ -1728,7 +1737,7 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                 items.append({
                     "nro": i,
                     "ind_fact": 3 if item.get('iva') == 'Basico' or item.get('iva')=='Básico' else 1,
-                    "nombre": item.get("descripcion"),
+                    "nombre": escape(item.get("descripcion")),
                     "cantidad": 1,
                     "unidad": "N/A",
                     "precio_unitario": item.get("precio") ,
@@ -1933,6 +1942,11 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
             # efactura
             tipo_cfe = 111
 
+        if arbitraje is None or arbitraje == 0:
+            dolar_hoy = Dolar.objects.filter(ufecha__date=fecha).first()
+            if dolar_hoy:
+                arbitraje=dolar_hoy.uvalor
+
         moneda = int(moneda)
         cliente = Clientes.objects.filter(codigo=cliente_codigo).first()
         ciudad = None
@@ -1973,6 +1987,8 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
             "pais_receptor": cliente.pais if cliente else '',
             "es_extranjero": True if cliente.pais != 'Uruguay' else False,
         }
+        data = {k: escape(str(v)) if isinstance(v, str) else v for k, v in data.items()}
+
         # data['exento'] = exento if exento else ''
 
         items = []
@@ -1986,7 +2002,7 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
             items.append({
                 "nro": i,
                 "ind_fact": 3 if item.iva == 'Basico' or item.iva == 'Básico' else 1,
-                "nombre": item.concepto,
+                "nombre": escape(item.concepto),
                 "cantidad": 1,
                 "unidad": "N/A",
                 "precio_unitario": item.precio,
@@ -2082,6 +2098,12 @@ def refacturar_uruware(request):
         iva = factura.miva
         precio_total = factura.mtotal
 
+        if arbitraje is None or arbitraje == 0:
+            dolar_hoy = Dolar.objects.filter(ufecha__date=fecha).first()
+            if dolar_hoy:
+                arbitraje=dolar_hoy.uvalor
+
+
         tipo_cfe = None
         if int(tipo) == 23:
             # nc eticket
@@ -2152,6 +2174,7 @@ def refacturar_uruware(request):
             "pais_receptor": cliente.pais if cliente else '',
             "es_extranjero": True if cliente.pais !='Uruguay' else False,
         }
+        data = {k: escape(str(v)) if isinstance(v, str) else v for k, v in data.items()}
         # data['exento'] = exento if exento else ''
 
         items = []
@@ -2165,7 +2188,7 @@ def refacturar_uruware(request):
             items.append({
                 "nro": i,
                 "ind_fact": 3 if item.iva == 'Basico' or item.iva == 'Básico' else 1,
-                "nombre": item.concepto,
+                "nombre": escape(item.concepto),
                 "cantidad": 1,
                 "unidad": "N/A",
                 "precio_unitario": item.precio,

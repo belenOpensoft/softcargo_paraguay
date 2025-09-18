@@ -431,11 +431,11 @@ $(document).ready(function () {
         "language": {
             url: "/static/datatables/es_ES.json"
         },
-        initComplete: function () {
+    initComplete: function () {
             var api = this.api();
-            api.columns().every(function() {
-                let that = this;
-                $('.input', this.footer()).on('keyup change', function() {
+            api.columns().every(function () {
+                var that = this;
+                $('.filter-input', this.footer()).on('keyup change', function () {
                     if (that.search() !== this.value) {
                         that.search(this.value).draw();
                     }
