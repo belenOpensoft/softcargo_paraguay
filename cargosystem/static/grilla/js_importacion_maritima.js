@@ -518,23 +518,44 @@ $(document).ready(function () {
         }
     }
 });
+    // $("#deposito_master_add").autocomplete({
+    //     source: '/autocomplete_depositos/',
+    //     minLength: 2,
+    //     select: function (event, ui) {
+    //         $(this).attr('data-id', ui.item['id']);
+    //     },
+    //     change: function (event, ui) {
+    //         if (ui.item) {
+    //              $('#deposito_master_nro_add').val(ui.item['id']);
+    //             $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+    //         } else {
+    //             $(this).val('');
+    //              $('#deposito_master_nro_add').val(ui.item['id']);
+    //             $(this).css({"border-color": "", 'box-shadow': ''});
+    //         }
+    //     }
+    // });
     $("#deposito_master_add").autocomplete({
         source: '/autocomplete_depositos/',
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $('#deposito_master_nro_add').val(ui.item['id']);
         },
         change: function (event, ui) {
             if (ui.item) {
-                 $('#deposito_master_nro_add').val(ui.item['id']);
+                // Caso: seleccionó un valor válido
+                $('#deposito_master_nro_add').val(ui.item['id']);
                 $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
             } else {
+                // Caso: borró o puso un valor no válido
                 $(this).val('');
-                 $('#deposito_master_nro_add').val(ui.item['id']);
+                $('#deposito_master_nro_add').val(''); // limpiar también el hidden
                 $(this).css({"border-color": "", 'box-shadow': ''});
             }
         }
-    });
+});
+
     //productos para el embarque
     $("#id_producto").autocomplete({
     source: function (request, response) {
@@ -948,23 +969,45 @@ $(document).ready(function () {
             }
         }
     });
+    // $("#deposito_master").autocomplete({
+    //     source: '/autocomplete_depositos/',
+    //     minLength: 2,
+    //     select: function (event, ui) {
+    //         $(this).attr('data-id', ui.item['id']);
+    //     },
+    //     change: function (event, ui) {
+    //         if (ui.item) {
+    //              $('#deposito_master_nro').val(ui.item['id']);
+    //             $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+    //         } else {
+    //             $(this).val('');
+    //              $('#deposito_master_nro').val(ui.item['id']);
+    //             $(this).css({"border-color": "", 'box-shadow': ''});
+    //         }
+    //     }
+    // });
+
     $("#deposito_master").autocomplete({
         source: '/autocomplete_depositos/',
         minLength: 2,
         select: function (event, ui) {
             $(this).attr('data-id', ui.item['id']);
+            $('#deposito_master_nro').val(ui.item['id']);
         },
         change: function (event, ui) {
             if (ui.item) {
-                 $('#deposito_master_nro').val(ui.item['id']);
+                // Caso válido: guarda la id y aplica estilos de éxito
+                $('#deposito_master_nro').val(ui.item['id']);
                 $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
             } else {
+                // Caso borrado o texto no válido: limpia
                 $(this).val('');
-                 $('#deposito_master_nro').val(ui.item['id']);
+                $('#deposito_master_nro').val('');
                 $(this).css({"border-color": "", 'box-shadow': ''});
             }
         }
     });
+
     //rutas
 
 

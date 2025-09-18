@@ -1,4 +1,6 @@
 from datetime import datetime
+from urllib.parse import urlencode
+
 from django.shortcuts import redirect
 from administracion_contabilidad.models import Dolar
 
@@ -7,7 +9,8 @@ class VerificarArbitrajeMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        modulo = request.session.get('rol')
+        # modulo = request.session.get('rol')
+        modulo = getattr(request, "rol_pestana", None) or request.session.get("rol_activo") or request.session.get("rol")
         path = request.path
 
         excepciones = [
@@ -22,7 +25,12 @@ class VerificarArbitrajeMiddleware:
         ):
             hoy = datetime.today().date()
             if not Dolar.objects.filter(ufecha__date=hoy).exists():
-                return redirect('/admin_cont/verificar_arbitraje/')
+                query = urlencode({"rol": modulo}) if modulo else ""
+                url = '/admin_cont/verificar_arbitraje/'
+                if query:
+                    url = f"{url}?{query}"
+                return redirect(url)
+                # return redirect('/admin_cont/verificar_arbitraje/')
 
         return self.get_response(request)
 

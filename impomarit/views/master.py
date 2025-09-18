@@ -335,6 +335,7 @@ def edit_master(request, id_master):
                 except IntegrityError:
                     messages.error(request, 'Error: No se pudo actualizar los datos.')
                     return HttpResponseRedirect(request.path_info)
+
     except Exception as e:
         messages.error(request, str(e))
         return JsonResponse({

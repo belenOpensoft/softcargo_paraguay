@@ -77,6 +77,7 @@ param_busqueda = {
     9: 'consignatario__icontains',
     10: 'origen_text__icontains',   # si usás descripción, si no, 'origen'
     11: 'destino_text__icontains',  # idem
+    12: 'posicion__icontains',  # idem
 }
 
 """ TABLA PUERTO """
@@ -93,6 +94,7 @@ columns_table = {
     9: 'consignatario',
     10: 'origen_text',
     11: 'destino_text',
+    12: 'posicion',
 }
 
 

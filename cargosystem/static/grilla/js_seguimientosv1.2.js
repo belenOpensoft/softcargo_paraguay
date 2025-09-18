@@ -140,6 +140,12 @@ $(document).ready(function () {
                     return row[5]; // Toma el índice 5 para la columna 6
                 }
             },
+            {
+                "targets": [12],
+                "render": function (data, type, row, meta) {
+                    return row[31]; // Toma el índice 5 para la columna 6
+                }
+            },
         ],
         "order": [[1, "desc"],],
         "processing": true,
