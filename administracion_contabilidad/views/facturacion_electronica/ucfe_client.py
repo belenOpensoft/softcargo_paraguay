@@ -5,6 +5,8 @@ from typing import Dict, Any, Optional
 
 import requests
 import json
+
+from django.conf import settings
 from requests import Session
 from requests.auth import HTTPBasicAuth
 from zeep import Client
@@ -15,6 +17,9 @@ from datetime import datetime
 import uuid
 from jinja2 import Environment, FileSystemLoader
 from datetime import date
+
+from cargosystem.settings import RUTA_PROYECTO
+
 
 class UCFEClient:
     """
@@ -302,7 +307,7 @@ class UCFEClient:
         Retorna:
             str: XML generado
         """
-        env = Environment(loader=FileSystemLoader("cargosystem/media/plantillas_xml"))
+        env = Environment(loader=FileSystemLoader(RUTA_PROYECTO + "/media/plantillas_xml"))
         # Mapear tipo CFE a la plantilla correspondiente
         plantilla_map = {
             "101": "eticket.xml",
