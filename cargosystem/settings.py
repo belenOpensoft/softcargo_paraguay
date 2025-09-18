@@ -25,6 +25,7 @@ SECRET_KEY = 'django-insecure-e-1*c(&*w!hbn1r9ok^5q)p1sut-snx*2r-u9u^9rtbk((-c48
 DEBUG = True
 #DEBUG = False
 ALLOWED_HOSTS = ["*"]
+DAPHNE_PORT=8002
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 URL_DESCONSOLIDACION='http://www.importsys.com.uy/ws/wsOcean.exe'
 # Application definition
