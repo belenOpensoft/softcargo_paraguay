@@ -6,7 +6,7 @@ from administracion_contabilidad.views.editar_consultar_cobranzas import editar_
     actualizar_campos_movims_cobranza, anular_cobranza
 from administracion_contabilidad.views.editar_consultar_ventas import editar_consultar_ventas, obtener_detalle_venta, \
     buscar_ordenes_por_boleta_ventas, obtener_detalle_pago_ventas, obtener_imputados_orden_venta, \
-    modificar_embarque_imputado
+    modificar_embarque_imputado, actualizar_campos_movims_v
 from administracion_contabilidad.views.editar_consultar_compras import editar_consultar_compras, obtener_detalle_compra, \
     buscar_ordenes_por_boleta, obtener_detalle_pago, obtener_imputados_orden_compra, obtener_imputados_compra, \
     procesar_imputaciones_compra, actualizar_campos_movims, anular_compra, obtener_datos_embarque_por_posicion
@@ -145,6 +145,7 @@ urlpatterns = [
     path('procesar_imputaciones_cobranza/', procesar_imputaciones_cobranza, name='procesar_imputaciones_cobranza'),
     path('actualizar_cobranza/', actualizar_campos_movims_cobranza, name='actualizar_cobranza'),
     path('anular_cobranza/', anular_cobranza, name='anular_cobranza'),
+    path('modificar_venta/', actualizar_campos_movims_v, name='modificar_venta'),
 
     #editar y conusltar cobranzas#
 

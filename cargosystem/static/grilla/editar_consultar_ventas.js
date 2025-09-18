@@ -107,7 +107,7 @@
         style: "width:90px;",
         class: "btn btn-primary",
         click: function () {
-          guardarCambiosFormulario();
+          guardarCambiosFormularioVenta();
         }
       },
       {
@@ -821,5 +821,70 @@ function modificar_embarque_imputado(autogenerado, datos) {
     })
     .catch(error => {
         console.error("Error:", error);
+    });
+}
+function guardarCambiosFormularioVenta() {
+    const camposModificados = document.querySelectorAll(".bg-warning");
+    const datos = {};
+
+    const autogen = document.getElementById("autogen_detalle_venta").value;
+    const tipo = document.getElementById("id_tipo").value;
+
+    if (!autogen || !tipo) {
+        console.error("Faltan autogenerado o tipo.");
+        return;
+    }
+
+    datos["autogen"] = autogen;
+    datos["tipo"] = tipo;
+
+    camposModificados.forEach(campo => {
+        const name = campo.name;
+        const value = campo.value;
+        if (name) {
+            datos[name] = value;
+        }
+    });
+
+    // 🔄 Recolectar datos de la tabla directamente con nth-child
+    const posiciones = [];
+    document.querySelectorAll("#tabla_items_venta tbody tr").forEach(fila => {
+        const nroserv = fila.querySelector("td:nth-child(1)")?.textContent.trim();
+        const posicionCelda = fila.querySelector("td:nth-child(6)");
+
+        if (nroserv && posicionCelda) {
+            const input = posicionCelda.querySelector("input");
+            const nuevaPos = input ? input.value.trim() : posicionCelda.textContent.trim();
+
+            posiciones.push({
+                nroserv: nroserv,
+                nueva_posicion: nuevaPos
+            });
+        }
+    });
+
+    if (posiciones.length > 0) {
+        datos["posiciones"] = posiciones;
+    }
+
+    fetch("/admin_cont/modificar_venta/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrf_token
+        },
+        body: JSON.stringify(datos)
+    })
+    .then(res => res.json())
+    .then(response => {
+        if (response.success) {
+            alert("Cambios guardados correctamente.");
+            $("#modalFacturaDetalle").dialog('close');
+        } else {
+            alert("Error al guardar: " + response.error);
+        }
+    })
+    .catch(err => {
+        console.error("Error al guardar cambios:", err);
     });
 }

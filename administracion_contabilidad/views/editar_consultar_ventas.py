@@ -335,3 +335,57 @@ def modificar_embarque_imputado(request):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
+def actualizar_campos_movims_v(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            autogen = data.get("autogen")
+            tipo = data.get("tipo")
+
+            if not autogen or not tipo:
+                return JsonResponse({"success": False, "error": "Faltan parámetros clave."})
+
+            factura = Movims.objects.filter(mautogen=autogen, mnombremov=tipo).first()
+            boleta = Boleta.objects.filter(autogenerado=autogen).first()
+
+            if not factura or not boleta:
+                return JsonResponse({"success": False, "error": "Factura no encontrada."})
+
+            # Asignación individual de campos
+            if 'detalle' in data:
+                factura.mdetalle = data['detalle']
+                boleta.detalle = data['detalle']
+
+            if 'fecha' in data:
+                factura.mfechamov = data['fecha']
+                boleta.fecha = data['fecha']
+
+            if 'paridad' in data:
+                factura.mparidad = float(data['paridad'])
+                boleta.paridad = float(data['paridad'])
+
+            if 'arbitraje' in data:
+                factura.marbitraje = float(data['arbitraje'])
+                boleta.arbitraje = float(data['arbitraje'])
+
+            factura.save()
+            boleta.save()
+
+            if 'posiciones' in data:
+                for item in data['posiciones']:
+                    nroserv = item.get('nroserv')
+                    nueva_posicion = item.get('nueva_posicion')
+
+                    if nroserv and nueva_posicion is not None:
+                        asientos = Asientos.objects.filter(autogenerado=autogen, nroserv=nroserv)
+                        for asiento in asientos:
+                            if asiento.posicion != nueva_posicion:
+                                asiento.posicion = nueva_posicion
+                                asiento.save()
+
+            return JsonResponse({"success": True})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return JsonResponse({"success": False, "error": "Método no permitido"}, status=405)
