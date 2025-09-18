@@ -2085,6 +2085,7 @@ def refacturar_uruware(request):
     autogenerado = request.POST.get("autogenerado")
     try:
         factura = Movims.objects.filter(mautogen=autogenerado).first()
+        bol = Boleta.objects.filter(autogenerado=autogenerado).first()
         if not factura:
             return JsonResponse({"success": False, "mensaje": "Factura no encontrada"})
 
@@ -2092,7 +2093,7 @@ def refacturar_uruware(request):
         moneda = factura.mmoneda
         cliente_codigo=factura.mcliente
         serie = factura.mserie
-        numero = factura.mboleta
+        numero = bol.numero
         fecha = factura.mfechamov
         arbitraje = factura.marbitraje
         iva = factura.miva
@@ -2271,12 +2272,13 @@ def descargar_pdf_uruware(request):
     autogenerado = request.POST.get("autogenerado")
     try:
         factura = Movims.objects.filter(mautogen=autogenerado).first()
+        bol = Boleta.objects.filter(autogenerado=autogenerado).first()
         if not factura:
             return JsonResponse({"success": False, "mensaje": "Factura no encontrada"})
 
         tipo = factura.mtipo
         serie = factura.mserie
-        numero = factura.mboleta
+        numero = bol.numero
 
         tipo_cfe = None
         if int(tipo) == 23:
