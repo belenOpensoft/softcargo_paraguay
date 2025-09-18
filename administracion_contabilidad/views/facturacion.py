@@ -1,5 +1,6 @@
 import base64
 import json
+import logging
 import re
 import uuid
 from functools import reduce
@@ -15,6 +16,7 @@ from reportlab.lib.validators import isNumber
 from zeep.helpers import serialize_object
 
 from administracion_contabilidad.views.facturacion_electronica.ucfe_client import UCFEClient
+from cargosystem.settings import BASE_DIR
 from expaerea.models import ExportEmbarqueaereo, ExportCargaaerea, VEmbarqueaereo as EA, ExportReservas, \
     ExportServiceaereo
 from expmarit.models import ExpmaritEmbarqueaereo, ExpmaritCargaaerea, VEmbarqueaereo as EM, ExpmaritReservas, \
@@ -64,6 +66,13 @@ columns_table = {
     8: 'total',
 }
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(str(BASE_DIR) + "/logs/facturacion.log", mode="a", encoding="utf-8")
+    ]
+)
 
 def source_facturacion(request):
     args = {str(i): request.GET.get(f'columns[{i}][search][value]', '') for i in range(1,9)}
@@ -1785,6 +1794,7 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                         "ucfe_response": data_post,
                     }
                 else:
+                    logging.info(f"Error al firmar: {data_firma} {xml}")
                     return {
                         "success": False,
                         "mensaje": f"Error al enviar a DGI {tipo_cfe}-{serie}-{numero}",
@@ -1794,6 +1804,7 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                 return {"success": False, "mensaje": "Número de folio no disponible"}
 
         except Exception as e:
+            logging.info(f"Error {e}")
             return {"success": False, "mensaje": str(e)}
 
 @require_POST
@@ -2041,6 +2052,7 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
                     "ucfe_response": data_post,
                 }
             else:
+                logging.info(f"Error al firmar: {data_firma} {xml}")
                 return {
                     "success": False,
                     "mensaje": f"Error al enviar a DGI {tipo_cfe}-{serie}-{numero}",
@@ -2050,6 +2062,7 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
             return {"success": False, "mensaje": "Número de folio no disponible"}
 
     except Exception as e:
+        logging.info(f"Error: {e}")
         return {"success": False, "mensaje": str(e)}
 
 def refacturar_uruware(request):
@@ -2210,8 +2223,6 @@ def refacturar_uruware(request):
             )
             data_post = serialize_object(resp_post)
 
-            # ucfe.test_obtener_pdf("213971080016", tipo_cfe, serie, numero)
-
             if data_post:
                 return JsonResponse({
                     "success": True,
@@ -2220,6 +2231,7 @@ def refacturar_uruware(request):
                     "ucfe_response": data_post,
                 })
             else:
+                logging.info(f"Error al firmar: {data_firma} {xml}")
                 return JsonResponse({
                     "success": False,
                     "mensaje": f"Error al enviar a DGI {tipo_cfe}-{serie}-{numero}",
@@ -2229,6 +2241,7 @@ def refacturar_uruware(request):
             return JsonResponse({"success": False, "mensaje": "Número de folio no disponible"})
 
     except Exception as e:
+        logging.info(f"Error al refacturar: {e}")
         return JsonResponse({"success": False, "mensaje": str(e)})
 
 def descargar_pdf_uruware(request):
@@ -2284,4 +2297,5 @@ def descargar_pdf_uruware(request):
         return response
 
     except Exception as e:
+        logging.info(f"Error al obtener PDF: {e}")
         return JsonResponse({"success": False, "mensaje": str(e)})
