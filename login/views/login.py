@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 import numpy as np
 from django.contrib import messages
@@ -7,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 
 from administracion_contabilidad.models import Dolar
+from administracion_contabilidad.views.get_brou_rates import brou_rates
 from cargosystem import settings
 from login.forms import usuarioForm
 
@@ -76,9 +78,35 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect('/')
 
-def verificar_arbitraje(request):
+def verificar_arbitraje_old(request):
     return render(request, 'forzar_arbitraje.html', {
         'hoy': datetime.today().strftime('%Y-%m-%d')
+    })
+def verificar_arbitraje(request):
+    hoy = datetime.today().strftime('%Y-%m-%d')
+    raw_rates = brou_rates()
+    rates = json.loads(raw_rates.content.decode("utf-8"))
+
+    arb_dolar = 0
+    ui = 0
+    tipo_moneda = "2"  # 2 = Dólares USA en tu <select>
+
+    if "dolar" in rates:
+        try:
+            arb_dolar = float(rates["dolar"]["bid"].replace(",", "."))
+        except Exception as e:
+            pass
+    if "unidad_indexada" in rates:
+        try:
+            ui = float(rates["unidad_indexada"]["ask"].replace(",", "."))
+        except Exception as e:
+            pass
+
+    return render(request, 'forzar_arbitraje.html', {
+        'hoy': hoy,
+        'arb_dolar': arb_dolar,
+        'ui': ui,
+        'tipo_moneda': tipo_moneda,
     })
 
 def cambiar_modulo_old(request, modulo):

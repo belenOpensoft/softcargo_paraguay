@@ -6,74 +6,111 @@
     <form id="arbitrajeForm">
         <div class="container-fluid" style="font-size: 0.8rem;">
             <div class="row mb-2">
-<!--                <div class="form-group col-sm-6 mb-1">-->
-<!--                    <label for="valor_pizarra" class="mb-1">Pizarra</label>-->
-<!--                    <input type="number" id="valor_pizarra" class="form-control form-control-sm">-->
-<!--                </div>-->
+                <!--                <div class="form-group col-sm-6 mb-1">-->
+                <!--                    <label for="valor_pizarra" class="mb-1">Pizarra</label>-->
+                <!--                    <input type="number" id="valor_pizarra" class="form-control form-control-sm">-->
+                <!--                </div>-->
                 <div class="form-group col-sm-6 mb-1">
                     <label for="valor_arbitraje" class="mb-1">Arbitraje</label>
-                    <input type="number" id="valor_arbitraje" class="form-control form-control-sm">
+                    <input type="number" id="valor_arbitraje" class="form-control form-control-sm"
+                           value="">
                 </div>
                 <div class="form-group col-sm-6 mb-1">
                     <label for="valor_paridad" class="mb-1">Paridad</label>
-                    <input type="number" id="valor_paridad" class="form-control form-control-sm">
+                    <input type="number" id="valor_paridad" class="form-control form-control-sm"
+                           value="0">
                 </div>
+                <input type="hidden" id="valor_ui" class="form-control form-control-sm" value="">
             </div>
+                <div class="row mb-2">
+                    <div class="form-group col-sm-6 mb-1">
 
-            <div class="row mb-2">
-
-                <div class="form-group col-sm-6 mb-1">
-                    <label for="moneda_select" class="mb-1">Moneda</label>
-                    <select id="moneda_select" class="form-control form-control-sm">
-                        <option value="1">MONEDA NACIONAL</option>
-                        <option value="2">DOLARES USA</option>
-                        <option value="3">EURO</option>
-                        <option value="4">LIBRA</option>
-                        <option value="5">ZAR</option>
-                        <option value="6">FRANCO SUIZO</option>
-                    </select>
+                        <select id="moneda_select" class="form-control form-control-sm">
+                            <option value="1" {% if tipo_moneda == 1 %}selected{% endif %}>MONEDA NACIONAL</option>
+                            <option value="2" {% if tipo_moneda == 2 %}selected{% endif %}>DOLARES USA</option>
+                            <option value="3" {% if tipo_moneda == 3 %}selected{% endif %}>EURO</option>
+                            <option value="4" {% if tipo_moneda == 4 %}selected{% endif %}>LIBRA</option>
+                            <option value="5" {% if tipo_moneda == 5 %}selected{% endif %}>ZAR</option>
+                            <option value="6" {% if tipo_moneda == 6 %}selected{% endif %}>FRANCO SUIZO</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-sm-6 mb-1">
+                        <input type="date" id="fecha_arbi" class="form-control form-control-sm"
+                               value="">
+                    </div>
                 </div>
-                                <div class="form-group col-sm-6 mb-1">
-                    <label for="fecha_arbi" class="mb-1">Fecha</label>
-                    <input type="date" id="fecha_arbi" class="form-control form-control-sm">
-                </div>
-            </div>
 
+
+                <!--                <div class="form-group col-sm-6 mb-1">-->
+                <!--                    <label for="valor_arbitraje" class="mb-1">Arbitraje</label>-->
+                <!--                    <input type="number" id="valor_arbitraje" class="form-control form-control-sm">-->
+                <!--                </div>-->
+                <!--                <div class="form-group col-sm-6 mb-1">-->
+                <!--                    <label for="valor_paridad" class="mb-1">Paridad</label>-->
+                <!--                    <input type="number" id="valor_paridad" class="form-control form-control-sm">-->
+                <!--                </div>-->
+                <!--            </div>-->
+
+                <!--            <div class="row mb-2">-->
+
+                <!--                <div class="form-group col-sm-6 mb-1">-->
+                <!--                    <label for="moneda_select" class="mb-1">Moneda</label>-->
+                <!--                    <select id="moneda_select" class="form-control form-control-sm">-->
+                <!--                        <option value="1">MONEDA NACIONAL</option>-->
+                <!--                        <option value="2">DOLARES USA</option>-->
+                <!--                        <option value="3">EURO</option>-->
+                <!--                        <option value="4">LIBRA</option>-->
+                <!--                        <option value="5">ZAR</option>-->
+                <!--                        <option value="6">FRANCO SUIZO</option>-->
+                <!--                    </select>-->
+                <!--                </div>-->
+                <!--                                <div class="form-group col-sm-6 mb-1">-->
+                <!--                    <label for="fecha_arbi" class="mb-1">Fecha</label>-->
+                <!--                    <input type="date" id="fecha_arbi" class="form-control form-control-sm">-->
+                <!--                </div>-->
+                <!--            </div>-->
+
+            <button type="submit" class="d-none"></button>
         </div>
-        <button type="submit" class="d-none"></button>
     </form>
 </div>
 
-    <script>
+<script>
     $(document).ready(function () {
+        const arb_dolar = "{{ arb_dolar|default:0 }}";
+        const ui_val = "{{ ui|default:0 }}";
+        const tipo_moneda = "{{ tipo_moneda|default:'2' }}";
+        const hoy = "{{ hoy }}";
+
         $('#arbitrajeForm').on('submit', function (e) {
-                e.preventDefault();  // Evita recarga de página
+            e.preventDefault();  // Evita recarga de página
 
-                let datos = {
-                    arbDolar: parseFloat($('#valor_arbitraje').val()) || 0,
-                    parDolar: parseFloat($('#valor_paridad').val()) || 0,
-                    tipoMoneda: $('#moneda_select').val(),
-                    pizDolar: 0,
-                    fecha: $('#fecha_arbi').val()
-                };
+            let datos = {
+                arbDolar: parseFloat($('#valor_arbitraje').val()) || 0,
+                parDolar: parseFloat($('#valor_paridad').val()) || 0,
+                tipoMoneda: $('#moneda_select').val(),
+                pizDolar: 0,
+                ui: $('#valor_ui').val(),
+                fecha: $('#fecha_arbi').val()
+            };
 
-                $.ajax({
-                    url: "/admin_cont/guardar_arbitraje/",
-                    method: "POST",
-                    headers: { "X-CSRFToken": "{{ csrf_token }}" },
-                    data: datos,
-                    success: function (response) {
-                        if (response.status === "Registro guardado correctamente.") {
-                            window.location.href = cambiarModuloUrl;
-                        } else {
-                            alert(response.status);
-                        }
-                    },
-                    error: function () {
-                        alert("Error al guardar el arbitraje.");
+            $.ajax({
+                url: "/admin_cont/guardar_arbitraje/",
+                method: "POST",
+                headers: {"X-CSRFToken": "{{ csrf_token }}"},
+                data: datos,
+                success: function (response) {
+                    if (response.status === "Registro guardado correctamente.") {
+                        window.location.href = cambiarModuloUrl;
+                    } else {
+                        alert(response.status);
                     }
-                });
+                },
+                error: function () {
+                    alert("Error al guardar el arbitraje.");
+                }
             });
+        });
 
         $("#arbitraje_modal").dialog({
             modal: true,
@@ -81,8 +118,14 @@
             width: 400,
             height: 'auto',
             closeOnEscape: false,
-            open: function(event, ui) {
+            open: function (event, ui) {
+                console.log(ui_val);
+                console.log(arb_dolar);
                 $(".ui-dialog-titlebar-close").hide();
+                $("#valor_arbitraje").val(arb_dolar.replace(",", "."));
+                $("#valor_ui").val(ui_val.replace(",", "."));
+                $("#moneda_select").val(tipo_moneda);
+                $("#fecha_arbi").val(hoy);
             },
             buttons: [
                 {
@@ -94,6 +137,7 @@
                             parDolar: parseFloat($('#valor_paridad').val()) || 0,
                             tipoMoneda: $('#moneda_select').val(),
                             pizDolar: 0,
+                            ui: $('#valor_ui').val(),
                             fecha: $('#fecha_arbi').val()
                         };
 
@@ -101,7 +145,7 @@
                         $.ajax({
                             url: "/admin_cont/guardar_arbitraje/",
                             method: "POST",
-                            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                            headers: {"X-CSRFToken": "{{ csrf_token }}"},
                             data: datos,
                             success: function (response) {
                                 if (response.status === "Registro guardado correctamente.") {
@@ -119,10 +163,10 @@
                 }
             ]
         });
-         const hoy = new Date().toISOString().split('T')[0];
-         document.getElementById('fecha_arbi').value = hoy;
+        // const hoy = new Date().toISOString().split('T')[0];
+        // document.getElementById('fecha_arbi').value = hoy;
     });
-    </script>
+</script>
 
 <script>
     const cambiarModuloUrl = "{% url 'vista_cambiar_modulo' 'administracion' %}";

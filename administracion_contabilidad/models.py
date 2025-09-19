@@ -625,6 +625,7 @@ class Difpagos(models.Model):
 class Dolar(models.Model):
     ufecha = models.DateTimeField(blank=True, null=True)
     uvalor = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
+    ui = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     umoneda = models.SmallIntegerField(blank=True, null=True)
     upizarra = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     paridad = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)

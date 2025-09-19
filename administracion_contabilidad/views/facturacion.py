@@ -1313,6 +1313,7 @@ def guardar_arbitraje(request):
             par_dolar = request.POST.get('parDolar', 0)
             tipo_moneda = request.POST.get('tipoMoneda', 0)
             piz_dolar = request.POST.get('pizDolar', 0)
+            ui = request.POST.get('ui', 0)
             fecha_cliente = request.POST.get('fecha', None)
 
             # Validar y formatear la fecha
@@ -1341,6 +1342,7 @@ def guardar_arbitraje(request):
                 registro_existente.uvalor = float(arb_dolar)
                 registro_existente.umoneda = float(tipo_moneda)
                 registro_existente.ufecha = fecha_final
+                registro_existente.ui = ui
                 registro_existente.save()
             else:
                 # Crear un nuevo registro
@@ -1350,6 +1352,7 @@ def guardar_arbitraje(request):
                 dolar.uvalor = float(arb_dolar)
                 dolar.umoneda = float(tipo_moneda)
                 dolar.ufecha = fecha_final
+                dolar.ui = ui
                 dolar.save()
 
             return JsonResponse({'status': 'Registro guardado correctamente.'})
