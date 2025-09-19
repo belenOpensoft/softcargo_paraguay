@@ -17,38 +17,41 @@
                 <Ciudad>{{ ciudad }}</Ciudad>
                 <Departamento>{{ departamento }}</Departamento>
             </Emisor>
-                    <Receptor>
-            <TipoDocRecep>4</TipoDocRecep>
-            <CodPaisRecep>{{ pais_codigo }}</CodPaisRecep>
-        {% if es_extranjero %}
-          <DocRecepExt>CF</DocRecepExt>
-        {% else %}
-            <DocRecep>0</DocRecep>
-        {% endif %}
-        <RznSocRecep>{{ razon_social_receptor }}</RznSocRecep>
-        <DirRecep>{{ direccion_receptor }}</DirRecep>
-        <CiudadRecep>{{ ciudad_receptor }}</CiudadRecep>
-        <PaisRecep>{{ pais_receptor }}</PaisRecep>
-        </Receptor>
-<Totales>
-        <TpoMoneda>{{ moneda }}</TpoMoneda>
-        {% if tipo_cambio %}
-        <TpoCambio>{{ tipo_cambio }}</TpoCambio>
-        {% endif %}
-        {% if hay_items_exento == True %}
-            <MntNoGrv>{{ monto_exento }}</MntNoGrv>
-        {% endif %}
-        {% if hay_items_iva == True %}
-            <MntNetoIVATasaBasica>{{ neto_tasa_basica }}</MntNetoIVATasaBasica>
-        <IVATasaMin>10.000</IVATasaMin>
-            <IVATasaBasica>{{ iva_tasa_basica }}</IVATasaBasica>
-            <MntIVATasaBasica>{{ iva_monto_basica }}</MntIVATasaBasica>
-        {% endif %}
-        <MntTotal>{{ total }}</MntTotal>
-        <CantLinDet>{{ cantidad_items }}</CantLinDet>
-        <MntPagar>{{ monto_pagar }}</MntPagar>
+            {% if lleva_receptor %}
+            <Receptor>
+                <TipoDocRecep>4</TipoDocRecep>
+                <CodPaisRecep>{{ pais_codigo }}</CodPaisRecep>
+                {% if es_extranjero %}
+                <DocRecepExt>CF</DocRecepExt>
+                {% else %}
+                <DocRecep>0</DocRecep>
+                {% endif %}
+                <RznSocRecep>{{ razon_social_receptor }}</RznSocRecep>
+                <DirRecep>{{ direccion_receptor }}</DirRecep>
+                <CiudadRecep>{{ ciudad_receptor }}</CiudadRecep>
+                <PaisRecep>{{ pais_receptor }}</PaisRecep>
+            </Receptor>
+            {% endif %}
 
-      </Totales>
+            <Totales>
+                <TpoMoneda>{{ moneda }}</TpoMoneda>
+                {% if tipo_cambio %}
+                <TpoCambio>{{ tipo_cambio }}</TpoCambio>
+                {% endif %}
+                {% if hay_items_exento == True %}
+                <MntNoGrv>{{ monto_exento }}</MntNoGrv>
+                {% endif %}
+                {% if hay_items_iva == True %}
+                <MntNetoIVATasaBasica>{{ neto_tasa_basica }}</MntNetoIVATasaBasica>
+                <IVATasaMin>10.000</IVATasaMin>
+                <IVATasaBasica>{{ iva_tasa_basica }}</IVATasaBasica>
+                <MntIVATasaBasica>{{ iva_monto_basica }}</MntIVATasaBasica>
+                {% endif %}
+                <MntTotal>{{ total }}</MntTotal>
+                <CantLinDet>{{ cantidad_items }}</CantLinDet>
+                <MntPagar>{{ monto_pagar }}</MntPagar>
+
+            </Totales>
         </Encabezado>
         <Detalle>
             {% for item in items %}

@@ -17,6 +17,7 @@
         <Ciudad>{{ ciudad }}</Ciudad>
         <Departamento>{{ departamento }}</Departamento>
       </Emisor>
+          {% if lleva_receptor %}
         <Receptor>
             <TipoDocRecep>4</TipoDocRecep>
             <CodPaisRecep>{{ pais_codigo }}</CodPaisRecep>
@@ -30,6 +31,7 @@
         <CiudadRecep>{{ ciudad_receptor }}</CiudadRecep>
         <PaisRecep>{{ pais_receptor }}</PaisRecep>
         </Receptor>
+        {% endif %}
       <Totales>
                 <TpoMoneda>{{ moneda }}</TpoMoneda>
         {% if tipo_cambio %}

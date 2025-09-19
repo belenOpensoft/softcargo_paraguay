@@ -1667,6 +1667,8 @@ def cargar_pendientes_imputacion_venta(request):
 
 def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva,items_data,facturas_imputadas,fecha,arbitraje,mnto_neto,exento,autogen):
         try:
+            numero = int(numero)
+
             tipo_cfe = None
             if int(tipo) == 23:
                 # nc eticket
@@ -1682,6 +1684,11 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
             elif int(tipo) == 20:
                 # efactura
                 tipo_cfe = 111
+
+            ui_valor = 0
+            dolar_hoy = Dolar.objects.filter(ufecha__date=datetime.now()).first()
+            if dolar_hoy:
+                ui_valor = dolar_hoy.ui
 
             if arbitraje is None or arbitraje == 0:
                 dolar_hoy = Dolar.objects.filter(ufecha__date=fecha).first()
@@ -1725,7 +1732,25 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                 "direccion_receptor": cliente.direccion if cliente else '',
                 "ciudad_receptor": ciudad.nombre if ciudad else 'Montevideo',
                 "pais_receptor": cliente.pais if cliente else '',
+                "lleva_receptor": False,
             }
+
+            if tipo in (23, 24):
+                # Calcular tope en pesos
+                tope_ui = Decimal("5000") * Decimal(ui_valor or 0)
+
+                supera_tope = False
+                if moneda == 1:  # pesos
+                    supera_tope = Decimal(precio_total) > tope_ui
+                elif moneda == 2:  # dólares
+                    supera_tope = Decimal(precio_total) * Decimal(arbitraje or 0) > tope_ui
+
+                if supera_tope:
+                    # podés setear un flag en data
+                    data["lleva_receptor"] = True
+                else:
+                    data["lleva_receptor"] = False
+
             data = {k: escape(str(v)) if isinstance(v, str) else v for k, v in data.items()}
 
             # data['exento'] = exento if exento else ''
@@ -1928,6 +1953,8 @@ def hacer_nota_credito(request):
 
 def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, precio_total, neto, iva, nota_creada, factura_autogen,
                      fecha, arbitraje, mnto_neto, exento):
+    numero = int(numero)
+
     try:
         tipo_cfe = None
         if int(tipo) == 23:
@@ -1945,10 +1972,15 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
             # efactura
             tipo_cfe = 111
 
+        ui_valor = 0
+        dolar_hoy = Dolar.objects.filter(ufecha__date=datetime.now()).first()
+        if dolar_hoy:
+            ui_valor = dolar_hoy.ui
+
         if arbitraje is None or arbitraje == 0:
             dolar_hoy = Dolar.objects.filter(ufecha__date=fecha).first()
             if dolar_hoy:
-                arbitraje=dolar_hoy.uvalor
+                arbitraje = dolar_hoy.uvalor
 
         moneda = int(moneda)
         cliente = Clientes.objects.filter(codigo=cliente_codigo).first()
@@ -1988,11 +2020,26 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
             "direccion_receptor": cliente.direccion if cliente else '',
             "ciudad_receptor": ciudad.nombre if ciudad else 'Montevideo',
             "pais_receptor": cliente.pais if cliente else '',
+            "lleva_receptor": False,
             "es_extranjero": True if cliente.pais != 'Uruguay' else False,
         }
         data = {k: escape(str(v)) if isinstance(v, str) else v for k, v in data.items()}
 
-        # data['exento'] = exento if exento else ''
+        if tipo in (23, 24):
+            # Calcular tope en pesos
+            tope_ui = Decimal("5000") * Decimal(ui_valor or 0)
+
+            supera_tope = False
+            if moneda == 1:  # pesos
+                supera_tope = Decimal(precio_total) > tope_ui
+            elif moneda == 2:  # dólares
+                supera_tope = Decimal(precio_total) * Decimal(arbitraje or 0) > tope_ui
+
+            if supera_tope:
+                # podés setear un flag en data
+                data["lleva_receptor"] = True
+            else:
+                data["lleva_receptor"] = False
 
         items = []
         for i, item in enumerate(items_nc, start=1):
@@ -2096,16 +2143,21 @@ def refacturar_uruware(request):
         moneda = factura.mmoneda
         cliente_codigo=factura.mcliente
         serie = factura.mserie
-        numero = bol.numero
+        numero = int(bol.numero)
         fecha = factura.mfechamov
         arbitraje = factura.marbitraje
         iva = factura.miva
         precio_total = factura.mtotal
 
+        ui_valor = 0
+        dolar_hoy = Dolar.objects.filter(ufecha__date=datetime.now()).first()
+        if dolar_hoy:
+            ui_valor = dolar_hoy.ui
+
         if arbitraje is None or arbitraje == 0:
             dolar_hoy = Dolar.objects.filter(ufecha__date=fecha).first()
             if dolar_hoy:
-                arbitraje=dolar_hoy.uvalor
+                arbitraje = dolar_hoy.uvalor
 
 
         tipo_cfe = None
@@ -2176,10 +2228,25 @@ def refacturar_uruware(request):
             "direccion_receptor": cliente.direccion if cliente else '',
             "ciudad_receptor": ciudad.nombre if ciudad else 'Montevideo',
             "pais_receptor": cliente.pais if cliente else '',
+            "lleva_receptor": False,
             "es_extranjero": True if cliente.pais !='Uruguay' else False,
         }
         data = {k: escape(str(v)) if isinstance(v, str) else v for k, v in data.items()}
-        # data['exento'] = exento if exento else ''
+        if tipo in (23, 24):
+            # Calcular tope en pesos
+            tope_ui = Decimal("5000") * Decimal(ui_valor or 0)
+
+            supera_tope = False
+            if moneda == 1:  # pesos
+                supera_tope = Decimal(precio_total) > tope_ui
+            elif moneda == 2:  # dólares
+                supera_tope = Decimal(precio_total) * Decimal(arbitraje or 0) > tope_ui
+
+            if supera_tope:
+                # podés setear un flag en data
+                data["lleva_receptor"] = True
+            else:
+                data["lleva_receptor"] = False
 
         items = []
         for i, item in enumerate(items_factura, start=1):
