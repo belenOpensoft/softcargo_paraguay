@@ -834,3 +834,334 @@ AttributeError: 'JsonResponse' object has no attribute 'decode'
 2025-09-19 11:26:04,250 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/administracion_contabilidad/views/facturacion.py changed, reloading.
 2025-09-19 11:40:46,189 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/expmarit/views/mails.py changed, reloading.
 2025-09-19 12:21:08,275 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/administracion_contabilidad/views/facturacion.py changed, reloading.
+2025-09-22 17:41:49,951 - WARNING - Not Found: /favicon.ico
+2025-09-22 17:43:15,366 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/cargosystem/settings.py changed, reloading.
+2025-09-22 17:44:21,383 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/cargosystem/settings.py changed, reloading.
+2025-09-22 17:44:37,310 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/cargosystem/settings.py changed, reloading.
+2025-09-22 17:51:46,267 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/cargosystem/settings.py changed, reloading.
+2025-09-23 12:52:03,611 - WARNING - Not Found: /favicon.ico
+2025-09-23 12:54:53,326 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/seguimientos/views/pdf.py changed, reloading.
+2025-09-23 12:58:00,708 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/impaerea/views/pdf.py changed, reloading.
+2025-09-23 12:59:21,344 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/expaerea/views/pdf.py changed, reloading.
+2025-09-23 13:02:19,563 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/impaerea/views/pdf.py changed, reloading.
+2025-09-23 13:09:47,316 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/seguimientos/views/pdf.py changed, reloading.
+2025-09-23 13:11:29,847 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/seguimientos/views/pdf.py changed, reloading.
+2025-09-23 14:03:11,082 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/expaerea/views/pdf.py changed, reloading.
+2025-09-23 14:07:47,586 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/impaerea/views/pdf.py changed, reloading.
+2025-09-23 14:08:02,535 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/expmarit/views/pdf.py changed, reloading.
+2025-09-23 14:08:31,930 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/expmarit/views/pdf.py changed, reloading.
+2025-09-23 14:09:54,547 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/expmarit/views/pdf.py changed, reloading.
+2025-09-23 14:10:53,948 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/impomarit/views/pdf.py changed, reloading.
+2025-09-23 14:13:24,239 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/impomarit/views/pdf.py changed, reloading.
+2025-09-23 14:13:39,263 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/impomarit/views/pdf.py changed, reloading.
+2025-09-23 14:16:29,080 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/expaerea/views/pdf.py changed, reloading.
+2025-09-23 14:42:27,828 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/impomarit/views/embarques.py changed, reloading.
+2025-09-23 14:52:43,610 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/seguimientos/views/embarques.py changed, reloading.
+2025-09-23 14:54:01,065 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/seguimientos/views/embarques.py changed, reloading.
+2025-09-23 15:06:09,227 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/expaerea/views/master.py changed, reloading.
+2025-09-23 15:10:45,339 - INFO - /home/opensoft_pc2/PycharmProjects/softcargo/expaerea/views/master.py changed, reloading.
+2025-09-23 15:13:32,896 - ERROR - Internal Server Error: /source_guias/
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 206, in execute
+    res = self._query(query)
+          ^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 319, in _query
+    db.query(q)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/connections.py", line 254, in query
+    _mysql.connection.query(self, query)
+MySQLdb.ProgrammingError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 97, in get_data
+    for registro in registros_filtrados:
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 398, in __iter__
+    self._fetch_all()
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1560, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 206, in execute
+    res = self._query(query)
+          ^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 319, in _query
+    db.query(q)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/connections.py", line 254, in query
+    _mysql.connection.query(self, query)
+django.db.utils.ProgrammingError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 80, in source_guias
+    data = get_data(registros[start:end])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 111, in get_data
+    raise TypeError(e)
+TypeError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+2025-09-23 15:13:55,153 - ERROR - Internal Server Error: /source_guias/
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 206, in execute
+    res = self._query(query)
+          ^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 319, in _query
+    db.query(q)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/connections.py", line 254, in query
+    _mysql.connection.query(self, query)
+MySQLdb.ProgrammingError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 97, in get_data
+    for registro in registros_filtrados:
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 398, in __iter__
+    self._fetch_all()
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1560, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 206, in execute
+    res = self._query(query)
+          ^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 319, in _query
+    db.query(q)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/connections.py", line 254, in query
+    _mysql.connection.query(self, query)
+django.db.utils.ProgrammingError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 80, in source_guias
+    data = get_data(registros[start:end])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 111, in get_data
+    raise TypeError(e)
+TypeError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+2025-09-23 15:13:59,994 - WARNING - Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2025-09-23 15:15:00,924 - WARNING - Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2025-09-23 15:15:01,498 - WARNING - Not Found: /favicon.ico
+2025-09-23 15:15:13,477 - ERROR - Internal Server Error: /source_guias/
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 206, in execute
+    res = self._query(query)
+          ^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 319, in _query
+    db.query(q)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/connections.py", line 254, in query
+    _mysql.connection.query(self, query)
+MySQLdb.ProgrammingError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 97, in get_data
+    for registro in registros_filtrados:
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 398, in __iter__
+    self._fetch_all()
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1560, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 206, in execute
+    res = self._query(query)
+          ^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 319, in _query
+    db.query(q)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/connections.py", line 254, in query
+    _mysql.connection.query(self, query)
+django.db.utils.ProgrammingError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 80, in source_guias
+    data = get_data(registros[start:end])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 111, in get_data
+    raise TypeError(e)
+TypeError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+2025-09-23 15:15:29,871 - WARNING - Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2025-09-23 15:26:40,971 - ERROR - Internal Server Error: /source_guias/
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 206, in execute
+    res = self._query(query)
+          ^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 319, in _query
+    db.query(q)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/connections.py", line 254, in query
+    _mysql.connection.query(self, query)
+MySQLdb.ProgrammingError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 97, in get_data
+    for registro in registros_filtrados:
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 398, in __iter__
+    self._fetch_all()
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1560, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 206, in execute
+    res = self._query(query)
+          ^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/cursors.py", line 319, in _query
+    db.query(q)
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/MySQLdb/connections.py", line 254, in query
+    _mysql.connection.query(self, query)
+django.db.utils.ProgrammingError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/.venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 80, in source_guias
+    data = get_data(registros[start:end])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/opensoft_pc2/PycharmProjects/softcargo/mantenimientos/views/guias.py", line 111, in get_data
+    raise TypeError(e)
+TypeError: (1146, "Table 'cargosystem.VGrillaGuias' doesn't exist")
+2025-09-23 15:26:44,063 - WARNING - Not Found: /.well-known/appspecific/com.chrome.devtools.json

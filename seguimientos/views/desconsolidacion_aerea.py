@@ -24,6 +24,10 @@ from seguimientos.views import seguimientos
 
 def desconsolidacion_aerea(request):
     try:
+        if not getattr(settings, "DESCONSOLIDACION_AEREA"):
+            messages.error(request, "La funcionalidad de Desconsolidación Aérea está deshabilitada.")
+            return HttpResponseRedirect("/")
+
         if request.user.has_perms(["seguimientos.add_", ]):
             ctx = {'form': desconsolidacion_form(), 'title_page': 'Desconsolidacion de importacion aerea'}
             if request.method == 'POST':

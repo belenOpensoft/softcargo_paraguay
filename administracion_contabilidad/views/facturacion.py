@@ -16,6 +16,7 @@ from reportlab.lib.validators import isNumber
 from zeep.helpers import serialize_object
 
 from administracion_contabilidad.views.facturacion_electronica.ucfe_client import UCFEClient
+from cargosystem import settings
 from cargosystem.settings import BASE_DIR
 from expaerea.models import ExportEmbarqueaereo, ExportCargaaerea, VEmbarqueaereo as EA, ExportReservas, \
     ExportServiceaereo
@@ -669,10 +670,15 @@ def procesar_factura(request):
                     if preventa:
                         gastos_detalle_marcar(preventa.get('autogenerado'),autogenerado)
 
-                resultado = facturar_uruware(
-                    numero, tipo, serie, moneda, cliente_data,
-                    precio_total, neto, iva, items_data, facturas_imputadas, fecha_obj,arbitraje,mnt_neto_iva_basica,exento,autogenerado
-                )
+                if getattr(settings, "FACTURACION_ELECTRONICA", True):
+
+                    resultado = facturar_uruware(
+                        numero, tipo, serie, moneda, cliente_data,
+                        precio_total, neto, iva, items_data, facturas_imputadas, fecha_obj,arbitraje,mnt_neto_iva_basica,exento,autogenerado
+                    )
+                    mensaje = resultado['mensaje']
+                else:
+                    mensaje = 'ok'
 
                 if resultado["success"]:
                     return JsonResponse({
@@ -1709,7 +1715,7 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                 "numero": numero,
                 "fecha_emision": fecha.strftime('%Y-%m-%d'),
                 "forma_pago": "2",
-                "ruc_emisor": "213971080016",
+                "ruc_emisor": settings.FACTURACION_RUT,
                 "razon_social": "Oceanlink LTDA",
                 "codigo_sucursal": "1",
                 "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
@@ -1786,23 +1792,23 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                 })
             # hacer el dict de las referencias cuando es nota d ecredito
             ucfe = UCFEClient(
-                base_url="https://test.ucfe.com.uy/Inbox115/CfeService.svc",
-                usuario="213971080016",
-                rut="213971080016",
-                clave="9rtcl5NzMXlRHKU2PGtPUw==",
-                cod_comercio="OCEANL-394",
-                cod_terminal="FC-394",
-                wsdl_inbox="https://test.ucfe.com.uy/Inbox115/CfeService.svc?singleWsdl",
-                wsdl_query="https://test.ucfe.com.uy/Query116/WebServicesFE.svc?singleWsdl"
+                base_url=settings.FACTURACION_BASE_URL,
+                usuario=settings.FACTURACION_USUARIO,
+                rut=settings.FACTURACION_RUT,
+                clave=settings.FACTURACION_CLAVE,
+                cod_comercio=settings.FACTURACION_COMERCIO,
+                cod_terminal=settings.FACTURACION_TERMINAL,
+                wsdl_inbox=settings.FACTURACION_INBOX_URL,
+                wsdl_query=settings.FACTURACION_QUERY_URL,
             )
-            if ucfe.is_folio_free(tipo_cfe, serie, numero, "213971080016"):
+            if ucfe.is_folio_free(tipo_cfe, serie, numero, settings.FACTURACION_RUT):
                 xml = ucfe.render_xml(data, items,referencias)
                 uuid_val = str(uuid.uuid4())
 
                 resp_firma = ucfe.soap_solicitar_firma(
                     xml,
                     uuid_str=uuid_val,
-                    rut_emisor="213971080016",
+                    rut_emisor=settings.FACTURACION_RUT,
                     tipo_cfe=tipo_cfe,
                     serie=serie,
                     numero=numero
@@ -1815,14 +1821,13 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                     b.save()
 
                 resp_post = ucfe.soap_obtener_cfe_emitido(
-                    rut="213971080016",
+                    rut=settings.FACTURACION_RUT,
                     tipo_cfe=tipo_cfe,
                     serie=serie,
                     numero=numero
                 )
                 data_post = serialize_object(resp_post)
 
-                # ucfe.test_obtener_pdf("213971080016",tipo_cfe,serie,numero)
 
                 if data_post:
                     return {
@@ -1945,7 +1950,9 @@ def hacer_nota_credito(request):
             monto_iva=round(monto_iva,2)
             monto_exento=round(monto_exento,2)
 
-            facturar_uruware_nc_directa(numero_nc,tipo_nota,nueva_nota.mserie,nueva_nota.mmoneda,nueva_nota.mcliente,nueva_nota.mtotal,nueva_nota.mmonto,
+            if getattr(settings, "FACTURACION_ELECTRONICA"):
+
+                facturar_uruware_nc_directa(numero_nc,tipo_nota,nueva_nota.mserie,nueva_nota.mmoneda,nueva_nota.mcliente,nueva_nota.mtotal,nueva_nota.mmonto,
                                         nueva_nota.miva,nuevo_autogenerado,fac.mautogen,nueva_nota.mfechamov,nueva_nota.marbitraje,monto_iva,monto_exento)
 
         return JsonResponse({"mensaje": "Nota de crédito creada con éxito."})
@@ -2000,7 +2007,7 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
             "numero": numero,
             "fecha_emision": fecha.strftime('%Y-%m-%d'),
             "forma_pago": "2",
-            "ruc_emisor": "213971080016",
+            "ruc_emisor": settings.FACTURACION_RUT,
             "razon_social": "Oceanlink LTDA",
             "codigo_sucursal": "1",
             "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
@@ -2075,23 +2082,23 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
         })
         # hacer el dict de las referencias cuando es nota d ecredito
         ucfe = UCFEClient(
-            base_url="https://test.ucfe.com.uy/Inbox115/CfeService.svc",
-            usuario="213971080016",
-            rut="213971080016",
-            clave="9rtcl5NzMXlRHKU2PGtPUw==",
-            cod_comercio="OCEANL-394",
-            cod_terminal="FC-394",
-            wsdl_inbox="https://test.ucfe.com.uy/Inbox115/CfeService.svc?singleWsdl",
-            wsdl_query="https://test.ucfe.com.uy/Query116/WebServicesFE.svc?singleWsdl"
+            base_url=settings.FACTURACION_BASE_URL,
+            usuario=settings.FACTURACION_USUARIO,
+            rut=settings.FACTURACION_RUT,
+            clave=settings.FACTURACION_CLAVE,
+            cod_comercio=settings.FACTURACION_COMERCIO,
+            cod_terminal=settings.FACTURACION_TERMINAL,
+            wsdl_inbox=settings.FACTURACION_INBOX_URL,
+            wsdl_query=settings.FACTURACION_QUERY_URL,
         )
-        if ucfe.is_folio_free(tipo_cfe, serie, numero, "213971080016"):
+        if ucfe.is_folio_free(tipo_cfe, serie, numero, settings.FACTURACION_RUT):
             xml = ucfe.render_xml(data, items, referencias)
             uuid_val = str(uuid.uuid4())
 
             resp_firma = ucfe.soap_solicitar_firma(
                 xml,
                 uuid_str=uuid_val,
-                rut_emisor="213971080016",
+                rut_emisor=settings.FACTURACION_RUT,
                 tipo_cfe=tipo_cfe,
                 serie=serie,
                 numero=numero
@@ -2105,14 +2112,13 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
 
 
             resp_post = ucfe.soap_obtener_cfe_emitido(
-                rut="213971080016",
+                rut=settings.FACTURACION_RUT,
                 tipo_cfe=tipo_cfe,
                 serie=serie,
                 numero=numero
             )
             data_post = serialize_object(resp_post)
 
-            # ucfe.test_obtener_pdf("213971080016", tipo_cfe, serie, numero)
 
             if data_post:
                 return {
@@ -2136,6 +2142,12 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
         return {"success": False, "mensaje": str(e)}
 
 def refacturar_uruware(request):
+    if not getattr(settings, "FACTURACION_ELECTRONICA"):
+        return JsonResponse({
+            "success": False,
+            "mensaje": "Funcionalidad no permitida"
+        })
+
     autogenerado = request.POST.get("autogenerado")
     try:
         factura = Movims.objects.filter(mautogen=autogenerado).first()
@@ -2212,7 +2224,7 @@ def refacturar_uruware(request):
             "numero": numero,
             "fecha_emision": fecha.strftime('%Y-%m-%d'),
             "forma_pago": "2",
-            "ruc_emisor": "213971080016",
+            "ruc_emisor": settings.FACTURACION_RUT,
             "razon_social": "Oceanlink LTDA",
             "codigo_sucursal": "1",
             "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
@@ -2288,23 +2300,23 @@ def refacturar_uruware(request):
                 })
         # hacer el dict de las referencias cuando es nota d ecredito
         ucfe = UCFEClient(
-            base_url="https://test.ucfe.com.uy/Inbox115/CfeService.svc",
-            usuario="213971080016",
-            rut="213971080016",
-            clave="9rtcl5NzMXlRHKU2PGtPUw==",
-            cod_comercio="OCEANL-394",
-            cod_terminal="FC-394",
-            wsdl_inbox="https://test.ucfe.com.uy/Inbox115/CfeService.svc?singleWsdl",
-            wsdl_query="https://test.ucfe.com.uy/Query116/WebServicesFE.svc?singleWsdl"
+            base_url=settings.FACTURACION_BASE_URL,
+            usuario=settings.FACTURACION_USUARIO,
+            rut=settings.FACTURACION_RUT,
+            clave=settings.FACTURACION_CLAVE,
+            cod_comercio=settings.FACTURACION_COMERCIO,
+            cod_terminal=settings.FACTURACION_TERMINAL,
+            wsdl_inbox=settings.FACTURACION_INBOX_URL,
+            wsdl_query=settings.FACTURACION_QUERY_URL,
         )
-        if ucfe.is_folio_free(tipo_cfe, serie, numero, "213971080016"):
+        if ucfe.is_folio_free(tipo_cfe, serie, numero, settings.FACTURACION_RUT):
             xml = ucfe.render_xml(data, items, referencias)
             uuid_val = str(uuid.uuid4())
 
             resp_firma = ucfe.soap_solicitar_firma(
                 xml,
                 uuid_str=uuid_val,
-                rut_emisor="213971080016",
+                rut_emisor=settings.FACTURACION_RUT,
                 tipo_cfe=tipo_cfe,
                 serie=serie,
                 numero=numero
@@ -2318,7 +2330,7 @@ def refacturar_uruware(request):
 
 
             resp_post = ucfe.soap_obtener_cfe_emitido(
-                rut="213971080016",
+                rut=settings.FACTURACION_RUT,
                 tipo_cfe=tipo_cfe,
                 serie=serie,
                 numero=numero
@@ -2347,6 +2359,9 @@ def refacturar_uruware(request):
         return JsonResponse({"success": False, "mensaje": str(e)})
 
 def descargar_pdf_uruware(request):
+    if not getattr(settings, "FACTURACION_ELECTRONICA"):
+        return JsonResponse({"success": False, "mensaje": "Funcionalidad no permitida"})
+
     autogenerado = request.POST.get("autogenerado")
     try:
         factura = Movims.objects.filter(mautogen=autogenerado).first()
@@ -2369,18 +2384,18 @@ def descargar_pdf_uruware(request):
             tipo_cfe = 111
 
         ucfe = UCFEClient(
-            base_url="https://test.ucfe.com.uy/Inbox115/CfeService.svc",
-            usuario="213971080016",
-            rut="213971080016",
-            clave="9rtcl5NzMXlRHKU2PGtPUw==",
-            cod_comercio="OCEANL-394",
-            cod_terminal="FC-394",
-            wsdl_inbox="https://test.ucfe.com.uy/Inbox115/CfeService.svc?singleWsdl",
-            wsdl_query="https://test.ucfe.com.uy/Query116/WebServicesFE.svc?singleWsdl"
+            base_url=settings.FACTURACION_BASE_URL,
+            usuario=settings.FACTURACION_USUARIO,
+            rut=settings.FACTURACION_RUT,
+            clave=settings.FACTURACION_CLAVE,
+            cod_comercio=settings.FACTURACION_COMERCIO,
+            cod_terminal=settings.FACTURACION_TERMINAL,
+            wsdl_inbox=settings.FACTURACION_INBOX_URL,
+            wsdl_query=settings.FACTURACION_QUERY_URL,
         )
 
         resp = ucfe.soap_query.service.ObtenerPdf(
-            rut="213971080016",
+            rut=settings.FACTURACION_RUT,
             tipoCfe=tipo_cfe,
             serieCfe=serie,
             numeroCfe=numero

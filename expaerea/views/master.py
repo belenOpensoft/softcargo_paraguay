@@ -129,7 +129,7 @@ def master_detail(request):
                     'agente_e': master.agente,
                     'consignatario_e': master.consignatario,
                     'aduana_e': master.aduana,
-                    'tarifa_e': master.tarifaawb,
+                    'tarifa_e': round(float(master.tarifaawb),2) if master.tarifaawb else 0,
                     'moneda_e': master.moneda,
                     'arbitraje_e': master.arbitraje,
                     'kilos_e': master.kilos,

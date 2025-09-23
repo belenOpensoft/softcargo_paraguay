@@ -90,17 +90,17 @@ def verificar_arbitraje(request):
     arb_dolar = 0
     ui = 0
     tipo_moneda = "2"  # 2 = Dólares USA en tu <select>
-
-    if "dolar" in rates:
-        try:
-            arb_dolar = float(rates["dolar"]["bid"].replace(",", "."))
-        except Exception as e:
-            pass
-    if "unidad_indexada" in rates:
-        try:
-            ui = float(rates["unidad_indexada"]["ask"].replace(",", "."))
-        except Exception as e:
-            pass
+    if getattr(settings, "DATOS_BROU"):
+        if "dolar" in rates:
+            try:
+                arb_dolar = float(rates["dolar"]["bid"].replace(",", "."))
+            except Exception as e:
+                pass
+        if "unidad_indexada" in rates:
+            try:
+                ui = float(rates["unidad_indexada"]["ask"].replace(",", "."))
+            except Exception as e:
+                pass
 
     return render(request, 'forzar_arbitraje.html', {
         'hoy': hoy,

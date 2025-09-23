@@ -74,7 +74,9 @@ def get_data(registros_filtrados):
             registro_json.append('' if registro.tipo is None else str(registro.tipo))
             registro_json.append('' if registro.bruto is None else str(registro.bruto))
             registro_json.append('' if registro.medidas is None else str(registro.medidas))
-            registro_json.append('' if registro.cbm is None else str(registro.cbm))
+            vol = registro.cbm if registro.cbm else 0
+            vol = round(float(vol),3)
+            registro_json.append('' if vol == 0 else str(vol))
             registro_json.append('' if registro.mercaderia is None else str(registro.mercaderia))
             registro_json.append('' if registro.materialreceipt is None else str(registro.materialreceipt))
             registro_json.append('' if registro.producto is None else str(registro.producto.codigo))

@@ -876,65 +876,84 @@ $(document).ready(function () {
         $("#impucompra_nota").dialog("close");
     });
 
-$('#reenviar_uruware').on('click', function () {
-    let autogenerado= $('#autogen_detalle_venta').val()
-        $.ajax({
-      url: "/admin_cont/refacturar_uruware/",
-      method: "POST",
-      data: {
-        csrfmiddlewaretoken: csrf_token,
-        autogenerado: autogenerado,
-      },
-      dataType: "json" // jQuery parsea resp a objeto
-    })
-      .done(function (resp) {
-          console.log(resp);
-          alert(resp.mensaje);
+    $('#reenviar_uruware').on('click', function () {
+        let autogenerado= $('#autogen_detalle_venta').val()
+            $.ajax({
+          url: "/admin_cont/refacturar_uruware/",
+          method: "POST",
+          data: {
+            csrfmiddlewaretoken: csrf_token,
+            autogenerado: autogenerado,
+          },
+          dataType: "json" // jQuery parsea resp a objeto
+        })
+          .done(function (resp) {
+              console.log(resp);
+              alert(resp.mensaje);
 
-        $('#modalFacturaDetalle').dialog("close");
+            $('#modalFacturaDetalle').dialog("close");
 
-      })
-      .fail(function (xhr) {
-        let msg = "error";
-        try {
-          const r = JSON.parse(xhr.responseText);
-          if (r.mensaje) msg = r.mensaje;
-        } catch (e) {}
-        alert(msg);
-      })
-      .always(function (resp) {
-      });
-});
-
-$('#descargar_uruware').on('click', function () {
-    let autogenerado= $('#autogen_detalle_venta').val()
-
-    fetch("/admin_cont/descargar_pdf_uruware/", {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": csrf_token // asegurate de tener csrf_token definido
-        },
-        body: new URLSearchParams({ autogenerado: autogenerado,csrfmiddlewaretoken: csrf_token,
- })
-    })
-    .then(response => {
-        if (!response.ok) throw new Error("Error al descargar el PDF");
-        return response.blob();
-    })
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "descarga_"+autogenerado+".pdf"; // nombre de archivo en la descarga
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-    })
-    .catch(error => {
-        alert("Error: " + error.message);
+          })
+          .fail(function (xhr) {
+            let msg = "error";
+            try {
+              const r = JSON.parse(xhr.responseText);
+              if (r.mensaje) msg = r.mensaje;
+            } catch (e) {}
+            alert(msg);
+          })
+          .always(function (resp) {
+          });
     });
-});
+
+    $('#descargar_uruware').on('click', function () {
+        let autogenerado= $('#autogen_detalle_venta').val()
+
+        fetch("/admin_cont/descargar_pdf_uruware/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrf_token // asegurate de tener csrf_token definido
+            },
+            body: new URLSearchParams({ autogenerado: autogenerado,csrfmiddlewaretoken: csrf_token,
+     })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Error al descargar el PDF");
+            return response.blob();
+        })
+        // .then(blob => {
+        //     const url = window.URL.createObjectURL(blob);
+        //     const a = document.createElement("a");
+        //     a.href = url;
+        //     a.download = "descarga_"+autogenerado+".pdf"; // nombre de archivo en la descarga
+        //     document.body.appendChild(a);
+        //     a.click();
+        //     a.remove();
+        //     window.URL.revokeObjectURL(url);
+        // })
+
+        .then(async response => {
+        const contentType = response.headers.get("Content-Type");
+
+        if (contentType && contentType.includes("application/pdf")) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "descarga_" + autogenerado + ".pdf";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } else {
+            const data = await response.json();
+            alert(data.mensaje || "Ocurrió un error");
+        }
+        })
+        .catch(error => {
+            alert("Error: " + error.message);
+        });
+    });
 
 });
 

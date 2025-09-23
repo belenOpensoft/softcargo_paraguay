@@ -51,7 +51,7 @@ def get_data(registros_filtrados):
             registro_json.append('' if registro.tipo is None else str(registro.tipo))
             registro_json.append('' if registro.bruto is None else str(registro.bruto))
             registro_json.append('' if registro.medidas is None else str(registro.medidas))
-            registro_json.append('' if registro.producto is None else str(registro.producto.codigo))
+            registro_json.append('' if registro.producto.codigo is None else str(registro.producto.codigo))
 
             data.append(registro_json)
         return data

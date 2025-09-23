@@ -209,17 +209,6 @@ class UCFEClient:
             print("SOAP Consulta ESTADO ERROR:", e)
             return None
 
-    # def soap_obtener_pdf(self, tipo_cfe: int, serie: str, numero: int,
-    #                      rut_emisor: str = "213971080016"):
-    #     if not self.soap_query:
-    #         raise RuntimeError("WSDL de Query no configurado")
-    #     return self.soap_query.service.ObtenerPdf(
-    #         rut=rut_emisor,
-    #         tipoCfe=tipo_cfe,
-    #         serieCfe=serie,
-    #         numeroCfe=numero,
-    #     )
-
 
     def soap_obtener_cfe_emitido(self, rut: str, tipo_cfe: int, serie: str, numero: int):
         """
@@ -352,69 +341,6 @@ class UCFEClient:
             referencias=referencias or []
         ).strip()
 
-    # def test_obtener_pdf(self, rut_emisor, tipo_cfe, serie, numero):
-    #     try:
-    #         # Datos de prueba
-    #         rut_emisor = "213971080016"
-    #         tipo_cfe = 111
-    #         serie = "A"
-    #         numero = 37
-    #
-    #         resp = self.soap_query.service.ObtenerPdf(
-    #             rut=rut_emisor,
-    #             tipoCfe=tipo_cfe,
-    #             serieCfe=serie,
-    #             numeroCfe=numero
-    #         )
-    #
-    #         if not resp:
-    #             return
-    #
-    #         # Caso 1: el servicio devuelve PDF binario directo
-    #         if isinstance(resp, (bytes, bytearray)) and resp.startswith(b"%PDF"):
-    #             pdf_bytes = resp
-    #
-    #         # Caso 2: el servicio devuelve base64 en string
-    #         else:
-    #             import base64
-    #             pdf_bytes = base64.b64decode(resp)
-    #
-    #         # Guardar PDF en archivo
-    #         ruta = f"TEST_CFE_{tipo_cfe}_{serie}{numero}.pdf"
-    #         with open(ruta, "wb") as f:
-    #             f.write(pdf_bytes)
-    #
-    #
-    #     except Exception as e:
-    #         print("❌ Error durante la prueba:", e)
-
-    # def obtener_pdf(self, rut_emisor, tipo_cfe, serie, numero):
-    #     """
-    #     Obtiene el PDF desde UCFE y devuelve los bytes listos para descarga.
-    #     """
-    #     try:
-    #         resp = self.soap_query.service.ObtenerPdf(
-    #             rut=rut_emisor,
-    #             tipoCfe=tipo_cfe,
-    #             serieCfe=serie,
-    #             numeroCfe=numero
-    #         )
-    #
-    #         if not resp:
-    #             return None
-    #
-    #         # Caso 1: UCFE devuelve binario directo
-    #         if isinstance(resp, (bytes, bytearray)) and resp.startswith(b"%PDF"):
-    #             pdf_bytes = resp
-    #         # Caso 2: UCFE devuelve base64 (string)
-    #         else:
-    #             pdf_bytes = base64.b64decode(resp)
-    #         logging.info(f"PDF obtenido correctamente: {rut_emisor}-{tipo_cfe}-{serie}-{numero}")
-    #         return pdf_bytes
-    #
-    #     except Exception as e:
-    #         print("❌ Error en obtener_pdf:", e)
-    #         return None
 
     #PARA PRUEBAS#
 
