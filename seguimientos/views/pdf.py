@@ -52,9 +52,18 @@ def get_datos_caratula(request):
             texto += formatear_caratula("ETD", row.etd.strftime('%d-%m-%Y') if isinstance(row.etd, datetime.datetime) else "?")
 
             if aereo:
-                vapor = Conexaerea.objects.filter(numero=row.numero).values_list('vapor', flat=True).first()
-                nombre_vapor = vapor or 'S/I'
+                vuelos = (
+                    Conexaerea.objects
+                    .filter(numero=row.numero)
+                    .values_list('cia', 'vapor')
+                )
+                if vuelos:
+                    nombre_vapor = "; ".join([f"{cia}{vapor}" for cia, vapor in vuelos])
+                else:
+                    nombre_vapor = "S/I"
+
                 texto += formatear_caratula("Vuelo", nombre_vapor)
+
             else:
                 if isinstance(row.vapor, int) or (isinstance(row.vapor, str) and row.vapor.isdigit()):
                     vapor_obj = Vapores.objects.filter(codigo=int(row.vapor)).first()
@@ -143,13 +152,29 @@ def get_datos_caratula(request):
             # Detalle de mercadería
             embarque = Cargaaerea.objects.filter(numero=id)
             if embarque:
+                total_bultos = 0
+                total_peso = 0.0
+                total_volumen = 0.0
+                mercaderias = []
                 for e in embarque:
-                    texto += formatear_caratula("Nro Bultos", f"{e.bultos} {e.tipo}") if movimiento is not None and movimiento == 'LCL/LCL' else formatear_caratula("Nro Bultos", f"{e.bultos}")
-                    texto += formatear_caratula("Mercadería", e.producto.nombre if e.producto else '')
-                    texto += '<br>'
-                    texto += formatear_caratula("Peso", round(float(e.bruto or 0),2))
-                    texto += formatear_caratula("Volumen", round(float(e.cbm or 0),2))
-                    texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
+                    total_bultos += e.bultos or 0
+                    total_peso += float(e.bruto or 0)
+                    total_volumen += float(e.cbm or 0)
+                    if e.producto:
+                        mercaderias.append(e.producto.nombre)
+
+                mercaderias_str = "; ".join(mercaderias)
+
+                if movimiento is not None and movimiento == 'LCL/LCL':
+                    texto += formatear_caratula("Nro Bultos", f"{total_bultos} {e.tipo}")
+                else:
+                    texto += formatear_caratula("Nro Bultos", f"{total_bultos}")
+
+                texto += formatear_caratula("Mercadería", mercaderias_str)
+                texto += formatear_caratula("Peso", round(total_peso, 2))
+                texto += formatear_caratula("Volumen", round(total_volumen, 2))
+
+                texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             texto += formatear_caratula("Forma de pago", row.pago)
             texto += formatear_caratula("Vendedor", row.vendedor)

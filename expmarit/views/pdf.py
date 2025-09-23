@@ -118,14 +118,34 @@ def get_datos_caratula(request):
 
             # Detalle de la mercadería
             embarque_h = ExpmaritCargaaerea.objects.filter(numero=id)
+
             if embarque_h:
+                total_bultos = 0
+                total_peso = 0.0
+                total_volumen = 0.0
+                mercaderias = []
+                tipo = None  # para guardar el último tipo
+
                 for e in embarque_h:
-                    texto += formatear_caratula("Nro Bultos", f"{e.bultos} {e.tipo}") if movimiento is not None and movimiento == 'LCL/LCL' else formatear_caratula("Nro Bultos", f"{e.bultos}")
-                    texto += formatear_caratula("Mercadería", e.producto.nombre if e.producto else '')
-                    texto += '<br>'
-                    texto += formatear_caratula("Peso", round(float(e.bruto or 0),2))
-                    texto += formatear_caratula("Volumen", round(float(e.cbm or 0),2))
-                    texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
+                    total_bultos += e.bultos or 0
+                    total_peso += float(e.bruto or 0)
+                    total_volumen += float(e.cbm or 0)
+                    tipo = e.tipo  # me quedo con el último (o podés elegir uno en particular)
+                    if e.producto:
+                        mercaderias.append(e.producto.nombre)
+
+                mercaderias_str = "; ".join(mercaderias)
+
+                # Totales
+                if movimiento is not None and movimiento == 'LCL/LCL':
+                    texto += formatear_caratula("Nro Bultos", f"{total_bultos} {tipo or ''}")
+                else:
+                    texto += formatear_caratula("Nro Bultos", f"{total_bultos}")
+
+                texto += formatear_caratula("Mercadería", mercaderias_str)
+                texto += formatear_caratula("Peso", round(total_peso, 2))
+                texto += formatear_caratula("Volumen", round(total_volumen, 2))
+                texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             texto += formatear_caratula("Forma de pago", seguimiento.pago)
             texto += formatear_caratula("Vendedor", seguimiento.vendedor)

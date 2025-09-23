@@ -20,9 +20,9 @@ def get_datos_caratula(request):
             embarque = ImportEmbarqueaereo.objects.get(numero=id)
             embarcador = Clientes.objects.get(codigo=embarque.embarcador)
             consignatario = Clientes.objects.get(codigo=embarque.consignatario)
-            ruta = ImportConexaerea.objects.filter(numero=id).order_by('-id').values_list('salida', 'llegada','vuelo','ciavuelo').first()
-
-            salida, llegada, vuelo, cia = ruta if ruta else (None, None, None, None)
+            # ruta = ImportConexaerea.objects.filter(numero=id).order_by('-id').values_list('salida', 'llegada','vuelo','ciavuelo').first()
+            #
+            # salida, llegada, vuelo, cia = ruta if ruta else (None, None, None, None)
 
             try:
                 seguimiento = VGrillaSeguimientos.objects.get(numero=Vembarque.seguimiento)
@@ -64,7 +64,19 @@ def get_datos_caratula(request):
                                         Vembarque.eta.strftime('%d/%m/%Y') if isinstance(Vembarque.eta, datetime.datetime) else '?')
             texto += formatear_caratula("ETD",
                                         Vembarque.etd.strftime('%d/%m/%Y') if isinstance(Vembarque.etd, datetime.datetime) else '?')
-            texto += formatear_caratula("Vuelo", vuelo if vuelo else 'S/I')
+            vuelos = (
+                ImportConexaerea.objects
+                .filter(numero=Vembarque.numero)
+                .values_list('ciavuelo', 'vuelo')
+            )
+            if vuelos:
+                nombre_vapor = "; ".join([f"{ciavuelo}{vuelo}" for ciavuelo, vuelo in vuelos])
+                cia = "; ".join([cia for cia, _ in vuelos])
+            else:
+                nombre_vapor = "S/I"
+                cia = "S/I"
+
+            texto += formatear_caratula("Vuelo", nombre_vapor)
             texto += formatear_caratula("Compañía", cia if cia else 'S/I')
             texto += formatear_caratula("Transportista", Vembarque.transportista)
             texto += formatear_caratula("Orden cliente", seguimiento.refcliente)
@@ -94,30 +106,38 @@ def get_datos_caratula(request):
             texto += '<span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             # Detalle del embarque
-            cargas = ImportCargaaerea.objects.filter(numero=id)
-            if cargas:
-                for e in cargas:
+            embarque = ImportCargaaerea.objects.filter(numero=id)
+            if embarque:
+                total_bultos = 0
+                total_peso = 0.0
+                total_volumen = 0.0
+                mercaderias = []
+                for e in embarque:
+                    total_bultos += e.bultos or 0
+                    total_peso += float(e.bruto or 0)
                     volumen = ''
-                    if e.medidas:
+                    if e.medidas is not None:
                         medidas = e.medidas.split('*')
                     else:
                         medidas = None
 
-                    if medidas and len(medidas) == 3 and all(m.replace('.', '', 1).isdigit() for m in medidas):
-                        try:
-                            volumen = round(float(medidas[0]) * float(medidas[1]) * float(medidas[2]) * float(e.bultos) / 1000000, 2)
-                        except:
-                            volumen = 0
+                    if medidas and len(medidas) == 3 and all(m.isdigit() for m in medidas):
+                        volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
                     else:
                         volumen = 0
 
+                    total_volumen += float(volumen or 0)
+                    if e.producto:
+                        mercaderias.append(e.producto.nombre)
 
-                    texto += formatear_caratula("Nro Bultos", e.bultos)
-                    texto += formatear_caratula("Mercaderia", e.producto.nombre if e.producto else '')
-                    texto += '<br>'
-                    texto += formatear_caratula("Peso", e.bruto)
-                    texto += formatear_caratula("Volumen", round(volumen,2))
-                    texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
+                mercaderias_str = "; ".join(mercaderias)
+
+                texto += formatear_caratula("Nro Bultos", f"{total_bultos}")
+
+                texto += formatear_caratula("Mercadería", mercaderias_str)
+                texto += formatear_caratula("Peso", round(total_peso, 2))
+                texto += formatear_caratula("Volumen", round(total_volumen, 2))
+                texto += '<br><span style="display: block; border-top: 0.2pt solid #CCC; margin: 2px 0;"></span><br>'
 
             texto += formatear_caratula("Forma de pago", seguimiento.pago)
             texto += formatear_caratula("Vendedor", seguimiento.vendedor)
