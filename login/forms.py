@@ -9,6 +9,7 @@ class usuarioForm(forms.Form):
                                'placeholder':'Usuario',
                                'autocomplete' : "off",
                                'autofocus' : "true",
+                               "class": "form-control form-control-lg",
                               }),
                             label='Usuario', max_length=50
     )
@@ -19,6 +20,7 @@ class usuarioForm(forms.Form):
                                   'type':'password',
                                   'placeholder':'Contraseña',
                                   'autocomplete': "off",
+                                   "class": "form-control form-control-lg",
                                   }),
                             label='Clave', max_length=30
     )

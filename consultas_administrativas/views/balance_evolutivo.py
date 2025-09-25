@@ -1,6 +1,7 @@
+from django.contrib import messages
 from django.shortcuts import render
 from datetime import datetime
-from administracion_contabilidad.models import Asientos, Cuentas
+from administracion_contabilidad.models import Asientos, Cuentas, Movims
 from consultas_administrativas.forms import LibroDiarioForm, BalanceEvolutivoForm
 from mantenimientos.models import Clientes, Monedas
 
@@ -17,7 +18,8 @@ CUENTAS_MAP = OrderedDict([
     ('VENTAS DE EXPORTACION Y ASIMIL', 411),
     ('VENTAS TASA BASICA', 412),
     ('VENTAS EXENTAS', 414),
-    ('DIFERENCIA DE CAMBIO', 422),
+    ('VENTAS POR CUENTA Y ORDEN', 417),
+    # ('DIFERENCIA DE CAMBIO', 422),
 
     ('GASTOS BANCARIOS', 535),
     ('SERV CONTRATADOS GRAV Y EXENTOS', 5161),
@@ -33,6 +35,7 @@ CUENTAS_MAP = OrderedDict([
     ('GASTOS GENERALES', 52304),
     ('GASTOS DE VIAJES', 52307),
     ('GASTOS DE PAPELERIA', 52312),
+    ('GASTOS POR CUENTA Y ORDEN', 52322),
 ])
 
 # Determinación de grupo (Ganancias vs Pérdidas)
@@ -47,13 +50,16 @@ def _meses_jan_dec_labels(anio: int):
     return [(m, calendar.month_name[m]) for m in range(1, 13)]
 
 
-def balance_evolutivo(request):
+def balance_evolutivo_old(request):
     try:
+        # suma=cuenta_difcambio()
+        # calculo_agrupado()
+
         if request.method == 'POST':
             form = BalanceEvolutivoForm(request.POST)
             if form.is_valid():
                 fecha_desde = form.cleaned_data.get('desde')
-                fecha_hasta = datetime.now().date()   # hasta hoy
+                fecha_hasta = form.cleaned_data.get('hasta')
 
                 consolidar_dolares = form.cleaned_data.get('consolidar_dolares', False)
                 consolidar_moneda_nac = form.cleaned_data.get('consolidar_moneda_nac', False)
@@ -199,6 +205,168 @@ def balance_evolutivo(request):
         # En producción podrías loggear el error
         return render(request, 'contabilidad_ca/balance_evolutivo.html', {'form': BalanceEvolutivoForm()})
 
+def balance_evolutivo(request):
+    try:
+        # suma=cuenta_difcambio()
+        # calculo_agrupado()
+
+        if request.method == 'POST':
+            form = BalanceEvolutivoForm(request.POST)
+            if form.is_valid():
+                fecha_desde = form.cleaned_data.get('desde')
+                fecha_hasta = form.cleaned_data.get('hasta')
+
+                consolidar_dolares = form.cleaned_data.get('consolidar_dolares', False)
+                consolidar_moneda_nac = form.cleaned_data.get('consolidar_moneda_nac', False)
+
+                # Moneda de destino (conversión)
+                destino_moneda = None
+                if consolidar_moneda_nac and not consolidar_dolares:
+                    destino_moneda = 1   # moneda nacional
+                    titulo_moneda = "Cons. Moneda Nacional"
+                elif consolidar_dolares and not consolidar_moneda_nac:
+                    destino_moneda = 2   # dólares
+                    titulo_moneda = "Cons. USD"
+                else:
+                    titulo_moneda = "Sin conversión"
+
+                # Meses (siempre Ene..Dic del año de fecha_hasta)
+                anio = fecha_hasta.year
+                meses = _meses_jan_dec_labels(anio)
+
+                # Traer asientos relevantes
+                qs = (
+                    Asientos.objects
+                    .filter(
+                        fecha__date__gte=fecha_desde,
+                        fecha__date__lte=fecha_hasta,
+                        cuenta__in=list(CUENTAS_MAP.values())
+                    )
+                    .values('cuenta', 'fecha', 'monto', 'moneda', 'cambio', 'paridad','tipo','autogenerado')
+                )
+
+                # Estructura base
+                data = {}
+                for nombre, numero in CUENTAS_MAP.items():
+                    data[numero] = {
+                        'nombre': nombre,
+                        'por_mes': {m: {'debe': Decimal('0.00'), 'haber': Decimal('0.00')} for m, _ in meses},
+                        'tot_debe': Decimal('0.00'),
+                        'tot_haber': Decimal('0.00'),
+                    }
+
+                # Procesar asientos con conversión
+                for row in qs:
+                    numero = row['cuenta']
+                    nombre = next((k for k, v in CUENTAS_MAP.items() if v == numero), str(numero))
+                    mes_num = row['fecha'].month
+
+                    monto = Decimal(row['monto'] or 0)
+                    origen = row['moneda']       # int: 1 = MN, 2 = USD, otros
+                    arbitraje = row['cambio']    # tipo de cambio
+                    paridad = row['paridad']     # paridad (ej: EUR/USD)
+
+                    # Conversión si corresponde
+                    if destino_moneda:
+                        monto = Decimal(convertir_monto(monto, origen, destino_moneda, arbitraje, paridad))
+
+                    # Inicialización por si aparece una cuenta no listada
+                    if numero not in data:
+                        data[numero] = {
+                            'nombre': nombre,
+                            'por_mes': {m: {'debe': Decimal('0.00'), 'haber': Decimal('0.00')} for m, _ in meses},
+                            'tot_debe': Decimal('0.00'),
+                            'tot_haber': Decimal('0.00'),
+                        }
+
+                    # Reglas de acumulación:
+                    # - Ganancias comunes (411, 412, 414): sumar en HABER.
+                    # - Cuenta 422: es de DEBER, pero se muestra en bloque de Ganancias; cargar en DEBE.
+                    # - Pérdidas (>=500): sumar en DEBE.
+                    if es_ganancia(numero):
+                        mov = Movims.objects.filter(mautogen=row['autogenerado']).only('mtipo').first()
+                        if mov is not None and mov.mtipo == 21:
+                            monto = -monto
+                        else:
+                            if mov is None:
+                                pass
+                        # if numero == 422:
+                        #     # Solo DEBE (después se mostrará negativo en columnas mensuales)
+                        #     if row['tipo']=='G' or row['tipo']=='V':
+                        #         data[numero]['por_mes'][mes_num]['debe'] += monto
+                        #         data[numero]['tot_debe'] += monto
+                        # else:
+                        data[numero]['por_mes'][mes_num]['haber'] += monto
+                        data[numero]['tot_haber'] += monto
+                    else:
+                        data[numero]['por_mes'][mes_num]['debe'] += monto
+                        data[numero]['tot_debe'] += monto
+
+                # Totales (globales y por mes)
+                tot_gan_debe = Decimal('0.00')
+                tot_gan_haber = Decimal('0.00')
+                tot_perd_debe = Decimal('0.00')
+                tot_perd_haber = Decimal('0.00')
+
+                # Para la fila "TOTALES DE GANANCIAS" queremos:
+                # suma(mensual de 411/412/414 en +) + suma(mensual de 422 en negativo)
+                tot_mes_gan = {m: Decimal('0.00') for m, _ in meses}
+                # Para "TOTALES DE PERDIDAS": Debe - Haber (usualmente solo Debe)
+                tot_mes_perd = {m: Decimal('0.00') for m, _ in meses}
+
+                for numero, info in data.items():
+                    if es_ganancia(numero):
+                        tot_gan_debe += info['tot_debe']
+                        tot_gan_haber += info['tot_haber']
+                        for m, _ in meses:
+                            pm = info['por_mes'][m]
+                            # Ganancias:
+                            # - Cuentas normales: usar HABER (positivo)
+                            # - 422: usar -DEBE (negativo)
+                            val_mes = (pm['haber'] if numero != 422 else -pm['debe'])
+                            tot_mes_gan[m] += val_mes
+                    else:
+                        tot_perd_debe += info['tot_debe']
+                        tot_perd_haber += info['tot_haber']
+                        for m, _ in meses:
+                            pm = info['por_mes'][m]
+                            tot_mes_perd[m] += (pm['debe'] - pm['haber'])
+
+                # Resultados por mes = Ganancias (netas) - Pérdidas (netas)
+                resultados_mes = {m: (tot_mes_gan[m] - tot_mes_perd[m]) for m, _ in meses}
+                resultado_total = (tot_gan_haber - tot_gan_debe) - (tot_perd_debe - tot_perd_haber)
+
+                titulo = (
+                    f"Balance de resultados entre el {fecha_desde.strftime('%d/%m/%Y')} "
+                    f"y el {fecha_hasta.strftime('%d/%m/%Y')} en {titulo_moneda}"
+                )
+
+                output = _generar_excel_balance_evolutivo(
+                    titulo, meses, data,
+                    tot_gan_debe, tot_gan_haber,
+                    tot_perd_debe, tot_perd_haber,
+                    tot_mes_gan, tot_mes_perd,
+                    resultados_mes, resultado_total
+                )
+
+                resp = HttpResponse(
+                    output.getvalue(),
+                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                )
+                resp['Content-Disposition'] = (
+                    f"attachment; filename=Balance_Evolutivo_{fecha_desde.strftime('%d%m%Y')}_a_{fecha_hasta.strftime('%d%m%Y')}.xlsx"
+                )
+                return resp
+        else:
+            form = BalanceEvolutivoForm()
+
+        return render(request, 'contabilidad_ca/balance_evolutivo.html', {'form': form})
+
+    except Exception as e:
+        messages.error(request, e)
+        # En producción podrías loggear el error
+        return render(request, 'contabilidad_ca/balance_evolutivo.html', {'form': BalanceEvolutivoForm()})
+
 
 def _generar_excel_balance_evolutivo(
     titulo,
@@ -338,3 +506,120 @@ def convertir_monto(monto, origen, destino, arbitraje, paridad):
         return round(monto, 2)
     except Exception as e:
         return str(e)
+
+def cuenta_difcambio():
+    try:
+        asientos = Asientos.objects.filter(cuenta=422)
+        suma=0
+        for a in asientos:
+            mov = Movims.objects.filter(mautogen=a.autogenerado).only('mtipo').first()
+
+            if a.tipo in ['V','Z','D']:
+                if a.tipo=='V': #si es venta
+                    tipo_fac=mov.mtipo
+                    if tipo_fac in [20,24]: #si es venta
+                        if a.moneda == 2:
+                            suma += a.monto
+                        elif a.moneda == 1:
+                            if a.cambio != 0:
+                                monto = Decimal(a.monto) / Decimal(a.cambio)
+                                suma += monto
+                        else:
+                            suma += 0
+                    else: #si es nota de credito
+                        if a.moneda == 2:
+                            suma -= a.monto
+                        elif a.moneda == 1:
+                            if a.cambio != 0:
+                                monto = Decimal(a.monto) / Decimal(a.cambio)
+                                suma -= monto
+                        else:
+                            suma -= 0
+                else:
+                    if a.moneda==2:
+                        suma += a.monto
+                    elif a.moneda==1:
+                        if a.cambio != 0:
+                            monto = Decimal(a.monto) / Decimal(a.cambio)
+                            suma += monto
+                    else:
+                        suma +=0
+
+            elif a.tipo in ['G','P','C']:
+                if a.tipo=='P':
+                    tipo_fac = mov.mtipo
+                    if tipo_fac == 40: #si es compra
+                        if a.moneda == 2:
+                            suma -= a.monto
+                        elif a.moneda == 1:
+                            if a.cambio !=0:
+                                monto = Decimal(a.monto) / Decimal(a.cambio)
+                                suma -= monto
+                        else:
+                            suma -= 0
+                    else: #si es nota de credito
+                        if a.moneda == 2:
+                            suma += a.monto
+                        elif a.moneda == 1:
+                            if a.cambio != 0:
+                                monto = Decimal(a.monto) / Decimal(a.cambio)
+                                suma += monto
+                        else:
+                            suma -= 0
+                else:
+                    if a.moneda==2:
+                        suma -= a.monto
+                    elif a.moneda==1:
+                        if a.cambio != 0:
+                            monto = Decimal(a.monto) / Decimal(a.cambio)
+                            suma -= monto
+                    else:
+                        suma -= 0
+
+
+            else:
+                suma+=0
+
+        return suma
+    except Exception as e:
+        return str(e)
+
+def calculo_agrupado():
+    try:
+        asientos = Asientos.objects.filter(cuenta=422,fecha__range=['2025-01-01','2025-01-31'])
+        v, z, d, g, p, c = 0, 0, 0, 0, 0, 0
+        for a in asientos:
+            # mov = Movims.objects.filter(mautogen=a.autogenerado).only('mtipo').first()
+
+            if a.moneda==2:
+                monto = a.monto
+            else:
+                if a.cambio !=0:
+                    monto = Decimal(a.monto) / Decimal(a.cambio)
+                else:
+                    monto = a.monto *39
+
+            match a.tipo:
+                case 'V':
+                    v += monto
+                case 'Z':
+                    z += monto
+                case 'D':
+                    d += monto
+                case 'G':
+                    g += monto
+                case 'P':
+                    p += monto
+                case 'C':
+                    c += monto
+
+        print("V:",v)
+        print("C:",c)
+        print("D:",d)
+        print("G:",g)
+        print("P:",p)
+        print("Z:",z)
+
+    except Exception as e:
+        return str(e)
+

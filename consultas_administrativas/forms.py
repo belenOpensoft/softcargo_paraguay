@@ -631,7 +631,10 @@ class BalanceEvolutivoForm(forms.Form):
         label="Desde",
         widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
     )
-
+    hasta = forms.DateField(
+        label="Hasta",
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
     consolidar_moneda_nac = forms.BooleanField(
         label="Consolidar Moneda Nacional",
         required=False,
