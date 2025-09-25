@@ -873,13 +873,13 @@ def obtener_datos_guia(row_id):
         # CONSIGNATARIO
         consignatario = SociosComerciales.objects.get(codigo=house.consignatario)
         carrier = SociosComerciales.objects.get(codigo=house.transportista)
+        shipper = SociosComerciales.objects.get(codigo=house.cliente)
 
         data['consignatario'] = f"{consignatario.empresa}\n{consignatario.direccion}\n{consignatario.ciudad}\n{consignatario.pais} RUT: {consignatario.ruc} PH: {consignatario.telefono}"
-        data['empresa']=settings.EMPRESA_HAWB_editar
+        data['empresa']=f"{shipper.empresa}\n{shipper.direccion}\n{shipper.ciudad}\n{shipper.pais} RUT: {shipper.ruc} PH: {shipper.telefono}"
         data['by_first_carrier']=carrier.empresa
         # SHIPPER
-        shipper = SociosComerciales.objects.get(codigo=house.cliente)
-        data['shipper'] = f"{shipper.empresa}\n{shipper.direccion}\n{shipper.ciudad}\n{shipper.pais} RUT: {shipper.ruc} PH: {shipper.telefono}"
+        data['shipper'] = settings.EMPRESA_HAWB_editar
         data['shipper_signature'] = str(shipper.empresa)
         data['carrier_signature'] = (
                 "AS AGENT\nOF DE CARRIER " + str(carrier.empresa) + "\n" +
@@ -1388,7 +1388,7 @@ def descargar_hawb_operativas(request,row_id,draft=None,asagreed=None):
                 return s != '' and s != '0'
             return bool(v)
 
-        if asagreed:
+        if asagreed == 1:
             # actualizás los atributos simples como antes...
             campos = [
                 'total_prepaid', 'total_collect',
@@ -1543,15 +1543,15 @@ def obtener_datos_guia_madre(row_id):
         # CONSIGNATARIO
         consignatario = SociosComerciales.objects.get(codigo=master.consignatario)
         carrier = SociosComerciales.objects.get(codigo=master.transportista)
+        empresa = SociosComerciales.objects.get(codigo=master.transportista)
 
         data['consignatario'] = f"{consignatario.empresa}\n{consignatario.direccion}\n{consignatario.ciudad}\n{consignatario.pais} RUT: {consignatario.ruc} PH: {consignatario.telefono}"
-        data['shipper']=settings.EMPRESA_HAWB_editar
+        data['shipper']=f"{empresa.empresa}\n{empresa.direccion}\n{empresa.ciudad}\n{empresa.pais} RUT: {empresa.ruc} PH: {empresa.telefono}"
         data['issuing_carrier']=settings.EMPRESA_AWB_editar
         data['by_first_carrier']=carrier.empresa
         data['currency']='USD' if master.moneda == 2 else 'UYU' if master.moneda == 1 else 'S/I'
         # SHIPPER
-        empresa = SociosComerciales.objects.get(codigo=master.transportista)
-        data['empresa'] = f"{empresa.empresa}\n{empresa.direccion}\n{empresa.ciudad}\n{empresa.pais} RUT: {empresa.ruc} PH: {empresa.telefono}"
+        data['empresa'] = settings.EMPRESA_HAWB_editar
         data['shipper_signature'] = 'OCEANLINK'
         data['carrier_signature'] = (
                 'OCEANLINK AS AGENT\n'
@@ -1778,11 +1778,10 @@ def obtener_datos_guia_madre(row_id):
                 total_bultos += (carga.bultos or 0)
                 total_bruto += Decimal(str(carga.bruto or 0))
 
-                va = Decimal(str(carga.aplicable or 0))
-                if va > 0:
-                    total_aplicable += va
+
 
             tarifa = Decimal(str(master.tarifaawb or 0))
+            total_aplicable = Decimal(master.aplicable)
 
             if total_aplicable == 0:
                 # Caso sin aplicables -> MIN (1 * tarifa), una sola vez
@@ -1892,8 +1891,8 @@ def descargar_awb_operativas(request,row_id,draft=None):
 
             # Datos principales del documento
             reporte.consignatario = data.get("consignatario", "")
-            reporte.shipper = data.get("empresa", "")
-            reporte.empresa = data.get("shipper", "")
+            reporte.shipper = data.get("shipper", "")
+            reporte.empresa = data.get("empresa", "")
             reporte.issuing_carrier = data.get("issuing_carrier", "")
             reporte.info = data.get("info", "")
 
@@ -2016,13 +2015,13 @@ def guardar_awb(request, row_id):
             # Campos de texto
             guia.posicion = request.POST.get("posicion", "")
             guia.consignatario = request.POST.get("consignatario", "")
-            guia.shipper = request.POST.get("empresa", "")
+            guia.shipper = request.POST.get("shipper", "")
             guia.awb_sf = request.POST.get("awb", "")
             guia.awb1 = request.POST.get("awb1", "")
             guia.awb2 = request.POST.get("awb2", "")
             guia.awb3 = request.POST.get("awb3", "")
             guia.hawb = request.POST.get("hawb", "")
-            guia.empresa = request.POST.get("shipper", "")
+            guia.empresa = request.POST.get("empresa", "")
             guia.info = request.POST.get("info", "")
             guia.vuelos1 = request.POST.get("vuelos1", "")
             guia.vuelos2 = request.POST.get("vuelos2", "")
