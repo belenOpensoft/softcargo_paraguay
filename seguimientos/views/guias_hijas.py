@@ -250,10 +250,12 @@ class GuiasReport:
                     c.drawString(340, y, self.formatear_valor(m['total']))  # Total
 
                     """ DESCRIPCIÓN MERCADERÍA """
-                    texto = m['descripcion']  # Ya viene con salto de línea y CBM incluido
+                    texto = m['descripcion']
 
+                    # Insertar un salto de línea antes de cada '('
+                    texto = texto.replace('(', '<br/>(')
 
-                    data = [[Paragraph(texto, encoding='utf-8', style=style_texto_7)]]
+                    data = [[Paragraph(texto, style=style_texto_7)]]
                     table = Table(
                         data=data,
                         colWidths=[5 * cm],
@@ -261,7 +263,7 @@ class GuiasReport:
                         style=[
                             ('BOX', (0, 0), (-1, -1), 0.5, colors.transparent),
                             ('VALIGN', (0, 0), (0, 0), 'TOP'),
-                        ]
+                        ],
                     )
                     table.wrapOn(c, 0, 0)
                     table.drawOn(c, 145 * mm, 142 * mm)

@@ -323,7 +323,8 @@ def agregar_socio_comercial(request, id_socio=None):
                     'contactos': cliente.contactos,
                     'observaciones': cliente.observaciones,
                     'ciudad': cliente.ciudad,
-                    'pais': cliente.pais,
+                    'pais': cliente.pais.strip(),
+
                     'emailad': cliente.emailad,
                     'emailem': cliente.emailem,
                     'emailea': cliente.emailea,

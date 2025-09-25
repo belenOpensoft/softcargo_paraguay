@@ -96,7 +96,11 @@ urlpatterns = [
     path('descargar_awb/<int:row_id>/', descargar_awb_operativas, name='descargar_awb'),
     path('descargar_awb_draft/<int:row_id>/<str:draft>', descargar_awb_operativas, name='descargar_awb'),
     path('descargar_hawb/<int:row_id>/', descargar_hawb_operativas, name='descargar_hawb'),
-    path('descargar_hawb_draft/<int:row_id>/<str:draft>', descargar_hawb_operativas, name='descargar_hawb'),
+    path(
+        'descargar_hawb_draft/<int:row_id>/<str:draft>/<str:asagreed>',
+        descargar_hawb_operativas,
+        name='descargar_hawb'
+    ),
 
 
     #editar guia

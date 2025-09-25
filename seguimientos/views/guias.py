@@ -252,8 +252,13 @@ class GuiasReport:
                     y -= 50  # espacio entre filas
 
             # Mostrar descripción una sola vez
+            import re
+
             if hasattr(self, 'descripcion_mercaderias') and self.descripcion_mercaderias:
-                data = [[Paragraph(self.descripcion_mercaderias, encoding='utf-8', style=style_texto_7)]]
+                # Inserta <br/> antes de cada "(" excepto si está al inicio del texto
+                desc_br = re.sub(r'(?<!^)\(', r'<br/>(', self.descripcion_mercaderias)
+
+                data = [[Paragraph(desc_br, style=style_texto_7)]]
                 table = Table(
                     data=data,
                     colWidths=[5 * cm],
@@ -263,7 +268,7 @@ class GuiasReport:
                     ]
                 )
                 table.wrapOn(c, 0, 0)
-                table.drawOn(c, 145 * mm, 142 * mm)  # ajustar posición si hace falta
+                table.drawOn(c, 145 * mm, 135 * mm)  # ajustar posición si hace falta
 
             # Totales pie
             c.drawString(52, 280, str(self.total_bultos))

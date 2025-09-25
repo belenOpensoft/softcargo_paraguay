@@ -5971,6 +5971,7 @@ let tabla = localStorage.getItem('tabla_origen');
             });
 }
 function descargar_hawb_draft(){
+    let as_agreed= confirm('¿Desea guia AS AGREED?');
 let tabla = localStorage.getItem('tabla_origen');
         let selectedRowN,url;
 
@@ -5992,10 +5993,14 @@ let tabla = localStorage.getItem('tabla_origen');
                         return;
                     }
                     let numero_hawb = localStorage.getItem('num_house_gasto');
-                    console.log(numero_hawb);
                     row = table.rows('.table-secondary').data();
                     if (row.length === 1) {
-                        window.open('/exportacion_aerea/descargar_hawb_draft/' + numero_hawb + '/d', '_blank');
+                        let flag = as_agreed ? '1' : '0';
+                        window.open(
+                          '/exportacion_aerea/descargar_hawb_draft/' + numero_hawb + '/d/' + flag,
+                          '_blank'
+                        );
+
                     } else {
                         alert('Debe seleccionar al menos un registro');
                     }
@@ -6116,6 +6121,8 @@ function editar_guia_madre() {
                 }
             });
 }
+
+
 function guardar_awb(row_id) {
     const form = document.getElementById('guias_madres_form');
 

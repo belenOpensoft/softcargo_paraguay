@@ -323,8 +323,9 @@ class add_cliente_form(forms.Form):
             self.fields[field].widget.attrs['autocomplete'] = 'off'
 
         # Cargar opciones en los selects con un valor por defecto opcional
-        self.fields['pais'].choices = [('', 'Seleccione un país')] + [(pais.nombre, pais.nombre) for pais in
-                                                                      Paises.objects.all()]
+        self.fields['pais'].choices = [('', 'Seleccione un país')] + [
+            (pais.nombre.strip(), pais.nombre.strip()) for pais in Paises.objects.all()
+        ]
         self.fields['ciudad'].choices = [('', 'Seleccione una ciudad')] + [(ciudad.codigo, ciudad.nombre) for ciudad
                                                                            in Ciudades.objects.all()]
         self.fields['ctavta'].choices = [('0', 'Seleccione una cuenta')] + [(c.xcodigo, c.xnombre) for c in
