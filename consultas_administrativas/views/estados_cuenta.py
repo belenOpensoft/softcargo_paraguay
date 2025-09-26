@@ -49,30 +49,28 @@ def estados_cuenta(request):
 
     return render(request, 'ventas_ca/estados_cuenta.html', {'form': form})
 
-def obtener_estado_individual(form,fecha_desde, fecha_hasta, moneda):
+def obtener_estado_individual(form, fecha_desde, fecha_hasta, moneda):
     cliente = form.cleaned_data['cliente_codigo']
     cliente_nombre = form.cleaned_data['cliente']
     todas_monedas = form.cleaned_data['todas_las_monedas']
 
-
     tipos_mov = (20, 21, 24, 23, 25, 29)
-
 
     if not cliente:
         return {}
-    cliente_ob=Clientes.objects.only('fechadenegado','tipo','socio').filter(codigo=cliente).first()
+    cliente_ob = Clientes.objects.only('fechadenegado', 'tipo', 'socio').filter(codigo=cliente).first()
     if not cliente_ob:
         return {}
 
     filtro_base = {
-            'mfechamov__lte': fecha_hasta,
-            'mfechamov__gte': fecha_desde,
-            'mcliente': cliente,
-            'mactivo': 'S',
-            'mtipo__in': tipos_mov
-        }
+        'mfechamov__lte': fecha_hasta,
+        'mfechamov__gte': fecha_desde,
+        'mcliente': cliente,
+        'mactivo': 'S',
+        'mtipo__in': tipos_mov
+    }
 
-    if cliente_ob.tipo !=1:
+    if cliente_ob.tipo != 1:
         if isinstance(cliente_ob.fechadenegado, datetime):
             filtro_base['mfechamov__gt'] = cliente_ob.fechadenegado
 
@@ -91,6 +89,26 @@ def obtener_estado_individual(form,fecha_desde, fecha_hasta, moneda):
     ).only('autogenerado', 'vto', 'posicion', 'cuenta')
     asientos_dict = {a.autogenerado: a for a in asientos}
 
+    # ==============================
+    # Precalcular cobros
+    # ==============================
+    impuvtas = Impuvtas.objects.filter(
+        autofac__in=autogen_list
+    ).values('autofac', 'autogen')
+
+    pagos_ids = [i['autogen'] for i in impuvtas]
+    pagos_movs = Movims.objects.filter(
+        mautogen__in=pagos_ids
+    ).only('mautogen', 'mboleta', 'mserie', 'mprefijo', 'mfechamov')
+    pagos_dict = {m.mautogen: m for m in pagos_movs}
+
+    pagos_por_factura = {}
+    for i in impuvtas:
+        pagos_por_factura.setdefault(i['autofac'], []).append(i['autogen'])
+
+    # ==============================
+    # Armar datos finales
+    # ==============================
     datos = {
         cliente: {
             'datos_cliente': [{
@@ -102,21 +120,59 @@ def obtener_estado_individual(form,fecha_desde, fecha_hasta, moneda):
     }
 
     for m in movimientos:
+        pago = ''
+        signo = ''
+        numero_pago = ''
+        fecha_pago = ''
+
+        pagos_ids = pagos_por_factura.get(m.mautogen, [])
+        if pagos_ids:
+            if m.msaldo == 0:
+                pago, signo = 'OK', '(*)'
+            else:
+                pago, signo = 'Parcial', '(+)'
+
+            for pid in pagos_ids:
+                mov = pagos_dict.get(pid)
+                if not mov:
+                    continue
+
+                numero_pago += str(mov.mboleta) + ';'
+
+                if mov.mfechamov:
+                    fecha = mov.mfechamov.strftime('%d/%m/%Y')
+                    fecha_pago += str(fecha) + ';'
+        else:
+            pago='No' if m.mtipo !=25 else ''
+
+        numero_completo = ''
+        if m.mserie and m.mprefijo and m.mboleta:
+            s = str(m.mserie)
+            p = str(m.mprefijo)
+            tz = len(s) - len(s.rstrip('0'))
+            lz = len(p) - len(p.lstrip('0'))
+            sep = '0' * max(0, 3 - (tz + lz))
+            numero_completo = f"{s}{sep}{p}-{m.mboleta} "
+
         asiento = asientos_dict.get(m.mautogen)
         datos[cliente]['movimientos'].append({
             'fecha': m.mfechamov,
             'tipo': m.mnombremov,
             'numero_tipo': m.mtipo,
-            'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
+            'documento': numero_completo + signo,
             'vencimiento': asiento.vto if asiento else None,
             'detalle': m.mdetalle,
             'total': m.mtotal,
             'saldo': m.msaldo,
+            'numero_pago': numero_pago,
+            'fecha_pago': fecha_pago,
+            'pago': pago,
             'posicion': asiento.posicion if asiento else None,
             'cuenta': asiento.cuenta if asiento else None,
         })
 
     return datos
+
 
 def obtener_estado_general(form,fecha_desde, fecha_hasta, moneda):
     filtro_tipo = form.cleaned_data['filtro_tipo']
@@ -173,17 +229,74 @@ def obtener_estado_general(form,fecha_desde, fecha_hasta, moneda):
             'movimientos': []
         }
 
+        # 1. Traer todos los Impuvtas de las facturas de este cliente
+        impuvtas = Impuvtas.objects.filter(
+            autofac__in=autogen_list
+        ).values('autofac', 'autogen')
+
+        # 2. Traer todos los Movims de esos cobros en un solo query
+        pagos_ids = [i['autogen'] for i in impuvtas]
+        pagos_movs = Movims.objects.filter(
+            mautogen__in=pagos_ids
+        ).only('mautogen', 'mboleta', 'mserie', 'mprefijo', 'mfechamov')
+
+        # 3. Indexar pagos por id
+        pagos_dict = {m.mautogen: m for m in pagos_movs}
+
+        # 4. Indexar facturas → lista de pagos
+        pagos_por_factura = {}
+        for i in impuvtas:
+            pagos_por_factura.setdefault(i['autofac'], []).append(i['autogen'])
+
         for m in movimientos:
+            pago = ''
+            signo = ''
+            numero_pago = ''
+            fecha_pago = ''
+
+            pagos_ids = pagos_por_factura.get(m.mautogen, [])
+            if pagos_ids:
+                if m.msaldo == 0:
+                    pago, signo = 'OK', '(*)'
+                else:
+                    pago, signo = 'Parcial', '(+)'
+
+                for pid in pagos_ids:
+                    mov = pagos_dict.get(pid)
+                    if not mov:
+                        continue
+                    numero_pago+=str(mov.mboleta)+';'
+
+                    # Concatenar fechas de pago
+                    if mov.mfechamov:
+                        fecha = mov.mfechamov.strftime('%d/%m/%Y')
+                        fecha_pago += str(fecha) + ';'
+            else:
+                pago = 'No' if m.mtipo != 25 else ''
+
+            numero_completo=''
+            if m.mserie and m.mprefijo and m.mboleta:
+                s = str(m.mserie)
+                p = str(m.mprefijo)
+                tz = len(s) - len(s.rstrip('0'))
+                lz = len(p) - len(p.lstrip('0'))
+                sep = '0' * max(0, 3 - (tz + lz))
+                numero_completo = f"{s}{sep}{p}-{m.mboleta} "
+
+            # Ahora agregás estos datos a tu dict final como antes:
             asiento = asientos_dict.get(m.mautogen)
             datos[cliente_id]['movimientos'].append({
                 'fecha': m.mfechamov,
                 'tipo': m.mnombremov,
                 'numero_tipo': m.mtipo,
-                'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
+                'documento': numero_completo + signo,
                 'vencimiento': asiento.vto if asiento else None,
                 'detalle': m.mdetalle,
                 'total': m.mtotal,
                 'saldo': m.msaldo,
+                'numero_pago': numero_pago,
+                'fecha_pago': fecha_pago,
+                'pago': pago,
                 'posicion': asiento.posicion if asiento else None,
                 'cuenta': asiento.cuenta if asiento else None,
             })
@@ -363,12 +476,21 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
         total_format = workbook.add_format({'bold': True, 'border': 1, 'bg_color': '#FFF2CC'})
 
         row = 0
-        titulo = f"Cuentas a cobrar desde 0 a Z al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
+        if cliente and len(clientes_ordenados) == 1:
+            # Tomamos el nombre del único cliente presente
+            cli_name = clientes_ordenados[0]['nombre']
+            titulo = f"Estado de cuenta de {cli_name} del {fecha_desde:%d/%m/%Y} al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
+        else:
+            titulo = f"Cuentas a cobrar desde 0 a Z al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
+
         worksheet.merge_range(row, 0, row, 9, titulo, title_format)
         row += 2
 
+        # headers = ['Fecha', 'Tipo', 'Documento', 'Vto.', 'Detalle',
+        #            'Debe', 'Haber', 'Saldo', 'Posición', 'Cta. Ventas']
         headers = ['Fecha', 'Tipo', 'Documento', 'Vto.', 'Detalle',
-                   'Debe', 'Haber', 'Saldo', 'Posición', 'Cta. Ventas']
+                   'Debe', 'Haber', 'Saldo', 'Posición', 'Cta. Ventas',
+                   'Cobro', 'Fecha Cobro', 'Documento Cobro']
         worksheet.write_row(row, 0, headers, header_format)
         row += 1
 
@@ -412,6 +534,10 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
                     worksheet.write(row, 8, m.get('posicion'), text_format)
                     worksheet.write(row, 9, m.get('cuenta'), text_format)
 
+                    worksheet.write(row, 10, m.get('pago'), text_format)
+                    worksheet.write(row, 11, m.get('fecha_pago'), text_format)
+                    worksheet.write(row, 12, m.get('numero_pago'), text_format)
+
                     row += 1
             else:
                 worksheet.write(row, 4, "Sin movimientos en el período", text_format)
@@ -440,3 +566,153 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
 
     except Exception as e:
         raise RuntimeError(f"Error al generar Excel de ventas: {e}")
+
+
+
+
+
+
+
+
+
+def obtener_estado_individual_old(form,fecha_desde, fecha_hasta, moneda):
+    cliente = form.cleaned_data['cliente_codigo']
+    cliente_nombre = form.cleaned_data['cliente']
+    todas_monedas = form.cleaned_data['todas_las_monedas']
+
+
+    tipos_mov = (20, 21, 24, 23, 25, 29)
+
+
+    if not cliente:
+        return {}
+    cliente_ob=Clientes.objects.only('fechadenegado','tipo','socio').filter(codigo=cliente).first()
+    if not cliente_ob:
+        return {}
+
+    filtro_base = {
+            'mfechamov__lte': fecha_hasta,
+            'mfechamov__gte': fecha_desde,
+            'mcliente': cliente,
+            'mactivo': 'S',
+            'mtipo__in': tipos_mov
+        }
+
+    if cliente_ob.tipo !=1:
+        if isinstance(cliente_ob.fechadenegado, datetime):
+            filtro_base['mfechamov__gt'] = cliente_ob.fechadenegado
+
+    movimientos = Movims.objects.filter(**filtro_base).only(
+        'mcliente', 'mfechamov', 'mnombre', 'mtotal', 'msaldo', 'mnombremov',
+        'mtipo', 'mserie', 'mboleta', 'mprefijo', 'mautogen', 'mdetalle', 'mmoneda'
+    ).order_by('mfechamov')
+
+    if not todas_monedas and moneda:
+        movimientos = movimientos.filter(mmoneda=moneda.codigo)
+
+    autogen_list = movimientos.values_list('mautogen', flat=True).distinct()
+    asientos = Asientos.objects.filter(
+        autogenerado__in=autogen_list,
+        imputacion=2
+    ).only('autogenerado', 'vto', 'posicion', 'cuenta')
+    asientos_dict = {a.autogenerado: a for a in asientos}
+
+    datos = {
+        cliente: {
+            'datos_cliente': [{
+                'nombre': cliente_nombre,
+                'codigo': cliente,
+            }],
+            'movimientos': []
+        }
+    }
+
+    for m in movimientos:
+        asiento = asientos_dict.get(m.mautogen)
+        datos[cliente]['movimientos'].append({
+            'fecha': m.mfechamov,
+            'tipo': m.mnombremov,
+            'numero_tipo': m.mtipo,
+            'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
+            'vencimiento': asiento.vto if asiento else None,
+            'detalle': m.mdetalle,
+            'total': m.mtotal,
+            'saldo': m.msaldo,
+            'posicion': asiento.posicion if asiento else None,
+            'cuenta': asiento.cuenta if asiento else None,
+        })
+
+    return datos
+
+def obtener_estado_general_old(form,fecha_desde, fecha_hasta, moneda):
+    filtro_tipo = form.cleaned_data['filtro_tipo']
+    omitir_saldos_cero = form.cleaned_data['omitir_saldos_cero']
+    tipos_mov = (20, 21, 24, 23, 25, 29)
+
+    clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado', 'tipo').order_by('empresa')
+    datos = {}
+
+    for cli in clientes:
+        if filtro_tipo == 'clientes' and cli.tipo != 1:
+            continue
+        elif filtro_tipo == 'agentes' and cli.tipo != 6:
+            continue
+        elif filtro_tipo == 'transportistas' and cli.tipo != 5:
+            continue
+
+        cliente_id = cli.codigo
+
+        filtro_base = {
+            'mfechamov__lte': fecha_hasta,
+            'mfechamov__gte': fecha_desde,
+            'mcliente': cliente_id,
+            'mactivo': 'S',
+            'mtipo__in': tipos_mov
+        }
+
+        if moneda:
+            filtro_base['mmoneda'] = moneda.codigo
+
+        if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1:
+            filtro_base['mfechamov__gt'] = cli.fechadenegado
+
+        movimientos = Movims.objects.filter(**filtro_base).only(
+            'mcliente', 'mfechamov', 'mnombre', 'mtotal', 'msaldo', 'mnombremov',
+            'mtipo', 'mserie', 'mboleta', 'mprefijo', 'mautogen', 'mdetalle', 'mmoneda'
+        ).order_by('mfechamov')
+
+        if not movimientos.exists():
+            continue
+
+        autogen_list = movimientos.values_list('mautogen', flat=True).distinct()
+        asientos = Asientos.objects.filter(
+            autogenerado__in=autogen_list,
+            imputacion=2
+        ).only('autogenerado', 'vto', 'posicion', 'cuenta')
+        asientos_dict = {a.autogenerado: a for a in asientos}
+
+        datos[cliente_id] = {
+            'datos_cliente': [{
+                'nombre': cli.empresa,
+                'codigo': cliente_id,
+            }],
+            'movimientos': []
+        }
+
+        for m in movimientos:
+            asiento = asientos_dict.get(m.mautogen)
+            datos[cliente_id]['movimientos'].append({
+                'fecha': m.mfechamov,
+                'tipo': m.mnombremov,
+                'numero_tipo': m.mtipo,
+                'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
+                'vencimiento': asiento.vto if asiento else None,
+                'detalle': m.mdetalle,
+                'total': m.mtotal,
+                'saldo': m.msaldo,
+                'posicion': asiento.posicion if asiento else None,
+                'cuenta': asiento.cuenta if asiento else None,
+            })
+
+
+    return datos

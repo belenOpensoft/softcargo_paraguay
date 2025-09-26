@@ -8,7 +8,7 @@ from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from administracion_contabilidad.models import Movims, Asientos, Impuvtas, Boleta
+from administracion_contabilidad.models import Movims, Asientos, Impuvtas, Boleta, Impucompras
 from consultas_administrativas.forms import ReporteCobranzasForm, AntiguedadSaldosForm, EstadoCuentaForm
 from consultas_administrativas.models import VAntiguedadSaldos
 from mantenimientos.models import Clientes
@@ -88,6 +88,26 @@ def obtener_estado_individual(form,fecha_desde, fecha_hasta, moneda):
     ).only('autogenerado', 'vto', 'posicion', 'cuenta')
     asientos_dict = {a.autogenerado: a for a in asientos}
 
+    # ==============================
+    # Precalcular cobros
+    # ==============================
+    impuvtas = Impuvtas.objects.filter(
+        autofac__in=autogen_list
+    ).values('autofac', 'autogen')
+
+    pagos_ids = [i['autogen'] for i in impuvtas]
+    pagos_movs = Movims.objects.filter(
+        mautogen__in=pagos_ids
+    ).only('mautogen', 'mboleta', 'mserie', 'mprefijo', 'mfechamov')
+    pagos_dict = {m.mautogen: m for m in pagos_movs}
+
+    pagos_por_factura = {}
+    for i in impuvtas:
+        pagos_por_factura.setdefault(i['autofac'], []).append(i['autogen'])
+
+    # ==============================
+    # Armar datos finales
+    # ==============================
     datos = {
         cliente: {
             'datos_cliente': [{
@@ -98,18 +118,56 @@ def obtener_estado_individual(form,fecha_desde, fecha_hasta, moneda):
         }
     }
 
+
     for m in movimientos:
         if m.mserie !='P':
+            pago = ''
+            signo = ''
+            numero_pago = ''
+            fecha_pago = ''
+
+            pagos_ids = pagos_por_factura.get(m.mautogen, [])
+            if pagos_ids:
+                if m.msaldo == 0:
+                    pago, signo = 'OK', '(*)'
+                else:
+                    pago, signo = 'Parcial', '(+)'
+
+                for pid in pagos_ids:
+                    mov = pagos_dict.get(pid)
+                    if not mov:
+                        continue
+
+                    numero_pago += str(mov.mboleta) + ';'
+
+                    if mov.mfechamov:
+                        fecha = mov.mfechamov.strftime('%d/%m/%Y')
+                        fecha_pago += str(fecha) + ';'
+            else:
+                pago = 'No' if m.mtipo != 25 else ''
+
+            numero_completo = ''
+            if m.mserie and m.mprefijo and m.mboleta:
+                s = str(m.mserie)
+                p = str(m.mprefijo)
+                tz = len(s) - len(s.rstrip('0'))
+                lz = len(p) - len(p.lstrip('0'))
+                sep = '0' * max(0, 3 - (tz + lz))
+                numero_completo = f"{s}{sep}{p}-{m.mboleta} "
+
             asiento = asientos_dict.get(m.mautogen)
             datos[cliente]['movimientos'].append({
                 'fecha': m.mfechamov,
                 'tipo': m.mnombremov,
                 'numero_tipo': m.mtipo,
-                'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
+                'documento': numero_completo+signo,
                 'vencimiento': asiento.vto if asiento else None,
                 'detalle': m.mdetalle,
                 'total': m.mtotal,
                 'saldo': m.msaldo,
+                'numero_pago': numero_pago,
+                'fecha_pago': fecha_pago,
+                'pago': pago,
                 'posicion': asiento.posicion if asiento else None,
                 'cuenta': asiento.cuenta if asiento else None,
             })
@@ -173,18 +231,74 @@ def obtener_estado_general(form,fecha_desde, fecha_hasta, moneda):
             'movimientos': []
         }
 
+        # 1. Traer todos los Impuvtas de las facturas de este cliente
+        impucompras = Impucompras.objects.filter(
+            autofac__in=autogen_list
+        ).values('autofac', 'autogen')
+
+        # 2. Traer todos los Movims de esos cobros en un solo query
+        pagos_ids = [i['autogen'] for i in impucompras]
+        pagos_movs = Movims.objects.filter(
+            mautogen__in=pagos_ids
+        ).only('mautogen', 'mboleta', 'mserie', 'mprefijo', 'mfechamov')
+
+        # 3. Indexar pagos por id
+        pagos_dict = {m.mautogen: m for m in pagos_movs}
+
+        # 4. Indexar facturas → lista de pagos
+        pagos_por_factura = {}
+        for i in impucompras:
+            pagos_por_factura.setdefault(i['autofac'], []).append(i['autogen'])
+
         for m in movimientos:
             if m.mserie != 'P':
+                pago = ''
+                signo = ''
+                numero_pago = ''
+                fecha_pago = ''
+
+                pagos_ids = pagos_por_factura.get(m.mautogen, [])
+                if pagos_ids:
+                    if m.msaldo == 0:
+                        pago, signo = 'OK', '(*)'
+                    else:
+                        pago, signo = 'Parcial', '(+)'
+
+                    for pid in pagos_ids:
+                        mov = pagos_dict.get(pid)
+                        if not mov:
+                            continue
+                        numero_pago += str(mov.mboleta) + ';'
+
+                        # Concatenar fechas de pago
+                        if mov.mfechamov:
+                            fecha = mov.mfechamov.strftime('%d/%m/%Y')
+                            fecha_pago += str(fecha) + ';'
+                else:
+                    pago = 'No' if m.mtipo != 25 else ''
+
+                numero_completo = ''
+                if m.mserie and m.mprefijo and m.mboleta:
+                    s = str(m.mserie)
+                    p = str(m.mprefijo)
+                    tz = len(s) - len(s.rstrip('0'))
+                    lz = len(p) - len(p.lstrip('0'))
+                    sep = '0' * max(0, 3 - (tz + lz))
+                    numero_completo = f"{s}{sep}{p}-{m.mboleta} "
+
                 asiento = asientos_dict.get(m.mautogen)
                 datos[cliente_id]['movimientos'].append({
                     'fecha': m.mfechamov,
                     'tipo': m.mnombremov,
                     'numero_tipo': m.mtipo,
-                    'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
+                    'documento': numero_completo + signo,
                     'vencimiento': asiento.vto if asiento else None,
                     'detalle': m.mdetalle,
                     'total': m.mtotal,
                     'saldo': m.msaldo,
+                    'numero_pago': numero_pago,
+                    'fecha_pago': fecha_pago,
+                    'pago': pago,
                     'posicion': asiento.posicion if asiento else None,
                     'cuenta': asiento.cuenta if asiento else None,
                 })
@@ -318,12 +432,17 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
         total_format = workbook.add_format({'bold': True, 'border': 1, 'bg_color': '#FFF2CC'})  # amarillo
 
         row = 0
-        titulo = f"Cuentas a cobrar desde 0 a Z al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
+        if cliente and len(clientes_ordenados) == 1:
+            # Tomamos el nombre del único cliente presente
+            cli_name = clientes_ordenados[0]['nombre']
+            titulo = f"Estado de cuenta de {cli_name} del {fecha_desde:%d/%m/%Y} al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
+        else:
+            titulo = f"Cuentas a pagar desde 0 a Z al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
         worksheet.merge_range(row, 0, row, 9, titulo, title_format)
         row += 2
 
         headers = ['Fecha', 'Tipo', 'Documento', 'Vto.', 'Detalle',
-                   'Debe', 'Haber', 'Saldo', 'Posición', 'Cta. Ventas']
+                   'Debe', 'Haber', 'Saldo', 'Posición', 'Cta. Ventas','Pago', 'Fecha Pago', 'Documento Pago']
         worksheet.write_row(row, 0, headers, header_format)
         row += 1
 
@@ -366,7 +485,9 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
                     worksheet.write(row, 7, float(saldo_acumulado), money_format)
                     worksheet.write(row, 8, m.get('posicion'), text_format)
                     worksheet.write(row, 9, m.get('cuenta'), text_format)
-
+                    worksheet.write(row, 10, m.get('pago'), text_format)
+                    worksheet.write(row, 11, m.get('fecha_pago'), text_format)
+                    worksheet.write(row, 12, m.get('numero_pago'), text_format)
                     row += 1
             else:
                 worksheet.write(row, 4, "Sin movimientos en el período", text_format)

@@ -1783,7 +1783,7 @@ def obtener_datos_guia_madre(row_id):
             tarifa = Decimal(str(master.tarifaawb or 0))
             total_aplicable = Decimal(master.aplicable)
 
-            if total_aplicable == 0:
+            if total_aplicable == 1:
                 # Caso sin aplicables -> MIN (1 * tarifa), una sola vez
                 aplicable_display = "MIN"
                 total_total = tarifa
