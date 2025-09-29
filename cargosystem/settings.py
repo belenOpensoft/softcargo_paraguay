@@ -265,9 +265,9 @@ EMAIL_HOST_PASSWORD = '6EPCuBByz8zS'
 EMAIL_PORT = 465
 DEFAULT_FROM_EMAIL = 'opensoft@oceanlinkgroup.com'
 
+EMPRESA_HAWB = 'OCEANLINK' + '<br />\n' + 'Quesada 4926. Esq. Tte. Zotti' + '<br />\n' + 'Edificio Atlas Center. Piso 5.' + '<br />\n'+ 'Asunción - Paraguay' + '<br />\n' + '+595 981 420680 ext. 109' + '<br />\n'
+EMPRESA_HAWB_editar = 'OCEANLINK' + '\n' + 'Quesada 4926. Esq. Tte. Zotti' + '\n' + 'Edificio Atlas Center. Piso 5.' + '\n'+ 'Asunción - Paraguay' + '\n' + '+595 981 420680 ext. 109' + '\n'
+EMPRESA_firma= 'OCEANLINK' + '<br />\n' + 'Quesada 4926. Esq. Tte. Zotti, Edificio Atlas Center. Piso 5. Asunción - Paraguay'
 
-EMPRESA_HAWB = 'OCEANLINK' + '<br />\n' + 'Bolonia 2280 LATU,' + '<br />\n' + 'Edificio Los Álamos, Of.103' + '<br />\n'+ 'Montevideo, CP 11500' + '<br />\n' + 'PH:+5982 2605 2332' + '<br />\n'
-EMPRESA_HAWB_editar = 'OCEANLINK' + '\n' + 'Bolonia 2280 LATU,' + '\n' + 'Edificio Los Álamos, Of.103' + '\n'+ 'Montevideo, CP 11500' + '\n' + 'PH:+5982 2605 2332' + '\n'
 EMPRESA_AWB = 'LOGISTICA TOTAL LTDA.' + '<br />\n' + 'Bolonia 2280 LATU,' + '<br />\n' + 'Edificio Los Álamos, Of.103' + '<br />\n'+ 'Montevideo,Uruguay. CP 11500' + '<br />\n' + 'PH:+5982 2605 2332' + '<br />\n'
 EMPRESA_AWB_editar = 'LOGISTICA TOTAL LTDA.' + '\n' + 'Bolonia 2280 LATU,' + '\n' + 'Edificio Los Álamos, Of.103' + '\n'+ 'Montevideo,Uruguay. CP 11500' + '\n' + 'PH:+5982 2605 2332' + '\n'
-EMPRESA_firma= 'OCEANLINK' + '<br />\n' + 'Bolonia 2280 LATU, Edificio Los Álamos, Of.103. Montevideo, CP 11500'
