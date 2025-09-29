@@ -1,0 +1,30 @@
+# Ignorar settings
+**/settings.py
+**/settings_*.py
+**/local_settings.py
+
+# Archivos de configuración sensibles
+.env
+*.env
+
+# Archivos compilados de Python
+*.pyc
+__pycache__/
+
+# Archivos temporales
+*.log
+*.pot
+*.py[cod]
+*$py.class
+
+# Migraciones automáticas (si no querés versionarlas)
+#migrations/
+
+# Entornos virtuales
+venv/
+ENV/
+.venv/
+
+# Archivos de IDEs
+.vscode/
+.idea/
