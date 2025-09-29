@@ -3,6 +3,7 @@ from django import forms
 
 class usuarioForm(forms.Form):
 
+
     usuario = forms.CharField(widget=forms.TextInput(attrs={'required': True,
                                'id':'userName',
                                'type':'text',
