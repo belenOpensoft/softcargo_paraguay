@@ -22,8 +22,7 @@ RUTA_PROYECTO = os.path.dirname(os.path.realpath(__file__))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-e-1*c(&*w!hbn1r9ok^5q)p1sut-snx*2r-u9u^9rtbk((-c48'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-#DEBUG = False
+DEBUG = False
 ALLOWED_HOSTS = ["*"]
 DAPHNE_PORT=8002
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
