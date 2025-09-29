@@ -14,6 +14,7 @@ class usuarioForm(forms.Form):
                             label='Usuario', max_length=50
     )
 
+
     clave = forms.CharField(widget=forms.PasswordInput(render_value=False,
                             attrs={'required': True,
                                   'id':'pwd',
