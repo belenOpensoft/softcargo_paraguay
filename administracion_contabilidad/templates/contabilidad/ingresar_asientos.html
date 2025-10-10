@@ -38,7 +38,7 @@
 
     <div class="row mt-3">
       <div class="col">
-        <button type="button" class="btn btn-success btn-sm" id="btnGuardar">Guardar</button>
+        <button type="button" class="btn btn-success btn-sm" id="btnGuardar">Insertar</button>
         <button type="button" class="btn btn-danger btn-sm" id="btnEliminar">Eliminar</button>
         <button type="button" class="btn btn-secondary btn-sm" id="btnClonar">Clonar</button>
       </div>
@@ -70,7 +70,7 @@
 <div class="border rounded p-3 bg-white mt-3 shadow-sm">
   <div class="row align-items-end">
     <div class="col-md-2 d-flex align-items-end">
-      <button type="button" id="btnFinalizar" class="btn btn-primary w-100">Finalizar</button>
+      <button type="button" id="btnFinalizar" class="btn btn-primary w-100">Grabar</button>
     </div>
     <div class="col-md-2">
       <label>Debe</label>
@@ -88,7 +88,7 @@
 </div>
 
 </form>
-<script src="{% static 'grilla/ingresar_asientos.js' %}"></script>
+<script src="{% static 'grilla/ingresar_asientosv1.2.js' %}"></script>
 <script>
    var csrf_token = '{{ csrf_token }}';
 </script>

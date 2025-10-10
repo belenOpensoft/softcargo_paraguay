@@ -12,37 +12,6 @@ from consultas_administrativas.models import VReporteSubdiarioVentas
 from impomarit.models import VistaOperativas
 
 
-def subdiario_ventas_old(request):
-    if request.method == 'POST':
-        form = ReporteMovimientosForm(request.POST)
-        if form.is_valid():
-            # Obtenemos los datos limpios del formulario
-            fecha_desde = form.cleaned_data['fecha_desde']
-            fecha_hasta = form.cleaned_data['fecha_hasta']
-            moneda = form.cleaned_data['moneda']
-            todas_monedas = form.cleaned_data['todas_monedas']
-            consolidar_dolares = form.cleaned_data['consolidar_dolares']
-            socio_comercial = form.cleaned_data['socio_comercial']
-            movimiento = form.cleaned_data['movimiento']
-            estado = form.cleaned_data['estado']
-
-            # Acá podés generar el archivo o realizar acciones
-            print("Desde:", fecha_desde)
-            print("Hasta:", fecha_hasta)
-            print("Moneda:", moneda)
-            print("Todas monedas:", todas_monedas)
-            print("Consolidar:", consolidar_dolares)
-            print("Socio Comercial:", socio_comercial)
-            print("Movimiento:", movimiento)
-            print("Estado:", estado)
-
-            # Por ejemplo, podrías retornar un archivo o una respuesta
-            return HttpResponse("Formulario recibido. (Acá generarías el reporte)")
-
-    else:
-        form = ReporteMovimientosForm(initial={'estado': 'todo'})
-
-    return render(request, 'ventas_ca/subdiario_ventas.html', {'form': form})
 
 def subdiario_ventas(request):
     if request.method == 'POST':

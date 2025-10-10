@@ -268,7 +268,7 @@ class GuiasReport:
                     ]
                 )
                 table.wrapOn(c, 0, 0)
-                table.drawOn(c, 145 * mm, 135 * mm)  # ajustar posición si hace falta
+                table.drawOn(c, 145 * mm, 143 * mm)  # ajustar posición si hace falta
 
             # Totales pie
             c.drawString(52, 280, str(self.total_bultos))

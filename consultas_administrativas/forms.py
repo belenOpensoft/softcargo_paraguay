@@ -163,7 +163,7 @@ class EstadoCuentaForm(forms.Form):
     tipo_consulta = forms.ChoiceField(
         choices=TIPO_CONSULTA_CHOICES,
         widget=forms.RadioSelect,
-        initial='general',
+        initial='individual',
         label="Tipo de consulta"
     )
 
@@ -376,7 +376,7 @@ class EstadoCuentaComprasForm(forms.Form):
     tipo_consulta = forms.ChoiceField(
         choices=TIPO_CONSULTA_CHOICES,
         widget=forms.RadioSelect,
-        initial='general',
+        initial='individual',
         label="Tipo de consulta"
     )
 
@@ -398,11 +398,11 @@ class EstadoCuentaComprasForm(forms.Form):
 
     # Individual
     cliente = forms.CharField(
-        label="Cliente",
+        label="Proveedor",
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control form-control-sm'})
     )
-    cliente_codigo=forms.CharField(widget=forms.HiddenInput())
+    cliente_codigo=forms.CharField(widget=forms.HiddenInput(),required=False)
     todas_las_monedas = forms.BooleanField(
         required=False,
         label="Todas las monedas",
@@ -472,7 +472,7 @@ class EstadoCuentaMixtasForm(forms.Form):
     tipo_consulta = forms.ChoiceField(
         choices=TIPO_CONSULTA_CHOICES,
         widget=forms.RadioSelect,
-        initial='general',
+        initial='individual',
         label="Tipo de consulta"
     )
 

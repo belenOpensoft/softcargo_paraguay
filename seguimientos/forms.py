@@ -198,7 +198,6 @@ class seguimientoForm(BSModalModelForm):
             'cliente', 'despachante', 'embarcador', 'consignatario', 'notificar',
             'agente', 'transportista', 'armador', 'agecompras', 'ageventas',
             'origen', 'destino', 'vendedor', 'deposito', 'vapor',
-            'loading', 'discharge'
         ]
 
         EXCLUIR_VALIDACION_AUTOCOMPLETE = ['vapor']

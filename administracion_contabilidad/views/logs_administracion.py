@@ -1,7 +1,7 @@
 # consultas_administrativas/views.py
 import json
 from django.db.models import Q, Value as V
-from django.db.models.functions import Concat
+from django.db.models.functions import Concat, Collate
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.utils.timezone import make_aware
@@ -9,9 +9,26 @@ from datetime import datetime, time, timedelta
 from django.apps import apps
 from auditlog.models import LogEntry
 
-from administracion_contabilidad.forms import AuditLogFilterForm
+from administracion_contabilidad.forms import AuditLogFilterForm, AuditLogFilterFormHistorico
 import io
 import xlsxwriter
+import io
+from datetime import datetime, time, timedelta
+from django.http import HttpResponse
+from django.apps import apps
+from django.db.models import Q
+import xlsxwriter
+from auditlog.models import LogEntry
+
+from expaerea.models import ExportTraceop
+from expmarit.models import ExpmaritTraceop
+from expterrestre.models import ExpterraTraceop
+from impaerea.models import ImportTraceop
+from impomarit.models import Traceop as ImpmaritTraceop
+from impterrestre.models import ImpterraTraceop
+from seguimientos.models import Traceop
+from django.http import JsonResponse
+from datetime import datetime
 
 # Página con filtros + tabla
 def audit_logs_page(request):
@@ -20,158 +37,6 @@ def audit_logs_page(request):
 
 # consultas_administrativas/views.py
 
-
-
-def audit_logs_data_old(request):
-    """
-    Endpoint server-side para DataTables.
-    Agrupa logs por mautogen de Movims. La fila principal es el Movim,
-    y debajo se despliegan TODOS los modelos que compartan ese autogenerado.
-    La columna 'Factura' siempre muestra el nro de factura armado desde Movims,
-    excepto factudif que muestra 'SEG <seguimiento>'.
-    """
-    # Parámetros DataTables
-    draw   = int(request.GET.get("draw", 1))
-    start  = int(request.GET.get("start", 0))
-    length = int(request.GET.get("length", 25))
-    search_value = request.GET.get("search[value]", "").strip()
-
-    # Filtros
-    date_from = request.GET.get("date_from") or None
-    date_to   = request.GET.get("date_to") or None
-    user_id   = request.GET.get("user") or None
-
-    # Query base
-    base_qs = (
-        LogEntry.objects
-        .select_related("content_type", "actor")
-        .filter(content_type__app_label="administracion_contabilidad")
-    ).order_by("-timestamp")
-
-    # Filtro fechas
-    if date_from:
-        try:
-            dt_from = make_aware(datetime.combine(datetime.fromisoformat(date_from).date(), time.min))
-            base_qs = base_qs.filter(timestamp__gte=dt_from)
-        except Exception:
-            pass
-    if date_to:
-        try:
-            dt_to = make_aware(datetime.combine(datetime.fromisoformat(date_to).date(), time.max))
-            base_qs = base_qs.filter(timestamp__lte=dt_to)
-        except Exception:
-            pass
-
-    # Filtro usuario
-    if user_id:
-        base_qs = base_qs.filter(actor_id=user_id)
-
-    # Búsqueda global
-    if search_value:
-        base_qs = base_qs.filter(
-            Q(content_type__app_label__icontains=search_value) |
-            Q(content_type__model__icontains=search_value) |
-            Q(actor__username__icontains=search_value) |
-            Q(actor__email__icontains=search_value) |
-            Q(changes__icontains=search_value)
-        )
-
-    records_total = LogEntry.objects.filter(content_type__app_label="administracion_contabilidad").count()
-    records_filtered = base_qs.count()
-
-    # Paginación
-    page_qs = base_qs[start:start + length]
-
-    # Agrupación
-    groups = {}
-    Movims = apps.get_model("administracion_contabilidad", "Movims")
-    Factudif = apps.get_model("administracion_contabilidad", "Factudif")
-
-    def format_movim_number(movim):
-        """
-        Formatea el nro de factura a partir del Movims.
-        """
-        nro_completo = ""
-        if movim.mserie and movim.mprefijo and movim.mboleta:
-            s = str(movim.mserie)
-            p = str(movim.mprefijo)
-            n = str(movim.mboleta)
-
-            tz = len(s) - len(s.rstrip('0'))  # ceros al final de serie
-            lz = len(p) - len(p.lstrip('0'))  # ceros al inicio de prefijo
-            sep = '0' * max(0, 3 - (tz + lz))
-
-            tipo_txt = (str(movim.mnombremov).strip() + " ") if movim.mtipo else ""
-            nro_completo = f"{tipo_txt}{s}{sep}{p}-{n}"
-        return nro_completo or "--"
-
-    for e in page_qs:
-        model = e.content_type.model_class()
-        if not model:
-            continue
-
-        obj = model.objects.filter(pk=e.object_pk).first()
-        if not obj:
-            continue
-
-        table = model._meta.db_table.lower()
-        factura_txt = "--"
-        tabla_txt = table
-        mautogen = None
-
-        if table == "dataset_movims":
-            mautogen = getattr(obj, "mautogen", None)
-            factura_txt = format_movim_number(obj)
-
-        elif table == "dataset_factudif":
-            factura_txt = f"SEG {getattr(obj, 'zseguimiento', '--')} - {getattr(obj, 'zposicion', '--')}"
-            tabla_txt = f"preventa-{getattr(obj, 'znumero', '--')}"
-            mautogen = f"factudif-{obj.pk}"
-
-        else:
-            # Buscar Movims asociado por autogenerado
-            autogen = getattr(obj, "autogenerado", None) or getattr(obj, "mautogen", None) or getattr(obj, "mautofac", None)
-            if autogen:
-                movim = Movims.objects.filter(mautogen=autogen).first()
-                if movim:
-                    mautogen = movim.mautogen
-                    factura_txt = format_movim_number(movim)
-
-        if not mautogen:
-            mautogen = f"extra-{e.id}"
-
-        # Inicializar grupo
-        if mautogen not in groups:
-            groups[mautogen] = {
-                "mautogen": factura_txt,
-                "tabla": tabla_txt if table in ["dataset_movims", "dataset_factudif"] else "--",
-                "fecha": e.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-                "usuario": (
-                    e.actor.get_username() if e.actor and hasattr(e.actor, "get_username")
-                    else (e.actor.email if e.actor and getattr(e.actor, "email", None) else None)
-                ) or "—",
-                "detalles": []
-            }
-
-        # Agregar como detalle si no es movims ni factudif
-        if table not in ["dataset_movims", "dataset_factudif"]:
-            groups[mautogen]["detalles"].append({
-                "tabla": table,
-                "fecha": e.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-                "usuario": (
-                    e.actor.get_username() if e.actor and hasattr(e.actor, "get_username")
-                    else (e.actor.email if e.actor and getattr(e.actor, "email", None) else None)
-                ) or "—",
-                "cambios": e.changes or "--"
-            })
-
-    response = {
-        "draw": draw,
-        "recordsTotal": records_total,
-        "recordsFiltered": records_filtered,
-        "data": list(groups.values()),
-    }
-    return JsonResponse(response)
 
 
 
@@ -404,13 +269,6 @@ def audit_logs_data(request):
         "data": data,
     }
     return JsonResponse(response)
-import io
-from datetime import datetime, time, timedelta
-from django.http import HttpResponse
-from django.apps import apps
-from django.db.models import Q
-import xlsxwriter
-from auditlog.models import LogEntry
 
 
 def export_logs_administracion(request):
@@ -606,3 +464,117 @@ def export_logs_administracion(request):
     )
     resp['Content-Disposition'] = 'attachment; filename="logs_administracion.xlsx"'
     return resp
+
+## historico
+
+def audit_logs_page_historico(request):
+    form = AuditLogFilterFormHistorico(request.GET or None)
+    return render(request, "logs_historicos.html", {"form": form})
+
+
+
+def audit_logs_data_traceop(request):
+    """
+    Endpoint server-side para DataTables con datos de Traceop (export, import, seguimientos).
+    - Une todos los modelos de traceo.
+    - Permite filtrar por fecha, usuario, módulo y clave/acción.
+    """
+    try:
+        # Parámetros DataTables
+        draw = int(request.GET.get("draw", 1))
+        start = int(request.GET.get("start", 0))
+        length = int(request.GET.get("length", 100))
+        search_value = request.GET.get("search[value]", "").strip()
+
+        # Filtros recibidos
+        date_from = request.GET.get("date_from") or None
+        date_to = request.GET.get("date_to") or None
+        usuario = request.GET.get("user") or None
+        modulo = request.GET.get("modulo") or None
+        accion = request.GET.get("accion") or None  # en los modelos es 'clave'
+
+        # Normalizar fechas
+        try:
+            if date_from:
+                date_from = datetime.strptime(date_from, "%Y-%m-%d")
+        except:
+            date_from = None
+
+        try:
+            if date_to:
+                date_to = datetime.strptime(date_to, "%Y-%m-%d")
+        except:
+            date_to = None
+
+        # Helper para aplicar filtros en cada queryset
+        def filtrar(qs):
+            if date_from:
+                qs = qs.filter(fecha__gte=date_from)
+            if date_to:
+                qs = qs.filter(fecha__lte=date_to)
+            if usuario:
+                qs = qs.filter(nomusuario=usuario)
+            if modulo:
+                qs = qs.filter(modulo=modulo)
+            if accion:
+                qs = qs.filter(clave=accion)
+            if search_value:
+                qs = qs.filter(
+                    Q(nomusuario__icontains=search_value) |
+                    Q(modulo__icontains=search_value) |
+                    Q(detalle__icontains=search_value) |
+                    Q(clave__icontains=search_value)
+                )
+            # 🔹 Forzar todas las columnas de texto al mismo collation
+            return qs.annotate(
+                nomusuario_col=Collate("nomusuario", "utf8mb4_unicode_ci"),
+                modulo_col=Collate("modulo", "utf8mb4_unicode_ci"),
+                detalle_col=Collate("detalle", "utf8mb4_unicode_ci"),
+                clave_col=Collate("clave", "utf8mb4_unicode_ci"),
+            ).values(
+                "fecha", "nomusuario_col", "modulo_col", "detalle_col", "clave_col"
+            ).order_by('-fecha')
+
+        # Querysets con filtros aplicados ANTES de la unión
+        expo_aerea = filtrar(ExportTraceop.objects.all())
+        expo_maritima = filtrar(ExpmaritTraceop.objects.all())
+        expo_terrestre = filtrar(ExpterraTraceop.objects.all())
+        impo_terrestre = filtrar(ImpterraTraceop.objects.all())
+        impo_maritimo = filtrar(ImpmaritTraceop.objects.all())
+        impo_aereo = filtrar(ImportTraceop.objects.all())
+        seguimientos = filtrar(Traceop.objects.all())
+
+        # Unión de todos
+        historico_qs = (
+            expo_aerea.union(
+                expo_maritima,
+                expo_terrestre,
+                impo_terrestre,
+                impo_maritimo,
+                impo_aereo,
+                seguimientos,
+                all=True
+            )
+            .order_by("-fecha")
+        )
+
+        # Total registros
+        records_total = historico_qs.count()
+
+        # Paginación
+        page_qs = historico_qs[start:start + length]
+
+        # Convertir a lista de dicts
+        data = list(page_qs)
+
+        response = {
+            "draw": draw,
+            "recordsTotal": records_total,
+            "recordsFiltered": records_total,
+            "data": data,
+        }
+        return JsonResponse(response, safe=False)
+
+    except Exception as error:
+        return JsonResponse({"error": str(error)}, safe=False)
+

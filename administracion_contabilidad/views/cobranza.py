@@ -64,7 +64,7 @@ def cobranza_view(request):
 def buscar_cliente(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
         query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
-        clientes = Clientes.objects.filter(empresa__icontains=query)[:10]  # Limitar resultados a 10
+        clientes = Clientes.objects.filter(empresa__istartswith=query)[:10]  # Limitar resultados a 10
         results = [{'id': cliente.id, 'text': cliente.empresa} for cliente in clientes]
         return JsonResponse(results, safe=False)
 
@@ -189,70 +189,6 @@ def get_argumentos_busqueda(**kwargs):
     except Exception as e:
         raise TypeError(e)
 
-
-def source_facturas_pendientes_old(request):
-    try:
-        start = int(request.GET.get('start', 0))
-        length = int(request.GET.get('length', 10))
-        cliente = int(request.GET.get('cliente'))
-        moneda_objetivo = request.GET.get('moneda')
-
-        # Filtrar registros por cliente
-        pendientes = VistaCobranza.objects.filter(nrocliente=cliente)
-
-        # Paginación
-        total_registros = pendientes.count()
-        pendientes = pendientes[start:start + length]
-
-        # Convertir los resultados en lista de diccionarios
-        data = []
-        for pendiente in pendientes:
-            try:
-                moneda_nombre = Monedas.objects.get(codigo=pendiente.moneda).nombre
-            except ObjectDoesNotExist:
-                moneda_nombre = "Desconocida"
-
-            try:
-                arbitraje, paridad = Movims.objects.filter(mautogen=pendiente.autogenerado).values_list('mcambio','mparidad').first() or (0, 0)
-            except Exception:
-                arbitraje, paridad = 0, 0
-
-            total = float(pendiente.total or 0)
-            saldo = float(pendiente.saldo or 0)
-
-            arbitraje = float(arbitraje or 0)
-            paridad = float(paridad or 0)
-
-            total_convertido = convertir_monto(total, int(pendiente.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
-            saldo_convertido = convertir_monto(saldo, int(pendiente.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
-
-            data.append({
-                'id': 0,
-                'vencimiento': pendiente.vencimiento.strftime('%Y-%m-%d') if pendiente.vencimiento is not None else '',
-                'emision': pendiente.emision.strftime('%Y-%m-%d') if pendiente.emision is not None else '',
-                'documento': pendiente.documento,
-                'total': total_convertido,
-                'saldo': saldo_convertido,
-                'imputado': pendiente.pago if pendiente.pago is not None else 0,
-                'tipo_cambio': pendiente.arbitraje,
-                'embarque': pendiente.embarque,
-                'detalle': pendiente.detalle,
-                'posicion': pendiente.posicion,
-                'moneda': moneda_nombre,
-                'paridad': pendiente.paridad,
-                'tipo_doc': pendiente.tipo_doc,
-                'source': pendiente.source,
-            })
-
-        return JsonResponse({
-            'draw': int(request.GET.get('draw', 1)),
-            'recordsTotal': total_registros,
-            'recordsFiltered': total_registros,
-            'data': data,
-        })
-
-    except Exception as e:
-        return JsonResponse({'error': str(e)})
 
 def source_facturas_pendientes(request):
     try:

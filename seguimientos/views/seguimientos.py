@@ -580,86 +580,6 @@ def guardar_cronologia(request):
     return HttpResponse(data_json, content_type="application/json")
 
 
-def guardar_seguimiento_old(request):
-    resultado = {}
-    try:
-        data = simplejson.loads(request.POST['form'])
-        tipo = request.POST['tipo']
-
-        # Determinar si se está modificando un registro o creando uno nuevo
-        if 'id' in data and data['id'][0] != '':
-            registro = SeguimientoReal.objects.get(id=data['id'][0])
-            tiporeg = 'modifica'
-        else:
-            hawb = data.get('hawb', [''])[0]
-            awb = data.get('awb', [''])[0]
-
-            # Verificación individual y combinada
-            if hawb and awb:
-                existe = SeguimientoReal.objects.filter(hawb=hawb, awb=awb).exists()
-                if existe:
-                    resultado[
-                        'resultado'] = f'Error: La combinación HAWB {hawb} y AWB {awb} ya fue ingresada previamente.'
-                    return HttpResponse(json.dumps(resultado), content_type="application/json")
-            elif hawb:
-                existe = SeguimientoReal.objects.filter(hawb=hawb).exists()
-                if existe:
-                    resultado['resultado'] = f'Error: El HAWB {hawb} ya fue ingresado previamente.'
-                    return HttpResponse(json.dumps(resultado), content_type="application/json")
-            elif awb:
-                existe = SeguimientoReal.objects.filter(awb=awb).exists()
-                if existe:
-                    resultado['resultado'] = f'Error: El AWB {awb} ya fue ingresado previamente.'
-                    return HttpResponse(json.dumps(resultado), content_type="application/json")
-
-            registro = SeguimientoReal()
-            numero = SeguimientoReal.objects.all().values_list('numero', flat=True).order_by('-numero').first()
-            registro.numero = (numero + 1) if numero else 1  # Manejo de caso si no hay registros previos
-            tiporeg = 'nuevo'
-
-
-        campos = vars(registro)
-
-        # Asignar valores a los campos del modelo
-        for k, v in data.items():
-            for name in campos:
-                if name == k:
-                    if v[0] is not None and len(v[0]) > 0:
-                        setattr(registro, name, v[1] if v[1] is not None else v[0])
-                    else:
-                        setattr(registro, name, None)
-                    continue
-
-        #registro.modo = tipo
-
-        if 'id' in data and data['id'][0] != '':
-            registro.id = data['id'][0]
-            registro.save()
-        else:
-            # Inicializar valores por defecto
-            registro.iniciales = 'S/I'
-            registro.recepcionado = 'N'
-            registro.tarifafija = 'N'
-            registro.multimodal = 'N'
-            registro.unidadpeso = 'K'
-            registro.unidadvolumen = 'B'
-            registro.tipobonifcli = 'P'
-            registro.editado = 'S/I'
-            registro.save()
-
-        resultado['resultado'] = 'exito'
-        resultado['numero'] = str(registro.numero)
-        resultado['id'] = str(registro.id)
-        resultado['tipo'] = tiporeg
-
-    except IntegrityError as e:
-        resultado['resultado'] = f'Error de integridad, intente nuevamente: {str(e)}'
-    except Exception as e:
-        resultado['resultado'] = str(e)
-
-    return HttpResponse(json.dumps(resultado), content_type="application/json")
-
-
 
 def guardar_seguimiento(request):
     resultado = {}
@@ -768,32 +688,6 @@ def guardar_seguimiento(request):
             'field': None
         }), content_type="application/json")
 
-
-def eliminar_seguimiento_old(request):
-    resultado = {}
-    try:
-        id = request.POST['id']
-        seguimiento = SeguimientoReal.objects.get(id=id)
-        numero = seguimiento.numero  # Obtener el número antes de borrar el seguimiento
-        seguimiento.nroreferedi=numero
-        # Eliminar registros relacionados
-        #Cargaaerea.objects.filter(numero=numero).delete()
-        #Conexaerea.objects.filter(numero=numero).delete()
-        #Serviceaereo.objects.filter(numero=numero).delete()
-        #Envases.objects.filter(numero=numero).delete()
-
-        # Eliminar el seguimiento
-        seguimiento.save()
-        resultado['resultado'] = 'exito'
-
-    except IntegrityError:
-        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
-    except SeguimientoReal.DoesNotExist:
-        resultado['resultado'] = 'El seguimiento no existe.'
-    except Exception as e:
-        resultado['resultado'] = str(e)
-
-    return HttpResponse(json.dumps(resultado), content_type="application/json")
 
 def eliminar_seguimiento(request):
     resultado = {}

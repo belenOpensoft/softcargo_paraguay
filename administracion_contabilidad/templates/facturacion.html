@@ -15,12 +15,10 @@
 }
 
 #facturaM .form-control,
-#facturaM .form-select,
 #facturaM input[type="text"],
 #facturaM input[type="number"],
 #facturaM input[type="date"],
-#facturaM select,
-#facturaM textarea {
+#facturaM select{
     font-size: 0.75rem !important;
     padding: 1px 4px !important;
     height: 26px !important;
@@ -159,6 +157,13 @@
                         </div>
                     </div>
 
+                    <div>
+                        <div>
+                            {{ form.adenda.label_tag }}
+                            {{ form.adenda }}
+                        </div>
+                    </div>
+
                     <div class="d-grid mt-2" style="grid-template-columns: repeat(5, 1fr); gap: 10px;align-items: end;">
                         <div>
                             <label for="item">Buscar Item</label>
@@ -250,7 +255,7 @@
 {% endblock table_datatable %}
 {% block script_datatable %}
 <script src="{% static 'js/jquery-ui.min_last.js' %}"></script>
-<script src="{% static 'grilla/facturacion.js' %}"></script>
+<script src="{% static 'grilla/facturacionv1.3.js' %}"></script>
 
 <link rel="stylesheet" href="{% static 'jquery-ui/jquery-ui_last.css' %}">
 

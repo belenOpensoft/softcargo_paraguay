@@ -78,10 +78,7 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect('/')
 
-def verificar_arbitraje_old(request):
-    return render(request, 'forzar_arbitraje.html', {
-        'hoy': datetime.today().strftime('%Y-%m-%d')
-    })
+
 def verificar_arbitraje(request):
     hoy = datetime.today().strftime('%Y-%m-%d')
     raw_rates = brou_rates()
@@ -109,19 +106,6 @@ def verificar_arbitraje(request):
         'tipo_moneda': tipo_moneda,
     })
 
-def cambiar_modulo_old(request, modulo):
-    request.session["rol"] = modulo
-    if modulo == 'administracion':
-        hoy = datetime.today().date()
-        arbitraje_existente = Dolar.objects.filter(ufecha__date=hoy).exists()
-
-        if not arbitraje_existente:
-            return redirect('/admin_cont/verificar_arbitraje/')
-
-    if modulo == 'seguimientos':
-        return  HttpResponseRedirect('/seguimientos')
-    else:
-        return HttpResponseRedirect('/')
 
 
 def cambiar_modulo(request, modulo):

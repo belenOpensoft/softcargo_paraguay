@@ -1,6 +1,8 @@
 import io
 import random
 from datetime import datetime
+
+from django.db import transaction
 from django.db.models import Q
 
 import xlsxwriter
@@ -46,129 +48,154 @@ def generar_autogenerado(fecha_noseusa=None):
 def guardar_infofactura(request):
     if request.method == "POST":
         try:
-            datos_json = json.loads(request.body.decode('utf-8'))
-            preventa_datos = datos_json.get("preventa")
-            tipo = datos_json.get("tipo")
-            fecha_str = preventa_datos.get("fecha")
+            with transaction.atomic():
+                datos_json = json.loads(request.body.decode('utf-8'))
+                preventa_datos = datos_json.get("preventa")
+                tipo = datos_json.get("tipo")
+                fecha_str = preventa_datos.get("fecha")
 
-            if fecha_str is None:
-                fecha_str = datetime.now().strftime("%d-%m-%y")
+                if fecha_str is None:
+                    fecha_str = datetime.now().strftime("%d-%m-%y")
 
-            try:
-                fecha_obj = datetime.strptime(fecha_str, "%d-%m-%y")
-                fecha_formateada = fecha_obj.strftime("%Y-%m-%d %H:%M:%S")
-            except ValueError:
-                fecha_formateada = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                try:
+                    fecha_obj = datetime.strptime(fecha_str, "%d-%m-%y")
+                    fecha_formateada = fecha_obj.strftime("%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    fecha_formateada = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            if not isinstance(preventa_datos, dict):
-                return JsonResponse({"resultado": "error", "mensaje": "Los datos no son un objeto válido."}, status=400)
+                if not isinstance(preventa_datos, dict):
+                    return JsonResponse({"resultado": "error", "mensaje": "Los datos no son un objeto válido."}, status=400)
 
-            hoy = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            posicion = preventa_datos.get("posicion", "")
+                hoy = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                posicion = preventa_datos.get("posicion", "")
 
-            infofactura = Factudif()
-            numero = infofactura.get_num()
+                infofactura = Factudif()
+                numero = infofactura.get_num()
 
-            embarque = preventa_datos.get("referencia")
-            # ids = preventa_datos.get("items_ids")
-            # clase = posicion[:2]
-            #
-            # gastos = VistaGastosPreventa.objects.filter(
-            #     numero=embarque,
-            #     source=clase,
-            #     modo=tipo.capitalize()
-            # ).filter(
-            #     Q(detalle__isnull=True) | Q(detalle='S/I') | Q(detalle='')
-            # )
-            ids_raw = preventa_datos.get("items_ids", []) or []
+                embarque = preventa_datos.get("referencia")
+                # ids = preventa_datos.get("items_ids")
+                # clase = posicion[:2]
+                #
+                # gastos = VistaGastosPreventa.objects.filter(
+                #     numero=embarque,
+                #     source=clase,
+                #     modo=tipo.capitalize()
+                # ).filter(
+                #     Q(detalle__isnull=True) | Q(detalle='S/I') | Q(detalle='')
+                # )
+                ids_raw = preventa_datos.get("items_ids", []) or []
 
-            # 1) Normalizar -> ints únicos
-            try:
-                ids_seleccionados = list({int(x) for x in ids_raw})
-            except (TypeError, ValueError):
-                return JsonResponse({'error': 'items_ids inválidos'}, status=400)
+                # 1) Normalizar -> ints únicos
+                try:
+                    ids_seleccionados = list({int(x) for x in ids_raw})
+                except (TypeError, ValueError):
+                    return JsonResponse({'error': 'items_ids inválidos'}, status=400)
 
-            clase = posicion[:2]
+                clase = posicion[:2]
 
-            # Base (tu mismo filtro de siempre)
-            gastos_base = (VistaGastosPreventa.objects
-                           .filter(
-                numero=embarque,
-                source=clase,
-                modo=tipo.capitalize()
-            )
-                           .filter(Q(detalle__isnull=True) | Q(detalle='S/I') | Q(detalle=''))
-                           )
-
-            # 2) Si mandaron IDs, verificá pertenencia y filtrá por ellas
-            if ids_seleccionados:
-                # Verificación de pertenencia (opcional pero recomendable)
-                valid_count = VistaGastosPreventa.objects.filter(
-                    pk__in=ids_seleccionados,
+                # Base (tu mismo filtro de siempre)
+                gastos_base = (VistaGastosPreventa.objects
+                               .filter(
                     numero=embarque,
                     source=clase,
                     modo=tipo.capitalize()
-                ).count()
-
-                if valid_count != len(ids_seleccionados):
-                    return JsonResponse({'error': 'Algún ítem seleccionado no pertenece al embarque/clase/modo'},
-                                        status=400)
-
-                # 3) Aplicar filtro por pk__in
-                gastos = gastos_base.filter(pk__in=ids_seleccionados)
-
-                # 4) (Opcional) preservar el orden en que vinieron las IDs
-                orden_map = {pk: idx for idx, pk in enumerate(ids_seleccionados)}
-                case_expr = Case(
-                    *[When(pk=pk, then=idx) for pk, idx in orden_map.items()],
-                    output_field=IntegerField()
                 )
-                gastos = gastos.order_by(case_expr)
-            else:
-                # Sin selección explícita: mantenés tu comportamiento actual (todos los elegibles)
-                gastos = gastos_base
+                               .filter(Q(detalle__isnull=True) | Q(detalle='S/I') | Q(detalle=''))
+                               )
 
-            for gasto in gastos:
-                nueva_infofactura = Factudif()
-                nueva_infofactura.znumero = numero
-                nueva_infofactura.zrefer = preventa_datos.get("referencia")
-                nueva_infofactura.zseguimiento = preventa_datos.get("seguimiento")
-                nueva_infofactura.zcarrier = preventa_datos.get("transportista")
-                nueva_infofactura.zmaster = preventa_datos.get("master")
-                nueva_infofactura.zhouse = preventa_datos.get("house")
-                nueva_infofactura.zfechagen = hoy
-                nueva_infofactura.zllegasale = fecha_formateada
-                nueva_infofactura.zcommodity = preventa_datos.get("commodity")
-                nueva_infofactura.zkilos = preventa_datos.get("kilos")
-                nueva_infofactura.zvolumen = preventa_datos.get("volumen")
-                nueva_infofactura.zbultos = preventa_datos.get("bultos")
-                nueva_infofactura.zorigen = preventa_datos.get("origen")
-                nueva_infofactura.zdestino = preventa_datos.get("destino")
-                nueva_infofactura.zconsignatario = preventa_datos.get("consigna") or preventa_datos.get("consignatario")
-                nueva_infofactura.zcliente = preventa_datos.get("cliente")
-                nueva_infofactura.zembarcador = preventa_datos.get("embarca")
-                nueva_infofactura.zagente = preventa_datos.get("agente")
-                nueva_infofactura.zposicion = preventa_datos.get("posicion")
-                nueva_infofactura.zterminos = preventa_datos.get("terminos")
-                nueva_infofactura.zpagoflete = preventa_datos.get("pagoflete")
-                nueva_infofactura.zwr = preventa_datos.get("wr")
-                nueva_infofactura.ztransporte = posicion[1] if len(posicion) > 1 else None
-                nueva_infofactura.zclase = posicion[:2] if len(posicion) >= 2 else None
+                # 2) Si mandaron IDs, verificá pertenencia y filtrá por ellas
+                if ids_seleccionados:
+                    # Verificación de pertenencia (opcional pero recomendable)
+                    valid_count = VistaGastosPreventa.objects.filter(
+                        pk__in=ids_seleccionados,
+                        numero=embarque,
+                        source=clase,
+                        modo=tipo.capitalize()
+                    ).count()
 
-                monto = gasto.precio if gasto.precio not in [None, 0] else gasto.costo if gasto.costo not in [None, 0] else 0
-                nueva_infofactura.zitem = gasto.id_servicio
-                nueva_infofactura.zmonto = monto
-                nueva_infofactura.ziva = 1 if gasto.iva == 'Basico' else 0
-                nueva_infofactura.zmoneda = gasto.id_moneda
+                    if valid_count != len(ids_seleccionados):
+                        return JsonResponse({'error': 'Algún ítem seleccionado no pertenece al embarque/clase/modo'},
+                                            status=400)
 
-                nueva_infofactura.save()
+                    # 3) Aplicar filtro por pk__in
+                    gastos = gastos_base.filter(pk__in=ids_seleccionados)
 
-            return JsonResponse({"resultado": "exito"})
+                    # 4) (Opcional) preservar el orden en que vinieron las IDs
+                    orden_map = {pk: idx for idx, pk in enumerate(ids_seleccionados)}
+                    case_expr = Case(
+                        *[When(pk=pk, then=idx) for pk, idx in orden_map.items()],
+                        output_field=IntegerField()
+                    )
+                    gastos = gastos.order_by(case_expr)
+                else:
+                    # Sin selección explícita: mantenés tu comportamiento actual (todos los elegibles)
+                    gastos = gastos_base
+
+                for gasto in gastos:
+                    nueva_infofactura = Factudif()
+                    nueva_infofactura.znumero = numero
+                    nueva_infofactura.zrefer = preventa_datos.get("referencia")
+                    nueva_infofactura.zseguimiento = preventa_datos.get("seguimiento")
+                    nueva_infofactura.zcarrier = preventa_datos.get("transportista")
+                    nueva_infofactura.zmaster = preventa_datos.get("master")
+                    nueva_infofactura.zhouse = preventa_datos.get("house")
+                    nueva_infofactura.zfechagen = hoy
+                    nueva_infofactura.zllegasale = fecha_formateada
+                    nueva_infofactura.zcommodity = preventa_datos.get("commodity")
+                    nueva_infofactura.zkilos = preventa_datos.get("kilos")
+                    nueva_infofactura.zvolumen = preventa_datos.get("volumen")
+                    nueva_infofactura.zbultos = preventa_datos.get("bultos")
+                    nueva_infofactura.zorigen = preventa_datos.get("origen")
+                    nueva_infofactura.zdestino = preventa_datos.get("destino")
+                    nueva_infofactura.zconsignatario = preventa_datos.get("consigna") or preventa_datos.get("consignatario")
+                    nueva_infofactura.zcliente = preventa_datos.get("cliente")
+                    nueva_infofactura.zembarcador = preventa_datos.get("embarca")
+                    nueva_infofactura.zagente = preventa_datos.get("agente")
+                    nueva_infofactura.zposicion = preventa_datos.get("posicion")
+                    nueva_infofactura.zterminos = preventa_datos.get("terminos")
+                    nueva_infofactura.zpagoflete = preventa_datos.get("pagoflete")
+                    nueva_infofactura.zwr = preventa_datos.get("wr")
+                    nueva_infofactura.ztransporte = posicion[1] if len(posicion) > 1 else None
+                    nueva_infofactura.zclase = posicion[:2] if len(posicion) >= 2 else None
+
+                    monto = gasto.precio if gasto.precio not in [None, 0] else gasto.costo if gasto.costo not in [None, 0] else 0
+                    nueva_infofactura.zitem = gasto.id_servicio
+                    nueva_infofactura.zmonto = monto
+                    nueva_infofactura.ziva = 1 if gasto.iva == 'Basico' else 0
+                    nueva_infofactura.zmoneda = gasto.id_moneda
+
+                    nueva_infofactura.save()
+
+                    asignar_detalle(ids_seleccionados,numero,clase)
+                return JsonResponse({"resultado": "exito"})
         except Exception as e:
             return JsonResponse({"resultado": "error", "mensaje": str(e)}, status=500)
     else:
         return JsonResponse({"resultado": "error", "mensaje": "Método no permitido"}, status=405)
 
+def asignar_detalle(ids,num_preventa,clase):
+    try:
+        MODELOS = {
+            "IM": Serviceaereo,
+            "EM": ExpmaritServiceaereo,
+            "IA": ImportServiceaereo,
+            "EA": ExportServiceaereo,
+            "ET": ExpterraServiceaereo,
+            "IT": ImpterraServiceaereo,
+        }
+        modelo = MODELOS.get(clase)
+        if not modelo:
+            raise TypeError('clase no existe')
+
+        gastos = modelo.objects.filter(id__in=ids)
+        if not gastos:
+            raise TypeError('no hay gastos')
+
+        for g in gastos:
+            g.detalle=num_preventa
+            g.save()
+    except Exception as e:
+        raise TypeError(str(e))
 
 def source_embarques_factura(request):
     numero = request.GET.get('numero')
@@ -249,75 +276,6 @@ def get_name_by_id_productos(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
-def house_detail_factura_old(request):
-    if request.method == 'GET':
-        numero = request.GET.get('numero', None)
-        clase = request.GET.get('clase', None)
-
-
-        if numero and clase:
-
-            if clase == "IM":
-                house = Embarqueaereo.objects.get(numero=numero)
-            elif clase == "EM":
-                house = ExpmaritEmbarqueaereo.objects.get(numero=numero)
-            elif clase == "IA":
-                house = ImportEmbarqueaereo.objects.get(numero=numero)
-            elif clase == "EA":
-                house = ExportEmbarqueaereo.objects.get(numero=numero)
-            elif clase == "IT":
-                house = ImpterraEmbarqueaereo.objects.get(numero=numero)
-            elif clase == "ET":
-                house = ExpterraEmbarqueaereo.objects.get(numero=numero)
-            else:
-                return JsonResponse({'error': 'Clase no válida'}, status=400)
-
-            try:
-                data = {
-                    'id': house.id if clase == 'IM' else house.numero,
-                    'cliente_e': house.cliente,
-                    'vendedor_e': house.vendedor,
-                    'transportista_e': house.transportista,
-                    'agente_e': house.agente,
-                    'consignatario_e': house.consignatario,
-                    'origen_e': house.origen,
-                    'loading_e': house.loading if clase == 'IM' or clase =='EM' else None,
-                    'destino_e': house.destino ,
-                    'discharge_e': house.discharge if clase == 'IM' or clase =='EM' else None,
-                    'posicion_e': house.posicion,
-                    'operacion_e': house.operacion,
-                    'hawb_e': house.hawb,
-                    'vapor_e': house.vapor if clase == 'IM' or clase =='EM' else None,
-                    'viaje_e': house.viaje if clase == 'IM' or clase =='EM' else None,
-                    'pago': house.pagoflete,
-                    'moneda_e': house.moneda,
-                    'arbitraje_e': house.arbitraje,
-                    'demora_e': house.demora if clase == 'IM' or clase =='EM' else None,
-                    'embarcador_e': house.embarcador,
-                    'armador_e': house.armador if clase == 'IM' or clase =='EM' else None,
-                    'agventas_e': house.ageventas,
-                    'agcompras_e': house.agecompras,
-                    'notifcliente_e': house.notifcliente if clase == 'IM' or clase == 'IA' or clase == 'IT' else None,
-                    'notifagente_e': house.notifagente if clase == 'IM' or clase == 'IA' or clase == 'IT' else None,
-                    'fecharetiro_e': house.fecharetiro,
-                    'fechaembarque_e': house.fechaembarque,
-                    'status_e': house.status,
-                    'wreceipt_e': house.wreceipt,
-                    'trackid_e': house.trackid,
-                    'seguimiento': house.seguimiento,
-                    'terminos':house.terminos,
-                    'wr':house.wreceipt,
-                }
-
-                data['awb_e'] = house.awb if house.awb is not None else 0
-
-                return JsonResponse(data)
-            except Exception as e:
-                raise Http404("Ocurrió un error")
-        else:
-            return JsonResponse({'error': 'No ID provided'}, status=400)
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 def house_detail_factura(request):
     if request.method == 'GET':

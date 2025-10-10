@@ -799,7 +799,9 @@ class Traceop(models.Model):
     formulario = models.CharField(db_column='Formulario', max_length=20, blank=True, null=True)
     clave = models.CharField(db_column='Clave', max_length=4, blank=True, null=True)
     numero = models.IntegerField(db_column='Numero', blank=True, null=True)
-
+    class Meta:
+        managed = False
+        db_table = 'impmarit_traceop'
 
 class Conexaerea(models.Model):
     choice_modo = (

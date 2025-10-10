@@ -625,7 +625,7 @@ def descargar_archivo(request,id):
         att = ImpterraAttachhijo.objects.get(id=id)
         ruta_archivo = default_storage.path(att.archivo)
         response = FileResponse(open(ruta_archivo, 'rb'), as_attachment=True)
-        archivo = att.archivo[25:]
+        archivo = att.archivo[18:]
         response['Content-Disposition'] = 'attachment; filename="' + archivo + '"'
         return response
     except Exception as e:
@@ -655,43 +655,6 @@ def modificar_fecha_retiro(request):
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
 
-def buscar_registros_old(request):
-    if request.method == "POST":
-        seguimiento = request.POST.get("seguimiento", "")
-        embarque = request.POST.get("embarque", "")
-        reserva = request.POST.get("reserva", "")
-        master = request.POST.get("master", "")
-        house = request.POST.get("house", "")
-        consignatario = request.POST.get("consignatario", "")
-        transportista = request.POST.get("transportista", "")
-        origen = request.POST.get("origen", "")
-        posicion = request.POST.get("posicion", "")
-        if reserva:
-            resultados = Master.objects.filter(numero=reserva).values_list("awb", flat=True)
-        else:
-            resultados = VEmbarqueaereo.objects.all()
-
-            if seguimiento:
-                resultados = resultados.filter(seguimiento__icontains=seguimiento)
-            if embarque:
-                resultados = resultados.filter(numero__icontains=embarque)
-            if master:
-                resultados = resultados.filter(awb__icontains=master)
-            if house:
-                resultados = resultados.filter(hawb__icontains=house)
-            if consignatario:
-                resultados = resultados.filter(consignatario__icontains=consignatario)
-            if transportista:
-                resultados = resultados.filter(transportista__icontains=transportista)
-            if posicion:
-                resultados = resultados.filter(posicion__icontains=posicion)
-            if origen:
-                resultados = resultados.filter(origen__icontains=origen.upper())
-            resultados = resultados.values_list("awb", flat=True)
-
-        return JsonResponse({"resultados": list(resultados)}, safe=False)
-
-    return JsonResponse({"error": "Método no permitido"}, status=400)
 
 def buscar_registros(request):
     if request.method == "POST":
@@ -736,37 +699,6 @@ def buscar_registros(request):
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
 
-def buscar_registros_directos_old(request):
-    if request.method == "POST":
-        seguimiento = request.POST.get("seguimiento", "")
-        master = request.POST.get("master", "")
-        house = request.POST.get("house", "")
-        consignatario = request.POST.get("consignatario", "")
-        transportista = request.POST.get("transportista", "")
-        origen = request.POST.get("origen", "")
-        posicion = request.POST.get("posicion", "")
-
-        resultados = VEmbarqueaereoDirecto.objects.all()
-
-        if seguimiento:
-            resultados = resultados.filter(seguimiento__icontains=seguimiento)
-        if master:
-            resultados = resultados.filter(awb__icontains=master)
-        if house:
-            resultados = resultados.filter(hawb__icontains=house)
-        if consignatario:
-            resultados = resultados.filter(consignatario__icontains=consignatario)
-        if transportista:
-            resultados = resultados.filter(transportista__icontains=transportista)
-        if posicion:
-            resultados = resultados.filter(posicion__icontains=posicion)
-        if origen:
-            resultados = resultados.filter(origen__icontains=origen.upper())
-        resultados = resultados.values_list("numero", flat=True)
-
-        return JsonResponse({"resultados": list(resultados)}, safe=False)
-
-    return JsonResponse({"error": "Método no permitido"}, status=400)
 
 def buscar_registros_directos(request):
     if request.method != "POST":

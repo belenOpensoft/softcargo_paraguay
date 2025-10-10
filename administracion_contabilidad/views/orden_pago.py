@@ -158,14 +158,6 @@ def buscar_proveedor(request):
 
     return JsonResponse({'error': 'Solicitud inválida'}, status=400)
 
-def buscar_proveedor_old(request):
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
-        query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
-        proveedores = Clientes.objects.filter(empresa__icontains=query)[:10]  # Limitar resultados a 10
-        results = [{'id': proveedor.id, 'text': proveedor.empresa} for proveedor in proveedores]
-        return JsonResponse(results, safe=False)
-
-    return JsonResponse({'error': 'Solicitud inválida'}, status=400)
 
 def buscar_proveedores(request):
     if request.method == "GET":
@@ -186,60 +178,6 @@ def buscar_proveedores(request):
     return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
 
 
-def obtener_imputables_old_(request):
-    proveedor_id = request.GET.get('codigo')
-
-    # Obtener los parámetros de paginación
-    start = int(request.GET.get('start', 0))  # Inicio de la página (offset)
-    length = int(request.GET.get('length', 5))  # Número de registros por página
-    # Filtrar los registros según el proveedor
-    registros_totales = VistaPagos.objects.filter(nrocliente=proveedor_id)
-
-    filtrados=[]
-    for r in registros_totales:
-        if r.tipo_factura!='anticipo':
-            saldo = r.total - r.pago if r.pago is not None else r.total
-            if saldo <0:
-                saldo='error'
-        else:
-            saldo = -r.saldo
-
-        pago = r.pago if r.pago is not None else 0
-        if pago != r.total and saldo !='error':
-            try:
-                moneda_nombre = Monedas.objects.get(codigo=r.moneda).nombre if r.moneda in [1, 2, 3, 4, 5,6] else ''
-            except Monedas.DoesNotExist:
-                moneda_nombre = ''
-
-            filtrados.append({
-                'autogenerado': r.autogenerado,
-                'fecha': r.fecha.strftime('%Y-%m-%d') if r.fecha else '',
-                'documento': r.documento,
-                'total': r.total,
-                'monto': r.monto,
-                'iva': r.iva,
-                'tipo': r.tipo_factura,
-                'moneda': moneda_nombre,
-                'saldo': saldo,
-                'imputado': 0
-            })
-
-    # Aplicar la paginación: [start:start+length] para obtener solo los registros de la página solicitada
-    registros = filtrados[start:start + length]
-
-
-    # Estructura de respuesta para DataTable
-    response_data = {
-        'draw': request.GET.get('draw', 0),  # Para mantener la coherencia con DataTable
-        'recordsTotal': registros_totales.count(),  # Total de registros sin filtros
-        'recordsFiltered': len(filtrados),
-        # Total de registros después del filtrado (aplica el filtro de 'nrocliente')
-        'data': registros  # Datos que se mostrarán en la tabla
-    }
-
-    return JsonResponse(response_data, safe=False)
-
-
 def obtener_imputables(request):
     proveedor_id = request.GET.get('codigo')
     moneda_objetivo = request.GET.get('moneda')
@@ -247,7 +185,10 @@ def obtener_imputables(request):
     start = int(request.GET.get('start', 0))  # Inicio de la página (offset)
     length = int(request.GET.get('length', 5))  # Número de registros por página
     # Filtrar los registros según el proveedor
-    registros_totales = Movims.objects.filter(mcliente=proveedor_id,mactivo='S').exclude(msaldo=0)
+    if len(proveedor_id) > 0:
+        registros_totales = Movims.objects.filter(mcliente=proveedor_id,mactivo='S').exclude(msaldo=0).exclude(mserie='P')
+    else:
+        registros_totales = Movims.objects.none()
 
     filtrados=[]
     for r in registros_totales:
@@ -329,66 +270,6 @@ def obtener_imputables(request):
 
     return JsonResponse(response_data, safe=False)
 
-def obtener_imputables_old(request):
-    proveedor_id = request.GET.get('codigo')
-    moneda_objetivo = request.GET.get('moneda')
-    # Obtener los parámetros de paginación
-    start = int(request.GET.get('start', 0))  # Inicio de la página (offset)
-    length = int(request.GET.get('length', 5))  # Número de registros por página
-    # Filtrar los registros según el proveedor
-    registros_totales = VistaPagos.objects.filter(nrocliente=proveedor_id)
-
-    filtrados=[]
-    for r in registros_totales:
-
-        try:
-            moneda_nombre = Monedas.objects.get(codigo=r.moneda).nombre if r.moneda in [1, 2, 3, 4, 5,6] else ''
-        except Monedas.DoesNotExist:
-            moneda_nombre = ''
-
-        try:
-            arbitraje, paridad = Movims.objects.filter(mautogen=r.autogenerado).values_list('mcambio','mparidad').first() or (0,0)
-        except Exception:
-            arbitraje, paridad = 0, 0
-
-        total = float(r.total or 0)
-        saldo = float(r.saldo or 0)
-
-        arbitraje = float(arbitraje) if arbitraje else 0
-        paridad = float(paridad) if paridad else 0
-
-        total_convertido = convertir_monto(total, int(r.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
-        saldo_convertido = convertir_monto(saldo, int(r.moneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
-
-        filtrados.append({
-            'autogenerado': r.autogenerado,
-            'fecha': r.fecha.strftime('%Y-%d-%m') if r.fecha else None,
-            'documento': r.documento,
-            'total': total_convertido,
-            'monto': r.monto,
-            'iva': r.iva,
-            'tipo': r.tipo_factura,
-            'moneda': moneda_nombre,
-            'saldo': saldo_convertido,
-            'imputado': 0,
-            'arbitraje': arbitraje,
-            'paridad': paridad
-        })
-
-    # Aplicar la paginación: [start:start+length] para obtener solo los registros de la página solicitada
-    registros = filtrados[start:start + length]
-
-
-    # Estructura de respuesta para DataTable
-    response_data = {
-        'draw': request.GET.get('draw', 0),  # Para mantener la coherencia con DataTable
-        'recordsTotal': registros_totales.count(),  # Total de registros sin filtros
-        'recordsFiltered': len(filtrados),
-        # Total de registros después del filtrado (aplica el filtro de 'nrocliente')
-        'data': registros  # Datos que se mostrarán en la tabla
-    }
-
-    return JsonResponse(response_data, safe=False)
 
 def convertir_monto(monto, origen, destino, arbitraje, paridad):
     """
@@ -427,197 +308,6 @@ def convertir_monto(monto, origen, destino, arbitraje, paridad):
         return round(monto, 2)
     except Exception as e:
         return str(e)
-
-def guardar_impuorden_old(request):
-    try:
-        with transaction.atomic():
-            if request.method == 'POST':
-                body_unicode = request.body.decode('utf-8')
-                body_data = json.loads(body_unicode)
-                vector = body_data.get('vector', {})
-                imputaciones = vector.get('imputaciones', [])
-                asientos = vector.get('asiento', [])
-                movimiento = vector.get('movimiento', [])
-                cobranza = vector.get('cobranza', [])
-
-                verificar_num = int(cobranza[0]['numero'])
-                verif = Movims.objects.filter(mboleta=verificar_num, mnombremov='O/PAGO')
-                if verif.exists():
-                    return JsonResponse({'status': 'Error: ' + 'El número ingresado para la orden de pago, ya existe.'})
-
-                autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))
-                fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-
-                if vector and imputaciones:
-                    for item in imputaciones:
-
-                        boleta = VistaPagos.objects.filter(documento=item['nroboleta'],tipo_factura=item['source'])
-                        if boleta.count() == 1:
-                            monto = float(item['imputado']) #if boleta.tipo == 20 else -float(item['imputado']) if boleta.tipo == 21  else 0
-                            impuordenes = Impuordenes()
-                            impuordenes.autofac = boleta[0].autogenerado
-                            impuordenes.numero = item['nroboleta']
-                            impuordenes.prefijo = boleta[0].prefijo
-                            impuordenes.serie = boleta[0].serie
-                            impuordenes.orden = cobranza[0]['numero']
-                            impuordenes.cliente = cobranza[0]['nrocliente']
-                            impuordenes.monto = monto
-                            impuordenes.save()
-
-                            movimiento_fac=Movims.objects.filter(mautogen=boleta[0].autogenerado).first()
-                            if movimiento_fac:
-                                movimiento_fac.msaldo=float(movimiento_fac.msaldo)-float(item['imputado'])
-                                movimiento_fac.save()
-
-                        elif boleta.count() > 1:
-                            raise TypeError('Error: mas de una boleta encontrada.')
-                        else:
-                            raise TypeError('Error: boleta no encontrada.')
-
-                try:
-                    cliente_data = Clientes.objects.get(codigo=cobranza[0]['nrocliente'])
-                except Exception as _:
-                    cliente_data = None
-
-                orden = Ordenes()
-                orden.mmonto=cobranza[0]['total']
-                orden.mboleta=cobranza[0]['numero']
-                orden.mfechamov=fecha
-                orden.mmoneda=cobranza[0]['nromoneda']
-                orden.mdetalle=movimiento[0]['boletas']
-                orden.mcliente=cobranza[0]['nrocliente']
-                orden.mactiva='N' if cobranza[0]['definitivo'] == True else 'S'
-                orden.mcaja=11112 if cobranza[0]['nromoneda'] !=1 else 11111
-                orden.mautogenmovims=autogenerado_impuventa if cobranza[0]['definitivo'] == True else None
-                if cliente_data:
-                    orden.mnombre=cliente_data.empresa
-                else:
-                    orden.mnombre=''
-                orden.save()
-
-                if cobranza[0]['definitivo'] == True:
-                    if cliente_data:
-                        for asiento in asientos:
-                            fechaj = datetime.now().strftime("%Y-%m-%d")
-                            fecha_obj = datetime.strptime(fechaj, '%Y-%m-%d')
-                            nroasiento = generar_numero()
-                            movimiento_num = modificar_numero(nroasiento)
-
-                            detalle_asiento = 'O/PAGO' +'-'+ str(cobranza[0]['numero']) +'-'+ cliente_data.empresa
-                            asiento_vector_1 = {
-                                'detalle': detalle_asiento,
-                                'monto': asiento['total_pago'],
-                                'moneda': cobranza[0]['nromoneda'],
-                                'cambio': cobranza[0]['arbitraje'],
-                                'asiento': nroasiento,
-                                'conciliado': 'N',
-                                'clearing': fecha_obj,
-                                'fecha': fecha_obj,
-                                'imputacion': 2,
-                                'modo': asiento['modo'],
-                                'tipo': 'G',
-                                'cuenta': asiento['cuenta'],
-                                'documento': cobranza[0]['numero'],
-                                'vencimiento': fecha_obj,
-                                'pasado': 1,
-                                'autogenerado': autogenerado_impuventa,
-                                'cliente': cliente_data.codigo,
-                                'banco': asiento['banco'] if asiento['modo'] != 'CHEQUE' else " - ".join(map(str, Cuentas.objects.filter(xcodigo=asiento['cuenta']).values_list('xcodigo', 'xnombre').first() or ('', ''))),
-                                'centro': 'ADM',
-                                'mov': int(movimiento_num) + 1,
-                                'anio': fecha_obj.year,
-                                'mes': fecha_obj.month,
-                                'fechacheque': fecha_obj,
-                                'paridad': cobranza[0]['paridad'],
-                                'posicion': None
-
-                            }  # haber
-                            crear_asiento(asiento_vector_1)
-                            if asiento.get('modo') == 'CHEQUE':
-                                numero=asiento['nro_mediopago']
-                                banco=asiento['banco']
-                                fecha_vencimiento=asiento['vencimiento']
-                                monto=asiento['total_pago']
-                                chequera=Chequeras.ojects.filter(cheque=numero).first()
-                                if chequera:
-                                    chequera.estado=1
-                                    chequera.save()
-                                    cheque = Chequeorden()
-                                    cheque.cnumero=numero
-                                    cheque.cbanco=banco
-                                    cheque.cfecha=fecha_obj
-                                    cheque.cvto=fecha_vencimiento
-                                    cheque.corden=cobranza[0]['numero']
-                                    cheque.cmonto=monto
-                                    cheque.save()
-
-                            elif asiento.get('modo') == 'CHEQUE TERCEROS':
-                                cheque=Cheques.objects.get(id=asiento['cuenta'])
-                                cheque.cestado=2
-                                cheque.save()
-
-                        #asiento general
-                        asiento_vector_2 = {  # deber
-                            'detalle': detalle_asiento,
-                            'monto': cobranza[0]['total'],
-                            'moneda': cobranza[0]['nromoneda'],
-                            'cambio': cobranza[0]['arbitraje'],
-                            'asiento': nroasiento,
-                            'conciliado': 'N',
-                            'clearing': fecha_obj,
-                            'fecha': fecha_obj,
-                            'imputacion': 1,
-                            'modo': None,
-                            'tipo': 'G',
-                            'cuenta': cliente_data.ctavta,
-                            'documento': cobranza[0]['numero'],
-                            'vencimiento': fecha_obj,
-                            'pasado': 1,
-                            'autogenerado': autogenerado_impuventa,
-                            'cliente': cliente_data.codigo,
-                            'banco': 'S/I',
-                            'centro': 'S/I',
-                            'mov': movimiento_num,
-                            'anio': fecha_obj.year,
-                            'mes': fecha_obj.month,
-                            'fechacheque': fecha_obj,
-                            'paridad': cobranza[0]['paridad'],
-                            'posicion': None
-                        }  # deber general
-                        crear_asiento(asiento_vector_2)
-                        #crear el movimiento
-                        movimiento_vec = {
-                            'tipo': 45,
-                            'fecha': fecha_obj,
-                            'boleta': cobranza[0]['numero'],
-                            'monto': 0,
-                            'paridad': cobranza[0]['paridad'],
-                            'iva': boleta[0].iva,
-                            'total': cobranza[0]['total'],
-                            'saldo': movimiento[0]['saldo'],
-                            'moneda': cobranza[0]['nromoneda'],
-                            'detalle': movimiento[0]['boletas'],
-                            'cliente': cliente_data.codigo,
-                            'nombre': cliente_data.empresa,
-                            'nombremov': 'O/PAGO',
-                            'cambio': cobranza[0]['arbitraje'],
-                            'autogenerado': autogenerado_impuventa,
-                            'serie': None,
-                            'prefijo': None,
-                            'posicion':None,
-                            'anio': fecha_obj.year,
-                            'mes': fecha_obj.month,
-                            'monedaoriginal': cobranza[0]['nromoneda'],
-                            'montooriginal': cobranza[0]['total'],
-                            'arbitraje': cobranza[0]['arbitraje'],
-
-                        }
-                        crear_movimiento(movimiento_vec)
-
-                return JsonResponse({'status': 'exito'})
-    except Exception as e:
-        return JsonResponse({'status': 'Error: ' + str(e)})
 
 
 def crear_asiento(asiento):
@@ -921,7 +611,17 @@ def guardar_impuorden(request):
                         status=200
                     )
                 autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))
-                fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                fecha_str = cobranza[0]['fecha']  # viene como string
+                if fecha_str:
+                    try:
+                        fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
+                    except ValueError:
+                        # Si no cumple el formato esperado, usar la fecha actual
+                        fecha = datetime.now()
+                else:
+                    # Si directamente no vino fecha en el POST, también usar fecha actual
+                    fecha = datetime.now()
 
                 facturas_list = []
                 if vector and imputaciones:
@@ -989,12 +689,13 @@ def guardar_impuorden(request):
                 if cobranza[0]['definitivo'] == True:
                     if cliente_data:
                         for asiento in asientos:
-                            fechaj = datetime.now().strftime("%Y-%m-%d")
-                            fecha_obj = datetime.strptime(fechaj, '%Y-%m-%d')
+                            # fechaj = datetime.now().strftime("%Y-%m-%d")
+                            # fecha_obj = datetime.strptime(fechaj, '%Y-%m-%d')
                             nroasiento = generar_numero()
                             movimiento_num = modificar_numero(nroasiento)
 
                             detalle_asiento = 'O/PAGO' +'-'+ str(cobranza[0]['numero']) +'-'+ cliente_data.empresa
+                            banco = asiento['banco'].split('-')[0].strip()
                             asiento_vector_1 = {
                                 'detalle': detalle_asiento,
                                 'monto': asiento['total_pago'],
@@ -1002,23 +703,23 @@ def guardar_impuorden(request):
                                 'cambio': cobranza[0]['arbitraje'],
                                 'asiento': nroasiento,
                                 'conciliado': 'N',
-                                'clearing': fecha_obj,
-                                'fecha': fecha_obj,
+                                'clearing': fecha,
+                                'fecha': fecha,
                                 'imputacion': 2,
                                 'modo': asiento['modo'],
                                 'tipo': 'G',
-                                'cuenta': asiento['cuenta'] if 'cuenta' in asiento and asiento['cuenta'] != '' else None,
+                                'cuenta': banco if banco else 0,
                                 'documento': cobranza[0]['numero'],
-                                'vencimiento': fecha_obj,
+                                'vencimiento': fecha,
                                 'pasado': 1,
                                 'autogenerado': autogenerado_impuventa,
                                 'cliente': cliente_data.codigo,
                                 'banco': asiento['banco'] if asiento['modo'] != 'CHEQUE' else " - ".join(map(str, Cuentas.objects.filter(xcodigo=asiento['cuenta']).values_list('xcodigo', 'xnombre').first() or ('', ''))),
                                 'centro': 'ADM',
                                 'mov': int(movimiento_num) + 1,
-                                'anio': fecha_obj.year,
-                                'mes': fecha_obj.month,
-                                'fechacheque': fecha_obj,
+                                'anio': fecha.year,
+                                'mes': fecha.month,
+                                'fechacheque': fecha,
                                 'paridad': cobranza[0]['paridad'],
                                 'posicion': None
 
@@ -1036,7 +737,7 @@ def guardar_impuorden(request):
                                     cheque = Chequeorden()
                                     cheque.cnumero=numero
                                     cheque.cbanco=banco
-                                    cheque.cfecha=fecha_obj
+                                    cheque.cfecha=fecha
                                     cheque.cvto=fecha_vencimiento
                                     cheque.corden=cobranza[0]['numero']
                                     cheque.cmonto=monto
@@ -1055,23 +756,23 @@ def guardar_impuorden(request):
                             'cambio': cobranza[0]['arbitraje'],
                             'asiento': nroasiento,
                             'conciliado': 'N',
-                            'clearing': fecha_obj,
-                            'fecha': fecha_obj,
+                            'clearing': fecha,
+                            'fecha': fecha,
                             'imputacion': 1,
                             'modo': None,
                             'tipo': 'G',
                             'cuenta': cliente_data.ctavta,
                             'documento': cobranza[0]['numero'],
-                            'vencimiento': fecha_obj,
+                            'vencimiento': fecha,
                             'pasado': 1,
                             'autogenerado': autogenerado_impuventa,
                             'cliente': cliente_data.codigo,
                             'banco': 'S/I',
                             'centro': 'S/I',
                             'mov': movimiento_num,
-                            'anio': fecha_obj.year,
-                            'mes': fecha_obj.month,
-                            'fechacheque': fecha_obj,
+                            'anio': fecha.year,
+                            'mes': fecha.month,
+                            'fechacheque': fecha,
                             'paridad': cobranza[0]['paridad'],
                             'posicion': None
                         }  # deber general
@@ -1079,7 +780,7 @@ def guardar_impuorden(request):
                         #crear el movimiento
                         movimiento_vec = {
                             'tipo': 45,
-                            'fecha': fecha_obj,
+                            'fecha': fecha,
                             'boleta': cobranza[0]['numero'],
                             'monto': 0,
                             'paridad': cobranza[0]['paridad'],
@@ -1096,8 +797,8 @@ def guardar_impuorden(request):
                             'serie': None,
                             'prefijo': None,
                             'posicion':None,
-                            'anio': fecha_obj.year,
-                            'mes': fecha_obj.month,
+                            'anio': fecha.year,
+                            'mes': fecha.month,
                             'monedaoriginal': cobranza[0]['nromoneda'],
                             'montooriginal': cobranza[0]['total'],
                             'arbitraje': cobranza[0]['arbitraje'],
@@ -1108,8 +809,8 @@ def guardar_impuorden(request):
                 #return JsonResponse({'status': 'exito'})
                 pdf_data = {
                     "nro": cobranza[0]['numero'],
-                    "fecha_pago": fecha_obj.strftime("%Y-%m-%d"),
-                    "vto": fecha_obj.strftime("%Y-%m-%d"),  # o el vencimiento real si lo tenés
+                    "fecha_pago": fecha.strftime("%Y-%m-%d"),
+                    "vto": fecha.strftime("%Y-%m-%d"),  # o el vencimiento real si lo tenés
                     "detalle": movimiento[0]['boletas'],
                     "cambio_general": cobranza[0]['arbitraje'],
                     "monto_total": str(cobranza[0]['total']),
@@ -1436,67 +1137,6 @@ def monto_a_letras(monto,moneda):
         return f"SON {moneda} {letras} CON {decimales:02d}/100."
     except:
         return f"SON {moneda} S/I"
-
-def reimprimir_op_old(request):
-    autogenerado = request.GET.get('autogenerado')
-    if not autogenerado:
-        return JsonResponse({'status': 'Error: falta el autogenerado'}, status=400)
-
-    try:
-        orden = Ordenes.objects.get(mautogenmovims=autogenerado)
-        cliente_data = Clientes.objects.filter(codigo=orden.mcliente).first()
-        asientos = Asientos.objects.filter(autogenerado=orden.mautogenmovims,imputacion=2)
-        imputaciones = Impuordenes.objects.filter(orden=orden.mboleta)
-        movimiento = Movims.objects.filter(mautogen=autogenerado).first()
-
-        if not movimiento:
-            return JsonResponse({'status': 'Error: no se encontró el movimiento para la orden'}, status=404)
-
-        facturas_list = []
-        for imp in imputaciones:
-            movimiento_fac = Movims.objects.filter(mautogen=imp.autofac).first()
-            asiento_fac = Asientos.objects.filter(autogenerado=imp.autofac).exclude(posicion__isnull=True).values('posicion').first()
-            facturas_list.append({
-                "documento": movimiento_fac.mboleta if movimiento_fac else 'S/I',
-                "importe": float(imp.monto),
-                "detalle_fac": movimiento_fac.mdetalle if movimiento_fac and movimiento_fac.mdetalle else "S/I",
-                "cambio": float(movimiento_fac.marbitraje) if movimiento_fac else 0,
-                "posicion": asiento_fac['posicion'] if asiento_fac else "S/I"
-            })
-
-        pdf_data = {
-            "nro": orden.mboleta,
-            "fecha_pago": orden.mfechamov.strftime("%Y-%m-%d"),
-            "vto": orden.mfechamov.strftime("%Y-%m-%d"),
-            "detalle": orden.mdetalle,
-            "cambio_general": float(movimiento.marbitraje) if hasattr(movimiento, 'marbitraje') else "",
-            "monto_total": str(orden.mmonto),
-            "moneda": "MONEDA NACIONAL" if orden.mmoneda == 1 else "DÓLARES",
-            "proveedor_nombre": cliente_data.empresa if cliente_data else "",
-            "proveedor_direccion": cliente_data.direccion if cliente_data else "",
-            "proveedor_telefono": cliente_data.telefono if cliente_data else "",
-            "facturas": json.dumps(facturas_list),
-            "forma_pago": json.dumps([
-                {
-                    "modo": i.modo,
-                    "numero": (
-                        Chequeorden.objects.filter(corden=orden.mboleta).first().cnumero
-                        if i.modo == 'CHEQUE' else 0
-                    ),
-                    "banco": i.banco,
-                    "monto_total": float(i.monto),
-                    "vencimiento_cheque": i.vto.strftime('%Y-%m-%d') if i.vto else None
-                }
-                for i in asientos
-            ])
-        }
-
-        return generar_orden_pago_pdf(pdf_data, request)
-
-    except Ordenes.DoesNotExist:
-        return JsonResponse({'status': 'Error: orden no encontrada'}, status=404)
-    except Exception as e:
-        return JsonResponse({'status': 'Error: ' + str(e)}, status=500)
 
 def reimprimir_op(request):
     autogenerado = request.GET.get('autogenerado')

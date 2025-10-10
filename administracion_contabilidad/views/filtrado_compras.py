@@ -175,7 +175,7 @@ def buscar_embarques(request):
     if vapor:
         filtros['vapor__icontains'] = vapor
     if seguimiento:
-        filtros['seguimiento__icontains'] = seguimiento
+        filtros['seguimiento'] = seguimiento
     if master:
         filtros['awb__icontains'] = master
     if embarque:

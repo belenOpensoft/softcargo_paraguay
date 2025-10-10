@@ -18,33 +18,7 @@ def ingresar_asiento(request):
     form = IngresarAsiento({'fecha':datetime.now().strftime('%Y-%m-%d')})
     return render(request, 'contabilidad/ingresar_asientos.html', {'form': form})
 
-def guardar_asientos_old(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            asientos = data.get("asientos", [])
-            numero=generar_numero()
 
-            for asiento in asientos:
-                a = Asientos()
-                a.id = a.get_id()
-                a.fecha = datetime.now().strftime('%Y-%m-%d')
-                a.asiento = numero
-                a.cuenta = asiento.get("cuenta").split(" - ")[0].strip() if asiento.get("cuenta") else None
-                a.imputacion = 1 if asiento.get("debe") else 2
-                a.tipo = 'D'
-                a.paridad = asiento.get("paridad") or None
-                a.cambio = asiento.get("tipo_cambio") or None
-                a.monto = asiento.get("debe") or asiento.get("haber") or 0
-                a.detalle = asiento.get("detalle") or None
-                a.posicion = asiento.get("posicion") or None
-                a.save()
-
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=400)
-
-    return JsonResponse({"success": False, "error": "Método no permitido"}, status=405)
 
 def generar_numero():
     # Obtener la fecha y hora actual
@@ -69,11 +43,12 @@ def guardar_asientos(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            fecha_str = data.get('fecha')
             asientos = data.get("asientos", [])
             numero = generar_numero()
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d')
 
             movimientos_pdf = []
-
             for asiento in asientos:
                 cuenta_cod = asiento.get("cuenta").split(" - ")[0].strip() if asiento.get("cuenta") else None
                 cuenta_nombre = asiento.get("cuenta").split(" - ")[1].strip() if asiento.get("cuenta") and " - " in asiento.get("cuenta") else ""
@@ -82,7 +57,7 @@ def guardar_asientos(request):
 
                 a = Asientos()
                 a.id = a.get_id()
-                a.fecha = datetime.now().strftime('%Y-%m-%d')
+                a.fecha = fecha_str
                 a.asiento = numero
                 a.cuenta = cuenta_cod
                 a.imputacion = imputacion
@@ -112,7 +87,7 @@ def guardar_asientos(request):
             }
 
             # Generar y devolver el PDF directamente
-            return generar_pdf_contable(pdf_data, request)
+            return generar_pdf_contable(pdf_data, request,fecha)
 
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=400)
@@ -130,7 +105,9 @@ def reimprimir_asiento(request):
             return JsonResponse({"success": False, "error": f"No se encontraron registros para el asiento {nro_asiento}."}, status=404)
 
         movimientos_pdf = []
+        fecha = None
         for a in registros:
+            fecha = a.fecha.strftime('%d-%m-%Y')
             cuenta_obj = Cuentas.objects.filter(xcodigo=a.cuenta).values_list('xnombre', flat=True).first()
             cuenta_nombre = cuenta_obj or 'S/I'
             movimientos_pdf.append({
@@ -148,12 +125,12 @@ def reimprimir_asiento(request):
             "movimientos": movimientos_pdf
         }
 
-        return generar_pdf_contable(pdf_data, request)
+        return generar_pdf_contable(pdf_data, request,fecha)
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
-def generar_pdf_contable(pdf_data, request):
+def generar_pdf_contable(pdf_data, request,fecha):
     try:
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="asiento_contable.pdf"; filename*=UTF-8\'\'asiento_contable.pdf'
@@ -194,7 +171,7 @@ def generar_pdf_contable(pdf_data, request):
         c.drawString(20 * mm, y, "ASIENTO CONTABLE .. : INGRESO DIRECTO")
         y -= 6 * mm
         c.setFont("Courier", 10)
-        c.drawString(20 * mm, y, f"Fecha .............. : {datetime.now().strftime('%d/%m/%Y')}")
+        c.drawString(20 * mm, y, f"Fecha .............. : {fecha}")
         y -= 6 * mm
         c.drawString(20 * mm, y, f"Emitido por ........ : {request.user.first_name.upper()} {request.user.last_name.upper()}")
         y -= 10 * mm
@@ -207,7 +184,7 @@ def generar_pdf_contable(pdf_data, request):
 
         # ====== MONEDA NACIONAL ======
         c.setFont("Courier-Bold", 10)
-        c.drawString(20 * mm, y, "Asiento contable en Moneda Nacional:")
+        c.drawString(20 * mm, y, "Asiento contable:")
         y -= 6 * mm
         c.line(20 * mm, y, 190 * mm, y)
         y -= 6 * mm

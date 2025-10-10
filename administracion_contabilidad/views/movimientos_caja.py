@@ -90,8 +90,7 @@ def guardar_movimiento_caja(request):
 
 def crear_orden_pago(general,autogenerado_impuventa):
     try:
-        fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        fecha_orden = datetime.now().strftime("%Y-%m-%d")
+        fecha = general.get('fecha')
         orden = Ordenes()
         numero=orden.get_next_mboleta()
         orden.mmonto=general.get('acumulado')
@@ -106,7 +105,7 @@ def crear_orden_pago(general,autogenerado_impuventa):
         #crear el movimiento
         movimiento_vec = {
             'tipo': 45,
-            'fecha': fecha_orden,
+            'fecha': fecha,
             'boleta': numero,
             'monto': general.get('acumulado'),
             'paridad': general.get('paridad',0),

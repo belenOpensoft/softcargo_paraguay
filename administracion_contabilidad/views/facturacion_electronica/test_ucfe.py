@@ -68,11 +68,11 @@ def main():
     tipo_cfe = 111
     serie = "A"
 
-    print("==== Paso 1: Verificar si el folio está libre ====")
-    if ucfe.is_folio_free(tipo_cfe, serie, next_num, rut_emisor):
-        print("✅ El número está LIBRE para usarse.")
-    else:
-        print("❌ El número ya fue emitido.")
+    # print("==== Paso 1: Verificar si el folio está libre ====")
+    # if ucfe.is_folio_free(tipo_cfe, serie, next_num, rut_emisor):
+    #     print("✅ El número está LIBRE para usarse.")
+    # else:
+    #     print("❌ El número ya fue emitido.")
 
     print("\n==== SOAP ENDPOINTS (Inbox) ====")
 
@@ -134,6 +134,7 @@ def main():
             print(f"✅ El CFE {tipo_cfe}-{serie}-{next_num} quedó registrado en UCFE.")
         else:
             print(f"⚠️ No se encontró el CFE {tipo_cfe}-{serie}-{next_num}.")
+
     except Exception as e:
         print(f"❌ Error consultando estado post-envío: {e}")
 

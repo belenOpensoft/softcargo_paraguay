@@ -1267,6 +1267,7 @@ $(document).ready(function () {
         source: '/autocomplete_clientes/',
         minLength: 2,
         select: function (event, ui) {
+            $(this).data('item-seleccionado', true);
             $(this).attr('data-id', ui.item['id']);
         },
         change: function (event, ui) {
@@ -1280,6 +1281,18 @@ $(document).ready(function () {
                 $(this).css({"border-color": "", 'box-shadow': ''});
                 $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
             }
+        }
+    })
+    .on('focus', function() {
+    // Al enfocar, reseteamos la bandera
+        $(this).data('item-seleccionado', false);
+    })
+    .on('blur', function() {
+        // Si el usuario salió del campo sin seleccionar de la lista → limpiar
+        const seleccion = $(this).data('item-seleccionado');
+        if (!seleccion) {
+            $(this).val('');
+            $('#destinatario_input').val('');
         }
     });
 
@@ -2649,7 +2662,7 @@ $(document).ready(function () {
                         click: function () {
                             if (confirm('¿Confirma adjuntar el archivo seleccionado?')) {
                                     let table = $('#tabla_archivos').DataTable();
-                                    let row = table.rows('.table-secondary').data();
+                                    let row = table.rows('.selected').data();
                                 let nombre = row[0][2].split("/")[1];
                                 let id = row[0][0];
                                 if(id in archivos_adjuntos) {

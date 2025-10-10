@@ -100,70 +100,8 @@ def is_ajax(request):
         messages.error(request,e)
 
 
-def guardar_ruta_old(request):
-    resultado = {}
-    try:
-        numero = request.POST['numero']
-        data = simplejson.loads(request.POST['data'])
-        if len(data[0]['value']) > 0:
-            registro = ExportConexaerea.objects.get(id=data[0]['value'])
-        else:
-            registro = ExportConexaerea()
-        campos = vars(registro)
-        for x in data:
-            k = x['name']
-            v = x['value']
-            for name in campos:
-                if name == k:
-                    if v is not None and len(v) > 0:
-                        if v is not None:
-                            setattr(registro, name, v)
-                        else:
-                            if len(v) > 0:
-                                setattr(registro, name, v)
-                    else:
-                        setattr(registro, name, None)
-                    continue
-        registro.numero = numero
-        registro.save()
-
-        eta = next(item['value'] for item in data if item['name'] == 'llegada')
-        etd = next(item['value'] for item in data if item['name'] == 'salida')
-        #vapor = next(item['value'] for item in data if item['name'] == 'vapor')
-        viaje = next(item['value'] for item in data if item['name'] == 'viaje')
-
-        actualizar_fechas(etd, eta, numero, viaje)
 
 
-        resultado['resultado'] = 'exito'
-        resultado['numero'] = str(registro.numero)
-    except IntegrityError as e:
-        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
-    except Exception as e:
-        resultado['resultado'] = str(e)
-    data_json = json.dumps(resultado)
-    mimetype = "application/json"
-    return HttpResponse(data_json, mimetype)
-
-
-def actualizar_fechas_old(etd, eta, numero,viaje):
-    try:
-        etd = datetime.strptime(etd, "%Y-%m-%d")
-        eta = datetime.strptime(eta, "%Y-%m-%d")
-        resultado = {}
-        num=ExportEmbarqueaereo.objects.get(numero=numero).seguimiento
-        seg=Seguimiento.objects.get(numero=num)
-        if seg is not None:
-            if etd is not None:
-                seg.etd=etd
-            if eta is not None:
-                seg.eta=eta
-            if viaje is not None:
-                seg.viaje=viaje
-            seg.save()
-    except Exception as e:
-        resultado['resultado'] = f'Ocurrió un error: {str(e)}'
-    return JsonResponse(resultado)
 
 def guardar_ruta(request):
     resultado = {}

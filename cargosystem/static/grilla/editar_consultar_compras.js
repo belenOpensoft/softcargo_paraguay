@@ -762,42 +762,6 @@ $.ajax({
   }
 });
 }
-function cargarImputacionesCompra_old(autogen) {
-    fetch('/admin_cont/obtener_imputados_compra/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrf_token
-        },
-        body: JSON.stringify({ autogen: autogen })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const tbody = document.getElementById('tablaImputaciones');
-        tbody.innerHTML = '';  // Limpiar tabla antes de cargar
-
-        if (data.documentos && data.documentos.length > 0) {
-            data.documentos.forEach(doc => {
-                const fila = document.createElement('tr');
-
-                fila.innerHTML = `
-                    <td class="oculto">${doc.autogenerado}</td>
-                    <td>${doc.documento}</td>
-                    <td>${doc.imputado}</td>
-                `;
-
-                tbody.appendChild(fila);
-            });
-        } else {
-            const fila = document.createElement('tr');
-            fila.innerHTML = `<td colspan="3" class="text-center">No se encontraron imputaciones.</td>`;
-            tbody.appendChild(fila);
-        }
-    })
-    .catch(error => {
-        console.error('Error al cargar imputaciones:', error);
-    });
-}
 function cargarImputacionesCompra(autogen) {
     $.ajax({
         url: '/admin_cont/obtener_imputados_compra/',
@@ -1020,52 +984,6 @@ function eliminarImputacionCompra(autogen, autofac) {
   .catch(error => {
     console.error("Error en la solicitud:", error);
   });
-}
-function guardarCambiosFormulario_old() {
-    const camposModificados = document.querySelectorAll(".bg-warning");
-    const datos = {};
-
-    // Obtener autogenerado y tipo (de inputs ocultos o lo que uses)
-    const autogen = document.getElementById("autogen_detalle_compra").value;
-    const tipo = document.getElementById("id_tipo").value;
-
-    // Validación mínima
-    if (!autogen || !tipo) {
-        console.error("Faltan autogenerado o tipo.");
-        return;
-    }
-
-    datos["autogen"] = autogen;
-    datos["tipo"] = tipo;
-
-    camposModificados.forEach(campo => {
-        const name = campo.name;
-        const value = campo.value;
-        if (name) {
-            datos[name] = value;
-        }
-    });
-
-    fetch("/admin_cont/modificar_compra/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": csrf_token  // si usás CSRF
-        },
-        body: JSON.stringify(datos)
-    })
-    .then(res => res.json())
-    .then(response => {
-        if (response.success) {
-            alert("Cambios guardados correctamente.");
-            $("#modalFacturaDetalle").dialog('close');
-        } else {
-            alert("Error al guardar: " + response.error);
-        }
-    })
-    .catch(err => {
-        console.error("Error al guardar cambios:", err);
-    });
 }
 function guardarCambiosFormulario() {
     const camposModificados = document.querySelectorAll(".bg-warning");

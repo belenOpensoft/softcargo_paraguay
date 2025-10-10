@@ -1,7 +1,9 @@
 import base64
 import json
 import logging
+import os
 import re
+import threading
 import uuid
 from functools import reduce
 from operator import or_
@@ -9,6 +11,8 @@ from operator import or_
 from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.forms import model_to_dict
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
@@ -19,15 +23,15 @@ from administracion_contabilidad.views.facturacion_electronica.ucfe_client impor
 from cargosystem import settings
 from cargosystem.settings import BASE_DIR
 from expaerea.models import ExportEmbarqueaereo, ExportCargaaerea, VEmbarqueaereo as EA, ExportReservas, \
-    ExportServiceaereo
+    ExportServiceaereo, ExportConexaerea, ExportAttachhijo
 from expmarit.models import ExpmaritEmbarqueaereo, ExpmaritCargaaerea, VEmbarqueaereo as EM, ExpmaritReservas, \
-    ExpmaritServiceaereo
+    ExpmaritServiceaereo, ExpmaritEnvases, ExpmaritAttachhijo
 from expterrestre.models import ExpterraEmbarqueaereo, ExpterraCargaaerea, VEmbarqueaereo as ET, ExpterraReservas, \
-    ExpterraServiceaereo
+    ExpterraServiceaereo, ExpterraEnvases, ExpterraAttachhijo
 from impaerea.models import ImportEmbarqueaereo, ImportCargaaerea, VEmbarqueaereo as IA, ImportConexaerea, \
-    ImportReservas, ImportServiceaereo
+    ImportReservas, ImportServiceaereo, ImportAttachhijo
 from impterrestre.models import ImpterraEmbarqueaereo, ImpterraCargaaerea, VEmbarqueaereo as IT, ImpterraReservas, \
-    ImpterraServiceaereo
+    ImpterraServiceaereo, ImpterraEnvases, ImpterraAttachhijo
 from mantenimientos.models import Clientes, Servicios, Monedas, Vapores, Ciudades, Paises
 from administracion_contabilidad.forms import Factura, RegistroCargaForm, VentasDetalleTabla
 from administracion_contabilidad.models import Boleta, Asientos, Movims, Infofactura, \
@@ -37,7 +41,7 @@ from datetime import datetime
 from django.db import transaction
 from django.db.models import F, Max, Q
 from impomarit.models import VGastosHouse, Envases, Cargaaerea, Embarqueaereo, VEmbarqueaereo as IM, Reservas, \
-    Serviceaereo, BloqueoEdicion
+    Serviceaereo, BloqueoEdicion, Attachhijo
 from decimal import Decimal
 from administracion_contabilidad.forms import pdfForm
 from django.utils.timezone import now, timedelta
@@ -70,7 +74,7 @@ columns_table = {
 }
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.ERROR,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler(str(BASE_DIR) + "/logs/facturacion.log", mode="a", encoding="utf-8")
@@ -119,60 +123,6 @@ def source_facturacion(request):
         'recordsFiltered': total_filtered,
     })
 
-def source_facturacion_old(request):
-    args = {
-        '1': request.GET['columns[1][search][value]'],
-        '2': request.GET['columns[2][search][value]'],
-        '3': request.GET['columns[3][search][value]'],
-        '4': request.GET['columns[4][search][value]'],
-        '5': request.GET['columns[5][search][value]'],
-        '6': request.GET['columns[6][search][value]'],
-        '7': request.GET['columns[7][search][value]'],
-        '8': request.GET['columns[8][search][value]'],
-    }
-
-    filtro = get_argumentos_busqueda(**args)
-    start = int(request.GET['start'])
-    length = int(request.GET['length'])
-    buscar = str(request.GET['buscar'])
-    que_buscar = str(request.GET['que_buscar'])
-
-    if len(buscar) > 0:
-        filtro[que_buscar] = buscar
-
-    order = get_order(request, columns_table)
-
-    # Agrupar por autogenerado y obtener fecha más reciente
-    agrupados = (VistaVentas.objects
-                 .filter(**filtro)
-                 .values('autogenerado')
-                 .annotate(fecha_max=Max('fecha'))
-                 )
-
-    # Ahora traemos todos los registros que coinciden con autogenerado y fecha_max
-    todo = VistaVentas.objects.filter(
-        reduce(
-            or_,
-            [Q(autogenerado=row['autogenerado'], fecha=row['fecha_max']) for row in agrupados]
-        )
-    ).order_by(*order)
-
-    # Agrupar manualmente en Python por autogenerado (por si hay más de uno con misma fecha)
-    vista_unicos = {}
-    for row in todo:
-        if row.autogenerado not in vista_unicos:
-            vista_unicos[row.autogenerado] = row
-
-    # Convertir a lista y paginar
-    registros_finales = list(vista_unicos.values())
-    resultado = {
-        'data': get_data(registros_finales[start:start + length]),
-        'length': length,
-        'draw': request.GET['draw'],
-        'recordsTotal': len(vista_unicos),
-        'recordsFiltered': len(vista_unicos),
-    }
-    return JsonResponse(resultado)
 
 def get_argumentos_busqueda(**kwargs):
     try:
@@ -343,13 +293,13 @@ def generar_autogenerado(tipo, hora, fecha, numero):
 def procesar_factura(request):
     try:
         with transaction.atomic():
-
             if request.method == 'POST':
 
                 lista = Boleta.objects.last()
                 numero = int(lista.numero) + 1
                 hora = datetime.now().strftime('%H%M%S%f')
                 fecha = request.POST.get('fecha')
+                adenda = request.POST.get('adenda','')
                 tipo = request.POST.get('tipoFac', 0)
 
                 preventa = json.loads(request.POST.get('preventa'))
@@ -373,7 +323,7 @@ def procesar_factura(request):
                     origen=preventa.get('origen')
                     destino=preventa.get('destino')
                     seguimiento=preventa.get('seguimiento')
-                    referencia = None
+                    referencia = preventa.get('referencia')
                     aplicable = None
                     volumen = shipper=agente=detalle=None
                     transportista = llegasale=consignatario = commodity= None
@@ -384,7 +334,6 @@ def procesar_factura(request):
                     for r in reg:
                         r.zfacturado='S'
                         r.save()
-
                 else:
                     if registro_carga:
                         kilos = float(registro_carga.get('peso') or 0)
@@ -535,6 +484,7 @@ def procesar_factura(request):
                     'monedaoriginal': moneda,
                     'montooriginal': precio_total,
                     'arbitraje': arbitraje,
+                    'adenda': adenda,
                 }
                 asiento_general = {
                     'detalle': detalle_asiento,
@@ -674,7 +624,7 @@ def procesar_factura(request):
 
                     resultado = facturar_uruware(
                         numero, tipo, serie, moneda, cliente_data,
-                        precio_total, neto, iva, items_data, facturas_imputadas, fecha_obj,arbitraje,mnt_neto_iva_basica,exento,autogenerado
+                        precio_total, neto, iva, items_data, facturas_imputadas, fecha_obj,arbitraje,mnt_neto_iva_basica,exento,autogenerado,adenda,referencia,posicion,request.user.id
                     )
                     mensaje = resultado['mensaje']
                 else:
@@ -683,18 +633,17 @@ def procesar_factura(request):
                 if resultado["success"]:
                     return JsonResponse({
                         "success": True,
-                        "mensaje": resultado["mensaje"],
+                        "mensaje": mensaje,
                         "ucfe_response": resultado.get("ucfe_response", {}),
                     })
                 else:
                     return JsonResponse({
                         "success": False,
-                        "mensaje": resultado["mensaje"],
+                        "mensaje": mensaje,
                     })
             return None
     except Exception as e:
         return JsonResponse({'status': 'Error: ' + str(e)})
-
 
 def gastos_detalle_marcar(numero_preventa,autogenerado):
     try:
@@ -713,22 +662,23 @@ def gastos_detalle_marcar(numero_preventa,autogenerado):
         gastos = VistaGastosPreventa.objects.filter(
             numero=embarque,
             source=clase,
-        ).filter(
-                Q(detalle__isnull=True) | Q(detalle='S/I') | Q(detalle='')
-            )
+        )
 
         ids_coincidentes = []
 
-        for r in reg:
-            num_servicio = r.zitem
-            monto_gasto = Decimal(r.zmonto)
-
-            for g in gastos:
-                precio = Decimal(g.precio or 0)
-                costo = Decimal(g.costo or 0)
-
-                if g.id_servicio == num_servicio and (precio == monto_gasto or costo == monto_gasto):
-                    ids_coincidentes.append(g.id)
+        # for r in reg:
+        #     num_servicio = r.zitem
+        #     monto_gasto = Decimal(r.zmonto)
+        #
+        #     for g in gastos:
+        #         precio = Decimal(g.precio or 0)
+        #         costo = Decimal(g.costo or 0)
+        #
+        #         if g.id_servicio == num_servicio and (precio == monto_gasto or costo == monto_gasto):
+        #             ids_coincidentes.append(g.id)
+        for g in gastos:
+            if g.detalle == str(numero_preventa):
+                ids_coincidentes.append(g.id)
 
         if clase == "IM":
             service = Serviceaereo.objects.filter(id__in=ids_coincidentes)
@@ -843,6 +793,7 @@ def crear_movimiento(movimiento):
         lista.marbitraje = movimiento['arbitraje']
         lista.mmontooriginal = movimiento['montooriginal']
         lista.mactivo = 'S'
+        lista.adenda =movimiento['adenda']
         lista.save()
 
     except Exception as e:
@@ -853,21 +804,33 @@ def source_infofactura(request):
     try:
         registros = VPreventas.objects.all()
 
-        data = [{
-            'numero': item.znumero,
-            'cliente': item.zconsignatario,
-            'posicion': item.zposicion,
-            'master': item.zmaster,
-            'house': item.zhouse,
-            'vapor_vuelo': item.zcarrier,
-            'contenedor': (
-                Envases.objects.filter(numero=item.zrefer).order_by('id').first().nrocontenedor
-                if Envases.objects.filter(numero=item.zrefer).exists() else 0
-            ),
-            'clase': item.zclase,
-            'referencia': item.zrefer,
-            'fecha': item.zllegasale.strftime('%Y-%m-%d') if item.zllegasale else None,
-        } for item in registros]
+        MODELOS = {
+            "IM": Envases,
+            "EM": ExpmaritEnvases,
+            "ET": ExpterraEnvases,
+            "IT": ImpterraEnvases,
+        }
+
+        data = []
+        for item in registros:
+            modelo = MODELOS.get(item.zclase)
+            contenedor = ''
+            if modelo:
+                qs = modelo.objects.filter(numero=item.zrefer).order_by("id").values_list("nrocontenedor", flat=True)
+                contenedor = ";".join(str(c) for c in qs) if qs else ''
+
+            data.append({
+                'numero': item.znumero,
+                'cliente': item.zconsignatario,
+                'posicion': item.zposicion,
+                'master': item.zmaster,
+                'house': item.zhouse,
+                'vapor_vuelo': item.zcarrier,
+                'contenedor': contenedor,
+                'clase': item.zclase,
+                'referencia': item.zrefer,
+                'fecha': item.zllegasale.strftime('%Y-%m-%d') if item.zllegasale else None,
+            })
 
         return JsonResponse({'data': data})
 
@@ -974,29 +937,36 @@ def cargar_preventa_infofactura(request):
 
             # gastos_raw = VistaGastosPreventa.objects.filter(numero=referencia,source=clase)
 
+            # gastos_raw = VistaGastosPreventa.objects.filter(
+            #     numero=referencia,
+            #     source=clase
+            # ).filter(
+            #     Q(detalle__isnull=True) | Q(detalle='') | Q(detalle='S/I')
+            # )
             gastos_raw = VistaGastosPreventa.objects.filter(
                 numero=referencia,
                 source=clase
-            ).filter(
-                Q(detalle__isnull=True) | Q(detalle='') | Q(detalle='S/I')
             )
-
-            reg = Factudif.objects.filter(znumero=preventa)
+            # reg = Factudif.objects.filter(znumero=preventa)
 
             ids_coincidentes = []
 
             #encontrar los que se facturaron
 
-            for r in reg:
-                num_servicio = r.zitem
-                monto_gasto = Decimal(r.zmonto)
+            # for r in reg:
+            #     num_servicio = r.zitem
+            #     monto_gasto = Decimal(r.zmonto)
+            #
+            #     for g in gastos_raw:
+            #         precio = Decimal(g.precio or 0)
+            #         costo = Decimal(g.costo or 0)
+            #
+            #         if g.id_servicio == num_servicio and (precio == monto_gasto or costo == monto_gasto):
+            #             ids_coincidentes.append(g.id)
 
-                for g in gastos_raw:
-                    precio = Decimal(g.precio or 0)
-                    costo = Decimal(g.costo or 0)
-
-                    if g.id_servicio == num_servicio and (precio == monto_gasto or costo == monto_gasto):
-                        ids_coincidentes.append(g.id)
+            for g in gastos_raw:
+                if g.detalle==str(preventa):
+                    ids_coincidentes.append(g.id)
 
             gastos = VistaGastosPreventa.objects.filter(id__in=ids_coincidentes,source=prev.zclase)
 
@@ -1213,42 +1183,6 @@ def cargar_preventa_infofactura_multiple(request):
                         moneda = embarque.moneda
 
 
-                    data_preventa_old = {
-                        'autogenerado': prev.autogenerado,
-                        'house': prev.house,
-                        'master': prev.master,
-                        'moneda': moneda,
-                        'total_con_iva': str(total_con_iva),
-                        'total_sin_iva': str(total_sin_iva),
-                        'cliente_i': cliente.empresa,
-                        'peso': prev.kilos,
-                        'direccion': cliente.direccion,
-                        'localidad': cliente.localidad,
-                        'aplic': Cargaaerea.objects.filter(numero=ref).values('aplicable').first().get('aplicable', 'S/I') if clase == "IA" else 'S/I',
-                        'bultos': prev.bultos,
-                        'volumen': prev.volumen,
-                        'commodity': prev.commodity,
-                        'inconterms': prev.terminos,
-                        'flete': prev.pagoflete,
-                        'deposito': "S/I",
-                        'wr': prev.wr,
-                        'referencia': prev.referencia,
-                        'llegada_salida': embarque.fecharetiro,
-                        'origen': prev.destino,
-                        'destino': prev.origen,
-                        'transportista': prev.transportista,
-                        'consignatario': prev.consigna,
-                        'embarcador': prev.embarca,
-                        'agente': prev.agente,
-                        'vuelo_vapor': prev.vuelo,
-                        'seguimiento': prev.seguimiento,
-                        'mawb_mbl_mcrt': prev.master,
-                        'hawb_hbl_hcrt': prev.house,
-                        'posicion': prev.posicion,
-                        'status': 'PARA FACTURAR',
-                        'orden': "S/I",
-                        'modo': 'MARITIMO',
-                    }
                     data_preventa = {
                         'autogenerado': prev.znumero,
                         'house': prev.zhouse,
@@ -1537,93 +1471,6 @@ def get_datos_embarque(request):
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
-@require_POST
-def hacer_nota_credito_old(request):
-    numero_nc = request.POST.get("numero")
-    arbitraje = request.POST.get("arbitraje")
-    autogenerado_factura = request.POST.get("autogenerado")
-
-    if Movims.objects.filter(mboleta=numero_nc, mtipo=21).exists():
-        return JsonResponse({"mensaje": "Ese número ya existe para una Nota de Crédito."}, status=400)
-
-    try:
-        with transaction.atomic():
-            nuevos_movims = []
-            nuevos_boleta = []
-            nuevos_asientos = []
-
-            hora = datetime.now().strftime('%H%M%S%f')
-            fecha = datetime.now().strftime('%Y-%m-%d')
-
-            nuevo_autogenerado = generar_autogenerado(21, hora, fecha, numero_nc)
-            # Clonar BOLETA
-            for bol in Boleta.objects.filter(autogenerado=autogenerado_factura):
-                data = model_to_dict(bol)
-                data.pop('id', None)
-                data.update({
-                    'autogenerado': nuevo_autogenerado,
-                    'tipo': 21,
-                    'numero': numero_nc,
-                    'cambio': arbitraje,
-                    'fecha': datetime.now(),
-                    'vto': datetime.now(),
-                })
-                nuevos_boleta.append(Boleta(**data))
-            # Clonar MOVIMS
-            for mov in Movims.objects.filter(mautogen=autogenerado_factura):
-                data = model_to_dict(mov)
-                data.pop('id', None)
-                data.update({
-                    'mautogen': nuevo_autogenerado,
-                    'mtipo': 21,
-                    'mnombremov': 'NOTA CRED.',
-                    'mboleta': numero_nc,
-                    'marbitraje': arbitraje,
-                    'mfechamov': datetime.now(),
-                    'mvtomov': datetime.now(),
-                    'mdetalle': f"Nota de credito de factura {mov.mboleta} - {mov.mnombre}",
-                })
-                nuevos_movims.append(Movims(**data))
-
-            # Clonar ASIENTOS
-            for asiento in Asientos.objects.filter(autogenerado=autogenerado_factura):
-                data = model_to_dict(asiento)
-                data.pop('id', None)
-
-                data.update({
-                    'autogenerado': nuevo_autogenerado,
-                    'asiento': generar_numero(),
-                    'detalle': f"NC-{asiento.detalle}",
-                    'tipo': 'V',
-                    'cambio': arbitraje,
-                    'documento': numero_nc,
-                    'fecha': datetime.now(),
-                    'vto': datetime.now(),
-                })
-                nuevos_asientos.append(Asientos(**data))
-
-            fac = Movims.objects.filter(mautogen=autogenerado_factura, mtipo=20).first()
-
-            impuc = Impuvtas()
-            impuc.autogen = str(nuevo_autogenerado)
-            impuc.autofac = autogenerado_factura
-            impuc.cliente = fac.mcliente
-            impuc.monto = fac.mtotal
-            impuc.save()
-
-            fac.msaldo = 0
-            fac.save()
-
-            # Guardar clones
-            Movims.objects.bulk_create(nuevos_movims)
-            Boleta.objects.bulk_create(nuevos_boleta)
-            Asientos.objects.bulk_create(nuevos_asientos)
-
-        return JsonResponse({"mensaje": "Nota de crédito creada con éxito."})
-    except Exception as e:
-        return JsonResponse({"mensaje": f"Error al crear nota de crédito: {str(e)}"}, status=500)
-
-
 def cargar_pendientes_imputacion_venta(request):
     try:
         nrocliente = request.GET.get('nrocliente')
@@ -1669,9 +1516,9 @@ def cargar_pendientes_imputacion_venta(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva,items_data,facturas_imputadas,fecha,arbitraje,mnto_neto,exento,autogen):
+def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva,items_data,facturas_imputadas,fecha,arbitraje,mnto_neto,exento,autogen,adenda,referencia,posicion,user_id):
         try:
-            numero = int(numero)
+            # numero = int(numero)
 
             tipo_cfe = None
             if int(tipo) == 23:
@@ -1707,24 +1554,22 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                 ciudad = Ciudades.objects.filter(codigo=cliente.ciudad).first()
             #
             if not ciudad:
-                return JsonResponse({"success": False, "mensaje": "El cliente no tiene una ciudad ingresada. Dirijase a mantenimientos y complete los datos para facturar."})
+                return {"success": False, "mensaje": "El cliente no tiene una ciudad ingresada. Dirijase a mantenimientos y complete los datos para facturar."}
 
             data = {
                 "tipo_cfe": tipo_cfe,
-                "serie": serie,
-                "numero": numero,
                 "fecha_emision": fecha.strftime('%Y-%m-%d'),
                 "forma_pago": "2",
                 "ruc_emisor": settings.FACTURACION_RUT,
                 "razon_social": "Oceanlink LTDA",
-                "codigo_sucursal": "1",
+                "codigo_sucursal": "2",
                 "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
                 "ciudad": "Montevideo",
                 "departamento": "Montevideo",
                 "moneda": "UYU" if moneda and moneda == 1 else "USD" if moneda and moneda == 2 else "EUR" if moneda and moneda == 3 else "Error",
                 "neto_tasa_basica": mnto_neto,
                 "iva_tasa_basica": "22" ,
-                "iva_monto_basica": iva,
+                "iva_monto_basica": round(Decimal(iva),2),
                 "total": precio_total,
                 "cantidad_items": len(items_data),
                 "monto_pagar": precio_total,
@@ -1737,7 +1582,7 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                 "documento_receptor": cliente.ruc if cliente else '',
                 "razon_social_receptor": cliente.razonsocial if cliente else '',
                 "direccion_receptor": cliente.direccion if cliente else '',
-                "ciudad_receptor": ciudad.nombre if ciudad else 'Montevideo',
+                "ciudad_receptor": ciudad.nombre if ciudad else '',
                 "pais_receptor": cliente.pais if cliente else '',
                 "lleva_receptor": False,
             }
@@ -1800,52 +1645,63 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                 cod_terminal=settings.FACTURACION_TERMINAL,
                 wsdl_inbox=settings.FACTURACION_INBOX_URL,
                 wsdl_query=settings.FACTURACION_QUERY_URL,
+                adenda=adenda
             )
-            if ucfe.is_folio_free(tipo_cfe, serie, numero, settings.FACTURACION_RUT):
-                xml = ucfe.render_xml(data, items,referencias)
-                uuid_val = str(uuid.uuid4())
+            xml = ucfe.render_xml(data, items,referencias)
+            uuid_val = str(uuid.uuid4())
 
-                resp_firma = ucfe.soap_solicitar_firma(
-                    xml,
-                    uuid_str=uuid_val,
-                    rut_emisor=settings.FACTURACION_RUT,
-                    tipo_cfe=tipo_cfe,
-                    serie=serie,
-                    numero=numero
+            resp_firma = ucfe.soap_solicitar_firma(
+                xml,
+                uuid_str=uuid_val,
+                rut_emisor=settings.FACTURACION_RUT,
+                tipo_cfe=tipo_cfe,
+            )
+            data_firma = serialize_object(resp_firma)
+            cae_num = data_firma["Resp"].get("IdCae")
+            mensaje = data_firma["Resp"].get("MensajeRta")
+
+            boleta = Boleta.objects.filter(autogenerado=autogen)
+            movimiento_factura = Movims.objects.filter(mautogen=autogen).first()
+
+            cfe_numero = data_firma["Resp"].get("NumeroCfe")
+            serie_cfe = data_firma["Resp"].get("Serie")
+
+            movimiento_factura.mboleta = cfe_numero
+            movimiento_factura.mserie = serie_cfe
+            movimiento_factura.save()
+
+            for b in boleta:
+                b.cae = cae_num
+                b.save()
+
+            resp_post = ucfe.soap_obtener_cfe_emitido(
+                rut=settings.FACTURACION_RUT,
+                tipo_cfe=tipo_cfe,
+                serie=serie_cfe,
+                numero=cfe_numero
+            )
+            data_post = serialize_object(resp_post)
+
+
+            if data_post:
+                hilo = threading.Thread(
+                    target=adjuntar_factura,
+                    args=(referencia, posicion, tipo_cfe, serie_cfe, cfe_numero, user_id)
                 )
-                data_firma = serialize_object(resp_firma)
-                cae_num = data_firma["Resp"].get("IdCae")
-                boleta = Boleta.objects.filter(autogenerado=autogen)
-                for b in boleta:
-                    b.cae = cae_num
-                    b.save()
-
-                resp_post = ucfe.soap_obtener_cfe_emitido(
-                    rut=settings.FACTURACION_RUT,
-                    tipo_cfe=tipo_cfe,
-                    serie=serie,
-                    numero=numero
-                )
-                data_post = serialize_object(resp_post)
-
-
-                if data_post:
-                    return {
-                        "success": True,
-                        "mensaje": f"CFE {tipo_cfe}-{serie}-{numero} registrado",
-                        "xml": xml,
-                        "ucfe_response": data_post,
-                    }
-                else:
-                    logging.info(f"Error al firmar: {data_firma} {xml}")
-                    return {
-                        "success": False,
-                        "mensaje": f"Error al enviar a DGI {tipo_cfe}-{serie}-{numero}",
-                        "xml": xml,
-                    }
+                hilo.start()
+                return {
+                    "success": True,
+                    "mensaje": mensaje if mensaje else 'Cfe Registrado',
+                    "xml": xml,
+                    "ucfe_response": data_post,
+                }
             else:
-                return {"success": False, "mensaje": "Número de folio no disponible"}
-
+                logging.info(f"Error al firmar: {data_firma} {xml}")
+                return {
+                    "success": False,
+                    "mensaje":mensaje,
+                    "xml": xml,
+                }
         except Exception as e:
             logging.info(f"Error {e}")
             return {"success": False, "mensaje": str(e)}
@@ -1938,6 +1794,8 @@ def hacer_nota_credito(request):
 
             nueva_nota = Movims.objects.filter(mautogen=nuevo_autogenerado).first()
             boleta_nc=Boleta.objects.filter(autogenerado=nuevo_autogenerado)
+            referencia = boleta_nc[0].refer
+            posicion = boleta_nc[0].posicion
             monto_iva=0
             monto_exento=0
 
@@ -1953,15 +1811,14 @@ def hacer_nota_credito(request):
             if getattr(settings, "FACTURACION_ELECTRONICA"):
 
                 facturar_uruware_nc_directa(numero_nc,tipo_nota,nueva_nota.mserie,nueva_nota.mmoneda,nueva_nota.mcliente,nueva_nota.mtotal,nueva_nota.mmonto,
-                                        nueva_nota.miva,nuevo_autogenerado,fac.mautogen,nueva_nota.mfechamov,nueva_nota.marbitraje,monto_iva,monto_exento)
+                                        nueva_nota.miva,nuevo_autogenerado,fac.mautogen,nueva_nota.mfechamov,nueva_nota.marbitraje,monto_iva,monto_exento,referencia,posicion,request.user.id)
 
         return JsonResponse({"mensaje": "Nota de crédito creada con éxito."})
     except Exception as e:
         return JsonResponse({"mensaje": f"Error al crear nota de crédito: {str(e)}"}, status=500)
 
 def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, precio_total, neto, iva, nota_creada, factura_autogen,
-                     fecha, arbitraje, mnto_neto, exento):
-    numero = int(numero)
+                     fecha, arbitraje, mnto_neto, exento,referencia,posicion,user_id):
 
     try:
         tipo_cfe = None
@@ -2000,23 +1857,22 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
             return JsonResponse({"success": False, "mensaje": "El cliente no tiene una ciudad ingresada. Dirijase a mantenimientos y complete los datos para facturar."})
 
         items_nc = Boleta.objects.filter(autogenerado=nota_creada)
+        movimiento_factura = Movims.objects.filter(mautogen=nota_creada).first()
 
         data = {
             "tipo_cfe": tipo_cfe,
-            "serie": serie,
-            "numero": numero,
             "fecha_emision": fecha.strftime('%Y-%m-%d'),
             "forma_pago": "2",
             "ruc_emisor": settings.FACTURACION_RUT,
             "razon_social": "Oceanlink LTDA",
-            "codigo_sucursal": "1",
+            "codigo_sucursal": "2",
             "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
             "ciudad": "Montevideo",
             "departamento": "Montevideo",
             "moneda": "UYU" if moneda and moneda == 1 else "USD" if moneda and moneda == 2 else "EUR" if moneda and moneda == 3 else "Error",
             "neto_tasa_basica": mnto_neto,
             "iva_tasa_basica": "22",
-            "iva_monto_basica": iva,
+            "iva_monto_basica": round(Decimal(iva),2),
             "total": precio_total,
             "cantidad_items": len(items_nc),
             "monto_pagar": precio_total,
@@ -2090,52 +1946,60 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
             cod_terminal=settings.FACTURACION_TERMINAL,
             wsdl_inbox=settings.FACTURACION_INBOX_URL,
             wsdl_query=settings.FACTURACION_QUERY_URL,
+            adenda=movimiento_factura.adenda
         )
-        if ucfe.is_folio_free(tipo_cfe, serie, numero, settings.FACTURACION_RUT):
-            xml = ucfe.render_xml(data, items, referencias)
-            uuid_val = str(uuid.uuid4())
+        xml = ucfe.render_xml(data, items, referencias)
+        uuid_val = str(uuid.uuid4())
 
-            resp_firma = ucfe.soap_solicitar_firma(
-                xml,
-                uuid_str=uuid_val,
-                rut_emisor=settings.FACTURACION_RUT,
-                tipo_cfe=tipo_cfe,
-                serie=serie,
-                numero=numero
+        resp_firma = ucfe.soap_solicitar_firma(
+            xml,
+            uuid_str=uuid_val,
+            rut_emisor=settings.FACTURACION_RUT,
+            tipo_cfe=tipo_cfe,
+        )
+        data_firma = serialize_object(resp_firma)
+        cae_num = data_firma["Resp"].get("IdCae")
+        cfe_numero = data_firma["Resp"].get("NumeroCfe")
+        serie_cfe = data_firma["Resp"].get("Serie")
+        mensaje = data_firma["Resp"].get("MensajeRta")
+
+        movimiento_factura.mboleta=cfe_numero
+        movimiento_factura.mserie=serie_cfe
+        movimiento_factura.save()
+
+        for b in items_nc:
+            b.cae=cae_num
+            b.save()
+
+
+        resp_post = ucfe.soap_obtener_cfe_emitido(
+            rut=settings.FACTURACION_RUT,
+            tipo_cfe=tipo_cfe,
+            serie=serie_cfe,
+            numero=cfe_numero
+        )
+        data_post = serialize_object(resp_post)
+
+
+        if data_post:
+            hilo = threading.Thread(
+                target=adjuntar_factura,
+                args=(referencia, posicion, tipo_cfe, serie_cfe, cfe_numero, user_id)
             )
-            data_firma = serialize_object(resp_firma)
-            cae_num = data_firma["Resp"].get("IdCae")
-
-            for b in items_nc:
-                b.cae=cae_num
-                b.save()
-
-
-            resp_post = ucfe.soap_obtener_cfe_emitido(
-                rut=settings.FACTURACION_RUT,
-                tipo_cfe=tipo_cfe,
-                serie=serie,
-                numero=numero
-            )
-            data_post = serialize_object(resp_post)
-
-
-            if data_post:
-                return {
-                    "success": True,
-                    "mensaje": f"CFE {tipo_cfe}-{serie}-{numero} registrado",
-                    "xml": xml,
-                    "ucfe_response": data_post,
-                }
-            else:
-                logging.info(f"Error al firmar: {data_firma} {xml}")
-                return {
-                    "success": False,
-                    "mensaje": f"Error al enviar a DGI {tipo_cfe}-{serie}-{numero}",
-                    "xml": xml,
-                }
+            hilo.start()
+            return {
+                "success": True,
+                "mensaje": mensaje if mensaje else 'Cfe Registrado',
+                "xml": xml,
+                "ucfe_response": data_post,
+            }
         else:
-            return {"success": False, "mensaje": "Número de folio no disponible"}
+            logging.info(f"Error al firmar: {data_firma} {xml}")
+            return {
+                "success": False,
+                "mensaje": mensaje,
+                "xml": xml,
+            }
 
     except Exception as e:
         logging.info(f"Error: {e}")
@@ -2151,19 +2015,20 @@ def refacturar_uruware(request):
     autogenerado = request.POST.get("autogenerado")
     try:
         factura = Movims.objects.filter(mautogen=autogenerado).first()
-        bol = Boleta.objects.filter(autogenerado=autogenerado).first()
+        # bol = Boleta.objects.filter(autogenerado=autogenerado).first()
         if not factura:
             return JsonResponse({"success": False, "mensaje": "Factura no encontrada"})
 
         tipo = factura.mtipo
         moneda = factura.mmoneda
         cliente_codigo=factura.mcliente
-        serie = factura.mserie
-        numero = int(bol.numero)
+        # serie = factura.mserie
+        # numero = int(bol.numero)
         fecha = factura.mfechamov
         arbitraje = factura.marbitraje
         iva = factura.miva
         precio_total = factura.mtotal
+        adenda = factura.adenda
 
         ui_valor = 0
         dolar_hoy = Dolar.objects.filter(ufecha__date=datetime.now()).first()
@@ -2208,11 +2073,17 @@ def refacturar_uruware(request):
 
         #
         items_factura = Boleta.objects.filter(autogenerado=autogenerado)
+        movimiento_factura = Movims.objects.filter(mautogen=autogenerado).first()
 
         monto_iva = 0
         monto_exento = 0
 
+        referencia=None
+        posicion=None
+
         for b in items_factura:
+            referencia=b.refer
+            posicion=b.posicion
             if b.iva == 'Basico' or b.iva=='Básico':
                 monto_iva += b.precio
             else:
@@ -2220,20 +2091,18 @@ def refacturar_uruware(request):
 
         data = {
             "tipo_cfe": tipo_cfe,
-            "serie": serie,
-            "numero": numero,
             "fecha_emision": fecha.strftime('%Y-%m-%d'),
             "forma_pago": "2",
             "ruc_emisor": settings.FACTURACION_RUT,
             "razon_social": "Oceanlink LTDA",
-            "codigo_sucursal": "1",
+            "codigo_sucursal": "2",
             "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
             "ciudad": "Montevideo",
             "departamento": "Montevideo",
             "moneda": "UYU" if moneda and moneda == 1 else "USD" if moneda and moneda == 2 else "EUR" if moneda and moneda == 3 else "Error",
             "neto_tasa_basica": round(monto_iva,2),
             "iva_tasa_basica": "22",
-            "iva_monto_basica": round(iva,2),
+            "iva_monto_basica": round(Decimal(iva),2),
             "total": precio_total,
             "cantidad_items": len(items_factura),
             "monto_pagar": precio_total,
@@ -2308,51 +2177,67 @@ def refacturar_uruware(request):
             cod_terminal=settings.FACTURACION_TERMINAL,
             wsdl_inbox=settings.FACTURACION_INBOX_URL,
             wsdl_query=settings.FACTURACION_QUERY_URL,
+            adenda=adenda
         )
-        if ucfe.is_folio_free(tipo_cfe, serie, numero, settings.FACTURACION_RUT):
-            xml = ucfe.render_xml(data, items, referencias)
-            uuid_val = str(uuid.uuid4())
+        xml = ucfe.render_xml(data, items, referencias)
+        uuid_val = str(uuid.uuid4())
 
-            resp_firma = ucfe.soap_solicitar_firma(
-                xml,
-                uuid_str=uuid_val,
-                rut_emisor=settings.FACTURACION_RUT,
-                tipo_cfe=tipo_cfe,
-                serie=serie,
-                numero=numero
+        resp_firma = ucfe.soap_solicitar_firma(
+            xml,
+            uuid_str=uuid_val,
+            rut_emisor=settings.FACTURACION_RUT,
+            tipo_cfe=tipo_cfe,
+        )
+        if resp_firma is None:
+            logging.info(f"Error al firmar")
+            return JsonResponse({
+                "success": False,
+                "mensaje": f"Error al enviar a DGI",
+                "xml": xml,
+            })
+
+        data_firma = serialize_object(resp_firma)
+        cae_num = data_firma["Resp"].get("IdCae")
+        cfe_numero = data_firma["Resp"].get("NumeroCfe")
+        serie_cfe = data_firma["Resp"].get("Serie")
+        mensaje = data_firma["Resp"].get("MensajeRta")
+
+        movimiento_factura.mboleta=cfe_numero
+        movimiento_factura.mserie=serie_cfe
+        movimiento_factura.save()
+
+        for b in items_factura:
+            b.cae=cae_num
+            b.save()
+
+
+        resp_post = ucfe.soap_obtener_cfe_emitido(
+            rut=settings.FACTURACION_RUT,
+            tipo_cfe=tipo_cfe,
+            serie=serie_cfe,
+            numero=cfe_numero
+        )
+        data_post = serialize_object(resp_post)
+
+        if data_post:
+            hilo = threading.Thread(
+                target=adjuntar_factura,
+                args=(referencia, posicion, tipo_cfe, serie_cfe, cfe_numero, request.user.id)
             )
-            data_firma = serialize_object(resp_firma)
-            cae_num = data_firma["Resp"].get("IdCae")
-
-            for b in items_factura:
-                b.cae=cae_num
-                b.save()
-
-
-            resp_post = ucfe.soap_obtener_cfe_emitido(
-                rut=settings.FACTURACION_RUT,
-                tipo_cfe=tipo_cfe,
-                serie=serie,
-                numero=numero
-            )
-            data_post = serialize_object(resp_post)
-
-            if data_post:
-                return JsonResponse({
-                    "success": True,
-                    "mensaje": f"CFE {serie}-{numero} registrado",
-                    "xml": xml,
-                    "ucfe_response": data_post,
-                })
-            else:
-                logging.info(f"Error al firmar: {data_firma} {xml}")
-                return JsonResponse({
-                    "success": False,
-                    "mensaje": f"Error al enviar a DGI {tipo_cfe}-{serie}-{numero}",
-                    "xml": xml,
-                })
+            hilo.start()
+            return JsonResponse({
+                "success": True,
+                "mensaje":mensaje if mensaje else 'Cfe Registrado',
+                "xml": xml,
+                "ucfe_response": data_post,
+            })
         else:
-            return JsonResponse({"success": False, "mensaje": "Número de folio no disponible"})
+            logging.info(f"Error al firmar: {data_firma} {xml}")
+            return JsonResponse({
+                "success": False,
+                "mensaje": mensaje,
+                "xml": xml,
+            })
 
     except Exception as e:
         logging.info(f"Error al refacturar: {e}")
@@ -2365,13 +2250,13 @@ def descargar_pdf_uruware(request):
     autogenerado = request.POST.get("autogenerado")
     try:
         factura = Movims.objects.filter(mautogen=autogenerado).first()
-        bol = Boleta.objects.filter(autogenerado=autogenerado).first()
+        # bol = Boleta.objects.filter(autogenerado=autogenerado).first()
         if not factura:
             return JsonResponse({"success": False, "mensaje": "Factura no encontrada"})
 
         tipo = factura.mtipo
         serie = factura.mserie
-        numero = bol.numero
+        numero = factura.mboleta
 
         tipo_cfe = None
         if int(tipo) == 23:
@@ -2417,3 +2302,184 @@ def descargar_pdf_uruware(request):
     except Exception as e:
         logging.info(f"Error al obtener PDF: {e}")
         return JsonResponse({"success": False, "mensaje": str(e)})
+
+
+def get_datos_adenda(request):
+
+    try:
+        MODELOS = {
+            "IM": Embarqueaereo,
+            "EM": ExpmaritEmbarqueaereo,
+            "IA": ImportEmbarqueaereo,
+            "EA": ExportEmbarqueaereo,
+            "ET": ExpterraEmbarqueaereo,
+            "IT": ImpterraEmbarqueaereo,
+        }
+        MODELOS_CARGA = {
+            "IM": Cargaaerea,
+            "EM": ExpmaritCargaaerea,
+            "IA": ImportCargaaerea,
+            "EA": ExportCargaaerea,
+            "ET": ExpterraCargaaerea,
+            "IT": ImpterraCargaaerea
+        }
+
+        MODELOS_ENVASES = {
+            "IM": Envases,
+            "EM": ExpmaritEnvases,
+            "ET": ExpterraEnvases,
+            "IT": ImpterraEnvases,
+        }
+
+        posicion = request.POST.get('posicion')
+        referencia = request.POST.get('referencia')
+
+        if not posicion:
+            return JsonResponse({'error': 'Debe enviar una posición'}, status=400)
+
+        clase = posicion[:2]
+        modelo = MODELOS.get(clase)
+        if not modelo:
+            return JsonResponse({'error': 'Error'}, status=400)
+
+        embarque = modelo.objects.filter(numero=referencia).first()
+
+        if not embarque:
+            return JsonResponse({'error': 'Error'}, status=400)
+
+
+        if clase == 'IA':
+            vuelos = ImportConexaerea.objects.filter(numero=referencia).values('ciavuelo','vuelo')
+            barco_vuelo = "; ".join([f"{v['ciavuelo']}{v['vuelo']}" for v in vuelos])
+
+        elif clase == 'EA':
+            vuelos = ExportConexaerea.objects.filter(numero=referencia).values('ciavuelo','vuelo')
+            barco_vuelo = "; ".join([f"{v['ciavuelo']}{v['vuelo']}" for v in vuelos])
+
+        else:
+            barco_vuelo = embarque.vapor if embarque.vapor else 'S/I'
+
+        modelo_carga = MODELOS_CARGA.get(clase)
+
+        if not modelo_carga:
+            return JsonResponse({'error': 'Error'}, status=400)
+
+        carga = modelo_carga.objects.filter(numero=referencia).values('producto__nombre')
+
+        mercaderia = "; ".join([c['producto__nombre'] for c in carga])
+
+        contenedores=''
+        if clase not in ['IA','EA']:
+
+            modelo_envase = MODELOS_ENVASES.get(clase)
+            if not modelo_envase:
+                return JsonResponse({'error': 'Error'}, status=400)
+
+            envases = modelo_envase.objects.filter(numero=referencia).values('nrocontenedor')
+            contenedores = "; ".join([n['nrocontenedor'] for n in envases])
+
+
+        orden_cliente= embarque.ordencliente if embarque.ordencliente else 'S/I'
+        master= embarque.awb if embarque.awb else 'S/I'
+        house= embarque.hawb if embarque.hawb else 'S/I'
+        seguimiento= embarque.seguimiento if embarque.seguimiento else 'S/I'
+        fecha_salida= embarque.etd.strftime('%d/%m/%Y') if embarque.etd else 'S/I'
+
+        ciudad_origen = Ciudades.objects.filter(codigo=embarque.origen).first()
+        ciudad_destino = Ciudades.objects.filter(codigo=embarque.destino).first()
+
+        origen=destino='S/I'
+
+        if ciudad_origen:
+            origen= ciudad_origen.nombre if ciudad_origen.nombre else 'S/I'
+        if ciudad_destino:
+            destino= ciudad_destino.nombre if ciudad_destino.nombre else 'S/I'
+
+        adenda = ('Origen: ' + str(origen) + ' Destino: ' + str(destino)+' Fecha salida: ' + str(fecha_salida)+' Barco/Vuelo: '+str(barco_vuelo)+'\nPosicion: '+str(posicion)+
+                  ' Mercaderia: ' + str(mercaderia) + ' Orden cliente: ' + str(orden_cliente)+'\nMAWB-MB/L: '+str(master)+' HAWB-HB/L'+str(house)+' Seguimiento: '+str(seguimiento) +
+                  '\nContenedores: ' + str(contenedores))
+
+        return JsonResponse({'success':True,'adenda': adenda}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({'success':False,'error': str(e)}, status=500)
+
+def adjuntar_factura(referencia,posicion,tipo_cfe,serie,numero,user_id):
+
+    try:
+        if posicion and referencia and tipo_cfe and serie and numero and user_id:
+            ruta =guardar_pdf_ucfe(tipo_cfe,serie,numero)
+            if ruta !=400:
+                MODELOS = {
+                    "IM": Attachhijo,
+                    "EM": ExpmaritAttachhijo,
+                    "IA": ImportAttachhijo,
+                    "EA": ExportAttachhijo,
+                    "ET": ExpterraAttachhijo,
+                    "IT": ImpterraAttachhijo,
+                }
+                clase = posicion[:2]
+                modelo = MODELOS.get(clase)
+                if modelo:
+                    registro = modelo()
+                    registro.idusuario = user_id
+                    registro.archivo = ruta
+                    registro.numero = referencia
+                    registro.detalle = posicion
+                    registro.fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
+                    registro.save()
+    except Exception as _:
+      pass
+
+def guardar_pdf_ucfe(tipo_cfe, serie, numero):
+    """
+    Obtiene el PDF de un CFE desde UCFE y lo guarda en RUTA_ARCHIVOS.
+    Retorna la ruta del archivo o un JsonResponse con error.
+    """
+    try:
+        # Crear cliente UCFE
+        ucfe = UCFEClient(
+            base_url=settings.FACTURACION_BASE_URL,
+            usuario=settings.FACTURACION_USUARIO,
+            rut=settings.FACTURACION_RUT,
+            clave=settings.FACTURACION_CLAVE,
+            cod_comercio=settings.FACTURACION_COMERCIO,
+            cod_terminal=settings.FACTURACION_TERMINAL,
+            wsdl_inbox=settings.FACTURACION_INBOX_URL,
+            wsdl_query=settings.FACTURACION_QUERY_URL,
+        )
+
+        # Llamar al servicio
+        resp = ucfe.soap_query.service.ObtenerPdf(
+            rut=settings.FACTURACION_RUT,
+            tipoCfe=tipo_cfe,
+            serieCfe=serie,
+            numeroCfe=numero
+        )
+
+        if not resp:
+            return 400
+
+        # Detectar binario o base64
+        if isinstance(resp, (bytes, bytearray)) and resp.startswith(b"%PDF"):
+            pdf_bytes = resp
+        else:
+            pdf_bytes = base64.b64decode(resp)
+
+        # Nombre de archivo
+        nombre_archivo = f"{tipo_cfe}_{serie}_{numero}_{datetime.now():%Y%m%d%H%M%S}.pdf"
+
+        # ruta_completa = settings.RUTA_ARCHIVOS, nombre_archivo
+        ruta_completa = settings.RUTA_ARCHIVOS + nombre_archivo
+        ruta_completa = default_storage.save(ruta_completa, ContentFile(pdf_bytes))
+
+        # # Guardar en disco
+        # with open(ruta_completa, "wb") as f:
+        #     f.write(pdf_bytes)
+
+        return ruta_completa
+
+    except Exception as e:
+        return 400
+
+

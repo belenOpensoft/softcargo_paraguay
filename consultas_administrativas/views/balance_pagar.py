@@ -22,71 +22,7 @@ TIPOS = {
 }
 
 
-def balance_pagos_old(request):
-    if request.method == 'POST':
-        form = BalanceCuentasPagarForm(request.POST)
-        if form.is_valid():
-            fecha_hasta = form.cleaned_data['fecha_hasta']
-            moneda = form.cleaned_data['moneda']
-            consolidar_dolares = form.cleaned_data['consolidar_dolares']
-            consolidar_moneda_nac = form.cleaned_data['consolidar_moneda_nac']
 
-            nombres = {}
-            socios = {}
-            saldos = defaultdict(Decimal)
-
-            clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado', 'tipo').order_by('empresa')
-
-            for cli in clientes:
-                cliente = cli.codigo
-                nombres[cliente] = cli.empresa
-                socios[cliente] = cli.tipo
-
-                if isinstance(cli.fechadenegado, datetime.datetime) and cli.tipo != 1:
-                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje').filter(
-                        mmoneda=moneda.codigo, mfechamov__lte=fecha_hasta, mfechamov__gt=cli.fechadenegado,
-                        mcliente=cli.codigo, mactivo='S',mtipo__in=TIPOS.values()).order_by('mfechamov', 'id')
-                else:
-                    movimientos = Movims.objects.only('mfechamov', 'mtipo', 'mtotal', 'mmoneda', 'mcambio', 'marbitraje').filter(
-                        mmoneda=moneda.codigo, mfechamov__lte=fecha_hasta, mcliente=cli.codigo, mactivo='S',mtipo__in=TIPOS.values()).order_by('mfechamov', 'id')
-
-                if movimientos.exists():
-                    for m in movimientos:
-                        if m.mtipo == TIPOS['FP']:
-                            saldos[cliente] -= m.mtotal
-                        elif m.mtipo == TIPOS['NP']:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo == TIPOS['ND']:
-                            saldos[cliente] += m.mtotal
-                        elif m.mtipo == TIPOS['RP']:
-                            saldos[cliente] += m.mtotal
-
-            resultados = []
-            for cliente, saldo in saldos.items():
-                if saldo != 0:
-                    movimiento = Movims.objects.filter(
-                        mcliente=cliente,
-                        mmoneda=moneda.codigo,
-                        mfechamov__lte=fecha_hasta,
-                        mactivo='S'
-                    ).order_by('-mfechamov').first()
-
-                    resultados.append({
-                        "codigo": cliente,
-                        "nombre": nombres[cliente],
-                        "moneda": movimiento.mmoneda if movimiento else None,
-                        "saldo": saldo,
-                        "arbitraje": movimiento.mcambio if movimiento else Decimal("1.0"),
-                        "paridad": movimiento.marbitraje if movimiento else Decimal("1.0"),
-                        "fecha": movimiento.mfechamov if movimiento else None
-                    })
-
-            return generar_excel_balance_pagar(resultados, fecha_hasta, moneda, consolidar_dolares, consolidar_moneda_nac)
-
-    else:
-        form = BalanceCuentasPagarForm()
-
-    return render(request, 'compras_ca/balance_pagar.html', {'form': form})
 
 def balance_pagos(request):
     if request.method == 'POST':

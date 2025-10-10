@@ -290,57 +290,6 @@ def envio_msj(url, datos, usuario, contrasena):
     except Exception as e:
         raise TypeError(e)
 
-def get_status_old(url, usuario, contrasena):
-    try:
-        datos = """<?xml version = "1.0" encoding = "ISO-8859-1"?>
-            <DAE xmlns="http://www.aduanas.gub.uy/LUCIA/DAE">
-                <TipoDocumento>4</TipoDocumento>
-                <IdDocumento>213971080016</IdDocumento> 
-                <FechaHoraDocumentoElectronico></FechaHoraDocumentoElectronico>
-                <CodigoIntercambio>WS_MANIFIESTO</CodigoIntercambio>
-                <NroTransaccion></NroTransaccion>
-                <Objeto>
-                </Objeto>
-            </DAE>
-        """
-        print(datos)
-        # Crear el encabezado de autorización Basic
-        auth_value = f'{usuario}:{contrasena}'
-        auth_value = base64.b64encode(auth_value.encode()).decode('utf-8')
-        headers = {
-            'Authorization': f'Basic {auth_value}'
-        }
-        if isinstance(datos, str):
-            datos = datos.encode('utf-8')
-        # Crear la solicitud con los encabezados
-        req = Request(url, data=datos, headers=headers)
-        s = urlopen(req)
-        sl = s.read()
-        # resp = str(sl)[2:].replace('\\r\\n', '')
-        xml_str = sl.decode('ISO-8859-1')
-        xml_doc = minidom.parseString(xml_str)
-
-        # Ejemplo de cómo acceder a los elementos del XML
-        # Obtén el primer nodo (ejemplo: <response>)
-        root = xml_doc.documentElement
-
-        # Accede a un nodo específico (ejemplo: <status>)
-        status_nodes = root.getElementsByTagName('status')
-        if status_nodes:
-            status = status_nodes[0].firstChild.nodeValue
-            print(f'Status: {status}')
-
-        # Si quieres obtener todos los nodos, puedes hacer algo como:
-        all_nodes = root.getElementsByTagName('*')
-        respuesta = {}
-        for node in all_nodes:
-            respuesta[node.tagName] = node.firstChild.nodeValue
-        if 'Codigo' in respuesta:
-            return True
-        else:
-            return False
-    except Exception as e:
-        return False
 
 def get_status(url, usuario, contrasena):
     try:

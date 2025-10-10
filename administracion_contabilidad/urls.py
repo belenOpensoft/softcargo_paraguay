@@ -19,12 +19,12 @@ from administracion_contabilidad.views.facturacion import facturacion_view, busc
     buscar_item_v, buscar_items_v, procesar_factura, source_facturacion, source_infofactura, \
     cargar_preventa_infofactura, source_infofactura_cliente, cargar_preventa_infofactura_multiple, guardar_arbitraje, \
     get_datos_embarque, hacer_nota_credito, cargar_pendientes_imputacion_venta, buscar_items_v_codigo, \
-    refacturar_uruware, descargar_pdf_uruware
+    refacturar_uruware, descargar_pdf_uruware, get_datos_adenda
 from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
 from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos, reimprimir_asiento
 from administracion_contabilidad.views.logs_administracion import audit_logs_page, audit_logs_data, \
-    export_logs_administracion
+    export_logs_administracion, audit_logs_page_historico, audit_logs_data_traceop
 from administracion_contabilidad.views.mantenimiento_chequeras import mantenimiento_chequeras, guardar_stock_cheques, \
     buscar_cheques, eliminar_cheque, habilitar_deshabilitar
 from administracion_contabilidad.views.modificar_asientos import filtro_asientos, guardar_asiento_editado, \
@@ -81,6 +81,7 @@ urlpatterns = [
     path('check_if_reference_exists/', check_if_reference_exists, name='check_if_reference_exists'),
     path('eliminar_preventa/', eliminar_preventa, name='eliminar_preventa'),
     path('datos_xls/', datos_xls, name='datos_xls'),
+    path('get_datos_adenda/', get_datos_adenda, name='get_datos_adenda'),
     # preventa
 
     #cobranza
@@ -211,7 +212,9 @@ urlpatterns = [
 
     #logs
     path("audit-logs/", audit_logs_page, name="audit_logs_page"),
+    path("audit-logs-historico/", audit_logs_page_historico, name="audit_logs_page_historico"),
     path("source_logs_administracion/", audit_logs_data, name="audit_logs_data"),
+    path("source_logs_administracion_historico/", audit_logs_data_traceop, name="source_logs_administracion_historico"),
     path("export_logs_administracion/", export_logs_administracion, name="export_logs_administracion"),
 
     #logs

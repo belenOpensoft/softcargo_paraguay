@@ -140,15 +140,6 @@ def get_order(request, columns):
         raise TypeError(e)
 
 
-def get_argumentos_busqueda_old(**kwargs):
-    try:
-        result = {}
-        for row in kwargs:
-            if len(kwargs[row]) > 0:
-                result[param_busqueda[int(row)]] = kwargs[row]
-        return result
-    except Exception as e:
-        raise TypeError(e)
 
 def get_argumentos_busqueda(**kwargs):
     try:
@@ -198,34 +189,6 @@ def normalizar(texto):
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
-
-@login_required(login_url="/")
-def agregar_pais_old(request):
-    try:
-        if request.user.has_perms(["mantenimientos.add_paises", ]):
-            ctx = {'form': add_pais_form(),'title_page': 'Agregar pais'}
-            if request.method == 'POST':
-                form = add_pais_form(request.POST)
-                if form.is_valid():
-                    pais = Paises()
-                    pais.nombre = form.cleaned_data['nombre']
-                    pais.continente = int(form.cleaned_data['continente'])
-                    pais.iata = form.cleaned_data['iata']
-                    pais.idinternacional = form.cleaned_data['idinternacional']
-                    pais.cuit = form.cleaned_data['cuit']
-                    pais.edi = form.cleaned_data['edi']
-                    pais.save()
-                    messages.success(request, 'Pais agregada con èxito')
-                    return HttpResponseRedirect('/paises')
-                else:
-                    messages.error(request, 'Formulario invalido, intente nuevamente.')
-                    return HttpResponseRedirect('/agregar_pais')
-            return render(request, "paises/agregar.html", ctx)
-        else:
-            raise TypeError('No tiene permisos para realizar esta accion.')
-    except Exception as e:
-        messages.error(request, str(e))
-        return HttpResponseRedirect("/paises")
 
 
 @login_required(login_url="/")

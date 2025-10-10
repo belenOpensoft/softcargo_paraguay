@@ -206,6 +206,17 @@ class Factura(forms.Form):
         }
     )
 
+    adenda = forms.CharField(
+        label="Adenda",
+        widget=forms.Textarea(attrs={
+            'style':'height:4rem !important',
+            'rows': 4,         # cantidad de filas visibles
+            'cols': 50,        # cantidad de columnas visibles
+            'placeholder': 'Escribe la adenda aquí...',
+            'class': 'form-control'  # si usás Bootstrap
+        }))
+
+
     def __init__(self, *args, **kwargs):
         super(Factura, self).__init__(*args, **kwargs)
 
@@ -2004,12 +2015,12 @@ class MovimientoBancarioForm(forms.Form):
     tipo_movimiento = forms.ChoiceField(
         label="Tipo",
         choices=[
+            ('transferencia', 'Transferencia'),
+            ('egresos', 'Egresos'),
+            ('ingresos', 'Ingresos'),
             ('depositar', 'Depositar'),
             ('cheque_comun', 'Cheque Común'),
             ('cheque_diferido', 'Cheque Diferido'),
-            ('ingresos', 'Ingresos'),
-            ('egresos', 'Egresos'),
-            ('transferencia', 'Transferencia'),
         ],
         initial='depositar',
         widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
@@ -2670,5 +2681,62 @@ class AuditLogFilterForm(forms.Form):
     )
     user = forms.ModelChoiceField(
         label="Usuario", required=False, queryset=User.objects.order_by("username"),
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+
+
+class AuditLogFilterFormHistorico(forms.Form):
+    date_from = forms.DateField(
+        label="Desde", required=False,
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
+    date_to = forms.DateField(
+        label="Hasta", required=False,
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
+
+    USER_CHOICES = [
+        (None, "Seleccionar"),
+        ("SMARSICO", "SMARSICO"),
+        ("AARAUJO", "AARAUJO"),
+        ("PCARBALLAL", "PCARBALLAL"),
+        ("MMARTINEZ", "MMARTINEZ"),
+        ("IDELAFUENTE", "IDELAFUENTE"),
+        ("LBOCSKOR", "LBOCSKOR"),
+        ("VDUARTE", "VDUARTE"),
+        ("AJORBA", "AJORBA"),
+        ("SCOR", "SCOR"),
+        ("AGARCIA", "AGARCIA"),
+        ("JLOPEZ", "JLOPEZ"),
+    ]
+    user = forms.ChoiceField(
+        label="Usuario", required=False,
+        choices=USER_CHOICES,
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+
+    MODULO_CHOICES = [
+        (None, "Seleccionar"),
+        ("EM", "EM"),
+        ("IM", "IM"),
+        ("IA", "IA"),
+        ("EA", "EA"),
+        ("IT", "IT"),
+        ("ET", "ET"),
+        ("SE", "SE"),
+    ]
+    modulo = forms.ChoiceField(
+        label="Módulo", required=False,
+        choices=MODULO_CHOICES,
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+
+    ACCION_CHOICES = [
+        ("ALTA", "ALTA"),
+        ("EDIT", "EDIT"),
+    ]
+    accion = forms.ChoiceField(
+        label="Acción", required=False,
+        choices=ACCION_CHOICES,
         widget=forms.Select(attrs={"class": "form-control"})
     )

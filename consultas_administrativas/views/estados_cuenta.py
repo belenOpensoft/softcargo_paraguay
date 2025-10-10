@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 from decimal import Decimal, ROUND_HALF_UP
 import io
@@ -9,6 +10,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from administracion_contabilidad.models import Movims, Asientos, Impuvtas, Boleta
+from cargosystem import settings
 from consultas_administrativas.forms import ReporteCobranzasForm, AntiguedadSaldosForm, EstadoCuentaForm
 from consultas_administrativas.models import VAntiguedadSaldos
 from mantenimientos.models import Clientes
@@ -399,7 +401,7 @@ def calcular_saldos_anteriores_ventas(fecha_desde, moneda=None, cliente_id=None)
 
     return saldos
 
-def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
+def generar_excel_estados_cuenta_old(datos, fecha_desde, fecha_hasta, moneda,
                                         consolidar_dolares=False,
                                         consolidar_moneda_nac=False,
                                         omitir_saldos_cero=False,
@@ -465,6 +467,7 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
         worksheet = workbook.add_worksheet("EstadoCuentaVentas")
+
 
         # Formatos
         title_format = workbook.add_format({'bold': True, 'font_size': 12})
@@ -569,150 +572,201 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
 
 
 
+def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
+                                        consolidar_dolares=False,
+                                        consolidar_moneda_nac=False,
+                                        omitir_saldos_cero=False,
+                                        cliente=None):
+    try:
+        if consolidar_dolares:
+            nombre_moneda = "DOLARES USA"
+        elif consolidar_moneda_nac:
+            nombre_moneda = "MONEDA NACIONAL"
+        else:
+            nombre_moneda = moneda.nombre.upper() if moneda else "TODAS LAS MONEDAS"
 
+        # --- Calcular saldos anteriores por cliente ---
+        saldos_anteriores = calcular_saldos_anteriores_ventas(fecha_desde, moneda, cliente_id=cliente)
 
+        # --- Unificar todos los clientes ---
+        clientes_dict = {}
 
+        # clientes con movimientos
+        for cliente_id, info in datos.items():
+            cliente_id_int = int(cliente_id)
+            cli = info['datos_cliente'][0]
+            saldo_anterior = saldos_anteriores.get(cliente_id_int, {}).get('saldo', Decimal('0.00'))
+            clientes_dict[cliente_id_int] = {
+                'codigo': int(cli.get('codigo')),
+                'nombre': cli.get('nombre'),
+                'saldo_anterior': saldo_anterior,
+                'movimientos': info['movimientos']
+            }
 
+        # clientes solo con saldo anterior distinto de 0
+        for cliente_id, info in saldos_anteriores.items():
+            cliente_id_int = int(cliente_id)
+            if cliente_id_int not in clientes_dict and info['saldo'] != 0:
+                clientes_dict[cliente_id_int] = {
+                    'codigo': cliente_id_int,
+                    'nombre': info['nombre'],
+                    'saldo_anterior': info['saldo'],
+                    'movimientos': []
+                }
 
+        # --- Filtrado opcional de saldos en cero ---
+        if omitir_saldos_cero:
+            clientes_filtrados = {}
+            for cliente_id, info in clientes_dict.items():
+                saldo_final = info['saldo_anterior']
+                for m in info['movimientos']:
+                    tipo = m.get('numero_tipo')
+                    total = Decimal(m.get('total') or 0)
+                    if tipo in (20, 24, 29):
+                        saldo_final += total
+                    elif tipo in (21, 25, 23):
+                        saldo_final -= total
+                if saldo_final != 0:
+                    clientes_filtrados[cliente_id] = info
+            clientes_dict = clientes_filtrados
 
-def obtener_estado_individual_old(form,fecha_desde, fecha_hasta, moneda):
-    cliente = form.cleaned_data['cliente_codigo']
-    cliente_nombre = form.cleaned_data['cliente']
-    todas_monedas = form.cleaned_data['todas_las_monedas']
+        # --- Ordenar clientes ---
+        clientes_ordenados = sorted(clientes_dict.values(),
+                                    key=lambda x: int(x['codigo']))  # ascendente
 
+        # --- Crear Excel ---
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet("EstadoCuentaVentas")
 
-    tipos_mov = (20, 21, 24, 23, 25, 29)
+        # --- Formatos ---
+        title_format = workbook.add_format({
+            'bold': True,
+            'font_size': 12,
+            'align': 'left',
+            'valign': 'vcenter',
+        })
+        header_format = workbook.add_format({'bold': True, 'bg_color': '#d9d9d9', 'border': 1, 'align': 'center'})
+        money_format = workbook.add_format({'num_format': '#,##0.00', 'border': 1})
+        date_format = workbook.add_format({'num_format': 'dd/mm/yyyy', 'border': 1})
+        text_format = workbook.add_format({'border': 1})
+        bold_format = workbook.add_format({'bold': True, 'border': 1})
+        total_format = workbook.add_format({'bold': True, 'border': 1, 'bg_color': '#FFF2CC'})
 
+        # --- Diccionario para autoajustar columnas ---
+        col_widths = {}
 
-    if not cliente:
-        return {}
-    cliente_ob=Clientes.objects.only('fechadenegado','tipo','socio').filter(codigo=cliente).first()
-    if not cliente_ob:
-        return {}
+        def write_and_track(row, col, value, cell_format=None):
+            worksheet.write(row, col, value, cell_format)
+            length = len(str(value)) if value is not None else 0
+            if col not in col_widths or length > col_widths[col]:
+                col_widths[col] = length
 
-    filtro_base = {
-            'mfechamov__lte': fecha_hasta,
-            'mfechamov__gte': fecha_desde,
-            'mcliente': cliente,
-            'mactivo': 'S',
-            'mtipo__in': tipos_mov
-        }
+        # --- Determinar título ---
+        if cliente and len(clientes_ordenados) == 1:
+            cli_name = clientes_ordenados[0]['nombre']
+            titulo = f"                                     Estado de cuenta de {cli_name} del {fecha_desde:%d/%m/%Y} al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
+        else:
+            titulo = f"                                     Cuentas a cobrar desde 0 a Z al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
 
-    if cliente_ob.tipo !=1:
-        if isinstance(cliente_ob.fechadenegado, datetime):
-            filtro_base['mfechamov__gt'] = cliente_ob.fechadenegado
+        # --- Merge inicial para título y logo ---
+        worksheet.merge_range(0, 0, 3, 12, titulo, title_format)
 
-    movimientos = Movims.objects.filter(**filtro_base).only(
-        'mcliente', 'mfechamov', 'mnombre', 'mtotal', 'msaldo', 'mnombremov',
-        'mtipo', 'mserie', 'mboleta', 'mprefijo', 'mautogen', 'mdetalle', 'mmoneda'
-    ).order_by('mfechamov')
-
-    if not todas_monedas and moneda:
-        movimientos = movimientos.filter(mmoneda=moneda.codigo)
-
-    autogen_list = movimientos.values_list('mautogen', flat=True).distinct()
-    asientos = Asientos.objects.filter(
-        autogenerado__in=autogen_list,
-        imputacion=2
-    ).only('autogenerado', 'vto', 'posicion', 'cuenta')
-    asientos_dict = {a.autogenerado: a for a in asientos}
-
-    datos = {
-        cliente: {
-            'datos_cliente': [{
-                'nombre': cliente_nombre,
-                'codigo': cliente,
-            }],
-            'movimientos': []
-        }
-    }
-
-    for m in movimientos:
-        asiento = asientos_dict.get(m.mautogen)
-        datos[cliente]['movimientos'].append({
-            'fecha': m.mfechamov,
-            'tipo': m.mnombremov,
-            'numero_tipo': m.mtipo,
-            'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
-            'vencimiento': asiento.vto if asiento else None,
-            'detalle': m.mdetalle,
-            'total': m.mtotal,
-            'saldo': m.msaldo,
-            'posicion': asiento.posicion if asiento else None,
-            'cuenta': asiento.cuenta if asiento else None,
+        # --- Insertar logo sobre el bloque ---
+        logo_path = os.path.join(settings.PACKAGE_ROOT, 'static', 'images', 'oceanlink.png')
+        worksheet.insert_image('A1', logo_path, {
+            'x_scale': 0.5,
+            'y_scale': 0.5,
+            'x_offset': 5,
+            'y_offset': 5
         })
 
-    return datos
+        row = 5
 
-def obtener_estado_general_old(form,fecha_desde, fecha_hasta, moneda):
-    filtro_tipo = form.cleaned_data['filtro_tipo']
-    omitir_saldos_cero = form.cleaned_data['omitir_saldos_cero']
-    tipos_mov = (20, 21, 24, 23, 25, 29)
+        headers = ['Fecha', 'Tipo', 'Documento', 'Vto.', 'Detalle',
+                   'Debe', 'Haber', 'Saldo', 'Posición', 'Cta. Ventas',
+                   'Cobro', 'Fecha Cobro', 'Documento Cobro']
+        for col, header in enumerate(headers):
+            write_and_track(row, col, header, header_format)
+        row += 1
 
-    clientes = Clientes.objects.only('codigo', 'empresa', 'fechadenegado', 'tipo').order_by('empresa')
-    datos = {}
+        total_general = Decimal('0.00')
 
-    for cli in clientes:
-        if filtro_tipo == 'clientes' and cli.tipo != 1:
-            continue
-        elif filtro_tipo == 'agentes' and cli.tipo != 6:
-            continue
-        elif filtro_tipo == 'transportistas' and cli.tipo != 5:
-            continue
+        # --- Iterar clientes ---
+        for cli in clientes_ordenados:
+            write_and_track(row, 2, "1")
+            write_and_track(row, 4, cli['codigo'], text_format)
+            write_and_track(row, 5, cli['nombre'], text_format)
+            row += 1
 
-        cliente_id = cli.codigo
+            saldo_acumulado = cli['saldo_anterior']
+            write_and_track(row, 6, "Saldo anterior", bold_format)
+            write_and_track(row, 7, float(saldo_acumulado), bold_format)
+            row += 1
 
-        filtro_base = {
-            'mfechamov__lte': fecha_hasta,
-            'mfechamov__gte': fecha_desde,
-            'mcliente': cliente_id,
-            'mactivo': 'S',
-            'mtipo__in': tipos_mov
-        }
+            if cli['movimientos']:
+                for m in cli['movimientos']:
+                    tipo = m.get('numero_tipo')
+                    total = Decimal(m.get('total') or 0)
+                    debe = haber = Decimal('0.00')
 
-        if moneda:
-            filtro_base['mmoneda'] = moneda.codigo
+                    if tipo in (20, 23, 24, 29):
+                        debe = total
+                    elif tipo in (21, 25):
+                        haber = total
 
-        if isinstance(cli.fechadenegado, datetime) and cli.tipo != 1:
-            filtro_base['mfechamov__gt'] = cli.fechadenegado
+                    saldo_acumulado += debe - haber
 
-        movimientos = Movims.objects.filter(**filtro_base).only(
-            'mcliente', 'mfechamov', 'mnombre', 'mtotal', 'msaldo', 'mnombremov',
-            'mtipo', 'mserie', 'mboleta', 'mprefijo', 'mautogen', 'mdetalle', 'mmoneda'
-        ).order_by('mfechamov')
+                    write_and_track(row, 0, m.get('fecha'),
+                                    date_format if isinstance(m.get('fecha'), datetime) else text_format)
+                    write_and_track(row, 1, m.get('tipo'), text_format)
+                    write_and_track(row, 2, m.get('documento'), text_format)
+                    write_and_track(row, 3, m.get('vencimiento'),
+                                    date_format if isinstance(m.get('vencimiento'), datetime) else text_format)
+                    write_and_track(row, 4, m.get('detalle') or "Sin movimientos en el período", text_format)
+                    write_and_track(row, 5, float(debe), money_format)
+                    write_and_track(row, 6, float(haber), money_format)
+                    write_and_track(row, 7, float(saldo_acumulado), money_format)
+                    write_and_track(row, 8, m.get('posicion'), text_format)
+                    write_and_track(row, 9, m.get('cuenta'), text_format)
 
-        if not movimientos.exists():
-            continue
+                    write_and_track(row, 10, m.get('pago'), text_format)
+                    write_and_track(row, 11, m.get('fecha_pago'), text_format)
+                    write_and_track(row, 12, m.get('numero_pago'), text_format)
 
-        autogen_list = movimientos.values_list('mautogen', flat=True).distinct()
-        asientos = Asientos.objects.filter(
-            autogenerado__in=autogen_list,
-            imputacion=2
-        ).only('autogenerado', 'vto', 'posicion', 'cuenta')
-        asientos_dict = {a.autogenerado: a for a in asientos}
+                    row += 1
+            else:
+                write_and_track(row, 4, "Sin movimientos en el período", text_format)
+                row += 1
 
-        datos[cliente_id] = {
-            'datos_cliente': [{
-                'nombre': cli.empresa,
-                'codigo': cliente_id,
-            }],
-            'movimientos': []
-        }
+            write_and_track(row, 6, "Actual", bold_format)
+            write_and_track(row, 7, float(saldo_acumulado), bold_format)
+            row += 2
 
-        for m in movimientos:
-            asiento = asientos_dict.get(m.mautogen)
-            datos[cliente_id]['movimientos'].append({
-                'fecha': m.mfechamov,
-                'tipo': m.mnombremov,
-                'numero_tipo': m.mtipo,
-                'documento': f"{m.mserie or ''}{m.mprefijo or ''}{m.mboleta or ''}",
-                'vencimiento': asiento.vto if asiento else None,
-                'detalle': m.mdetalle,
-                'total': m.mtotal,
-                'saldo': m.msaldo,
-                'posicion': asiento.posicion if asiento else None,
-                'cuenta': asiento.cuenta if asiento else None,
-            })
+            total_general += saldo_acumulado
+
+        # --- Total general ---
+        write_and_track(row, 6, "TOTAL GENERAL", total_format)
+        write_and_track(row, 7, float(total_general), total_format)
+
+        # --- Ajustar anchos de columna ---
+        for col, width in col_widths.items():
+            worksheet.set_column(col, col, width + 2)
+
+        workbook.close()
+        output.seek(0)
+
+        nombre_archivo = f"estado_cuenta_ventas_{fecha_desde:%Y-%m-%d}_{fecha_hasta:%Y-%m-%d}.xlsx"
+
+        return HttpResponse(
+            output.read(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers={'Content-Disposition': f'attachment; filename="{nombre_archivo}"'}
+        )
+
+    except Exception as e:
+        raise RuntimeError(f"Error al generar Excel de ventas: {e}")
 
 
-    return datos
+
+

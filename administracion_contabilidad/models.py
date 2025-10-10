@@ -730,7 +730,7 @@ class Factudif(models.Model):
     zmonto = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     ziva = models.SmallIntegerField(blank=True, null=True)
     zrefer = models.CharField(max_length=10, blank=True, null=True)
-    zcarrier = models.CharField(max_length=30, blank=True, null=True)
+    zcarrier = models.CharField(max_length=100, blank=True, null=True)
     zmaster = models.CharField(max_length=40, blank=True, null=True)
     zdate = models.CharField(max_length=30, blank=True, null=True)
     zhouse = models.CharField(max_length=50, blank=True, null=True)
@@ -1118,7 +1118,7 @@ class Impuestosbrasil(models.Model):
 
 
 class Impuordenes(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     orden = models.IntegerField(blank=True, null=True)
     numero = models.CharField(max_length=20, blank=True, null=True)
     cliente = models.IntegerField(blank=True, null=True)
@@ -1313,7 +1313,7 @@ class Movims(models.Model):
     recuperodegastos = models.CharField(max_length=2, blank=True, null=True)
     jurisdiccion = models.SmallIntegerField(blank=True, null=True)
     eticket = models.CharField(max_length=1, blank=True, null=True)
-
+    adenda = models.TextField(blank=True, null=True)
     class Meta:
         managed = False
         db_table = 'dataset_movims'
@@ -1395,7 +1395,7 @@ class Observacionescae(models.Model):
 
 
 class Ordenes(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     mboleta = models.IntegerField()
     mfechamov = models.DateTimeField(blank=True, null=True)
     mmonto = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)

@@ -1254,15 +1254,6 @@ def image_to_base64(image_path):
 
 
 
-def formatear_linea_old(titulo, valor, ancho_total=110, ancho_col_izq=25):
-    """
-    Formatea una línea con estilo tipo factura o instrucción de embarque,
-    usando puntos y dos columnas al estilo:
-    Título ......... : Valor
-    """
-    puntos = '.' * (ancho_col_izq - len(titulo))
-    col_izq = f"{titulo} {puntos} :"
-    return f"<div style='font-family: Courier New, monospace; font-size: 12px; line-height: 1;'>{col_izq} {valor}</div>"
 
 def formatear_linea(titulo, valor, alinear_derecha=None, ancho_total=110, ancho_col_izq=25):
     """
@@ -1285,9 +1276,6 @@ def formatear_linea(titulo, valor, alinear_derecha=None, ancho_total=110, ancho_
         </div>
     """
 
-
-def formatear_caratula_old(titulo, valor):
-    return f"<div style='font-family: Courier New, monospace; font-size: 11.5px; line-height: 1;'>{titulo}: {valor}</div>"
 
 
 def formatear_caratula(titulo, valor):

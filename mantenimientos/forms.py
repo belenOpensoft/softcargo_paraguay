@@ -109,129 +109,6 @@ class edit_vendedor_form(forms.Form):
         self.fields['ciudad'].choices = [('', 'Seleccione una ciudad')] + [(ciudad.codigo, ciudad.nombre) for ciudad in
                                                                            Ciudades.objects.all()]
 
-class add_cliente_form_old_last(forms.Form):
-    tipo = forms.ChoiceField(
-        choices=[
-            (1, 'Cliente'),
-            (2, 'Proveedor'),
-            (3, 'Mixto'),
-            (4, 'Armador'),
-            (5, 'Transportista'),
-            (6, 'Agente de carga'),
-            (7, 'Despachante'),
-            (8, 'Otro tipo'),
-        ],
-        widget=forms.Select(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-        label="Tipo"
-    )
-    empresa = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-        label="Empresa",
-        required=False
-    )
-    razonsocial = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 100}),
-        label="Razón Social",
-        max_length=100,
-        required=True
-    )
-    direccion = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 150}),
-        label="Dirección",
-        max_length=150,
-        required=True
-    )
-    localidad = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 100}),
-        label="Localidad",
-        max_length=100,
-        required=True
-    )
-    cpostal = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 10}),
-        label="Código Postal",
-        max_length=10,
-        required=False
-    )
-    ruc = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20}),
-        label="RUT",
-        max_length=20,
-    )
-    telefono = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 20}),
-        label="Teléfono",
-        max_length=20,
-        required=True
-    )
-    fecalta = forms.DateField(
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-        label="Fecha de Alta",
-        required=True
-    )
-    contactos = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_length': 100}),
-        label="Contactos",
-        max_length=100,
-        required=False
-    )
-    observaciones = forms.CharField(
-        widget=forms.Textarea(attrs={'class': 'form-control', 'autocomplete': 'off', 'rows': 3}),
-        label="Observaciones",
-        required=False
-    )
-    ciudad = forms.ChoiceField(
-        widget=forms.Select(attrs={'class': 'form-control', 'autocomplete': 'off', 'id': 'ciudad-select'}),
-        label="Ciudad",
-        required=False
-    )
-    pais = forms.ChoiceField(
-        widget=forms.Select(attrs={'class': 'form-control', 'autocomplete': 'off', 'id': 'pais-select'}),
-        label="País",
-        required=False
-    )
-
-    # ✅ Añadiendo los campos de email
-    emailad = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-        label="Email Administrativo",
-        required=False
-    )
-    emailem = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-        label="Email Exportación Marítima",
-        required=False
-    )
-    emailea = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-        label="Email Exportación Aérea",
-        required=False
-    )
-    emailet = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-        label="Email Exportación Terrestre",
-        required=False
-    )
-    emailim = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-        label="Email Importación Marítima",
-        required=False
-    )
-    emailia = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-        label="Email Importación Aérea",
-        required=False
-    )
-    emailit = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-        label="Email Importación Terrestre",
-        required=False
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['pais'].choices = [('', 'Seleccione un país')] + [(pais.nombre, pais.nombre) for pais in Paises.objects.all()]
-        self.fields['ciudad'].choices = [('', 'Seleccione una ciudad')] + [(ciudad.codigo, ciudad.nombre) for ciudad in Ciudades.objects.all()]
 
 class add_cliente_form(forms.Form):
 
@@ -326,6 +203,7 @@ class add_cliente_form(forms.Form):
         self.fields['pais'].choices = [('', 'Seleccione un país')] + [
             (pais.nombre.strip(), pais.nombre.strip()) for pais in Paises.objects.all()
         ]
+
         self.fields['ciudad'].choices = [('', 'Seleccione una ciudad')] + [(ciudad.codigo, ciudad.nombre) for ciudad
                                                                            in Ciudades.objects.all()]
         self.fields['ctavta'].choices = [('0', 'Seleccione una cuenta')] + [(c.xcodigo, c.xnombre) for c in

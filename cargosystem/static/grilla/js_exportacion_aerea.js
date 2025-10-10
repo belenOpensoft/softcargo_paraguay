@@ -2625,7 +2625,7 @@ function aplicable_volumen(volumen){
                         click: function () {
                             if (confirm('¿Confirma adjuntar el archivo seleccionado?')) {
                                     let table = $('#tabla_archivos').DataTable();
-                                    let row = table.rows('.table-secondary').data();
+                                    let row = table.rows('.selected').data();
                                 let nombre = row[0][2].split("/")[1];
                                 let id = row[0][0];
                                 if(id in archivos_adjuntos) {
@@ -5429,44 +5429,7 @@ function guia_master() {
                     }
 
 }
-function guia_master_edit_old(master) {
-    let transportista = $('#transportista_ie').val();
-    if (transportista) {
-        $.ajax({
-            url: '/obtener-guias/' + transportista + '/',
-            method: 'GET',
-            success: function(data) {
-                // Limpiar las opciones actuales del select
-                $('#id_awb_select_e').empty();
 
-                if (data.length > 0) {
-                    // Si hay guías disponibles, agregar las opciones
-                    data.forEach(function(item) {
-                        let optionText = item.prefijo + '-' + item.numero;
-
-                        // Agregar cada opción al select
-                        $('#id_awb_select_e').append('<option value="' + optionText + '">' + optionText + '</option>');
-                    });
-                /*    if (data.length > 0) {
-                        let lastOptionValue = data[data.length - 1].prefijo + '-' + data[data.length - 1].numero;
-                    }
-                */
-                } else {
-                    // Si no hay guías, agregar un mensaje indicando que no hay disponibles
-                    $('#id_awb_select_e').append('<option value="sin guia">No hay guías disponibles</option>');
-                    $('#awd_e').val('sin guia');
-
-                }
-            },
-            error: function(error) {
-                console.error('Error al obtener las guías:', error);
-            }
-        });
-        $('#id_awb_select_e').val(master);
-    }
-
-
-}
 function guia_master_edit(master) {
 
                     let transportista = $('#transportista_ie').val();
@@ -5922,6 +5885,8 @@ $("#destinatario").autocomplete({
     source: '/autocomplete_clientes/',
     minLength: 2,
     select: function (event, ui) {
+            $(this).data('item-seleccionado', true);
+
         $(this).attr('data-id', ui.item['id']);
     },
     change: function (event, ui) {
@@ -5936,7 +5901,19 @@ $("#destinatario").autocomplete({
             $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
         }
     }
-});
+})
+    .on('focus', function() {
+    // Al enfocar, reseteamos la bandera
+        $(this).data('item-seleccionado', false);
+    })
+    .on('blur', function() {
+        // Si el usuario salió del campo sin seleccionar de la lista → limpiar
+        const seleccion = $(this).data('item-seleccionado');
+        if (!seleccion) {
+            $(this).val('');
+            $('#destinatario_input').val('');
+        }
+    });
 
 //descargar guias hijas
 function descargar_hawb(){

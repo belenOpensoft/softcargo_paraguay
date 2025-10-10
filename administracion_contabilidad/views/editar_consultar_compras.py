@@ -150,55 +150,6 @@ def obtener_detalle_compra(request):
         return JsonResponse({'error': 'No se encontró el registro'}, status=404)
 
 
-def buscar_ordenes_por_boleta_old(request):
-    numero = request.GET.get('numero')
-    cliente = request.GET.get('cliente')
-
-    if not numero or not cliente:
-        return JsonResponse({'error': 'Faltan parámetros'}, status=400)
-
-    try:
-        # Expresión regular: busca número exacto entre delimitadores
-        regex = r'(^|;)\s*{}(\s*;|$)'.format(re.escape(numero))
-
-        # Buscar en Ordenes
-        ordenes = Movims.objects.filter(
-            mdetalle__regex=regex,
-            mcliente=cliente,
-            mtipo=45
-        )
-        # Buscar en Movims (mtipo=25)
-        movims = Movims.objects.filter(
-            mdetalle__regex=regex,
-            mcliente=cliente,
-            mtipo=25
-        )
-
-        # Armar la lista combinada
-        data = []
-
-        for o in ordenes:
-            data.append({
-                'autogenerado': o.mautogen,
-                'nro_documento': o.mboleta,
-                'fecha': o.mfechamov.strftime('%Y-%m-%d') if o.mfechamov else '',
-                'monto': o.mtotal,
-                'tipo': 'ORDEN PAGO',
-            })
-
-        for m in movims:
-            data.append({
-                'autogenerado': m.mautogen,
-                'nro_documento': m.mboleta if hasattr(m, 'mboleta') else '',
-                'fecha': m.mfechamov.strftime('%Y-%m-%d') if m.mfechamov else '',
-                'monto': m.mtotal,
-                'tipo': 'COBRO',
-            })
-
-        return JsonResponse({'resultados': data})
-
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
 def buscar_ordenes_por_boleta(request):
     numero = request.GET.get('numero')
     cliente = request.GET.get('cliente')
@@ -263,26 +214,7 @@ def buscar_ordenes_por_boleta(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-def obtener_detalle_pago_old(request):
-    autogenerado = request.GET.get('autogenerado')
-    try:
-        pago = Movims.objects.get(mautogen=autogenerado)
 
-        data = {
-            'numero': pago.mboleta,
-            'moneda': pago.mmoneda,
-            'fecha': pago.mfechamov.strftime('%Y-%m-%d'),
-            'arbitraje': pago.marbitraje,
-            'importe': pago.mtotal,
-            'por_imputar': 0,
-            'paridad': pago.mparidad,
-            'proveedor': pago.mnombre,
-            'detalle': pago.mdetalle,
-        }
-        return JsonResponse(data)
-
-    except Movims.DoesNotExist:
-        return JsonResponse({'error': 'No se encontró el registro'}, status=404)
 
 def obtener_detalle_pago(request):
     autogenerado = request.GET.get('autogenerado')
@@ -454,42 +386,6 @@ def procesar_imputaciones_compra(request):
             return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
-
-def actualizar_campos_movims_old(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            autogen = data.get("autogen")
-            tipo = data.get("tipo")
-
-            if not autogen or not tipo:
-                return JsonResponse({"success": False, "error": "Faltan parámetros clave."})
-
-            factura = Movims.objects.filter(mautogen=autogen, mnombremov=tipo).first()
-
-            if not factura:
-                return JsonResponse({"success": False, "error": "Factura no encontrada."})
-
-            # Asignación individual de campos
-            if 'detalle' in data:
-                factura.mdetalle = data['detalle']
-
-            if 'fecha' in data:
-                factura.mfechamov = (data['fecha'])
-
-            if 'paridad' in data:
-                factura.mparidad = float(data['paridad'])
-
-            if 'arbitraje' in data:
-                factura.marbitraje = float(data['arbitraje'])
-
-            factura.save()
-            return JsonResponse({"success": True})
-
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    return JsonResponse({"success": False, "error": "Método no permitido"}, status=405)
 
 
 def actualizar_campos_movims(request):

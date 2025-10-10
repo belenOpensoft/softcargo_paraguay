@@ -100,26 +100,6 @@ def is_ajax(request):
         return True
     except Exception as e:
         messages.error(request,e)
-def actualizar_fechas_old(etd, eta, numero,viaje,vapor):
-    try:
-        etd = datetime.strptime(etd, "%Y-%m-%d")
-        eta = datetime.strptime(eta, "%Y-%m-%d")
-        resultado = {}
-        num=Embarqueaereo.objects.get(numero=numero).seguimiento
-        seg=Seguimiento.objects.get(numero=num)
-        if seg is not None:
-            if etd is not None:
-                seg.etd=etd
-            if eta is not None:
-                seg.eta=eta
-            if viaje is not None:
-                seg.viaje=viaje
-            if vapor is not None:
-                seg.vapor=vapor
-            seg.save()
-    except Exception as e:
-        resultado['resultado'] = f'Ocurrió un error: {str(e)}'
-    return JsonResponse(resultado)
 
 def guardar_ruta(request):
     resultado = {}

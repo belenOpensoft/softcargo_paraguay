@@ -10,7 +10,8 @@ from administracion_contabilidad.models import Movims, Asientos, VistaProveedore
 from administracion_contabilidad.views.facturacion import generar_autogenerado, generar_numero, modificar_numero
 from mantenimientos.models import Clientes, Servicios
 from administracion_contabilidad.forms import ProveedoresGastos, ComprasDetalleTabla
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+
 param_busqueda = {
     1: 'autogenerado__icontains',
     2: 'fecha__icontains',
@@ -46,7 +47,7 @@ def proveedores_gastos_view(request):
 def buscar_proveedor(request):
     if request.method == 'GET':
         query = request.GET.get('term', '').strip()
-        proveedores = Clientes.objects.filter(empresa__icontains=query)[:10]
+        proveedores = Clientes.objects.filter(empresa__istartswith=query)[:10]
         results = [
             {'id': p.id, 'text': p.empresa, 'codigo': p.codigo}
             for p in proveedores
@@ -116,6 +117,23 @@ def procesar_factura_proveedor(request):
                 fecha = request.POST.get('fecha')
                 tipo = request.POST.get('tipoFac', 0)
                 numero = request.POST.get('numero', 0)
+                cliente_data = json.loads(request.POST.get('clienteData'))
+
+                if numero is None or numero =='':
+                    return HttpResponse(
+                        json.dumps({'success':False,'status': 'Error: Debe ingresar un número.'}),
+                        content_type='application/json',
+                        status=200
+                    )
+
+                verif = Movims.objects.filter(mboleta=numero, mtipo=tipo,mcliente=cliente_data['codigo'])
+                if verif.exists():
+                    return HttpResponse(
+                        json.dumps({'success':False,'status': 'Error: El número ingresado para la compra, ya existe.'}),
+                        content_type='application/json',
+                        status=200
+                    )
+
 
                 autogenerado=generar_autogenerado(tipo, hora, fecha, numero)
                 master=None
@@ -135,7 +153,6 @@ def procesar_factura_proveedor(request):
                 moneda = request.POST.get('moneda', "")
                 arbitraje = request.POST.get('arbitraje', 0)
                 paridad = request.POST.get('paridad', 0)
-                cliente_data = json.loads(request.POST.get('clienteData'))
                 facturas_json = request.POST.get('facturas_imputadas')
                 if facturas_json:
                     facturas_imputadas = json.loads(facturas_json)
@@ -363,10 +380,10 @@ def procesar_factura_proveedor(request):
                 }
                 crear_movimiento(movimiento)
 
-                return JsonResponse({'status': 'Factura procesada correctamente N° ' + str(numero)})
+                return JsonResponse({'success':True,'status': 'Factura procesada correctamente N° ' + str(numero)})
             return None
     except Exception as e:
-        return JsonResponse({'status': 'Error: ' + str(e)})
+        return JsonResponse({'success':False,'status': 'Error: ' + str(e)})
 
 def crear_asiento(asiento):
     try:
@@ -412,7 +429,7 @@ def crear_movimiento(movimiento):
         lista.miva = movimiento['iva']
         lista.mtotal = movimiento['total']
         lista.msobretasa = 0
-        lista.msaldo = movimiento['saldo']
+        lista.msaldo = movimiento['saldo'] if movimiento['saldo'] is not None else 0
         lista.mvtomov = movimiento['fecha']
         lista.mmoneda = movimiento['moneda']
         lista.mdetalle = movimiento['detalle']

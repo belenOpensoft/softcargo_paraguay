@@ -98,23 +98,6 @@ function renderWizardToolbar(){
   `);
 }
 
-function updateHeaderToolbarButtons_old($bar){
-  const isFirst = (window.wizardStep === 0);
-  const isLast  = (window.wizardStep === WIZ_STEPS.length - 1);
-  const canGoBack = WIZ_STEPS[window.wizardStep].allowBack && window.wizardStep > 0;
-
-  // visibilidad base por posición/flags
-  $bar.find('.wiz-prev').toggle(canGoBack);
-  $bar.find('.wiz-next').toggle(!isLast);
-  $bar.find('.wiz-finish').toggle(isLast);
-
-  // Paso 0 sin guardar → solo “Cancelar”
-  if (window.wizardStep === 0 && !firstStepSaved) {
-    $bar.find('.wiz-prev').hide();
-    $bar.find('.wiz-next').hide();
-    $bar.find('.wiz-finish').hide();
-  }
-}
 
 function updateHeaderToolbarButtons($bar){
   const lastIdx   = lastEnabledIndex();

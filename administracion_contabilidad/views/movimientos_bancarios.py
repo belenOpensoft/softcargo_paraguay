@@ -21,7 +21,7 @@ from mantenimientos.models import Clientes
 
 
 def movimientos_bancarios(request):
-    form = MovimientoBancarioForm({'fecha':datetime.now().strftime('%Y-%m-%d'),'vto_cheque':datetime.now().strftime('%Y-%m-%d'),'tipo_movimiento': 'depositar'})
+    form = MovimientoBancarioForm({'fecha':datetime.now().strftime('%Y-%m-%d'),'vto_cheque':datetime.now().strftime('%Y-%m-%d'),'tipo_movimiento': 'transferencia'})
     return render(request, 'contabilidad/movimientos_bancarios.html', {'form': form})
 
 def cheques_disponibles_clientes(request):
@@ -65,6 +65,7 @@ def guardar_movimiento_bancario(request):
                 numero_orden=0
                 asientos = data.get("asientos", [])
                 general = data.get("general", [])
+                fecha = general.get('fecha')
                 numero=generar_numero()
                 autogenerado = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))
                 autogenerado=str(autogenerado)+'NA'
@@ -82,7 +83,7 @@ def guardar_movimiento_bancario(request):
                     modo_asiento='INGRESO'
 
                 if general.get('orden')==1:
-                    numero_orden=crear_orden_pago(general,autogenerado,tipo_asiento)
+                    numero_orden=crear_orden_pago(general,autogenerado,tipo_asiento,fecha)
 
                 cheque = general.get('cheque')
                 tipo_adentro = 'S/I'
@@ -110,6 +111,7 @@ def guardar_movimiento_bancario(request):
                         a.autogenerado = autogenerado
                         a.paridad = general.get('paridad') or None
                         a.cambio = general.get('arbitraje') or None
+                        a.moneda = general.get('moneda') or None
                         a.monto = asiento.get("monto") or None
                         a.detalle = general.get('detalle') or None
                         a.documento = general.get('documento') or None
@@ -131,6 +133,8 @@ def guardar_movimiento_bancario(request):
                         a.documento = general.get("documento") or None
                         a.banco = general.get('banco') or None
                         a.modo = modo_asiento
+                        a.moneda = general.get('moneda') or None
+
                         a.save()
 
                         if asiento.get('autogen'):
@@ -161,6 +165,7 @@ def guardar_movimiento_bancario(request):
                     a.detalle=general.get('detalle') or None
                     a.documento=general.get('documento') or None
                     a.banco = general.get('banco') or None
+                    a.moneda = general.get('moneda') or None
 
                     a.save()
 
@@ -177,6 +182,7 @@ def guardar_movimiento_bancario(request):
                         a.monto = asiento.get("monto")  or None
                         a.detalle = asiento.get("detalle") or None
                         a.documento = general.get("documento") or None
+                        a.moneda = general.get('moneda') or None
                         a.modo=modo_asiento
                         a.banco = general.get('banco') or None
                         a.autogenerado = autogenerado
@@ -218,10 +224,10 @@ def cheques_disponibles_listado_diferidos(request):
 
     return JsonResponse(resultado, safe=False)
 
-def crear_orden_pago(general,autogenerado_impuventa,tipo):
+def crear_orden_pago(general,autogenerado_impuventa,tipo,fecha):
     try:
-        fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        fecha_orden = datetime.now().strftime("%Y-%m-%d")
+        # fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # fecha_orden = datetime.now().strftime("%Y-%m-%d")
         orden = Ordenes()
         numero=orden.get_next_mboleta()
         orden.mmonto=general.get('acumulado')
@@ -251,7 +257,7 @@ def crear_orden_pago(general,autogenerado_impuventa,tipo):
         #crear el movimiento
         movimiento_vec = {
             'tipo': 45,
-            'fecha': fecha_orden,
+            'fecha': fecha,
             'boleta': numero,
             'monto': general.get('acumulado'),
             'paridad': general.get('paridad',0),

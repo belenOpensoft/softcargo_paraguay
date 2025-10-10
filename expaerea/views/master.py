@@ -53,17 +53,19 @@ def add_importacion_maritima(request):
                 reserva.posicion = generar_posicion()
                 numero=form.cleaned_data.get('numero_guia',0)
                 prefijo = form.cleaned_data.get('prefijo_guia', 0)
+                prefijo = str(prefijo).zfill(3)
                 reserva.notas = form.cleaned_data.get('radio', "")
 
                 if reserva.status != 'CANCELADO':
                     try:
                         guia = Guias.objects.get(numero=numero, prefijo=prefijo)
+                        guia.estado = 1
+                        guia.save()
                     except Guias.DoesNotExist:
                         # Manejar el caso en que no se encuentra la guía
                         guia = None
 
-                    guia.estado = 1
-                    guia.save()
+
                 else:
                     reserva.awb+='singuia'
                 # Guardar el registro
@@ -165,111 +167,6 @@ def get_name_by_id(request):
             return JsonResponse({'name': name})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
-def edit_master_old(request, id_master):
-    if request is None:
-        return JsonResponse({
-            'success': False,
-            'message': "El objeto request es None",
-            'errors': {}
-        })
-
-    # Obtener el registro del master por id
-    master = ExportReservas.objects.get(numero=id_master)
-
-    if request.method == 'POST':
-        form = edit_form(request.POST)
-        try:
-            if form.is_valid():
-                # Asignar campos numéricos y de texto, asegurando valores predeterminados en caso de estar vacíos
-                master.transportista = form.cleaned_data.get('transportista_ie', 0)
-                master.agente = form.cleaned_data.get('agente_ie', 0)
-                master.consignatario = form.cleaned_data.get('consignatario_ie', 0)
-
-                master.aduana = form.cleaned_data.get('aduana_e', 'S/I')
-                master.moneda = form.cleaned_data.get('moneda_e', "")
-                master.tarifaawb = form.cleaned_data.get('tarifa_e', 0) if form.cleaned_data.get('tarifa_e') not in [None, ''] else 0
-                master.arbitraje = form.cleaned_data.get('arbitraje_e', 0) if form.cleaned_data.get('arbitraje_e') not in [None, ''] else 0
-                master.kilos = form.cleaned_data.get('kilos_e', 0) if form.cleaned_data.get('kilos_e') not in [None, ''] else 0
-                master.trafico = form.cleaned_data.get('trafico_e', 0) if form.cleaned_data.get('trafico_e') not in [None, ''] else 0
-                master.cotizacion = form.cleaned_data.get('cotizacion_e', 0) if form.cleaned_data.get('cotizacion_e') not in [None, ''] else 0
-
-                # Otros campos con texto
-                master.pagoflete = form.cleaned_data.get('pagoflete_e', "")  # Asignar "" si está vacío
-                master.fecha = form.cleaned_data.get('fecha_e', None)  # Si la fecha está vacía, asignar None
-                master.destino = form.cleaned_data.get('destino_e', "")  # Asignar "" si está vacío
-                master.origen = form.cleaned_data.get('origen_e', "")  # Asignar "" si está vacío
-                master.status = form.cleaned_data.get('status_e', "")  # Asignar "" si está vacío
-                master.posicion = form.cleaned_data.get('posicion_e', "")  # Asignar "" si está vacío
-                master.operacion = form.cleaned_data.get('operacion_e', "")  # Asignar "" si está vacío
-                master.awb = form.cleaned_data.get('awd_e', "")  # Asignar "" si está vacío
-                master.volumen = form.cleaned_data.get('volumen',0)
-                master.aplicable = form.cleaned_data.get('aplicable',0)
-                numero=form.cleaned_data.get('numero_guia',0)
-                prefijo = form.cleaned_data.get('prefijo_guia', 0)
-                numero_old=form.cleaned_data.get('numero_old',0)
-                prefijo_old = form.cleaned_data.get('prefijo_old', 0)
-                master.notas=form.cleaned_data.get('radio',"")
-
-                if numero_old != numero or prefijo_old !=prefijo:
-                    #si cambio el master
-                    try:
-                        guia = Guias.objects.get(numero=numero, prefijo=prefijo)
-                    except Guias.DoesNotExist:
-                        guia = None
-
-                    guia.estado = 1
-                    guia.save()
-
-                    try:
-                        guia_old = Guias.objects.get(numero=numero_old, prefijo=prefijo_old)
-                    except Guias.DoesNotExist:
-                        guia_old = None
-
-                    guia_old.estado = 0
-                    guia_old.save()
-
-                if master.status == 'CANCELADO':
-                    # si cambio el master a cancelado
-                    try:
-                        guia = Guias.objects.get(numero=numero, prefijo=prefijo)
-                    except Guias.DoesNotExist:
-                        guia = None
-
-                    guia.estado = 0
-                    guia.save()
-
-                try:
-                    master.save()
-                    messages.success(request, 'Datos actualizados con éxito.')
-                    return JsonResponse({
-                        'success': True,
-                        'message': 'Datos actualizados con éxito.',
-                    })
-                except IntegrityError:
-                    messages.error(request, 'Error: No se pudo actualizar los datos.')
-                    return HttpResponseRedirect(request.path_info)
-
-                except Exception as e:
-                    messages.error(request, str(e))
-                    return JsonResponse({
-                        'success': False,
-                        'message': f'Error: {str(e)}',
-                        'errors': {}
-                    })
-            else:
-                # Devolver los errores del formulario
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Formulario inválido.',
-                    'errors': form.errors  # Mostrar los errores del formulario
-                })
-        except Exception as e:
-            messages.error(request, str(e))
-            return JsonResponse({
-                'success': False,
-                'message': f'Error: {str(e)}',
-                'errors': {}
-            })
 
 def edit_master(request, id_master):
     if request is None:

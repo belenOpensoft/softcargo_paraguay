@@ -22,7 +22,7 @@ from datetime import date
 from cargosystem.settings import RUTA_PROYECTO, BASE_DIR
 
 logging.basicConfig(
-    level=logging.INFO,                      # Nivel de log: DEBUG, INFO, WARNING, ERROR, CRITICAL
+    level=logging.ERROR,                      # Nivel de log: DEBUG, INFO, WARNING, ERROR, CRITICAL
     format="%(asctime)s - %(levelname)s - %(message)s",  # Formato de salida
     handlers=[
         logging.StreamHandler(),             # Muestra en consola
@@ -40,11 +40,12 @@ class UCFEClient:
 
     def __init__(self, base_url: str, usuario: str,rut:str, clave: str,
                  cod_comercio: str, cod_terminal: str,
-                 wsdl_inbox: str = None, wsdl_query: str = None):
+                 wsdl_inbox: str = None, wsdl_query: str = None,adenda=None):
         self.base_url = base_url.rstrip("/")
         self.auth = (usuario, clave)
         self.cod_comercio = cod_comercio
         self.cod_terminal = cod_terminal
+        self.adenda = adenda
         self.rut = rut
 
         # Configuración SOAP
@@ -126,7 +127,6 @@ class UCFEClient:
 
     def soap_solicitar_firma(self, cfe_xml: str, uuid_str: str = "TEST-UUID-001",
                              rut_emisor: str = "213971080016",
-                             serie: str = None, numero: str = None,
                              tipo_cfe: str = None):
 
         if not self.soap_inbox:
@@ -137,8 +137,8 @@ class UCFEClient:
 
         # Si no se pasa explícito, lo saco del XML
         tipo_cfe = tipo_cfe or self._extract_tipo_cfe(cfe_xml)
-        serie = serie or self._extract_serie(cfe_xml)
-        numero = numero or self._extract_numero(cfe_xml)
+        # serie = serie or self._extract_serie(cfe_xml)
+        # numero = numero or self._extract_numero(cfe_xml)
 
         # Tipos desde el WSDL
         RequerimientoParaUcfe = self.soap_inbox.get_type("ns0:RequerimientoParaUcfe")
@@ -150,13 +150,14 @@ class UCFEClient:
             TipoMensaje=310,  # Solicitar firma
             Uuid=uuid_str,
             RutEmisor=rut_emisor,
-            Serie=serie,
+            # Serie=serie,
             TipoCfe=tipo_cfe,
-            NumeroCfe=numero,
+            # NumeroCfe=numero,
             IdReq=id_req,
             FechaReq=now.strftime("%Y%m%d"),
             HoraReq=now.strftime("%H%M%S"),
             CfeXmlOTexto=cfe_xml,
+            Adenda=self.adenda,
         )
 
         req_body = ReqBody(
@@ -579,6 +580,9 @@ class UCFEClient:
     </CFE>"""
         return xml.strip()
 
+    # < Serie > A < / Serie >
+    # < Nro > {num} < / Nro >
+
     def xml_efactura(self,num) -> str:
         """Genera XML de e-Factura siguiendo el ejemplo 6.2.2.1 del manual,
         adaptado a los RUTs y agregando Serie y Nro obligatorios.
@@ -589,8 +593,6 @@ class UCFEClient:
         <Encabezado>
           <IdDoc>
             <TipoCFE>111</TipoCFE>
-            <Serie>A</Serie>
-            <Nro>{num}</Nro>
             <FchEmis>{date.today().strftime("%Y-%m-%d")}</FchEmis>
             <FmaPago>1</FmaPago>
           </IdDoc>

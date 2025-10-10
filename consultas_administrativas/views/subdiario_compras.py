@@ -38,6 +38,16 @@ def subdiario_compras(request):
                 filtros['tipo'] = movimiento
 
             queryset = VReporteSubdiarioCompras.objects.filter(**filtros)
+
+            vistos = set()
+            queryset_unicos = []
+            for q in queryset:
+                if q.autogen_factura not in vistos:
+                    queryset_unicos.append(q)
+                    vistos.add(q.autogen_factura)
+
+            queryset = queryset_unicos
+
             pagos_factura = {}
             for q in queryset:
                 impucompras = Impucompras.objects.filter(autofac=q.autogen_factura).only('autogen', 'monto')
@@ -87,6 +97,8 @@ def subdiario_compras(request):
                     q.cancelada = "NO"
                     q.pago = None
                     q.tipo_cambio_pago = None
+
+
 
             datos = []
             for q in queryset:

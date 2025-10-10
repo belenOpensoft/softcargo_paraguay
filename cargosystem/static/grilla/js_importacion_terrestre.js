@@ -2435,7 +2435,7 @@ var expandedRow;
                         click: function () {
                             if (confirm('¿Confirma adjuntar el archivo seleccionado?')) {
                                     let table = $('#tabla_archivos').DataTable();
-                                    let row = table.rows('.table-secondary').data();
+                                    let row = table.rows('.selected').data();
                                 let nombre = row[0][2].split("/")[1];
                                 let id = row[0][0];
                                 if(id in archivos_adjuntos) {
