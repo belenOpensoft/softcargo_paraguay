@@ -9,17 +9,18 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import simplejson
+from bs4 import BeautifulSoup
 from django.core import mail
 from django.core.files.storage import default_storage
 from django.core.mail import EmailMessage
 from django.http import  HttpResponse
 
 from cargosystem.settings import BASE_DIR
-from expaerea.models import ExportEmbarqueaereo, ExportAttachhijo
-from expmarit.models import ExpmaritEmbarqueaereo, ExpmaritAttachhijo
-from expterrestre.models import ExpterraEmbarqueaereo, ExpterraAttachhijo
-from impaerea.models import ImportEmbarqueaereo, ImportAttachhijo
-from impomarit.models import Embarqueaereo, Attachhijo as ImpMaritAttachhijo
+from expaerea.models import ExportEmbarqueaereo, ExportAttachhijo, ExportFaxes
+from expmarit.models import ExpmaritEmbarqueaereo, ExpmaritAttachhijo, ExpmaritFaxes
+from expterrestre.models import ExpterraEmbarqueaereo, ExpterraAttachhijo, ExpterraFaxes
+from impaerea.models import ImportEmbarqueaereo, ImportAttachhijo, ImportFaxes
+from impomarit.models import Embarqueaereo, Attachhijo as ImpMaritAttachhijo, Faxes as ImpMaritFaxes
 from impterrestre.models import ImpterraEmbarqueaereo, ImpterraAttachhijo
 from login.models import CorreoEnviado, Account, AccountEmail
 from cargosystem import settings
@@ -36,10 +37,13 @@ def envio_notificacion_seguimiento(request,modulo=None):
             cco = request.POST['cco'].split(';') if (request.POST['cco'] is not None and request.POST['cco']) else []
             tipo = request.POST['tipo']
             seguimiento = request.POST['seguimiento']
+            numero_embarque = seguimiento
             num_seg = ''
             if modulo == 'SG':
                 aux = Seguimiento.objects.get(numero=seguimiento)
-                num_seg = str(aux.numero) + ' ' + str(aux.modo)
+                modo = aux.modo
+                aux=aux.numero
+                num_seg = str(aux) + ' ' + str(modo)
             elif modulo == 'IA':
                 aux = ImportEmbarqueaereo.objects.get(numero=seguimiento).seguimiento
                 num_seg = str(aux) + ' IMPORT AEREO'
@@ -73,7 +77,7 @@ def envio_notificacion_seguimiento(request,modulo=None):
                 clave = account_email.clave
 
             if clave is not None:
-                if envio_correo_electronico(message,to,subject,adjuntos,cc,cco,tipo=tipo,seguimiento=num_seg,usuario=request.user,emisor=from_email,clave=clave,name_firma=user.firma.name,modulo=modulo):
+                if envio_correo_electronico(message,to,subject,adjuntos,cc,cco,tipo=tipo,seguimiento=num_seg,usuario=request.user,emisor=from_email,clave=clave,name_firma=user.firma.name,modulo=modulo,numero=numero_embarque):
                     fx = Faxes()
                     fx.fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
                     fx.numero = seguimiento
@@ -92,16 +96,16 @@ def envio_notificacion_seguimiento(request,modulo=None):
     mimetype = "application/json"
     return HttpResponse(data_json, mimetype)
 
-def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave=None,seguimiento=None,usuario=None,empresa='', tipo='PRUEBA', archivos=None, emisor=None,name_firma=None,modulo=None):
+def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave=None,seguimiento=None,usuario=None,empresa='', tipo='PRUEBA', archivos=None, emisor=None,name_firma=None,modulo=None,numero=None):
     correo = CorreoEnviado()
     try:
         # Crear el mensaje HTML con la imagen incrustada
-        html_message = f'<html><body><img src="https://oceanlink-py.opensoft.uy/static/images/oceanlink.png"><br><br>' + str(mensaje)
+        html_message = f'<html><body><img src="https://oceanlink.opensoft.uy/static/images/oceanlink.png"><br><br>' + str(mensaje)
         # firma
         cc.append(emisor)
         file = str(BASE_DIR) + '/cargosystem/media/' + name_firma
         if name_firma is not None and os.path.isfile(file):
-            html_message += '<br><img src="https://oceanlink-py.opensoft.uy/media/' + name_firma + '">'
+            html_message += '<br><img src="https://oceanlink.opensoft.uy/media/' + name_firma + '">'
         html_message += '</body></html>'
         # Crear el objeto EmailMessage
         if clave is not None and emisor is not None:
@@ -182,6 +186,7 @@ def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave
         email.send()
         correo.estado = 'ENVIADO'
         correo.save()
+        crear_nota(modulo,numero,titulo,mensaje)
         return True
     except Exception as e:
         correo.estado = 'FALLIDO'
@@ -191,6 +196,39 @@ def envio_correo_electronico(mensaje, remitentes, titulo, adjuntos, cc,cco,clave
 
 
 
+def crear_nota(modulo,numero,asunto,mensaje):
+    try:
+        if not numero or not modulo:
+            return
+
+        MODELOS = {
+            "IM": ImpMaritFaxes,
+            "SG": Faxes,
+            "EM": ExpmaritFaxes,
+            "IA": ImportFaxes,
+            "EA": ExportFaxes,
+            "ET": ExpterraFaxes,
+            "IT": ImportFaxes,
+        }
+        modelo=MODELOS.get(modulo)
+        if not modelo:
+            return
+
+        fecha = datetime.now().strftime('%Y-%m-%d')
+        soup = BeautifulSoup(mensaje, "html.parser")
+        texto_plano = soup.get_text()
+
+        registro = modelo(
+            numero=numero,
+            fecha=fecha,
+            asunto=asunto,
+            tipo='IN',
+            notas=texto_plano
+        )
+        registro.save()
+
+    except Exception as e:
+        pass
 
 
 
