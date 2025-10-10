@@ -12,18 +12,7 @@ from impomarit.models import VistaEventosCalendario
 def calendario(request):
     try:
         if request.user.has_perms(["impomarit.view_vistaeventoscalendario",]):
-            opciones_busqueda = {
-                'cliente__icontains': 'CLIENTE',
-                'embarcador__icontains': 'EMBARCADOR',
-                'consignatario__icontains': 'CONSIGNATARIO',
-                'origen_text__icontains': 'ORIGEN',
-                'destino_text__icontains': 'DESTINO',
-                'awb__icontains': 'BL',
-                'hawb__icontains': 'HBL',
-                'vapor__icontains': 'Vapor',
-                'posicion__icontains': 'Posicion',
-                # 'contenedores__icontains': 'Contenedor',
-            }
+
             return render(request, 'impormarit/calendar_general.html',{
 
             })
@@ -65,8 +54,8 @@ def eventos_calendario(request):
             color = '#FF7F7F'
             source_formatted = "IMPO TERRESTRE"
 
-        if evento.fecharetiro is not None:
-            fecha_evento = evento.fecharetiro.strftime('%Y-%m-%d')
+        if evento.eta is not None:
+            fecha_evento = evento.eta.strftime('%Y-%m-%d')
         else:
             fecha_evento = None
 
@@ -113,7 +102,7 @@ def generar_reporte_excel(request):
 
     # Aplicar filtro por rango de fechas
     if desde_filtro and hasta_filtro:
-        eventos = eventos.filter(fecharetiro__range=[desde_filtro, hasta_filtro])
+        eventos = eventos.filter(eta__range=[desde_filtro, hasta_filtro])
 
     # Formatear los eventos para pasarlos a la función que genera el reporte Excel
     eventos_formateados = []
@@ -127,7 +116,7 @@ def generar_reporte_excel(request):
             'destino': evento.destino,
             'transportista': evento.transportista,
             'consignatario': evento.consignatario,
-            'fecharetiro': evento.fecharetiro.strftime('%Y-%m-%d') if evento.fecharetiro else '',
+            'eta': evento.eta.strftime('%Y-%m-%d') if evento.eta else '',
             'source_formatted': (
                 'IMPO AÉREO' if evento.source == 'import'
                 else 'IMPO MARÍTIMO' if evento.source == 'impmarit'
@@ -162,7 +151,7 @@ def generar_reporte_excel_file(datos, modo_filtro='', filtro_cliente='', desde='
     worksheet.set_column('J:J', 20)  # Ajustar la columna de 'Tipo' a 20 caracteres de ancho
 
     # Escribir encabezados de columnas en la primera fila
-    headers = ['Posición', 'AWB', 'HAWB', 'Status', 'Origen', 'Destino', 'Transportista', 'Consignatario', 'Fecha Retiro', 'Tipo']
+    headers = ['Posición', 'AWB', 'HAWB', 'Status', 'Origen', 'Destino', 'Transportista', 'Consignatario', 'ETA', 'Tipo']
     for col_num, header in enumerate(headers):
         worksheet.write(0, col_num, header)
 
@@ -176,7 +165,7 @@ def generar_reporte_excel_file(datos, modo_filtro='', filtro_cliente='', desde='
         worksheet.write(row_num, 5, evento['destino'])
         worksheet.write(row_num, 6, evento['transportista'])
         worksheet.write(row_num, 7, evento['consignatario'])
-        worksheet.write(row_num, 8, evento['fecharetiro'])
+        worksheet.write(row_num, 8, evento['eta'])
         worksheet.write(row_num, 9, evento['source_formatted'])
 
     # Si hay filtros aplicados, agregarlos en una sección del reporte

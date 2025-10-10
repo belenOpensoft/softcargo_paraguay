@@ -937,7 +937,7 @@ class VistaEventosCalendario(models.Model):
     status = models.CharField(max_length=255, null=True)
     origen = models.CharField(max_length=255, null=True)
     destino = models.CharField(max_length=255, null=True)
-    fecharetiro = models.DateField(null=True)
+    eta = models.DateField(null=True)
     consignatario = models.CharField(max_length=255, null=True)
     transportista = models.CharField(max_length=255, null=True)
     source = models.CharField(max_length=255, null=True)
