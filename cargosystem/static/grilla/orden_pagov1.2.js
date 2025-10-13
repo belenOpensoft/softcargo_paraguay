@@ -174,7 +174,6 @@ $(document).ready(function() {
         }
     });
     table = $('#tabla_op').DataTable({
-    "stateSave": true,
     "dom": 'Btlipr',
     "scrollX": true,
     "bAutoWidth": false,
@@ -225,8 +224,8 @@ $(document).ready(function() {
         { "orderable": true },
         { "orderable": true },
         { "orderable": true },
-        { "orderable": true },
-        { "orderable": true },
+        { "orderable": true,'visible':false },
+        { "orderable": true,'visible':false },
         { "orderable": true },
     ],
 

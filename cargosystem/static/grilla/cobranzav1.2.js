@@ -171,8 +171,8 @@ $(document).ready(function () {
             {"orderable": true},
             {"orderable": true},
             {"orderable": true},
-            {"orderable": true},
-            {"orderable": true},
+            {"orderable": true,'visible':false},
+            {"orderable": true,'visible':false},
             {"orderable": true},
         ],
         "language": {
