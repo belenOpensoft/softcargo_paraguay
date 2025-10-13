@@ -624,21 +624,27 @@ def procesar_factura(request):
 
                     resultado = facturar_uruware(
                         numero, tipo, serie, moneda, cliente_data,
-                        precio_total, neto, iva, items_data, facturas_imputadas, fecha_obj,arbitraje,mnt_neto_iva_basica,exento,autogenerado,adenda,referencia,posicion,request.user.id
+                        precio_total, neto, iva, items_data, facturas_imputadas, fecha_obj, arbitraje,
+                        mnt_neto_iva_basica, exento, autogenerado, adenda, referencia, posicion, request.user.id
                     )
                     mensaje = resultado['mensaje']
+
+                    if resultado["success"]:
+                        return JsonResponse({
+                            "success": True,
+                            "mensaje": mensaje,
+                            "ucfe_response": resultado.get("ucfe_response", {}),
+                        })
+                    else:
+                        return JsonResponse({
+                            "success": False,
+                            "mensaje": mensaje,
+                        })
                 else:
                     mensaje = 'ok'
 
-                if resultado["success"]:
                     return JsonResponse({
                         "success": True,
-                        "mensaje": mensaje,
-                        "ucfe_response": resultado.get("ucfe_response", {}),
-                    })
-                else:
-                    return JsonResponse({
-                        "success": False,
                         "mensaje": mensaje,
                     })
             return None
