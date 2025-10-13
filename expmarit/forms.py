@@ -869,8 +869,8 @@ class gastosForm(BSModalModelForm):
     arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"id":"id_arbitraje_id","required":False}, ), max_digits=12,decimal_places=4, required=True, label="Arbitraje", initial='0')
     moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13","id":"id_moneda_id"}),
                                required=True, label="Moneda", choices=(), initial='2')
-    socio = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13"}),
-                               required=True, label="Socio comercial", choices=())
+    socio = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': False, "tabindex": "13"}),
+                                label="Socio comercial", choices=(),required=False)
 
 class gastosFormHouse(BSModalModelForm):
     class Meta:

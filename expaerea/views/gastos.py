@@ -397,7 +397,8 @@ def add_gasto_house(request):
         pinformar = form_data.get('pinformar', 0)  # valor opcional
         notomaprofit = form_data.get('notomaprofit') == 'on'
         modo = form_data.get('modo')
-        socio = form_data.get('socio')
+        socio = form_data.get('socio',None) if form_data.get('socio',None) != '' else None
+
         detalle = form_data.get('detalle')
         empresa = form_data.get('empresa',0)
         reembolsable = form_data.get('reembolsable')

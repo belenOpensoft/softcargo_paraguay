@@ -1,4 +1,3 @@
-
 from bootstrap_modal_forms.forms import BSModalModelForm
 from mantenimientos.models import Clientes, Monedas, Depositos, Servicios
 from seguimientos.models import Seguimiento, VGrillaSeguimientos, Envases, Cargaaerea, Serviceaereo, Attachhijo, \
@@ -63,17 +62,19 @@ class emailsForm(forms.Form):
     #     self.helper.form_method = 'post'
     #     self.helper.add_input(Submit('submit', 'Actualizar'))
 
-    to = forms.EmailField(label='Para',widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    cc = forms.EmailField(label='CC',widget=forms.EmailInput(attrs={'class': 'form-control'}), required=False)
-    cco = forms.EmailField(label='CCO',widget=forms.EmailInput(attrs={'class': 'form-control'}), required=False)
-    subject = forms.CharField(label='Asunto',widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
-    email = forms.CharField(widget=forms.Textarea(attrs={"id": 'email_add_input',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"100","class":"form-control"}, ), required=False,label="Email", max_length=500)
+    to = forms.EmailField(label='Para', widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    cc = forms.EmailField(label='CC', widget=forms.EmailInput(attrs={'class': 'form-control'}), required=False)
+    cco = forms.EmailField(label='CCO', widget=forms.EmailInput(attrs={'class': 'form-control'}), required=False)
+    subject = forms.CharField(label='Asunto', widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
+    email = forms.CharField(widget=forms.Textarea(
+        attrs={"id": 'email_add_input', "autocomplete": "off", 'required': False, 'max_length': 500, "rows": "5",
+               " cols": "100", "class": "form-control"}, ), required=False, label="Email", max_length=500)
 
 
 class pdfForm(BSModalModelForm):
     class Meta:
         model = Seguimiento
-        fields = ['observaciones',]  # Agrega los campos que deseas actualizar
+        fields = ['observaciones', ]  # Agrega los campos que deseas actualizar
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -81,7 +82,9 @@ class pdfForm(BSModalModelForm):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Actualizar'))
 
-    observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'pdf_add_input', "autocomplete": "off", 'required': False, 'max_length': 500, "rows": "25"," cols": "100", "class": "form-control"}, ), required=False, label="Notas", max_length=500)
+    observaciones = forms.CharField(widget=forms.Textarea(
+        attrs={"id": 'pdf_add_input', "autocomplete": "off", 'required': False, 'max_length': 500, "rows": "25",
+               " cols": "100", "class": "form-control"}, ), required=False, label="Notas", max_length=500)
 
 
 class seguimientoForm(BSModalModelForm):
@@ -163,11 +166,11 @@ class seguimientoForm(BSModalModelForm):
             'modo': forms.Select(choices=MODOS_CHOICES, attrs={'class': 'form-control form-control-sm'}),
         }
         attrs = {
-            'deposito' : "tabindex=16;",
-            'awb' : "tabindex=17;",
-            'wreceipt' : "tabindex=18;",
-            'status' : "tabindex=19;",
-            'operacion' : "tabindex=12;",
+            'deposito': "tabindex=16;",
+            'awb': "tabindex=17;",
+            'wreceipt': "tabindex=18;",
+            'status': "tabindex=19;",
+            'operacion': "tabindex=12;",
         }
 
         # Asignación de tabindex en el orden que especificaste
@@ -247,36 +250,62 @@ class seguimientoForm(BSModalModelForm):
                        )
 
     # primera columna
-    cliente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'cliente_add'}))
-    despachante = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'despachante_add'}))
-    observaciones = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'observaciones'}))
-    embarcador = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'embarcador_add'}))
-    consignatario = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'consignatario_add'}))
-    notificar = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'notificar_add'}),label='Notificar a:')
-    agente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'agente_add'}))
-    transportista = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'transportista_add'}))
-    armador = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'armador_add','required': False}),required=False)
-    agecompras = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'agecompras_add',"required":False}),required=False,label='Ag.Compras')
-    ageventas = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'ageventas_add',"required":False}),required=False,label='Ag.Ventas')
-    refproveedor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control',"required":False}),required=False,label='Ref. Proveedor')
-    refcliente = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control',"required":False}),required=False,label='Ref. Cliente')
+    cliente = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'cliente_add'}))
+    despachante = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'despachante_add'}))
+    observaciones = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'observaciones'}))
+    embarcador = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'embarcador_add'}))
+    consignatario = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'consignatario_add'}))
+    notificar = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'notificar_add'}),
+                                label='Notificar a:')
+    agente = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'agente_add'}))
+    transportista = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'transportista_add'}))
+    armador = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'armador_add', 'required': False}), required=False)
+    agecompras = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'agecompras_add', "required": False}),
+        required=False, label='Ag.Compras')
+    ageventas = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'ageventas_add', "required": False}),
+        required=False, label='Ag.Ventas')
+    refproveedor = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', "required": False}),
+                                   required=False, label='Ref. Proveedor')
+    refcliente = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', "required": False}),
+                                 required=False, label='Ref. Cliente')
     # segunda columna
-    deposito = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'deposito_add'}),required=False)
-    origen = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'origen_add'}))
-    destino = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'destino_add'}))
-    operacion = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True,'id':'id_operacion_seg'}),required=True,label="Operacion",choices=choice_op,initial='')
-    moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete":"off",'required': True}),required=True,label="Moneda", choices=(),initial='')
-    vendedor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','id':'vendedor_add'}))
-    vapor = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','required': False,'id':'vapor_add'}),required=False)
+    deposito = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'deposito_add'}),
+        required=False)
+    origen = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'origen_add'}))
+    destino = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'destino_add'}))
+    operacion = forms.ChoiceField(
+        widget=forms.Select(attrs={"autocomplete": "off", 'required': True, 'id': 'id_operacion_seg'}), required=True,
+        label="Operacion", choices=choice_op, initial='')
+    moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True}), required=True,
+                               label="Moneda", choices=(), initial='')
+    vendedor = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'vendedor_add'}))
+    vapor = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'required': False, 'id': 'vapor_add'}), required=False)
     # tercer columna
-    loading = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'loading_add', 'required': False}),required=False)
-    discharge = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'discharge_add', 'required': False}),required=False)
-    proyecto = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'proyecto_add', 'required': False}),required=False)
-    trafico = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'id_trafico_seg', 'required': False}),required=False)
-    actividad = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'actividad_add', 'required': False}),required=False)
-    terminos = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'id': 'terminos', 'required': True}),required=True,choices=CHOICE_TERMINOS)
+    loading = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'loading_add', 'required': False}), required=False)
+    discharge = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'discharge_add', 'required': False}),
+        required=False)
+    proyecto = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'proyecto_add', 'required': False}),
+        required=False)
+    trafico = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'id_trafico_seg', 'required': False}),
+        required=False)
+    actividad = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'actividad_add', 'required': False}),
+        required=False)
+    terminos = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'terminos', 'required': True}), required=True,
+        choices=CHOICE_TERMINOS)
     # observaciones = forms.CharField(widget=forms.Textarea(attrs={"id": 'notas_seguimiento',"autocomplete": "off", 'required': False, 'max_length': 500,"rows":"5"," cols":"10","class":"form-control"}, ), required=False,label="Notas", max_length=500)
-    id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False}), required=False, label="ID")
+    id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False}), required=False,
+                            label="ID")
     propia = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'propia', 'required': True}),
         required=True,
@@ -297,15 +326,31 @@ class seguimientoForm(BSModalModelForm):
         required=True,
         label="Fecha Loading"
     )
-    tomopeso = forms.BooleanField(widget=forms.CheckboxInput(attrs={"autocomplete": "off", 'required': False,"class": "d-none"}), required=False, label="Tomo peso",initial=1)
-    iniciales = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'iniciales', 'required': False}),required=False)
-    recepcionado = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'recepcionado', 'required': False}),required=False,initial='N')
-    tarifafija = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'tarifafija', 'required': False}),required=False,initial='N')
-    multimodal = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'multimodal', 'required': False}),required=False,initial='N')
-    unidadpeso = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'unidadpeso', 'required': False}),required=False,initial='K')
-    unidadvolumen = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'unidadvolumen', 'required': False}),required=False,initial='B')
-    tipobonifcli = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'tipobonifcli', 'required': False}),required=False,initial='P')
-    editado = forms.CharField(widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'editado', 'required': False}),required=False)
+    tomopeso = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={"autocomplete": "off", 'required': False, "class": "d-none"}), required=False,
+        label="Tomo peso", initial=1)
+    iniciales = forms.CharField(
+        widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'iniciales', 'required': False}), required=False)
+    recepcionado = forms.CharField(
+        widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'recepcionado', 'required': False}),
+        required=False, initial='N')
+    tarifafija = forms.CharField(
+        widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'tarifafija', 'required': False}),
+        required=False, initial='N')
+    multimodal = forms.CharField(
+        widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'multimodal', 'required': False}),
+        required=False, initial='N')
+    unidadpeso = forms.CharField(
+        widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'unidadpeso', 'required': False}),
+        required=False, initial='K')
+    unidadvolumen = forms.CharField(
+        widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'unidadvolumen', 'required': False}),
+        required=False, initial='B')
+    tipobonifcli = forms.CharField(
+        widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'tipobonifcli', 'required': False}),
+        required=False, initial='P')
+    editado = forms.CharField(
+        widget=forms.HiddenInput(attrs={'class': 'form-control', 'id': 'editado', 'required': False}), required=False)
     volumen = forms.DecimalField(
         widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_volumen_seg', 'required': False}),
         required=False,
@@ -336,7 +381,6 @@ class cronologiaForm(BSModalModelForm):
             'eta': forms.DateInput(attrs={'type': 'date', 'tabindex': 3}),
             'originales': forms.Select(attrs={'tabindex': 4}),
         }
-
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -400,7 +444,10 @@ class envasesForm(BSModalModelForm):
             self.fields[field].widget.attrs['class'] = 'form-control'
             self.fields[field].widget.required = True
 
-    id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False,'id':'id_envase_id'}), required=False,label="ID")
+    id = forms.IntegerField(
+        widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False, 'id': 'id_envase_id'}),
+        required=False, label="ID")
+
 
 class aplicableForm(BSModalModelForm):
     OPCIONES = (
@@ -424,7 +471,6 @@ class aplicableForm(BSModalModelForm):
         }),
         max_digits=12, decimal_places=4, required=False, label="Peso"
     )
-
 
     class Meta:
         model = Seguimiento
@@ -472,17 +518,16 @@ class embarquesForm(BSModalModelForm):
             'cbm': 'Volumen',
             'bruto': 'Peso bruto',
             'tipo': 'Tipo',
-            'mercaderia':'Detalle'
+            'mercaderia': 'Detalle'
         }
         widgets = {
             # 'id': forms.HiddenInput(attrs={'id':'id_embarque_id',}),
-            'tipo': forms.Select(attrs={'id':'id_tipo_embarque',}),
-            'mercaderia': forms.Textarea(attrs={'rows':'2',}),
-            'bultos': forms.NumberInput(attrs={'id':'id_bultos_embarque','min': '0'}),
-            'bruto': forms.NumberInput(attrs={'id':'id_bruto_embarque','min': '0'}),
+            'tipo': forms.Select(attrs={'id': 'id_tipo_embarque', }),
+            'mercaderia': forms.Textarea(attrs={'rows': '2', }),
+            'bultos': forms.NumberInput(attrs={'id': 'id_bultos_embarque', 'min': '0'}),
+            'bruto': forms.NumberInput(attrs={'id': 'id_bruto_embarque', 'min': '0'}),
             'cbm': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
         }
-
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -491,10 +536,12 @@ class embarquesForm(BSModalModelForm):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Actualizar'))
         for field in self.fields:
-            if field not in ['tomopeso','tipobonifcli','tarifafija']:
+            if field not in ['tomopeso', 'tipobonifcli', 'tarifafija']:
                 self.fields[field].widget.attrs['class'] = 'form-control'
 
-    id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False,'id':'id_embarque_id'}), required=False,label="ID")
+    id = forms.IntegerField(
+        widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False, 'id': 'id_embarque_id'}),
+        required=False, label="ID")
     """
     aplicable = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12,'decimal_places': 1,"required":False}, ), max_digits=12,decimal_places=4, required=False, label="Aplicable")
     tarifaprofit = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 1,"required":False}, ), max_digits=12,decimal_places=4, required=False, label="Tarifa informar")
@@ -515,7 +562,7 @@ class embarquesForm(BSModalModelForm):
         widget=forms.RadioSelect(attrs={'style':'width:50px;','onchange':'return recalculo_embarques();'}),
         label='Peso'
     )
- 
+
     OPCIONES2 = (
         ('P', 'Porcentual tarifa venta'),
         ('V', 'Monto fijo p/peso aplicable'),
@@ -533,6 +580,7 @@ class embarquesForm(BSModalModelForm):
         'class': 'form-control',
         'autocomplete': 'off'
     }))
+
 
 class gastosForm(BSModalModelForm):
     class Meta:
@@ -554,13 +602,12 @@ class gastosForm(BSModalModelForm):
             'pinformar': 'A informar',
             'modo': 'Pago',
             'notomaprofit': 'Excluir del profit share',
-            'secomparte' : 'Se comparte',
+            'secomparte': 'Se comparte',
         }
         widgets = {
             'modo': forms.Select(attrs={'id': 'id_modo_id'}),
             'arbitraje': forms.NumberInput(attrs={'min': '0'}),  # Evita números negativos
         }
-
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -571,18 +618,20 @@ class gastosForm(BSModalModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
             self.fields[field].widget.required = True
-        servicios = [("", "---------"), ] + list(Servicios.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
+        servicios = [("", "---------"), ] + list(
+            Servicios.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
         self.fields['servicio'].choices = servicios
         monedas = [("", "---------"), ] + list(Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
         self.fields['moneda'].choices = monedas
-        socios = [("0", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa'))
+        socios = [("0", "---------"), ] + list(
+            Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa'))
         self.fields['socio'].choices = socios
 
         self.fields['secomparte'].widget = forms.HiddenInput()
         self.fields['notomaprofit'].widget = forms.HiddenInput()
 
     CHOICES = [
-        ('N','--------'),
+        ('N', '--------'),
         ('C', 'Compra'),
         ('V', 'Venta '),
     ]
@@ -595,18 +644,28 @@ class gastosForm(BSModalModelForm):
         ('LOCAL CHARGES', 'LOCAL CHARGES '),
     ]
     Servicios()
-    id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False,'id':'id_gasto_id'}), required=False,label="ID")
-    compra_venta = forms.CharField(widget=forms.Select(choices=CHOICES),label='Tipo movimiento')
-    tipogasto = forms.CharField(widget=forms.Select(choices=CHOICES_TG),label='Tipo')
+    id = forms.IntegerField(
+        widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False, 'id': 'id_gasto_id'}), required=False,
+        label="ID")
+    compra_venta = forms.CharField(widget=forms.Select(choices=CHOICES), label='Tipo movimiento')
+    tipogasto = forms.CharField(widget=forms.Select(choices=CHOICES_TG), label='Tipo')
     servicio = forms.ChoiceField(choices=list(), widget=forms.Select(
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, }), label="Servicio", required=True)
-    importe = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"required":True,'min': '0'}, ), max_digits=12,decimal_places=4, required=True, label="Importe",initial=0)
-    pinformar = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"required":True,'min': '0'}, ), max_digits=12,decimal_places=4, required=True, label="A informar",initial=0)
-    arbitraje = forms.DecimalField(widget=forms.HiddenInput(attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,"id":"id_arbitraje_id","required":False,'min': '0'}, ), max_digits=12,decimal_places=4, required=False, label="Arbitraje",initial=0)
-    moneda = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13","id":"id_moneda_id"}),
-                               required=True, label="Moneda", choices=(), initial='2')
-    socio = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off",}),
-                             label="Socio comercial", choices=(), initial='0',required=False)
+    importe = forms.DecimalField(widget=forms.NumberInput(
+        attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4, "required": True,
+               'min': '0'}, ), max_digits=12, decimal_places=4, required=True, label="Importe", initial=0)
+    pinformar = forms.DecimalField(widget=forms.NumberInput(
+        attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4, "required": True,
+               'min': '0'}, ), max_digits=12, decimal_places=4, required=True, label="A informar", initial=0)
+    arbitraje = forms.DecimalField(widget=forms.HiddenInput(
+        attrs={'class': 'form-control', "autocomplete": "off", 'max_digits': 12, 'decimal_places': 4,
+               "id": "id_arbitraje_id", "required": False, 'min': '0'}, ), max_digits=12, decimal_places=4,
+                                   required=False, label="Arbitraje", initial=0)
+    moneda = forms.ChoiceField(
+        widget=forms.Select(attrs={"autocomplete": "off", 'required': True, "tabindex": "13", "id": "id_moneda_id"}),
+        required=True, label="Moneda", choices=(), initial='2')
+    socio = forms.ChoiceField(widget=forms.Select(attrs={"autocomplete": "off", 'required': False}),
+                              label="Socio comercial", choices=(), required=False)
 
 
 class archivosForm(forms.ModelForm):
@@ -614,10 +673,7 @@ class archivosForm(forms.ModelForm):
         model = Attachhijo
         fields = ('numero', 'archivo', 'detalle', 'restringido')
 
-
-
     def __init__(self, *args, **kwargs):
-
         super(archivosForm, self).__init__(*args, **kwargs)
         self.fields['detalle'].widget.attrs['class'] = 'form-control'
         self.fields['detalle'].widget.attrs['style'] = 'width:400px'
@@ -699,7 +755,9 @@ class rutasForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
 
-    id = forms.IntegerField(widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False, 'id': 'id_ruta_id'}), required=False,label="ID")
+    id = forms.IntegerField(
+        widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False, 'id': 'id_ruta_id'}), required=False,
+        label="ID")
 
 
 class clonarForm(forms.Form):

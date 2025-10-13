@@ -1952,7 +1952,6 @@ var expandedRow;
                 success: function (resultado) {
                     if (resultado['resultado'] === 'exito') {
                           $("#id_gasto_id_").val('');
-                        alert('Guardado con éxito.');
                         $("#tabla_gastos").dataTable().fnDestroy();
                         $("#ingresar_gasto_master").html('Agregar');
                        get_datos_gastos();
@@ -2033,7 +2032,6 @@ var expandedRow;
                 success: function (resultado) {
                     if (resultado['resultado'] === 'exito') {
                         $("#id_gasto_id_house").val('');
-                        alert('Guardado con éxito.');
                         $("#tabla_gastos_house").dataTable().fnDestroy();
                         $("#ingresar_gasto_house").html('Agregar');
                        get_datos_gastos_house();
@@ -2114,7 +2112,6 @@ var expandedRow;
                 success: function (resultado) {
                     if (resultado['resultado'] === 'exito') {
                         $("#id_house_ruta").val('');
-                        alert('Guardado con éxito.');
                         $("#tabla_rutas_house").dataTable().fnDestroy();
                         $("#ingresar_ruta_house").html('Agregar');
                        get_datos_rutas_house();
@@ -2194,7 +2191,6 @@ var expandedRow;
                 success: function (resultado) {
                     if (resultado['resultado'] === 'exito') {
                         $("#id_envase_id").val('');
-                        alert('Guardado con éxito.');
                         $("#tabla_envases_house").dataTable().fnDestroy();
                         $("#ingresar_envase_house").html('Agregar');
                        get_datos_envases_house();
@@ -2285,7 +2281,6 @@ var expandedRow;
                         $("#id_producto").val('');
                         $("#id_producto").css({"border-color": "", 'box-shadow': ''});
                         $("#id_embarque_id").val('');
-                        alert('Guardado con éxito.');
                         $("#tabla_embarques_house").dataTable().fnDestroy();
                         $("#ingresar_embarque_house").html('Agregar');
                        get_datos_embarques_house();
