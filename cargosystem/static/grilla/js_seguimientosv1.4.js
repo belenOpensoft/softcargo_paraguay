@@ -2170,15 +2170,12 @@ $(document).ready(function () {
                                                     aux = resultado['resultado'];
 
                                                     mostrarToast('¡Embarque eliminado correctamente!', 'success');
-                                                    $("#tabla_embarques").dataTable().fnDestroy();
+                                                    // $("#tabla_embarques").dataTable().fnDestroy();
                                                     $("#ingresar_embarque").html('Agregar');
-                                                    $('#embarques_btn').addClass('triggered').trigger('click');
+                                                    // $('#embarques_btn').addClass('triggered').trigger('click');
                                                     $('#id_embarque_id').val("");
-                                                    table.ajax.reload(function (json) {
-                                                        // Callback function to handle the response data
-
-
-                                                    });
+                                                    // table.ajax.reload(function (json) {
+                                                    // });
                                                     $('#tabla_embarques').DataTable().ajax.reload();
                                                     $('#tabla_seguimiento').DataTable().ajax.reload();
 
@@ -2190,7 +2187,8 @@ $(document).ready(function () {
                                         }
                                     }
                                 },
-                            }, {
+                            },
+                            {
                                 text: "Salir",
                                 class: "btn btn-dark",
                                 style: "width:100px",

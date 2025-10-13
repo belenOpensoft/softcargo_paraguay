@@ -500,7 +500,10 @@ function tabla_facturas_pendientes(cliente,moneda) {
 
     const table = $('#imputacionTablePagos').DataTable({
         info: false,        // Oculta "Mostrando X a Y de Z registros"
-        lengthChange: false ,
+        scrollY: "500px",             // Altura visible (ajustala según tu layout)
+        scrollCollapse: true,         // Colapsa el scroll si hay pocos registros
+        scroller: true,   // Oculta "Mostrando X a Y de Z registros"
+        pageLength: 100,
         serverSide: true,
         ajax: {
             url: "/admin_cont/obtener_imputables",

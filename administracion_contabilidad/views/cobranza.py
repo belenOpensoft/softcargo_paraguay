@@ -198,7 +198,10 @@ def source_facturas_pendientes(request):
         moneda_objetivo = request.GET.get('moneda')
 
         # Filtrar registros por cliente
-        pendientes = Movims.objects.filter(mcliente=cliente,mactivo='S').exclude(msaldo=0)
+        if cliente:
+            pendientes = Movims.objects.filter(mcliente=cliente,mactivo='S').exclude(msaldo=0)
+        else:
+            prendiente = Movims.objects.none()
 
         # Paginación
         total_registros = pendientes.count()
@@ -295,7 +298,7 @@ def guardar_impuventa(request):
                     return JsonResponse({'status': 'Error: ' + 'El número ingresado para la cobranza, ya existe.'})
 
                 autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))
-                fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                fecha = cobranza[0]['fecha']
 
                 if vector and imputaciones:
                     for item in imputaciones:
@@ -335,11 +338,11 @@ def guardar_impuventa(request):
 
                 if cliente_data:
                     for asiento in asientos:
-                        fechaj = datetime.now().strftime("%Y-%m-%d")
-                        fecha_obj = datetime.strptime(fechaj, '%Y-%m-%d')
+                        fecha_str = cobranza[0]['fecha']
+                        fecha_obj = datetime.strptime(fecha_str, "%Y-%m-%d")
                         nroasiento = generar_numero()
                         movimiento_num = modificar_numero(nroasiento)
-
+                        banco = asiento['banco'].split('-')[0].strip()
                         detalle_asiento = 'COBRO' + cobranza[0]['serie'] +'-'+ str(cobranza[0]['prefijo']) +'-'+ str(cobranza[0]['numero']) +'-'+ cliente_data.empresa
                         asiento_vector_1 = {
                             'detalle': detalle_asiento,
@@ -353,7 +356,7 @@ def guardar_impuventa(request):
                             'imputacion': 1,
                             'modo': asiento['modo'],
                             'tipo': 'Z',
-                            'cuenta': asiento['cuenta'],
+                            'cuenta': banco if banco else 0,
                             'documento': cobranza[0]['numero'],
                             'vencimiento': fecha_obj,
                             'pasado': 0,
@@ -471,7 +474,7 @@ def guardar_anticipo(request):
 
                 autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))+'111'
 
-                fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                fecha = cobranza[0]['fecha']
 
                 arbitraje = float(cobranza[0]['arbitraje'])
                 paridad = float(cobranza[0]['paridad'])
@@ -499,8 +502,8 @@ def guardar_anticipo(request):
 
                 if cliente_data:
                     for asiento in asientos:
-                        fechaj = datetime.now().strftime("%Y-%m-%d")
-                        fecha_obj = datetime.strptime(fechaj, '%Y-%m-%d')
+                        fecha_str = cobranza[0]['fecha']
+                        fecha_obj = datetime.strptime(fecha_str, "%Y-%m-%d")
                         nroasiento = generar_numero()
                         movimiento_num = modificar_numero(nroasiento)
 
