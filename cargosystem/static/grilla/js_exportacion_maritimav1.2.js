@@ -45,6 +45,34 @@ var awbRegex = "";
 let table_add_em;
 
 $(document).ready(function () {
+     $('#id_compra_venta').change(function() {
+            var tipo = $(this).val();
+            var $servicio = $('#id_servicio_h');
+
+            if (tipo === '' || tipo === 'N') {
+                $servicio.html('<option value="">---------</option>');
+                return;
+            }
+
+            $.ajax({
+                url: '/obtener_servicios/',
+                data: {'tipo': tipo},
+                dataType: 'json',
+                success: function(data) {
+                    $servicio.empty();
+                    $servicio.append('<option value="">---------</option>');
+                    $.each(data, function(index, item) {
+                        $servicio.append(
+                            $('<option></option>').val(item.codigo).text(item.nombre)
+                        );
+                    });
+                },
+                error: function() {
+                    alert('Error al cargar los servicios.');
+                }
+            });
+        });
+
     $(document).on("submit", "#searchForm", function(e) {
         e.preventDefault();
         let formData = $(this).serialize();
@@ -2083,8 +2111,8 @@ var expandedRow;
         $("#cancelar_gasto_house").show();
     });
     $('#tabla_gastos_house tbody').off('click').on('click', 'tr', function () {
-        $('#tabla_gastos_house tbody tr').removeClass('table-secondary');
-        $(this).addClass('table-secondary');
+        $('#tabla_gastos_house tbody tr').removeClass('selected');
+        $(this).addClass('selected');
     });
 
     //rutas house

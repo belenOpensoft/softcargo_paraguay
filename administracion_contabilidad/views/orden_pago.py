@@ -1186,7 +1186,7 @@ def reimprimir_op(request):
                     "documento": movimiento_fac.mboleta if movimiento_fac else 'S/I',
                     "importe": float(imp.monto),
                     "detalle_fac": movimiento_fac.mdetalle if movimiento_fac and movimiento_fac.mdetalle else "S/I",
-                    "cambio": float(movimiento_fac.marbitraje) if movimiento_fac and movimiento.marbitraje else 0,
+                    "cambio": float(movimiento_fac.marbitraje) if movimiento_fac and movimiento_fac.marbitraje else 0,
                     "posicion": asiento_fac['posicion'] if asiento_fac else "S/I"
                 })
 

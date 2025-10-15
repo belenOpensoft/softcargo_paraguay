@@ -48,16 +48,18 @@ def get_data_email_op(request):
             master_boolean = request.POST['master']
             gastos_boolean = request.POST['gastos']
             directo_boolean = request.POST['directo']
-            #armador = request.POST['armador']
+            # armador = request.POST['armador']
 
-            #9155
-            embarque=ImportEmbarqueaereo.objects.get(numero=row_number)
+            # 9155
+            embarque = ImportEmbarqueaereo.objects.get(numero=row_number)
             row = VEmbarqueaereo.objects.get(numero=row_number)
             row2 = ImportCargaaerea.objects.filter(numero=row_number)
             gastos = VGastosHouse.objects.filter(numero=row_number)
-            #master=ImportReservas.objects.filter(awb=embarque.awb)
-            email_cliente = Clientes.objects.get(codigo=embarque.consignatario).emailia if embarque.consignatario is not None else 'S/I'
-            email_agente = Clientes.objects.get(codigo=embarque.agente).emailia if embarque.agente is not None else 'S/I'
+            # master=ImportReservas.objects.filter(awb=embarque.awb)
+            email_cliente = Clientes.objects.get(
+                codigo=embarque.consignatario).emailia if embarque.consignatario is not None else 'S/I'
+            email_agente = Clientes.objects.get(
+                codigo=embarque.agente).emailia if embarque.agente is not None else 'S/I'
             conex = ImportConexaerea.objects.filter(numero=embarque.numero)
             if conex:
                 vapor = conex[0].vuelo if conex[0].vuelo else 'S/I'
@@ -68,12 +70,16 @@ def get_data_email_op(request):
                 seguimiento = VGrillaSeguimientos.objects.get(numero=row.seguimiento)
 
             except VGrillaSeguimientos.DoesNotExist:
-                seguimiento = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='', deposito='', pago='',vendedor='')
-                seg = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='', deposito='', pago='',vendedor='')
+                seguimiento = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='', deposito='', pago='',
+                                                  vendedor='')
+                seg = VGrillaSeguimientos(numero='', eta=None, etd=None, refcliente='', deposito='', pago='',
+                                          vendedor='')
 
             texto = ''
             texto += f'<br>'
-            texto, resultado = get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista,master_boolean,gastos_boolean,directo_boolean,request)
+            texto, resultado = get_data_html(row_number, row, row2, seg, title, texto, resultado, seguimiento, gastos,
+                                             embarque, conex, vapor, transportista, master_boolean, gastos_boolean,
+                                             directo_boolean, request)
             estilo = "font-family: Courier New, Courier, monospace; font-size: 12px;"
             texto += f"<div style='{estilo}'>Agradeciendo vuestra preferencia, le saludamos muy atentamente.</div></br>"
             texto += f"<div style='{estilo}'>{request.user.first_name} {request.user.last_name}</div>"
@@ -87,7 +93,7 @@ def get_data_email_op(request):
             resultado['emails_disponibles'] = emails_disponibles
             resultado['resultado'] = 'exito'
             resultado['mensaje'] = texto
-            resultado['asunto']=str(title.upper())+' - '+str(resultado['asunto'])
+            resultado['asunto'] = str(title.upper()) + ' - ' + str(resultado['asunto'])
 
         except Exception as e:
             resultado['resultado'] = str(e)
@@ -98,7 +104,8 @@ def get_data_email_op(request):
     return HttpResponse(data_json, mimetype)
 
 
-def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento,gastos,embarque,conex,vapor,transportista_boolean,master_boolean,gastos_boolean,directo_boolean,request):
+def get_data_html(row_number, row, row2, seg, title, texto, resultado, seguimiento, gastos, embarque, conex, vapor,
+                  transportista_boolean, master_boolean, gastos_boolean, directo_boolean, request):
     # merca = Productos.objects.get(codigo=row2.producto.codigo)
     try:
         if row2 is not None:
@@ -139,10 +146,13 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             texto += formatear_linea("Referencia", str(row_number) if row_number is not None else "S/I")
             texto += formatear_linea("Posición", str(row.posicion) if row.posicion is not None else "S/I")
             texto += formatear_linea("Seguimiento", str(row.seguimiento) if row.seguimiento is not None else "S/I")
-            texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario is not None else "S/I")
+            texto += formatear_linea("Consignatario",
+                                     str(row.consignatario) if row.consignatario is not None else "S/I")
             texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
-            texto += formatear_linea("Orden cliente", str(row.orden_cliente) if row.orden_cliente is not None else "S/I")
-            texto += formatear_linea("Ref. proveedor", str(row.ref_proveedor) if row.ref_proveedor is not None else "S/I")
+            texto += formatear_linea("Orden cliente",
+                                     str(row.orden_cliente) if row.orden_cliente is not None else "S/I")
+            texto += formatear_linea("Ref. proveedor",
+                                     str(row.ref_proveedor) if row.ref_proveedor is not None else "S/I")
             texto += formatear_linea("Mercadería", str(merca) if merca is not None else "S/I")
 
             texto += "<br>"
@@ -163,8 +173,8 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             fecha_actual = datetime.now()
 
             resultado['asunto'] = 'Ref.: ' + str(row.seguimiento) + ' - Shipper: ' + str(row.embarcador) + \
-         \
-                                      '; Consignee: ' + str(row.consignatario)
+ \
+                                  '; Consignee: ' + str(row.consignatario)
 
             fecha_formateada = fecha_actual.strftime(
 
@@ -196,9 +206,8 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             texto += formatear_linea("H B/L", str(row.hawb) if row.hawb is not None else "S/I")
             texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
 
-            texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario is not None else "S/I")
-
-
+            texto += formatear_linea("Consignatario",
+                                     str(row.consignatario) if row.consignatario is not None else "S/I")
 
             # Mercaderías
             if merca:
@@ -240,8 +249,8 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             fecha_actual = datetime.now()
 
-            resultado['asunto'] = 'Ref.: ' + str(row.seguimiento) +  ' - Shipper: ' + str(row.embarcador) + \
-     \
+            resultado['asunto'] = 'Ref.: ' + str(row.seguimiento) + ' - Shipper: ' + str(row.embarcador) + \
+ \
                                   '; Consignee: ' + str(row.consignatario)
 
             texto += f'{hora_actual} <br><br>'
@@ -274,7 +283,8 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += formatear_linea("Consignatario", str(row.consignatario) if row.consignatario else "S/I")
 
-            texto += formatear_linea("Dirección", str(row.direccion_consignatario) if row.direccion_consignatario else "S/I")
+            texto += formatear_linea("Dirección",
+                                     str(row.direccion_consignatario) if row.direccion_consignatario else "S/I")
 
             texto += formatear_linea("Ciudad", str(row.ciudad_consignatario) if row.ciudad_consignatario else "S/I")
 
@@ -330,7 +340,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             resultado['asunto'] = (
 
                 f' Ref.: {row.seguimiento} -'
-    
+
                 f'HB/l: {row.hawb} - Ship: {row.embarcador} - Consig: {row.consignatario}; Vuelo: {vapor}; Ord. Cliente: {refcliente}'
 
             )
@@ -364,14 +374,14 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             llegada = seg.eta.strftime("%d/%m/%Y") if isinstance(seg.eta, datetime) else ''
 
-            texto += formatear_linea("Salida", salida )
+            texto += formatear_linea("Salida", salida)
 
-            texto += formatear_linea("Llegada", llegada )
+            texto += formatear_linea("Llegada", llegada)
             # origen y destino nombre entero
             origen = Ciudades.objects.filter(codigo=row.origen).first()
             destino = Ciudades.objects.filter(codigo=row.destino).first()
             texto += formatear_linea("Origen", origen.nombre if origen else 'S/I')
-            texto += formatear_linea("Destino", destino.nombre if destino else 'S/I' )
+            texto += formatear_linea("Destino", destino.nombre if destino else 'S/I')
 
             texto += formatear_linea("HAWB", embarque.hawb)
 
@@ -397,7 +407,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += formatear_linea("Ref. Proveedor", row.embarcador)
 
-            volumen=0
+            volumen = 0
             if carga:
 
                 for c in carga:
@@ -429,8 +439,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                     texto += formatear_linea("Peso", bruto)
 
                     texto += formatear_linea("Aplicable", str(aplicable))
-                    texto += formatear_linea("CBM", str(volumen or 'S/I')+' M³')
-
+                    texto += formatear_linea("CBM", str(volumen or 'S/I') + ' M³')
 
                 texto += "<br>"
 
@@ -452,15 +461,15 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                         total_iva += float(g.precio) * 0.22
 
                     if g.precio != 0:
-                        texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}",1)
+                        texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}", 1)
 
                 texto += "<br>"
 
-                texto += formatear_linea("TOTAL DE GASTOS", f"{total_gastos:.2f}",1)
+                texto += formatear_linea("TOTAL DE GASTOS", f"{total_gastos:.2f}", 1)
 
-                texto += formatear_linea("I.V.A", f"{total_iva:.2f}",1)
+                texto += formatear_linea("I.V.A", f"{total_iva:.2f}", 1)
 
-                texto += formatear_linea("TOTAL A PAGAR", f"{total_gastos + total_iva:.2f}",1)
+                texto += formatear_linea("TOTAL A PAGAR", f"{total_gastos + total_iva:.2f}", 1)
 
                 texto += "<br>"
 
@@ -573,7 +582,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                     tramo = f"({ruta.origen}/{ruta.destino})   {ruta.ciavuelo}{ruta.viaje}/{fecha}"
                     texto += formatear_linea("Vuelo", tramo)
 
-            #origen y destino nombre entero
+            # origen y destino nombre entero
             origen = Ciudades.objects.filter(codigo=row.origen).first()
             destino = Ciudades.objects.filter(codigo=row.destino).first()
 
@@ -626,19 +635,17 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += formatear_linea("House", row.hawb or "")
 
-            texto += formatear_linea("Peso", f"{peso} KGS",)
+            texto += formatear_linea("Peso", f"{peso} KGS", )
 
-            texto += formatear_linea("Bultos", str(bultos),)
+            texto += formatear_linea("Bultos", str(bultos), )
 
-            texto += formatear_linea("CBM", f"{volumen:.3f} M³",)
+            texto += formatear_linea("CBM", f"{volumen:.3f} M³", )
             texto += formatear_linea("Aplicable", str(row.aplicable))
             texto += "<br>"
 
             texto += formatear_linea("Mercadería", mercaderias.rstrip(' -'))
 
             texto += formatear_linea("Depósito", seguimiento.deposito or "")
-
-
 
             if gastos_boolean == 'true':
 
@@ -660,26 +667,26 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
                         if servicio is not None:
 
-                            if g.precio !=0 and g.precio is not None:
+                            if g.precio != 0 and g.precio is not None:
                                 total_gastos += float(g.precio)
-                            elif g.costo is not None and g.costo!=0:
+                            elif g.costo is not None and g.costo != 0:
                                 total_gastos += float(g.costo)
                             else:
-                                total_gastos+=0
+                                total_gastos += 0
 
                             iva = True if servicio.tasa == 'B' else False
 
                             if iva:
-                                if g.precio is not None and g.precio !=0:
+                                if g.precio is not None and g.precio != 0:
                                     total_iva += float(g.precio) * 0.22
-                                elif g.costo is not None and g.costo !=0:
-                                    total_iva +=float(g.costo) * 0.22
+                                elif g.costo is not None and g.costo != 0:
+                                    total_iva += float(g.costo) * 0.22
                                 else:
-                                    total_iva+=0
+                                    total_iva += 0
 
-                            if g.precio is not None and g.precio !=0:
+                            if g.precio is not None and g.precio != 0:
                                 texto += formatear_linea(servicio.nombre, f"{g.precio:.2f}", 1)
-                            elif g.costo is not None and g.costo !=0:
+                            elif g.costo is not None and g.costo != 0:
                                 texto += formatear_linea(servicio.nombre, f"{g.costo:.2f}", 1)
                             else:
                                 texto += formatear_linea("Problema con los gastos cargados", 0)
@@ -740,14 +747,12 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
                 f'Ref.: {row.seguimiento} - HB/l: {row.hawb} - Ship: {row.embarcador}'
 
-
             )
             try:
-                consigna=Clientes.objects.get(codigo=row.consignatario_id)
-                telefono=consigna.telefono
+                consigna = Clientes.objects.get(codigo=row.consignatario_id)
+                telefono = consigna.telefono
             except Clientes.DoesNotExist:
-                direccion=telefono='S/I'
-
+                direccion = telefono = 'S/I'
 
             texto += formatear_linea("Fecha", fecha_formateada.upper())
 
@@ -761,8 +766,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += formatear_linea("Teléfono", telefono or "")
 
-
-           # texto += formatear_linea("Vapor", row.vapor or "")  # cambiar esto
+            # texto += formatear_linea("Vapor", row.vapor or "")  # cambiar esto
             salida = seguimiento.etd.strftime("%d/%m/%Y") if isinstance(seguimiento.etd, datetime) else ""
 
             llegada = seguimiento.eta.strftime("%d/%m/%Y") if isinstance(seguimiento.eta, datetime) else ""
@@ -777,7 +781,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += formatear_linea("Embarcador", row.embarcador)
 
-            #texto += formatear_linea("Consignatario", row.consignatario)
+            # texto += formatear_linea("Consignatario", row.consignatario)
 
             texto += formatear_linea("Orden cliente", seguimiento.refcliente)
 
@@ -809,7 +813,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             cant_cntr = ImportCargaaerea.objects.filter(numero=row.numero).values(
 
-                'bruto', 'medidas', 'bultos','producto__nombre').annotate(total=Count('id'))
+                'bruto', 'medidas', 'bultos', 'producto__nombre').annotate(total=Count('id'))
 
             if cant_cntr.count() > 0:
 
@@ -831,10 +835,9 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                         volumen += float(medidas[0]) * float(medidas[1]) * float(medidas[2])
 
                     else:
-                        volumen+=0
+                        volumen += 0
 
                     mercaderias += f'{cn["producto__nombre"]} - '
-
 
             texto += formatear_linea("Bultos", str(bultos))
 
@@ -852,7 +855,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             texto += "<b>ATENCION!</b><br><br>"
 
             texto += "DETALLE DE DESCONSOLIDACION<br><br>"
-            return texto,resultado
+            return texto, resultado
         elif title == 'Orden de facturacion':
 
             resultado['asunto'] = 'seguimiento: ' + str(
@@ -865,7 +868,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                 llegada = str(seguimiento.eta.strftime("%d/%m/%Y"))
             else:
                 llegada = ''
-            tabla_html = fecha_formateada+"<br><br>"
+            tabla_html = fecha_formateada + "<br><br>"
             tabla_html += f"<p>ORDEN DE FACTURACIÓN SEGUIMIENTO: {row.seguimiento}</p><br>"
             tabla_html += f"<p>POSICIÓN: {row.posicion}</p><br>"
             tabla_html += f"<p>MASTER: {row.awb}</p><br>"
@@ -937,7 +940,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             return texto, resultado
 
         elif title == 'Shipping instruction':
-            #embarcador = Clientes.objects.get(codigo=embarque.embarcador)
+            # embarcador = Clientes.objects.get(codigo=embarque.embarcador)
             consignatario = Clientes.objects.get(codigo=embarque.consignatario)
             cliente = Clientes.objects.get(codigo=embarque.cliente)
             agente = Clientes.objects.get(codigo=embarque.agente)
@@ -959,7 +962,8 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             except Clientes.DoesNotExist:
                 direccion = empresa = ciudad = pais = email = contactos = ''
 
-            resultado['asunto'] = f'Ref.: {seguimiento.numero} - Shipper: {empresa} - Consignee: {consignatario.empresa}'
+            resultado[
+                'asunto'] = f'Ref.: {seguimiento.numero} - Shipper: {empresa} - Consignee: {consignatario.empresa}'
 
             locale.setlocale(locale.LC_TIME, 'en_US.UTF-8')
             fecha_actual = datetime.now()
@@ -984,7 +988,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                     ocean.ruc) + ' ' + str(ocean.telefono)
                 texto += formatear_linea("Shipper", agente.empresa)
                 texto += formatear_linea("Consignee", texto_ocean)
-            texto+='</br>'
+            texto += '</br>'
             texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>{'HAWB' if directo_boolean == 'true' else 'AWB'}</p>"
 
             texto += formatear_linea("Shipper name", empresa)
@@ -1038,7 +1042,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                 texto += formatear_linea("Packages", m.bultos)
                 texto += formatear_linea("Weight", f"{peso:.2f} KGS")
                 texto += formatear_linea("Volume", f"{volumen:.2f} CBM")
-                #texto += formatear_linea("Chargeable weight", aplicable)
+                # texto += formatear_linea("Chargeable weight", aplicable)
 
             condicion_pago = "Collect" if row.pago_flete == "C" else "Prepaid" if row.pago_flete == "P" else "N/A"
             texto += formatear_linea("Payment terms", condicion_pago)
@@ -1050,9 +1054,9 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             texto += formatear_linea("Mode of shipment", "AEREO")
             texto += formatear_linea("Currency", moneda.nombre if moneda is not None else 'S/I')
             texto += "<br>"
-            return texto,resultado
+            return texto, resultado
         elif title == 'Instruccion de embarque':
-            #embarcador = Clientes.objects.get(codigo=embarque.embarcador)
+            # embarcador = Clientes.objects.get(codigo=embarque.embarcador)
             consignatario = Clientes.objects.get(codigo=embarque.consignatario)
             cliente = Clientes.objects.get(codigo=embarque.cliente)
             agente = Clientes.objects.get(codigo=embarque.agente)
@@ -1069,8 +1073,10 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                     pais = proveedor.pais
                     email = proveedor.emailim
                     contactos = proveedor.contactos
+                    telefono = proveedor.telefono if proveedor else ''
+
                 else:
-                    direccion = empresa = ciudad = pais = email = contactos = ''
+                    direccion = empresa = ciudad = pais = email = contactos = telefono = ''
             except Clientes.DoesNotExist:
                 direccion = empresa = ciudad = pais = email = contactos = ''
 
@@ -1110,6 +1116,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             texto += formatear_linea("País", pais)
             texto += formatear_linea("E-mail", email)
             texto += formatear_linea("Contactos", contactos)
+            texto += formatear_linea("Telefono", telefono)
 
             texto += "<br>"
             texto += formatear_linea("Consignatario", consignatario.empresa)
@@ -1146,7 +1153,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                 if medidas and len(medidas) == 3 and all(m.isdigit() for m in medidas):
                     volumen = float(medidas[0]) * float(medidas[1]) * float(medidas[2])
                 else:
-                    volumen =0
+                    volumen = 0
                 calculado = volumen * 166.67
                 aplicable = peso if peso > calculado else f"{calculado:.2f} AS VOL"
 
@@ -1154,7 +1161,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
                 texto += formatear_linea("Bultos", m.bultos)
                 texto += formatear_linea("Peso", f"{peso:.2f} KGS")
                 texto += formatear_linea("Volumen", f"{volumen:.2f} CBM")
-                #texto += formatear_linea("Aplicable", aplicable)
+                # texto += formatear_linea("Aplicable", aplicable)
 
             texto += formatear_linea("Condiciones de pago",
                                      "Collect" if row.pago_flete == "C" else "Prepaid" if row.pago_flete == "P" else "S/I")
@@ -1165,7 +1172,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
             texto += formatear_linea("Modo de embarque", "AÉREO")
             texto += formatear_linea("Moneda", moneda.nombre if moneda is not None else 'S/I')
             texto += "<br>"
-            return texto,resultado
+            return texto, resultado
         elif title == 'Invoice':
 
             resultado['asunto'] = f'INVOICE - seguimiento: {row.seguimiento} //'
@@ -1195,7 +1202,7 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
             texto += "</pre>"
 
-        return texto,resultado
+        return texto, resultado
     except Exception as e:
         raise TypeError(e)
 

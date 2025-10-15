@@ -1023,6 +1023,7 @@ class gastosFormHouse(BSModalModelForm):
         widget=forms.Select(attrs={'autocomplete': 'off', 'required': True,  'id': 'id_socio_h'}),
         label='Socio comercial', choices=())
     arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'id': 'id_arbitraje_h'}), max_digits=12, decimal_places=4, label='Arbitraje', initial='0')
+    compra_venta = forms.CharField(widget=forms.Select(choices=CHOICES),label='Tipo movimiento',initial='V')
 
 
 class rutasFormHouse(forms.ModelForm):

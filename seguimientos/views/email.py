@@ -1147,6 +1147,7 @@ def get_data_email(request):
                 pais = embarcador.pais if embarcador else ''
                 email = embarcador.emailim if embarcador else ''
                 contactos = embarcador.contactos if embarcador else ''
+                telefono = embarcador.telefono if embarcador else ''
 
                 consignatario = Clientes.objects.get(
                     codigo=row.consignatario_codigo) if row.consignatario_codigo else None
@@ -1210,6 +1211,7 @@ def get_data_email(request):
                 texto += formatear_linea("País", pais)
                 texto += formatear_linea("E-mail", email)
                 texto += formatear_linea("Contactos", contactos)
+                texto += formatear_linea("Telefono", telefono)
 
                 texto += "<br>"
                 if consignatario:

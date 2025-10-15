@@ -10,7 +10,7 @@ from django.utils.datetime_safe import datetime
 from datetime import datetime
 
 from impomarit.models import Embarqueaereo
-from mantenimientos.models import Vapores
+from mantenimientos.models import Vapores, Servicios
 from seguimientos.forms import NotasForm, seguimientoForm, cronologiaForm, envasesForm, embarquesForm, gastosForm, \
     pdfForm, archivosForm, rutasForm, emailsForm, clonarForm,aplicableForm
 from seguimientos.models import VGrillaSeguimientos as Seguimiento, Seguimiento as SeguimientoReal, Envases, Cargaaerea, \
@@ -925,3 +925,15 @@ def guardar_aplicable(request):
             return JsonResponse({'status': 'error', 'mensaje': 'Seguimiento no encontrado'})
 
     return JsonResponse({'status': 'error', 'mensaje': 'Método no permitido'})
+
+def obtener_servicios(request):
+    tipo = request.GET.get('tipo')  # 'C' o 'V'
+    if tipo == 'C':
+        servicios = Servicios.objects.filter(tipogasto='C').order_by('nombre')
+    elif tipo == 'V':
+        servicios = Servicios.objects.filter(tipogasto='V').order_by('nombre')
+    else:
+        servicios = Servicios.objects.none()
+
+    data = list(servicios.values('codigo', 'nombre'))
+    return JsonResponse(data, safe=False)

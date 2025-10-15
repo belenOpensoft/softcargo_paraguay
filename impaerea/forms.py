@@ -925,14 +925,14 @@ class gastosFormHouse(BSModalModelForm):
         self.fields['socio'].widget.attrs['id'] = 'id_socio_h'
 
         # Actualizando las opciones para 'servicio', 'moneda', y 'socio'
-        servicios = [("", "---------"), ] + list(Servicios.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
+        servicios = [("", "---------"), ]
         self.fields['servicio'].choices = servicios
 
         monedas = [("", "---------"), ] + list(Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
         self.fields['moneda'].choices = monedas
 
-        # socios = [("", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa'))
-        # self.fields['socio'].choices = socios
+        socios = [("", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa'))
+        self.fields['socio'].choices = socios
 
         #cambiar este campo a autocompletado
 
@@ -1004,6 +1004,7 @@ class gastosFormHouse(BSModalModelForm):
         widget=forms.Select(attrs={'autocomplete': 'off', 'required': True,  'id': 'id_socio_h'}),
         label='Socio comercial', choices=())
     arbitraje = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'id': 'id_arbitraje_h'}), max_digits=12, decimal_places=4, label='Arbitraje', initial='0')
+    compra_venta = forms.CharField(widget=forms.Select(choices=CHOICES),label='Tipo movimiento',initial='V')
 
 
 class rutasFormHouse(forms.ModelForm):

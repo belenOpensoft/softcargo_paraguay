@@ -711,13 +711,16 @@ $(document).ready(function () {
             of: window
         },
         buttons: [
-            {
-                text: "Procesar",
-                class: "btn btn-primary",
-                click: function () {
-                    procesar_complementarios();
-                }
-            },
+{
+            text: "Procesar",
+            class: "btn btn-primary",
+            id: "btnProcesar",
+            click: function () {
+                var boton = $(this).parent().find("#btnProcesar");
+                boton.prop("disabled", true);
+                procesar_complementarios();
+            }
+        },
 
             {
                 text: "Salir",
@@ -2294,6 +2297,9 @@ function procesar_factura() {
     }
 
     if (confirm('¿Está seguro de que desea facturar?')) {
+        $('#facturar')
+          .prop('disabled', true)
+          .text('Procesando...');
 
         let tipoFac = $('#id_tipo').val();
         let adenda = $('#id_adenda').val();
@@ -2440,6 +2446,7 @@ function procesar_factura_nota() {
     }
 
     if (confirm('¿Está seguro de que desea facturar?')) {
+        $('#facturar').prop('disable',true);
 
         let tipoFac = $('#id_tipo').val();
         let adenda = $('#id_adenda').val();

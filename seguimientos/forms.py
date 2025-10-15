@@ -623,8 +623,8 @@ class gastosForm(BSModalModelForm):
         self.fields['servicio'].choices = servicios
         monedas = [("", "---------"), ] + list(Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
         self.fields['moneda'].choices = monedas
-        socios = [("0", "---------"), ] + list(
-            Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa'))
+        socios = ([("0", "---------"), ])
+        # + list(Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa')))
         self.fields['socio'].choices = socios
 
         self.fields['secomparte'].widget = forms.HiddenInput()
@@ -647,7 +647,7 @@ class gastosForm(BSModalModelForm):
     id = forms.IntegerField(
         widget=forms.HiddenInput(attrs={"autocomplete": "off", 'required': False, 'id': 'id_gasto_id'}), required=False,
         label="ID")
-    compra_venta = forms.CharField(widget=forms.Select(choices=CHOICES), label='Tipo movimiento')
+    compra_venta = forms.CharField(widget=forms.Select(choices=CHOICES), label='Tipo movimiento', initial='V')
     tipogasto = forms.CharField(widget=forms.Select(choices=CHOICES_TG), label='Tipo')
     servicio = forms.ChoiceField(choices=list(), widget=forms.Select(
         attrs={'class': 'form-control', "autocomplete": "off", 'required': True, }), label="Servicio", required=True)

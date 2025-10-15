@@ -2930,7 +2930,33 @@ $(document).ready(function () {
             }
         }
     });
+     $('#id_compra_venta').change(function() {
+            var tipo = $(this).val();
+            var $servicio = $('#id_servicio');
 
+            if (tipo === '' || tipo === 'N') {
+                $servicio.html('<option value="">---------</option>');
+                return;
+            }
+
+            $.ajax({
+                url: '/obtener_servicios/',
+                data: {'tipo': tipo},
+                dataType: 'json',
+                success: function(data) {
+                    $servicio.empty();
+                    $servicio.append('<option value="">---------</option>');
+                    $.each(data, function(index, item) {
+                        $servicio.append(
+                            $('<option></option>').val(item.codigo).text(item.nombre)
+                        );
+                    });
+                },
+                error: function() {
+                    alert('Error al cargar los servicios.');
+                }
+            });
+        });
 });
 
 function format(d) {

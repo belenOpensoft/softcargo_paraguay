@@ -10,14 +10,17 @@ from django.http import FileResponse, Http404, HttpResponseBadRequest, JsonRespo
 import os
 import xlsxwriter as xlsxwriter
 from django.contrib import messages
-from django.db.models import Count
+from django.db.models import Count, Q, Sum
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 
 from cargosystem.settings import BASE_DIR
 from expaerea.models import ExportEmbarqueaereo, ExportConexaerea, ExportCargaaerea, ExportServiceaereo, ExportReservas, \
     VEmbarqueaereo, ExportServireserva, ExportConexreserva, GuiasHijas, GuiasMadres
+from expmarit.models import ExpmaritEnvases
+from expterrestre.models import ExpterraEnvases
 from impomarit.models import VistaOperativas, VistaOperativasGastos
+from impterrestre.models import ImpterraEnvases
 from mantenimientos.models import Clientes as SociosComerciales, Ciudades, Servicios
 from cargosystem import settings
 from mantenimientos.forms import add_buque_form, reporte_seguimiento_form, reporte_operativas_form
@@ -546,6 +549,25 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
             clave_gasto = (p.modo.lower(), p.tipo_operacion.lower(), str(p.numero))
             gasto_correspondiente = gastos_dict.get(clave_gasto)
 
+            MODELOS = {
+                "IM": Envases,
+                "EM": ExpmaritEnvases,
+                "ET": ExpterraEnvases,
+                "IT": ImpterraEnvases,
+            }
+            clase = p.posicion[:2]
+            modelo = MODELOS.get(clase)
+            cantidad_20=None
+            cantidad_40=None
+            if modelo:
+                conteo = modelo.objects.filter(numero=p.numero).aggregate(
+                    total_20=Sum('cantidad', filter=Q(unidad='20')),
+                    total_40=Sum('cantidad', filter=Q(unidad='40'))
+                )
+
+                cantidad_20 = conteo['total_20']
+                cantidad_40 = conteo['total_40']
+
             for columna in columnas:
                 if columna == 'Numero':
                     datos_finales.append(str(p.numero).zfill(8))
@@ -670,6 +692,12 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
                     datos_finales.append(p.loading)
                 elif columna == 'Discharge':
                     datos_finales.append(p.discharge)
+                elif columna == 'Posicion':
+                    datos_finales.append(p.posicion)
+                elif columna == 'Contenedores_20':
+                    datos_finales.append(cantidad_20) if cantidad_20 else ''
+                elif columna == 'Contenedores_40':
+                    datos_finales.append(cantidad_40) if cantidad_40 else ''
 
             col = 0
             for dato in datos_finales:

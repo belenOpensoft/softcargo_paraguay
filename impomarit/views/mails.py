@@ -1151,8 +1151,10 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
                     pais = proveedor.pais
                     email = proveedor.emailim
                     contactos = proveedor.contactos
+                    telefono = proveedor.telefono if proveedor else ''
+
                 else:
-                    direccion = empresa = ciudad = pais = contactos=email=''
+                    direccion = empresa = ciudad = pais = contactos=email=telefono=''
             except Clientes.DoesNotExist:
                 direccion = empresa = ciudad = pais = contactos = email = ''
 
@@ -1191,6 +1193,7 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
             texto += formatear_linea("País", pais)
             texto += formatear_linea("E-mail", email)
             texto += formatear_linea("Contactos", contactos)
+            texto += formatear_linea("Telefono", telefono)
             texto += "<br>"
             texto += formatear_linea("Consignatario", consignatario.empresa)
             texto += formatear_linea("Dirección", consignatario.direccion)

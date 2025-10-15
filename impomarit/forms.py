@@ -1155,7 +1155,8 @@ class gastosFormHouse(BSModalModelForm):
         self.fields['socio'].widget.attrs['id'] = 'id_socio_h'
 
         # Actualizando las opciones para 'servicio', 'moneda', y 'socio'
-        servicios = [("", "---------"), ] + list(Servicios.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
+        servicios = [("", "---------"), ]
+        # + list(Servicios.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
         self.fields['servicio'].choices = servicios
 
         monedas = [("", "---------"), ] + list(Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
@@ -1224,6 +1225,7 @@ class gastosFormHouse(BSModalModelForm):
     pinformar = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'max_digits': 12, 'decimal_places': 4, 'id': 'id_pinformar_h'}), max_digits=12, decimal_places=4, label='Informar', initial='0')
     moneda = forms.ChoiceField(widget=forms.Select(attrs={'autocomplete': 'off', 'required': True,  'id': 'id_moneda_h'}), label='Moneda', choices=(), initial='2')
     socio = forms.ChoiceField(widget=forms.Select(attrs={'autocomplete': 'off', 'required': True, 'id': 'id_socio_h'}), label='Socio comercial', choices=())
+    compra_venta = forms.CharField(widget=forms.Select(choices=CHOICES),label='Tipo movimiento',initial='V')
 
 class rutasFormHouse(forms.ModelForm):
     class Meta:
