@@ -5119,7 +5119,10 @@ function archivos_btn_h_click(){
          selectedRowN= localStorage.getItem('id_master_editar');
          url='master-detail/';
         }
-
+    if (selectedRowN==null){
+        alert('Debe seleccionar un registro');
+        return;
+    }
             $.ajax({
             url: '/importacion_terrestre/'+url,
                 data: {id: selectedRowN},

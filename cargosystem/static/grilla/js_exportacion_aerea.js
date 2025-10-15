@@ -46,6 +46,34 @@ var awbRegex = "";
 let table_add_ea;
 
 $(document).ready(function () {
+     $('#id_compra_venta').change(function() {
+            var tipo = $(this).val();
+            var $servicio = $('#id_servicio_h');
+
+            if (tipo === '' || tipo === 'N') {
+                $servicio.html('<option value="">---------</option>');
+                return;
+            }
+
+            $.ajax({
+                url: '/obtener_servicios/',
+                data: {'tipo': tipo},
+                dataType: 'json',
+                success: function(data) {
+                    $servicio.empty();
+                    $servicio.append('<option value="">---------</option>');
+                    $.each(data, function(index, item) {
+                        $servicio.append(
+                            $('<option></option>').val(item.codigo).text(item.nombre)
+                        );
+                    });
+                },
+                error: function() {
+                    alert('Error al cargar los servicios.');
+                }
+            });
+        });
+
     $(document).on("submit", "#searchForm", function(e) {
         e.preventDefault();
         let formData = $(this).serialize();
@@ -800,51 +828,106 @@ $(document).ready(function () {
         }
     });
     //productos para el embarque
+//     $("#id_producto").autocomplete({
+//     source: function (request, response) {
+//         $.getJSON('/autocomplete_productos/', { term: request.term }, response);
+//     },
+//     minLength: 2,
+//     select: function (event, ui) {
+//         $(this).attr('data-id', ui.item['id']);  // Guarda el ID si es un item de la lista
+//         $('#cod_producto').val(ui.item['id']);
+//     },
+//     change: function (event, ui) {
+//         var input = $(this);
+//         var valorIngresado = input.val();
+//
+//         if (ui.item) {
+//             input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+//         } else {
+//             if (valorIngresado.trim() !== '') {
+//                 $.ajax({
+//                     url: '/agregar_producto/',
+//                     method: 'POST',
+//                     data: {
+//                         nombre: valorIngresado,
+//                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+//                     },
+//                     success: function (data) {
+//                         if (data.success) {
+//                             input.attr('data-id', data.id);
+//                             $('#cod_producto').val(data.id);
+//                             input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+//                         } else {
+//                             alert("No se pudo guardar el vapor.");
+//                         }
+//                     },
+//                     error: function () {
+//                         alert("Error en la comunicación con el servidor.");
+//                     }
+//                 });
+//             } else {
+//                 input.val('');
+//                 input.css({"border-color": "", 'box-shadow': ''});
+//             }
+//         }
+//     }
+// });
     $("#id_producto").autocomplete({
-    source: function (request, response) {
-        $.getJSON('/autocomplete_productos/', { term: request.term }, response);
-    },
-    minLength: 2,
-    select: function (event, ui) {
-        $(this).attr('data-id', ui.item['id']);  // Guarda el ID si es un item de la lista
-        $('#cod_producto').val(ui.item['id']);
-    },
-    change: function (event, ui) {
-        var input = $(this);
-        var valorIngresado = input.val();
+        source: function (request, response) {
+            $.getJSON('/autocomplete_productos/', {term: request.term}, response);
+        },
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).data('item-seleccionado', true);
+            $(this).attr('data-id', ui.item['id']);  // Guarda el ID si es un item de la lista
+            $('#cod_producto').val(ui.item['id']);
+        },
+        change: function (event, ui) {
+            var input = $(this);
+            var valorIngresado = input.val();
 
-        if (ui.item) {
-            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-        } else {
-            if (valorIngresado.trim() !== '') {
-                $.ajax({
-                    url: '/agregar_producto/',
-                    method: 'POST',
-                    data: {
-                        nombre: valorIngresado,
-                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-                    },
-                    success: function (data) {
-                        if (data.success) {
-                            input.attr('data-id', data.id);
-                            $('#cod_producto').val(data.id);
-                            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-                        } else {
-                            alert("No se pudo guardar el vapor.");
-                        }
-                    },
-                    error: function () {
-                        alert("Error en la comunicación con el servidor.");
-                    }
-                });
+            if (ui.item) {
+                input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
             } else {
-                input.val('');
-                input.css({"border-color": "", 'box-shadow': ''});
+                if (valorIngresado.trim() !== '') {
+                    $.ajax({
+                        url: '/agregar_producto/',
+                        method: 'POST',
+                        data: {
+                            nombre: valorIngresado,
+                            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                input.attr('data-id', data.id);
+                                $('#cod_producto').val(data.id);
+                                input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                            } else {
+                                alert("No se pudo guardar el vapor.");
+                            }
+                        },
+                        error: function () {
+                            alert("Error en la comunicación con el servidor.");
+                        }
+                    });
+                } else {
+                    input.val('');
+                    input.css({"border-color": "", 'box-shadow': ''});
+                }
             }
         }
-    }
-});
-
+    })
+        .on('focus', function () {
+            $(this).data('item-seleccionado', false);
+        })
+        .on('blur', function () {
+            // Si el usuario salió del campo sin seleccionar de la lista → limpiar
+            const seleccion = $(this).data('item-seleccionado');
+            if (!seleccion) {
+                $(this).val('');
+                $('#cod_producto').val('')
+            }
+        });
     // autocompletes edit house form
     $("#armador_addh_e").autocomplete({
         source: '/autocomplete_clientes/',
@@ -5169,7 +5252,10 @@ let tabla = localStorage.getItem('tabla_origen');
          selectedRowN= localStorage.getItem('id_master_editar');
          url='master-detail/';
         }
-
+    if (selectedRowN==null){
+        alert('Debe seleccionar un registro');
+        return;
+    }
             $.ajax({
             url: '/exportacion_aerea/'+url,
                 data: {id: selectedRowN},

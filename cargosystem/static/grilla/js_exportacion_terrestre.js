@@ -5093,7 +5093,10 @@ let tabla = localStorage.getItem('tabla_origen');
          selectedRowN= localStorage.getItem('id_master_editar');
          url='master-detail/';
         }
-
+    if (selectedRowN==null){
+        alert('Debe seleccionar un registro');
+        return;
+    }
             $.ajax({
             url: '/exportacion_terrestre/'+url,
                 data: {id: selectedRowN},

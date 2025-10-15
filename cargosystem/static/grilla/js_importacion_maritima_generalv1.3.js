@@ -1308,6 +1308,10 @@ function archivos_btn_h_click_general(){
         let selectedRowN,url;
 
          selectedRowN= localStorage.getItem('num_house_gasto');
+             if (selectedRowN==null){
+        alert('Debe seleccionar un registro');
+        return;
+    }
          url='house-detail/';
             $.ajax({
                 url: '/importacion_maritima/'+url,

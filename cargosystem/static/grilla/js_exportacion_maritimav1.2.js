@@ -1199,52 +1199,107 @@ $('#tabla_expomarit tfoot th').each(function(index) {
         }
     });
     //productos para el embarque
+//     $("#id_producto").autocomplete({
+//     source: function (request, response) {
+//         $.getJSON('/autocomplete_productos/', { term: request.term }, response);
+//     },
+//     minLength: 2,
+//     select: function (event, ui) {
+//         $(this).attr('data-id', ui.item['id']);  // Guarda el ID si es un item de la lista
+//         $('#cod_producto').val(ui.item['id']);
+//     },
+//     change: function (event, ui) {
+//         var input = $(this);
+//         var valorIngresado = input.val();
+//
+//         if (ui.item) {
+//             input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+//         } else {
+//             if (valorIngresado.trim() !== '') {
+//                 $.ajax({
+//                     url: '/agregar_producto/',
+//                     method: 'POST',
+//                     data: {
+//                         nombre: valorIngresado,
+//                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+//                     },
+//                     success: function (data) {
+//                         if (data.success) {
+//                             input.attr('data-id', data.id);
+//                             $('#cod_producto').val(data.id);
+//                             input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+//                         } else {
+//                             alert("No se pudo guardar el vapor.");
+//                         }
+//                     },
+//                     error: function () {
+//                         alert("Error en la comunicación con el servidor.");
+//                     }
+//                 });
+//             } else {
+//                 input.val('');
+//                 input.css({"border-color": "", 'box-shadow': ''});
+//             }
+//         }
+//     }
+// });
+    //botones funcionalidades
     $("#id_producto").autocomplete({
-    source: function (request, response) {
-        $.getJSON('/autocomplete_productos/', { term: request.term }, response);
-    },
-    minLength: 2,
-    select: function (event, ui) {
-        $(this).attr('data-id', ui.item['id']);  // Guarda el ID si es un item de la lista
-        $('#cod_producto').val(ui.item['id']);
-    },
-    change: function (event, ui) {
-        var input = $(this);
-        var valorIngresado = input.val();
+        source: function (request, response) {
+            $.getJSON('/autocomplete_productos/', {term: request.term}, response);
+        },
+        minLength: 2,
+        select: function (event, ui) {
+            $(this).data('item-seleccionado', true);
+            $(this).attr('data-id', ui.item['id']);  // Guarda el ID si es un item de la lista
+            $('#cod_producto').val(ui.item['id']);
+        },
+        change: function (event, ui) {
+            var input = $(this);
+            var valorIngresado = input.val();
 
-        if (ui.item) {
-            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-        } else {
-            if (valorIngresado.trim() !== '') {
-                $.ajax({
-                    url: '/agregar_producto/',
-                    method: 'POST',
-                    data: {
-                        nombre: valorIngresado,
-                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-                    },
-                    success: function (data) {
-                        if (data.success) {
-                            input.attr('data-id', data.id);
-                            $('#cod_producto').val(data.id);
-                            input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-                        } else {
-                            alert("No se pudo guardar el vapor.");
-                        }
-                    },
-                    error: function () {
-                        alert("Error en la comunicación con el servidor.");
-                    }
-                });
+            if (ui.item) {
+                input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
             } else {
-                input.val('');
-                input.css({"border-color": "", 'box-shadow': ''});
+                if (valorIngresado.trim() !== '') {
+                    $.ajax({
+                        url: '/agregar_producto/',
+                        method: 'POST',
+                        data: {
+                            nombre: valorIngresado,
+                            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                input.attr('data-id', data.id);
+                                $('#cod_producto').val(data.id);
+                                input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+                            } else {
+                                alert("No se pudo guardar el vapor.");
+                            }
+                        },
+                        error: function () {
+                            alert("Error en la comunicación con el servidor.");
+                        }
+                    });
+                } else {
+                    input.val('');
+                    input.css({"border-color": "", 'box-shadow': ''});
+                }
             }
         }
-    }
-});
-    //botones funcionalidades
-
+    })
+        .on('focus', function () {
+            $(this).data('item-seleccionado', false);
+        })
+        .on('blur', function () {
+            // Si el usuario salió del campo sin seleccionar de la lista → limpiar
+            const seleccion = $(this).data('item-seleccionado');
+            if (!seleccion) {
+                $(this).val('');
+                $('#cod_producto').val('')
+            }
+        });
     //form addmaster
     $('#add_btn').click(function () {
         //generar_posicion();
@@ -5163,7 +5218,10 @@ let tabla = localStorage.getItem('tabla_origen');
          selectedRowN= localStorage.getItem('id_master_editar');
          url='master-detail/';
         }
-
+    if (selectedRowN==null){
+        alert('Debe seleccionar un registro');
+        return;
+    }
             $.ajax({
             url: '/exportacion_maritima/'+url,
                 data: {id: selectedRowN},

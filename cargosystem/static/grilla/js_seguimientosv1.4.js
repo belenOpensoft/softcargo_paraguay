@@ -2866,18 +2866,63 @@ $(document).ready(function () {
     });
     // FIN AUTOCOMPLETES
     //productos para el embarque
+    // $("#id_producto").autocomplete({
+    //     source: function (request, response) {
+    //         $.getJSON('/autocomplete_productos/', {term: request.term}, response);
+    //     },
+    //     minLength: 2,
+    //     select: function (event, ui) {
+    //         $(this).attr('data-id', ui.item['id']);
+    //         $(this).attr('data-label', ui.item['label']);
+    //         $(this).css({
+    //             "border-color": "#3D9A37",
+    //             "box-shadow": "0 0 0 0.1rem #3D9A37"
+    //         });
+    //         $('#cod_producto').val(ui.item['id']);
+    //     },
+    //     change: function (event, ui) {
+    //         var input = $(this);
+    //         var valorIngresado = input.val();
+    //
+    //         if (ui.item) {
+    //             input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+    //         } else {
+    //             if (valorIngresado.trim() !== '') {
+    //                 $.ajax({
+    //                     url: '/agregar_producto/',
+    //                     method: 'POST',
+    //                     data: {
+    //                         nombre: valorIngresado,
+    //                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+    //                     },
+    //                     success: function (data) {
+    //                         if (data.success) {
+    //                             input.attr('data-id', data.id);
+    //                             $('#cod_producto').val(data.id);
+    //                             input.css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+    //                         } else {
+    //                             alert("No se pudo guardar el vapor.");
+    //                         }
+    //                     },
+    //                     error: function () {
+    //                         alert("Error en la comunicación con el servidor.");
+    //                     }
+    //                 });
+    //             } else {
+    //                 input.val('');
+    //                 input.css({"border-color": "", 'box-shadow': ''});
+    //             }
+    //         }
+    //     }
+    // });
     $("#id_producto").autocomplete({
         source: function (request, response) {
             $.getJSON('/autocomplete_productos/', {term: request.term}, response);
         },
         minLength: 2,
         select: function (event, ui) {
-            $(this).attr('data-id', ui.item['id']);
-            $(this).attr('data-label', ui.item['label']);
-            $(this).css({
-                "border-color": "#3D9A37",
-                "box-shadow": "0 0 0 0.1rem #3D9A37"
-            });
+            $(this).data('item-seleccionado', true);
+            $(this).attr('data-id', ui.item['id']);  // Guarda el ID si es un item de la lista
             $('#cod_producto').val(ui.item['id']);
         },
         change: function (event, ui) {
@@ -2914,8 +2959,18 @@ $(document).ready(function () {
                 }
             }
         }
-    });
-
+    })
+        .on('focus', function () {
+            $(this).data('item-seleccionado', false);
+        })
+        .on('blur', function () {
+            // Si el usuario salió del campo sin seleccionar de la lista → limpiar
+            const seleccion = $(this).data('item-seleccionado');
+            if (!seleccion) {
+                $(this).val('');
+                $('#cod_producto').val('')
+            }
+        });
 
     const campoPrecio = document.getElementById("id_importe");
     const campoInformar = document.getElementById("id_pinformar");

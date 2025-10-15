@@ -1190,6 +1190,10 @@ function archivos_btn_h_click_general(){
         let selectedRowN,url;
 
          selectedRowN= localStorage.getItem('num_house_gasto');
+             if (selectedRowN==null){
+        alert('Debe seleccionar un registro');
+        return;
+    }
          url='house-detail/';
             $.ajax({
                 url: '/exportacion_aerea/'+url,
@@ -1789,7 +1793,3 @@ function filtrar_tabla_general(data, e) {
         },
         success: function(response) {
             // numeros_general = response.resultados;
-            // console.log(numeros_general);
-            table_general_ea.ajax.reload();
-        },
-        error: function(xhr, status, error) {
