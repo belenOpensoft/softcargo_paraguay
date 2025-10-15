@@ -1266,6 +1266,34 @@ def get_data_email(request):
                 texto += formatear_linea("Modo de Embarque", modo)
                 texto += formatear_linea("Moneda", moneda_nombre)
                 texto += "<br>"
+            elif title == 'Invoice':
+
+                resultado['asunto'] = f'INVOICE - seguimiento: {row.numero} //'
+
+                locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
+                fecha_actual = datetime.datetime.now()
+
+                fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+
+                texto = ""
+
+                texto += formatear_linea("Fecha", fecha_formateada)
+
+                texto += "<br>"
+
+                texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
+
+                texto += f"Seguimiento: {row.numero}\n"
+
+                texto += f"Posicion: {row.posicion}\n\n"
+                texto += f"Master: {row.awb}\n"
+                texto += f"House: {row.hawb}\n\n"
+
+                texto += "PLEASE FIND ATTACHED OUR INVOICE FOR THE ABOVE MENTIONED SHIPMENT.\n"
+                texto += "BEST REGARDS.\n"
+
+                texto += "</pre>"
 
             estilo = "font-family: Courier New, Courier, monospace; font-size: 12px;"
             texto += f"<div style='{estilo}'>Agradeciendo vuestra preferencia, le saludamos muy atentamente.</div></br>"

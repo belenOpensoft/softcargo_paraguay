@@ -758,7 +758,7 @@ class gastosForm(BSModalModelForm):
         self.fields['servicio'].choices = servicios
         monedas = [("", "---------"), ] + list(Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
         self.fields['moneda'].choices = monedas
-        socios = [("", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('id', 'empresa'))
+        socios = [("", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa'))
         self.fields['socio'].choices = socios
 
     CHOICES = [
@@ -900,7 +900,7 @@ class gastosFormHouse(BSModalModelForm):
         monedas = [("", "---------"), ] + list(Monedas.objects.all().order_by('nombre').values_list('codigo', 'nombre'))
         self.fields['moneda'].choices = monedas
 
-        socios = [("", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('id', 'empresa'))
+        socios = [("", "---------"), ] + list(Clientes.objects.all().order_by('empresa').values_list('codigo', 'empresa'))
         self.fields['socio'].choices = socios
 
 

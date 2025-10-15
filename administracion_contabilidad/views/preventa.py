@@ -437,8 +437,7 @@ def check_if_reference_exists(request):
         messages.error(request, 'No tiene permisos para realizar esta accion.')
         return HttpResponseRedirect('/')
 
-
-def eliminar_preventa(request):
+def eliminar_preventa_old(request):
     if request.method == "POST":
         try:
             datos = json.loads(request.body.decode('utf-8'))
@@ -449,6 +448,50 @@ def eliminar_preventa(request):
 
             try:
                 Factudif.objects.filter(znumero=preventa_id).delete()
+                return JsonResponse({"resultado": "éxito", "mensaje": "Preventa eliminada correctamente"})
+            except Factudif.DoesNotExist:
+                return JsonResponse({"resultado": "error", "mensaje": "La preventa no existe"}, status=404)
+
+        except Exception as e:
+            return JsonResponse({"resultado": "error", "mensaje": str(e)}, status=500)
+    else:
+        return JsonResponse({"resultado": "error", "mensaje": "Método no permitido"}, status=405)
+
+def eliminar_preventa(request):
+    if request.method == "POST":
+        try:
+            datos = json.loads(request.body.decode('utf-8'))
+            preventa_id = datos.get("id")
+            MODELOS = {
+                "IM": Serviceaereo,
+                "EM": ExpmaritServiceaereo,
+                "IA": ImportServiceaereo,
+                "EA": ExportServiceaereo,
+                "ET": ExpterraServiceaereo,
+                "IT": ImpterraServiceaereo,
+            }
+
+            if not preventa_id:
+                return JsonResponse({"resultado": "error", "mensaje": "ID no proporcionado"}, status=400)
+
+            try:
+                preventa = Factudif.objects.filter(znumero=preventa_id).first()
+                modelo = MODELOS.get(preventa.zclase)
+                referencia = preventa.zrefer
+                if modelo:
+                    gastos = modelo.objects.filter(numero=referencia)
+                    if gastos:
+                        for g in gastos:
+                            g.detalle = None
+                            g.save()
+
+                        Factudif.objects.filter(znumero=preventa_id).delete()
+
+                    else:
+                        return JsonResponse({"resultado": "error", "mensaje": "No se encontraron gastos asociados"}, status=404)
+                else:
+                    return JsonResponse({"resultado": "error", "mensaje": "Error al obtener el modelo"}, status=404)
+
                 return JsonResponse({"resultado": "éxito", "mensaje": "Preventa eliminada correctamente"})
             except Factudif.DoesNotExist:
                 return JsonResponse({"resultado": "error", "mensaje": "La preventa no existe"}, status=404)

@@ -2834,7 +2834,7 @@ function buscar_gastos(autogenerado) {
 function buscar_ordenes(cliente, numero, autogenerado) {
 
     if (!cliente || !numero || !autogenerado) {
-        alert('Faltan datos');
+        // alert('Faltan datos');
         return;
     }
 

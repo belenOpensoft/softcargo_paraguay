@@ -4013,7 +4013,12 @@ function get_datos_gastos_house() {
         "order": [[1, "desc"], [1, "desc"]],
         "processing": true,
         "serverSide": true,
-        "pageLength": 10,
+        info: false,        // Oculta "Mostrando X a Y de Z registros"
+        lengthChange: false,
+        scrollY: "200px",             // Altura visible (ajustala según tu layout)
+        scrollCollapse: true,         // Colapsa el scroll si hay pocos registros
+        scroller: true,   // Oculta "Mostrando X a Y de Z registros"
+        pageLength: 200,
         "language": {
             url: "/static/datatables/es_ES.json"
         },
@@ -4131,7 +4136,7 @@ function gastos_btn_h_click(){
                                 style: "width:100px",
                                 click: function () {
                                     if (confirm('¿Confirma eliminar el gasto seleccionado?')) {
-                                        row = table_gastos.rows('.table-secondary').data();
+                                        row = table_gastos.rows('.selected').data();
                                         if (row.length === 1) {
                                             miurl = "/importacion_aerea/eliminar_gasto_house/";
                                             var toData = {
@@ -5325,10 +5330,13 @@ function cargar_gastos_factura(callback){
                 let tabla_factura = $('#facturar_table').DataTable({
                     info: false,        // Oculta "Mostrando X a Y de Z registros"
                     lengthChange: false,
+                    scrollY: "700px",             // Altura visible (ajustala según tu layout)
+                    scrollCollapse: true,         // Colapsa el scroll si hay pocos registros
+                    scroller: true,   // Oculta "Mostrando X a Y de Z registros"
+                    pageLength: 200,
                     "order": [[1, "desc"], [1, "desc"]],
                     "processing": true,
                     "serverSide": true,
-                    "pageLength": 10,
                     "language": {
                         url: "/static/datatables/es_ES.json"
                     },
@@ -5424,18 +5432,24 @@ function cargar_gastos_factura(callback){
                         } else if(color === 'VERDE'){
                                 $(row).addClass('fila-verde');
                             }
-                        // Agregar el evento de clic para resaltar la fila seleccionada
-                        $(row).off('click').on('click', function () {
-                            $('#facturar_table tbody tr').removeClass('table-secondary');
-                            $(this).addClass('table-secondary');
-                            const valorColumna7 = $(row).find('td').eq(7).text().trim();
+                            $(row).off('click').on('click', function (e) {
+                                    // Si el clic viene directamente del checkbox, no hacemos doble acción
+                                    if ($(e.target).is('input[type="checkbox"]')) return;
 
-                            if (valorColumna7 === 'S/I') {
-                                $('#concepto_detalle').prop('checked', false); // Desmarcar el checkbox
-                            } else {
-                                $('#concepto_detalle').prop('checked', true); // Marcar el checkbox
-                            }
-                        });
+                                    const $checkbox = $(this).find('input.fila-check');
+                                    const isChecked = $checkbox.prop('checked');
+
+                                    // Alternar selección visual
+                                    $('#facturar_table tbody tr').removeClass('table-secondary');
+                                    $(this).toggleClass('table-secondary', !isChecked);
+
+                                    // Alternar el checkbox
+                                    $checkbox.prop('checked', !isChecked);
+
+                                    // Sincronizar el checkbox de "Concepto + detalle" del formulario
+                                    const valorColumna7 = $(this).find('td').eq(7).text().trim();
+                                    $('#concepto_detalle').prop('checked', valorColumna7 !== 'S/I');
+                                });
                     }
                 });
                 setTimeout(function () {

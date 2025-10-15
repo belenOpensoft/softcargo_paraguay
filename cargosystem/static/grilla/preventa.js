@@ -558,3 +558,24 @@ function asignar_costo_todos() {
         $tr.find('td').eq(COL_FACTURAR_A).text(cliente);
     });
 }
+
+// Alternar selección de todos los checkboxes
+$('#seleccionar_todos').on('click', function () {
+    const tabla = $('#facturar_table').DataTable();
+    const $boton = $(this);
+    const marcar = !$boton.data('todos-seleccionados'); // true si aún no están todos marcados
+
+    // Cambia texto del botón según el estado
+    $boton.text(marcar ? 'Deseleccionar todos' : 'Seleccionar todos');
+    $boton.data('todos-seleccionados', marcar);
+
+    // Itera sobre las filas visibles
+    tabla.rows({ page: 'current' }).every(function () {
+        const $row = $(this.node());
+        const $checkbox = $row.find('input.fila-check');
+        if ($checkbox.length) {
+            $checkbox.prop('checked', marcar);
+            $row.toggleClass('table-secondary', marcar);
+        }
+    });
+});

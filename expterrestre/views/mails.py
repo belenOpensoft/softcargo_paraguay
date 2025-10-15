@@ -620,6 +620,34 @@ def get_data_html(row_number, row, row2, row3, title, texto, resultado,seguimien
 
         texto += "DETALLE DE DESCONSOLIDACION<br><br>"
         return texto, resultado
+    elif title == 'Invoice':
+
+        resultado['asunto'] = f'INVOICE - seguimiento: {row.seguimiento} //'
+
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
+        fecha_actual = datetime.now()
+
+        fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+
+        texto = ""
+
+        texto += formatear_linea("Fecha", fecha_formateada)
+
+        texto += "<br>"
+
+        texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
+
+        texto += f"Seguimiento: {row.seguimiento}\n"
+
+        texto += f"Posicion: {row.posicion}\n\n"
+        texto += f"Master: {row.awb}\n"
+        texto += f"House: {row.hawb}\n\n"
+
+        texto += "PLEASE FIND ATTACHED OUR INVOICE FOR THE ABOVE MENTIONED SHIPMENT.\n"
+        texto += "BEST REGARDS.\n"
+
+        texto += "</pre>"
 
 #hacer de nuevo y en español
     elif title == 'Shipping instruction':
