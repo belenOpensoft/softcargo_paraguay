@@ -232,14 +232,23 @@ def obtener_imputables(request):
             sep = '0' * max(0, 3 - (tz + lz))
 
             nro_completo = f"{s}{sep}{p}-{r.mboleta}"
+        else:
+            nro_completo=r.mboleta
 
         source = 'VERDE' if r.mtipo in [20,21,23,24,25] else 'AZUL'
 
         # total_convertido = convertir_monto(total, int(r.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
         # saldo_convertido = convertir_monto(saldo, int(r.mmoneda or 0), int(moneda_objetivo or 0), arbitraje, paridad)
 
-        total_convertido = total_convertido if r.mtipo in [40, 45, 21, 23] else - total_convertido
-        saldo_convertido = saldo_convertido if r.mtipo in [40, 45, 21, 23] else - saldo_convertido
+        if r.mtipo not in [40, 21, 23]:
+            total_convertido= -abs(total_convertido)
+            saldo_convertido = -abs(saldo_convertido)
+        else:
+            total_convertido = total
+            saldo_convertido = saldo
+
+        # total_convertido = total_convertido if r.mtipo in [40, 45, 21, 23] else - total_convertido
+        # saldo_convertido = saldo_convertido if r.mtipo in [40, 45, 21, 23] else - saldo_convertido
 
         filtrados.append({
             'autogenerado': r.mautogen,
@@ -433,7 +442,7 @@ def guardar_anticipo_orden(request):
 
                 autogenerado_impuventa = generar_autogenerado(datetime.now().strftime("%Y-%m-%d"))+'111'
 
-                fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                fecha = cobranza[0]['fecha']
 
                 arbitraje = float(cobranza[0]['arbitraje'])
                 paridad = float(cobranza[0]['paridad'])
@@ -454,6 +463,7 @@ def guardar_anticipo_orden(request):
                     es_definitivo = cobranza[0].get('definitivo', False)
                     orden.mactiva = 'N' if es_definitivo else 'S'
                     orden.mautogenmovims = autogenerado_impuventa if es_definitivo else None
+                    orden.save()
 
                 try:
                     cliente_data = Clientes.objects.get(codigo=cobranza[0]['nrocliente'])
@@ -462,24 +472,26 @@ def guardar_anticipo_orden(request):
 
                 if cliente_data:
                     for asiento in asientos:
-                        fechaj = datetime.now().strftime("%Y-%m-%d")
-                        fecha_obj = datetime.strptime(fechaj, '%Y-%m-%d')
+                        fechaj = fecha
+                        fecha_obj =datetime.strptime(fecha, "%Y-%m-%d")
                         nroasiento = generar_numero()
                         movimiento_num = modificar_numero(nroasiento)
                         detalle_asiento = 'O/PAGO' + '-' + str(cobranza[0]['numero']) + '-' + cliente_data.empresa
                         asiento_monto = asiento['total_pago']
 
-                        if nromoneda == 2:  # dolar
-                            monto_asiento = float(asiento_monto) * arbitraje
-                        elif nromoneda not in [1, 2]:
-                            aux = float(asiento_monto) * paridad
-                            monto_asiento = aux * arbitraje
-                        else:
-                            monto_asiento = 0
+                        # if nromoneda == 2:  # dolar
+                        #     monto_asiento = float(asiento_monto) * arbitraje
+                        # elif nromoneda not in [1, 2]:
+                        #     aux = float(asiento_monto) * paridad
+                        #     monto_asiento = aux * arbitraje
+                        # else:
+                        #     monto_asiento = 0
+
+                        banco = asiento['banco'].split('-')[0].strip()
 
                         asiento_vector_1 = {
                             'detalle': detalle_asiento,
-                            'monto': monto_asiento,
+                            'monto': asiento_monto,
                             'moneda': cobranza[0]['nromoneda'],
                             'cambio': cobranza[0]['arbitraje'],
                             'asiento': nroasiento,
@@ -488,8 +500,8 @@ def guardar_anticipo_orden(request):
                             'fecha': fecha_obj,
                             'imputacion': 1,
                             'modo': asiento['modo'],
-                            'tipo': 'Z',
-                            'cuenta': asiento['cuenta'],
+                            'tipo': 'G',
+                            'cuenta': banco,
                             'documento': cobranza[0]['numero'],
                             'vencimiento': fecha_obj,
                             'pasado': 1,
@@ -558,7 +570,7 @@ def guardar_anticipo_orden(request):
                     crear_asiento(asiento_vector_2)
                     #crear el movimiento
                     movimiento_vec = {
-                        'tipo': 25,
+                        'tipo': 45,
                         'fecha': fecha_obj,
                         'boleta': cobranza[0]['numero'],
                         'monto': 0,
@@ -570,7 +582,7 @@ def guardar_anticipo_orden(request):
                         'detalle': 0,
                         'cliente': cliente_data.codigo,
                         'nombre': cliente_data.empresa,
-                        'nombremov': 'COBRO',
+                        'nombremov': 'O/PAGO',
                         'cambio': cobranza[0]['arbitraje'],
                         'autogenerado': autogenerado_impuventa,
                         'serie': cobranza[0].get('serie'),
@@ -944,7 +956,7 @@ def generar_orden_pago_pdf_sin_prov(pdf_data, request):
             y -= 6 * mm
             tipo = f.get("modo", "S/I")
             numero = str(f.get("numero", ""))
-            banco = f.get("banco", "")[:25]
+            banco = f.get("banco", "")[:25] if f.get("banco") else ""
             importe = str(f.get("monto_total", "0"))
             vto_fp = f.get("vencimiento_cheque", " ")
 

@@ -500,7 +500,7 @@ function tabla_facturas_pendientes(cliente,moneda) {
 
     const table = $('#imputacionTablePagos').DataTable({
         info: false,        // Oculta "Mostrando X a Y de Z registros"
-        scrollY: "500px",             // Altura visible (ajustala según tu layout)
+        scrollY: "300px",             // Altura visible (ajustala según tu layout)
         scrollCollapse: true,         // Colapsa el scroll si hay pocos registros
         scroller: true,   // Oculta "Mostrando X a Y de Z registros"
         pageLength: 100,
@@ -580,10 +580,10 @@ function tabla_facturas_pendientes(cliente,moneda) {
             });
 
             if (filaImputada) {
-                $('#abrirpago').prop('disabled', false); // Habilitar el botón
+                // $('#abrirpago').prop('disabled', false); // Habilitar el botón
                 $('#deshacer').prop('disabled', false); // Habilitar el botón
             } else {
-                $('#abrirpago').prop('disabled', true);  // Deshabilitar el botón
+                // $('#abrirpago').prop('disabled', true);  // Deshabilitar el botón
                 $('#deshacer').prop('disabled', true);  // Deshabilitar el botón
             }
 
@@ -815,7 +815,7 @@ function tabla_facturas_pendientes(cliente,moneda) {
         localStorage.setItem('filasAfectadas', JSON.stringify(filasAfectadas));
         localStorage.setItem('historial', JSON.stringify(historial));
         updateBalance();
-        $('#abrirpago').prop('disabled', false);
+        // $('#abrirpago').prop('disabled', false);
         $('#deshacer').prop('disabled', false);
     });
     $('#imputarSeleccion').off('click').on('click', function () {
@@ -981,7 +981,7 @@ function tabla_facturas_pendientes(cliente,moneda) {
 
       // Limpiar selección y habilitar acciones
       seleccionadas.nodes().to$().removeClass('table-secondary');
-      $('#abrirpago').prop('disabled', false);
+      // $('#abrirpago').prop('disabled', false);
       $('#deshacer').prop('disabled', false);
 });
 
@@ -1065,10 +1065,10 @@ function verificarImputado(table) {
 
         // Habilitar o deshabilitar el botón basado en si alguna fila fue imputada
         if (filaImputada) {
-            $('#abrirpago').prop('disabled', false); // Habilitar el botón
+            // $('#abrirpago').prop('disabled', false); // Habilitar el botón
             $('#deshacer').prop('disabled', false); // Habilitar el botón
         } else {
-            $('#abrirpago').prop('disabled', true);  // Deshabilitar el botón
+            // $('#abrirpago').prop('disabled', true);  // Deshabilitar el botón
             $('#deshacer').prop('disabled', true);  // Deshabilitar el botón
         }
     }
@@ -1491,9 +1491,11 @@ cobranza.push({
         prefijo:null,
         numero:$('#id_numero').val(),
         total:$('#id_importe').val(),
+        saldo:$('#id_importe').val(),
         nromoneda:$('#id_moneda').val(),
         arbitraje:$('#id_arbitraje').val(),
-        paridad:$('#id_paridad').val()
+        paridad:$('#id_paridad').val(),
+        fecha:$('#id_fecha').val(),
     });
 
 
@@ -1524,10 +1526,9 @@ $.ajax({
         contentType: 'application/json',
         success: function(response) {
             if (response.status === 'exito') {
-                console.log("Datos guardados correctamente");
-                // Opcional: recargar una tabla o actualizar la UI
+                resetUI();
             } else {
-                alert("ghfghfgh: " + response.status);
+                alert("error: " + response.status);
             }
         },
         error: function(xhr) {
@@ -1536,20 +1537,29 @@ $.ajax({
     });
 
 }
-
+function resetUI() {
+  $('#dialog-form').dialog('close');
+  $('#paymentModal').dialog('close');
+  $('#cobranzaForm').trigger('reset');
+  $('#paymentModal').find('input, select, textarea').val('');
+  $('#paymentModal').find('input:checkbox, input:radio').prop('checked', false);
+  $('#id_importe').prop('readonly', false);
+  $('#paymentModal').find('table').each(function () { $(this).find('tbody').empty(); });
+  $('#dialog-form').find('table').each(function () { $(this).find('tbody').empty(); });
+}
 function verificar(){
-let key=true;
-//let key=false;
-//let rows = document.querySelectorAll('#imputacionTablePagos tbody tr');
-//rows.forEach(row => {
-//    let imputado = row.cells[9]?.textContent.trim();
-//    let imputadoValue = parseFloat(imputado) || 0;
-//
-//    if (imputadoValue !== 0) {
-//        console.log('Fila con Imputado diferente de cero:', imputadoValue);
-//        key = true;
-//    }
-//});
+// let key=true;
+let key=false;
+let rows = document.querySelectorAll('#imputacionTablePagos tbody tr');
+rows.forEach(row => {
+   let imputado = row.cells[9]?.textContent.trim();
+   let imputadoValue = parseFloat(imputado) || 0;
+
+   if (imputadoValue !== 0) {
+       console.log('Fila con Imputado diferente de cero:', imputadoValue);
+       key = true;
+   }
+});
 let importe = $('#id_importe').val();
 let imputar = $('#a_imputar').val();
 
@@ -1602,7 +1612,8 @@ cobranza.push({
         nromoneda:$('#id_moneda').val(),
         arbitraje:$('#id_arbitraje').val(),
         paridad:$('#id_paridad').val(),
-        saldo:$('#a_imputar').val()
+        saldo:$('#a_imputar').val(),
+        fecha:$('#id_fecha').val(),
     });
 
 

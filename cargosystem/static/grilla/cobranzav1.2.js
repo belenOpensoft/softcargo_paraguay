@@ -583,7 +583,7 @@ function tabla_facturas_pendientes(cliente, moneda) {
 
     const table = $('#imputacionTable').DataTable({
         info: false,
-        scrollY: "500px",             // Altura visible (ajustala según tu layout)
+        scrollY: "300px",             // Altura visible (ajustala según tu layout)
         scrollCollapse: true,         // Colapsa el scroll si hay pocos registros
         scroller: true,   // Oculta "Mostrando X a Y de Z registros"
         pageLength: 100,
@@ -1844,7 +1844,8 @@ function crear_anticipo() {
         success: function (response) {
             if (response.status === 'exito') {
                 alert("Datos guardados correctamente");
-                // Opcional: recargar una tabla o actualizar la UI
+                $('#dialog-form').dialog('close');
+                $('#paymentModal').dialog('close');
             } else {
                 alert("ghfghfgh: " + response.status);
             }

@@ -126,7 +126,7 @@ def procesar_factura_proveedor(request):
                         status=200
                     )
 
-                verif = Movims.objects.filter(mboleta=numero, mtipo=tipo,mcliente=cliente_data['codigo'])
+                verif = Movims.objects.filter(mboleta=numero, mtipo=tipo,mcliente=cliente_data['codigo'],mactivo='S')
                 if verif.exists():
                     return HttpResponse(
                         json.dumps({'success':False,'status': 'Error: El número ingresado para la compra, ya existe.'}),

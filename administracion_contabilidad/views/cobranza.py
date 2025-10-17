@@ -243,10 +243,18 @@ def source_facturas_pendientes(request):
                 sep = '0' * max(0, 3 - (tz + lz))
 
                 nro_completo = f"{s}{sep}{p}-{pendiente.mboleta}"
+            else:
+                nro_completo=pendiente.mboleta
 
+            if pendiente.mtipo in [40,25, 21, 23]:
+                total_convertido = -abs(total_convertido)
+                saldo_convertido = -abs(saldo_convertido)
+            else:
+                total_convertido = total
+                saldo_convertido = saldo
 
-            total_convertido = - total_convertido if pendiente.mtipo in [40,45,21,23] else total_convertido
-            saldo_convertido = - saldo_convertido if pendiente.mtipo in [40,45,21,23] else saldo_convertido
+            # total_convertido = - total_convertido if pendiente.mtipo in [40,45,21,23] else total_convertido
+            # saldo_convertido = - saldo_convertido if pendiente.mtipo in [40,45,21,23] else saldo_convertido
 
             source = 'VERDE' if pendiente.mtipo in [20,21,23,24,25] else 'AZUL'
 
