@@ -525,7 +525,7 @@ def guardar_anticipo(request):
                             monto_asiento = aux * arbitraje
                         else:
                             monto_asiento = 0
-
+                        banco = asiento['banco'].split('-')[0]
                         asiento_vector_1 = {
                             'detalle': detalle_asiento,
                             'monto': monto_asiento,
@@ -544,7 +544,7 @@ def guardar_anticipo(request):
                             'pasado': 0,
                             'autogenerado': autogenerado_impuventa,
                             'cliente': cliente_data.codigo,
-                            'banco': asiento['banco'] if asiento['modo'] != 'CHEQUE' else " - ".join(map(str, Cuentas.objects.filter(xcodigo=asiento['cuenta']).values_list('xcodigo', 'xnombre').first() or ('', ''))),
+                            'banco': banco if asiento['modo'] != 'CHEQUE' else " - ".join(map(str, Cuentas.objects.filter(xcodigo=asiento['cuenta']).values_list('xcodigo', 'xnombre').first() or ('', ''))),
                             'centro': 'ADM',
                             'mov': int(movimiento_num) + 1,
                             'anio': fecha_obj.year,

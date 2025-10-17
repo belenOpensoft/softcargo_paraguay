@@ -107,3 +107,43 @@ def eliminar_nota(request):
         resultado['resultado'] = str(e)
 
     return JsonResponse(resultado)
+def add_nota_importado(request):
+    resultado = {}
+    try:
+        body = request.body.decode("utf-8") if request.body else ""
+        payload = json.loads(body) if body else {}
+
+        # Esperamos {'data': [ {...}, {...} ]}
+        data = payload.get("data", [])
+
+        if isinstance(data, list):
+            for nota_data in data:
+                # Crear el registro del modelo Envases
+                registro = Faxes()
+
+                # Obtener los campos disponibles del modelo
+                campos = [f.name for f in Faxes._meta.fields]
+
+                # Iterar sobre el diccionario y asignar los valores al modelo
+                for nombre_campo, valor_campo in nota_data.items():
+                    if nombre_campo in campos:  # Verificar si el campo existe en el modelo
+                        if valor_campo is not None and len(str(valor_campo)) > 0:
+                            setattr(registro, nombre_campo, valor_campo)
+                        else:
+                            setattr(registro, nombre_campo, None)
+
+                # Guardar el registro en la base de datos
+                registro.save()
+
+            # Retornar el resultado de éxito
+            resultado['resultado'] = 'exito'
+        else:
+            resultado['resultado'] = 'Los datos enviados no son una lista válida.'
+
+    except IntegrityError as e:
+        resultado['resultado'] = 'Error de integridad, intente nuevamente.'
+    except Exception as e:
+        resultado['resultado'] = f'Ocurrió un error: {str(e)}'
+
+    # Devolver el resultado en formato JSON
+    return JsonResponse(resultado)

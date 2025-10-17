@@ -28,7 +28,7 @@ from administracion_contabilidad.views.logs_administracion import audit_logs_pag
 from administracion_contabilidad.views.mantenimiento_chequeras import mantenimiento_chequeras, guardar_stock_cheques, \
     buscar_cheques, eliminar_cheque, habilitar_deshabilitar
 from administracion_contabilidad.views.modificar_asientos import filtro_asientos, guardar_asiento_editado, \
-    eliminar_asiento
+    eliminar_asiento, asientos_relacionados
 from administracion_contabilidad.views.movimientos_bancarios import movimientos_bancarios, cheques_disponibles_clientes, \
     guardar_movimiento_bancario, cheques_disponibles_listado, cheques_disponibles_listado_diferidos, \
     generar_orden_pago_pdf, generar_comprobante_deposito_pdf
@@ -172,6 +172,8 @@ urlpatterns = [
     path('guardar_asiento_editado/', guardar_asiento_editado, name='guardar_asiento_editado'),
     path('eliminar_asiento/', eliminar_asiento, name='eliminar_asiento'),
     path('reimprimir_asiento/', reimprimir_asiento, name='reimprimir_asiento'),
+    path('asientos_relacionados/', asientos_relacionados, name='asientos_relacionados'),
+
     #modificra asientos
 
     #movimientos bancarios

@@ -7,7 +7,7 @@ from expaerea.views.gastos import add_gasto_master, source_gastos, eliminar_gast
 from expaerea.views.house import add_house_impmarit, edit_house_function, house_detail, \
     get_name_by_id_vendedores, source_seguimientos_importado, add_house_importado, source_gastos_importado, \
     eliminar_house, source_envases_importado, source_rutas_importado, source_embarque_id, source_seguimiento_id, \
-    generar_posicion, source_embarque_importado, source_archivos_importado
+    generar_posicion, source_embarque_importado, source_archivos_importado, source_notas_importado
 from expaerea.views.exp_aerea import master_expo_aerea, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
     descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros, \
@@ -17,7 +17,7 @@ from expaerea.views.master import master_detail, add_importacion_maritima, edit_
     consultar_seguimientos
 
 from expaerea.views.mails import get_data_email_op
-from expaerea.views.notas import source, guardar_notas, eliminar_nota
+from expaerea.views.notas import source, guardar_notas, eliminar_nota, add_nota_importado
 from expaerea.views.pdf import get_datos_caratula
 from expaerea.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado, \
     datos_embarque_ruta, source_rutas_master, eliminar_ruta_master, guardar_ruta_master, datos_embarque_ruta_master
@@ -29,6 +29,9 @@ from seguimientos.views.reportes import descargar_awb_operativas, descargar_hawb
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
+    path(r'source_notas_importado/', source_notas_importado, name="source_notas_importado"),
+    path(r'add_nota_importado/', add_nota_importado, name="add_nota_importado"),
+
     path('source/', source, name='source'),
     path('datos_embarque_ruta/', datos_embarque_ruta, name='datos_embarque_ruta'),
     path('datos_embarque_ruta_master/', datos_embarque_ruta_master, name='datos_embarque_ruta_master'),

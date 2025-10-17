@@ -3662,7 +3662,9 @@ function traer_seguimientos() {
                 let posicionInicial = posicion; // El formato inicial de la posición
 
                 response.data.forEach(function (item, index) {
-                    item.awb = master;
+                                    if (master!=0){
+                                    item.awb = master;
+                                        }
                     let partes = posicionInicial.split('-');
                     let numeroCentral = partes[1];
                     let nuevoNumero = String(parseInt(numeroCentral, 10) + index).padStart(5, '0');
@@ -3683,7 +3685,9 @@ function traer_seguimientos() {
             alert('ocurrio error con lugar_importarhijo');
             }
             response.data.forEach(function (item) {
+                if (master!=0){
             item.awb = master;
+                }
             item.posicion = posicion;
             });
             let seguimientos = response.data.map(item => item.seguimiento);
@@ -3712,6 +3716,7 @@ function guardar_importado_house(data, seguimientos) {
                 traer_rutas_importado(seguimientos, response.numeros_guardados);
                 traer_embarques_importado(seguimientos, response.numeros_guardados);
                 traer_archivos_importado(seguimientos, response.numeros_guardados);
+                traer_notas_importado(seguimientos, response.numeros_guardados);
 
                 alert('House/s importado/s con éxito');
                agregarASeleccionados();
@@ -4045,7 +4050,62 @@ function guardar_archivo_importado(data) {
         });
 
 }
+function traer_notas_importado(numeros, numeros_guardados){
 
+    if (numeros.length === 0) {
+        console.log("No hay seguimientos seleccionados. archivos");
+        return;
+    }
+
+    // Hacer la solicitud AJAX para enviar los IDs al servidor
+     const csrftoken = getCookie2('csrftoken');
+    $.ajax({
+        url: '/exportacion_maritima/source_notas_importado/',
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({ ids: numeros }),
+        beforeSend: function(xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        },
+        success: function(response) {
+            if (response.data.length > 0) {
+                    response.data.forEach(function(item) {
+                        numeros_guardados.forEach(function(guardado) {
+                            if (item.seguimiento_control === guardado.seguimiento) {
+                                // Si coinciden los seguimientos, asignar el numero
+                                item.numero = guardado.numero;
+                            }
+                        });
+                    });
+                    console.log(response.data);
+                    guardar_nota_importado(response.data);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error al traer los seguimientos:", error);
+        }
+    });
+}
+function guardar_nota_importado(data) {
+    const miurl = "/exportacion_maritima/add_nota_importado/";
+
+        // Enviar los datos como JSON (ruta del archivo, número y detalle)
+        $.ajax({
+            type: "POST",
+            url: miurl,
+            contentType: "application/json",
+            data: JSON.stringify({data}),
+            headers: { 'X-CSRFToken': csrf_token },  // Enviar token CSRF
+            success: function (resultado) {
+                console.log('nota guardado correctamente:', resultado);
+            },
+            error: function (error) {
+                console.log('Error en la solicitud:', error);
+            }
+        });
+
+}
 //eliminar houses de un master
 function eliminar_house(){
 let tabla = localStorage.getItem('tabla_origen');

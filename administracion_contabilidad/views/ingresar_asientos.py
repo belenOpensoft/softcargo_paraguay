@@ -10,6 +10,7 @@ from reportlab.pdfgen import canvas
 
 from administracion_contabilidad.forms import IngresarAsiento
 from administracion_contabilidad.models import Asientos, Cuentas
+from administracion_contabilidad.views.preventa import generar_autogenerado
 from cargosystem import settings
 
 from reportlab.lib.colors import grey
@@ -17,8 +18,6 @@ from reportlab.lib.colors import grey
 def ingresar_asiento(request):
     form = IngresarAsiento({'fecha':datetime.now().strftime('%Y-%m-%d')})
     return render(request, 'contabilidad/ingresar_asientos.html', {'form': form})
-
-
 
 def generar_numero():
     # Obtener la fecha y hora actual
@@ -47,6 +46,7 @@ def guardar_asientos(request):
             asientos = data.get("asientos", [])
             numero = generar_numero()
             fecha = datetime.strptime(fecha_str, '%Y-%m-%d')
+            autogen= generar_autogenerado()
 
             movimientos_pdf = []
             for asiento in asientos:
@@ -61,6 +61,7 @@ def guardar_asientos(request):
                 a.asiento = numero
                 a.cuenta = cuenta_cod
                 a.imputacion = imputacion
+                a.autogenerado = autogen
                 a.tipo = 'D'
                 a.paridad = asiento.get("paridad") or None
                 a.cambio = asiento.get("tipo_cambio") or None

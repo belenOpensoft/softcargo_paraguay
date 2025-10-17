@@ -2,6 +2,7 @@ import json
 
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.views.decorators.http import require_GET
 
 from administracion_contabilidad.forms import FiltroAsientosForm, EditarAsientoForm
 from administracion_contabilidad.models import Asientos, Cuentas
@@ -39,12 +40,13 @@ def filtro_asientos(request):
         datos = [
             {
                 'asiento': r.asiento,
-                'fecha': r.fecha.strftime('%d/%m/%Y') if r.fecha else '',
+                'autogenerado': r.autogenerado,
+                'fecha': r.fecha.strftime('%Y-%d-%m') if r.fecha else None,
                 'detalle': r.detalle,
                 'monto': round(r.monto,2) if r.monto else 0,
                 'imputacion': r.imputacion,
-                'tipo_cambio': r.cambio,
-                'paridad': r.paridad,
+                'tipo_cambio': r.cambio if r.cambio else 0,
+                'paridad': r.paridad if r.paridad else 0,
                 'posicion': r.posicion if r.posicion else 'S/I',
                 'moneda': r.moneda,
                 'id': r.id,
@@ -134,3 +136,50 @@ def eliminar_asiento(request):
             return JsonResponse({"success": False, "error": str(e)}, status=400)
 
     return JsonResponse({"success": False, "error": "Método no permitido"}, status=405)
+
+@require_GET
+def asientos_relacionados(request):
+    autogenerado = (request.GET.get('autogenerado') or '').strip()
+    exclude_id   = (request.GET.get('exclude_id') or '').strip()
+
+    if not autogenerado:
+        return JsonResponse({'data': []})
+
+    qs = Asientos.objects.filter(autogenerado=autogenerado)
+    if exclude_id.isdigit():
+        qs = qs.exclude(id=int(exclude_id))
+
+    # Si querés limitar a mismo número de asiento, quitá el exclude y filtrá como te convenga.
+    # Orden sugerido: por fecha y por id
+    qs = qs.order_by('fecha', 'id')
+
+    data = []
+    for a in qs:
+        # Nombre de cuenta opcional
+        cuenta_nombre = None
+        if a.cuenta:
+            c = Cuentas.objects.filter(xcodigo=a.cuenta).first()
+            cuenta_nombre = c.xnombre if c else None
+
+        # Mapeo: asumiendo que 'imputacion' == 1 => Debe, otro => Haber
+        debe  = float(a.monto) if getattr(a, 'imputacion', None) == 1 else 0.0
+        haber = float(a.monto) if getattr(a, 'imputacion', None) != 1 else 0.0
+
+        data.append({
+            'id': a.id,
+            'autogenerado': a.autogenerado or '',
+            'fecha': a.fecha.strftime('%Y-%m-%d') if a.fecha else '',
+            'asiento': a.asiento,
+            'cuenta': a.cuenta,
+            'cuenta_nombre': cuenta_nombre,
+            'detalle': a.detalle or '',
+            'debe': debe,
+            'haber': haber,
+            'moneda': a.moneda or '',
+            'posicion': a.posicion or '',
+            'paridad': a.paridad or '',
+            'arbitraje': a.cambio or '',
+            'tipo': 'D' if getattr(a, 'imputacion', None) == 1 else 'H',
+        })
+
+    return JsonResponse({'data': data})

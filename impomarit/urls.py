@@ -10,7 +10,7 @@ from impomarit.views.gastos import add_gasto_master, source_gastos, eliminar_gas
 from impomarit.views.house import add_house_impmarit, edit_house_function, house_detail, \
     get_name_by_id_vendedores, source_seguimientos_importado, add_house_importado, source_gastos_importado, \
     eliminar_house, source_envases_importado, source_rutas_importado, source_embarque_id, source_seguimiento_id, \
-    generar_posicion, source_embarque_importado, source_archivos_importado
+    generar_posicion, source_embarque_importado, source_archivos_importado, source_notas_importado
 from impomarit.views.impo_maritima import master_importacion_maritima, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
     descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros, \
@@ -18,13 +18,16 @@ from impomarit.views.impo_maritima import master_importacion_maritima, source_im
     buscar_registros_general
 from impomarit.views.mails import get_data_email_op
 from impomarit.views.master import consultar_seguimientos, add_importacion_maritima, edit_master,master_detail, get_name_by_id
-from impomarit.views.notas import source, guardar_notas, eliminar_nota
+from impomarit.views.notas import source, guardar_notas, eliminar_nota, add_nota_importado
 from impomarit.views.pdf import get_datos_caratula
 from impomarit.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado, \
     datos_embarque_ruta
 from seguimientos.views.seguimientos import source_seguimientos_modo
 
 urlpatterns = [
+    path(r'source_notas_importado/', source_notas_importado, name="source_notas_importado"),
+    path(r'add_nota_importado/', add_nota_importado, name="add_nota_importado"),
+
     path('get_sugerencias_envases/<int:numero>/', get_sugerencias_envases, name="get_sugerencias_envases"),
     path(r'source_embarque_aereo_full/<str:master>/', source_embarque_aereo_full, name="source_embarque_aereo_full"),
     path('get_datos_caratula/', get_datos_caratula, name='get_datos_caratula'),

@@ -9,7 +9,7 @@ from expmarit.views.gastos import add_gasto_master, source_gastos, eliminar_gast
 from expmarit.views.house import add_house_impmarit, edit_house_function, house_detail, \
     get_name_by_id_vendedores, source_seguimientos_importado, add_house_importado, source_gastos_importado, \
     eliminar_house, source_envases_importado, source_rutas_importado, source_embarque_id, source_seguimiento_id, \
-    generar_posicion, source_embarque_importado, source_archivos_importado
+    generar_posicion, source_embarque_importado, source_archivos_importado, source_notas_importado
 from expmarit.views.expo_maritima import master_expo_maritima, source_importacion_master, source_embarque_aereo, \
     source_embarque_consolidado, house_importacion_maritima, source_archivos, guardar_archivo_im, eliminar_archivo, \
     descargar_archivo, modificar_fecha_retiro, add_archivo_importado, source_embarque_aereo_full, buscar_registros, \
@@ -19,7 +19,7 @@ from expmarit.views.master import master_detail, add_importacion_maritima, edit_
     consultar_seguimientos
 
 from expmarit.views.mails import get_data_email_op
-from expmarit.views.notas import source, guardar_notas, eliminar_nota
+from expmarit.views.notas import source, guardar_notas, eliminar_nota, add_nota_importado
 from expmarit.views.pdf import get_datos_caratula
 from expmarit.views.rutas import source_rutas_house, guardar_ruta, eliminar_ruta, add_ruta_importado, \
     datos_embarque_ruta
@@ -60,6 +60,9 @@ urlpatterns = [
     path(r'source_seguimientos_importado/', source_seguimientos_importado, name="source_seguimientos_importado"),
     path(r'source_gastos_importado/', source_gastos_importado, name="source_gastos_importado"),
     path(r'source_archivos_importado/', source_archivos_importado, name="source_archivos_importado"),
+    path(r'source_notas_importado/', source_notas_importado, name="source_notas_importado"),
+    path(r'add_nota_importado/', add_nota_importado, name="add_nota_importado"),
+
     path(r'source_embarque_importado/', source_embarque_importado, name="source_embarque_importado"),
     path(r'source_envases_importado/', source_envases_importado, name="source_envases_importado"),
     path(r'source_rutas_importado/', source_rutas_importado, name="source_rutas_importado"),

@@ -1,12 +1,12 @@
 from django.contrib.auth.decorators import login_required
 import json
-from impomarit.models import Embarqueaereo, Serviceaereo,Envases as Env, Conexaerea as Conex , Cargaaerea as Carga
+from impomarit.models import Embarqueaereo, Serviceaereo,Envases as Env, Conexaerea as Conex , Cargaaerea as Carga, Faxes as FX
 from mantenimientos.models import Vendedores, Vapores
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from django.db import IntegrityError, transaction
 from impomarit.forms import add_house, edit_house
-from seguimientos.models import Seguimiento, Envases, Conexaerea, Cargaaerea, Attachhijo
+from seguimientos.models import Seguimiento, Envases, Conexaerea, Cargaaerea, Attachhijo, Faxes
 import re
 from datetime import datetime
 
@@ -451,6 +451,33 @@ def source_archivos_importado(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+def source_notas_importado(request):
+    try:
+        data = json.loads(request.body)
+        # Números de los seguimientos
+        ids = data.get('ids', [])
+
+        registros = Faxes.objects.filter(numero__in=ids)
+
+        if not registros.exists():
+            # Si no hay registros, devolver un array vacío
+            return JsonResponse({"data": []}, safe=False)
+
+        resultado = []
+        for registro in registros:
+            resultado.append({
+                "numero": 0,
+                "seguimiento_control": registro.numero,
+                "notas": str(registro.notas),
+                "tipo": registro.tipo,
+                "fecha": registro.fecha,
+                "asunto": registro.asunto,
+            })
+
+        return JsonResponse({"data": resultado}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 ###
 
@@ -637,6 +664,7 @@ def eliminar_house(request):
             Conexaerea.objects.filter(numero=id).delete()
             Envases.objects.filter(numero=id).delete()
             Serviceaereo.objects.filter(numero=id).delete()
+            FX.objects.filter(numero=id).delete()
 
         resultado['resultado'] = 'exito'
 
