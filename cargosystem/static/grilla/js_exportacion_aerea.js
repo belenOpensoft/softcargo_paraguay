@@ -5685,6 +5685,10 @@ let tabla = localStorage.getItem('tabla_origen');
                         return;
                     }
                     let selectedRowN = localStorage.getItem('num_house_gasto');
+                                        if(selectedRowN==null){
+                        alert('Debe seleccionar una fila');
+                        return;
+                    }
                     const wHeight = $(window).height();
                     const wWidth = $(window).width();
                     $("#notas_modal").dialog({
