@@ -9,11 +9,14 @@ from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 
 from administracion_contabilidad.forms import IngresarAsiento
-from administracion_contabilidad.models import Asientos, Cuentas
+from administracion_contabilidad.models import Asientos, Cuentas, Cheques
 from administracion_contabilidad.views.preventa import generar_autogenerado
 from cargosystem import settings
 
 from reportlab.lib.colors import grey
+
+from mantenimientos.models import Monedas, Clientes
+
 
 def ingresar_asiento(request):
     form = IngresarAsiento({'fecha':datetime.now().strftime('%Y-%m-%d')})
@@ -96,18 +99,22 @@ def guardar_asientos(request):
     return JsonResponse({"success": False, "error": "Método no permitido"}, status=405)
 
 def reimprimir_asiento(request):
-    nro_asiento = request.GET.get('asiento')
-    if not nro_asiento:
+    autogenerado = request.GET.get('autogenerado')
+    if not autogenerado:
         return JsonResponse({"success": False, "error": "Número de asiento no proporcionado."}, status=400)
 
     try:
-        registros = Asientos.objects.filter(asiento=nro_asiento).order_by('id')
+        registros = Asientos.objects.filter(autogenerado=autogenerado).order_by('id')
         if not registros.exists():
-            return JsonResponse({"success": False, "error": f"No se encontraron registros para el asiento {nro_asiento}."}, status=404)
-
+            return JsonResponse({"success": False, "error": f"No se encontraron registros para el asiento {autogenerado}."}, status=404)
+        flag = False
         movimientos_pdf = []
         fecha = None
         for a in registros:
+            modo = a.enviado
+            if modo == 'D':
+                flag = True
+
             fecha = a.fecha.strftime('%d-%m-%Y')
             cuenta_obj = Cuentas.objects.filter(xcodigo=a.cuenta).values_list('xnombre', flat=True).first()
             cuenta_nombre = cuenta_obj or 'S/I'
@@ -122,11 +129,14 @@ def reimprimir_asiento(request):
             })
 
         pdf_data = {
-            "asiento": nro_asiento,
+            "asiento": autogenerado,
             "movimientos": movimientos_pdf
         }
 
-        return generar_pdf_contable(pdf_data, request,fecha)
+        if flag:
+            return generar_comprobante_deposito_pdf(autogenerado)
+        else:
+            return generar_pdf_contable(pdf_data, request,fecha)
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)
@@ -279,3 +289,125 @@ def generar_pdf_contable(pdf_data, request,fecha):
 
     except Exception as e:
         return HttpResponse(f"Error al generar PDF: {str(e)}", content_type='text/plain')
+
+def generar_comprobante_deposito_pdf(autogenerado):
+    try:
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="comprobante_deposito.pdf"; filename*=UTF-8\'\'comprobante_deposito.pdf'
+
+        c = canvas.Canvas(response, pagesize=A4)
+        width, height = A4
+        y = height - 30 * mm
+
+        # Logo
+        logo_path = os.path.join(settings.PACKAGE_ROOT, 'static', 'images', 'oceanlink.png')
+        c.drawImage(logo_path, 20 * mm, y, width=40 * mm, preserveAspectRatio=True, mask='auto')
+        y -= 10 * mm
+
+        asiento = Asientos.objects.filter(autogenerado=autogenerado).first()
+        moneda = Monedas.objects.filter(codigo=asiento.moneda).first()
+        if not asiento:
+            return response
+        # Encabezado
+
+        nro = asiento.documento if asiento.documento else ''
+        fecha = asiento.fecha.strftime('%d/%m/%Y') if asiento.fecha else ''
+        # try:
+        #     fecha = datetime.strptime(fecha_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
+        #     fecha = fecha.strftime('%Y/%m/%d')
+        # except (ValueError, TypeError):
+        #     fecha = fecha_str
+
+        c.setFont("Courier", 12)
+        c.drawString(20 * mm, y, f"Depósito ..........: {nro}")
+        y -= 6 * mm
+        c.drawString(20 * mm, y, f"Fecha ..............: {fecha}")
+        y -= 10 * mm
+
+        # Moneda y monto
+        moneda = moneda.nombre if moneda else ''
+        monto = asiento.monto
+        banco_destino = asiento.banco
+        detalle = asiento.detalle
+
+        c.setFont("Courier-Bold", 10)
+        c.drawString(20 * mm, y, f"Moneda .............: {moneda}")
+        y -= 6 * mm
+        c.drawString(20 * mm, y, f"Monto depositado ...: {monto}")
+        y -= 6 * mm
+        c.drawString(20 * mm, y, f"Banco destino ......: {banco_destino}")
+        y -= 6 * mm
+        c.drawString(20 * mm, y, f"Detalle ......: {detalle}")
+
+        # Línea de sección
+        y -= 12 * mm
+        c.setFont("Courier", 10)
+        titulo = "Valores depositados"
+        c.drawString(20 * mm, y, titulo)
+        y -= 8 * mm
+
+        # cheques = Cheques.objects.filter(cnrodepos=nro,ccliente=asiento.cliente,cmoneda=asiento.moneda,cmonto=asiento.monto)
+        asientos = Asientos.objects.filter(autogenerado=autogenerado)
+        if asientos:
+            c.setFont("Courier", 9)
+            c.drawString(20 * mm, y, "Cheque")
+            c.drawString(50 * mm, y, "Banco")
+            c.drawString(100 * mm, y, "Cliente")
+            c.drawString(170 * mm, y, "Importe")
+            c.line(20 * mm, y - 1.5 * mm, 200 * mm, y - 1.5 * mm)
+            y -= 6 * mm
+
+            try:
+                for chq in asientos:
+                    cheque = str(chq.documento)
+                    banco = str(chq.cuenta)
+                    cli = Clientes.objects.filter(codigo=chq.cliente).only('empresa').first()
+                    cliente = str(cli.empresa) if cli else ''
+                    monto = str(chq.monto)
+
+                    # Calcular líneas por campo
+                    lineas_cheque = dividir_lineas(cheque, c, "Courier", 9, 28 * mm)
+                    lineas_banco = dividir_lineas(banco, c, "Courier", 9, 45 * mm)
+                    lineas_cliente = dividir_lineas(cliente, c, "Courier", 9, 65 * mm)
+
+                    # Determinar la cantidad de líneas necesarias
+                    max_lineas = max(len(lineas_cheque), len(lineas_banco), len(lineas_cliente))
+
+                    for i in range(max_lineas):
+                        c.setFont("Courier", 9)
+                        if i < len(lineas_cheque):
+                            c.drawString(20 * mm, y, lineas_cheque[i])
+                        if i < len(lineas_banco):
+                            c.drawString(50 * mm, y, lineas_banco[i])
+                        if i < len(lineas_cliente):
+                            c.drawString(100 * mm, y, lineas_cliente[i])
+                        if i == 0:
+                            c.drawRightString(184 * mm, y, monto)
+                        y -= 6 * mm
+            except Exception as e:
+                c.setFont("Courier", 9)
+                c.drawString(20 * mm, y, f"[Error al procesar cheques: {str(e)}]")
+                y -= 6 * mm
+
+        c.showPage()
+        c.save()
+        return response
+        return None
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
+
+def dividir_lineas(texto, c, fuente, tamano, max_width):
+    c.setFont(fuente, tamano)
+    palabras = texto.split()
+    lineas = []
+    linea_actual = ""
+    for palabra in palabras:
+        prueba = (linea_actual + " " + palabra).strip()
+        if c.stringWidth(prueba, fuente, tamano) <= max_width:
+            linea_actual = prueba
+        else:
+            lineas.append(linea_actual)
+            linea_actual = palabra
+    if linea_actual:
+        lineas.append(linea_actual)
+    return lineas

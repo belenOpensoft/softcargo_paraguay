@@ -84,13 +84,13 @@ document.addEventListener("DOMContentLoaded", function () {
         text: "Imprimir",
         class: "btn btn-warning btn-sm",
         click: function () {
-          const nro_asiento = $("#detalle_asiento").val();
-          if (!nro_asiento) {
+          const autogenerado = $("#detalle_asiento_autogen").val();
+          if (!autogenerado) {
             alert("Debe especificar un número de asiento para imprimir.");
             return;
           }
 
-          fetch(`/admin_cont/reimprimir_asiento/?asiento=${encodeURIComponent(nro_asiento)}`, {
+          fetch(`/admin_cont/reimprimir_asiento/?autogenerado=${encodeURIComponent(autogenerado)}`, {
             method: "GET",
             headers: {
               "X-CSRFToken": csrf_token
@@ -226,33 +226,6 @@ document.addEventListener("DOMContentLoaded", function () {
     ]
   });
 
-//   $('#tabla_asientos tbody').on('dblclick', 'tr', function () {
-//   const tds = $(this).find('td');
-//
-//   $('#detalle_cuenta').val(tds.eq(10).text().trim());
-//   $('#detalle_detalle').val(tds.eq(1).text().trim());
-//   const debe = parseFloat(tds.eq(2).text().trim());
-//   const haber = parseFloat(tds.eq(3).text().trim());
-//   $('#detalle_monto').val(debe > 0 ? debe : haber);
-//   if (tds.eq(11).text().trim() == 1) {
-//     $('#id_tipo_0').prop('checked', true);  // debe
-//   } else {
-//     $('#id_tipo_1').prop('checked', true);  // haber
-//   }
-//   $('#detalle_moneda').val(tds.eq(7).text().trim());
-//   $('#detalle_posicion').val(tds.eq(6).text().trim());
-//   $('#detalle_paridad').val(tds.eq(5).text().trim());
-//   $('#detalle_arbitraje').val(tds.eq(4).text().trim());
-//   $('#detalle_asiento').val(tds.eq(8).text().trim());
-//   $('#detalle_fecha').val(tds.eq(9).text());
-//   $('#detalle_id').val(tds.eq(12).text().trim());
-//
-//   let autogenerado=tds.eq(13).text().trim();
-//   let id=tds.eq(12).text().trim();
-//   cargarAsientosRelacionados(autogenerado,id);
-//
-//   $("#modalEditarAsiento").dialog('open');
-// });
   $('#tabla_asientos tbody').on('dblclick', 'tr', function () {
   const tds = $(this).find('td');
 
@@ -274,6 +247,7 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   setDetalleAsientoFromObj(r);
+  $('#detalle_asiento_autogen').val(r.autogenerado);
 
   // Cargar los otros del mismo autogenerado
   if (r.autogenerado) {
@@ -285,50 +259,50 @@ document.addEventListener("DOMContentLoaded", function () {
 
   });
 
-function cargarAsientosRelacionados(autogenerado, excludeId) {
-  const $tbody = $('#tabla_asientos_rel_body');
-  $tbody.empty().append(
-    `<tr><td colspan="11" class="text-center">Cargando...</td></tr>`
-  );
-
-  $.getJSON('/admin_cont/asientos_relacionados/', { autogenerado, exclude_id: excludeId })
-    .done(function(resp){
-      const filas = (resp && resp.data) ? resp.data : [];
-      $tbody.empty();
-
-      if (!filas.length) {
-        $tbody.append(`<tr><td colspan="11" class="text-center">No hay otros asientos con este autogenerado.</td></tr>`);
-        return;
-      }
-
-      for (const r of filas) {
-        const fecha = (r.fecha || '').toString().substring(0,10); // YYYY-MM-DD
-        const debe  = (typeof r.debe  === 'number') ? r.debe.toFixed(2)  : (r.debe  ?? '');
-        const haber = (typeof r.haber === 'number') ? r.haber.toFixed(2) : (r.haber ?? '');
-
-        const tr = `
-          <tr>
-            <td>${fecha}</td>
-            <td>${r.asiento ?? ''}</td>
-            <td>${r.cuenta_nombre ?? r.cuenta ?? ''}</td>
-            <td>${r.detalle ?? ''}</td>
-            <td class="text-end">${debe}</td>
-            <td class="text-end">${haber}</td>
-            <td>${r.moneda ?? ''}</td>
-            <td>${r.posicion ?? ''}</td>
-            <td>${r.paridad ?? ''}</td>
-            <td>${r.arbitraje ?? ''}</td>
-            <td>${r.tipo ?? ''}</td>
-          </tr>`;
-        $tbody.append(tr);
-      }
-    })
-    .fail(function(){
-      $tbody.empty().append(
-        `<tr><td colspan="11" class="text-center text-danger">Error cargando relacionados.</td></tr>`
-      );
-    });
-}
+// function cargarAsientosRelacionados(autogenerado, excludeId) {
+//   const $tbody = $('#tabla_asientos_rel_body');
+//   $tbody.empty().append(
+//     `<tr><td colspan="11" class="text-center">Cargando...</td></tr>`
+//   );
+//
+//   $.getJSON('/admin_cont/asientos_relacionados/', { autogenerado, exclude_id: excludeId })
+//     .done(function(resp){
+//       const filas = (resp && resp.data) ? resp.data : [];
+//       $tbody.empty();
+//
+//       if (!filas.length) {
+//         $tbody.append(`<tr><td colspan="11" class="text-center">No hay otros asientos con este autogenerado.</td></tr>`);
+//         return;
+//       }
+//
+//       for (const r of filas) {
+//         const fecha = (r.fecha || '').toString().substring(0,10); // YYYY-MM-DD
+//         const debe  = (typeof r.debe  === 'number') ? r.debe.toFixed(2)  : (r.debe  ?? '');
+//         const haber = (typeof r.haber === 'number') ? r.haber.toFixed(2) : (r.haber ?? '');
+//
+//         const tr = `
+//           <tr>
+//             <td>${fecha}</td>
+//             <td>${r.asiento ?? ''}</td>
+//             <td>${r.cuenta_nombre ?? r.cuenta ?? ''}</td>
+//             <td>${r.detalle ?? ''}</td>
+//             <td class="text-end">${debe}</td>
+//             <td class="text-end">${haber}</td>
+//             <td>${r.moneda ?? ''}</td>
+//             <td>${r.posicion ?? ''}</td>
+//             <td>${r.paridad ?? ''}</td>
+//             <td>${r.arbitraje ?? ''}</td>
+//             <td>${r.tipo ?? ''}</td>
+//           </tr>`;
+//         $tbody.append(tr);
+//       }
+//     })
+//     .fail(function(){
+//       $tbody.empty().append(
+//         `<tr><td colspan="11" class="text-center text-danger">Error cargando relacionados.</td></tr>`
+//       );
+//     });
+// }
 function num(val) {
   const n = parseFloat(val);
   return isNaN(n) ? 0 : n;

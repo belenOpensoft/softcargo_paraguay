@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function () {
     .then(data => {
       if(tipo=='depositar'){
           if (confirm('¿Desea imprimir el comprobante de deposito?')){
-            descargar_depo();
+            descargar_depo(data.autogen);
           }
       }
       if(data.numero_orden!=0){
@@ -625,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error(error);
       });
   }
-  function descargar_depo(){
+  function descargar_depo(autogen){
   let documento= $('#id_nro_documento').val();
       let fecha= $('#id_fecha').val();
       let vto= $('#id_vto_cheque').val();
@@ -666,6 +666,7 @@ document.addEventListener('DOMContentLoaded', function () {
       formData.append('monto_total',total);
       formData.append('banco',banco);
       formData.append('detalle',detalle);
+      formData.append('autogen',autogen);
 
       fetch("/admin_cont/generar_comprobante_deposito_pdf/", {
         method: "POST",

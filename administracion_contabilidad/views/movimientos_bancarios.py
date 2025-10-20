@@ -106,6 +106,7 @@ def guardar_movimiento_bancario(request):
                         a.fecha = general.get('fecha') or None
                         a.asiento = numero
                         a.cuenta = general.get("banco").split(" - ")[0].strip() if general.get("banco") else None
+                        a.banco = general.get("banco") if general.get("banco") else None
                         a.imputacion = 1
                         a.tipo = tipo
                         a.autogenerado = autogenerado
@@ -123,6 +124,7 @@ def guardar_movimiento_bancario(request):
                         a.fecha = general.get('fecha') or None
                         a.asiento = numero
                         a.cuenta = asiento.get("cuenta").split(" - ")[0].strip() if asiento.get("cuenta") else None
+                        a.banco = asiento.get("cuenta") if asiento.get("cuenta") else None
                         a.imputacion = 2
                         a.autogenerado = autogenerado
                         a.tipo = tipo_adentro
@@ -146,9 +148,11 @@ def guardar_movimiento_bancario(request):
 
                 else:
                     if tipo_asiento == 'depositar':
+                        enviado = 'D'
                         tipo_adentro='C'
                     else:
                         tipo_adentro='B'
+                        enviado = None
 
                     #asiento general
                     a=Asientos()
@@ -158,6 +162,7 @@ def guardar_movimiento_bancario(request):
                     a.cuenta = general.get("banco").split(" - ")[0].strip() if general.get("banco") else None
                     a.imputacion=1
                     a.tipo=tipo
+                    a.enviado=enviado
                     a.autogenerado = autogenerado
                     a.paridad = general.get('paridad') or None
                     a.cambio=general.get('arbitraje') or None
@@ -177,6 +182,7 @@ def guardar_movimiento_bancario(request):
                         a.cuenta = asiento.get("cuenta").split(" - ")[0].strip() if asiento.get("cuenta") else None
                         a.imputacion = 2
                         a.tipo = tipo_adentro
+                        a.enviado = enviado
                         a.paridad = general.get("paridad") or None
                         a.cambio = general.get("arbitraje") or None
                         a.monto = asiento.get("monto")  or None
@@ -194,7 +200,7 @@ def guardar_movimiento_bancario(request):
                             chequera.estado=2
                             chequera.save()
 
-            return JsonResponse({"success": True,'numero_orden':numero_orden})
+            return JsonResponse({"success": True,'numero_orden':numero_orden,'autogen':autogenerado})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=400)
 
@@ -462,6 +468,8 @@ def generar_comprobante_deposito_pdf(request):
 
             # Encabezado
             nro = data.get("numero")
+            autogen = data.get("autogen")
+            asientos = Asientos.objects.filter(autogenerado=autogen)
             fecha_str = data.get("fecha", datetime.now().strftime('%d/%m/%Y'))
             try:
                 fecha = datetime.strptime(fecha_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
@@ -479,6 +487,7 @@ def generar_comprobante_deposito_pdf(request):
             moneda = data.get("moneda")
             monto = data.get("monto_total")
             banco_destino = data.get("banco")
+            detalle = data.get("detalle",'')
 
             c.setFont("Courier-Bold", 10)
             c.drawString(20 * mm, y, f"Moneda .............: {moneda}")
@@ -486,6 +495,8 @@ def generar_comprobante_deposito_pdf(request):
             c.drawString(20 * mm, y, f"Monto depositado ...: {monto}")
             y -= 6 * mm
             c.drawString(20 * mm, y, f"Banco destino ......: {banco_destino}")
+            y -= 6 * mm
+            c.drawString(20 * mm, y, f"Detalle ......: {detalle}")
 
             # Línea de sección
             y -= 12 * mm
@@ -494,8 +505,8 @@ def generar_comprobante_deposito_pdf(request):
             c.drawString(20 * mm, y, titulo)
             y -= 8 * mm
 
-            cheques = json.loads(data.get('data', '[]'))
-            if cheques:
+            # cheques = json.loads(data.get('data', '[]'))
+            if asientos:
                 c.setFont("Courier", 9)
                 c.drawString(20 * mm, y, "Cheque")
                 c.drawString(50 * mm, y, "Banco")
@@ -505,11 +516,12 @@ def generar_comprobante_deposito_pdf(request):
                 y -= 6 * mm
 
                 try:
-                    for chq in cheques:
-                        cheque = str(chq.get('numero', ''))
-                        banco = str(chq.get('banco', ''))
-                        cliente = str(chq.get('cliente', ''))
-                        monto = str(chq.get('monto', ''))
+                    for chq in asientos:
+                        cheque = str(chq.documento)
+                        banco = str(chq.cuenta)
+                        cli = Clientes.objects.filter(codigo=chq.cliente).only('empresa').first()
+                        cliente = str(cli.empresa) if cli else ''
+                        monto = str(chq.monto)
 
                         # Calcular líneas por campo
                         lineas_cheque = dividir_lineas(cheque, c, "Courier", 9, 28 * mm)

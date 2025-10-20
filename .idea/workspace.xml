@@ -4,23 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="335d398c-6d1f-4c1e-8c6c-9772af5dd01d" name="Changes" comment="cambios de caratulas">
+    <list default="true" id="335d398c-6d1f-4c1e-8c6c-9772af5dd01d" name="Changes" comment="cambios">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/views/facturacion.py" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/views/facturacion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/views/facturacion_electronica/ucfe_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/views/facturacion_electronica/ucfe_client.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cargosystem/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/facturacion.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/facturacion.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expaerea/views/embarques.py" beforeDir="false" afterPath="$PROJECT_DIR$/expaerea/views/embarques.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expaerea/views/master.py" beforeDir="false" afterPath="$PROJECT_DIR$/expaerea/views/master.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expmarit/views/embarques.py" beforeDir="false" afterPath="$PROJECT_DIR$/expmarit/views/embarques.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expterrestre/views/embarques.py" beforeDir="false" afterPath="$PROJECT_DIR$/expterrestre/views/embarques.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impaerea/views/embarques.py" beforeDir="false" afterPath="$PROJECT_DIR$/impaerea/views/embarques.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impomarit/views/embarques.py" beforeDir="false" afterPath="$PROJECT_DIR$/impomarit/views/embarques.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impterrestre/views/embarques.py" beforeDir="false" afterPath="$PROJECT_DIR$/impterrestre/views/embarques.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/login/views/login.py" beforeDir="false" afterPath="$PROJECT_DIR$/login/views/login.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs/facturacion.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/facturacion.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/seguimientos/views/desconsolidacion_aerea.py" beforeDir="false" afterPath="$PROJECT_DIR$/seguimientos/views/desconsolidacion_aerea.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/seguimientos/views/embarques.py" beforeDir="false" afterPath="$PROJECT_DIR$/seguimientos/views/embarques.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/templates/contabilidad/modificar_asientos_detalle.html" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/templates/contabilidad/modificar_asientos_detalle.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/views/ingresar_asientos.py" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/views/ingresar_asientos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/views/movimientos_bancarios.py" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/views/movimientos_bancarios.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/modificar_asientos.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/modificar_asientos.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/movimientos_bancariosv1.2.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/movimientos_bancariosv1.2.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,6 +35,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR_AND_PREVIEW&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/opensoft_pc2/PycharmProjects/softcargo_paraguay&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -99,7 +90,18 @@
       <workItem from="1758309653112" duration="793000" />
       <workItem from="1758311527590" duration="52000" />
       <workItem from="1758648434955" duration="160000" />
-      <workItem from="1758649736863" duration="3148000" />
+      <workItem from="1758649736863" duration="3176000" />
+      <workItem from="1758805406923" duration="287000" />
+      <workItem from="1758816876565" duration="5428000" />
+      <workItem from="1759151774070" duration="15000" />
+      <workItem from="1759153376529" duration="589000" />
+      <workItem from="1759249780663" duration="664000" />
+      <workItem from="1760112720265" duration="5197000" />
+      <workItem from="1760293025820" duration="7306000" />
+      <workItem from="1760448173366" duration="5637000" />
+      <workItem from="1760533590878" duration="5739000" />
+      <workItem from="1760705462125" duration="4343000" />
+      <workItem from="1760981152849" duration="549000" />
     </task>
     <task id="LOCAL-00001" summary="subir">
       <option name="closed" value="true" />
@@ -117,7 +119,159 @@
       <option name="project" value="LOCAL" />
       <updated>1758648579089</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="cambios de caratulas">
+      <option name="closed" value="true" />
+      <created>1758659258407</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1758659258407</updated>
+    </task>
+    <task id="LOCAL-00004" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1758805683341</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1758805683341</updated>
+    </task>
+    <task id="LOCAL-00005" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1758825957989</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1758825957989</updated>
+    </task>
+    <task id="LOCAL-00006" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1758829028984</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1758829028984</updated>
+    </task>
+    <task id="LOCAL-00007" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1758899685303</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1758899685303</updated>
+    </task>
+    <task id="LOCAL-00008" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1759153472057</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1759153472057</updated>
+    </task>
+    <task id="LOCAL-00009" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1759153795612</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1759153795612</updated>
+    </task>
+    <task id="LOCAL-00010" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760113267518</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1760113267518</updated>
+    </task>
+    <task id="LOCAL-00011" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760122605323</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1760122605324</updated>
+    </task>
+    <task id="LOCAL-00012" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760125814417</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1760125814417</updated>
+    </task>
+    <task id="LOCAL-00013" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760365033996</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1760365033996</updated>
+    </task>
+    <task id="LOCAL-00014" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760381013009</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1760381013009</updated>
+    </task>
+    <task id="LOCAL-00015" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760382174297</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1760382174297</updated>
+    </task>
+    <task id="LOCAL-00016" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760385877375</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1760385877375</updated>
+    </task>
+    <task id="LOCAL-00017" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760546945187</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1760546945187</updated>
+    </task>
+    <task id="LOCAL-00018" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760555755024</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1760555755024</updated>
+    </task>
+    <task id="LOCAL-00019" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760558726421</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1760558726421</updated>
+    </task>
+    <task id="LOCAL-00020" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760706064263</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1760706064263</updated>
+    </task>
+    <task id="LOCAL-00021" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760730809579</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1760730809579</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -126,6 +280,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="subir" />
     <MESSAGE value="cambios de caratulas" />
-    <option name="LAST_COMMIT_MESSAGE" value="cambios de caratulas" />
+    <MESSAGE value="cambios" />
+    <option name="LAST_COMMIT_MESSAGE" value="cambios" />
   </component>
 </project>
