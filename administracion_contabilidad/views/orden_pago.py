@@ -2,6 +2,8 @@ import json
 import os
 from collections import defaultdict
 from datetime import datetime
+from textwrap import wrap
+
 from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
@@ -691,7 +693,7 @@ def guardar_impuorden(request):
                 orden.mcliente=cobranza[0]['nrocliente']
                 orden.mactiva='N' if cobranza[0]['definitivo'] == True else 'S'
                 orden.mcaja=11112 if cobranza[0]['nromoneda'] !=1 else 11111
-                orden.mautogenmovims=autogenerado_impuventa if cobranza[0]['definitivo'] == True else None
+                orden.mautogenmovims=autogenerado_impuventa
                 if cliente_data:
                     orden.mnombre=cliente_data.empresa
                 else:
@@ -860,7 +862,7 @@ def guardar_impuorden(request):
             status=200
         )
 
-def generar_orden_pago_pdf_sin_prov(pdf_data, request):
+def generar_orden_pago_pdf_sin_prov_old(pdf_data, request):
     try:
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="orden_pago.pdf"; filename*=UTF-8\'\'orden_pago.pdf'
@@ -987,51 +989,218 @@ def generar_orden_pago_pdf_sin_prov(pdf_data, request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-def generar_orden_pago_pdf(data,request):
+
+def generar_orden_pago_pdf_sin_prov(pdf_data, request):
     try:
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="orden_pago.pdf"; filename*=UTF-8\'\'orden_pago.pdf'
+        response['Content-Disposition'] = (
+            'attachment; filename="orden_pago.pdf"; filename*=UTF-8\'\'orden_pago.pdf'
+        )
 
         c = canvas.Canvas(response, pagesize=A4)
         width, height = A4
         y = height - 30 * mm
 
-        # Logo
+        # --- LOGO ---
         logo_path = os.path.join(settings.PACKAGE_ROOT, 'static', 'images', 'oceanlink.png')
-        c.drawImage(logo_path, 20 * mm, y, width=40 * mm, preserveAspectRatio=True, mask='auto')
+        if os.path.exists(logo_path):
+            c.drawImage(logo_path, 20 * mm, y, width=40 * mm, preserveAspectRatio=True, mask='auto')
         y -= 5 * mm
 
-        detalle = data.get('detalle', '')[:35]
+        # --- FECHAS ---
+        fecha_pago_str = pdf_data.get("fecha_pago")
+        vto_str = pdf_data.get("vto")
+        try:
+            fecha_pago = datetime.strptime(fecha_pago_str, "%Y-%m-%d").strftime('%d/%m/%Y')
+            vto = datetime.strptime(vto_str, "%Y-%m-%d").strftime('%d/%m/%Y')
+        except (ValueError, TypeError):
+            fecha_pago = fecha_pago_str or ""
+            vto = vto_str or ""
+
+        # --- CABECERA ---
+        c.setFont("Courier", 12)
+        y -= 5 * mm
+        c.drawString(20 * mm, y, f"Orden de pago .....: {pdf_data.get('nro')}")
+        y -= 6 * mm
+        c.drawString(20 * mm, y, f"Fecha de pago .....: {fecha_pago}")
+        y -= 6 * mm
+        nombre = f"{request.user.first_name or ''} {request.user.last_name or ''}".strip()
+        c.drawString(20 * mm, y, f"Solicitada por ....: {nombre}")
+
+        # --- MONEDA Y MONTO ---
+        c.setFont("Courier-Bold", 10)
+        y -= 10 * mm
+        c.drawString(20 * mm, y, f"Moneda ............: {pdf_data.get('moneda')}")
+        y -= 6 * mm
+        c.drawString(20 * mm, y, f"Monto a pagar .....: {pdf_data.get('monto_total')}")
+
+        # --- CUENTAS IMPUTADAS ---
+        y -= 12 * mm
+        c.setFont("Courier-Bold", 10)
+        titulo = "Cuentas imputadas en el pago:"
+        c.drawString(20 * mm, y, titulo)
+        c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(titulo, "Courier-Bold", 10), y - 1.5 * mm)
+
+        y -= 8 * mm
+        c.setFont("Courier", 10)
+        encabezado = "Cuenta                           Monto        Detalle"
+        c.drawString(20 * mm, y, encabezado)
+        c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(encabezado, "Courier", 10), y - 1.5 * mm)
+        y -= 6 * mm
+
+        try:
+            detalle_items = json.loads(pdf_data.get('facturas', '[]'))
+            for item in detalle_items:
+                cuenta_p = item.get('cuenta', '')[:30]
+                monto_p = f"{float(item.get('importe', 0)):>10.2f}"
+                detalle_p = item.get('detalle_fac', '') or ''
+
+                # --- Envolver el detalle para evitar cortes ---
+                lineas_detalle = wrap(detalle_p, 35) or ['']
+
+                for i, linea in enumerate(lineas_detalle):
+                    if y < 20 * mm:
+                        c.showPage()
+                        y = height - 30 * mm
+                        c.setFont("Courier", 10)
+
+                    if i == 0:
+                        c.drawString(20 * mm, y, f"{cuenta_p.ljust(30)} {monto_p}    {linea}")
+                    else:
+                        c.drawString(20 * mm, y, f"{' ' * 35} {linea}")
+                    y -= 5 * mm
+
+        except Exception as e:
+            c.drawString(20 * mm, y, f"[Error al procesar filas: {str(e)}]")
+            y -= 6 * mm
+
+        # --- DETALLE GENERAL ---
+        y -= 6 * mm
+        c.setFont("Courier-Bold", 10)
+        titulo_fp = "Detalle"
+        c.drawString(20 * mm, y, titulo_fp)
+        c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(titulo_fp, "Courier-Bold", 10), y - 1.5 * mm)
+        y -= 6 * mm
+        c.setFont("Courier", 10)
+
+        detalle_texto = pdf_data.get('detalle', '') or ''
+        for linea in wrap(detalle_texto, 95):
+            if y < 20 * mm:
+                c.showPage()
+                y = height - 30 * mm
+                c.setFont("Courier", 10)
+            c.drawString(20 * mm, y, linea)
+            y -= 5 * mm
+
+        # --- FORMA DE PAGO ---
+        y -= 12 * mm
+        c.setFont("Courier-Bold", 10)
+        titulo_fp = "Forma de pago:"
+        c.drawString(20 * mm, y, titulo_fp)
+        c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(titulo_fp, "Courier-Bold", 10), y - 1.5 * mm)
+
+        y -= 6 * mm
+        c.setFont("Courier", 10)
+        c.drawString(20 * mm, y, "Tipo")
+        c.drawString(40 * mm, y, "Número")
+        c.drawString(70 * mm, y, "Banco")
+        c.drawString(140 * mm, y, "Importe")
+        c.drawString(170 * mm, y, "Vto.")
+        c.line(20 * mm, y - 1.5 * mm, 200 * mm, y - 1.5 * mm)
+
+        forma_pago = json.loads(pdf_data.get('forma_pago', '[]'))
+        for f in forma_pago:
+            y -= 6 * mm
+            tipo = f.get("modo", "S/I")
+            numero = str(f.get("numero", ""))
+            banco = f.get("banco", "")[:25] if f.get("banco") else ""
+            importe = str(f.get("monto_total", "0"))
+            vto_fp = f.get("vencimiento_cheque", " ")
+
+            if y < 20 * mm:
+                c.showPage()
+                y = height - 30 * mm
+                c.setFont("Courier", 10)
+
+            c.drawString(20 * mm, y, tipo or "")
+            c.drawString(40 * mm, y, numero or "")
+            c.drawString(70 * mm, y, banco or "")
+            c.drawRightString(155 * mm, y, importe or "0.00")
+            c.drawString(170 * mm, y, vto_fp or "")
+
+        # --- MONTO EN LETRAS ---
+        y -= 10 * mm
+        monto = pdf_data.get('monto_total', '0')
+        leyenda_monto = monto_a_letras(monto, pdf_data.get('moneda'))
+        c.drawString(20 * mm, y, leyenda_monto)
+
+        # --- FIRMAS ---
+        y -= 30 * mm
+        c.drawString(40 * mm, y, "______________________")
+        c.drawString(130 * mm, y, "______________________")
+        y -= 6 * mm
+        c.drawString(50 * mm, y, "Autorizado")
+        c.drawString(140 * mm, y, "Recibido")
+
+        # --- FINALIZAR ---
+        c.showPage()
+        c.save()
+        return response
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def generar_orden_pago_pdf(data, request):
+    try:
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = (
+            'attachment; filename="orden_pago.pdf"; filename*=UTF-8\'\'orden_pago.pdf'
+        )
+
+        c = canvas.Canvas(response, pagesize=A4)
+        width, height = A4
+        y = height - 30 * mm
+
+        # --- LOGO ---
+        logo_path = os.path.join(settings.PACKAGE_ROOT, 'static', 'images', 'oceanlink.png')
+        if os.path.exists(logo_path):
+            c.drawImage(logo_path, 20 * mm, y, width=40 * mm, preserveAspectRatio=True, mask='auto')
+        y -= 5 * mm
+
+        # --- FECHAS ---
+        detalle = data.get('detalle', '')
         fecha_pago_str = data.get("fecha_pago")
         vto_str = data.get("vto")
         try:
-            fecha_pago = datetime.strptime(fecha_pago_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
-            vto = datetime.strptime(vto_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
+            fecha_pago = datetime.strptime(fecha_pago_str, "%Y-%m-%d")
+            vto = datetime.strptime(vto_str, "%Y-%m-%d")
             fecha_pago = fecha_pago.strftime('%d/%m/%Y')
             vto = vto.strftime('%d/%m/%Y')
         except (ValueError, TypeError):
-            fecha_pago = fecha_pago_str
-            vto = fecha_pago_str
+            fecha_pago = fecha_pago_str or ""
+            vto = vto_str or ""
 
-            # Datos principales
+        # --- DATOS PRINCIPALES ---
         c.setFont("Courier", 12)
         y -= 5 * mm
         c.drawString(20 * mm, y, f"Orden de pago .....: {data.get('nro')}")
         y -= 6 * mm
         c.drawString(20 * mm, y, f"Fecha de pago .....: {fecha_pago}")
         y -= 6 * mm
-        nombre = str(request.user.first_name) + ' ' + str(request.user.last_name)
+        nombre = f"{request.user.first_name or ''} {request.user.last_name or ''}".strip()
         c.drawString(20 * mm, y, f"Solicitada por ....: {nombre}")
 
+        # --- PROVEEDOR ---
         c.setFont("Courier", 10)
         y -= 10 * mm
         c.drawString(20 * mm, y, f"Proveedor .........: {data.get('proveedor_nombre', '')}")
-        y -= 6 * mm  # bajar una línea
+        y -= 6 * mm
         c.drawString(20 * mm, y, f"                    {data.get('proveedor_direccion', '')}")
-        y -= 6 * mm  # bajar una línea
+        y -= 6 * mm
         c.drawString(20 * mm, y, f"                    {data.get('proveedor_telefono', '')}")
 
-        # Moneda y monto
+        # --- MONEDA Y MONTOS ---
         c.setFont("Courier-Bold", 10)
         y -= 10 * mm
         c.drawString(20 * mm, y, f"Moneda ............: {data.get('moneda')}")
@@ -1040,25 +1209,17 @@ def generar_orden_pago_pdf(data,request):
         y -= 6 * mm
         c.drawString(20 * mm, y, f"Monto a pagar .....: {data.get('monto_total')}")
 
-        # Cuentas imputadas
+        # --- FACTURAS IMPUTADAS ---
         y -= 12 * mm
         c.setFont("Courier", 11)
-        titulo = "Facturas imputadas en el pago:"
-        c.drawString(20 * mm, y, titulo)
+        c.drawString(20 * mm, y, "Facturas imputadas en el pago:")
 
         y -= 8 * mm
         c.setFont("Courier", 10)
-        encabezado = "Numero    Vencimiento    Importe    Detalle                  T.C.    Posicion    "
+        encabezado = "Numero    Vencimiento    Importe    Detalle                  T.C.    Posicion"
         c.drawString(20 * mm, y, encabezado)
         c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(encabezado, "Courier", 10), y - 1.5 * mm)
-
         y -= 6 * mm
-
-        """
-                banco = data.get('banco', '')[:30].ljust(30)
-        monto_valor = float(data.get('monto_total') or 0)
-        monto = f"{monto_valor:>10.2f}"
-        """
 
         try:
             facturas_items = json.loads(data.get('facturas', '[]'))
@@ -1067,24 +1228,36 @@ def generar_orden_pago_pdf(data,request):
                 cambio_fac = item.get('cambio', '')
                 posicion_fac = item.get('posicion', '')
                 monto_p = f"{float(item.get('importe', 0)):>10.2f}"
-                detalle_p = item.get('detalle_fac', '')[:25]
-                c.drawString(20 * mm, y, f"{documento_fac}    {fecha_pago}    {monto_p}    {detalle_p}                    {cambio_fac}    {posicion_fac}")
-                y -= 6 * mm
+                detalle_p = item.get('detalle_fac', '') or ''
+
+                # Envolver el detalle en varias líneas si es largo
+                lineas_detalle = wrap(detalle_p, 25) or ['']
+
+                for i, linea in enumerate(lineas_detalle):
+                    if y < 20 * mm:  # salto de página si llegamos al final
+                        c.showPage()
+                        y = height - 30 * mm
+                        c.setFont("Courier", 10)
+
+                    if i == 0:
+                        # Primera línea: mostramos toda la fila
+                        c.drawString(20 * mm, y,
+                                     f"{documento_fac:<10} {fecha_pago:<12} {monto_p:>10}    {linea:<25}    {cambio_fac:<6} {posicion_fac}")
+                    else:
+                        # Líneas siguientes: solo el detalle
+                        c.drawString(20 * mm, y, f"{'':<10} {'':<12} {'':>10}    {linea:<25}")
+                    y -= 5 * mm
+
         except Exception as e:
             c.drawString(20 * mm, y, f"[Error al procesar filas: {str(e)}]")
             y -= 6 * mm
 
-        # Forma de pago
-
+        # --- FORMAS DE PAGO ---
         forma_pago = json.loads(data.get('forma_pago', '[]'))
-
-        # Titulos
         y -= 12 * mm
         c.setFont("Courier", 11)
-        titulo_fp = "Forma de pago:"
-        c.drawString(20 * mm, y, titulo_fp)
+        c.drawString(20 * mm, y, "Forma de pago:")
 
-        # Encabezado
         y -= 6 * mm
         c.setFont("Courier", 10)
         c.drawString(20 * mm, y, "Tipo")
@@ -1095,38 +1268,52 @@ def generar_orden_pago_pdf(data,request):
         c.line(20 * mm, y - 1.5 * mm, 200 * mm, y - 1.5 * mm)
 
         for f in forma_pago:
-            # Valores
             y -= 6 * mm
-            tipo = f.get("modo")
+            tipo = f.get("modo", "")
             numero = f.get("numero", "")
             banco = f.get("banco", "")[:25]
             importe = f.get("monto_total", "0")
-            vto = f.get("vencimiento_cheque", None)
+            vto = f.get("vencimiento_cheque", "")
             if vto:
-                vto = datetime.strptime(vto_str, "%Y-%m-%d")  # o el formato en que venga tu fecha
-                vto = vto.strftime('%Y/%m/%d')
+                try:
+                    vto = datetime.strptime(vto, "%Y-%m-%d").strftime("%d/%m/%Y")
+                except Exception:
+                    pass
 
             c.drawString(20 * mm, y, str(tipo))
             c.drawString(40 * mm, y, str(numero))
             c.drawString(70 * mm, y, str(banco))
             c.drawRightString(155 * mm, y, str(importe))
             c.drawString(170 * mm, y, str(vto or ""))
+            if y < 20 * mm:
+                c.showPage()
+                y = height - 30 * mm
+                c.setFont("Courier", 10)
 
+        # --- DETALLE CON SALTO DE LÍNEA ---
         y -= 12 * mm
-        c.setFont("Courier", 10)
-        titulo_fp = "Detalle"
-        c.drawString(20 * mm, y, titulo_fp)
+        c.setFont("Courier-Bold", 10)
+        c.drawString(20 * mm, y, "Detalle:")
         y -= 6 * mm
         c.setFont("Courier", 10)
-        c.drawString(20 * mm, y, detalle)
 
-        # Texto en letras
+        detalle = data.get('detalle', '')
+        max_width = 95  # aprox. cantidad de caracteres por línea (ajustable)
+        for line in wrap(detalle, max_width):
+            if y < 20 * mm:  # salto de página automático
+                c.showPage()
+                y = height - 30 * mm
+                c.setFont("Courier", 10)
+            c.drawString(20 * mm, y, line)
+            y -= 5 * mm
+
+        # --- MONTO EN LETRAS ---
         y -= 10 * mm
         monto = data.get('monto_total', '0')
-        leyenda_monto = monto_a_letras(monto,data.get('moneda'))
+        leyenda_monto = monto_a_letras(monto, data.get('moneda'))
         c.drawString(20 * mm, y, leyenda_monto)
 
-        # Firmas
+        # --- FIRMAS ---
         y -= 30 * mm
         c.drawString(40 * mm, y, "______________________")
         c.drawString(130 * mm, y, "______________________")
@@ -1134,9 +1321,11 @@ def generar_orden_pago_pdf(data,request):
         c.drawString(50 * mm, y, "Autorizado")
         c.drawString(140 * mm, y, "Recibido")
 
+        # --- FINALIZAR ---
         c.showPage()
         c.save()
         return response
+
     except Exception as e:
         raise RuntimeError(f"Error al generar PDF: {e}")
 
@@ -1206,7 +1395,7 @@ def reimprimir_op(request):
                 "nro": orden.mboleta,
                 "fecha_pago": fecha_pago_str,
                 "vto": vto_str,
-                "detalle": orden.mdetalle,
+                "detalle": movimiento.mdetalle,
                 "cambio_general": cambio,
                 "monto_total": str(orden.mmonto),
                 "moneda": moneda_str,

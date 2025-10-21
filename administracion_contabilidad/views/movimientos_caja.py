@@ -1,6 +1,6 @@
 import json
 import os
-
+from textwrap import wrap
 
 from django.db import transaction
 from django.http import JsonResponse, HttpResponse
@@ -55,6 +55,7 @@ def guardar_movimiento_caja(request):
                 a.fecha=general.get('fecha') or None
                 a.asiento=numero
                 a.cuenta = general.get("banco").split(" - ")[0].strip() if general.get("banco") else None
+                a.banco = general.get("banco") if general.get("banco") else None
                 a.imputacion=2
                 a.tipo=tipo
                 a.autogenerado = autogenerado
@@ -73,6 +74,7 @@ def guardar_movimiento_caja(request):
                     a.fecha = general.get('fecha') or None
                     a.asiento = numero
                     a.cuenta = asiento.get("cuenta").split(" - ")[0].strip() if asiento.get("cuenta") else None
+                    a.banco = asiento.get("cuenta") if asiento.get("cuenta") else None
                     a.imputacion = 1
                     a.tipo = tipo_adentro
                     a.paridad = 0
@@ -145,7 +147,7 @@ def crear_movimiento(movimiento):
     except Exception as e:
         raise
 
-def generar_orden_pago_pdf(request):
+def generar_orden_pago_pdf_old(request):
     try:
         if request.method == 'POST':
             data = request.POST
@@ -281,6 +283,185 @@ def generar_orden_pago_pdf(request):
         return None
     except Exception as e:
         return JsonResponse({'error':str(e)})
+
+
+def generar_orden_pago_pdf(request):
+    try:
+        if request.method == 'POST':
+            data = request.POST
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = (
+                'attachment; filename="orden_pago.pdf"; filename*=UTF-8\'\'orden_pago.pdf'
+            )
+
+            c = canvas.Canvas(response, pagesize=A4)
+            width, height = A4
+            y = height - 30 * mm
+
+            # --- LOGO ---
+            logo_path = os.path.join(settings.PACKAGE_ROOT, 'static', 'images', 'oceanlink.png')
+            if os.path.exists(logo_path):
+                c.drawImage(logo_path, 20 * mm, y, width=40 * mm, preserveAspectRatio=True, mask='auto')
+            y -= 5 * mm
+
+            # --- FECHAS ---
+            fecha_pago_str = data.get("fecha_pago")
+            vto_str = data.get("vto")
+            try:
+                fecha_pago = datetime.strptime(fecha_pago_str, "%Y-%m-%d").strftime('%Y/%m/%d')
+                vto = datetime.strptime(vto_str, "%Y-%m-%d").strftime('%Y/%m/%d')
+            except (ValueError, TypeError):
+                fecha_pago = fecha_pago_str or ""
+                vto = vto_str or ""
+
+            # --- DATOS PRINCIPALES ---
+            c.setFont("Courier", 12)
+            y -= 5 * mm
+            c.drawString(20 * mm, y, f"Orden de pago .....: {data.get('orden')}")
+            y -= 6 * mm
+            c.drawString(20 * mm, y, f"Fecha de pago .....: {fecha_pago}")
+            y -= 6 * mm
+            nombre = f"{request.user.first_name or ''} {request.user.last_name or ''}".strip()
+            c.drawString(20 * mm, y, f"Solicitada por ....: {nombre}")
+
+            # --- MONEDA Y MONTO ---
+            c.setFont("Courier-Bold", 10)
+            y -= 10 * mm
+            c.drawString(20 * mm, y, f"Moneda ............: {data.get('moneda')}")
+            y -= 6 * mm
+            c.drawString(20 * mm, y, f"Monto a pagar .....: {data.get('monto_total')}")
+
+            # --- CUENTAS IMPUTADAS ---
+            y -= 12 * mm
+            c.setFont("Courier-Bold", 10)
+            titulo = "Cuentas imputadas en el pago:"
+            c.drawString(20 * mm, y, titulo)
+            c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(titulo, "Courier-Bold", 10), y - 1.5 * mm)
+
+            y -= 8 * mm
+            c.setFont("Courier", 10)
+            encabezado = "Cuenta                           Monto        Detalle"
+            c.drawString(20 * mm, y, encabezado)
+            c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(encabezado, "Courier", 10), y - 1.5 * mm)
+            y -= 6 * mm
+
+            try:
+                detalle_items = json.loads(request.POST.get('data', '[]'))
+                for item in detalle_items:
+                    cuenta_p = item.get('cuenta', '')[:30]
+                    monto_p = f"{float(item.get('monto', 0)):>10.2f}"
+                    detalle_p = (item.get('detalle', '') or '').replace('\r', '')
+
+                    # --- dividir por saltos de línea y envolver ---
+                    lineas_detalle = []
+                    for parte in detalle_p.split('\n'):
+                        lineas_detalle.extend(wrap(parte, 35) or [''])
+
+                    for i, linea in enumerate(lineas_detalle):
+                        if y < 20 * mm:
+                            c.showPage()
+                            y = height - 30 * mm
+                            c.setFont("Courier", 10)
+
+                        if i == 0:
+                            c.drawString(20 * mm, y, f"{cuenta_p.ljust(30)} {monto_p}    {linea}")
+                        else:
+                            c.drawString(20 * mm, y, f"{' ' * 35} {linea}")
+                        y -= 5 * mm
+
+            except Exception as e:
+                c.drawString(20 * mm, y, f"[Error al procesar filas: {str(e)}]")
+                y -= 6 * mm
+
+            # --- DETALLE GENERAL ---
+            y -= 6 * mm
+            c.setFont("Courier-Bold", 10)
+            titulo_fp = "Detalle"
+            c.drawString(20 * mm, y, titulo_fp)
+            c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(titulo_fp, "Courier-Bold", 10), y - 1.5 * mm)
+            y -= 6 * mm
+            c.setFont("Courier", 10)
+
+            detalle_general = (data.get('detalle', '') or '').replace('\r', '')
+            for parte in detalle_general.split('\n'):
+                for linea in wrap(parte, 95):
+                    if y < 20 * mm:
+                        c.showPage()
+                        y = height - 30 * mm
+                        c.setFont("Courier", 10)
+                    c.drawString(20 * mm, y, linea)
+                    y -= 5 * mm
+
+            # --- FORMA DE PAGO ---
+            y -= 12 * mm
+            c.setFont("Courier-Bold", 10)
+            titulo_fp = "Forma de pago:"
+            c.drawString(20 * mm, y, titulo_fp)
+            c.line(20 * mm, y - 1.5 * mm, 20 * mm + c.stringWidth(titulo_fp, "Courier-Bold", 10), y - 1.5 * mm)
+
+            y -= 6 * mm
+            c.setFont("Courier", 10)
+            c.drawString(20 * mm, y, "Tipo")
+            c.drawString(40 * mm, y, "Número")
+            c.drawString(70 * mm, y, "Banco")
+            c.drawString(140 * mm, y, "Importe")
+            c.drawString(170 * mm, y, "Vto.")
+            c.line(20 * mm, y - 1.5 * mm, 200 * mm, y - 1.5 * mm)
+
+            y -= 6 * mm
+            tipo = data.get('modo', '')
+            numero = data.get("numero", "")
+            banco = (data.get("banco", "") or "")[:25]
+            importe = data.get("monto_total", "0")
+
+            # Envolver banco si es largo
+            banco_lineas = wrap(banco, 25) or ['']
+
+            for i, linea_banco in enumerate(banco_lineas):
+                if y < 20 * mm:
+                    c.showPage()
+                    y = height - 30 * mm
+                    c.setFont("Courier", 10)
+                if i == 0:
+                    c.drawString(20 * mm, y, tipo)
+                    c.drawString(40 * mm, y, numero)
+                    c.drawString(70 * mm, y, linea_banco)
+                    c.drawRightString(155 * mm, y, importe)
+                    c.drawString(170 * mm, y, vto)
+                else:
+                    c.drawString(70 * mm, y, linea_banco)
+                y -= 5 * mm
+
+            # --- MONTO EN LETRAS ---
+            y -= 10 * mm
+            monto = data.get('monto_total', '0')
+            leyenda_monto = monto_a_letras(monto, data.get('moneda'))
+            for linea in wrap(leyenda_monto, 95):
+                if y < 20 * mm:
+                    c.showPage()
+                    y = height - 30 * mm
+                    c.setFont("Courier", 10)
+                c.drawString(20 * mm, y, linea)
+                y -= 5 * mm
+
+            # --- FIRMAS ---
+            y -= 30 * mm
+            c.drawString(40 * mm, y, "______________________")
+            c.drawString(130 * mm, y, "______________________")
+            y -= 6 * mm
+            c.drawString(50 * mm, y, "Autorizado")
+            c.drawString(140 * mm, y, "Recibido")
+
+            c.showPage()
+            c.save()
+            return response
+
+        return None
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
 def monto_a_letras(monto,moneda):
     try:
         monto = float(str(monto).replace(",", ""))  # Asegura formato numérico
