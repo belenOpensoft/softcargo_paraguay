@@ -64,7 +64,7 @@ def cobranza_view(request):
 def buscar_cliente(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
         query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
-        clientes = Clientes.objects.filter(empresa__istartswith=query)[:10]  # Limitar resultados a 10
+        clientes = Clientes.objects.filter(empresa__istartswith=query,activo='S')[:10]  # Limitar resultados a 10
         results = [{'id': cliente.id, 'text': cliente.empresa} for cliente in clientes]
         return JsonResponse(results, safe=False)
 

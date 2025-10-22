@@ -196,7 +196,7 @@ def buscar_cliente(request):
     #revisar
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
         query = request.GET.get('term', '').strip()  # Obtener y limpiar el término de búsqueda
-        clientes = Clientes.objects.filter(empresa__istartswith=query)[:10]  # Filtra por inicio y limita a 10 resultados
+        clientes = Clientes.objects.filter(empresa__istartswith=query,activo='S')[:10]  # Filtra por inicio y limita a 10 resultados
         results = [{'id': cliente.codigo, 'text': cliente.empresa} for cliente in clientes]
         return JsonResponse(results, safe=False)
 

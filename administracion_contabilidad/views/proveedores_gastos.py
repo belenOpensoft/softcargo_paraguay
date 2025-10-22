@@ -47,7 +47,7 @@ def proveedores_gastos_view(request):
 def buscar_proveedor(request):
     if request.method == 'GET':
         query = request.GET.get('term', '').strip()
-        proveedores = Clientes.objects.filter(empresa__istartswith=query)[:10]
+        proveedores = Clientes.objects.filter(empresa__istartswith=query,activo='S')[:10]
         results = [
             {'id': p.id, 'text': p.empresa, 'codigo': p.codigo}
             for p in proveedores

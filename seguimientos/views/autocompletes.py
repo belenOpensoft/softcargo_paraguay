@@ -15,7 +15,7 @@ from mantenimientos.models import Clientes, Ciudades, Vendedores, Vapores, Proye
 #
 def autocomplete_clientes(request):
     if 'term' in request.GET:
-        qs = Clientes.objects.filter(empresa__istartswith=request.GET.get('term')).order_by('empresa')
+        qs = Clientes.objects.filter(empresa__istartswith=request.GET.get('term'),activo='S').order_by('empresa')
         lista = []
         for x in qs:
             lista.append({'id':x.codigo,
