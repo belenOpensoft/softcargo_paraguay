@@ -1120,7 +1120,7 @@ class Impuestosbrasil(models.Model):
 class Impuordenes(models.Model):
     id = models.AutoField(primary_key=True)
     orden = models.IntegerField(blank=True, null=True)
-    numero = models.CharField(max_length=20, blank=True, null=True)
+    numero = models.CharField(max_length=60, blank=True, null=True)
     cliente = models.IntegerField(blank=True, null=True)
     monto = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
     autofac = models.CharField(max_length=40, blank=True, null=True)

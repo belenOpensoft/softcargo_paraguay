@@ -6,13 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="335d398c-6d1f-4c1e-8c6c-9772af5dd01d" name="Changes" comment="cambios">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/js_exportacion_aerea.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/js_exportacion_aerea.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/js_exportacion_maritima.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/js_exportacion_maritima.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/js_exportacion_maritimav1.2.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/js_exportacion_maritimav1.2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/js_exportacion_terrestre.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/js_exportacion_terrestre.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/js_importacion_aerea.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/js_importacion_aerea.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/js_importacion_maritima.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/js_importacion_maritima.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/js_importacion_terrestre.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/js_importacion_terrestre.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/views/cobranza.py" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/views/cobranza.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/cobranzav1.2.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/cobranzav1.2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/orden_pagov1.2.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/orden_pagov1.2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_compras.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_compras.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_mixtas.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_mixtas.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_compras.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_compras.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_ventas.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_ventas.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,7 +104,9 @@
       <workItem from="1760448173366" duration="5637000" />
       <workItem from="1760533590878" duration="5739000" />
       <workItem from="1760705462125" duration="4343000" />
-      <workItem from="1760981152849" duration="1322000" />
+      <workItem from="1760981152849" duration="1939000" />
+      <workItem from="1761052281302" duration="4311000" />
+      <workItem from="1761140225116" duration="995000" />
     </task>
     <task id="LOCAL-00001" summary="subir">
       <option name="closed" value="true" />
@@ -281,7 +284,23 @@
       <option name="project" value="LOCAL" />
       <updated>1760981743828</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1760983060734</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1760983060734</updated>
+    </task>
+    <task id="LOCAL-00024" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1761061669376</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1761061669376</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

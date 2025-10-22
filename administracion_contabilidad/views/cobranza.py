@@ -316,7 +316,7 @@ def guardar_impuventa(request):
                             boleta = Boleta.objects.filter(autogenerado=item['nroboleta']).order_by('-id').first()
                         except Exception as _:
                             boleta = None
-                            return JsonResponse({'status': 'Error: Boleta no encontrada.' })
+                            raise TypeError('no existe la boleta')
 
                         if boleta:
                             autofac = boleta.autogenerado

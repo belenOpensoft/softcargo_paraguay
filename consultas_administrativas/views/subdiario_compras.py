@@ -1,5 +1,6 @@
 import datetime
 import io
+from collections import defaultdict
 from decimal import Decimal
 
 import xlsxwriter
@@ -37,7 +38,7 @@ def subdiario_compras(request):
             if movimiento and movimiento != 'todos':
                 filtros['tipo'] = movimiento
 
-            queryset = VReporteSubdiarioCompras.objects.filter(**filtros)
+            queryset = VReporteSubdiarioCompras.objects.filter(**filtros).order_by('fecha')
 
             vistos = set()
             queryset_unicos = []
@@ -117,7 +118,7 @@ def subdiario_compras(request):
 
     return render(request, 'compras_ca/subdiario_compras.html', {'form': form})
 
-def generar_excel_subdiario_compras(datos, fecha_desde, fecha_hasta, consolidar_dolares):
+def generar_excel_subdiario_compras_old(datos, fecha_desde, fecha_hasta, consolidar_dolares):
     try:
         nombre_archivo = f'Subdiario_Compras_{fecha_desde}_al_{fecha_hasta}.xlsx'
         output = io.BytesIO()
@@ -226,3 +227,114 @@ def convertir_monto(monto, origen, destino, arbitraje, paridad):
         return round(monto, 2)
     except Exception as e:
         return str(e)
+
+def generar_excel_subdiario_compras(datos, fecha_desde, fecha_hasta, consolidar_dolares):
+    try:
+        nombre_archivo = f'Subdiario_Compras_{fecha_desde}_al_{fecha_hasta}.xlsx'
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet("Subdiario_compras")
+
+        title = f"Compras entre el {fecha_desde} y el {fecha_hasta}"
+        worksheet.merge_range('A1:AD1', title, workbook.add_format({'bold': True, 'align': 'left'}))
+
+        encabezados = [
+            'Fecha', 'Tipo', 'Nro', 'Proveedor', 'Nombre', 'Detalle', 'Exento', 'Gravado', 'Total',
+            'T. Cambio', 'Paridad','Cancelada','Posición','Cuenta','Vencimiento','Pago','Tca. Pago',
+            'Moneda', 'RUT'
+        ]
+
+        header_format = workbook.add_format({'bold': True, 'bg_color': '#d9d9d9', 'border': 1})
+        normal_format = workbook.add_format({'border': 1})
+        date_format = workbook.add_format({'num_format': 'dd-mm-yyyy', 'border': 1})
+        money_format = workbook.add_format({'num_format': '#,##0.00', 'border': 1})
+        total_format = workbook.add_format({'bold': True, 'bg_color': '#FFF2CC', 'border': 1})
+        title_format = workbook.add_format({'bold': True, 'font_size': 11})
+
+        # --- Agrupar los datos por moneda ---
+        datos_por_moneda = defaultdict(list)
+        for fila in datos:
+            moneda = fila[17] if len(fila) > 17 else 'SIN MONEDA'
+            datos_por_moneda[moneda].append(fila)
+
+        row = 2
+        totales_por_moneda = {}
+        col_widths = {}
+
+        def write_and_track(row, col, value, cell_format=None):
+            worksheet.write(row, col, value, cell_format)
+            length = len(str(value)) if value is not None else 0
+            if col not in col_widths or length > col_widths[col]:
+                col_widths[col] = length
+
+        for moneda, filas in datos_por_moneda.items():
+            write_and_track(row, 0, f"MONEDA: {moneda}", title_format)
+            row += 1
+
+            # Encabezados
+            for col_num, header in enumerate(encabezados):
+                write_and_track(row, col_num, header, header_format)
+            row += 1
+
+            total_moneda = Decimal('0.00')
+            datos_convertidos = []
+
+            for fila in filas:
+                fila = list(fila)
+
+                if consolidar_dolares:
+                    try:
+                        if fila[17] != 'DOLARES USA':
+                            moneda_origen = 1  # pesos
+                            moneda_destino = 2  # dólares
+                            arbitraje = Decimal(fila[9] or 1)
+                            paridad = Decimal(fila[10] or 1)
+                            for idx in [6, 7, 8]:  # exento, gravado, total
+                                monto = Decimal(fila[idx] or 0)
+                                fila[idx] = convertir_monto(monto, moneda_origen, moneda_destino, arbitraje, paridad)
+                    except Exception as e:
+                        print(f"Error al convertir moneda: {e}")
+
+                datos_convertidos.append(fila)
+
+            # Escribir filas
+            for fila in datos_convertidos:
+                for col_num, valor in enumerate(fila):
+                    if isinstance(valor, (datetime.date, datetime.datetime)):
+                        write_and_track(row, col_num, valor.strftime('%d/%m/%Y'), date_format)
+                    elif isinstance(valor, (Decimal, float, int)):
+                        write_and_track(row, col_num, float(valor), money_format)
+                    else:
+                        write_and_track(row, col_num, valor, normal_format)
+                total_moneda += Decimal(fila[8] or 0)
+                row += 1
+
+            # Total por moneda
+            write_and_track(row, 6, "TOTAL MONEDA", total_format)
+            write_and_track(row, 8, float(total_moneda), total_format)
+            totales_por_moneda[moneda] = total_moneda
+            row += 2
+
+        # --- Totales generales al final ---
+        write_and_track(row, 0, "=== TOTALES GENERALES POR MONEDA ===", title_format)
+        row += 1
+        for mon, total in totales_por_moneda.items():
+            write_and_track(row, 0, mon, workbook.add_format({'bold': True}))
+            write_and_track(row, 8, float(total), total_format)
+            row += 1
+
+        # --- Ajuste automático de columnas ---
+        for col, width in col_widths.items():
+            worksheet.set_column(col, col, width + 2)
+
+        workbook.close()
+        output.seek(0)
+
+        return HttpResponse(
+            output.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={'Content-Disposition': f'attachment; filename="{nombre_archivo}"'}
+        )
+    except Exception as e:
+        raise RuntimeError(f"Error al generar el Excel de compras: {e}")
+

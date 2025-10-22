@@ -379,7 +379,12 @@ function abrir_cobranza() {
         maxWidth: $(window).width() * 0.90,
         maxHeight: $(window).height() * 0.90,
         minWidth: 500,
-        minHeight: 200,
+        minHeight: 300,
+            position: {
+        my: "center top",
+        at: "center top+10",  // 👈 +10px de margen desde el borde superior
+        of: window
+    },
         beforeClose: function () {
             existe_cliente = false;
             localStorage.removeItem('medios_pago');
@@ -504,7 +509,7 @@ function tabla_facturas_pendientes(cliente, moneda) {
         info: false,
         scrollY: "300px",
         scrollCollapse: true,
-        scroller: true,
+        scroller: false,
         pageLength: 100,
         serverSide: true,
         ajax: {
@@ -545,113 +550,110 @@ function tabla_facturas_pendientes(cliente, moneda) {
 
         drawCallback: function () {
             updateBalance();
-
-            // ✅ restaurar selección visual
-            table.rows().every(function () {
-                const id = this.id();
-                if (selectedIds.has(id)) {
-                    $(this.node()).addClass('table-secondary');
-                }
-            });
             //
-            // // ✅ click para seleccionar filas
-            // $('#imputacionTablePagos tbody').off('click', 'tr').on('click', 'tr', function () {
-            //     const row = table.row(this);
-            //     const id = row.id();
-            //
-            //     if ($(this).hasClass('table-secondary')) {
-            //         $(this).removeClass('table-secondary');
-            //         selectedIds.delete(id);
-            //     } else {
-            //         $(this).addClass('table-secondary');
-            //         selectedIds.add(id);
+            // // ✅ restaurar selección visual
+            // table.rows().every(function () {
+            //     const id = this.id();
+            //     if (selectedIds.has(id)) {
+            //         $(this.node()).addClass('table-secondary');
             //     }
-            //
-            //     // Habilitar/deshabilitar botón
-            //     $('#imputarSeleccion').prop('disabled', selectedIds.size === 0);
-            //
-            //     // Detectar si hay filas imputadas
-            //     let filaImputada = false;
-            //     table.rows().every(function () {
-            //         const data = this.data();
-            //         if (parseFloat(data.imputado) !== 0) filaImputada = true;
-            //     });
-            //     $('#deshacer').prop('disabled', !filaImputada);
-            //
-            //     // Calcular importes seleccionados
-            //     let totalImporte = 0;
-            //     table.rows().every(function () {
-            //         if (selectedIds.has(this.id())) {
-            //             let saldo = parseFloat(this.data().saldo) || 0;
-            //             totalImporte += saldo;
-            //         }
-            //     });
-            //
-            //     $('#id_importe').val(totalImporte.toFixed(2));
-            //     $('#a_imputar').val(totalImporte.toFixed(2));
             // });
+
+            // ✅ click para seleccionar filas
             $('#imputacionTablePagos tbody').off('click', 'tr').on('click', 'tr', function () {
-                toggleRowSelection(this);
+                const row = table.row(this);
+                const id = row.id();
+
+                if ($(this).hasClass('table-secondary')) {
+                    $(this).removeClass('table-secondary');
+                    selectedIds.delete(id);
+                } else {
+                    $(this).addClass('table-secondary');
+                    selectedIds.add(id);
+                }
+
+                // Habilitar/deshabilitar botón
+                $('#imputarSeleccion').prop('disabled', selectedIds.size === 0);
+
+                // Detectar si hay filas imputadas
+                let filaImputada = false;
+                table.rows().every(function () {
+                    const data = this.data();
+                    if (parseFloat(data.imputado) !== 0) filaImputada = true;
+                });
+                $('#deshacer').prop('disabled', !filaImputada);
+
+                // Calcular importes seleccionados
+                let totalImporte = 0;
+                table.rows().every(function () {
+                    if (selectedIds.has(this.id())) {
+                        let saldo = parseFloat(this.data().saldo) || 0;
+                        totalImporte += saldo;
+                    }
+                });
+
+                $('#id_importe').val(totalImporte.toFixed(2));
+                $('#a_imputar').val(totalImporte.toFixed(2));
             });
         }
     });
 
 
-    // --- TECLADO ---
-    let currentIndex = 0;
-    const $tabla = $('#imputacionTablePagos');
-    $tabla.attr('tabindex', 0);
-
-    $tabla.off('keydown').on('keydown', function (e) {
-        const rows = table.rows({ page: 'current' }).nodes().to$();
-        if (!rows.length) return;
-
-        // quitar foco visual previo
-        rows.removeClass('row-focus');
-
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-            e.preventDefault();
-
-            if (e.key === 'ArrowDown') {
-                currentIndex = Math.min(currentIndex + 1, rows.length - 1);
-            } else if (e.key === 'ArrowUp') {
-                currentIndex = Math.max(currentIndex - 1, 0);
-            }
-
-            const currentRow = rows[currentIndex];
-            $(currentRow).addClass('row-focus');
-
-            // ejecutar la misma acción que el click
-            toggleRowSelection(currentRow);
-
-            // scroll suave
-            const container = $('#imputacionTablePagos_wrapper .dataTables_scrollBody');
-            const rowTop = $(currentRow).position().top;
-            const rowBottom = rowTop + $(currentRow).outerHeight();
-            const scrollTop = container.scrollTop();
-            const containerHeight = container.height();
-
-            if (rowBottom > containerHeight) {
-                container.animate({ scrollTop: scrollTop + (rowBottom - containerHeight) }, 100);
-            } else if (rowTop < 0) {
-                container.animate({ scrollTop: scrollTop + rowTop }, 100);
-            }
-        }
-    });
-
-    // --- Estilo para el foco (diferente color para pagos si querés) ---
-    const styleId = 'focus-style-pagos';
-    if (!document.getElementById(styleId)) {
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
-            .row-focus {
-                outline: 2px solid #ff8400 !important;
-                outline-offset: -2px;
-            }
-        `;
-        document.head.appendChild(style);
-    }
+    // // --- TECLADO ---
+    // let currentIndex = 0;
+    // const $tabla = $('#imputacionTablePagos');
+    // $tabla.attr('tabindex', 0);
+    //
+    // $tabla.off('keydown').on('keydown', function (e) {
+    //     const rows = table.rows({ page: 'current' }).nodes().to$();
+    //     if (!rows.length) return;
+    //
+    //     // quitar foco visual previo
+    //     rows.removeClass('row-focus');
+    //
+    //     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    //         e.preventDefault();
+    //
+    //         if (e.key === 'ArrowDown') {
+    //             currentIndex = Math.min(currentIndex + 1, rows.length - 1);
+    //         } else if (e.key === 'ArrowUp') {
+    //             currentIndex = Math.max(currentIndex - 1, 0);
+    //         }
+    //
+    //         const currentRow = rows[currentIndex];
+    //         $(currentRow).addClass('row-focus');
+    //
+    //         // ejecutar la misma acción que el click
+    //         toggleRowSelection(currentRow);
+    //
+    //         // scroll suave
+    //         const container = $('#imputacionTablePagos_wrapper .dataTables_scrollBody');
+    //         const rowTop = $(currentRow).position().top;
+    //         const rowBottom = rowTop + $(currentRow).outerHeight();
+    //         const scrollTop = container.scrollTop();
+    //         const containerHeight = container.height();
+    //
+    //         if (rowBottom > containerHeight) {
+    //             container.animate({ scrollTop: scrollTop + (rowBottom - containerHeight) }, 100);
+    //         } else if (rowTop < 0) {
+    //             container.animate({ scrollTop: scrollTop + rowTop }, 100);
+    //         }
+    //     }
+    // });
+    //
+    // // --- Estilo para el foco (diferente color para pagos si querés) ---
+    // const styleId = 'focus-style-pagos';
+    // if (!document.getElementById(styleId)) {
+    //     const style = document.createElement('style');
+    //     style.id = styleId;
+    //     style.textContent = `
+    //         .row-focus {
+    //             outline: 2px solid #ff5100 !important;
+    //             outline-offset: -2px;
+    //         }
+    //     `;
+    //     document.head.appendChild(style);
+    // }
 
     existe_cliente = true;
 

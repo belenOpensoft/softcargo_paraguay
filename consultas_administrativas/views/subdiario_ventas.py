@@ -44,7 +44,7 @@ def subdiario_ventas(request):
             if movimiento and movimiento !='todos':
                 filtros['tipo'] = movimiento
 
-            queryset = VReporteSubdiarioVentas.objects.filter(**filtros)
+            queryset = VReporteSubdiarioVentas.objects.filter(**filtros).order_by('fecha')
 
 
             cobros_factura = {}

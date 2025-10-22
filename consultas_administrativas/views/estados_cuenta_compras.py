@@ -13,7 +13,7 @@ from administracion_contabilidad.models import Movims, Asientos, Impuvtas, Bolet
 from cargosystem import settings
 from consultas_administrativas.forms import ReporteCobranzasForm, AntiguedadSaldosForm, EstadoCuentaComprasForm
 from consultas_administrativas.models import VAntiguedadSaldos
-from mantenimientos.models import Clientes
+from mantenimientos.models import Clientes, Monedas
 
 from datetime import date, datetime
 
@@ -166,6 +166,7 @@ def obtener_estado_individual(form,fecha_desde, fecha_hasta, moneda):
                 'vencimiento': asiento.vto if asiento else None,
                 'detalle': m.mdetalle,
                 'total': m.mtotal,
+                'moneda': m.mmoneda,
                 'saldo': m.msaldo,
                 'numero_pago': numero_pago,
                 'fecha_pago': fecha_pago,
@@ -301,6 +302,7 @@ def obtener_estado_general(form,fecha_desde, fecha_hasta, moneda):
                     'numero_pago': numero_pago,
                     'fecha_pago': fecha_pago,
                     'pago': pago,
+                    'moneda': m.mmoneda,
                     'posicion': asiento.posicion if asiento else None,
                     'cuenta': asiento.cuenta if asiento else None,
                 })
@@ -308,7 +310,7 @@ def obtener_estado_general(form,fecha_desde, fecha_hasta, moneda):
 
     return datos
 
-def calcular_saldos_anteriores(fecha_desde, moneda=None, cliente_id=None):
+def calcular_saldos_anteriores_old(fecha_desde, moneda=None, cliente_id=None):
     """
     Devuelve un diccionario con el saldo acumulado anterior a fecha_desde.
     - Si cliente_id es None → devuelve todos los clientes.
@@ -358,168 +360,8 @@ def calcular_saldos_anteriores(fecha_desde, moneda=None, cliente_id=None):
 
     return saldos
 
+
 def generar_excel_estados_cuenta_old(datos, fecha_desde, fecha_hasta, moneda,
-                                  consolidar_dolares=False,
-                                  consolidar_moneda_nac=False,
-                                  omitir_saldos_cero=False,
-                                  cliente=None):
-    try:
-        if consolidar_dolares:
-            nombre_moneda = "DOLARES USA"
-        elif consolidar_moneda_nac:
-            nombre_moneda = "MONEDA NACIONAL"
-        else:
-            nombre_moneda = moneda.nombre.upper() if moneda else "TODAS LAS MONEDAS"
-
-        # --- Calcular saldos anteriores por cliente ---
-        saldos_anteriores = calcular_saldos_anteriores(fecha_desde, moneda, cliente_id=cliente)
-
-        # --- Unificar todos los clientes ---
-        clientes_dict = {}
-
-        # clientes con movimientos
-        for cliente_id, info in datos.items():
-            cliente_id_int = int(cliente_id)  # 🔑 normalizamos la clave
-            cli = info['datos_cliente'][0]
-            saldo_anterior = saldos_anteriores.get(cliente_id_int, {}).get('saldo', Decimal('0.00'))
-            clientes_dict[cliente_id_int] = {
-                'codigo': int(cli.get('codigo')),   # por si viene string
-                'nombre': cli.get('nombre'),
-                'saldo_anterior': saldo_anterior,
-                'movimientos': info['movimientos']
-            }
-
-        # clientes solo con saldo anterior distinto de 0
-        for cliente_id, info in saldos_anteriores.items():
-            cliente_id_int = int(cliente_id)  # 🔑 normalizamos
-            if cliente_id_int not in clientes_dict and info['saldo'] != 0:
-                clientes_dict[cliente_id_int] = {
-                    'codigo': cliente_id_int,
-                    'nombre': info['nombre'],
-                    'saldo_anterior': info['saldo'],
-                    'movimientos': []
-                }
-
-        # --- Filtrado opcional de saldos en cero ---
-        if omitir_saldos_cero:
-            clientes_filtrados = {}
-            for cliente_id, info in clientes_dict.items():
-                saldo_final = info['saldo_anterior']
-                for m in info['movimientos']:
-                    tipo = m.get('numero_tipo')
-                    total = Decimal(m.get('total') or 0)
-                    if tipo in (41, 45):
-                        saldo_final += total
-                    elif tipo in (40,42,26):
-                        saldo_final -= total
-                if saldo_final != 0:
-                    clientes_filtrados[cliente_id] = info
-            clientes_dict = clientes_filtrados
-
-        # --- Ordenar clientes alfabéticamente por nombre ---
-        clientes_ordenados = sorted(clientes_dict.values(), key=lambda x: x['nombre'].lower())
-
-        # --- Crear Excel ---
-        output = io.BytesIO()
-        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
-        worksheet = workbook.add_worksheet("EstadoCuenta")
-
-        # Formatos
-        title_format = workbook.add_format({'bold': True, 'font_size': 12})
-        header_format = workbook.add_format({'bold': True, 'bg_color': '#d9d9d9', 'border': 1, 'align': 'center'})
-        money_format = workbook.add_format({'num_format': '#,##0.00', 'border': 1})
-        date_format = workbook.add_format({'num_format': 'dd/mm/yyyy', 'border': 1})
-        text_format = workbook.add_format({'border': 1})
-        bold_format = workbook.add_format({'bold': True, 'border': 1})
-        total_format = workbook.add_format({'bold': True, 'border': 1, 'bg_color': '#FFF2CC'})  # amarillo
-
-        row = 0
-        if cliente and len(clientes_ordenados) == 1:
-            # Tomamos el nombre del único cliente presente
-            cli_name = clientes_ordenados[0]['nombre']
-            titulo = f"Estado de cuenta de {cli_name} del {fecha_desde:%d/%m/%Y} al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
-        else:
-            titulo = f"Cuentas a pagar desde 0 a Z al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
-        worksheet.merge_range(row, 0, row, 9, titulo, title_format)
-        row += 2
-
-        headers = ['Fecha', 'Tipo', 'Documento', 'Vto.', 'Detalle',
-                   'Debe', 'Haber', 'Saldo', 'Posición', 'Cta. Ventas','Pago', 'Fecha Pago', 'Documento Pago']
-        worksheet.write_row(row, 0, headers, header_format)
-        row += 1
-
-        total_general = Decimal('0.00')
-
-        # --- Iterar clientes ya ordenados ---
-        for cli in clientes_ordenados:
-            worksheet.write(row, 2, "1")
-            worksheet.write(row, 4, cli['codigo'], text_format)
-            worksheet.write(row, 5, cli['nombre'], text_format)
-            row += 1
-
-            saldo_acumulado = cli['saldo_anterior']
-            worksheet.write(row, 6, "Saldo anterior", bold_format)
-            worksheet.write(row, 7, float(saldo_acumulado), bold_format)
-            row += 1
-
-            if cli['movimientos']:
-                for m in cli['movimientos']:
-                    tipo = m.get('numero_tipo')
-                    total = Decimal(m.get('total') or 0)
-                    debe = haber = Decimal('0.00')
-
-                    if tipo in (41, 45):
-                        debe = total
-                    elif tipo in (40,42,26):
-                        haber = total
-
-                    saldo_acumulado += debe - haber
-
-                    worksheet.write(row, 0, m.get('fecha'),
-                                    date_format if isinstance(m.get('fecha'), datetime) else text_format)
-                    worksheet.write(row, 1, m.get('tipo'), text_format)
-                    worksheet.write(row, 2, m.get('documento'), text_format)
-                    worksheet.write(row, 3, m.get('vencimiento'),
-                                    date_format if isinstance(m.get('vencimiento'), datetime) else text_format)
-                    worksheet.write(row, 4, m.get('detalle') or "Sin movimientos en el período", text_format)
-                    worksheet.write(row, 5, float(debe), money_format)
-                    worksheet.write(row, 6, float(haber), money_format)
-                    worksheet.write(row, 7, float(saldo_acumulado), money_format)
-                    worksheet.write(row, 8, m.get('posicion'), text_format)
-                    worksheet.write(row, 9, m.get('cuenta'), text_format)
-                    worksheet.write(row, 10, m.get('pago'), text_format)
-                    worksheet.write(row, 11, m.get('fecha_pago'), text_format)
-                    worksheet.write(row, 12, m.get('numero_pago'), text_format)
-                    row += 1
-            else:
-                worksheet.write(row, 4, "Sin movimientos en el período", text_format)
-                row += 1
-
-            worksheet.write(row, 6, "Actual", bold_format)
-            worksheet.write(row, 7, float(saldo_acumulado), bold_format)
-            row += 2
-
-            total_general += saldo_acumulado
-
-        # --- Total general ---
-        worksheet.write(row, 6, "TOTAL GENERAL", total_format)
-        worksheet.write(row, 7, float(total_general), total_format)
-
-        workbook.close()
-        output.seek(0)
-
-        nombre_archivo = f"estado_cuenta_{fecha_desde:%Y-%m-%d}_{fecha_hasta:%Y-%m-%d}.xlsx"
-
-        return HttpResponse(
-            output.read(),
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            headers={'Content-Disposition': f'attachment; filename="{nombre_archivo}"'}
-        )
-
-    except Exception as e:
-        raise RuntimeError(f"Error al generar Excel: {e}")
-
-def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
                                   consolidar_dolares=False,
                                   consolidar_moneda_nac=False,
                                   omitir_saldos_cero=False,
@@ -744,3 +586,245 @@ def convertir_monto(monto, origen, destino, arbitraje, paridad):
         return str(e)
 
 
+def calcular_saldos_anteriores(fecha_desde, moneda=None, proveedor_id=None):
+    """
+    Devuelve los saldos acumulados de COMPRAS anteriores a fecha_desde,
+    separados por moneda.
+    Estructura:
+    {
+      proveedor_id: {
+         'nombre': <nombre_proveedor>,
+         'saldos': { 'USD': Decimal(...), 'UYU': Decimal(...), ... }
+      }
+    }
+    """
+    tipos_mov = (40, 41, 42, 45, 26)
+
+    proveedores_qs = Clientes.objects.only(
+        'codigo', 'empresa', 'fechadenegado', 'tipo', 'socio'
+    ).order_by('empresa')
+
+    if proveedor_id:
+        proveedores_qs = proveedores_qs.filter(codigo=proveedor_id)
+
+    saldos = {}
+    for prov in proveedores_qs:
+        filtro_base = {
+            'mfechamov__lt': fecha_desde,
+            'mcliente': prov.codigo,
+            'mactivo': 'S',
+            'mtipo__in': tipos_mov
+        }
+
+        if isinstance(prov.fechadenegado, datetime) and prov.tipo != 1 and prov.socio != 'T':
+            filtro_base['mfechamov__gt'] = prov.fechadenegado
+
+        movimientos = Movims.objects.filter(**filtro_base).values('mmoneda', 'mtipo', 'mtotal', 'mserie')
+
+        if not movimientos.exists():
+            continue
+
+        saldos_proveedor = defaultdict(Decimal)
+
+        for m in movimientos:
+            if m.get('mserie') == 'P':
+                continue
+
+            cod_mon = m.get('mmoneda')
+            total = Decimal(m.get('mtotal') or 0)
+            debe = haber = Decimal('0.00')
+
+            if m['mtipo'] in (41, 45):  # Factura, orden de pago, etc.
+                debe = total
+            elif m['mtipo'] in (40, 42, 26):  # Nota de crédito, devolución, etc.
+                haber = total
+
+            saldos_proveedor[cod_mon] += (debe - haber)
+
+        saldos_filtrados = {k: v for k, v in saldos_proveedor.items() if v != 0}
+
+        if saldos_filtrados:
+            saldos[prov.codigo] = {
+                'nombre': prov.empresa,
+                'saldos': saldos_filtrados
+            }
+
+    return saldos
+
+def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
+                                         consolidar_dolares=False,
+                                         consolidar_moneda_nac=False,
+                                         omitir_saldos_cero=False,
+                                         proveedor=None, todas_monedas=False):
+    """
+    Genera un Excel con el estado de cuenta de compras, separado por proveedor y por moneda.
+    Incluye totales por proveedor/moneda y un resumen final por moneda.
+    También incluye proveedores sin movimientos pero con saldo anterior distinto de cero.
+    """
+    try:
+        # --- Determinar título general ---
+        if consolidar_dolares:
+            nombre_moneda = "DÓLARES USA"
+        elif consolidar_moneda_nac:
+            nombre_moneda = "MONEDA NACIONAL"
+        elif todas_monedas:
+            nombre_moneda = "TODAS LAS MONEDAS"
+        else:
+            if moneda:
+                m = Monedas.objects.filter(codigo=moneda).first()
+                nombre_moneda = m.nombre if m else "TODAS LAS MONEDAS"
+            else:
+                nombre_moneda = "TODAS LAS MONEDAS"
+
+        # --- Saldos anteriores ---
+        saldos_anteriores = calcular_saldos_anteriores(fecha_desde, None, proveedor_id=proveedor)
+
+        # --- Unificar proveedores con movimientos o solo saldo ---
+        proveedores_dict = {}
+        for pid, info in datos.items():
+            prov_data = info['datos_cliente'][0]
+            proveedores_dict[int(pid)] = info
+
+        for pid, info_saldo in saldos_anteriores.items():
+            if int(pid) not in proveedores_dict and info_saldo.get('saldos'):
+                proveedores_dict[int(pid)] = {
+                    'datos_cliente': [{
+                        'codigo': pid,
+                        'nombre': info_saldo.get('nombre', 'Desconocido')
+                    }],
+                    'movimientos': []
+                }
+
+        # --- Crear Excel ---
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet("EstadoCuentaCompras")
+
+        # --- Formatos comunes ---
+        title_format = workbook.add_format({'bold': True, 'font_size': 12, 'align': 'left'})
+        header_format = workbook.add_format({'bold': True, 'bg_color': '#d9d9d9', 'border': 1, 'align': 'center'})
+        money_format = workbook.add_format({'num_format': '#,##0.00', 'border': 1})
+        date_format = workbook.add_format({'num_format': 'dd/mm/yyyy', 'border': 1})
+        text_format = workbook.add_format({'border': 1})
+        bold_format = workbook.add_format({'bold': True, 'border': 1})
+        total_format = workbook.add_format({'bold': True, 'border': 1, 'bg_color': '#FFF2CC'})
+
+        col_widths = {}
+        def write_and_track(row, col, value, cell_format=None):
+            # Escribir números como números (evita errores tipo Err:509)
+            if isinstance(value, (int, float, Decimal)):
+                worksheet.write_number(row, col, float(value), cell_format)
+            else:
+                # Si empieza con "=", lo escribimos como texto literal
+                if isinstance(value, str) and value.startswith('='):
+                    value = "'" + value
+                worksheet.write(row, col, value, cell_format)
+
+            length = len(str(value)) if value is not None else 0
+            if col not in col_widths or length > col_widths[col]:
+                col_widths[col] = length
+
+
+        # --- Título ---
+        titulo = f"                                     Cuentas a pagar desde 0 a Z al {fecha_hasta:%d/%m/%Y} en {nombre_moneda}"
+        worksheet.merge_range(0, 0, 3, 12, titulo, title_format)
+        logo_path = os.path.join(settings.PACKAGE_ROOT, 'static', 'images', 'oceanlink.png')
+        worksheet.insert_image('A1', logo_path, {'x_scale': 0.5, 'y_scale': 0.5, 'x_offset': 5, 'y_offset': 5})
+
+        # --- Encabezado ---
+        row = 5
+        headers = ['Fecha', 'Tipo', 'Documento', 'Vto.', 'Detalle',
+                   'Debe', 'Haber', 'Saldo', 'Posición', 'Cta. Compras',
+                   'Pago', 'Fecha Pago', 'Documento Pago']
+        for col, h in enumerate(headers):
+            write_and_track(row, col, h, header_format)
+        row += 1
+
+        totales_por_moneda = defaultdict(Decimal)
+
+        # --- Iterar proveedores ---
+        for pid, info in sorted(proveedores_dict.items(), key=lambda x: int(x[0])):
+            prov_data = info['datos_cliente'][0]
+            codigo = prov_data.get('codigo')
+            nombre = prov_data.get('nombre')
+            movimientos = info['movimientos']
+
+            mov_por_moneda = defaultdict(list)
+            for m in movimientos:
+                mov_por_moneda[m.get('moneda')].append(m)
+
+            saldo_prov = saldos_anteriores.get(codigo, {}).get('saldos', {})
+            for cod_moneda in saldo_prov.keys():
+                mov_por_moneda.setdefault(cod_moneda, [])
+
+            for cod_moneda, movs in mov_por_moneda.items():
+                moneda_obj = Monedas.objects.filter(codigo=cod_moneda).first()
+                nombre_moneda_actual = moneda_obj.nombre.upper() if moneda_obj else f"MONEDA {cod_moneda}"
+
+                write_and_track(row, 0, f"Proveedor {codigo} – {nombre}  |  MONEDA: {nombre_moneda_actual}", bold_format)
+                row += 1
+
+                saldo_anterior = saldo_prov.get(cod_moneda, Decimal('0.00'))
+                write_and_track(row, 6, "Saldo anterior", bold_format)
+                write_and_track(row, 7, float(saldo_anterior), bold_format)
+                row += 1
+
+                saldo_acumulado = saldo_anterior
+                tiene_movs = False
+
+                for m in movs:
+                    tiene_movs = True
+                    tipo = m.get('numero_tipo')
+                    total = Decimal(m.get('total') or 0)
+                    debe = haber = Decimal('0.00')
+
+                    if tipo in (41, 45): debe = total
+                    elif tipo in (40, 42, 26): haber = total
+
+                    saldo_acumulado += (debe - haber)
+
+                    write_and_track(row, 0, m.get('fecha'), date_format if isinstance(m.get('fecha'), datetime) else text_format)
+                    write_and_track(row, 1, m.get('tipo'), text_format)
+                    write_and_track(row, 2, m.get('documento'), text_format)
+                    write_and_track(row, 3, m.get('vencimiento'), date_format if isinstance(m.get('vencimiento'), datetime) else text_format)
+                    write_and_track(row, 4, m.get('detalle') or "Sin movimientos en el período", text_format)
+                    write_and_track(row, 5, float(debe), money_format)
+                    write_and_track(row, 6, float(haber), money_format)
+                    write_and_track(row, 7, float(saldo_acumulado), money_format)
+                    row += 1
+
+                if not tiene_movs:
+                    write_and_track(row, 4, "Sin movimientos en el período", text_format)
+                    row += 1
+
+                write_and_track(row, 6, f"TOTAL {nombre_moneda_actual}", total_format)
+                write_and_track(row, 7, float(saldo_acumulado), total_format)
+                row += 2
+
+                totales_por_moneda[nombre_moneda_actual] += saldo_acumulado
+
+        # --- Totales generales ---
+        if totales_por_moneda:
+            row += 1
+            write_and_track(row, 0, "=== TOTALES GENERALES POR MONEDA ===", bold_format)
+            row += 1
+            for nombre_mon, total_mon in totales_por_moneda.items():
+                write_and_track(row, 0, f"MONEDA: {nombre_mon}", bold_format)
+                write_and_track(row, 7, float(total_mon), total_format)
+                row += 1
+
+        for c, w in col_widths.items():
+            worksheet.set_column(c, c, w + 2)
+
+        workbook.close()
+        output.seek(0)
+        nombre_archivo = f"estado_cuenta_compras_{fecha_desde:%Y-%m-%d}_{fecha_hasta:%Y-%m-%d}.xlsx"
+
+        return HttpResponse(
+            output.read(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers={'Content-Disposition': f'attachment; filename=\"{nombre_archivo}\"'}
+        )
+
+    except Exception as e:
+        raise RuntimeError(f"Error al generar Excel multimoneda de compras: {e}")
