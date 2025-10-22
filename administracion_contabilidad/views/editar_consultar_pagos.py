@@ -162,7 +162,7 @@ def cargar_pendientes_imputacion_pago(request):
         registros = Movims.objects.filter(
             mcliente=nrocliente,
             mtipo__in=(40, 41)
-        ).exclude(msaldo=0)
+        ).exclude(msaldo=0).exclude(mactivo='N').exclude(mserie='P')
 
         data = []
         for registro in registros:

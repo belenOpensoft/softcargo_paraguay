@@ -128,6 +128,11 @@ $(document).on('dblclick', '#tabla_consultar_cobranzas tbody tr', function () {
       modal: true,
       width: 'auto',
       height: 'auto',
+        position: {
+    my: "center top",
+    at: "center top+50", // más cerca del borde superior
+    of: window
+  },
     buttons: [
       {
         text: "Anular",

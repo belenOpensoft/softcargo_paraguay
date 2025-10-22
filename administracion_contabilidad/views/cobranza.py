@@ -301,7 +301,7 @@ def guardar_impuventa(request):
                 cobranza = vector.get('cobranza', [])
 
                 verificar_num=int(cobranza[0]['numero'])
-                verif= Movims.objects.filter(mboleta=verificar_num,mnombremov='COBRO')
+                verif= Movims.objects.filter(mboleta=verificar_num,mnombremov='COBRO',mactivo='S')
                 if verif.exists():
                     return JsonResponse({'status': 'Error: ' + 'El número ingresado para la cobranza, ya existe.'})
 

@@ -139,13 +139,14 @@ def get_data(registros_filtrados):
         data = []
         for registro in registros_filtrados:
             registro_json = []
+            monto = registro.total - registro.iva
             registro_json.append(str(registro.tipo))
             registro_json.append('' if registro.autogenerado is None else str(registro.autogenerado))
             registro_json.append('' if registro.fecha is None else registro.fecha.strftime('%Y-%m-%d'))
             registro_json.append('' if registro.num_completo is None else str(registro.num_completo))
             registro_json.append('' if registro.cliente is None else str(registro.cliente))
             registro_json.append('' if registro.posicion is None else str(registro.posicion))
-            registro_json.append('' if registro.monto is None else str(registro.monto))
+            registro_json.append(monto)
             registro_json.append('' if registro.iva is None else str(registro.iva))
             registro_json.append('' if registro.total is None else str(registro.total))
             registro_json.append('' if registro.nrocliente is None else str(registro.nrocliente))

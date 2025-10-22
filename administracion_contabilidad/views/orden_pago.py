@@ -820,6 +820,9 @@ def guardar_impuorden(request):
                         }
                         crear_movimiento(movimiento_vec)
 
+                moneda = Monedas.objects.filter(codigo=cobranza[0]['nromoneda']).first()
+                moneda_str = moneda.nombre if moneda else ''
+
                 #return JsonResponse({'status': 'exito'})
                 pdf_data = {
                     "nro": cobranza[0]['numero'],
@@ -828,7 +831,7 @@ def guardar_impuorden(request):
                     "detalle": movimiento[0]['boletas'],
                     "cambio_general": cobranza[0]['arbitraje'],
                     "monto_total": str(cobranza[0]['total']),
-                    "moneda": "MONEDA NACIONAL" if cobranza[0]['nromoneda'] == 1 else "DÓLARES",
+                    "moneda": moneda_str,
                     "proveedor_nombre": cliente_data.empresa if cliente_data else "",
                     "proveedor_direccion": cliente_data.direccion if cliente_data else "",
                     "proveedor_telefono": cliente_data.telefono if cliente_data else "",
@@ -1359,7 +1362,8 @@ def reimprimir_op(request):
         # Común para ambas funciones
         fecha_pago_str = orden.mfechamov.strftime("%Y-%m-%d")
         vto_str = fecha_pago_str
-        moneda_str = "MONEDA NACIONAL" if orden.mmoneda == 1 else "DÓLARES"
+        moneda = Monedas.objects.filter(codigo=movimiento.mmoneda).first()
+        moneda_str = moneda.nombre if moneda else ''
         cambio = float(movimiento.marbitraje) if hasattr(movimiento, 'marbitraje') and movimiento.marbitraje else 0
 
         forma_pago = json.dumps([

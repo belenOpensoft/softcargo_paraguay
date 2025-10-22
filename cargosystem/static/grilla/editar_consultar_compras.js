@@ -128,6 +128,11 @@
       modal: true,
       width: 'auto',
       height: 600,
+        position: {
+    my: "center top",
+    at: "center top+50", // más cerca del borde superior
+    of: window
+  },
     buttons: [
       {
         text: "Anular",
