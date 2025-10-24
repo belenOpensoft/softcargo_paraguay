@@ -104,6 +104,8 @@ $(document).ready(function () {
       const filas = document.querySelectorAll("#tablaMovimientos tr");
       const data = [];
       const monedas = new Set();
+      const tipo = new Set();
+      let t;
 
       filas.forEach(fila => {
         const celdas = fila.querySelectorAll("td");
@@ -117,6 +119,12 @@ $(document).ready(function () {
         const posicion = celdas[6].textContent.trim();
         const moneda = celdas[7].textContent.trim();
         monedas.add(moneda);
+        if (debe){
+          t='debe';
+        }else{
+          t='haber';
+        }
+        tipo.add(t);
         data.push({
           cuenta,
           detalle,
@@ -133,34 +141,15 @@ $(document).ready(function () {
           alert("Error: no se pueden combinar monedas distintas en un mismo asiento.");
           return;
         }
+      if (tipo.size == 1) {
+          alert("Error: no hay asientos de deber y de haber creados.");
+          return;
+        }
       if (data.length === 0) {
         alert("No hay datos para enviar.");
         return;
       }
-/*
-    fetch("/admin_cont/guardar_asientos/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": csrf_token
-      },
-      body: JSON.stringify({ asientos: data })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (!data.success && !data.status) {
-        console.error("Error del servidor:", data.error || data);
-        throw new Error("Error al guardar.");
-      }
-      $('#formIngresarAsiento').trigger('reset');
-      $('#tablaMovimientos').empty();
-      alert("Asientos guardados correctamente.");
-    })
-    .catch(error => {
-      console.error("Error en la petición:", error);
-      alert("Ocurrió un error al enviar los datos.");
-    });
-*/
+
       fetch("/admin_cont/guardar_asientos/", {
         method: "POST",
         headers: {
