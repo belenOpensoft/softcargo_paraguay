@@ -47,6 +47,7 @@ function facturar(){
     } else {
         console.log("La tabla no está inicializada.");
     }
+    $('#seleccionar_todos').text('Seleccionar todos');
 
     $("#facturar_modal").dialog({
         autoOpen: true,
@@ -54,13 +55,13 @@ function facturar(){
             if(tablaOrigen.includes('tabla_general')){
                 cargar_gastos_factura_general(function() {
             sumar_ingresos_tabla();
-            asignar_costo_todos(event);
+            // asignar_costo_todos(event);
 
         });
             }
         cargar_gastos_factura(function() {
             sumar_ingresos_tabla();
-            asignar_costo_todos(event);
+            // asignar_costo_todos(event);
         });
         },
         position: {
@@ -579,3 +580,48 @@ $('#seleccionar_todos').on('click', function () {
         }
     });
 });
+
+$('#destinatario').on('DOMNodeRemoved', function() {
+    console.log('⚠️ El nodo destinatario fue eliminado del DOM');
+});
+
+
+$("#destinatario").autocomplete({
+    source: '/autocomplete_clientes/',
+    minLength: 2,
+    select: function (event, ui) {
+            $(this).data('item-seleccionado', true);
+
+        $(this).attr('data-id', ui.item['id']);
+    },
+    change: function (event, ui) {
+        if (ui.item) {
+            $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
+             $('#destinatario_input').val(ui.item['id']);
+             $('#destinatario_input').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
+        } else {
+            $(this).val('');
+            $('#destinatario_input').val('');
+            $(this).css({"border-color": "", 'box-shadow': ''});
+            $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
+        }
+    }
+})
+    .on('focus', function() {
+    // Al enfocar, reseteamos la bandera
+        $(this).data('item-seleccionado', false);
+    })
+    .on('blur', function() {
+        const $this = $(this);
+        const seleccion = $this.data('item-seleccionado');
+        const valor = $this.val();
+        const dataId = $this.attr('data-id');
+        const destinatarioInputVal = $('#destinatario_input').val();
+
+        // Si no se seleccionó nada de la lista
+        // y tampoco hay data-id ni valores previos → limpiar
+        if (!seleccion && (!dataId || dataId === '') && (!valor || valor === '') && (!destinatarioInputVal || destinatarioInputVal === '')) {
+            $this.val('');
+            $('#destinatario_input').val('');
+        }
+    });

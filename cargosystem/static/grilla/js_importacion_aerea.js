@@ -5709,44 +5709,6 @@ function sumar_ingresos() {
 }
 
 //autocomplete factura
-$("#destinatario").autocomplete({
-    source: '/autocomplete_clientes/',
-    minLength: 2,
-    select: function (event, ui) {
-        $(this).data('item-seleccionado', true);
-
-        $(this).attr('data-id', ui.item['id']);
-    },
-    change: function (event, ui) {
-        if (ui.item) {
-            $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-            $('#destinatario_input').val(ui.item['id']);
-            $('#destinatario_input').css({
-                "border-color": "#3D9A37",
-                'box-shadow': '0 0 0 0.1rem #3D9A37',
-                'font-size': '10px'
-            });
-        } else {
-            $(this).val('');
-            $('#destinatario_input').val('');
-            $(this).css({"border-color": "", 'box-shadow': ''});
-            $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
-        }
-    }
-})
-    .on('focus', function () {
-        // Al enfocar, reseteamos la bandera
-        $(this).data('item-seleccionado', false);
-    })
-    .on('blur', function () {
-        // Si el usuario salió del campo sin seleccionar de la lista → limpiar
-        const seleccion = $(this).data('item-seleccionado');
-        if (!seleccion) {
-            $(this).val('');
-            $('#destinatario_input').val('');
-        }
-    });
-
 
 //modal para buscar
 function modal_buscar() {

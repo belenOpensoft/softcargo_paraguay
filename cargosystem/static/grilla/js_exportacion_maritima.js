@@ -5770,25 +5770,6 @@ function sumar_ingresos() {
     $('#total_ingresos').val(totalIngresos.toFixed(2)); // Redondea a 2 decimales si es necesario
 }
 //autocomplete factura
-$("#destinatario").autocomplete({
-    source: '/autocomplete_clientes/',
-    minLength: 2,
-    select: function (event, ui) {
-        $(this).attr('data-id', ui.item['id']);
-    },
-    change: function (event, ui) {
-        if (ui.item) {
-            $(this).css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37'});
-             $('#destinatario_input').val(ui.item['id']);
-             $('#destinatario_input').css({"border-color": "#3D9A37", 'box-shadow': '0 0 0 0.1rem #3D9A37', 'font-size':'10px'});
-        } else {
-            $(this).val('');
-            $('#destinatario_input').val('');
-            $(this).css({"border-color": "", 'box-shadow': ''});
-            $('#destinatario_input').css({"border-color": "", 'box-shadow': ''});
-        }
-    }
-});
 
 
 //modal para buscar
