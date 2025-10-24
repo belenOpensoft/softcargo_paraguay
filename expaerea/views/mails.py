@@ -474,37 +474,16 @@ def get_data_html(row_number, row, row2,seg, title, texto, resultado,seguimiento
 
         fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
 
-        if isinstance(seguimiento.eta, datetime):
-
-            llegada = seguimiento.eta.strftime("%d/%m/%Y")
-
+        if isinstance(row.eta, datetime):
+            llegada = str(row.eta.strftime("%d/%m/%Y"))
         else:
-
             llegada = ''
-
-        texto = ""
-
-        texto += formatear_linea("Fecha", fecha_formateada)
-
-        texto += "<br>"
-
-        texto += formatear_linea("Seguimiento", row.seguimiento)
-
-        texto += formatear_linea("Posición", row.posicion)
-
-        texto += formatear_linea("Master", row.awb)
-
-        texto += formatear_linea("ETA", llegada)
-
-        texto += formatear_linea("Cliente", seguimiento.cliente)
-
-        texto += "<br>"
-
-        texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
-
-        texto += "OCEANLINK\n"
-
-        texto += "</pre>"
+        texto = fecha_formateada + "<br><br>"
+        texto += formatear_linea('ORDEN DE FACTURACION SEGUIMIENTO', row.seguimiento)
+        texto += formatear_linea('POSICION', row.posicion)
+        texto += formatear_linea('MASTER', row.awb)
+        texto += formatear_linea('ETA', llegada)
+        texto += formatear_linea('CLIENTE', seguimiento.cliente)
 
         return texto, resultado
     elif title == 'Aviso de desconsolidacion':

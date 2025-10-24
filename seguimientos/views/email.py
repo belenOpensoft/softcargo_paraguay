@@ -917,23 +917,21 @@ def get_data_email(request):
                 fecha_actual = datetime.datetime.now()
                 fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
 
-                if isinstance(row.eta, datetime.datetime):
-                    llegada = row.eta.strftime("%d/%m/%Y")
-                else:
-                    llegada = ''
-
                 texto = ""
                 texto += formatear_linea("Fecha", fecha_formateada)
                 texto += "<br>"
 
-                texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
-                texto += f"ORDEN DE FACTURACIÓN - SEGUIMIENTO: {row.numero}\n\n"
-                texto += f"{'Posición:':<15} {row.posicion}\n"
-                texto += f"{'Master:':<15} {row.awb}\n"
-                texto += f"{'ETA:':<15} {llegada}\n"
-                texto += f"{'Cliente:':<15} {row.cliente}\n\n"
-                texto += "OCEANLINK\n"
-                texto += "</pre>"
+                if isinstance(row.eta, datetime.datetime):
+                    llegada = str(row.eta.strftime("%d/%m/%Y"))
+                else:
+                    llegada = ''
+                texto = fecha_formateada + "<br><br>"
+                texto += formatear_linea('ORDEN DE FACTURACION SEGUIMIENTO', row.numero)
+                texto += formatear_linea('POSICION', row.posicion)
+                texto += formatear_linea('MASTER', row.awb)
+                texto += formatear_linea('ETA', llegada)
+                texto += formatear_linea('CLIENTE', row.cliente)
+
             elif title == 'Novedades sobre la carga':
 
                 fecha_actual = datetime.datetime.now()
