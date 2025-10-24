@@ -6,14 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="335d398c-6d1f-4c1e-8c6c-9772af5dd01d" name="Changes" comment="cambios">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/views/cobranza.py" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/views/cobranza.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/cobranzav1.2.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/cobranzav1.2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/orden_pagov1.2.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/orden_pagov1.2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_compras.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_compras.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_mixtas.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_mixtas.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_compras.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_compras.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_ventas.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_ventas.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cargosystem/static/grilla/js_clientes.js" beforeDir="false" afterPath="$PROJECT_DIR$/cargosystem/static/grilla/js_clientes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mantenimientos/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/mantenimientos/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mantenimientos/views/clientes.py" beforeDir="false" afterPath="$PROJECT_DIR$/mantenimientos/views/clientes.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,7 +101,8 @@
       <workItem from="1760705462125" duration="4343000" />
       <workItem from="1760981152849" duration="1939000" />
       <workItem from="1761052281302" duration="4311000" />
-      <workItem from="1761140225116" duration="995000" />
+      <workItem from="1761140225116" duration="6076000" />
+      <workItem from="1761312218106" duration="779000" />
     </task>
     <task id="LOCAL-00001" summary="subir">
       <option name="closed" value="true" />
@@ -300,7 +296,31 @@
       <option name="project" value="LOCAL" />
       <updated>1761061669376</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1761157437104</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1761157437104</updated>
+    </task>
+    <task id="LOCAL-00026" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1761161823418</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1761161823418</updated>
+    </task>
+    <task id="LOCAL-00027" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1761163243132</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1761163243132</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

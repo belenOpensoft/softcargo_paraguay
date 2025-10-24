@@ -187,17 +187,16 @@ def agregar_socio_comercial(request, id_socio=None):
                     'ctavta': cliente.ctavta if cliente.ctavta else '',
                     'ctacomp': cliente.ctacomp if cliente.ctacomp else '',
                 })
-                tipo_accion = "Modificar"
                 return JsonResponse({'status': 'success', 'form_data': form.initial})
 
         form = add_cliente_form()
-        tipo_accion = "Agregar"
-
+        tipo_accion = ''
         if request.method == 'POST':
             form = add_cliente_form(request.POST)
             if form.is_valid():
                 try:
                     if id_socio:
+                        tipo_accion = 'modificado'
                         cliente = get_object_or_404(SociosComerciales, id=id_socio)
                         # **Actualizar cliente existente**
                         cliente.tipo = form.cleaned_data['tipo']
@@ -230,6 +229,7 @@ def agregar_socio_comercial(request, id_socio=None):
                         cliente.prefijoguia = form.cleaned_data['prefijoguia'] if form.cleaned_data['prefijoguia'] else 0
 
                     else:
+                        tipo_accion = 'agregado'
                         # **Crear un nuevo cliente**
                         cliente = SociosComerciales(
                             tipo=form.cleaned_data['tipo'],
@@ -261,18 +261,12 @@ def agregar_socio_comercial(request, id_socio=None):
                             ctacomp=form.cleaned_data['ctacomp'],
                         )
                         cliente.codigo = SociosComerciales().get_codigo()
-
                     cliente.save()
-
                     return JsonResponse({'status': 'success', 'message': f'Socio comercial {tipo_accion} con éxito'})
-
                 except IntegrityError:
                     return JsonResponse({'status': 'error', 'message': 'Error: Ya existe un socio comercial con el mismo código'})
-
             return JsonResponse({'status': 'error', 'message': 'Formulario inválido', 'errors': form.errors})
-
         return render(request, "clientes/agregar.html", {'form': form, 'title_page': f'{tipo_accion} socio comercial', 'tipo': tipo_accion})
-
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 

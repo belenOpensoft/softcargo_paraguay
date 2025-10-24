@@ -57,6 +57,7 @@ $(document).ready(function() {
                 text: 'Agregar',
                 action: function (e, dt, button, config) {
                     //window.location.replace("/agregar_socio_comercial");
+                    $(".error-message").remove();
                     $('#clienteform')[0].reset();
                     $("#cliente-modal").tabs("refresh");
                     $('#cliente-modal').dialog("open");
@@ -66,9 +67,11 @@ $(document).ready(function() {
             {
             text: 'Modificar',
             action: function (e, dt, button, config) {
+
                 if (row = table.row('.table-secondary').data()) {
+                    $(".error-message").remove();
+                    $('#clienteform')[0].reset();
                     var id_socio = row[0];  // ID del socio comercial seleccionado
-                    console.log(id_socio);
 
                     // Hacer la petición AJAX para obtener los datos
                     $.ajax({

@@ -143,8 +143,12 @@ class add_cliente_form(forms.Form):
                              label="País", required=False)
 
     # **Nuevos Campos**
-    activo = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-                                label="Activo")
+    # activo = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+    #                             label="Activo")
+    activo = forms.ChoiceField(
+        choices=choice_SN,
+        widget=forms.Select(attrs={'class': 'form-control'}), label='Activo'
+    )
     tipo = forms.ChoiceField(
         choices=[
             (1, 'Cliente'),
