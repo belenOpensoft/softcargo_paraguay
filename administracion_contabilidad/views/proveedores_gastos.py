@@ -275,7 +275,7 @@ def procesar_factura_proveedor(request):
                             'fecha': fecha_obj,
                             'imputacion': 1,
                             'tipo': tipo_asiento,
-                            'cuenta': item_data.get('cuenta'),
+                            'cuenta': 114812,
                             'documento': str(numero),
                             'vencimiento': fecha_obj,
                             'pasado': 0,

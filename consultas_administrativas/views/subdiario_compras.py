@@ -239,7 +239,7 @@ def generar_excel_subdiario_compras(datos, fecha_desde, fecha_hasta, consolidar_
         worksheet.merge_range('A1:AD1', title, workbook.add_format({'bold': True, 'align': 'left'}))
 
         encabezados = [
-            'Fecha', 'Tipo', 'Nro', 'Proveedor', 'Nombre', 'Detalle', 'Exento', 'Gravado', 'Total',
+            'Fecha', 'Tipo', 'Nro', 'Proveedor', 'Nombre', 'Detalle', 'Total sin IVA','Total IVA', 'Total',
             'T. Cambio', 'Paridad','Cancelada','Posición','Cuenta','Vencimiento','Pago','Tca. Pago',
             'Moneda', 'RUT'
         ]

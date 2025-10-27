@@ -219,7 +219,7 @@ def agregar_socio_comercial(request, id_socio=None):
                         cliente.emailim = form.cleaned_data['emailim'] if form.cleaned_data['emailim'] else 'S/I'
                         cliente.emailia = form.cleaned_data['emailia'] if form.cleaned_data['emailia'] else 'S/I'
                         cliente.emailit = form.cleaned_data['emailit'] if form.cleaned_data['emailit'] else 'S/I'
-                        cliente.activo = 0 if form.cleaned_data['activo'] == False else 1
+                        cliente.activo =  form.cleaned_data['activo']
                         cliente.tipo = form.cleaned_data['tipo'] if form.cleaned_data['tipo'] else 'S/I'
                         cliente.vendedor = form.cleaned_data['vendedor_input'] if form.cleaned_data['vendedor_input'] else 0
                         cliente.plazo = form.cleaned_data['plazo'] if form.cleaned_data['plazo'] else 0
@@ -253,7 +253,7 @@ def agregar_socio_comercial(request, id_socio=None):
                             emailim=form.cleaned_data['emailim'],
                             emailia=form.cleaned_data['emailia'],
                             emailit=form.cleaned_data['emailit'],
-                            activo=0 if form.cleaned_data['activo'] == False else 1,
+                            activo=form.cleaned_data['activo'],
                             vendedor=form.cleaned_data['vendedor_input'],
                             plazo=form.cleaned_data['plazo'],
                             limite=form.cleaned_data['limite'],

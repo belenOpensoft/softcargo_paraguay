@@ -34,12 +34,12 @@ def estados_cuenta_compras(request):
                 datos = obtener_estado_individual(form,fecha_desde, fecha_hasta, moneda)
             else:
                 datos = obtener_estado_general(form, fecha_desde,fecha_hasta, moneda)
-
+            moneda_cod = moneda.codigo if moneda else None
             return generar_excel_estados_cuenta(
                 datos,
                 fecha_desde,
                 fecha_hasta,
-                moneda,
+                moneda_cod,
                 consolidar_dolares,
                 consolidar_moneda_nac,
                 omitir_saldos_cero,
