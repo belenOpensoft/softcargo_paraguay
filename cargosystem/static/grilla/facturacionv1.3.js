@@ -85,6 +85,9 @@ $(document).ready(function () {
                         </tr>`;
                     $('#clienteTable tbody').html(row);
                     $('#clienteTable').show();
+                    if(!validarRucUyDeTabla()){
+                        $('#id_tipo').val(24);
+                    }
                 },
                 error: xhr => console.error('Error al obtener los detalles del cliente:', xhr)
             });
@@ -896,6 +899,8 @@ $(document).ready(function () {
     });
 
     $('#reenviar_uruware').on('click', function () {
+                $('#reenviar_uruware').prop('disabled', true).text('Procesando...');
+
         let autogenerado= $('#autogen_detalle_venta').val()
             $.ajax({
           url: "/admin_cont/refacturar_uruware/",
@@ -907,10 +912,10 @@ $(document).ready(function () {
           dataType: "json" // jQuery parsea resp a objeto
         })
           .done(function (resp) {
-              console.log(resp);
               alert(resp.mensaje);
 
             $('#modalFacturaDetalle').dialog("close");
+           $('#reenviar_uruware').prop('disabled', false).text('re-enviar factura');
 
           })
           .fail(function (xhr) {
@@ -920,6 +925,7 @@ $(document).ready(function () {
               if (r.mensaje) msg = r.mensaje;
             } catch (e) {}
             alert(msg);
+           $('#reenviar_uruware').prop('disabled', false).text('re-enviar factura');
           })
           .always(function (resp) {
           });
@@ -2271,7 +2277,6 @@ function procesar_factura() {
     }
 
     if(!validarRucUyDeTabla()){
-        console.log(tipo);
         if(tipo!=23 && tipo !=24){
             alert('El cliente es del exterior, seleccione Eticket o Eticket N/C');
             return;

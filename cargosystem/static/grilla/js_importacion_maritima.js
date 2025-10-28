@@ -4522,9 +4522,9 @@ function gastos_btn_h_click(){
                     let selectedRowN = localStorage.getItem('num_house_gasto');
                     let consignatario_code;
                     if ($.fn.dataTable.isDataTable('#table_edit_im')) {
-                        consignatario_code = $('#table_edit_im').DataTable().row('.table-secondary').data()[21];
+                        consignatario_code = $('#table_edit_im').DataTable().row('.table-secondary').data()[23];
                     } else {
-                        consignatario_code = $('#tabla_house_directo').DataTable().row('.table-secondary').data()[21];
+                        consignatario_code = $('#tabla_house_directo').DataTable().row('.table-secondary').data()[23];
                     }
                     if (selectedRowN != null) {
                         get_datos_gastos_house();

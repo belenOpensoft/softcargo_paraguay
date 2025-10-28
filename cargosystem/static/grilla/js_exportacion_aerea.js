@@ -4463,9 +4463,9 @@ let tabla = localStorage.getItem('tabla_origen');
                     let selectedRowN = localStorage.getItem('num_house_gasto');
                     let consignatario_code;
                     if ($.fn.dataTable.isDataTable('#table_edit_ea')) {
-                        consignatario_code = $('#table_edit_ea').DataTable().row('.table-secondary').data()[18];
+                        consignatario_code = $('#table_edit_ea').DataTable().row('.table-secondary').data()[20];
                     } else {
-                        consignatario_code = $('#tabla_house_directo_ea').DataTable().row('.table-secondary').data()[18];
+                        consignatario_code = $('#tabla_house_directo_ea').DataTable().row('.table-secondary').data()[20];
                     }
                     if (selectedRowN != null) {
                         get_datos_gastos_house();
@@ -6039,7 +6039,6 @@ function sumar_ingresos() {
     $('#total_ingresos').val(totalIngresos.toFixed(2)); // Redondea a 2 decimales si es necesario
 }
 //autocomplete factura
-
 
 //descargar guias hijas
 function descargar_hawb(){

@@ -1268,7 +1268,7 @@ def get_data_email(request):
                 texto += "<br>"
             elif title == 'Invoice':
 
-                resultado['asunto'] = f'INVOICE - seguimiento: {row.numero} //'
+                resultado['asunto'] = f'INVOICE - REF: {row.numero}'
 
                 locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 

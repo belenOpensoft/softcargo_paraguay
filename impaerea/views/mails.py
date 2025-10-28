@@ -1175,7 +1175,7 @@ def get_data_html(row_number, row, row2, seg, title, texto, resultado, seguimien
             return texto, resultado
         elif title == 'Invoice':
 
-            resultado['asunto'] = f'INVOICE - seguimiento: {row.seguimiento} //'
+            resultado['asunto'] = f'INVOICE - REF: {row.seguimiento}'
 
             locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 

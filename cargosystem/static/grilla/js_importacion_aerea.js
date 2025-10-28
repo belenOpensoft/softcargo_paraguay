@@ -4319,14 +4319,15 @@ function gastos_btn_h_click() {
             let selectedRowN = localStorage.getItem('num_house_gasto');
             let consignatario_code;
             if ($.fn.dataTable.isDataTable('#table_edit_ia')) {
-                consignatario_code = $('#table_edit_ia').DataTable().row('.table-secondary').data()[20];
+                consignatario_code = $('#table_edit_ia').DataTable().row('.table-secondary').data()[23];
             } else {
-                consignatario_code = $('#tabla_house_directo_ia').DataTable().row('.table-secondary').data()[20];
+                consignatario_code = $('#tabla_house_directo_ia').DataTable().row('.table-secondary').data()[23];
             }
             if (selectedRowN != null) {
                 get_datos_gastos_house();
                 $('#gastos_form_house').trigger("reset");
                 $("#id_socio_h").val(consignatario_code);
+                //aca
                 $("#gastos_modal_house").dialog({
                     autoOpen: true,
                     open: function () {
@@ -5709,6 +5710,7 @@ function sumar_ingresos() {
 }
 
 //autocomplete factura
+
 
 //modal para buscar
 function modal_buscar() {
