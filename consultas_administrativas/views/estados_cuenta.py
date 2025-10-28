@@ -531,7 +531,7 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
                 mov_por_moneda[m.get('moneda')].append(m)
 
             # Asegurar incluir monedas del saldo anterior
-            saldo_cliente = saldos_anteriores.get(codigo_cliente, {}).get('saldos', {})
+            saldo_cliente = saldos_anteriores.get(int(codigo_cliente), {}).get('saldos', {})
             for cod_moneda in saldo_cliente.keys():
                 mov_por_moneda.setdefault(cod_moneda, [])
 
@@ -545,8 +545,11 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
 
                 # --- Calcular saldo anterior ---
                 saldo_anterior = Decimal('0.00')
-                if codigo_cliente in saldos_anteriores and cod_moneda in saldos_anteriores[codigo_cliente]['saldos']:
-                    saldo_anterior = saldos_anteriores[codigo_cliente]['saldos'][cod_moneda]
+                codigo_cliente_int = int(codigo_cliente)
+                if codigo_cliente_int in saldos_anteriores:
+                    saldos_cli = saldos_anteriores[codigo_cliente_int].get('saldos', {})
+                    if cod_moneda in saldos_cli:
+                        saldo_anterior = saldos_cli[cod_moneda]
 
                 write_and_track(row, 6, "Saldo anterior", bold_format)
                 write_and_track(row, 7, float(saldo_anterior), bold_format)

@@ -753,7 +753,7 @@ def generar_excel_estados_cuenta(datos, fecha_desde, fecha_hasta, moneda,
             for m in movimientos:
                 mov_por_moneda[m.get('moneda')].append(m)
 
-            saldo_prov = saldos_anteriores.get(codigo, {}).get('saldos', {})
+            saldo_prov = saldos_anteriores.get(int(codigo), {}).get('saldos', {})
             for cod_moneda in saldo_prov.keys():
                 mov_por_moneda.setdefault(cod_moneda, [])
 

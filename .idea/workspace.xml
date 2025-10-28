@@ -6,11 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="335d398c-6d1f-4c1e-8c6c-9772af5dd01d" name="Changes" comment="cambios">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/views/proveedores_gastos.py" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/views/proveedores_gastos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_compras.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_compras.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_mixtas.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_mixtas.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_compras.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_compras.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mantenimientos/views/clientes.py" beforeDir="false" afterPath="$PROJECT_DIR$/mantenimientos/views/clientes.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,7 +102,8 @@
       <workItem from="1761052281302" duration="4311000" />
       <workItem from="1761140225116" duration="6076000" />
       <workItem from="1761312218106" duration="4563000" />
-      <workItem from="1761332505899" duration="2189000" />
+      <workItem from="1761332505899" duration="2900000" />
+      <workItem from="1761666487290" duration="845000" />
     </task>
     <task id="LOCAL-00001" summary="subir">
       <option name="closed" value="true" />
@@ -355,7 +353,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761331232014</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1761585903202</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1761585903202</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
