@@ -488,7 +488,7 @@ class reporte_seguimiento_form(forms.Form):
         ('origen', 'Origen'),
         ('destino', 'Destino'),
         ('status', 'Status'),
-        ('buque', 'Buque'),
+        ('vapor_codigo', 'Buque'),
     )
     MODO_CHOICES = (
         ('', 'Todos'),

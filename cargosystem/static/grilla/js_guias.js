@@ -21,6 +21,9 @@ $(document).ready(function()
         });
 
         table = $('#tabla_guias').DataTable( {
+                            responsive: true,   // ✅ Esto activa la adaptación automática
+    autoWidth: false,   // Evita que calcule anchos fijos
+    scrollX: true,
              "stateSave": true,
              dom: 'Btlipr',
 //             dom: 'Brtl',
