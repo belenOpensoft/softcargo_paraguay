@@ -155,36 +155,47 @@ def generar_excel_mayores_analiticos(
             elif consolidar_moneda_nac:
                 monto = convertir_monto(monto, moneda_origen, 1, arbitraje, paridad)
 
-            haber = debe = 0.0
-            if a.tipo == 'Z':
+
+            movimiento = obtener_movimiento(a.cuenta, a.tipo, a.detalle, a.imputacion)
+
+            debe = haber = 0.0
+            if movimiento == 'deber':
                 debe = float(monto)
-            elif a.tipo == 'C':
-                if a.imputacion == 1:
-                    haber = float(monto)
-                else:
-                    debe = float(monto)
-            elif a.tipo == 'G':
+            elif movimiento == 'haber':
                 haber = float(monto)
-            elif a.tipo == 'V':
-                if 'DEV/' in a.detalle:
-                    haber = float(monto)
-                else:
-                    debe = float(monto)
-            elif a.tipo == 'P':
-                if 'DEV/' in a.detalle:
-                    debe = float(monto)
-                else:
-                    haber = float(monto)
-            elif a.tipo == 'B':
-                if a.imputacion==2:
-                    haber = float(monto)
-                else:
-                    debe = float(monto)
-            elif a.tipo in ['D', 'T', 'I']:
-                if a.imputacion == 1:
-                    debe = float(monto)
-                else:
-                    haber = float(monto)
+            else:
+                debe = haber = 0.0
+
+            # haber = debe = 0.0
+            # if a.tipo == 'Z':
+            #     debe = float(monto)
+            # elif a.tipo == 'C':
+            #     if a.imputacion == 1:
+            #         haber = float(monto)
+            #     else:
+            #         debe = float(monto)
+            # elif a.tipo == 'G':
+            #     haber = float(monto)
+            # elif a.tipo == 'V':
+            #     if 'DEV/' in a.detalle:
+            #         haber = float(monto)
+            #     else:
+            #         debe = float(monto)
+            # elif a.tipo == 'P':
+            #     if 'DEV/' in a.detalle:
+            #         debe = float(monto)
+            #     else:
+            #         haber = float(monto)
+            # elif a.tipo == 'B':
+            #     if a.imputacion==2:
+            #         haber = float(monto)
+            #     else:
+            #         debe = float(monto)
+            # elif a.tipo in ['D', 'T', 'I']:
+            #     if a.imputacion == 1:
+            #         debe = float(monto)
+            #     else:
+            #         haber = float(monto)
 
             saldos[cuenta_actual] += Decimal(debe) - Decimal(haber)  # saldo real
             saldo_periodo        += Decimal(debe) - Decimal(haber)  # saldo desde 0
@@ -276,9 +287,6 @@ def convertir_monto(monto, origen, destino, arbitraje, paridad):
     except Exception as e:
         return str(e)
 
-from decimal import Decimal
-import datetime
-
 def calcular_saldo_anterior(cuenta_codigo, fecha_desde, *, consolidar_dolares=False, consolidar_moneda_nac=False,moneda=None):
     """
     Devuelve el saldo anterior (Decimal) de una cuenta hasta justo ANTES de `fecha_desde`.
@@ -303,39 +311,172 @@ def calcular_saldo_anterior(cuenta_codigo, fecha_desde, *, consolidar_dolares=Fa
         elif consolidar_moneda_nac:
             monto = convertir_monto(monto, moneda_origen, 1, arbitraje, paridad)
 
-        haber = debe = 0
+        movimiento = obtener_movimiento(cuenta_codigo, a.tipo, a.detalle, a.imputacion)
 
-        if a.tipo == 'Z':
+        debe = haber = 0.0
+        if movimiento == 'deber':
             debe = float(monto)
-        elif a.tipo == 'G':
+        elif movimiento == 'haber':
             haber = float(monto)
-        elif a.tipo == 'V':
-            if 'DEV/' in a.detalle:
-                haber = float(monto)
-            else:
-                debe = float(monto)
-        elif a.tipo == 'P':
-            if 'DEV/' in a.detalle:
-                debe = float(monto)
-            else:
-                haber = float(monto)
-        elif a.tipo in ['D', 'T', 'I']:
-            if a.imputacion==1:
-                debe = float(monto)
-            else:
-                haber = float(monto)
-        elif a.tipo == 'C':
-            if a.imputacion == 1:
-                debe = float(monto)
-            else:
-                haber = float(monto)
-        elif a.tipo == 'B':
-            if a.imputacion == 2:
-                haber = float(monto)
-            else:
-                debe = float(monto)
         else:
             debe = haber = 0.0
 
+        # if a.tipo == 'Z':
+        #     debe = float(monto)
+        # elif a.tipo == 'G':
+        #     haber = float(monto)
+        # elif a.tipo == 'V':
+        #     if 'DEV/' in a.detalle:
+        #         haber = float(monto)
+        #     else:
+        #         debe = float(monto)
+        # elif a.tipo == 'P':
+        #     if 'DEV/' in a.detalle:
+        #         debe = float(monto)
+        #     else:
+        #         haber = float(monto)
+        # elif a.tipo in ['D', 'T', 'I']:
+        #     if a.imputacion==1:
+        #         debe = float(monto)
+        #     else:
+        #         haber = float(monto)
+        # elif a.tipo == 'C':
+        #     if a.imputacion == 1:
+        #         debe = float(monto)
+        #     else:
+        #         haber = float(monto)
+        # elif a.tipo == 'B':
+        #     if a.imputacion == 2:
+        #         haber = float(monto)
+        #     else:
+        #         debe = float(monto)
+        # else:
+        #     debe = haber = 0.0
+
         saldo += Decimal(debe) - Decimal(haber)
     return saldo
+
+
+CONFIGURACION = {
+    'ACTIVO':{
+        'Z':'haber',
+        'G':'deber',
+        'V':'deber',
+        'V_nota':'haber',
+        'P':'haber',
+        'P_nota':'deber',
+        'D_1':'deber',
+        'D_2':'haber',
+        'B_1':'deber',
+        'B_2':'haber',
+        'C_1':'deber',
+        'C_2':'haber',
+        'I_1':'deber',
+        'I_2':'haber',
+        'T_1': 'deber',
+        'T_2': 'haber',
+    },
+    'PASIVO': {
+        'Z': 'haber',
+        'G': 'deber',
+        'V': 'deber',
+        'V_nota': 'haber',
+        'P': 'haber',
+        'P_nota': 'deber',
+        'D_1': 'deber',
+        'D_2': 'haber',
+        'B_1': 'deber',
+        'B_2': 'haber',
+        'C_1': 'deber',
+        'C_2': 'haber',
+        'I_1': 'deber',
+        'I_2': 'haber',
+        'T_1': 'deber',
+        'T_2': 'haber',
+    },
+    'GANANCIAS': {
+        'Z': 'haber',
+        'G': 'deber',
+        'V': 'haber',
+        'V_nota': 'deber',
+        'P': 'deber',
+        'P_nota': 'haber',
+        'D_1': 'deber',
+        'D_2': 'haber',
+        'B_1': None,
+        'B_2': None,
+        'C_1': None,
+        'C_2': None,
+        'I_1': None,
+        'I_2': None,
+        'T_1': None,
+        'T_2': None,
+    },
+    'PERDIDAS': {
+        'Z': None,
+        'G': None,
+        'V': 'haber',
+        'V_nota': 'deber',
+        'P': 'deber',
+        'P_nota': 'haber',
+        'D_1': 'deber',
+        'D_2': 'haber',
+        'B_1': None,
+        'B_2': None,
+        'C_1': None,
+        'C_2': None,
+        'I_1': None,
+        'I_2': None,
+        'T_1': None,
+        'T_2': None,
+    },
+    'PATRIMONIO': {
+        'Z':None,
+        'G':None,
+        'V':None,
+        'V_nota':None,
+        'P':None,
+        'P_nota':None,
+        'D_1':None,
+        'D_2':None,
+        'B_1':None,
+        'B_2':None,
+        'C_1':None,
+        'C_2':None,
+        'I_1':None,
+        'I_2':None,
+        'T_1': None,
+        'T_2': None,
+    },
+}
+
+def obtener_movimiento(xcodigo, tipo, detalle=None, imputacion=None):
+
+    grupo = None
+    try:
+        codigo_str = str(xcodigo).strip()
+        if codigo_str.startswith('1'):
+            grupo = 'ACTIVO'
+        elif codigo_str.startswith('2'):
+            grupo = 'PASIVO'
+        elif codigo_str.startswith('3'):
+            grupo = 'PATRIMONIO'
+        elif codigo_str.startswith('4'):
+            grupo = 'GANANCIAS'
+        elif codigo_str.startswith('5'):
+            grupo = 'PERDIDAS'
+    except Exception:
+        grupo = None
+
+    tipo_config = tipo
+    if detalle and ('DEV/' in detalle or 'NOT/CRED' in detalle):
+        tipo_config = f"{tipo}_nota"
+    elif tipo in ['D', 'B', 'C', 'I'] and imputacion in [1, 2]:
+        tipo_config = f"{tipo}_{imputacion}"
+
+    try:
+        movimiento = CONFIGURACION.get(grupo, {}).get(tipo_config)
+    except Exception:
+        movimiento = None
+
+    return movimiento

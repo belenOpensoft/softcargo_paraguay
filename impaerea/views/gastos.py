@@ -158,7 +158,12 @@ def get_data_preventa(registros_filtrados):
     try:
 
         data = []
-        for registro in registros_filtrados:
+        registros_con_precio = [
+            r for r in registros_filtrados
+            if r.precio not in (None, '', 0, '0', '0.0')
+        ]
+
+        for registro in registros_con_precio:
             registro_json = []
             registro_json.append(str(registro.id))
             registro_json.append('' if registro.servicio is None else str(registro.servicio))

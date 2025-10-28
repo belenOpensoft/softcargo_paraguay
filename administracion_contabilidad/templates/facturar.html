@@ -51,7 +51,11 @@
     font-size: 0.8rem;
 }
 
-
+  .tabla-scroll {
+    max-height: 800px;
+    overflow-y: auto;
+    display: block;
+  }
 </style>
 
 <div id="facturar_modal" style="display:none;">
@@ -108,7 +112,7 @@
     </button>
   </div>
 
-      <table id="facturar_table" class="table table-striped">
+      <table id="facturar_table" class="table table-striped tabla-scroll">
         <thead>
           <tr>
             <th>Seleccionar</th>

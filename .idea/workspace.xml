@@ -6,8 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="335d398c-6d1f-4c1e-8c6c-9772af5dd01d" name="Changes" comment="cambios">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_compras.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_compras.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/templates/facturar.html" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/templates/facturar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/mayores_analiticos.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/mayores_analiticos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/expaerea/views/gastos.py" beforeDir="false" afterPath="$PROJECT_DIR$/expaerea/views/gastos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/expmarit/views/gastos.py" beforeDir="false" afterPath="$PROJECT_DIR$/expmarit/views/gastos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/expterrestre/views/gastos.py" beforeDir="false" afterPath="$PROJECT_DIR$/expterrestre/views/gastos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/impaerea/views/gastos.py" beforeDir="false" afterPath="$PROJECT_DIR$/impaerea/views/gastos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/impomarit/views/gastos.py" beforeDir="false" afterPath="$PROJECT_DIR$/impomarit/views/gastos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/impterrestre/views/gastos.py" beforeDir="false" afterPath="$PROJECT_DIR$/impterrestre/views/gastos.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,7 +109,7 @@
       <workItem from="1761140225116" duration="6076000" />
       <workItem from="1761312218106" duration="4563000" />
       <workItem from="1761332505899" duration="2900000" />
-      <workItem from="1761666487290" duration="845000" />
+      <workItem from="1761666487290" duration="3250000" />
     </task>
     <task id="LOCAL-00001" summary="subir">
       <option name="closed" value="true" />
@@ -361,7 +367,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761585903202</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1761668353766</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1761668353766</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
