@@ -1002,6 +1002,11 @@ function procesar_factura(){
 
 }
 function guardar_factura(){
+    let arbitraje = $('#id_arbitraje').val();
+    if(arbitraje == null || arbitraje ==0){
+        alert('Ingrese un arbitraje valido.');
+        return;
+    }
     let pendientes = [];
 
     $('#itemTable tbody tr').each(function () {
@@ -1053,7 +1058,6 @@ function guardar_factura(){
     let cliente = $('#cliente').val();
     let fecha = $('#id_fecha_registro').val();
     let paridad = $('#id_paridad').val();
-    let arbitraje = $('#id_arbitraje').val();
     let imputar = $('#id_imputar').val();
     let moneda = $('#id_moneda').val();
     let clienteData = {

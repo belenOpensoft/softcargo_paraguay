@@ -1384,7 +1384,11 @@ const obtenerFechaHoy = () => {
 };
 
 function crear_impuventa_asiento_movimiento() {
-
+    let arbitraje = $('#id_arbitraje').val();
+    if(arbitraje == null || arbitraje ==0){
+        alert('Ingrese un arbitraje valido.');
+        return;
+    }
     if (!$('#id_cuenta_observaciones').val() && $('#difference').val() != 0) {
         alert('Debe asignar la diferencia a una cuenta');
         return;

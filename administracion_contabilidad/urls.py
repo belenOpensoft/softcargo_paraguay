@@ -19,7 +19,7 @@ from administracion_contabilidad.views.facturacion import facturacion_view, busc
     buscar_item_v, buscar_items_v, procesar_factura, source_facturacion, source_infofactura, \
     cargar_preventa_infofactura, source_infofactura_cliente, cargar_preventa_infofactura_multiple, guardar_arbitraje, \
     get_datos_embarque, hacer_nota_credito, cargar_pendientes_imputacion_venta, buscar_items_v_codigo, \
-    refacturar_uruware, descargar_pdf_uruware, get_datos_adenda
+    refacturar_uruware, descargar_pdf_uruware, get_datos_adenda, actualizar_cliente_preventa
 from administracion_contabilidad.views.filtrado_compras import buscar_embarques
 from administracion_contabilidad.views.imprimir_preventa import get_datos_caratula
 from administracion_contabilidad.views.ingresar_asientos import ingresar_asiento, guardar_asientos, reimprimir_asiento
@@ -227,4 +227,5 @@ urlpatterns = [
     path("descargar_pdf_uruware/", descargar_pdf_uruware, name="descargar_pdf_uruware"),
 
     #fcaturar uruware #
+    path('actualizar_cliente_preventa/', actualizar_cliente_preventa, name='actualizar_cliente_preventa'),
 ]

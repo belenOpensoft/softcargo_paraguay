@@ -980,6 +980,77 @@ $(document).ready(function () {
         });
     });
 
+    $('#cliente_i').autocomplete({
+    source: function(request, response) {
+        $.ajax({
+            url: "/admin_cont/buscar_proveedor",
+            dataType: 'json',
+            data: { term: request.term },
+            success: function(data) {
+                response(data.map(proveedor => ({
+                    label: proveedor.text,
+                    value: proveedor.text,
+                    codigo: proveedor.codigo
+                })));
+            },
+            error: xhr => console.error('Error al buscar proveedores:', xhr)
+        });
+    },
+    minLength: 2,
+    select: function(event, ui) {
+        const codigo = ui.item.codigo;
+        const nombre = ui.item.value;
+        $('#cliente_i').val(nombre);
+        $('#cliente_i_codigo').val(codigo);
+    }
+    });
+
+    // Escuchar cambios en el campo Cliente
+$(document).on('change', '#cliente_i', function() {
+    const nuevoCliente = $(this).val().trim();
+    const nuevoCodigo = $('#cliente_i_codigo').val().trim();
+
+    // Obtener datos actuales de preventa desde localStorage
+    const preventaData = JSON.parse(localStorage.getItem('preventa') || '{}');
+    if (!preventaData || Object.keys(preventaData).length === 0) return;
+
+    const preventaNumero = preventaData.autogenerado;
+
+    if (nuevoCliente !== preventaData.cliente_i) {
+        const confirmar = confirm(`El cliente fue modificado de "${preventaData.cliente_i}" a "${nuevoCliente}". ¿Desea guardar este cambio?`);
+        if (confirmar) {
+            // Actualizar en base de datos
+            $.ajax({
+                url: '/admin_cont/actualizar_cliente_preventa/',
+                method: 'POST',
+                headers: {'X-CSRFToken': csrf_token},
+                data: {
+                    numero_preventa: preventaNumero,
+                    cliente_nombre: nuevoCliente,
+                    cliente_codigo: nuevoCodigo
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Actualizar localStorage también
+                        preventaData.cliente_i = nuevoCliente;
+                        preventaData.nrocliente = nuevoCodigo;
+                        localStorage.setItem('preventa', JSON.stringify(preventaData));
+                        alert('Cliente actualizado correctamente.');
+                    } else {
+                        alert('Error: ' + response.error);
+                    }
+                },
+                error: function() {
+                    alert('Error al actualizar el cliente en la base de datos.');
+                }
+            });
+        } else {
+            // Restaurar valor anterior si cancela
+            $('#cliente_i').val(preventaData.cliente_i);
+        }
+    }
+});
+
 });
 
 /* INITIAL CONTROL PAGE */
@@ -1135,6 +1206,7 @@ function cargar_preventas(){
                         $('#total_con_iva').val(preventa.total_con_iva);
                         $('#total_sin_iva').val(preventa.total_sin_iva);
                         $('#cliente_i').val(preventa.cliente_i);
+                        $('#cliente_i_codigo').val(preventa.nrocliente);
                         $('#peso').val(preventa.peso);
                         $('#direccion').val(preventa.direccion);
                         $('#localidad').val(preventa.localidad);

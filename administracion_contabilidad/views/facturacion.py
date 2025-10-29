@@ -14,7 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.forms import model_to_dict
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST
 from reportlab.lib.validators import isNumber
 from zeep.helpers import serialize_object
@@ -625,8 +625,7 @@ def procesar_factura(request):
 
                     resultado = facturar_uruware(
                         numero, tipo, serie, moneda, cliente_data,
-                        precio_total, neto, iva, items_data, facturas_imputadas, fecha_obj, arbitraje,
-                        mnt_neto_iva_basica, exento, autogenerado, adenda, referencia, posicion, request.user.id
+                        precio_total, neto, iva, items_data, facturas_imputadas, fecha_obj,arbitraje,mnt_neto_iva_basica,exento,autogenerado,adenda,referencia,posicion,request.user.id
                     )
                     mensaje = resultado['mensaje']
 
@@ -1091,6 +1090,25 @@ def cargar_preventa_infofactura(request):
             return JsonResponse({'error': 'Cliente no encontrado'}, safe=False)
     return None
 
+def actualizar_cliente_preventa(request):
+    try:
+        numero_preventa = request.POST.get('numero_preventa')
+        cliente_nombre = request.POST.get('cliente_nombre')
+        cliente_codigo = request.POST.get('cliente_codigo')
+
+        if not numero_preventa or not cliente_nombre:
+            return JsonResponse({'success': False, 'error': 'Datos incompletos.'})
+
+        preventa = Factudif.objects.filter(znumero=numero_preventa)
+        for p in preventa:
+            p.zconsignatario=cliente_nombre
+            p.zcliente=cliente_codigo
+            p.save()
+
+        return JsonResponse({'success': True, 'mensaje': 'Cliente actualizado correctamente.'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 def verificar_bloqueo_edicion(referencia, numero_reserva, modulo, usuario):
     """
@@ -1542,6 +1560,7 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
             elif int(tipo) == 20:
                 # efactura
                 tipo_cfe = 111
+            tipo = int(tipo)
 
             ui_valor = 0
             dolar_hoy = Dolar.objects.filter(ufecha__date=datetime.now()).first()
@@ -1556,6 +1575,11 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
             moneda = int(moneda)
             codigo_cliente = cliente_data['codigo']
             cliente = Clientes.objects.filter(codigo=codigo_cliente).first()
+            pais_cod_receptor = Paises.objects.filter(nombre=cliente.pais).first()
+            if not pais_cod_receptor:
+                return {"success": False, "mensaje": "Ocurrió un error al obtener el codigo de pais del receptor."}
+            cod_receptor = pais_cod_receptor.idinternacional
+            cod_receptor = cod_receptor.strip()
             ciudad = None
             if cliente:
                 ciudad = Ciudades.objects.filter(codigo=cliente.ciudad).first()
@@ -1569,46 +1593,48 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
                 "forma_pago": "2",
                 "ruc_emisor": settings.FACTURACION_RUT,
                 "razon_social": "Oceanlink LTDA",
-                "codigo_sucursal": "2",
+                "codigo_sucursal": "6",
                 "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
                 "ciudad": "Montevideo",
                 "departamento": "Montevideo",
                 "moneda": "UYU" if moneda and moneda == 1 else "USD" if moneda and moneda == 2 else "EUR" if moneda and moneda == 3 else "Error",
-                "neto_tasa_basica": mnto_neto,
+                "neto_tasa_basica": round(Decimal(mnto_neto),2),
                 "iva_tasa_basica": "22" ,
                 "iva_monto_basica": round(Decimal(iva),2),
-                "total": precio_total,
+                "total": round(Decimal(precio_total),2),
                 "cantidad_items": len(items_data),
-                "monto_pagar": precio_total,
-                "monto_exento": Decimal(exento) if Decimal(exento) !=0 else '',
+                "monto_pagar": round(Decimal(precio_total),2),
+                "monto_exento": round(Decimal(exento),2) if Decimal(exento) !=0 else '',
                 "tipo_cambio": arbitraje,
                 "hay_items_iva": False,
                 "hay_items_exento": False,
                 "tipo_doc_receptor": 2,
-                "pais_codigo": "UY",
+                "pais_codigo": cod_receptor,
                 "documento_receptor": cliente.ruc if cliente else '',
                 "razon_social_receptor": cliente.razonsocial if cliente else '',
                 "direccion_receptor": cliente.direccion if cliente else '',
                 "ciudad_receptor": ciudad.nombre if ciudad else '',
                 "pais_receptor": cliente.pais if cliente else '',
-                "lleva_receptor": False,
+                "lleva_receptor": True,
+                "es_extranjero": True if cliente.pais !='Uruguay' else False,
+
             }
 
-            if tipo in (23, 24):
-                # Calcular tope en pesos
-                tope_ui = Decimal("5000") * Decimal(ui_valor or 0)
-
-                supera_tope = False
-                if moneda == 1:  # pesos
-                    supera_tope = Decimal(precio_total) > tope_ui
-                elif moneda == 2:  # dólares
-                    supera_tope = Decimal(precio_total) * Decimal(arbitraje or 0) > tope_ui
-
-                if supera_tope:
-                    # podés setear un flag en data
-                    data["lleva_receptor"] = True
-                else:
-                    data["lleva_receptor"] = False
+            # if tipo in (23, 24):
+            #     # Calcular tope en pesos
+            #     tope_ui = Decimal("5000") * Decimal(ui_valor or 0)
+            #
+            #     supera_tope = False
+            #     if moneda == 1:  # pesos
+            #         supera_tope = Decimal(precio_total) > tope_ui
+            #     elif moneda == 2:  # dólares
+            #         supera_tope = Decimal(precio_total) * Decimal(arbitraje or 0) > tope_ui
+            #
+            #     if supera_tope:
+            #         # podés setear un flag en data
+            #         data["lleva_receptor"] = True
+            #     else:
+            #         data["lleva_receptor"] = False
 
             data = {k: escape(str(v)) if isinstance(v, str) else v for k, v in data.items()}
 
@@ -1691,9 +1717,10 @@ def facturar_uruware(numero,tipo,serie,moneda,cliente_data,precio_total,neto,iva
 
 
             if data_post:
+                nombre=cliente.razonsocial if cliente else ''
                 hilo = threading.Thread(
                     target=adjuntar_factura,
-                    args=(referencia, posicion, tipo_cfe, serie_cfe, cfe_numero, user_id)
+                    args=(referencia, posicion, tipo_cfe, serie_cfe, cfe_numero, user_id,nombre)
                 )
                 hilo.start()
                 return {
@@ -1843,6 +1870,7 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
         elif int(tipo) == 20:
             # efactura
             tipo_cfe = 111
+        tipo = int(tipo)
 
         ui_valor = 0
         dolar_hoy = Dolar.objects.filter(ufecha__date=datetime.now()).first()
@@ -1866,54 +1894,59 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
         items_nc = Boleta.objects.filter(autogenerado=nota_creada)
         movimiento_factura = Movims.objects.filter(mautogen=nota_creada).first()
 
+        pais_cod_receptor = Paises.objects.filter(nombre=cliente.pais).first()
+        if not pais_cod_receptor:
+            return {"success": False, "mensaje": "Ocurrió un error al obtener el codigo de pais del receptor."}
+        cod_receptor = pais_cod_receptor.idinternacional
+        cod_receptor=cod_receptor.strip()
         data = {
             "tipo_cfe": tipo_cfe,
             "fecha_emision": fecha.strftime('%Y-%m-%d'),
             "forma_pago": "2",
             "ruc_emisor": settings.FACTURACION_RUT,
             "razon_social": "Oceanlink LTDA",
-            "codigo_sucursal": "2",
+            "codigo_sucursal": "6",
             "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
             "ciudad": "Montevideo",
             "departamento": "Montevideo",
             "moneda": "UYU" if moneda and moneda == 1 else "USD" if moneda and moneda == 2 else "EUR" if moneda and moneda == 3 else "Error",
-            "neto_tasa_basica": mnto_neto,
+            "neto_tasa_basica": round(Decimal(mnto_neto),2),
             "iva_tasa_basica": "22",
             "iva_monto_basica": round(Decimal(iva),2),
-            "total": precio_total,
+            "total": round(Decimal(precio_total),2),
             "cantidad_items": len(items_nc),
-            "monto_pagar": precio_total,
-            "monto_exento": Decimal(exento) if Decimal(exento) != 0 else '',
+            "monto_pagar": round(Decimal(precio_total),2),
+            "monto_exento": round(Decimal(exento),2) if Decimal(exento) != 0 else '',
             "tipo_cambio": arbitraje,
             "hay_items_iva": False,
             "hay_items_exento": False,
             "tipo_doc_receptor": 2,
-            "pais_codigo": "UY",
+            "pais_codigo": cod_receptor,
             "documento_receptor": cliente.ruc if cliente else '',
             "razon_social_receptor": cliente.razonsocial if cliente else '',
             "direccion_receptor": cliente.direccion if cliente else '',
             "ciudad_receptor": ciudad.nombre if ciudad else 'Montevideo',
             "pais_receptor": cliente.pais if cliente else '',
-            "lleva_receptor": False,
+            "lleva_receptor": True,
             "es_extranjero": True if cliente.pais != 'Uruguay' else False,
         }
         data = {k: escape(str(v)) if isinstance(v, str) else v for k, v in data.items()}
 
-        if tipo in (23, 24):
-            # Calcular tope en pesos
-            tope_ui = Decimal("5000") * Decimal(ui_valor or 0)
-
-            supera_tope = False
-            if moneda == 1:  # pesos
-                supera_tope = Decimal(precio_total) > tope_ui
-            elif moneda == 2:  # dólares
-                supera_tope = Decimal(precio_total) * Decimal(arbitraje or 0) > tope_ui
-
-            if supera_tope:
-                # podés setear un flag en data
-                data["lleva_receptor"] = True
-            else:
-                data["lleva_receptor"] = False
+        # if tipo in (23, 24):
+        #     # Calcular tope en pesos
+        #     tope_ui = Decimal("5000") * Decimal(ui_valor or 0)
+        #
+        #     supera_tope = False
+        #     if moneda == 1:  # pesos
+        #         supera_tope = Decimal(precio_total) > tope_ui
+        #     elif moneda == 2:  # dólares
+        #         supera_tope = Decimal(precio_total) * Decimal(arbitraje or 0) > tope_ui
+        #
+        #     if supera_tope:
+        #         # podés setear un flag en data
+        #         data["lleva_receptor"] = True
+        #     else:
+        #         data["lleva_receptor"] = False
 
         items = []
         for i, item in enumerate(items_nc, start=1):
@@ -1989,9 +2022,11 @@ def facturar_uruware_nc_directa(numero, tipo, serie, moneda, cliente_codigo, pre
 
 
         if data_post:
+            nombre = cliente.razonsocial if cliente else ''
+
             hilo = threading.Thread(
                 target=adjuntar_factura,
-                args=(referencia, posicion, tipo_cfe, serie_cfe, cfe_numero, user_id)
+                args=(referencia, posicion, tipo_cfe, serie_cfe, cfe_numero, user_id,nombre)
             )
             hilo.start()
             return {
@@ -2064,6 +2099,8 @@ def refacturar_uruware(request):
             # efactura
             tipo_cfe = 111
 
+        tipo = int(tipo)
+
         asociadas = None
         if tipo == 21 or tipo == 23:
             #traer facturas asociadas
@@ -2077,7 +2114,11 @@ def refacturar_uruware(request):
 
         if not ciudad:
             return JsonResponse({"success": False, "mensaje": "El cliente no tiene una ciudad ingresada. Dirijase a mantenimientos y complete los datos para facturar."})
-
+        pais_cod_receptor = Paises.objects.filter(nombre=cliente.pais).first()
+        if not pais_cod_receptor:
+            return {"success": False, "mensaje": "Ocurrió un error al obtener el codigo de pais del receptor."}
+        cod_receptor = pais_cod_receptor.idinternacional
+        cod_receptor=cod_receptor.strip()
         #
         items_factura = Boleta.objects.filter(autogenerado=autogenerado)
         movimiento_factura = Movims.objects.filter(mautogen=autogenerado).first()
@@ -2102,7 +2143,7 @@ def refacturar_uruware(request):
             "forma_pago": "2",
             "ruc_emisor": settings.FACTURACION_RUT,
             "razon_social": "Oceanlink LTDA",
-            "codigo_sucursal": "2",
+            "codigo_sucursal": "6",
             "domicilio": "Bolonia 2280 LATU, Edificio Los Álamos, Of.103",
             "ciudad": "Montevideo",
             "departamento": "Montevideo",
@@ -2110,39 +2151,39 @@ def refacturar_uruware(request):
             "neto_tasa_basica": round(monto_iva,2),
             "iva_tasa_basica": "22",
             "iva_monto_basica": round(Decimal(iva),2),
-            "total": precio_total,
+            "total": round(Decimal(precio_total),2),
             "cantidad_items": len(items_factura),
-            "monto_pagar": precio_total,
+            "monto_pagar": round(Decimal(precio_total),2),
             "monto_exento": round(Decimal(monto_exento),2) if Decimal(monto_exento) != 0 else '',
             "tipo_cambio": arbitraje,
             "hay_items_iva": False,
             "hay_items_exento": False,
             "tipo_doc_receptor": 2,
-            "pais_codigo": "UY",
+            "pais_codigo": cod_receptor,
             "documento_receptor": cliente.ruc if cliente else '',
             "razon_social_receptor": cliente.razonsocial if cliente else '',
             "direccion_receptor": cliente.direccion if cliente else '',
             "ciudad_receptor": ciudad.nombre if ciudad else '',
             "pais_receptor": cliente.pais if cliente else '',
-            "lleva_receptor": False,
+            "lleva_receptor": True,
             "es_extranjero": True if cliente.pais !='Uruguay' else False,
         }
         data = {k: escape(str(v)) if isinstance(v, str) else v for k, v in data.items()}
-        if tipo in (23, 24):
-            # Calcular tope en pesos
-            tope_ui = Decimal("5000") * Decimal(ui_valor or 0)
-
-            supera_tope = False
-            if moneda == 1:  # pesos
-                supera_tope = Decimal(precio_total) > tope_ui
-            elif moneda == 2:  # dólares
-                supera_tope = Decimal(precio_total) * Decimal(arbitraje or 0) > tope_ui
-
-            if supera_tope:
-                # podés setear un flag en data
-                data["lleva_receptor"] = True
-            else:
-                data["lleva_receptor"] = False
+        # if tipo in (23, 24):
+        #     # Calcular tope en pesos
+        #     tope_ui = Decimal("5000") * Decimal(ui_valor or 0)
+        #
+        #     supera_tope = False
+        #     if moneda == 1:  # pesos
+        #         supera_tope = Decimal(precio_total) > tope_ui
+        #     elif moneda == 2:  # dólares
+        #         supera_tope = Decimal(precio_total) * Decimal(arbitraje or 0) > tope_ui
+        #
+        #     if supera_tope:
+        #         # podés setear un flag en data
+        #         data["lleva_receptor"] = True
+        #     else:
+        #         data["lleva_receptor"] = False
 
         items = []
         for i, item in enumerate(items_factura, start=1):
@@ -2227,9 +2268,11 @@ def refacturar_uruware(request):
         data_post = serialize_object(resp_post)
 
         if data_post:
+            nombre = cliente.razonsocial if cliente else ''
+
             hilo = threading.Thread(
                 target=adjuntar_factura,
-                args=(referencia, posicion, tipo_cfe, serie_cfe, cfe_numero, request.user.id)
+                args=(referencia, posicion, tipo_cfe, serie_cfe, cfe_numero, request.user.id,nombre)
             )
             hilo.start()
             return JsonResponse({
@@ -2411,11 +2454,10 @@ def get_datos_adenda(request):
     except Exception as e:
         return JsonResponse({'success':False,'error': str(e)}, status=500)
 
-def adjuntar_factura(referencia,posicion,tipo_cfe,serie,numero,user_id):
-
+def adjuntar_factura(referencia,posicion,tipo_cfe,serie,numero,user_id,cliente):
     try:
         if posicion and referencia and tipo_cfe and serie and numero and user_id:
-            ruta =guardar_pdf_ucfe(tipo_cfe,serie,numero)
+            ruta =guardar_pdf_ucfe(tipo_cfe,serie,numero,cliente)
             if ruta !=400:
                 MODELOS = {
                     "IM": Attachhijo,
@@ -2438,7 +2480,7 @@ def adjuntar_factura(referencia,posicion,tipo_cfe,serie,numero,user_id):
     except Exception as _:
       pass
 
-def guardar_pdf_ucfe(tipo_cfe, serie, numero):
+def guardar_pdf_ucfe(tipo_cfe, serie, numero,cliente):
     """
     Obtiene el PDF de un CFE desde UCFE y lo guarda en RUTA_ARCHIVOS.
     Retorna la ruta del archivo o un JsonResponse con error.
@@ -2474,7 +2516,7 @@ def guardar_pdf_ucfe(tipo_cfe, serie, numero):
             pdf_bytes = base64.b64decode(resp)
 
         # Nombre de archivo
-        nombre_archivo = f"{tipo_cfe}_{serie}_{numero}_{datetime.now():%Y%m%d%H%M%S}.pdf"
+        nombre_archivo = f"{tipo_cfe}_{serie}_{numero}_{cliente}.pdf"
 
         # ruta_completa = settings.RUTA_ARCHIVOS, nombre_archivo
         ruta_completa = settings.RUTA_ARCHIVOS + nombre_archivo

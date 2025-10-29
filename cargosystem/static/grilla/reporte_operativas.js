@@ -12,17 +12,20 @@ $(document).ready(function () {
     // Asegurar que las columnas seleccionadas siempre estén arriba
     function reorderSelected() {
         const sortableList = $('#sortable-columns');
-        const selectedItems = sortableList.find('li').filter(function () {
-            return $(this).find('input[type="checkbox"]').is(':checked');
-        }).addClass('selected');
-        const unselectedItems = sortableList.find('li').filter(function () {
-            return !$(this).find('input[type="checkbox"]').is(':checked');
-        }).removeClass('selected');
+        const items = sortableList.find('li').get();
 
-        // Agregar los seleccionados al principio
-        sortableList.append(selectedItems);
-        sortableList.append(unselectedItems);
+        items.sort(function(a, b) {
+            const aChecked = $(a).find('input[type="checkbox"]').is(':checked');
+            const bChecked = $(b).find('input[type="checkbox"]').is(':checked');
+            // Mantiene el orden relativo de los seleccionados
+            return (aChecked === bChecked) ? 0 : aChecked ? -1 : 1;
+        });
+
+        $.each(items, function(_, item) {
+            sortableList.append(item);
+        });
     }
+
 
     // Escuchar cambios en los checkboxes
     $('#sortable-columns').on('change', 'input[type="checkbox"]', function () {
@@ -75,42 +78,80 @@ $(document).ready(function () {
     });
 
     // Acción para el botón "Guardar Seleccion" en el modal de guardar preferencia
+    // $("#btn-guardar-seleccion").click(function() {
+    //     var nombre = $("#nombre-preferencia").val();
+    //     if (nombre.trim() === "") {
+    //         alert("Debes ingresar un nombre para la preferencia.");
+    //         return;
+    //     }
+    //
+    //     const selectedColumns = [];
+    //     $("#sortable-columns li").each(function () {
+    //         const checkbox = $(this).find("input[type='checkbox']");
+    //         if (checkbox.is(":checked")) {
+    //             selectedColumns.push($(this).data("valor"));
+    //         }
+    //     });
+    //
+    //     $.ajax({
+    //         type: "POST",
+    //         url: "/guardar_preferencia/",
+    //         data: {
+    //             nombre: nombre,
+    //             selected_columns: JSON.stringify(selectedColumns)
+    //         },
+    //         headers: {
+    //             'X-CSRFToken': csrf_token
+    //         },
+    //         success: function(response) {
+    //             console.log("Preferencia guardada:", response);
+    //             $("#guardar-preferencia-modal").dialog("close");
+    //         },
+    //         error: function(xhr, status, error) {
+    //             console.error("Error al guardar la preferencia:", error);
+    //         }
+    //     });
+    //
+    //     $("#guardar-preferencia-modal").dialog("close");
+    // });
+    // Acción para el botón "Guardar Selección" en el modal de guardar preferencia
     $("#btn-guardar-seleccion").click(function() {
-        var nombre = $("#nombre-preferencia").val();
-        if (nombre.trim() === "") {
-            alert("Debes ingresar un nombre para la preferencia.");
-            return;
+    var nombre = $("#nombre-preferencia").val();
+    if (nombre.trim() === "") {
+        alert("Debes ingresar un nombre para la preferencia.");
+        return;
+    }
+
+    const selectedColumns = [];
+
+    // 🚀 Recorre los elementos en el orden actual del DOM (orden visual)
+    $("#sortable-columns li").each(function () {
+        const checkbox = $(this).find("input[type='checkbox']");
+        const valor = $(this).data("valor");  // identificador de la columna
+        if (checkbox.is(":checked")) {
+            selectedColumns.push(valor);
         }
-
-        const selectedColumns = [];
-        $("#sortable-columns li").each(function () {
-            const checkbox = $(this).find("input[type='checkbox']");
-            if (checkbox.is(":checked")) {
-                selectedColumns.push($(this).data("valor"));
-            }
-        });
-
-        $.ajax({
-            type: "POST",
-            url: "/guardar_preferencia/",
-            data: {
-                nombre: nombre,
-                selected_columns: JSON.stringify(selectedColumns)
-            },
-            headers: {
-                'X-CSRFToken': csrf_token
-            },
-            success: function(response) {
-                console.log("Preferencia guardada:", response);
-                $("#guardar-preferencia-modal").dialog("close");
-            },
-            error: function(xhr, status, error) {
-                console.error("Error al guardar la preferencia:", error);
-            }
-        });
-
-        $("#guardar-preferencia-modal").dialog("close");
     });
+
+    $.ajax({
+        type: "POST",
+        url: "/guardar_preferencia/",
+        data: {
+            nombre: nombre,
+            selected_columns: JSON.stringify(selectedColumns)
+        },
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function(response) {
+            console.log("Preferencia guardada:", response);
+            $("#guardar-preferencia-modal").dialog("close");
+        },
+        error: function(xhr, status, error) {
+            console.error("Error al guardar la preferencia:", error);
+        }
+    });
+});
 
     $("#tabla-preferencias").on("click", ".seleccionar-preferencia", function() {
         var $row = $(this).closest("tr");
@@ -156,23 +197,74 @@ $(document).ready(function () {
                 url: "/eliminar_preferencia/",
                 type: "POST",
                 data: { id: prefId },
-                headers: {
-                    'X-CSRFToken': csrf_token
-                },
+                headers: { 'X-CSRFToken': csrf_token },
                 success: function(response) {
                     if (response.success) {
                         $row.remove();
+                        alert(response.mensaje || "Preferencia eliminada correctamente.");
                     } else {
-                        alert("Error al eliminar la preferencia: " + response.error);
+                        alert("Error al eliminar la preferencia: " + (response.error || "Error desconocido."));
                     }
                 },
                 error: function(xhr, status, error) {
-                    alert("Error al eliminar la preferencia.");
+                    alert("Error al eliminar la preferencia: " + error);
                 }
             });
         }
     });
 
+
+    $("#tabla-preferencias").on("click", ".seleccionar-preferencia", function() {
+        var $row = $(this).closest("tr");
+        var prefId = $row.data("preferencia-id");
+
+        // columnas guardadas como string JSON
+        var selectedColumnsStr = $row.find("td").eq(4).text().trim();
+        var selectedArray = selectedColumnsStr.split(",").map(function(item) {
+            return item.trim();
+        });
+
+        // 🔸 1. Desmarcamos todo
+        $("#sortable-columns li").each(function() {
+            $(this).find("input[type='checkbox']").prop("checked", false);
+            $(this).removeClass("selected");
+        });
+
+        // 🔸 2. Reordenamos los elementos del DOM según el orden guardado
+        const sortableList = $("#sortable-columns");
+        const items = sortableList.find("li").get();
+
+        // Creamos un mapa de posiciones basado en selectedArray
+        const orderMap = {};
+        selectedArray.forEach((val, index) => {
+            orderMap[val] = index;
+        });
+
+        // Ordenar los <li> en función de su posición en el array guardado
+        items.sort(function(a, b) {
+            const aVal = $(a).data("valor");
+            const bVal = $(b).data("valor");
+            const aIdx = orderMap[aVal] !== undefined ? orderMap[aVal] : 9999;
+            const bIdx = orderMap[bVal] !== undefined ? orderMap[bVal] : 9999;
+            return aIdx - bIdx;
+        });
+
+        // Reinyectamos los elementos en el DOM
+        $.each(items, function(_, item) {
+            sortableList.append(item);
+        });
+
+        // 🔸 3. Marcamos los checkboxes según la preferencia
+        $("#sortable-columns li").each(function() {
+            var dataValor = $(this).data("valor");
+            if (selectedArray.includes(dataValor)) {
+                $(this).find("input[type='checkbox']").prop("checked", true);
+                $(this).addClass("selected");
+            }
+        });
+
+        $("#cargar-preferencia-modal").dialog("close");
+    });
 
 
 });

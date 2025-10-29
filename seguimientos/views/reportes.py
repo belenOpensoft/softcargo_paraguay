@@ -14,13 +14,15 @@ from django.db.models import Count, Q, Sum
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 
+from administracion_contabilidad.models import Movims
 from cargosystem.settings import BASE_DIR
 from expaerea.models import ExportEmbarqueaereo, ExportConexaerea, ExportCargaaerea, ExportServiceaereo, ExportReservas, \
     VEmbarqueaereo, ExportServireserva, ExportConexreserva, GuiasHijas, GuiasMadres
-from expmarit.models import ExpmaritEnvases
-from expterrestre.models import ExpterraEnvases
+from expmarit.models import ExpmaritEnvases, ExpmaritServiceaereo
+from expterrestre.models import ExpterraEnvases, ExpterraServiceaereo
+from impaerea.models import ImportServiceaereo
 from impomarit.models import VistaOperativas, VistaOperativasGastos
-from impterrestre.models import ImpterraEnvases
+from impterrestre.models import ImpterraEnvases, ImpterraServiceaereo
 from mantenimientos.models import Clientes as SociosComerciales, Ciudades, Servicios
 from cargosystem import settings
 from mantenimientos.forms import add_buque_form, reporte_seguimiento_form, reporte_operativas_form
@@ -555,10 +557,28 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
                 "ET": ExpterraEnvases,
                 "IT": ImpterraEnvases,
             }
+            MODELOS_GASTOS = {
+                "IM": Serviceaereo,
+                "EM": ExpmaritServiceaereo,
+                "IA": ImportServiceaereo,
+                "EA": ExportServiceaereo,
+                "ET": ExpterraServiceaereo,
+                "IT": ImpterraServiceaereo,
+            }
             clase = p.posicion[:2]
+
             modelo = MODELOS.get(clase)
+            modelo_gastos = MODELOS_GASTOS.get(clase)
+
             cantidad_20=None
             cantidad_40=None
+            precio_vendido=0
+            costo=0
+            otros_egresos=0
+            otros_ingresos=0
+            profit=0
+            fecha_facturacion=''
+
             if modelo:
                 conteo = modelo.objects.filter(numero=p.numero).aggregate(
                     total_20=Sum('cantidad', filter=Q(unidad='20')),
@@ -568,15 +588,35 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
                 cantidad_20 = conteo['total_20']
                 cantidad_40 = conteo['total_40']
 
+            if modelo_gastos:
+                gastos = modelo_gastos.objects.filter(numero=p.numero).only('detalle', 'costo', 'precio')
+                fechas_facturacion = set()  # Usamos set para evitar duplicados
+
+                for g in gastos:
+                    precio_vendido += g.precio
+                    costo += g.costo
+
+                    # Buscar facturas asociadas (solo tipo 20 o 21)
+                    facturas = Movims.objects.filter(mautogen=g.detalle, mtipo__in=[20, 21]).only('mfechamov')
+
+                    for f in facturas:
+                        if f.mfechamov:
+                            fechas_facturacion.add(f.mfechamov.strftime('%d/%m/%Y'))  # Set evita duplicados
+
+                # Convertimos el set en lista ordenada (por fecha si querés)
+                fecha_facturacion = ", ".join(sorted(fechas_facturacion))
+
+                profit = precio_vendido - costo
+
             for columna in columnas:
                 if columna == 'Numero':
                     datos_finales.append(str(p.numero).zfill(8))
                 elif columna == 'Fecha':
-                    datos_finales.append(p.fecha if p.fecha else None)
+                    datos_finales.append(p.fecha.strftime('%d/%m/%Y') if p.fecha else None)
                 elif columna == 'ETA':
-                    datos_finales.append(p.eta if p.eta else None)
+                    datos_finales.append(p.eta.strftime('%d/%m/%Y') if p.eta else None)
                 elif columna == 'ETD':
-                    datos_finales.append(p.etd if p.etd else None)
+                    datos_finales.append(p.etd.strftime('%d/%m/%Y') if p.etd else None)
                 elif columna == 'Llegada':
                     datos_finales.append(p.fecha_retiro if p.fecha_retiro else None)
                 elif columna == 'Embarque':
@@ -610,18 +650,18 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
                     datos_finales.append(p.flete)
                 elif columna == 'Otros Ingresos':
                     # datos_finales.append(p.otros_ingresos)
-                    datos_finales.append('S/I')
+                    datos_finales.append(otros_ingresos)
                 elif columna == 'Costo':
-                    datos_finales.append('S/I')
+                    datos_finales.append(costo)
                     # datos_finales.append('costo')
                 elif columna == 'Otros Egresos':
                     # datos_finales.append(p.otros_egresos)
-                    datos_finales.append('S/I')
+                    datos_finales.append(otros_egresos)
                 elif columna == 'Profit Final':
                     # datos_finales.append(p.profit_final)
-                    datos_finales.append('S/I')
+                    datos_finales.append(profit)
                 elif columna == 'Precio Vendido':
-                    datos_finales.append('S/I')
+                    datos_finales.append(precio_vendido)
                     # datos_finales.append(gasto_correspondiente.precio)
                 elif columna == 'Bultos':
                     datos_finales.append(p.bultos)
@@ -673,7 +713,7 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
                 elif columna == 'Pais':
                     datos_finales.append(p.pais)
                 elif columna == 'Fecha Facturacion':
-                    datos_finales.append(p.fecha_facturacion if p.fecha_facturacion else '')
+                    datos_finales.append(fecha_facturacion)
                 elif columna == 'Customer':
                     datos_finales.append(p.customer)
                 elif columna == 'Status':
@@ -695,9 +735,10 @@ def genero_xls_operativas(resultados, desde, hasta, columnas,gastos):
                 elif columna == 'Posicion':
                     datos_finales.append(p.posicion)
                 elif columna == 'Contenedores_20':
-                    datos_finales.append(cantidad_20) if cantidad_20 else ''
+                    datos_finales.append(cantidad_20 if cantidad_20 is not None else '')
                 elif columna == 'Contenedores_40':
-                    datos_finales.append(cantidad_40) if cantidad_40 else ''
+                    datos_finales.append(cantidad_40 if cantidad_40 is not None else '')
+
 
             col = 0
             for dato in datos_finales:
