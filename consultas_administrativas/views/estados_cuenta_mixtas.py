@@ -50,7 +50,7 @@ def estados_cuenta_mixtas(request):
                 cliente
             )
     else:
-        form = EstadoCuentaMixtasForm()
+        form = EstadoCuentaMixtasForm(initial={'fecha_hasta':datetime.now().strftime('%Y-%m-%d'),'fecha_desde':datetime.now().strftime('%Y-%m-%d')})
 
     return render(request, 'agentes_ca/estados_cuenta.html', {'form': form})
 
@@ -909,7 +909,7 @@ def generar_excel_estados_cuenta_mixto(datos, fecha_desde, fecha_hasta, moneda,
             for m in movs:
                 mov_por_moneda[m.get('moneda')].append(m)
 
-            saldo_cli = saldos_anteriores.get(codigo_cli, {}).get('saldos', {})
+            saldo_cli = saldos_anteriores.get(int(codigo_cli), {}).get('saldos', {})
             for cod_moneda in saldo_cli.keys():
                 mov_por_moneda.setdefault(cod_moneda, [])
 

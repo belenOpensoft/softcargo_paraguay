@@ -124,11 +124,11 @@ def subdiario_ventas(request):
             return generar_excel_subdiario_ventas(datos, fecha_desde, fecha_hasta,consolidar_dolares)
 
     else:
-        form = ReporteMovimientosForm(initial={'estado': 'todo'})
+        form = ReporteMovimientosForm(initial={'estado': 'todo','fecha_desde':datetime.datetime.now().strftime('%Y-%m-%d'),'fecha_hasta':datetime.datetime.now().strftime('%Y-%m-%d')})
 
     return render(request, 'ventas_ca/subdiario_ventas.html', {'form': form})
 
-def generar_excel_subdiario_ventas(datos, fecha_desde, fecha_hasta,consolidar_dolares):
+def generar_excel_subdiario_ventas_old(datos, fecha_desde, fecha_hasta,consolidar_dolares):
     try:
         nombre_archivo = f'Subdiario_Ventas_{fecha_desde}_al_{fecha_hasta}.xlsx'
         output = io.BytesIO()
@@ -269,3 +269,103 @@ def convertir_monto(monto, origen, destino, arbitraje, paridad):
         return round(monto, 2)
     except Exception as e:
         return str(e)
+
+def generar_excel_subdiario_ventas(datos, fecha_desde, fecha_hasta, consolidar_dolares):
+    try:
+        nombre_archivo = f'Subdiario_Ventas_{fecha_desde}_al_{fecha_hasta}.xlsx'
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet("Subdiario_ventas")
+
+        # Encabezado superior
+        title = f"Ventas entre el {fecha_desde} y el {fecha_hasta}"
+        worksheet.merge_range('A1:AD1', title, workbook.add_format({'bold': True, 'align': 'left'}))
+
+        # Encabezados de columnas
+        encabezados = [
+            'Fecha', 'Tipo', 'Boleta', 'Cliente', 'Nombre', 'Detalle del movimiento', 'Exento', 'Gravado', 'I.V.A.',
+            'Total', 'T. Cambio', 'Paridad', 'Referencia', 'Cancel.', 'Posición', 'Cuenta',
+            'Vendedor', 'Vto.', 'Cobro', 'Tca. Cob.', 'Moneda Original', 'R.U.T.', 'Vapor',
+            'Viaje', 'Seguimiento', 'Master', 'House', 'Embarcador', 'Consignatario', 'Flete',
+            'ETD', 'ETA', 'Imputada', 'Orden cliente', 'Agente', 'Origen', 'Destino',
+            'Operación', 'Movimiento', 'Depósito', 'WR', 'Transportista'
+        ]
+
+        header_format = workbook.add_format({'bold': True, 'bg_color': '#d9d9d9', 'border': 1, 'align': 'center'})
+        normal_format = workbook.add_format({'border': 1})
+        date_format = workbook.add_format({'num_format': 'dd-mm-yyyy', 'border': 1})
+
+        # Medidor de ancho de columnas
+        anchos = {i: len(encabezado) for i, encabezado in enumerate(encabezados)}
+
+        # Escribir encabezados
+        for col_num, header in enumerate(encabezados):
+            worksheet.write(1, col_num, header, header_format)
+
+        columnas_fecha = [0, 17, 18, 29, 30]  # columnas que son fechas
+        row_num = 2
+
+        # Conversión opcional a dólares
+        datos_convertidos = []
+        for fila in datos:
+            fila = list(fila)
+            if consolidar_dolares:
+                try:
+                    if fila[20] == 'DOLARES USA':
+                        moneda_origen = 2
+                    else:
+                        moneda_origen = 1
+                    moneda_destino = 2
+                    arbitraje = Decimal(fila[10] or 1)
+                    paridad = Decimal(fila[11] or 1)
+                    if moneda_origen != moneda_destino:
+                        for idx in [6, 7, 8, 9]:  # exento, gravado, iva, total
+                            monto = Decimal(fila[idx] or 0)
+                            fila[idx] = convertir_monto(monto, moneda_origen, moneda_destino, arbitraje, paridad)
+                except Exception as e:
+                    print(f"Error al convertir moneda: {e}")
+            datos_convertidos.append(fila)
+
+        # Escribir filas
+        for fila in datos_convertidos:
+            for col_num, valor in enumerate(fila[:len(encabezados)]):
+                # Formato especial para "Boleta"
+                if col_num == 2:
+                    try:
+                        serie = fila[-2] if len(fila) > 2 else ''
+                        prefijo = fila[-1] if len(fila) > 1 else ''
+                        numero = fila[2] if len(fila) > 2 else ''
+                        valor = f"{serie}{prefijo}-{numero}"
+                    except Exception:
+                        valor = fila[2]
+
+                # Escribir celda
+                if col_num in columnas_fecha and isinstance(valor, (datetime.date, datetime.datetime)):
+                    worksheet.write(row_num, col_num, valor, date_format)
+                else:
+                    worksheet.write(row_num, col_num, valor if valor is not None else '', normal_format)
+
+                # Medir ancho
+                longitud = len(str(valor)) if valor is not None else 0
+                if longitud > anchos[col_num]:
+                    anchos[col_num] = longitud
+
+            row_num += 1
+
+        # Ajuste automático de columnas (mínimo 10 de ancho)
+        for col_num, ancho in anchos.items():
+            ancho_final = max(10, ancho + 2)
+            worksheet.set_column(col_num, col_num, ancho_final)
+
+        workbook.close()
+        output.seek(0)
+
+        response = HttpResponse(
+            output.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+        return response
+
+    except Exception as e:
+        raise RuntimeError(f"Error al generar el Excel: {e}")

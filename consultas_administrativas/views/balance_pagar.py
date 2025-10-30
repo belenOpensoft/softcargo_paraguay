@@ -117,7 +117,7 @@ def balance_pagos(request):
             return generar_excel_balance_pagar(resultados, fecha_hasta, moneda, consolidar_dolares, consolidar_moneda_nac)
 
     else:
-        form = BalanceCuentasPagarForm()
+        form = BalanceCuentasPagarForm(initial={'fecha_hasta':datetime.now().strftime('%Y-%m-%d')})
 
     return render(request, 'compras_ca/balance_pagar.html', {'form': form})
 

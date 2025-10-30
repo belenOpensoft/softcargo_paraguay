@@ -112,7 +112,7 @@ def balance_cobrar(request):
             return generar_excel_balance_cobrar(resultados, fecha_hasta, moneda, consolidar_dolares, consolidar_moneda_nac)
 
     else:
-        form = BalanceCuentasCobrarForm()
+        form = BalanceCuentasCobrarForm(initial={'fecha_hasta':datetime.now().strftime('%Y-%m-%d')})
 
     return render(request, 'ventas_ca/balance_cobrar.html', {'form': form})
 

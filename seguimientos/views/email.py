@@ -14,7 +14,7 @@ from impomarit.views.mails import formatear_linea, format_fecha
 from login.models import AccountEmail
 from mantenimientos.models import Clientes, Servicios, Vapores, Monedas, Ciudades
 from mantenimientos.views.bancos import is_ajax
-from seguimientos.models import VGrillaSeguimientos, Envases, Cargaaerea, Conexaerea, Serviceaereo
+from seguimientos.models import VGrillaSeguimientos, Envases, Cargaaerea, Conexaerea, Serviceaereo, Seguimiento
 
 
 @login_required(login_url='/')
@@ -46,28 +46,48 @@ def get_data_email(request):
             # base64_string = image_to_base64(image_path)
             # texto += f'<img src="data:image/jpeg;base64,{base64_string}" alt="Imagen Base64">' + '<br><br><br><br>'
             texto += f'<br>'
-            if row.modo == 'IMPORT MARITIMO':
-                email_cliente = row.emailim
-                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailim if row.agente_codigo is not None else 'S/I'
-            elif row.modo == 'EXPORT MARITIMO':
-                email_cliente = row.emailem
-                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailem if row.agente_codigo is not None else 'S/I'
 
-            elif row.modo == 'IMPORT AEREO':
-                email_cliente = row.emailia
-                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailia if row.agente_codigo is not None else 'S/I'
+            modo_email_map = {
+                'IMPORT MARITIMO': 'emailim',
+                'EXPORT MARITIMO': 'emailem',
+                'IMPORT AEREO': 'emailia',
+                'EXPORT AEREO': 'emailea',
+                'IMPORT TERRESTRE': 'emailit',
+                'EXPORT TERRESTRE': 'emailet',
+            }
 
-            elif row.modo == 'EXPORT AEREO':
-                email_cliente = row.emailea
-                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailea if row.agente_codigo is not None else 'S/I'
+            email_cliente = 'S/I'
+            email_agente = 'S/I'
 
-            elif row.modo == 'IMPORT TERRESTRE':
-                email_cliente = row.emailit
-                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailit if row.agente_codigo is not None else 'S/I'
+            if row.modo in modo_email_map:
+                campo = modo_email_map[row.modo]
 
-            elif row.modo == 'EXPORT TERRESTRE':
-                email_cliente = row.emailet
-                email_agente = Clientes.objects.get(codigo=row.agente_codigo).emailet if row.agente_codigo is not None else 'S/I'
+                email_cliente_base = getattr(row, campo, None)
+                email_cliente_base = email_cliente_base if email_cliente_base and email_cliente_base != 'S/I' else None
+
+                notificar = Seguimiento.objects.filter(numero=row.numero).only('notificar').first()
+
+                email_notificar = None
+                if notificar and notificar.notificar:
+                    # Buscar email del "notificar" según el mismo campo del modo
+                    email_notificar = Clientes.objects.filter(codigo=notificar.notificar).values_list(campo,
+                                                                                                      flat=True).first()
+                    email_notificar = email_notificar if email_notificar and email_notificar != 'S/I' else None
+
+                if email_cliente_base and email_notificar and notificar.notificar != row.consignatario:
+                    email_cliente = f"{email_cliente_base};{email_notificar}"
+                elif email_cliente_base:
+                    email_cliente = email_cliente_base
+                elif email_notificar:
+                    email_cliente = email_notificar
+                else:
+                    email_cliente = 'S/I'
+
+            if row.modo in modo_email_map and row.agente_codigo:
+                campo = modo_email_map[row.modo]
+                email_agente_base = Clientes.objects.filter(codigo=row.agente_codigo).values_list(campo,
+                                                                                                  flat=True).first()
+                email_agente = email_agente_base if email_agente_base and email_agente_base != 'S/I' else 'S/I'
 
             if title == 'Traspaso a operaciones':
                 texto += formatear_linea("SEGUIMIENTO", row.numero)
@@ -151,6 +171,9 @@ def get_data_email(request):
                 texto += formatear_linea("Seguimiento", str(row.numero) if row.numero is not None else "S/I")
                 texto += formatear_linea("Consignatario",
                                          str(row.consignatario) if row.consignatario is not None else "S/I")
+                texto += formatear_linea("Notify",
+                                         str(row.notificar) if row.notificar is not None else "S/I")
+
                 texto += formatear_linea("Embarcador", str(row.embarcador) if row.embarcador is not None else "S/I")
                 texto += formatear_linea("Orden cliente",
                                          str(row.refcliente) if row.refcliente is not None else "S/I")
@@ -212,6 +235,8 @@ def get_data_email(request):
                 texto += formatear_linea("Proveedor", row.embarcador or "")
 
                 texto += formatear_linea("Consignatario", row.consignatario or "")
+                texto += formatear_linea("Notify",
+                                         str(row.notificar) if row.notificar is not None else "S/I")
 
                 texto += formatear_linea("Orden Cliente", row.refcliente or "")
 
@@ -474,8 +499,9 @@ def get_data_email(request):
                 texto += "<br>"
 
                 texto += formatear_linea("Att.", "")
-
-                texto += formatear_linea("Notificar a", row.consignatario)
+                texto += formatear_linea("Notify",
+                                         str(row.notificar) if row.notificar is not None else "S/I")
+                texto += formatear_linea("Consignatario", row.consignatario)
 
                 texto += formatear_linea("Dirección", consigna.direccion if consigna else "")
 
@@ -654,6 +680,8 @@ def get_data_email(request):
                 texto += formatear_linea("Fecha", fecha_formateada.upper())
 
                 texto += "<br>"
+                texto += formatear_linea("Notify",
+                                         str(row.notificar) if row.notificar is not None else "S/I")
                 texto += formatear_linea("Cliente", str(row.cliente))
 
                 texto += formatear_linea("Dirección", row.direccion_cliente or "")
@@ -790,6 +818,8 @@ def get_data_email(request):
                 texto += formatear_linea("HBL", row.hawb)
 
                 texto += formatear_linea("DATE", fecha_formateada.upper())
+                texto += formatear_linea("Notify",
+                                         str(row.notificar) if row.notificar is not None else "S/I")
 
                 texto += "<br>"
 
@@ -824,7 +854,8 @@ def get_data_email(request):
                 fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
 
                 texto = formatear_linea("Fecha", fecha_formateada)
-
+                texto += formatear_linea("Notify",
+                                         str(row.notificar) if row.notificar is not None else "S/I")
                 texto += "<br>"
 
                 texto += "<pre style='font-family: Courier New, monospace; font-size: 12px;'>"
@@ -980,6 +1011,8 @@ def get_data_email(request):
 
                 texto += formatear_linea("Consignatario",
                                          str(row.consignatario) if row.consignatario is not None else "S/I")
+                texto += formatear_linea("Notify",
+                                         str(row.notificar) if row.notificar is not None else "S/I")
                 # Mercaderías
 
                 mercaderia = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre','bultos','bruto','cbm')
@@ -1064,7 +1097,8 @@ def get_data_email(request):
                 texto += formatear_linea("To", agente.empresa if agente else "")
                 texto += formatear_linea("Department", modo)
                 texto += formatear_linea("Sent by", nombre)
-
+                texto += formatear_linea("Notify",
+                                         str(row.notificar) if row.notificar is not None else "S/I")
                 texto += "<br><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Dear colleagues:</p>"
                 texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please contact the following company to coordinate the following shipment as per our instructions below:</p>"
                 texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Please ack this message and let us know status of cargo asap.</p><br>"
@@ -1188,7 +1222,8 @@ def get_data_email(request):
                 texto += formatear_linea("A", agente.empresa if agente else "")
                 texto += formatear_linea("Departamento", modo)
                 texto += formatear_linea("Envíado", nombre)
-
+                texto += formatear_linea("Notify",
+                                         str(row.notificar) if row.notificar is not None else "S/I")
                 texto += "<br><p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Estimados Sres.:</p><br>"
                 texto += f"<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor, contactar a la siguiente compañía para coordinar el siguiente embarque según nuestras instrucciones a continuación:</p>"
                 texto += "<p style='font-family: Courier New, Courier, monospace; font-size: 12px;'>Por favor confirmar este mensaje e informarnos el estado de la carga a la brevedad.</p><br>"
@@ -1294,6 +1329,77 @@ def get_data_email(request):
                 texto += "BEST REGARDS.\n"
 
                 texto += "</pre>"
+            elif title == 'PREALERT':
+
+                resultado['asunto'] = f'PREALERT - REF: {row.numero} - HAWB {row.hawb} - Consignee {row.consignatario} - Shipper {row.embarcador}'
+                if 'MARITIMO' in row.modo:
+                    resultado['asunto']+=f' - P.O: {row.refcliente if row.refcliente else 'S/I'}'
+
+                locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
+                fecha_actual = datetime.datetime.now()
+
+                fecha_formateada = fecha_actual.strftime('%A, %d de %B del %Y').upper()
+                consignee = Clientes.objects.filter(codigo=row.consignatario_codigo).only('telefono').first()
+                notify = Clientes.objects.filter(codigo=row.notificar_codigo).only('telefono').first()
+                origen = Ciudades.objects.filter(codigo=row.origen).only('nombre').first()
+                destino = Ciudades.objects.filter(codigo=row.destino).only('nombre').first()
+                carga = Cargaaerea.objects.filter(numero=row.numero).values('producto__nombre', 'tipo')
+                con = Conexaerea.objects.filter(numero=row.numero).only('viaje','cia').order_by('-id').first()
+                env = Envases.objects.filter(numero=row.numero).values('nrocontenedor', 'precinto', 'cantidad')
+                contenedores = ""
+                precintos = ""
+
+                mercaderias=""
+
+                if carga.count() > 0:
+                    for c in carga:
+                        mercaderias += c['producto__nombre'] + ' - '
+                if env.count() > 0:
+                    for e in env:
+                        contenedores += '(' + str(e['cantidad']) + ')' + e['nrocontenedor'] + ' - '
+                        precintos += e['precinto'] + ' - '
+                texto = ""
+                texto += "PREALERT"
+                texto += formatear_linea("Date", fecha_formateada)
+
+                texto += "<br>"
+                texto += formatear_linea("Shipment number", row.numero)
+                texto += formatear_linea("Posicion", row.posicion)
+                if 'MARITIMO' in row.modo:
+                    texto += formatear_linea("Purchase order", row.refcliente)
+                    texto += formatear_linea("Vessel", row.vapor)
+                    texto += formatear_linea("Voyage", row.viaje)
+                    texto += formatear_linea("SHipowner", row.transportista)
+
+                texto += formatear_linea("Carrier", row.transportista)
+                texto += formatear_linea("MAWB/MBL", row.awb)
+                texto += formatear_linea("HAWB/HBL", row.hawb)
+                texto += formatear_linea("ETD", row.etd.strftime("%d/%m/%Y"))
+                if 'AEREO' in row.modo:
+                    texto += formatear_linea("Flight",str((con.cia if con.cia else '') + (con.viaje if con.viaje else '')))
+                texto += formatear_linea("ETA", row.eta.strftime("%d/%m/%Y"))
+                texto += formatear_linea("Shipper", row.embarcador)
+                texto += formatear_linea("Consignee", row.consignatario)
+                texto += formatear_linea("Phone", consignee.telefono if consignee and consignee.telefono else 'S/I')
+                texto += formatear_linea("Notify", row.notificar)
+                texto += formatear_linea("Phone", notify.telefono if notify and notify.telefono else 'S/I')
+                texto += formatear_linea("Origin", origen.nombre if origen and origen.nombre else 'S/I')
+                texto += formatear_linea("Destination", destino.nombre if destino and destino.nombre else 'S/I')
+                texto += formatear_linea("Freight type", row.pago)
+                texto += formatear_linea("Incoterms", row.terminos)
+                texto += formatear_linea("Commodity", mercaderias[:-3])
+                texto += formatear_linea("Container nbr", contenedores[:-3])
+                texto += formatear_linea("Seals", precintos[:-3])
+
+                texto += "All documents will be sent by fax/email immediately.</br>"
+
+                texto += "If you have any doubt please contact us."
+
+                texto += "*** Please deliver cargo to the CNEE only against presentation of our Original HAWB ***"
+
+                texto += "PLEASE CONFIRM US RECEIPT OF THIS MAIL"""
+
 
             estilo = "font-family: Courier New, Courier, monospace; font-size: 12px;"
             texto += f"<div style='{estilo}'>Agradeciendo vuestra preferencia, le saludamos muy atentamente.</div></br>"

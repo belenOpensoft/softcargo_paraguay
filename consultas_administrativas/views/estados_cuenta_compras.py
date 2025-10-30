@@ -46,7 +46,7 @@ def estados_cuenta_compras(request):
                 cliente
             )
     else:
-        form = EstadoCuentaComprasForm()
+        form = EstadoCuentaComprasForm(initial={'fecha_hasta':datetime.now().strftime('%Y-%m-%d'),'fecha_desde':datetime.now().strftime('%Y-%m-%d')})
 
     return render(request, 'compras_ca/estados_cuenta.html', {'form': form})
 

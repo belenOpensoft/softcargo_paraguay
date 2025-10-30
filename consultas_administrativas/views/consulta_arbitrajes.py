@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.shortcuts import render
 
 from administracion_contabilidad.models import Dolar
@@ -22,7 +24,7 @@ def consulta_arbitrajes(request):
             return generar_excel_cotizaciones(cotizaciones, fecha_desde, moneda, fecha_hasta)
 
     else:
-        form = ConsultaArbitrajesForm()
+        form = ConsultaArbitrajesForm(initial={'fecha_hasta':datetime.now().strftime('%Y-%m-%d'),'fecha_desde':datetime.now().strftime('%Y-%m-%d')})
 
     return render(request, 'contabilidad_ca/consulta_arbitrajes.html', {'form': form})
 

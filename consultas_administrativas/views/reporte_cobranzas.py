@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 import io
 
@@ -60,7 +61,7 @@ def reporte_cobranzas(request):
                 ver_anuladas
             )
     else:
-        form = ReporteCobranzasForm()
+        form = ReporteCobranzasForm(initial={'fecha_hasta':datetime.now().strftime('%Y-%m-%d'),'fecha_desde':datetime.now().strftime('%Y-%m-%d')})
 
     return render(request, 'ventas_ca/reporte_cobranzas.html', {'form': form})
 

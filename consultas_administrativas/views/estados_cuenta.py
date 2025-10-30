@@ -52,7 +52,7 @@ def estados_cuenta(request):
                 todas_monedas,
             )
     else:
-        form = EstadoCuentaForm()
+        form = EstadoCuentaForm(initial={'fecha_hasta':datetime.now().strftime('%Y-%m-%d'),'fecha_desde':datetime.now().strftime('%Y-%m-%d')})
 
     return render(request, 'ventas_ca/estados_cuenta.html', {'form': form})
 

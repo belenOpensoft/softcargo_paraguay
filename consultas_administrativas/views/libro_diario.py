@@ -69,7 +69,7 @@ def libro_diario(request):
             return generar_excel_libro_diario(asientos,moneda,fecha_desde,fecha_hasta,consolidar_dolares,consolidar_moneda_nac)
 
     else:
-        form = LibroDiarioForm()
+        form = LibroDiarioForm(initial={'fecha_hasta':datetime.now().strftime('%Y-%m-%d'),'fecha_desde':datetime.now().strftime('%Y-%m-%d')})
 
     return render(request, 'contabilidad_ca/libro_diario.html', {'form': form})
 

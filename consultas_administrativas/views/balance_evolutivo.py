@@ -204,7 +204,7 @@ def balance_evolutivo(request):
                 )
                 return resp
         else:
-            form = BalanceEvolutivoForm()
+            form = BalanceEvolutivoForm(initial={'hasta':datetime.now().strftime('%Y-%m-%d'),'desde':datetime.now().strftime('%Y-%m-%d')})
 
         return render(request, 'contabilidad_ca/balance_evolutivo.html', {'form': form})
 

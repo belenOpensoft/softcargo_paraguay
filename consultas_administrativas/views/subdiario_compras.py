@@ -114,7 +114,7 @@ def subdiario_compras(request):
             return generar_excel_subdiario_compras(datos, fecha_desde, fecha_hasta, consolidar_dolares)
 
     else:
-        form = ReporteMovimientosComprasForm(initial={'estado': 'todo'})
+        form = ReporteMovimientosComprasForm(initial={'estado': 'todo','fecha_hasta':datetime.datetime.now().strftime('%Y-%m-%d'),'fecha_desde':datetime.datetime.now().strftime('%Y-%m-%d')})
 
     return render(request, 'compras_ca/subdiario_compras.html', {'form': form})
 

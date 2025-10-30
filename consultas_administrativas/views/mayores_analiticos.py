@@ -81,7 +81,7 @@ def mayores_analiticos(request):
                 saldo
             )
     else:
-        form = MayoresAnaliticosForm()
+        form = MayoresAnaliticosForm(initial={'fecha_hasta':datetime.datetime.now().strftime('%Y-%m-%d'),'fecha_desde':datetime.datetime.now().strftime('%Y-%m-%d')})
     print("Errores del formulario:", form.errors)
 
 

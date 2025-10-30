@@ -506,13 +506,6 @@ def generar_excel_balance_mixtas_completo(queryset, fecha_hasta, moneda,
         raise RuntimeError(f"Error al generar el Excel de balance mixtas: {e}")
 
 
-from decimal import Decimal
-from collections import defaultdict
-from datetime import datetime
-import io
-import xlsxwriter
-from django.http import HttpResponse
-
 def balance_mixtas(request):
     if request.method == 'POST':
         form = BalanceMixtasForm(request.POST)
@@ -630,7 +623,7 @@ def balance_mixtas(request):
             )
 
     else:
-        form = BalanceMixtasForm()
+        form = BalanceMixtasForm(initial={'fecha_hasta':datetime.now().strftime('%Y-%m-%d'),'fecha_desde':datetime.now().strftime('%Y-%m-%d')})
 
     return render(request, 'agentes_ca/balance_mixtas.html', {'form': form})
 
