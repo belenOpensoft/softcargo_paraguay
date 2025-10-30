@@ -1333,7 +1333,7 @@ def get_data_email(request):
 
                 resultado['asunto'] = f'PREALERT - REF: {row.numero} - HAWB {row.hawb} - Consignee {row.consignatario} - Shipper {row.embarcador}'
                 if 'MARITIMO' in row.modo:
-                    resultado['asunto']+=f' - P.O: {row.refcliente if row.refcliente else 'S/I'}'
+                    resultado['asunto']+=f" - P.O: {row.refcliente if row.refcliente else 'S/I'}"
 
                 locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 

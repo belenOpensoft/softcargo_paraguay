@@ -6,43 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="335d398c-6d1f-4c1e-8c6c-9772af5dd01d" name="Changes" comment="cambios">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/administracion_contabilidad/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/administracion_contabilidad/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/balance_cobrar.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/balance_cobrar.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/balance_evolutivo.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/balance_evolutivo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/balance_mixtas.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/balance_mixtas.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/balance_pagar.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/balance_pagar.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/consulta_arbitrajes.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/consulta_arbitrajes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_compras.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_compras.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_mixtas.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/estados_cuenta_mixtas.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/libro_diario.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/libro_diario.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/mayores_analiticos.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/mayores_analiticos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/reporte_cobranzas.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/reporte_cobranzas.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/reporte_pagos.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/reporte_pagos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_compras.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_compras.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_ventas.py" beforeDir="false" afterPath="$PROJECT_DIR$/consultas_administrativas/views/subdiario_ventas.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expaerea/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/expaerea/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expaerea/templates/expaerea/edit_house_general.html" beforeDir="false" afterPath="$PROJECT_DIR$/expaerea/templates/expaerea/edit_house_general.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expaerea/templates/master_exp_aerea/menu_hd.html" beforeDir="false" afterPath="$PROJECT_DIR$/expaerea/templates/master_exp_aerea/menu_hd.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expaerea/templates/master_exp_aerea/menu_houses.html" beforeDir="false" afterPath="$PROJECT_DIR$/expaerea/templates/master_exp_aerea/menu_houses.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expaerea/views/mails.py" beforeDir="false" afterPath="$PROJECT_DIR$/expaerea/views/mails.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expmarit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/expmarit/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expmarit/templates/expmarit/edit_house_general.html" beforeDir="false" afterPath="$PROJECT_DIR$/expmarit/templates/expmarit/edit_house_general.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expmarit/templates/master_exp_maritima/menu_hd.html" beforeDir="false" afterPath="$PROJECT_DIR$/expmarit/templates/master_exp_maritima/menu_hd.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expmarit/templates/master_exp_maritima/menu_houses.html" beforeDir="false" afterPath="$PROJECT_DIR$/expmarit/templates/master_exp_maritima/menu_houses.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expmarit/views/mails.py" beforeDir="false" afterPath="$PROJECT_DIR$/expmarit/views/mails.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/expterrestre/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/expterrestre/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impaerea/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/impaerea/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impaerea/templates/impaerea/edit_house_general.html" beforeDir="false" afterPath="$PROJECT_DIR$/impaerea/templates/impaerea/edit_house_general.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impaerea/templates/master_imp_aerea/menu_hd.html" beforeDir="false" afterPath="$PROJECT_DIR$/impaerea/templates/master_imp_aerea/menu_hd.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impaerea/templates/master_imp_aerea/menu_houses.html" beforeDir="false" afterPath="$PROJECT_DIR$/impaerea/templates/master_imp_aerea/menu_houses.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impomarit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/impomarit/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impomarit/templates/impormarit/edit_house_general.html" beforeDir="false" afterPath="$PROJECT_DIR$/impomarit/templates/impormarit/edit_house_general.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impomarit/templates/master_impo_maritima/menu_hd.html" beforeDir="false" afterPath="$PROJECT_DIR$/impomarit/templates/master_impo_maritima/menu_hd.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impomarit/templates/master_impo_maritima/menu_houses.html" beforeDir="false" afterPath="$PROJECT_DIR$/impomarit/templates/master_impo_maritima/menu_houses.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impomarit/views/mails.py" beforeDir="false" afterPath="$PROJECT_DIR$/impomarit/views/mails.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/impterrestre/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/impterrestre/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/seguimientos/templates/seguimientos/menu.html" beforeDir="false" afterPath="$PROJECT_DIR$/seguimientos/templates/seguimientos/menu.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/seguimientos/views/email.py" beforeDir="false" afterPath="$PROJECT_DIR$/seguimientos/views/email.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -140,7 +103,7 @@
       <workItem from="1761312218106" duration="4563000" />
       <workItem from="1761332505899" duration="2900000" />
       <workItem from="1761666487290" duration="12068000" />
-      <workItem from="1761831375179" duration="5503000" />
+      <workItem from="1761831375179" duration="6222000" />
     </task>
     <task id="LOCAL-00001" summary="subir">
       <option name="closed" value="true" />
@@ -438,7 +401,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761764237525</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="cambios">
+      <option name="closed" value="true" />
+      <created>1761847600607</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1761847600607</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
